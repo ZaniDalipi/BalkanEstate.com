@@ -5,6 +5,7 @@ import ConversationView from './ConversationView';
 import { EnvelopeIcon } from '../../../constants';
 import PropertyCard from '../PropertyDisplay/PropertyCard';
 import Footer from '../../shared/Footer';
+import { SEO } from '../../../src/components/seo';
 
 const InboxPage: React.FC = () => {
     const { state, dispatch } = useAppContext();
@@ -108,6 +109,13 @@ const InboxPage: React.FC = () => {
 
     return (
         <div className="h-full w-full flex flex-col bg-neutral-50 overflow-y-auto">
+            {/* SEO - noindex for private page */}
+            <SEO
+                title="Inbox - Messages"
+                description="Your Balkan Estate inbox. View and manage conversations with property sellers and agents."
+                noindex={true}
+            />
+
             <main className="flex-grow flex flex-row overflow-hidden">
                 <div className={`
                     ${isMobile && selectedConversationId ? 'hidden' : 'block'}

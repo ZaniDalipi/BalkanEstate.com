@@ -5,7 +5,8 @@ import { MagnifyingGlassPlusIcon } from '../../../constants';
 import { SavedSearch, Filters, SellerType } from '../../../types';
 import AdvertisementBanner from '../../AdvertisementBanner';
 import Footer from '../../shared/Footer';
-import FeaturedAgencies from '../../FeaturedAgencies'; // Add this import
+import FeaturedAgencies from '../../FeaturedAgencies';
+import { SEO } from '../../../src/components/seo';
 
 const initialFilters: Filters = {
     query: '',
@@ -171,7 +172,13 @@ const SavedSearchesPage: React.FC = () => {
 
   return (
     <div className="bg-neutral-50 min-h-screen flex flex-col">
-     
+      {/* SEO - noindex for private page */}
+      <SEO
+        title="Saved Searches"
+        description="Track your saved property searches and get updates on new listings that match your criteria."
+        noindex={true}
+      />
+
       {/* Hero Banner */}
       <div className="bg-gradient-to-r from-primary via-primary-dark to-primary text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg">
         <div className="max-w-7xl mx-auto text-center">

@@ -26,6 +26,7 @@ import {
 } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import Footer from './shared/Footer';
+import { SEO } from '../src/components/seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -372,6 +373,14 @@ const AgenciesListPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
+      {/* SEO Meta Tags */}
+      <SEO
+        title="Real Estate Agencies in the Balkans"
+        description={`Discover ${agencies.length}+ trusted real estate agencies across Serbia, Montenegro, Croatia, Bosnia, and the Balkans. Find professional agencies to help with your property needs.`}
+        canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agencies`}
+        type="website"
+      />
+
       {/* Add CSS animations */}
       <style>{cssAnimations}</style>
 

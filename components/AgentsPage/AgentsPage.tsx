@@ -4,9 +4,10 @@ import { Agent, Agency } from '../../types';
 import { getAllAgents, getAgencies } from '../../services/apiService';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
-import AgencyBadge from '../shared/AgencyBadge'; // Added import
+import AgencyBadge from '../shared/AgencyBadge';
 import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon } from '../../constants';
 import Footer from '../shared/Footer';
+import { SEO } from '../../src/components/seo';
 type SearchTab = 'location' | 'name' | 'specialization';
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 
@@ -247,6 +248,14 @@ const AgentsPage: React.FC = () => {
 
   return (
     <div className="bg-neutral-50 min-h-screen flex flex-col">
+      {/* SEO Meta Tags */}
+      <SEO
+        title="Find Real Estate Agents in the Balkans"
+        description={`Browse ${agents.length}+ verified real estate agents across Serbia, Montenegro, Croatia, and the Balkans. Find trusted professionals to help you buy or sell property.`}
+        canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agents`}
+        type="website"
+      />
+
       {/* Add CSS animations */}
       <style>{`
         @keyframes fadeInUp {

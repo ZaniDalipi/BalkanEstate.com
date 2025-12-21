@@ -12,6 +12,7 @@ import { filterProperties } from '../../../utils/propertyUtils';
 import AiSearch from './AiSearch';
 import Modal from '../../shared/Modal';
 import { COUNTRY_OPTIONS, BALKAN_COUNTRIES } from '../../../constants/countries';
+import { SEO, generateSearchBreadcrumbs, Breadcrumbs } from '../../../src/components/seo';
 
 interface SearchPageProps {
     onToggleSidebar: () => void;
@@ -550,7 +551,42 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         isQueryInputFocused: isQueryInputFocused,
         onQueryInputFocusChange: setIsQueryInputFocused,
     };
-    
+
+    // Generate dynamic SEO based on current filters
+    const seoTitle = useMemo(() => {
+        const parts: string[] = [];
+        if (filters.country && filters.country !== 'all') {
+            parts.push(`Properties in ${filters.country}`);
+        } else {
+            parts.push('Properties in the Balkans');
+        }
+        if (filters.query) {
+            parts[0] = `Properties in ${filters.query}`;
+        }
+        return parts[0];
+    }, [filters.country, filters.query]);
+
+    const seoDescription = useMemo(() => {
+        let desc = 'Browse ';
+        if (filters.beds) desc += `${filters.beds}+ bedroom `;
+        desc += 'houses, apartments, and villas for sale';
+        if (filters.country && filters.country !== 'all') {
+            desc += ` in ${filters.country}`;
+        } else if (filters.query) {
+            desc += ` in ${filters.query}`;
+        } else {
+            desc += ' across the Balkans';
+        }
+        if (filters.minPrice || filters.maxPrice) {
+            desc += '. Price range: ';
+            if (filters.minPrice) desc += `€${filters.minPrice.toLocaleString()}`;
+            if (filters.minPrice && filters.maxPrice) desc += ' - ';
+            if (filters.maxPrice) desc += `€${filters.maxPrice.toLocaleString()}`;
+        }
+        desc += '. Find your dream property with Balkan Estate.';
+        return desc;
+    }, [filters]);
+
     const renderSearchInput = (isMobileInput: boolean) => (
          <div className="relative flex-grow" ref={isMobileInput ? null : searchWrapperRef}>
             {!isMobileInput && <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><SearchIcon className="h-4 w-4 text-neutral-400" /></div>}
@@ -582,9 +618,17 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             )}
         </div>
     );
-    
+
     return (
         <div className={`relative flex h-full w-full flex-col md:flex-row ${isMobile && isFiltersOpen ? 'overflow-hidden' : ''}`}>
+            {/* Dynamic SEO for Search Page */}
+            <SEO
+                title={seoTitle}
+                description={seoDescription}
+                canonical={`${window.location.origin}/search`}
+                type="website"
+            />
+
              <div className="absolute inset-0 z-0 bg-neutral-50"></div>
             <Toast show={toast.show} message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />
             <AiChatModal

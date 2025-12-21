@@ -4,6 +4,7 @@ import { formatPrice } from '../../utils/currency';
 import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, SparklesIcon, FireIcon, TrendingUpIcon, StarIcon, BuildingOfficeIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import Footer from '../shared/Footer';
+import { SEO } from '../../src/components/seo';
 
 const CityRecommendations: React.FC = () => {
   const [cities, setCities] = useState<CityMarketData[]>([]);
@@ -169,6 +170,14 @@ const CityRecommendations: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      {/* SEO Meta Tags */}
+      <SEO
+        title="Explore Balkan Cities - Real Estate Market Insights"
+        description={`Discover real estate opportunities in ${cities.length}+ major cities across Serbia, Montenegro, Croatia, Bosnia, and the Balkans. AI-powered market insights, trends, and property recommendations.`}
+        canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/explore-cities`}
+        type="website"
+      />
+
       <div className="p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header with Stats */}

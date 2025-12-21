@@ -11,6 +11,7 @@ import { formatPrice } from '../utils/currency';
 import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyAdmin, verifyInvitationCode, leaveAgency } from '../services/apiService';
 import { Agency } from '../types';
 import { socketService } from '../services/socketService';
+import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -580,6 +581,35 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-y-auto">
+      {/* SEO Meta Tags */}
+      <SEO
+        title={`${agencyData.name} - Real Estate Agency`}
+        description={agencyData.description || `${agencyData.name} is a trusted real estate agency in ${agencyData.city || 'the Balkans'}. Browse ${agencyData.totalProperties || 0} listings and connect with ${agencyData.totalAgents || 0} professional agents.`}
+        canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agencies/${agency.slug}`}
+        image={agencyData.logo || agencyData.coverImage}
+        type="website"
+        agency={{
+          name: agencyData.name,
+          logo: agencyData.logo,
+          description: agencyData.description,
+          address: agencyData.address,
+          phone: agencyData.phone,
+          email: agencyData.email,
+        }}
+      />
+
+      {/* Breadcrumbs */}
+      <div className="absolute top-4 left-4 z-20">
+        <Breadcrumbs
+          items={generateAgencyBreadcrumbs({
+            slug: agency.slug || '',
+            name: agencyData.name,
+            country: agencyData.country,
+          })}
+          className="text-white/80"
+        />
+      </div>
+
       {/* Hero Banner with Cover Image - Larger for agency branding */}
       <div className="relative h-[32rem] md:h-[36rem] bg-gradient-to-br from-primary to-primary-dark overflow-hidden flex-shrink-0">
         {agencyData.coverImage ? (

@@ -11,6 +11,7 @@ import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile
 import Footer from './Footer';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../SellerFlow/MapLocationPicker';
+import { SEO } from '../../src/components/seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -1272,6 +1273,13 @@ const MyAccountPage: React.FC = () => {
 
     return (
         <div className="bg-neutral-50 min-h-screen flex flex-col">
+            {/* SEO - noindex for private page */}
+            <SEO
+                title="My Account"
+                description="Manage your Balkan Estate account, listings, and subscription."
+                noindex={true}
+            />
+
             <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex-grow">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar */}
