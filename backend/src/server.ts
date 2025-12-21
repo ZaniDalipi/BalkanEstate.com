@@ -37,6 +37,7 @@ import agencyFeaturedSubscriptionRoutes from './routes/agencyFeaturedSubscriptio
 import adminRoutes from './routes/adminRoutes';
 import cityMarketDataRoutes from './routes/cityMarketDataRoutes';
 import licenseRoutes from './routes/licenseRoutes';
+import sitemapRoutes from './routes/sitemapRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -169,6 +170,9 @@ app.get('/health', (_req: Request, res: Response) => {
     cors: 'enabled'
   });
 });
+
+// SEO routes (sitemap.xml, robots.txt) - at root level, not under /api
+app.use('/', sitemapRoutes);
 
 // API routes
 app.use('/api/auth', authRoutes);

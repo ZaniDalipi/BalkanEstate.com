@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
 import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
+import { SEO } from './src/components/seo';
 import { UserRole } from './types';
 import Onboarding from './components/Onboarding';
 import { SearchPage } from './components/BuyerFlow/Search';
@@ -424,13 +426,16 @@ const AppWrapper: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ErrorBoundary level="app">
-      <QueryProvider>
-        <AppProvider>
-          <AlertProvider>
-            <AppWrapper />
-          </AlertProvider>
-        </AppProvider>
-      </QueryProvider>
+      <HelmetProvider>
+        <QueryProvider>
+          <AppProvider>
+            <AlertProvider>
+              <SEO />
+              <AppWrapper />
+            </AlertProvider>
+          </AppProvider>
+        </QueryProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 };

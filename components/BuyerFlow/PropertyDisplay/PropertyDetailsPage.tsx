@@ -8,6 +8,7 @@ import { ArrowLeftIcon } from '../../../constants';
 import ImageViewerModal from '../Modals/ImageViewerModal';
 import FloorPlanViewerModal from '../Modals/FloorPlanViewerModal';
 import FeaturedAgencies from '../../FeaturedAgencies';
+import { SEO } from '../../../src/components/seo';
 import {
   ImageEditorModal,
   PropertyGallery,
@@ -194,8 +195,37 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     return () => window.removeEventListener('popstate', handlePopState);
   }, [dispatch]);
 
+  // Generate SEO description
+  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.type || 'property'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 100) || ''}`;
+
+  // Get all images for SEO
+  const seoImages = allImages.map(img => img.url).filter(Boolean);
+
   return (
     <div className="bg-neutral-50 h-full overflow-y-auto animate-fade-in">
+      {/* SEO Meta Tags */}
+      <SEO
+        title={`${property.address}, ${property.city} - €${property.price?.toLocaleString()}`}
+        description={seoDescription}
+        canonical={`${window.location.origin}/property/${property.id}`}
+        image={property.imageUrl}
+        type="product"
+        property={{
+          price: property.price,
+          currency: 'EUR',
+          bedrooms: property.beds,
+          bathrooms: property.baths,
+          sqft: property.sqft,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+          propertyType: property.type,
+          images: seoImages,
+          latitude: property.lat,
+          longitude: property.lng,
+        }}
+      />
+
       {/* Modals */}
       {isEditorOpen && (
         <ImageEditorModal

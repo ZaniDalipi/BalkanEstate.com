@@ -1,0 +1,34 @@
+# Robots.txt for Balkan Estate
+# https://balkanestate.com
+
+User-agent: *
+Allow: /
+Allow: /property/
+Allow: /agencies/
+Allow: /agents
+Allow: /search
+
+# Disallow private areas
+Disallow: /account
+Disallow: /inbox
+Disallow: /admin
+Disallow: /saved-properties
+Disallow: /saved-searches
+Disallow: /create-listing
+Disallow: /payment/
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://balkanestate.com/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
