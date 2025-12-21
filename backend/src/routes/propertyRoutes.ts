@@ -15,11 +15,168 @@ import { upload } from '../utils/upload';
 
 const router = express.Router();
 
-// Public routes
+/**
+ * @swagger
+ * /api/properties:
+ *   get:
+ *     summary: Get all properties with filtering
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: city
+ *         schema:
+ *           type: string
+ *         description: Filter by city
+ *       - in: query
+ *         name: propertyType
+ *         schema:
+ *           type: string
+ *           enum: [apartment, house, land, commercial, other]
+ *         description: Filter by property type
+ *       - in: query
+ *         name: listingType
+ *         schema:
+ *           type: string
+ *           enum: [sale, rent]
+ *         description: Filter by listing type (sale/rent)
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum price
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum price
+ *       - in: query
+ *         name: bedrooms
+ *         schema:
+ *           type: integer
+ *         description: Minimum bedrooms
+ *       - in: query
+ *         name: bathrooms
+ *         schema:
+ *           type: integer
+ *         description: Minimum bathrooms
+ *     responses:
+ *       200:
+ *         description: List of properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 properties:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ */
 router.get('/', getProperties);
+
+/**
+ * @swagger
+ * /api/properties/{id}:
+ *   get:
+ *     summary: Get a single property by ID
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *     responses:
+ *       200:
+ *         description: Property details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Property'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
 router.get('/:id', getProperty);
 
-// Protected routes
+/**
+ * @swagger
+ * /api/properties:
+ *   post:
+ *     summary: Create a new property listing
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - price
+ *               - propertyType
+ *               - listingType
+ *               - location
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               propertyType:
+ *                 type: string
+ *                 enum: [apartment, house, land, commercial, other]
+ *               listingType:
+ *                 type: string
+ *                 enum: [sale, rent]
+ *               location:
+ *                 type: object
+ *                 properties:
+ *                   address:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *                   country:
+ *                     type: string
+ *               features:
+ *                 type: object
+ *                 properties:
+ *                   bedrooms:
+ *                     type: integer
+ *                   bathrooms:
+ *                     type: integer
+ *                   area:
+ *                     type: number
+ *     responses:
+ *       201:
+ *         description: Property created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Property'
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
 router.post('/', protect, createProperty);
 router.put('/:id', protect, updateProperty);
 router.delete('/:id', protect, deleteProperty);

@@ -226,6 +226,48 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         fetchProperties();
     }, []);
 
+    // Parse URL query parameters on mount and apply as filters
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const cityParam = searchParams.get('city');
+        const countryParam = searchParams.get('country');
+        const propertyTypeParam = searchParams.get('propertyType');
+
+        if (cityParam || countryParam || propertyTypeParam) {
+            const newFilters = { ...filters };
+
+            if (cityParam) {
+                newFilters.query = cityParam;
+            }
+            if (countryParam) {
+                newFilters.country = countryParam;
+            }
+            if (propertyTypeParam) {
+                newFilters.propertyType = propertyTypeParam;
+            }
+
+            // Apply filters from URL
+            updateSearchPageState({
+                filters: newFilters,
+                activeFilters: newFilters,
+            });
+
+            // If city is specified, fly to that location
+            if (cityParam && countryParam) {
+                // Use searchLocation to get coordinates for the city
+                searchLocation(`${cityParam}, ${BALKAN_COUNTRIES[countryParam]?.name || countryParam}`).then(results => {
+                    if (results.length > 0) {
+                        setFlyToTarget({
+                            center: [Number(results[0].lat), Number(results[0].lon)],
+                            zoom: 12
+                        });
+                    }
+                });
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Only run on mount
+
     useEffect(() => {
         let timeoutId: number;
 

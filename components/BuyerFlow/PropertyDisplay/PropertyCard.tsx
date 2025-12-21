@@ -3,6 +3,7 @@ import { Property } from '../../../types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
 import { formatPrice } from '../../../utils/currency';
+import { BALKAN_COUNTRIES } from '../../../constants/countries';
 
 interface PropertyCardProps {
   property: Property;
@@ -11,7 +12,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
-  const { state, dispatch, toggleSavedHome } = useAppContext();
+  const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
@@ -57,6 +58,46 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           }
       }
   }, [isInComparison, dispatch, property.id, state.comparisonList.length, showToast]);
+
+  // Handle location click to navigate to search with city/country filter
+  const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
+    e.stopPropagation();
+
+    // Find the country key from BALKAN_COUNTRIES
+    const countryKey = Object.keys(BALKAN_COUNTRIES).find(
+      key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
+    ) || '';
+
+    if (type === 'city') {
+      // Navigate to search with city filter
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: property.city,
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
+    } else {
+      // Navigate to search with country filter only
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: '',
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
+    }
+  }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
 
   // Property type labels (short versions for mobile)
   const propertyTypeLabel = {
@@ -212,12 +253,26 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </h3>
         )}
 
-        {/* Location */}
+        {/* Location - Clickable for navigation */}
         <div className="flex items-center gap-1.5 mb-3">
           <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-          <span className="text-xs sm:text-sm text-neutral-600 truncate">
-            {property.city}, {property.country}
-          </span>
+          <div className="text-xs sm:text-sm text-neutral-600 truncate flex items-center gap-1">
+            <button
+              onClick={(e) => handleLocationClick(e, 'city')}
+              className="hover:text-primary hover:underline transition-colors cursor-pointer"
+              title={`View all properties in ${property.city}`}
+            >
+              {property.city}
+            </button>
+            <span>,</span>
+            <button
+              onClick={(e) => handleLocationClick(e, 'country')}
+              className="hover:text-primary hover:underline transition-colors cursor-pointer"
+              title={`View all properties in ${property.country}`}
+            >
+              {property.country}
+            </button>
+          </div>
         </div>
 
         {/* Property Stats - Grid layout for better fit */}

@@ -1,7 +1,7 @@
 // PropertyInfo Component
 // Displays property details, description, and amenities
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
 import {
@@ -19,6 +19,8 @@ import {
   CheckCircleIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
+import { useAppContext } from '../../../context/AppContext';
+import { BALKAN_COUNTRIES } from '../../../constants/countries';
 
 interface PropertyInfoProps {
   property: Property;
@@ -45,6 +47,49 @@ interface PropertyInfoProps {
  * ```
  */
 export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloorPlan }) => {
+  const { state, dispatch, updateSearchPageState } = useAppContext();
+
+  // Handle location click to navigate to search with city/country filter
+  const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Find the country key from BALKAN_COUNTRIES
+    const countryKey = Object.keys(BALKAN_COUNTRIES).find(
+      key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
+    ) || '';
+
+    if (type === 'city') {
+      // Navigate to search with city filter
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: property.city,
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
+    } else {
+      // Navigate to search with country filter only
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: '',
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
+    }
+  }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
+
   return (
     <>
       {/* Price, Address, and Key Stats */}
@@ -66,18 +111,36 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             {formatPrice(property.price, property.country)}
           </p>
 
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-neutral-600 mt-2 group"
-            title="Open in Google Maps"
-          >
-            <MapPinIcon className="w-5 h-5 mr-2 text-neutral-400 group-hover:text-primary transition-colors" />
-            <span className="text-sm sm:text-base lg:text-lg group-hover:underline group-hover:text-primary transition-colors">
-              {property.address}, {property.city}, {property.country}
+          <div className="inline-flex items-center text-neutral-600 mt-2 flex-wrap">
+            <MapPinIcon className="w-5 h-5 mr-2 text-neutral-400 flex-shrink-0" />
+            <span className="text-sm sm:text-base lg:text-lg">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline hover:text-primary transition-colors"
+                title="Open in Google Maps"
+              >
+                {property.address}
+              </a>
+              <span>, </span>
+              <button
+                onClick={(e) => handleLocationClick(e, 'city')}
+                className="hover:underline hover:text-primary transition-colors cursor-pointer"
+                title={`View all properties in ${property.city}`}
+              >
+                {property.city}
+              </button>
+              <span>, </span>
+              <button
+                onClick={(e) => handleLocationClick(e, 'country')}
+                className="hover:underline hover:text-primary transition-colors cursor-pointer"
+                title={`View all properties in ${property.country}`}
+              >
+                {property.country}
+              </button>
             </span>
-          </a>
+          </div>
 
           <div className="mt-6 flex flex-wrap justify-around text-base sm:text-lg text-neutral-800 border-t border-neutral-200 pt-4 gap-4">
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">

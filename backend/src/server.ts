@@ -8,6 +8,9 @@ import connectDB from './config/database';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setSocketInstance } from './utils/socketInstance';
 
+// Import and initialize Sentry for error monitoring (must be early)
+import { initSentry, setupSentry, attachSentryErrorHandler } from './lib/sentry';
+
 // Import security middleware
 import {
   validateEnvironment,
@@ -22,8 +25,14 @@ import {
 // Import cache middleware
 import { apiCache } from './middleware/cache';
 
+// Import Swagger configuration
+import { setupSwagger } from './config/swagger';
+
 // Load environment variables
 dotenv.config();
+
+// Initialize Sentry first (before anything else)
+initSentry();
 
 // Validate environment variables (warns in dev, throws in production)
 validateEnvironment();
@@ -67,6 +76,9 @@ import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
 
 // Create Express app
 const app: Application = express();
+
+// Setup Sentry request handlers (must be first middleware)
+setupSentry(app);
 
 // Create HTTP server
 const httpServer = createServer(app);
@@ -153,6 +165,11 @@ if (process.env.NODE_ENV === 'development') {
 // Compression
 app.use(compression());
 
+// Setup Swagger API documentation (only in development or if explicitly enabled)
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
+  setupSwagger(app);
+}
+
 // Health check route
 app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
@@ -213,6 +230,9 @@ app.use('/api/license', licenseRoutes); // Agent license verification
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ message: 'Route not found' });
 });
+
+// Sentry error handler (must be before other error handlers)
+attachSentryErrorHandler(app);
 
 // Error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
