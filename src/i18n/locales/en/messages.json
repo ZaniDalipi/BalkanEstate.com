@@ -1,0 +1,58 @@
+{
+  "inbox": {
+    "title": "Messages",
+    "noMessages": "No messages yet",
+    "startConversation": "Start a conversation by contacting a seller",
+    "newMessage": "New Message",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "online": "Online",
+    "offline": "Offline",
+    "lastSeen": "Last seen {{time}}",
+    "typing": "Typing...",
+    "delivered": "Delivered",
+    "read": "Read",
+    "unread": "Unread",
+    "markAsRead": "Mark as Read",
+    "deleteConversation": "Delete Conversation",
+    "blockUser": "Block User",
+    "reportUser": "Report User",
+    "aboutProperty": "About this property"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "No notifications",
+    "markAllRead": "Mark all as read",
+    "newMessage": "New message from {{name}}",
+    "newProperty": "New property matching your search",
+    "priceReduced": "Price reduced on saved property",
+    "propertyViewed": "Your listing was viewed {{count}} times",
+    "newInquiry": "New inquiry on your listing"
+  },
+  "toast": {
+    "success": "Success!",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "updated": "Updated successfully",
+    "copied": "Copied to clipboard",
+    "linkCopied": "Link copied to clipboard",
+    "loginRequired": "Please log in to continue",
+    "networkError": "Network error. Please try again."
+  },
+  "confirm": {
+    "delete": "Are you sure you want to delete this?",
+    "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+    "logout": "Are you sure you want to log out?"
+  },
+  "empty": {
+    "favorites": "No saved properties yet",
+    "favoritesHint": "Save properties you like to view them later",
+    "listings": "No listings yet",
+    "listingsHint": "Create your first property listing",
+    "searches": "No saved searches",
+    "searchesHint": "Save searches to get notified about new properties"
+  }
+}

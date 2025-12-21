@@ -9,6 +9,9 @@ import { Analytics } from './src/components/marketing/Analytics';
 import { UserRole } from './types';
 import { LogoIcon } from './constants';
 
+// Initialize i18n
+import './src/i18n';
+
 // Core components (loaded immediately)
 import Onboarding from './components/Onboarding';
 import { SearchPage } from './components/BuyerFlow/Search';

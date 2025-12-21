@@ -2,6 +2,7 @@ import React, { useCallback, memo } from 'react';
 import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
+import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 
 interface HeaderProps {
     onToggleSidebar: () => void;
@@ -73,6 +74,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     return (
       <header className="absolute top-0 right-0 z-[1001] p-3">
         <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-md">
+          <LanguageSwitcher variant="compact" />
           <button
             onClick={handleSubscribeClick}
             className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
@@ -107,6 +109,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           </div>
 
           <nav className="flex justify-end items-center space-x-2 sm:space-x-3">
+            <LanguageSwitcher variant="compact" />
             <button
               onClick={handleSubscribeClick}
               className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"

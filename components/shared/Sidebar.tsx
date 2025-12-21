@@ -2,6 +2,7 @@ import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
+import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 
 const NavItem: React.FC<{
   view: AppView;
@@ -179,6 +180,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 </nav>
 
                 <div className="p-1.5 border-t border-neutral-200 flex-shrink-0">
+                    {/* Language Switcher */}
+                    <div className="px-3 py-2 mb-1">
+                        <LanguageSwitcher variant="dropdown" className="w-full" />
+                    </div>
+
                     {isAuthenticated && currentUser ? (
                         <div className="space-y-0.5">
                              <button

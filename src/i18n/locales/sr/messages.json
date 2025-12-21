@@ -1,0 +1,63 @@
+{
+  "success": {
+    "saved": "Uspešno sačuvano",
+    "deleted": "Uspešno obrisano",
+    "updated": "Uspešno ažurirano",
+    "created": "Uspešno kreirano",
+    "sent": "Uspešno poslato",
+    "copied": "Kopirano u međuspremnik",
+    "propertyAdded": "Nekretnina dodata",
+    "propertySaved": "Nekretnina sačuvana",
+    "propertyRemoved": "Nekretnina uklonjena",
+    "messagesSent": "Poruka poslata",
+    "loginSuccess": "Uspešna prijava",
+    "logoutSuccess": "Uspešna odjava",
+    "registrationSuccess": "Registracija uspešna",
+    "passwordChanged": "Lozinka promenjena",
+    "profileUpdated": "Profil ažuriran"
+  },
+  "error": {
+    "generic": "Nešto nije u redu",
+    "tryAgain": "Molimo pokušajte ponovo",
+    "notFound": "Nije pronađeno",
+    "unauthorized": "Nemate pristup",
+    "forbidden": "Pristup zabranjen",
+    "serverError": "Greška servera",
+    "networkError": "Greška mreže",
+    "validationError": "Greška validacije",
+    "loginFailed": "Prijava nije uspela",
+    "registrationFailed": "Registracija nije uspela",
+    "invalidCredentials": "Nevažeći podaci za prijavu",
+    "emailExists": "Email već postoji",
+    "weakPassword": "Lozinka je preslaba",
+    "passwordMismatch": "Lozinke se ne poklapaju",
+    "requiredField": "Ovo polje je obavezno",
+    "invalidEmail": "Nevažeća email adresa",
+    "invalidPhone": "Nevažeći broj telefona",
+    "fileTooLarge": "Fajl je prevelik",
+    "invalidFileType": "Nevažeći tip fajla",
+    "uploadFailed": "Otpremanje nije uspelo"
+  },
+  "confirm": {
+    "delete": "Da li ste sigurni da želite da obrišete?",
+    "unsavedChanges": "Imate nesačuvane promene. Da li ste sigurni da želite da napustite?",
+    "logout": "Da li ste sigurni da želite da se odjavite?",
+    "deleteAccount": "Da li ste sigurni da želite da obrišete svoj nalog? Ova radnja je nepovratna."
+  },
+  "loading": {
+    "loading": "Učitavanje...",
+    "pleaseWait": "Molimo sačekajte...",
+    "loadingProperties": "Učitavanje nekretnina...",
+    "loadingMap": "Učitavanje mape...",
+    "searching": "Pretraživanje...",
+    "saving": "Čuvanje...",
+    "sending": "Slanje..."
+  },
+  "empty": {
+    "noProperties": "Nema nekretnina",
+    "noResults": "Nema rezultata",
+    "noSavedProperties": "Nemate sačuvanih nekretnina",
+    "noMessages": "Nemate poruka",
+    "noNotifications": "Nemate obaveštenja"
+  }
+}

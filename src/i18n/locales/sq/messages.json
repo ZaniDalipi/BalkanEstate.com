@@ -1,0 +1,58 @@
+{
+  "inbox": {
+    "title": "Mesazhet",
+    "noMessages": "Nuk ka mesazhe ende",
+    "startConversation": "Filloni një bisedë duke kontaktuar një shitës",
+    "newMessage": "Mesazh i Ri",
+    "typeMessage": "Shkruani një mesazh...",
+    "send": "Dërgo",
+    "online": "Në linjë",
+    "offline": "Jashtë linje",
+    "lastSeen": "Parë për herë të fundit {{time}}",
+    "typing": "Duke shkruar...",
+    "delivered": "Dorëzuar",
+    "read": "Lexuar",
+    "unread": "Pa lexuar",
+    "markAsRead": "Shëno si të Lexuar",
+    "deleteConversation": "Fshi Bisedën",
+    "blockUser": "Blloko Përdoruesin",
+    "reportUser": "Raporto Përdoruesin",
+    "aboutProperty": "Rreth kësaj prone"
+  },
+  "notifications": {
+    "title": "Njoftimet",
+    "noNotifications": "Nuk ka njoftime",
+    "markAllRead": "Shëno të gjitha si të lexuara",
+    "newMessage": "Mesazh i ri nga {{name}}",
+    "newProperty": "Pronë e re që përputhet me kërkimin tuaj",
+    "priceReduced": "Çmimi u ul në pronën e ruajtur",
+    "propertyViewed": "Shpallja juaj u shikua {{count}} herë",
+    "newInquiry": "Kërkesë e re për shpalljen tuaj"
+  },
+  "toast": {
+    "success": "Sukses!",
+    "error": "Gabim",
+    "warning": "Paralajmërim",
+    "info": "Info",
+    "saved": "U ruajt me sukses",
+    "deleted": "U fshi me sukses",
+    "updated": "U përditësua me sukses",
+    "copied": "U kopjua në clipboard",
+    "linkCopied": "Linku u kopjua në clipboard",
+    "loginRequired": "Ju lutem hyni për të vazhduar",
+    "networkError": "Gabim rrjeti. Ju lutem provoni përsëri."
+  },
+  "confirm": {
+    "delete": "Jeni të sigurt që dëshironi ta fshini këtë?",
+    "unsavedChanges": "Keni ndryshime të paruajtura. Jeni të sigurt që dëshironi të largoheni?",
+    "logout": "Jeni të sigurt që dëshironi të dilni?"
+  },
+  "empty": {
+    "favorites": "Nuk ka prona të ruajtura ende",
+    "favoritesHint": "Ruani pronat që ju pëlqejnë për t'i parë më vonë",
+    "listings": "Nuk ka shpallje ende",
+    "listingsHint": "Krijoni shpalljen tuaj të parë",
+    "searches": "Nuk ka kërkime të ruajtura",
+    "searchesHint": "Ruani kërkimet për t'u njoftuar për prona të reja"
+  }
+}
