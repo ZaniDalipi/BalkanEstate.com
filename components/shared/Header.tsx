@@ -1,9 +1,7 @@
 import React, { useCallback, memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
-import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 
 interface HeaderProps {
     onToggleSidebar: () => void;
@@ -11,7 +9,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
-  const { t } = useTranslation(['nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { isAuthenticated, currentUser } = state;
 
@@ -57,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             ) : (
               <UserCircleIcon className="w-7 h-7" />
             )}
-            <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
+            <span className="hidden sm:inline text-sm">My Account</span>
         </button>
       );
     }
@@ -67,7 +64,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
         className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${floating ? 'text-neutral-700 bg-white hover:bg-neutral-100' : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'}`}
       >
           <UserIcon className="w-5 h-5" />
-          <span className="hidden sm:inline text-sm">{t('nav:loginRegister')}</span>
+          <span className="hidden sm:inline text-sm">Login / Register</span>
       </button>
     );
   };
@@ -76,20 +73,19 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     return (
       <header className="absolute top-0 right-0 z-[1001] p-3">
         <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-md">
-          <LanguageSwitcher variant="compact" />
           <button
             onClick={handleSubscribeClick}
             className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label="Subscribe to premium plan"
           >
-              {t('nav:subscribe')}
+              Subscribe
           </button>
           <button
             onClick={handleNewListingClick}
             className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label="Create new property listing"
           >
-              + {t('nav:newListing')}
+              + New Listing
           </button>
           <AuthButton floating />
         </nav>
@@ -111,20 +107,19 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           </div>
 
           <nav className="flex justify-end items-center space-x-2 sm:space-x-3">
-            <LanguageSwitcher variant="compact" />
             <button
               onClick={handleSubscribeClick}
               className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label="Subscribe to premium plan"
             >
-                {t('nav:subscribe')}
+                Subscribe
             </button>
             <button
               onClick={handleNewListingClick}
               className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label="Create new property listing"
             >
-                + {t('nav:newListing')}
+                + New Listing
             </button>
             <AuthButton />
           </nav>
