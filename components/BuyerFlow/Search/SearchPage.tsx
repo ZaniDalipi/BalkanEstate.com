@@ -233,8 +233,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
         const cityParam = searchParams.get('city');
-        const countryParam = searchParams.get('country');
+        const countryParamRaw = searchParams.get('country');
         const propertyTypeParam = searchParams.get('propertyType');
+
+        // Normalize country param to lowercase to match BALKAN_COUNTRIES keys
+        const countryParam = countryParamRaw?.toLowerCase() || null;
 
         if (cityParam || countryParam || propertyTypeParam) {
             const newFilters = { ...filters };
@@ -283,7 +286,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     // React to country filter changes (e.g., from PropertyCard navigation)
     useEffect(() => {
         const prevCountry = prevCountryRef.current;
-        const currentCountry = filters.country;
+        const currentCountry = filters.country?.toLowerCase() || '';
 
         // Only fly if country actually changed and it's a valid country (not 'any')
         if (prevCountry !== currentCountry && currentCountry && currentCountry !== 'any') {
