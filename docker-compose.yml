@@ -1,0 +1,83 @@
+# =============================================================================
+# Docker Compose for Local Development
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: balkanestate-mongodb
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=balkanestate
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: balkanestate-backend
+    restart: unless-stopped
+    ports:
+      - '5001:5001'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - MONGODB_URI=mongodb://mongodb:27017/balkanestate
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-dev-refresh-secret}
+    volumes:
+      - ./backend/src:/app/src:ro # For development hot-reload
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5001/health || exit 1
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Frontend (development server)
+  frontend:
+    image: node:20-alpine
+    container_name: balkanestate-frontend
+    working_dir: /app
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5001/api
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
+
+  # Redis (optional - for session storage/caching)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: balkanestate-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - '6379:6379'
+  #   volumes:
+  #     - redis_data:/data
+
+volumes:
+  mongodb_data:
+  # redis_data:
+
+networks:
+  default:
+    name: balkanestate-network
