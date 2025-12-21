@@ -5,7 +5,6 @@
 
 import helmet from 'helmet';
 import hpp from 'hpp';
-import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
 import cors from 'cors';
@@ -309,14 +308,53 @@ export const hppProtection = hpp({
 
 /**
  * MongoDB Query Sanitization
- * Prevents NoSQL injection attacks
+ * Custom implementation that prevents NoSQL injection attacks
+ * without modifying read-only Express properties
  */
-export const mongoSanitization = mongoSanitize({
-  replaceWith: '_',
-  onSanitize: ({ req, key }) => {
-    console.warn(`🚨 Potential NoSQL injection attempt blocked: ${key} in ${req.path}`);
-  },
-});
+const sanitizeNoSQLInjection = (obj: any, path = ''): any => {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (typeof obj === 'string') {
+    // Check for MongoDB operators in string values
+    if (obj.includes('$') && /\$[a-zA-Z]/.test(obj)) {
+      console.warn(`🚨 Potential NoSQL injection blocked in string at ${path}: ${obj.substring(0, 50)}`);
+      return obj.replace(/\$/g, '_');
+    }
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item, index) => sanitizeNoSQLInjection(item, `${path}[${index}]`));
+  }
+
+  if (typeof obj === 'object') {
+    const sanitized: Record<string, any> = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        // Block keys starting with $ (MongoDB operators)
+        if (key.startsWith('$')) {
+          console.warn(`🚨 Potential NoSQL injection blocked: operator "${key}" at ${path}`);
+          sanitized[`_${key.slice(1)}`] = sanitizeNoSQLInjection(obj[key], `${path}.${key}`);
+        } else {
+          sanitized[key] = sanitizeNoSQLInjection(obj[key], `${path}.${key}`);
+        }
+      }
+    }
+    return sanitized;
+  }
+
+  return obj;
+};
+
+export const mongoSanitization = (req: Request, _res: Response, next: NextFunction): void => {
+  // Only sanitize body - query and params are read-only in newer Express
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeNoSQLInjection(req.body, 'body');
+  }
+  next();
+};
 
 /**
  * XSS Sanitization middleware
