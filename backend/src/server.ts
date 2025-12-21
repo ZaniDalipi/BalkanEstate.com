@@ -8,9 +8,22 @@ import connectDB from './config/database';
 import { setupChatSocket } from './sockets/chatSocket';
 import { setSocketInstance } from './utils/socketInstance';
 
+// Import security middleware
+import {
+  validateEnvironment,
+  applySecurityMiddleware,
+  generalRateLimiter,
+  sensitiveRateLimiter,
+  paymentRateLimiter,
+  xssSanitizer,
+  getSocketCorsConfig,
+} from './middleware/security';
 
 // Load environment variables
 dotenv.config();
+
+// Validate environment variables (warns in dev, throws in production)
+validateEnvironment();
 
 // Import routes
 import authRoutes from './routes/authRoutes';
@@ -55,13 +68,9 @@ const app: Application = express();
 // Create HTTP server
 const httpServer = createServer(app);
 
-// Initialize Socket.io with CORS
+// Initialize Socket.io with secure CORS configuration
 const io = new Server(httpServer, {
-  cors: {
-    origin: '*', // Allow all origins in development
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
+  cors: getSocketCorsConfig(),
 });
 
 // Store Socket.IO instance for use in controllers
@@ -125,29 +134,9 @@ startCityMarketDataUpdateJob();
 console.log('✅ City market data update job started (biweekly)');
 
 // ============================================================================
-// MANUAL CORS MIDDLEWARE - Handle ALL CORS manually for maximum control
+// SECURITY MIDDLEWARE - Apply comprehensive security headers and CORS
 // ============================================================================
-app.use((req: Request, res: Response, next: NextFunction) => {
-  // Allow any origin in development
-  const origin = req.headers.origin || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.setHeader('Access-Control-Expose-Headers', 'Content-Range, X-Content-Range');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Handle preflight OPTIONS requests immediately
-  if (req.method === 'OPTIONS') {
-    console.log(`✅ CORS Preflight: ${req.method} ${req.url} - Origin: ${req.headers.origin || 'none'}`);
-    res.status(204).end();
-    return;
-  }
-
-  // Log all other requests
-  console.log(`📥 Request: ${req.method} ${req.url} - Origin: ${req.headers.origin || 'none'}`);
-  next();
-});
+applySecurityMiddleware(app);
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
@@ -174,16 +163,30 @@ app.get('/health', (_req: Request, res: Response) => {
 // SEO routes (sitemap.xml, robots.txt) - at root level, not under /api
 app.use('/', sitemapRoutes);
 
-// API routes
-app.use('/api/auth', authRoutes);
+// ============================================================================
+// API ROUTES with Rate Limiting
+// ============================================================================
+
+// Apply general rate limiting to all API routes
+app.use('/api', generalRateLimiter);
+
+// Apply XSS sanitization to all API routes
+app.use('/api', xssSanitizer);
+
+// Sensitive routes with stricter rate limiting (auth, password reset, etc.)
+app.use('/api/auth', sensitiveRateLimiter, authRoutes);
+
+// Payment routes with payment-specific rate limiting
+app.use('/api/payments', paymentRateLimiter, paymentRoutes);
+app.use('/api/subscriptions', paymentRateLimiter, subscriptionRoutes);
+app.use('/api/webhooks', webhookRoutes); // Webhooks from Stripe - no rate limit needed
+
+// Standard API routes
 app.use('/api/properties', propertyRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);
 app.use('/api/conversations', conversationRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/webhooks', webhookRoutes);
 app.use('/api/bank-exports', bankExportRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/coupons', couponRoutes);
@@ -197,7 +200,7 @@ app.use('/api/neighborhood-insights', neighborhoodInsightsRoutes);
 app.use('/api/sales-history', salesHistoryRoutes);
 app.use('/api/discount-codes', discountCodeRoutes);
 app.use('/api/cities', cityMarketDataRoutes); // City market data and recommendations
-app.use('/api/admin', adminRoutes); // Admin panel routes (VPN + admin role required)
+app.use('/api/admin', sensitiveRateLimiter, adminRoutes); // Admin panel routes (VPN + admin role required)
 app.use('/api/license', licenseRoutes); // Agent license verification
 
 // 404 handler
@@ -222,13 +225,20 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 const PORT = process.env.PORT || 5001;
 
 httpServer.listen(PORT, () => {
+  const isProd = process.env.NODE_ENV === 'production';
   console.log('');
   console.log('🚀 ============================================');
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('🚀 CORS: Enabled for all origins');
-  console.log('🚀 WebSocket: Enabled for real-time chat');
   console.log('🚀 ============================================');
+  console.log('');
+  console.log('🔒 Security Features:');
+  console.log('   - Helmet security headers: Enabled');
+  console.log('   - CORS: ' + (isProd ? 'Production whitelist' : 'Development (permissive)'));
+  console.log('   - Rate limiting: Enabled (general + sensitive + payment)');
+  console.log('   - XSS protection: Enabled');
+  console.log('   - HPP protection: Enabled');
+  console.log('   - NoSQL injection protection: Enabled');
   console.log('');
   console.log('📍 Health check: http://localhost:' + PORT + '/health');
   console.log('📍 API base URL: http://localhost:' + PORT + '/api');
