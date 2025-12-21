@@ -1,0 +1,41 @@
+{
+  "name": "balkan-estate",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^1.27.0",
+    "@google/generative-ai": "^0.24.1",
+    "@tanstack/react-query": "^5.90.11",
+    "@tanstack/react-query-devtools": "^5.91.1",
+    "browser-image-compression": "^2.0.2",
+    "cron": "^4.4.0",
+    "framer-motion": "^12.23.25",
+    "generative-ai": "^0.1.4",
+    "heroku": "^8.7.1",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.553.0",
+    "ngrok": "^5.0.0-beta.2",
+    "node-cron": "^4.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1",
+    "sharp": "^0.34.5",
+    "socket.io-client": "^4.8.1",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^22.19.3",
+    "@types/react": "^19.2.4",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

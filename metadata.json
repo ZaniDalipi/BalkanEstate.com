@@ -1,0 +1,7 @@
+{
+  "name": "Balkan Estate",
+  "description": "A property selling application similar to Zillow, tailored for the Balkan region. It provides tools for both buyers and sellers, including map-based search, property listings, seller calculators, and subscription services.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
