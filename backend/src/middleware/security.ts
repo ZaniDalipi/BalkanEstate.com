@@ -393,15 +393,9 @@ export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): 
     return obj;
   };
 
-  // Sanitize body, query, and params
+  // Only sanitize body - query and params are read-only in newer Express
   if (req.body) {
     req.body = sanitize(req.body);
-  }
-  if (req.query) {
-    req.query = sanitize(req.query);
-  }
-  if (req.params) {
-    req.params = sanitize(req.params);
   }
 
   next();
