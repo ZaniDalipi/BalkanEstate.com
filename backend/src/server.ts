@@ -25,6 +25,9 @@ import {
 // Import cache middleware
 import { apiCache } from './middleware/cache';
 
+// Import Swagger configuration
+import { setupSwagger } from './config/swagger';
+
 // Load environment variables
 dotenv.config();
 
@@ -161,6 +164,11 @@ if (process.env.NODE_ENV === 'development') {
 
 // Compression
 app.use(compression());
+
+// Setup Swagger API documentation (only in development or if explicitly enabled)
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
+  setupSwagger(app);
+}
 
 // Health check route
 app.get('/health', (_req: Request, res: Response) => {
