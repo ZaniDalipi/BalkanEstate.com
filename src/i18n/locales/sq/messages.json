@@ -1,6 +1,15 @@
 {
   "inbox": {
     "title": "Mesazhet",
+    "inboxTitle": "Mesazhet - Inbox",
+    "loginToView": "Hyni për të parë mesazhet tuaja",
+    "communicateWithSellers": "Komunikoni me shitësit dhe agjentët për pronat tuaja të preferuara.",
+    "emptyInbox": "Inbox-i Juaj është Bosh",
+    "inquireToStart": "Pyesni për një pronë për të filluar!",
+    "featuredProperties": "Ja disa prona:",
+    "creatingConversation": "Duke krijuar bisedën...",
+    "loadingConversation": "Duke ngarkuar bisedën...",
+    "selectConversation": "Zgjidhni një bisedë për të parë mesazhet.",
     "noMessages": "Nuk ka mesazhe ende",
     "startConversation": "Filloni një bisedë duke kontaktuar një shitës",
     "newMessage": "Mesazh i Ri",

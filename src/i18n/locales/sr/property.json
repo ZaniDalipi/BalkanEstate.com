@@ -144,5 +144,17 @@
     "underOffer": "U Pregovorima"
   },
   "noResults": "Nisu pronađene nekretnine",
-  "tryDifferentFilters": "Pokušajte promeniti filtere ili kriterijume pretrage"
+  "tryDifferentFilters": "Pokušajte promeniti filtere ili kriterijume pretrage",
+  "saved": {
+    "title": "Sačuvane Nekretnine",
+    "subtitle": "Vaše omiljene nekretnine, sve na jednom mestu",
+    "propertySaved": "Nekretnina Sačuvana",
+    "propertiesSaved": "Nekretnine Sačuvane",
+    "loginToView": "Prijavite se da vidite sačuvane nekretnine",
+    "saveDescription": "Sačuvajte omiljene nekretnine i pristupite im bilo gde, bilo kad.",
+    "noSaved": "Još niste sačuvali nijednu nekretninu.",
+    "clickHeart": "Kliknite na ikonu srca na bilo kojoj nekretnini da je sačuvate ovde.",
+    "popularProperties": "Evo nekih popularnih nekretnina",
+    "featuredAgencies": "Istaknute Agencije"
+  }
 }

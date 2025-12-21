@@ -144,5 +144,17 @@
     "underOffer": "Under Offer"
   },
   "noResults": "No properties found",
-  "tryDifferentFilters": "Try adjusting your filters or search criteria"
+  "tryDifferentFilters": "Try adjusting your filters or search criteria",
+  "saved": {
+    "title": "Saved Properties",
+    "subtitle": "Your favorite properties, all in one place",
+    "propertySaved": "Property Saved",
+    "propertiesSaved": "Properties Saved",
+    "loginToView": "Log in to view your saved homes",
+    "saveDescription": "Save your favorite properties and access them anytime, anywhere.",
+    "noSaved": "You haven't saved any homes yet.",
+    "clickHeart": "Click the heart icon on any property to save it here.",
+    "popularProperties": "Here are some popular properties",
+    "featuredAgencies": "Featured Agencies"
+  }
 }

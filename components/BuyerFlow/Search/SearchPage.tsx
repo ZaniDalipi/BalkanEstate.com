@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../../context/AppContext';
 import MapComponent from '../Maps/MapComponent';
 import PropertyList from './PropertyList';
@@ -87,6 +88,7 @@ const MobileFilters: React.FC<{
 
 
 const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
+    const { t } = useTranslation(['search', 'common']);
     const { state, dispatch, fetchProperties, updateSearchPageState, addSavedSearch } = useAppContext();
     const { properties, isAuthenticated, currentUser, searchPageState } = state;
     const { filters, activeFilters, mapBoundsJSON, drawnBoundsJSON, mobileView, searchMode, aiChatHistory, isAiChatModalOpen, isFiltersOpen, focusMapOnProperty } = searchPageState;

@@ -144,5 +144,17 @@
     "underOffer": "Në Negociata"
   },
   "noResults": "Nuk u gjetën prona",
-  "tryDifferentFilters": "Provoni të ndryshoni filtrat ose kriteret e kërkimit"
+  "tryDifferentFilters": "Provoni të ndryshoni filtrat ose kriteret e kërkimit",
+  "saved": {
+    "title": "Prona të Ruajtura",
+    "subtitle": "Pronat tuaja të preferuara, të gjitha në një vend",
+    "propertySaved": "Pronë e Ruajtur",
+    "propertiesSaved": "Prona të Ruajtura",
+    "loginToView": "Hyni për të parë pronat e ruajtura",
+    "saveDescription": "Ruani pronat tuaja të preferuara dhe qasuni kudo, kurdo.",
+    "noSaved": "Nuk keni ruajtur asnjë pronë ende.",
+    "clickHeart": "Klikoni ikonën e zemrës në çdo pronë për ta ruajtur këtu.",
+    "popularProperties": "Ja disa prona të njohura",
+    "featuredAgencies": "Agjenci të Zgjedhura"
+  }
 }
