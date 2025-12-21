@@ -226,6 +226,9 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         fetchProperties();
     }, []);
 
+    // Track previous country to detect changes
+    const prevCountryRef = useRef<string>(filters.country);
+
     // Parse URL query parameters on mount and apply as filters
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -252,7 +255,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 activeFilters: newFilters,
             });
 
-            // If city is specified, fly to that location
+            // If city is specified, fly to that city location
             if (cityParam && countryParam) {
                 // Use searchLocation to get coordinates for the city
                 searchLocation(`${cityParam}, ${BALKAN_COUNTRIES[countryParam]?.name || countryParam}`).then(results => {
@@ -263,10 +266,57 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         });
                     }
                 });
+            } else if (countryParam && !cityParam) {
+                // If only country is specified (no city), fly to country center
+                const countryData = BALKAN_COUNTRIES[countryParam];
+                if (countryData) {
+                    setFlyToTarget({
+                        center: countryData.center,
+                        zoom: countryData.zoom
+                    });
+                }
             }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Only run on mount
+
+    // React to country filter changes (e.g., from PropertyCard navigation)
+    useEffect(() => {
+        const prevCountry = prevCountryRef.current;
+        const currentCountry = filters.country;
+
+        // Only fly if country actually changed and it's a valid country (not 'any')
+        if (prevCountry !== currentCountry && currentCountry && currentCountry !== 'any') {
+            const countryData = BALKAN_COUNTRIES[currentCountry];
+            if (countryData) {
+                // If there's also a city query, search for it within the country
+                if (filters.query && filters.query.trim()) {
+                    searchLocation(`${filters.query}, ${countryData.name}`).then(results => {
+                        if (results.length > 0) {
+                            setFlyToTarget({
+                                center: [Number(results[0].lat), Number(results[0].lon)],
+                                zoom: 12
+                            });
+                        } else {
+                            // Fallback to country center if city not found
+                            setFlyToTarget({
+                                center: countryData.center,
+                                zoom: countryData.zoom
+                            });
+                        }
+                    });
+                } else {
+                    // Just country selected, fly to country center
+                    setFlyToTarget({
+                        center: countryData.center,
+                        zoom: countryData.zoom
+                    });
+                }
+            }
+        }
+
+        prevCountryRef.current = currentCountry;
+    }, [filters.country, filters.query]);
 
     useEffect(() => {
         let timeoutId: number;
