@@ -2,6 +2,7 @@
   "appName": "BalkanEstate",
   "tagline": "Pronađite Kuću Svojih Snova na Balkanu",
   "loading": "Učitavanje...",
+  "loadingMore": "Učitavanje još...",
   "error": "Došlo je do greške",
   "retry": "Pokušaj ponovo",
   "cancel": "Otkaži",

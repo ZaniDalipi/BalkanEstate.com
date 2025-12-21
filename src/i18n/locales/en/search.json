@@ -1,7 +1,10 @@
 {
   "title": "Search Properties",
+  "searchLocation": "Search Location",
   "searchPlaceholder": "City, address, neighborhood...",
   "searchButton": "Search",
+  "showResults": "Show Results",
+  "resultsFound": "{{count}} results found",
   "filters": {
     "title": "Filters",
     "showFilters": "Show Filters",
@@ -9,6 +12,7 @@
     "clearAll": "Clear All",
     "apply": "Apply Filters",
     "reset": "Reset Filters",
+    "resetFilters": "Reset Filters",
     "save": "Save Search",
     "country": "Country",
     "allCountries": "All Countries",
@@ -19,6 +23,8 @@
     "buy": "Buy",
     "rent": "Rent",
     "priceRange": "Price Range",
+    "min": "Min",
+    "max": "Max",
     "minPrice": "Min Price",
     "maxPrice": "Max Price",
     "bedrooms": "Bedrooms",
@@ -33,27 +39,96 @@
     "minYear": "Min Year",
     "maxYear": "Max Year",
     "furnishing": "Furnishing",
-    "anyFurnishing": "Any",
-    "heating": "Heating",
-    "anyHeating": "Any",
+    "heating": "Heating Type",
     "condition": "Condition",
-    "anyCondition": "Any",
-    "view": "View Type",
-    "anyView": "Any",
+    "viewType": "View",
     "energyRating": "Energy Rating",
-    "anyRating": "Any",
     "sellerType": "Seller Type",
-    "anySellerType": "Any",
-    "agentOnly": "Agents Only",
-    "privateOnly": "Private Sellers Only",
+    "parkingSpaces": "Parking Spaces",
+    "floorNumber": "Floor Number",
+    "advancedFilters": "Advanced Filters",
     "moreFilters": "More Filters",
     "lessFilters": "Less Filters"
   },
+  "options": {
+    "any": "Any",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "propertyTypes": {
+    "any": "Any",
+    "house": "House",
+    "apartment": "Apartment",
+    "villa": "Villa",
+    "land": "Land",
+    "commercial": "Commercial",
+    "other": "Other"
+  },
+  "listingTypes": {
+    "any": "Any",
+    "agent": "Agent",
+    "private": "Private"
+  },
+  "furnishingOptions": {
+    "any": "Any",
+    "furnished": "Furnished",
+    "semi-furnished": "Semi-Furnished",
+    "unfurnished": "Unfurnished"
+  },
+  "heatingOptions": {
+    "any": "Any",
+    "central": "Central Heating",
+    "electric": "Electric",
+    "gas": "Gas",
+    "oil": "Oil",
+    "heat-pump": "Heat Pump",
+    "solar": "Solar",
+    "wood": "Wood",
+    "none": "None"
+  },
+  "conditionOptions": {
+    "any": "Any",
+    "new": "New",
+    "excellent": "Excellent",
+    "good": "Good",
+    "fair": "Fair",
+    "needs-renovation": "Needs Renovation"
+  },
+  "viewOptions": {
+    "any": "Any",
+    "sea": "Sea View",
+    "mountain": "Mountain View",
+    "city": "City View",
+    "park": "Park View",
+    "garden": "Garden View",
+    "street": "Street View"
+  },
+  "amenities": {
+    "title": "Amenities",
+    "balcony": "Balcony/Terrace",
+    "garden": "Garden/Yard",
+    "elevator": "Elevator",
+    "security": "Security System",
+    "airConditioning": "Air Conditioning",
+    "pool": "Swimming Pool",
+    "petsAllowed": "Pets Allowed",
+    "placeholder": "Type amenity and press Enter (e.g., gym, pool)"
+  },
+  "distance": {
+    "title": "Maximum Distance (km)",
+    "toCenter": "To City Center",
+    "toSea": "To Sea/Beach",
+    "toSchool": "To School",
+    "toHospital": "To Hospital",
+    "maxKm": "Max km"
+  },
   "sort": {
     "title": "Sort By",
+    "sortBy": "Sort by",
     "relevance": "Relevance",
-    "newest": "Newest First",
-    "oldest": "Oldest First",
+    "newest": "Newest",
+    "oldest": "Oldest",
     "priceAsc": "Price: Low to High",
     "priceDesc": "Price: High to Low",
     "areaAsc": "Area: Small to Large",
@@ -70,20 +145,23 @@
     "forRent": "for rent"
   },
   "map": {
-    "showMap": "Show Map",
+    "showMap": "Map",
     "hideMap": "Hide Map",
+    "showList": "List",
     "fullscreenMap": "Fullscreen Map",
-    "drawArea": "Draw Area",
-    "clearArea": "Clear Area",
+    "drawArea": "Draw on Map",
+    "clearArea": "Clear Drawing",
     "zoomIn": "Zoom In",
     "zoomOut": "Zoom Out",
     "myLocation": "My Location",
     "satellite": "Satellite",
-    "street": "Street View"
+    "street": "Street View",
+    "legend": "Legend"
   },
   "savedSearch": {
     "title": "Saved Searches",
     "save": "Save This Search",
+    "saveSearch": "Save Search",
     "name": "Search Name",
     "namePlaceholder": "e.g., 2BR apartments in Pristina",
     "notifications": "Get notified about new listings",
@@ -93,6 +171,7 @@
   },
   "ai": {
     "title": "AI Search",
+    "aiPropertySearch": "AI Property Search",
     "placeholder": "Describe your ideal property...",
     "example": "e.g., A modern 3-bedroom apartment near the city center with a balcony and parking",
     "searching": "Searching...",

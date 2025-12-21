@@ -2,6 +2,7 @@
   "appName": "BalkanEstate",
   "tagline": "Find Your Dream Home in the Balkans",
   "loading": "Loading...",
+  "loadingMore": "Loading more...",
   "error": "An error occurred",
   "retry": "Retry",
   "cancel": "Cancel",

@@ -1,4 +1,5 @@
 import React, { useState, useCallback, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
@@ -12,6 +13,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
+  const { t } = useTranslation(['property', 'common']);
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -99,14 +101,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
     }
   }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
 
-  // Property type labels (short versions for mobile)
-  const propertyTypeLabel = {
-    apartment: 'Apt',
-    house: 'House',
-    villa: 'Villa',
-    land: 'Land',
-    commercial: 'Comm',
-  }[property.propertyType] || 'Property';
+  // Property type labels
+  const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
   // Determine card styles based on promotion tier
   const getCardStyles = () => {
@@ -157,7 +153,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             {isSold && (
               <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                SOLD
+                {t('property:sold').toUpperCase()}
               </div>
             )}
 
@@ -168,7 +164,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
                 </span>
-                NEW
+                {t('property:status.new').toUpperCase()}
               </div>
             )}
 
@@ -184,9 +180,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   : 'bg-gradient-to-r from-gray-600 to-gray-700'
               }`}>
                 <span className="text-xs">✨</span>
-                {promotionTier === 'premium' && 'PREMIUM'}
+                {promotionTier === 'premium' && t('common:premium').toUpperCase()}
                 {promotionTier === 'highlight' && 'HIGHLIGHT'}
-                {promotionTier === 'featured' && 'FEATURED'}
+                {promotionTier === 'featured' && t('common:featured').toUpperCase()}
                 {promotionTier === 'standard' && 'PROMOTED'}
               </div>
             )}
@@ -194,7 +190,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             {/* Urgent Badge */}
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
               <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg animate-pulse flex items-center gap-1">
-                🔥 URGENT
+                🔥 {t('property:status.urgent').toUpperCase()}
               </div>
             )}
 
@@ -277,19 +273,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
         {/* Property Stats - Grid layout for better fit */}
         <div className="grid grid-cols-4 gap-1.5 mb-3">
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} bedrooms`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} ${t('property:features.bedrooms')}`}>
             <BedIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.beds}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} bathrooms`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} ${t('property:features.bathrooms')}`}>
             <BathIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.baths}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} living rooms`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
             <LivingRoomIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.livingRooms}</span>
           </div>
-          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} m²`}>
+          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
             <SqftIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-primary">{property.sqft}</span>
           </div>
@@ -324,7 +320,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   ? 'bg-blue-500 text-white'
                   : 'bg-neutral-200 text-neutral-600'
               }`}>
-                {property.seller.type === 'agent' ? 'Agent' : 'Private'}
+                {property.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
             </div>
 
@@ -341,7 +337,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   <BuildingOfficeIcon className="w-5 h-5 text-primary" />
                 )}
                 <div className="hidden sm:block">
-                  <p className="text-[9px] text-neutral-500 leading-none">Agency</p>
+                  <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
                   <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[60px]">{property.seller.agencyName}</p>
                 </div>
               </div>
@@ -359,7 +355,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               }`}
             >
               <ScaleIcon className="w-4 h-4" />
-              <span>{isInComparison ? 'In Compare' : 'Add to Compare'}</span>
+              <span>{isInComparison ? t('property:actions.removeFromCompare') : t('property:actions.addToCompare')}</span>
             </button>
           )}
         </div>

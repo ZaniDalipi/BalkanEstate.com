@@ -2,6 +2,7 @@
   "appName": "BalkanEstate",
   "tagline": "Gjeni Shtëpinë e Ëndrrave në Ballkan",
   "loading": "Duke ngarkuar...",
+  "loadingMore": "Duke ngarkuar më shumë...",
   "error": "Ndodhi një gabim",
   "retry": "Provo përsëri",
   "cancel": "Anulo",
