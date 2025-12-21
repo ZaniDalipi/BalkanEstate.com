@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
@@ -41,6 +42,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+    const { t } = useTranslation(['nav', 'common', 'auth']);
     const { state, dispatch, logout } = useAppContext();
     const { activeView, isAuthenticated, currentUser, conversations } = state;
 
@@ -93,17 +95,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     };
 
     const baseNavItems = [
-      { view: 'search' as AppView, label: 'Search', icon: <SearchIcon /> },
-      { view: 'explore-cities' as AppView, label: 'Explore Cities', icon: <SparklesIcon /> },
-      { view: 'saved-searches' as AppView, label: 'Saved Searches', icon: <MagnifyingGlassPlusIcon /> },
-      { view: 'saved-properties' as AppView, label: 'Saved Properties', icon: <HeartIcon /> },
-      { view: 'agents' as AppView, label: 'Top Agents', icon: <AgentsIcon /> },
-      { view: 'agencies' as AppView, label: 'Agencies', icon: <BuildingOfficeIcon /> },
+      { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
+      { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
+      { view: 'saved-searches' as AppView, label: t('nav:savedSearches'), icon: <MagnifyingGlassPlusIcon /> },
+      { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <HeartIcon /> },
+      { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <AgentsIcon /> },
+      { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <BuildingOfficeIcon /> },
     ];
 
     // Add admin panel for admin users
     const navItems = currentUser?.role === 'admin' || currentUser?.role === 'super_admin'
-      ? [...baseNavItems, { view: 'admin' as AppView, label: 'Admin Panel', icon: <ShieldCheckIcon /> }]
+      ? [...baseNavItems, { view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <ShieldCheckIcon /> }]
       : baseNavItems;
 
     return (
@@ -149,14 +151,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-white bg-secondary hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
                         >
                             <PencilIcon className="w-5 h-5 flex-shrink-0" />
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ New Listing</span>
+                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
                         </button>
                         <button
                             onClick={handleSubscriptionClick}
                             className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
                         >
                             <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`}><StarIconSolid /></div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">Subscription</span>
+                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
                         </button>
                         <button
                             onClick={() => handleNavClick('inbox')}
@@ -174,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                     </span>
                                 )}
                             </div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">Inbox</span>
+                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:inbox')}</span>
                         </button>
                     </div>
                 </nav>
@@ -198,17 +200,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 <div className="w-5 h-5 flex-shrink-0">
                                 {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover"/> : <UserCircleIcon />}
                                 </div>
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">My Account</span>
+                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>
                             <button onClick={handleLogout} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start">
                                 <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" />
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">Logout</span>
+                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:logout')}</span>
                             </button>
                         </div>
                     ) : (
                          <button onClick={() => { dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } }); onClose(); }} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start">
                             <UserCircleIcon className="w-5 h-5 text-neutral-700 flex-shrink-0" />
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">Login / Register</span>
+                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
                         </button>
                     )}
                 </div>

@@ -1,4 +1,5 @@
 import React, { useCallback, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
@@ -10,6 +11,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
+  const { t } = useTranslation(['nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { isAuthenticated, currentUser } = state;
 
@@ -55,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             ) : (
               <UserCircleIcon className="w-7 h-7" />
             )}
-            <span className="hidden sm:inline text-sm">My Account</span>
+            <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>
       );
     }
@@ -65,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
         className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${floating ? 'text-neutral-700 bg-white hover:bg-neutral-100' : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'}`}
       >
           <UserIcon className="w-5 h-5" />
-          <span className="hidden sm:inline text-sm">Login / Register</span>
+          <span className="hidden sm:inline text-sm">{t('nav:loginRegister')}</span>
       </button>
     );
   };
@@ -80,14 +82,14 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label="Subscribe to premium plan"
           >
-              Subscribe
+              {t('nav:subscribe')}
           </button>
           <button
             onClick={handleNewListingClick}
             className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             aria-label="Create new property listing"
           >
-              + New Listing
+              + {t('nav:newListing')}
           </button>
           <AuthButton floating />
         </nav>
@@ -115,14 +117,14 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
               className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label="Subscribe to premium plan"
             >
-                Subscribe
+                {t('nav:subscribe')}
             </button>
             <button
               onClick={handleNewListingClick}
               className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               aria-label="Create new property listing"
             >
-                + New Listing
+                + {t('nav:newListing')}
             </button>
             <AuthButton />
           </nav>
