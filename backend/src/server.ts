@@ -19,6 +19,9 @@ import {
   getSocketCorsConfig,
 } from './middleware/security';
 
+// Import cache middleware
+import { apiCache } from './middleware/cache';
+
 // Load environment variables
 dotenv.config();
 
@@ -172,6 +175,9 @@ app.use('/api', generalRateLimiter);
 
 // Apply XSS sanitization to all API routes
 app.use('/api', xssSanitizer);
+
+// Apply API caching for GET requests (public data only)
+app.use('/api', apiCache);
 
 // Sensitive routes with stricter rate limiting (auth, password reset, etc.)
 app.use('/api/auth', sensitiveRateLimiter, authRoutes);

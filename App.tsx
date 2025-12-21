@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
@@ -7,32 +7,46 @@ import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from './src/components/seo';
 import { Analytics } from './src/components/marketing/Analytics';
 import { UserRole } from './types';
+import { LogoIcon } from './constants';
+
+// Core components (loaded immediately)
 import Onboarding from './components/Onboarding';
 import { SearchPage } from './components/BuyerFlow/Search';
-import { CityRecommendations } from './components/BuyerFlow';
-import CreateListingPage from './components/SellerFlow/SellerDashboard';
 import AuthPage from './components/auth/AuthModal';
-import PricingPlans from './components/SellerFlow/PricingPlans';
-import { SavedSearchesPage } from './components/BuyerFlow/Saved';
-import SavedPropertiesPage from './components/BuyerFlow/Saved/SavedHomesPage';
-import InboxPage from './components/BuyerFlow/Messaging/InboxPage';
-import MyAccountPage from './components/shared/MyAccountPage';
 import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
-import SubscriptionModal from './components/BuyerFlow/Modals/SubscriptionModal';
-import AgentsPage from './components/AgentsPage/AgentsPage';
-import AgenciesListPage from './components/AgenciesListPage';
-import AgencyDetailPage from './components/AgencyDetailPage';
-import EnterpriseCreationForm from './components/EnterpriseCreationForm';
-import PropertyDetailsPage from './components/BuyerFlow/PropertyDisplay/PropertyDetailsPage';
-import PaymentSuccess from './components/PaymentSuccess';
-import PaymentCancel from './components/PaymentCancel';
-import { LogoIcon } from './constants';
-import ListingLimitWarningModal from './components/shared/ListingLimitWarningModal';
-import DiscountGameModal from './components/shared/DiscountGameModal';
-import AdminDashboard from './components/AdminPanel/AdminDashboard';
-import ResetPasswordPage from './components/auth/ResetPasswordPage';
+
+// Lazy loaded components (loaded on demand)
+const CityRecommendations = lazy(() => import('./components/BuyerFlow/CityRecommendations').then(m => ({ default: m.CityRecommendations })));
+const CreateListingPage = lazy(() => import('./components/SellerFlow/SellerDashboard'));
+const PricingPlans = lazy(() => import('./components/SellerFlow/PricingPlans'));
+const SavedSearchesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedSearchesPage').then(m => ({ default: m.SavedSearchesPage })));
+const SavedPropertiesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedHomesPage'));
+const InboxPage = lazy(() => import('./components/BuyerFlow/Messaging/InboxPage'));
+const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
+const SubscriptionModal = lazy(() => import('./components/BuyerFlow/Modals/SubscriptionModal'));
+const AgentsPage = lazy(() => import('./components/AgentsPage/AgentsPage'));
+const AgenciesListPage = lazy(() => import('./components/AgenciesListPage'));
+const AgencyDetailPage = lazy(() => import('./components/AgencyDetailPage'));
+const EnterpriseCreationForm = lazy(() => import('./components/EnterpriseCreationForm'));
+const PropertyDetailsPage = lazy(() => import('./components/BuyerFlow/PropertyDisplay/PropertyDetailsPage'));
+const PaymentSuccess = lazy(() => import('./components/PaymentSuccess'));
+const PaymentCancel = lazy(() => import('./components/PaymentCancel'));
+const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
+const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
+const AdminDashboard = lazy(() => import('./components/AdminPanel/AdminDashboard'));
+const ResetPasswordPage = lazy(() => import('./components/auth/ResetPasswordPage'));
+
+// Loading fallback component
+const PageLoader: React.FC = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-3"></div>
+      <p className="text-gray-500 text-sm">Loading...</p>
+    </div>
+  </div>
+);
 
 const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
   const { state, dispatch } = useAppContext();
@@ -196,15 +210,27 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // Payment callback routes (highest priority)
   const path = window.location.pathname;
   if (path === '/payment/success') {
-    return <PaymentSuccess />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <PaymentSuccess />
+      </Suspense>
+    );
   }
   if (path === '/payment/cancel') {
-    return <PaymentCancel />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <PaymentCancel />
+      </Suspense>
+    );
   }
 
   // Global handler for selected property view
   if (state.selectedProperty) {
-    return <PropertyDetailsPage property={state.selectedProperty} />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <PropertyDetailsPage property={state.selectedProperty} />
+      </Suspense>
+    );
   }
 
   // Global handler for selected agency view - show detail page if we have a selectedAgencyId
@@ -219,34 +245,52 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         </div>
       );
     }
-    return <AgencyDetailPage agency={selectedAgency} />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <AgencyDetailPage agency={selectedAgency} />
+      </Suspense>
+    );
   }
 
-  switch (state.activeView) {
-    case 'explore-cities':
-      return <CityRecommendations />;
-    case 'saved-searches':
-      return <SavedSearchesPage />;
-    case 'saved-properties':
-      return <SavedPropertiesPage />;
-    case 'inbox':
-      return <InboxPage />;
-    case 'account':
-      return <MyAccountPage />;
-    case 'create-listing':
-      return <CreateListingPage />;
-    case 'agents':
-      return <AgentsPage />;
-    case 'agencies':
-      return <AgenciesListPage />;
-    case 'admin':
-      return <AdminDashboard />;
-    case 'reset-password':
-      return <ResetPasswordPage />;
-    case 'search':
-    default:
-      return <SearchPage onToggleSidebar={onToggleSidebar} />;
+  // Wrap lazy loaded views in Suspense
+  const renderView = () => {
+    switch (state.activeView) {
+      case 'explore-cities':
+        return <CityRecommendations />;
+      case 'saved-searches':
+        return <SavedSearchesPage />;
+      case 'saved-properties':
+        return <SavedPropertiesPage />;
+      case 'inbox':
+        return <InboxPage />;
+      case 'account':
+        return <MyAccountPage />;
+      case 'create-listing':
+        return <CreateListingPage />;
+      case 'agents':
+        return <AgentsPage />;
+      case 'agencies':
+        return <AgenciesListPage />;
+      case 'admin':
+        return <AdminDashboard />;
+      case 'reset-password':
+        return <ResetPasswordPage />;
+      case 'search':
+      default:
+        return <SearchPage onToggleSidebar={onToggleSidebar} />;
+    }
+  };
+
+  // SearchPage is not lazy loaded, so no Suspense needed for default
+  if (state.activeView === 'search' || !state.activeView) {
+    return <SearchPage onToggleSidebar={onToggleSidebar} />;
   }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      {renderView()}
+    </Suspense>
+  );
 };
 
 const MainLayout: React.FC = () => {
@@ -326,34 +370,47 @@ const MainLayout: React.FC = () => {
             </main>
         </div>
 
-        <ListingLimitWarningModal
-            isOpen={state.isListingLimitWarningOpen}
-            onClose={() => {
-                dispatch({ type: 'SET_PENDING_PROPERTY', payload: null });
-                dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: false });
-            }}
-            onConfirm={handleWarningConfirm}
-        />
-        <DiscountGameModal
-            isOpen={state.isDiscountGameOpen}
-            onGameComplete={handleGameComplete}
-        />
-        <PricingPlans
-            isOpen={state.isPricingModalOpen}
-            onClose={handlePricingClose}
-            onSubscribe={handleSubscribe}
-            isOffer={state.isFirstLoginOffer}
-            isAgencyMode={state.isAgencyCreationMode}
-        />
-        <SubscriptionModal
-            isOpen={state.isSubscriptionModalOpen}
-            onClose={() => dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: false } })}
-            initialEmail={state.subscriptionEmail || undefined}
-        />
-        <EnterpriseCreationForm
-            isOpen={state.isEnterpriseModalOpen}
-            onClose={() => dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: false })}
-        />
+        {/* Lazy loaded modals - only render when open */}
+        <Suspense fallback={null}>
+          {state.isListingLimitWarningOpen && (
+            <ListingLimitWarningModal
+                isOpen={state.isListingLimitWarningOpen}
+                onClose={() => {
+                    dispatch({ type: 'SET_PENDING_PROPERTY', payload: null });
+                    dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: false });
+                }}
+                onConfirm={handleWarningConfirm}
+            />
+          )}
+          {state.isDiscountGameOpen && (
+            <DiscountGameModal
+                isOpen={state.isDiscountGameOpen}
+                onGameComplete={handleGameComplete}
+            />
+          )}
+          {state.isPricingModalOpen && (
+            <PricingPlans
+                isOpen={state.isPricingModalOpen}
+                onClose={handlePricingClose}
+                onSubscribe={handleSubscribe}
+                isOffer={state.isFirstLoginOffer}
+                isAgencyMode={state.isAgencyCreationMode}
+            />
+          )}
+          {state.isSubscriptionModalOpen && (
+            <SubscriptionModal
+                isOpen={state.isSubscriptionModalOpen}
+                onClose={() => dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: false } })}
+                initialEmail={state.subscriptionEmail || undefined}
+            />
+          )}
+          {state.isEnterpriseModalOpen && (
+            <EnterpriseCreationForm
+                isOpen={state.isEnterpriseModalOpen}
+                onClose={() => dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: false })}
+            />
+          )}
+        </Suspense>
     </div>
   );
 };
