@@ -1,0 +1,60 @@
+{
+  "mortgage": {
+    "title": "Mortgage Calculator",
+    "description": "Estimate your monthly payments",
+    "fields": {
+      "propertyPrice": "Property Price",
+      "downPayment": "Down Payment",
+      "downPaymentPercent": "Down Payment (%)",
+      "loanAmount": "Loan Amount",
+      "interestRate": "Interest Rate (%)",
+      "loanTerm": "Loan Term",
+      "years": "years"
+    },
+    "results": {
+      "monthlyPayment": "Monthly Payment",
+      "totalPayment": "Total Payment",
+      "totalInterest": "Total Interest",
+      "principal": "Principal",
+      "interest": "Interest"
+    },
+    "breakdown": {
+      "title": "Payment Breakdown",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "total": "Total"
+    }
+  },
+  "rentVsBuy": {
+    "title": "Rent vs Buy Calculator",
+    "description": "Should you rent or buy?",
+    "fields": {
+      "monthlyRent": "Current Monthly Rent",
+      "rentIncrease": "Annual Rent Increase (%)",
+      "propertyPrice": "Property Price",
+      "downPayment": "Down Payment",
+      "mortgageRate": "Mortgage Rate (%)",
+      "propertyTax": "Property Tax (%)",
+      "maintenance": "Maintenance (%)",
+      "appreciation": "Property Appreciation (%)",
+      "timeframe": "Timeframe",
+      "years": "years"
+    },
+    "results": {
+      "recommendation": "Recommendation",
+      "buyingIsBetter": "Buying is Better",
+      "rentingIsBetter": "Renting is Better",
+      "totalRentCost": "Total Rent Cost",
+      "totalBuyCost": "Total Buying Cost",
+      "savings": "Potential Savings",
+      "equityBuilt": "Equity Built",
+      "breakEvenPoint": "Break-even Point"
+    }
+  },
+  "common": {
+    "calculate": "Calculate",
+    "reset": "Reset",
+    "perMonth": "/month",
+    "perYear": "/year"
+  }
+}

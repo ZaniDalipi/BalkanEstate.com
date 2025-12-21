@@ -1,0 +1,40 @@
+{
+  "password": {
+    "minLength": "Të paktën 8 karaktere",
+    "uppercase": "Një shkronjë të madhe",
+    "lowercase": "Një shkronjë të vogël",
+    "number": "Një numër",
+    "specialChar": "Një karakter special (!@#$%...)",
+    "noSequential": "Pa karaktere sekuenciale (123, abc, qwe)",
+    "notCommon": "Jo një fjalëkalim i zakonshëm",
+    "mismatch": "Fjalëkalimet nuk përputhen"
+  },
+  "email": {
+    "required": "Email-i është i detyrueshëm",
+    "invalid": "Ju lutemi shkruani një adresë email të vlefshme"
+  },
+  "phone": {
+    "required": "Numri i telefonit është i detyrueshëm",
+    "invalid": "Ju lutemi shkruani një numër telefoni të vlefshëm"
+  },
+  "required": "Kjo fushë është e detyrueshme",
+  "minLength": "Duhet të jetë të paktën {{count}} karaktere",
+  "maxLength": "Duhet të jetë jo më shumë se {{count}} karaktere",
+  "numeric": "Duhet të jetë një numër",
+  "positive": "Duhet të jetë një numër pozitiv",
+  "url": "Ju lutemi shkruani një URL të vlefshme",
+  "date": {
+    "invalid": "Ju lutemi shkruani një datë të vlefshme",
+    "future": "Data duhet të jetë në të ardhmen",
+    "past": "Data duhet të jetë në të kaluarën"
+  },
+  "file": {
+    "required": "Ju lutemi zgjidhni një skedar",
+    "size": "Madhësia e skedarit duhet të jetë më pak se {{size}}MB",
+    "type": "Lloji i skedarit i pavlefshëm. Të lejuara: {{types}}"
+  },
+  "form": {
+    "hasErrors": "Ju lutemi korrigjoni gabimet para se të dërgoni",
+    "submitError": "Ndodhi një gabim. Ju lutemi provoni përsëri."
+  }
+}

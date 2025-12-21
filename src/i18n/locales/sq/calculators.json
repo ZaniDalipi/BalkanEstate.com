@@ -1,0 +1,60 @@
+{
+  "mortgage": {
+    "title": "Llogaritësi i Kredisë",
+    "description": "Vlerësoni pagesat mujore",
+    "fields": {
+      "propertyPrice": "Çmimi i Pronës",
+      "downPayment": "Pagesa Fillestare",
+      "downPaymentPercent": "Pagesa Fillestare (%)",
+      "loanAmount": "Shuma e Kredisë",
+      "interestRate": "Norma e Interesit (%)",
+      "loanTerm": "Afati i Kredisë",
+      "years": "vite"
+    },
+    "results": {
+      "monthlyPayment": "Pagesa Mujore",
+      "totalPayment": "Pagesa Totale",
+      "totalInterest": "Interesi Total",
+      "principal": "Principali",
+      "interest": "Interesi"
+    },
+    "breakdown": {
+      "title": "Zbërthimi i Pagesave",
+      "monthly": "Mujore",
+      "yearly": "Vjetore",
+      "total": "Totale"
+    }
+  },
+  "rentVsBuy": {
+    "title": "Qira vs Blerje",
+    "description": "A duhet të merrni me qira apo të blini?",
+    "fields": {
+      "monthlyRent": "Qiraja Mujore Aktuale",
+      "rentIncrease": "Rritja Vjetore e Qirasë (%)",
+      "propertyPrice": "Çmimi i Pronës",
+      "downPayment": "Pagesa Fillestare",
+      "mortgageRate": "Norma e Kredisë (%)",
+      "propertyTax": "Tatimi i Pronës (%)",
+      "maintenance": "Mirëmbajtja (%)",
+      "appreciation": "Vlerësimi i Pronës (%)",
+      "timeframe": "Periudha Kohore",
+      "years": "vite"
+    },
+    "results": {
+      "recommendation": "Rekomandimi",
+      "buyingIsBetter": "Blerja është më e Mirë",
+      "rentingIsBetter": "Qiraja është më e Mirë",
+      "totalRentCost": "Kostoja Totale e Qirasë",
+      "totalBuyCost": "Kostoja Totale e Blerjes",
+      "savings": "Kursime Potenciale",
+      "equityBuilt": "Kapitali i Ndërtuar",
+      "breakEvenPoint": "Pika e Barazimit"
+    }
+  },
+  "common": {
+    "calculate": "Llogarit",
+    "reset": "Rivendos",
+    "perMonth": "/muaj",
+    "perYear": "/vit"
+  }
+}

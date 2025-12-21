@@ -20,27 +20,47 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-// Import translations
+// Import translations - English
 import enCommon from './locales/en/common.json';
 import enNav from './locales/en/nav.json';
 import enProperty from './locales/en/property.json';
 import enAuth from './locales/en/auth.json';
 import enSearch from './locales/en/search.json';
 import enMessages from './locales/en/messages.json';
+import enFooter from './locales/en/footer.json';
+import enNewsletter from './locales/en/newsletter.json';
+import enCalculators from './locales/en/calculators.json';
+import enPricing from './locales/en/pricing.json';
+import enValidation from './locales/en/validation.json';
+import enAdmin from './locales/en/admin.json';
 
+// Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
 import sqNav from './locales/sq/nav.json';
 import sqProperty from './locales/sq/property.json';
 import sqAuth from './locales/sq/auth.json';
 import sqSearch from './locales/sq/search.json';
 import sqMessages from './locales/sq/messages.json';
+import sqFooter from './locales/sq/footer.json';
+import sqNewsletter from './locales/sq/newsletter.json';
+import sqCalculators from './locales/sq/calculators.json';
+import sqPricing from './locales/sq/pricing.json';
+import sqValidation from './locales/sq/validation.json';
+import sqAdmin from './locales/sq/admin.json';
 
+// Import translations - Serbian
 import srCommon from './locales/sr/common.json';
 import srNav from './locales/sr/nav.json';
 import srProperty from './locales/sr/property.json';
 import srAuth from './locales/sr/auth.json';
 import srSearch from './locales/sr/search.json';
 import srMessages from './locales/sr/messages.json';
+import srFooter from './locales/sr/footer.json';
+import srNewsletter from './locales/sr/newsletter.json';
+import srCalculators from './locales/sr/calculators.json';
+import srPricing from './locales/sr/pricing.json';
+import srValidation from './locales/sr/validation.json';
+import srAdmin from './locales/sr/admin.json';
 
 // Language configuration
 export const languages = [
@@ -68,6 +88,12 @@ const resources = {
     auth: enAuth,
     search: enSearch,
     messages: enMessages,
+    footer: enFooter,
+    newsletter: enNewsletter,
+    calculators: enCalculators,
+    pricing: enPricing,
+    validation: enValidation,
+    admin: enAdmin,
   },
   sq: {
     common: sqCommon,
@@ -76,6 +102,12 @@ const resources = {
     auth: sqAuth,
     search: sqSearch,
     messages: sqMessages,
+    footer: sqFooter,
+    newsletter: sqNewsletter,
+    calculators: sqCalculators,
+    pricing: sqPricing,
+    validation: sqValidation,
+    admin: sqAdmin,
   },
   sr: {
     common: srCommon,
@@ -84,6 +116,12 @@ const resources = {
     auth: srAuth,
     search: srSearch,
     messages: srMessages,
+    footer: srFooter,
+    newsletter: srNewsletter,
+    calculators: srCalculators,
+    pricing: srPricing,
+    validation: srValidation,
+    admin: srAdmin,
   },
   // Other languages will fallback to English until translations are added
 };
@@ -96,7 +134,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin'],
 
     interpolation: {
       escapeValue: false, // React already escapes

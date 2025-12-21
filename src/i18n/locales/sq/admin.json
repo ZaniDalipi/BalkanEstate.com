@@ -1,0 +1,124 @@
+{
+  "dashboard": {
+    "title": "Paneli i Adminit",
+    "welcome": "Mirësevini, {{name}}",
+    "overview": "Përmbledhje"
+  },
+  "sidebar": {
+    "dashboard": "Paneli",
+    "properties": "Pronat",
+    "users": "Përdoruesit",
+    "agencies": "Agjencitë",
+    "discountCodes": "Kodet e Zbritjes",
+    "promotions": "Promovimet",
+    "analytics": "Analitika",
+    "settings": "Cilësimet"
+  },
+  "properties": {
+    "title": "Menaxheri i Pronave",
+    "loading": "Duke ngarkuar pronat...",
+    "noProperties": "Nuk u gjetën prona",
+    "addNew": "Shto Pronë të Re",
+    "edit": "Ndrysho Pronën",
+    "delete": "Fshi Pronën",
+    "deleteConfirm": "A jeni i sigurt që dëshironi të fshini \"{{title}}\"? Ky veprim nuk mund të zhbëhet.",
+    "updateSuccess": "Prona u përditësua me sukses",
+    "deleteSuccess": "Prona u fshi me sukses",
+    "loadError": "Dështoi ngarkimi i pronave",
+    "status": {
+      "active": "Aktive",
+      "pending": "Në Pritje",
+      "sold": "Shitur",
+      "inactive": "Joaktive"
+    }
+  },
+  "users": {
+    "title": "Menaxheri i Përdoruesve",
+    "loading": "Duke ngarkuar përdoruesit...",
+    "noUsers": "Nuk u gjetën përdorues",
+    "addNew": "Shto Përdorues të Ri",
+    "edit": "Ndrysho Përdoruesin",
+    "delete": "Fshi Përdoruesin",
+    "deleteConfirm": "A jeni i sigurt që dëshironi të fshini këtë përdorues? Ky veprim nuk mund të zhbëhet.",
+    "roles": {
+      "admin": "Admin",
+      "agent": "Agjent",
+      "buyer": "Blerës",
+      "seller": "Shitës"
+    },
+    "status": {
+      "active": "Aktiv",
+      "suspended": "Pezulluar",
+      "pending": "Në Pritje të Verifikimit"
+    }
+  },
+  "agencies": {
+    "title": "Menaxheri i Agjencive",
+    "loading": "Duke ngarkuar agjencitë...",
+    "noAgencies": "Nuk u gjetën agjenci",
+    "addNew": "Shto Agjenci të Re",
+    "edit": "Ndrysho Agjencin",
+    "delete": "Fshi Agjencin",
+    "deleteConfirm": "A jeni i sigurt që dëshironi të fshini këtë agjenci? Ky veprim nuk mund të zhbëhet.",
+    "approve": "Aprovo",
+    "reject": "Refuzo",
+    "status": {
+      "active": "Aktive",
+      "pending": "Në Pritje të Aprovimit",
+      "suspended": "Pezulluar"
+    }
+  },
+  "discountCodes": {
+    "title": "Menaxheri i Kodeve të Zbritjes",
+    "loading": "Duke ngarkuar kodet e zbritjes...",
+    "noCodes": "Nuk u gjetën kode zbritjeje",
+    "addNew": "Krijo Kod të Ri",
+    "edit": "Ndrysho Kodin",
+    "delete": "Fshi Kodin",
+    "deleteConfirm": "A jeni i sigurt që dëshironi të fshini këtë kod zbritjeje?",
+    "code": "Kodi",
+    "discount": "Zbritja",
+    "usageLimit": "Kufiri i Përdorimit",
+    "usedCount": "Herë i Përdorur",
+    "validFrom": "Valid Nga",
+    "validTo": "Valid Deri",
+    "status": {
+      "active": "Aktiv",
+      "expired": "Skaduar",
+      "disabled": "Çaktivizuar"
+    }
+  },
+  "promotions": {
+    "title": "Menaxheri i Promovimeve",
+    "loading": "Duke ngarkuar promovimet...",
+    "noPromotions": "Nuk u gjetën promovime",
+    "addNew": "Krijo Promovim të Ri",
+    "edit": "Ndrysho Promovimin",
+    "delete": "Fshi Promovimin"
+  },
+  "common": {
+    "actions": "Veprimet",
+    "save": "Ruaj",
+    "cancel": "Anulo",
+    "edit": "Ndrysho",
+    "delete": "Fshi",
+    "view": "Shiko",
+    "search": "Kërko...",
+    "filter": "Filtro",
+    "export": "Eksporto",
+    "refresh": "Rifresko",
+    "showing": "Duke shfaqur {{from}} deri {{to}} nga {{total}} rezultate",
+    "noResults": "Nuk u gjetën rezultate",
+    "confirmDelete": "Konfirmo Fshirjen",
+    "yes": "Po",
+    "no": "Jo"
+  },
+  "errors": {
+    "notAuthenticated": "Jo i autentifikuar",
+    "accessDenied": "Qasja e Refuzuar",
+    "adminRequired": "Kërkohet qasje admin",
+    "connectionFailed": "Dështoi lidhja me panelin e adminit",
+    "pleaseLogin": "Ju lutemi hyni për të pasur qasje në panelin e adminit.",
+    "goHome": "Shko në Ballina"
+  }
+}

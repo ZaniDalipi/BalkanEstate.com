@@ -1,0 +1,60 @@
+{
+  "mortgage": {
+    "title": "Kalkulator Kredita",
+    "description": "Izračunajte mesečne rate",
+    "fields": {
+      "propertyPrice": "Cena Nekretnine",
+      "downPayment": "Učešće",
+      "downPaymentPercent": "Učešće (%)",
+      "loanAmount": "Iznos Kredita",
+      "interestRate": "Kamatna Stopa (%)",
+      "loanTerm": "Period Otplate",
+      "years": "godina"
+    },
+    "results": {
+      "monthlyPayment": "Mesečna Rata",
+      "totalPayment": "Ukupna Isplata",
+      "totalInterest": "Ukupna Kamata",
+      "principal": "Glavnica",
+      "interest": "Kamata"
+    },
+    "breakdown": {
+      "title": "Raspored Plaćanja",
+      "monthly": "Mesečno",
+      "yearly": "Godišnje",
+      "total": "Ukupno"
+    }
+  },
+  "rentVsBuy": {
+    "title": "Kirija vs Kupovina",
+    "description": "Da li da iznajmite ili kupite?",
+    "fields": {
+      "monthlyRent": "Trenutna Mesečna Kirija",
+      "rentIncrease": "Godišnje Povećanje Kirije (%)",
+      "propertyPrice": "Cena Nekretnine",
+      "downPayment": "Učešće",
+      "mortgageRate": "Kamatna Stopa (%)",
+      "propertyTax": "Porez na Imovinu (%)",
+      "maintenance": "Održavanje (%)",
+      "appreciation": "Rast Vrednosti Nekretnine (%)",
+      "timeframe": "Vremenski Period",
+      "years": "godina"
+    },
+    "results": {
+      "recommendation": "Preporuka",
+      "buyingIsBetter": "Kupovina je Bolja",
+      "rentingIsBetter": "Iznajmljivanje je Bolje",
+      "totalRentCost": "Ukupni Trošak Kirije",
+      "totalBuyCost": "Ukupni Trošak Kupovine",
+      "savings": "Potencijalne Uštede",
+      "equityBuilt": "Izgrađeni Kapital",
+      "breakEvenPoint": "Tačka Rentabilnosti"
+    }
+  },
+  "common": {
+    "calculate": "Izračunaj",
+    "reset": "Resetuj",
+    "perMonth": "/mesečno",
+    "perYear": "/godišnje"
+  }
+}

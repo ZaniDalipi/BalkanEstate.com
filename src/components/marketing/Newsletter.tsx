@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface NewsletterProps {
   variant?: 'inline' | 'card' | 'footer';
@@ -8,6 +9,7 @@ interface NewsletterProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', className = '' }) => {
+  const { t } = useTranslation(['newsletter']);
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -17,7 +19,7 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
 
     if (!email || !email.includes('@')) {
       setStatus('error');
-      setMessage('Please enter a valid email address');
+      setMessage(t('newsletter:messages.invalidEmail'));
       return;
     }
 
@@ -34,17 +36,17 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
 
       if (response.ok) {
         setStatus('success');
-        setMessage('Thank you for subscribing! Check your inbox for confirmation.');
+        setMessage(t('newsletter:messages.success'));
         setEmail('');
       } else {
         const data = await response.json();
         setStatus('error');
-        setMessage(data.message || 'Subscription failed. Please try again.');
+        setMessage(data.message || t('newsletter:messages.error'));
       }
     } catch (error) {
       // For now, simulate success since newsletter endpoint may not exist
       setStatus('success');
-      setMessage('Thank you for subscribing! We\'ll keep you updated on the best properties.');
+      setMessage(t('newsletter:messages.success'));
       setEmail('');
     }
   };
@@ -56,7 +58,7 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email"
+          placeholder={t('newsletter:form.placeholder')}
           className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
           disabled={status === 'loading'}
         />
@@ -65,7 +67,7 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
           disabled={status === 'loading'}
           className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 text-sm font-medium whitespace-nowrap"
         >
-          {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
+          {status === 'loading' ? t('newsletter:form.subscribing') : t('newsletter:form.submit')}
         </button>
         {status === 'success' && (
           <span className="text-green-600 text-sm self-center">✓</span>
@@ -77,16 +79,16 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
   if (variant === 'footer') {
     return (
       <div className={className}>
-        <h4 className="text-white font-semibold mb-3">Stay Updated</h4>
+        <h4 className="text-white font-semibold mb-3">{t('newsletter:subtitle')}</h4>
         <p className="text-neutral-400 text-sm mb-4">
-          Get the latest property listings and market insights delivered to your inbox.
+          {t('newsletter:description')}
         </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Your email address"
+            placeholder={t('newsletter:form.placeholder')}
             className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:ring-2 focus:ring-primary focus:border-primary"
             disabled={status === 'loading'}
           />
@@ -95,7 +97,7 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
             disabled={status === 'loading'}
             className="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 font-medium"
           >
-            {status === 'loading' ? 'Subscribing...' : 'Subscribe to Newsletter'}
+            {status === 'loading' ? t('newsletter:form.subscribing') : t('newsletter:cta.title')}
           </button>
         </form>
         {message && (
@@ -117,8 +119,8 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
           </svg>
         </div>
         <div>
-          <h3 className="text-xl font-bold">Never Miss a Property</h3>
-          <p className="text-white/80 text-sm">Get personalized listings in your inbox</p>
+          <h3 className="text-xl font-bold">{t('newsletter:title')}</h3>
+          <p className="text-white/80 text-sm">{t('newsletter:description')}</p>
         </div>
       </div>
 
@@ -127,19 +129,19 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
           <svg className="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-          New listings matching your criteria
+          {t('newsletter:features.newListings')}
         </li>
         <li className="flex items-center gap-2">
           <svg className="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-          Price drop alerts on saved properties
+          {t('newsletter:features.priceDrops')}
         </li>
         <li className="flex items-center gap-2">
           <svg className="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-          Weekly market insights & trends
+          {t('newsletter:features.marketInsights')}
         </li>
       </ul>
 
@@ -148,7 +150,7 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email address"
+          placeholder={t('newsletter:form.placeholder')}
           className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:ring-2 focus:ring-secondary focus:border-secondary backdrop-blur-sm"
           disabled={status === 'loading'}
         />
@@ -163,10 +165,10 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              Subscribing...
+              {t('newsletter:form.subscribing')}
             </span>
           ) : (
-            'Subscribe for Free'
+            t('newsletter:cta.button')
           )}
         </button>
       </form>
@@ -178,7 +180,7 @@ export const Newsletter: React.FC<NewsletterProps> = ({ variant = 'card', classN
       )}
 
       <p className="mt-4 text-xs text-white/60 text-center">
-        By subscribing, you agree to our Privacy Policy. Unsubscribe anytime.
+        {t('newsletter:privacy')}
       </p>
     </div>
   );

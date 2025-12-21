@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import {
     LogoIcon,
@@ -25,6 +26,7 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ className = '' }) => {
+    const { t } = useTranslation(['footer', 'common']);
     const currentYear = new Date().getFullYear();
     const { dispatch, state } = useAppContext();
 
@@ -33,6 +35,20 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
         window.history.pushState({}, '', `/${view === 'search' ? '' : view}`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    const buyerLinks = [
+        { icon: SearchIcon, labelKey: 'links.searchProperties', view: 'search' },
+        { icon: HeartIcon, labelKey: 'links.savedProperties', view: 'saved-properties' },
+        { icon: BellIcon, labelKey: 'links.savedSearches', view: 'saved-searches' },
+        { icon: UserGroupIcon, labelKey: 'links.findAgents', view: 'agents' },
+        { icon: BuildingLibraryIcon, labelKey: 'links.browseAgencies', view: 'agencies' }
+    ];
+
+    const sellerLinks = [
+        { icon: BuildingOfficeIcon, labelKey: 'links.listProperty', view: 'create-listing' },
+        { icon: InboxIcon, labelKey: 'links.messages', view: 'inbox' },
+        { icon: UserCircleIcon, labelKey: 'links.myAccount', view: 'account' }
+    ];
 
     return (
         <footer className={`relative bg-gray-50 text-gray-900 border-t border-gray-200 mt-auto pb-4 ${className}`}>
@@ -51,10 +67,10 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             <div className="p-1.5 bg-gradient-to-br from-gray-900 to-gray-700 rounded-xl shadow-sm">
                                 <LogoIcon className="w-5 h-5 text-white" />
                             </div>
-                            <span className="text-xl font-semibold text-gray-900">Balkan Estate</span>
+                            <span className="text-xl font-semibold text-gray-900">{t('common:appName')}</span>
                         </div>
                         <p className="text-sm text-gray-600 leading-relaxed max-w-md">
-                            Finding perfect properties across the Balkans with premium service and modern technology.
+                            {t('footer:tagline')}
                         </p>
 
                         {/* Social Media Links */}
@@ -81,23 +97,17 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                     {/* For Buyers */}
                     <div>
                         <h3 className="text-xs font-semibold text-gray-900 mb-3 tracking-wide uppercase">
-                            For Buyers
+                            {t('footer:sections.forBuyers')}
                         </h3>
                         <ul className="space-y-2">
-                            {[
-                                { icon: SearchIcon, label: 'Search Properties', view: 'search' },
-                                { icon: HeartIcon, label: 'Saved Properties', view: 'saved-properties' },
-                                { icon: BellIcon, label: 'Saved Searches', view: 'saved-searches' },
-                                { icon: UserGroupIcon, label: 'Find Agents', view: 'agents' },
-                                { icon: BuildingLibraryIcon, label: 'Browse Agencies', view: 'agencies' }
-                            ].map(({ icon: Icon, label, view }) => (
-                                <li key={label}>
+                            {buyerLinks.map(({ icon: Icon, labelKey, view }) => (
+                                <li key={labelKey}>
                                     <button
                                         onClick={() => handleNavigation(view as any)}
                                         className="group flex items-center gap-3 hover:translate-x-1 transition-all duration-200 text-left w-full py-1"
                                     >
                                         <Icon className="w-4 h-4 text-blue-500 group-hover:text-blue-600 transition-colors" />
-                                        <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{label}</span>
+                                        <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{t(`footer:${labelKey}`)}</span>
                                     </button>
                                 </li>
                             ))}
@@ -107,21 +117,17 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                     {/* For Sellers */}
                     <div>
                         <h3 className="text-xs font-semibold text-gray-900 mb-3 tracking-wide uppercase">
-                            For Sellers
+                            {t('footer:sections.forSellers')}
                         </h3>
                         <ul className="space-y-2">
-                            {[
-                                { icon: BuildingOfficeIcon, label: 'List Property', view: 'create-listing' },
-                                { icon: InboxIcon, label: 'Messages', view: 'inbox' },
-                                { icon: UserCircleIcon, label: 'My Account', view: 'account' }
-                            ].map(({ icon: Icon, label, view }) => (
-                                <li key={label}>
+                            {sellerLinks.map(({ icon: Icon, labelKey, view }) => (
+                                <li key={labelKey}>
                                     <button
                                         onClick={() => handleNavigation(view as any)}
                                         className="group flex items-center gap-3 hover:translate-x-1 transition-all duration-200 text-left w-full py-1"
                                     >
                                         <Icon className="w-4 h-4 text-green-500 group-hover:text-green-600 transition-colors" />
-                                        <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{label}</span>
+                                        <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{t(`footer:${labelKey}`)}</span>
                                     </button>
                                 </li>
                             ))}
@@ -131,25 +137,25 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                     {/* Contact */}
                     <div>
                         <h3 className="text-xs font-semibold text-gray-900 mb-3 tracking-wide uppercase">
-                            Contact
+                            {t('footer:sections.contact')}
                         </h3>
                         <ul className="space-y-2">
                             <li>
-                                <a 
-                                    href="tel:+383XXXXXXX" 
+                                <a
+                                    href="tel:+383XXXXXXX"
                                     className="flex items-center gap-3 hover:translate-x-1 transition-all duration-200 group py-1"
                                 >
                                     <PhoneIcon className="w-4 h-4 text-purple-500 group-hover:text-purple-600 transition-colors flex-shrink-0" />
-                                    <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">+383 XX XXX XXX</span>
+                                    <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{t('footer:contact.phone')}</span>
                                 </a>
                             </li>
                             <li>
-                                <a 
-                                    href="mailto:info@balkanestate.com" 
+                                <a
+                                    href="mailto:info@balkanestate.com"
                                     className="flex items-center gap-3 hover:translate-x-1 transition-all duration-200 group py-1"
                                 >
                                     <EnvelopeIcon className="w-4 h-4 text-purple-500 group-hover:text-purple-600 transition-colors flex-shrink-0" />
-                                    <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">info@balkanestate.com</span>
+                                    <span className="text-sm text-gray-600 group-hover:text-gray-900 font-medium">{t('footer:contact.email')}</span>
                                 </a>
                             </li>
                         </ul>
@@ -162,12 +168,12 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm">
                         <p className="text-gray-600 text-center md:text-left">
-                            © {currentYear} <span className="font-semibold text-gray-900">Balkan Estate</span>. All rights reserved.
+                            © {currentYear} <span className="font-semibold text-gray-900">{t('common:appName')}</span>. {t('footer:legal.allRightsReserved')}
                         </p>
                         <div className="flex flex-wrap gap-6 justify-center">
-                            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Privacy Policy</a>
-                            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Terms of Service</a>
-                            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Cookie Policy</a>
+                            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">{t('footer:legal.privacyPolicy')}</a>
+                            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">{t('footer:legal.termsOfService')}</a>
+                            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">{t('footer:legal.cookiePolicy')}</a>
                         </div>
                     </div>
                 </div>

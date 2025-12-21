@@ -1,0 +1,77 @@
+{
+  "title": "Choose Your Selling Plan",
+  "subtitle": "Select the perfect plan to list your property",
+  "loading": "Loading plans...",
+  "limitedOffer": "Limited Time Offer Ends In:",
+  "plans": {
+    "free": {
+      "name": "Free",
+      "description": "Perfect for getting started"
+    },
+    "proMonthly": {
+      "name": "Pro Monthly",
+      "description": "Best for active sellers",
+      "badge": "Popular"
+    },
+    "proYearly": {
+      "name": "Pro Yearly",
+      "description": "Save {{percent}}% with annual billing",
+      "badge": "Best Value"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "description": "For agencies and professionals"
+    }
+  },
+  "features": {
+    "activeListings": "Up to {{count}} active property ads",
+    "promotedListings": "Promote {{count}} ads for {{days}} days",
+    "featuredListings": "{{count}} featured listings",
+    "prioritySupport": "Priority support",
+    "analytics": "Advanced analytics",
+    "teamMembers": "Up to {{count}} team members",
+    "apiAccess": "API access",
+    "customBranding": "Custom branding",
+    "dedicatedManager": "Dedicated account manager"
+  },
+  "buttons": {
+    "getStarted": "Get Started",
+    "getPro": "Get Pro",
+    "getProAnnual": "Get Pro Annual",
+    "getProMonthly": "Get Pro Monthly",
+    "getEnterprise": "Get Enterprise",
+    "contactSales": "Contact Sales",
+    "currentPlan": "Current Plan"
+  },
+  "billing": {
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "billedAnnually": "Billed annually",
+    "billedMonthly": "Billed monthly"
+  },
+  "benefits": {
+    "moneyBack": "30-day money-back guarantee",
+    "moreViews": "{{multiplier}}x more views than free listings",
+    "instantActivation": "Instant activation",
+    "cancelAnytime": "Cancel anytime"
+  },
+  "enterprise": {
+    "required": "Enterprise Plan Required",
+    "message": "To register as an agency, you need an Enterprise subscription.",
+    "contactUs": "Contact us to learn more about our Enterprise plan."
+  },
+  "exitModal": {
+    "title": "Are you sure you want to exit?",
+    "message": "If you exit now, all agency information you entered will be lost. Your subscription will remain active.",
+    "stay": "Stay & Save!",
+    "leave": "Yes, Leave",
+    "continueSetup": "Continue Setup"
+  },
+  "success": {
+    "title": "Congratulations!",
+    "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
+    "startListing": "Start Listing Properties"
+  }
+}

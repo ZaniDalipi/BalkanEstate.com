@@ -1,0 +1,124 @@
+{
+  "dashboard": {
+    "title": "Admin Panel",
+    "welcome": "Dobrodošli, {{name}}",
+    "overview": "Pregled"
+  },
+  "sidebar": {
+    "dashboard": "Kontrolna Tabla",
+    "properties": "Nekretnine",
+    "users": "Korisnici",
+    "agencies": "Agencije",
+    "discountCodes": "Kodovi za Popust",
+    "promotions": "Promocije",
+    "analytics": "Analitika",
+    "settings": "Podešavanja"
+  },
+  "properties": {
+    "title": "Upravljanje Nekretninama",
+    "loading": "Učitavanje nekretnina...",
+    "noProperties": "Nema pronađenih nekretnina",
+    "addNew": "Dodaj Novu Nekretninu",
+    "edit": "Uredi Nekretninu",
+    "delete": "Obriši Nekretninu",
+    "deleteConfirm": "Da li ste sigurni da želite da obrišete \"{{title}}\"? Ova radnja se ne može poništiti.",
+    "updateSuccess": "Nekretnina uspešno ažurirana",
+    "deleteSuccess": "Nekretnina uspešno obrisana",
+    "loadError": "Greška pri učitavanju nekretnina",
+    "status": {
+      "active": "Aktivna",
+      "pending": "Na Čekanju",
+      "sold": "Prodata",
+      "inactive": "Neaktivna"
+    }
+  },
+  "users": {
+    "title": "Upravljanje Korisnicima",
+    "loading": "Učitavanje korisnika...",
+    "noUsers": "Nema pronađenih korisnika",
+    "addNew": "Dodaj Novog Korisnika",
+    "edit": "Uredi Korisnika",
+    "delete": "Obriši Korisnika",
+    "deleteConfirm": "Da li ste sigurni da želite da obrišete ovog korisnika? Ova radnja se ne može poništiti.",
+    "roles": {
+      "admin": "Admin",
+      "agent": "Agent",
+      "buyer": "Kupac",
+      "seller": "Prodavac"
+    },
+    "status": {
+      "active": "Aktivan",
+      "suspended": "Suspendovan",
+      "pending": "Čeka Verifikaciju"
+    }
+  },
+  "agencies": {
+    "title": "Upravljanje Agencijama",
+    "loading": "Učitavanje agencija...",
+    "noAgencies": "Nema pronađenih agencija",
+    "addNew": "Dodaj Novu Agenciju",
+    "edit": "Uredi Agenciju",
+    "delete": "Obriši Agenciju",
+    "deleteConfirm": "Da li ste sigurni da želite da obrišete ovu agenciju? Ova radnja se ne može poništiti.",
+    "approve": "Odobri",
+    "reject": "Odbij",
+    "status": {
+      "active": "Aktivna",
+      "pending": "Čeka Odobrenje",
+      "suspended": "Suspendovana"
+    }
+  },
+  "discountCodes": {
+    "title": "Upravljanje Kodovima za Popust",
+    "loading": "Učitavanje kodova za popust...",
+    "noCodes": "Nema pronađenih kodova za popust",
+    "addNew": "Kreiraj Novi Kod",
+    "edit": "Uredi Kod",
+    "delete": "Obriši Kod",
+    "deleteConfirm": "Da li ste sigurni da želite da obrišete ovaj kod za popust?",
+    "code": "Kod",
+    "discount": "Popust",
+    "usageLimit": "Limit Korišćenja",
+    "usedCount": "Broj Korišćenja",
+    "validFrom": "Važi Od",
+    "validTo": "Važi Do",
+    "status": {
+      "active": "Aktivan",
+      "expired": "Istekao",
+      "disabled": "Onemogućen"
+    }
+  },
+  "promotions": {
+    "title": "Upravljanje Promocijama",
+    "loading": "Učitavanje promocija...",
+    "noPromotions": "Nema pronađenih promocija",
+    "addNew": "Kreiraj Novu Promociju",
+    "edit": "Uredi Promociju",
+    "delete": "Obriši Promociju"
+  },
+  "common": {
+    "actions": "Akcije",
+    "save": "Sačuvaj",
+    "cancel": "Otkaži",
+    "edit": "Uredi",
+    "delete": "Obriši",
+    "view": "Pogledaj",
+    "search": "Pretraži...",
+    "filter": "Filtriraj",
+    "export": "Izvezi",
+    "refresh": "Osveži",
+    "showing": "Prikazujem {{from}} do {{to}} od {{total}} rezultata",
+    "noResults": "Nema rezultata",
+    "confirmDelete": "Potvrdi Brisanje",
+    "yes": "Da",
+    "no": "Ne"
+  },
+  "errors": {
+    "notAuthenticated": "Niste prijavljeni",
+    "accessDenied": "Pristup Odbijen",
+    "adminRequired": "Potreban admin pristup",
+    "connectionFailed": "Neuspela konekcija sa admin panelom",
+    "pleaseLogin": "Molimo prijavite se da pristupite admin panelu.",
+    "goHome": "Idi na Početnu"
+  }
+}

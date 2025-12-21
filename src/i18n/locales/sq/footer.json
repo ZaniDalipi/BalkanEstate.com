@@ -1,0 +1,28 @@
+{
+  "tagline": "Gjetja e pronave perfekte nëpër Ballkan me shërbim premium dhe teknologji moderne.",
+  "sections": {
+    "forBuyers": "Për Blerësit",
+    "forSellers": "Për Shitësit",
+    "contact": "Kontakti"
+  },
+  "links": {
+    "searchProperties": "Kërko Prona",
+    "savedProperties": "Prona të Ruajtura",
+    "savedSearches": "Kërkime të Ruajtura",
+    "findAgents": "Gjej Agjentë",
+    "browseAgencies": "Shfleto Agjencitë",
+    "listProperty": "Listo Pronën",
+    "messages": "Mesazhet",
+    "myAccount": "Llogaria Ime"
+  },
+  "contact": {
+    "phone": "+383 XX XXX XXX",
+    "email": "info@balkanestate.com"
+  },
+  "legal": {
+    "allRightsReserved": "Të gjitha të drejtat e rezervuara.",
+    "privacyPolicy": "Politika e Privatësisë",
+    "termsOfService": "Kushtet e Shërbimit",
+    "cookiePolicy": "Politika e Cookies"
+  }
+}
