@@ -8,7 +8,8 @@ import { ArrowLeftIcon } from '../../../constants';
 import ImageViewerModal from '../Modals/ImageViewerModal';
 import FloorPlanViewerModal from '../Modals/FloorPlanViewerModal';
 import FeaturedAgencies from '../../FeaturedAgencies';
-import { SEO } from '../../../src/components/seo';
+import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '../../../src/components/seo';
+import { SocialShare } from '../../../src/components/marketing/SocialShare';
 import {
   ImageEditorModal,
   PropertyGallery,
@@ -266,7 +267,19 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
-        <div className="p-4 flex items-center justify-between">
+        {/* Breadcrumbs */}
+        <div className="px-4 pt-3 pb-1">
+          <Breadcrumbs
+            items={generatePropertyBreadcrumbs({
+              id: property.id,
+              address: property.address,
+              city: property.city,
+              country: property.country,
+            })}
+          />
+        </div>
+
+        <div className="p-4 pt-2 flex items-center justify-between">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-primary font-semibold hover:underline"

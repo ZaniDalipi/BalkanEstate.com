@@ -4,7 +4,8 @@ import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
 import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
-import { SEO } from './src/components/seo';
+import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from './src/components/seo';
+import { Analytics } from './src/components/marketing/Analytics';
 import { UserRole } from './types';
 import Onboarding from './components/Onboarding';
 import { SearchPage } from './components/BuyerFlow/Search';
@@ -424,13 +425,29 @@ const AppWrapper: React.FC = () => {
 }
 
 const App: React.FC = () => {
+  // Get analytics IDs from environment variables
+  const googleAnalyticsId = import.meta.env.VITE_GA_ID;
+  const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
+
   return (
     <ErrorBoundary level="app">
       <HelmetProvider>
         <QueryProvider>
           <AppProvider>
             <AlertProvider>
+              {/* Global SEO Components */}
               <SEO />
+              <OrganizationSchema />
+              <FAQSchema faqs={realEstateFAQs} />
+
+              {/* Analytics - only loaded if IDs are provided */}
+              {(googleAnalyticsId || facebookPixelId) && (
+                <Analytics
+                  googleAnalyticsId={googleAnalyticsId}
+                  facebookPixelId={facebookPixelId}
+                />
+              )}
+
               <AppWrapper />
             </AlertProvider>
           </AppProvider>
