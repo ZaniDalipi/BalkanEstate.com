@@ -86,23 +86,31 @@
     "publicTransport": "Javni Prevoz"
   },
   "actions": {
+    "quickActions": "Brze Akcije",
     "viewDetails": "Pogledaj Detalje",
     "contactSeller": "Kontaktiraj Prodavca",
     "contactAgent": "Kontaktiraj Agenta",
     "requestTour": "Zatraži Obilazak",
     "schedule": "Zakaži Gledanje",
+    "scheduleVisit": "Zakaži Posetu",
     "saveProperty": "Sačuvaj Nekretninu",
     "removeFromSaved": "Ukloni iz Sačuvanih",
     "share": "Podeli",
     "print": "Štampaj",
     "report": "Prijavi Oglas",
     "compare": "Uporedi",
+    "comparing": "Upoređivanje",
     "addToCompare": "Dodaj za Poređenje",
     "removeFromCompare": "Ukloni iz Poređenja",
+    "compareLimit": "Možete uporediti do 4 nekretnine odjednom.",
     "virtualTour": "Virtuelna Tura",
     "view360": "360° Pogled",
     "floorPlan": "Plan Stana",
-    "viewOnMap": "Pogledaj na Mapi"
+    "viewOnMap": "Pogledaj na Mapi",
+    "callSeller": "Pozovi Prodavca",
+    "messageSeller": "Pošalji Poruku",
+    "startingChat": "Pokretanje Razgovora...",
+    "propertySold": "Nekretnina Prodata"
   },
   "seller": {
     "seller": "Prodavac",

@@ -86,23 +86,31 @@
     "publicTransport": "Public Transport"
   },
   "actions": {
+    "quickActions": "Quick Actions",
     "viewDetails": "View Details",
     "contactSeller": "Contact Seller",
     "contactAgent": "Contact Agent",
     "requestTour": "Request Tour",
     "schedule": "Schedule Viewing",
+    "scheduleVisit": "Schedule a Visit",
     "saveProperty": "Save Property",
     "removeFromSaved": "Remove from Saved",
     "share": "Share",
     "print": "Print",
     "report": "Report Listing",
     "compare": "Compare",
+    "comparing": "Comparing",
     "addToCompare": "Add to Compare",
     "removeFromCompare": "Remove from Compare",
+    "compareLimit": "You can compare up to 4 properties at a time.",
     "virtualTour": "Virtual Tour",
     "view360": "360° View",
     "floorPlan": "Floor Plan",
-    "viewOnMap": "View on Map"
+    "viewOnMap": "View on Map",
+    "callSeller": "Call Seller",
+    "messageSeller": "Message Seller",
+    "startingChat": "Starting Chat...",
+    "propertySold": "Property Sold"
   },
   "seller": {
     "seller": "Seller",

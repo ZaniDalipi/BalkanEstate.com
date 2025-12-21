@@ -86,23 +86,31 @@
     "publicTransport": "Transporti Publik"
   },
   "actions": {
+    "quickActions": "Veprime të Shpejta",
     "viewDetails": "Shiko Detajet",
     "contactSeller": "Kontakto Shitësin",
     "contactAgent": "Kontakto Agjentin",
     "requestTour": "Kërko Vizitë",
     "schedule": "Planifiko Vizitë",
+    "scheduleVisit": "Planifiko një Vizitë",
     "saveProperty": "Ruaj Pronën",
     "removeFromSaved": "Largo nga të Ruajturat",
     "share": "Shpërndaj",
     "print": "Printo",
     "report": "Raporto Shpalljen",
     "compare": "Krahaso",
+    "comparing": "Duke Krahasuar",
     "addToCompare": "Shto për Krahasim",
     "removeFromCompare": "Largo nga Krahasimi",
+    "compareLimit": "Mund të krahasoni deri në 4 prona njëkohësisht.",
     "virtualTour": "Tur Virtual",
     "view360": "Pamje 360°",
     "floorPlan": "Planimetria",
-    "viewOnMap": "Shiko në Hartë"
+    "viewOnMap": "Shiko në Hartë",
+    "callSeller": "Thirr Shitësin",
+    "messageSeller": "Dërgo Mesazh",
+    "startingChat": "Duke Filluar Bisedën...",
+    "propertySold": "Prona Shitur"
   },
   "seller": {
     "seller": "Shitësi",

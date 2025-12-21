@@ -2,6 +2,7 @@
 // Seller contact sidebar with calculators and quick actions
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { PhoneIcon, UserCircleIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
@@ -39,6 +40,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   isCreatingConversation,
   onContactSeller,
 }) => {
+  const { t } = useTranslation(['property']);
   const { state, dispatch } = useAppContext();
 
   const isInComparison = state.comparisonList.includes(property.id);
@@ -48,7 +50,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
       dispatch({ type: 'REMOVE_FROM_COMPARISON', payload: property.id });
     } else {
       if (state.comparisonList.length >= 4) {
-        alert('You can compare up to 4 properties at a time.');
+        alert(t('property:actions.compareLimit'));
         return;
       }
       dispatch({ type: 'ADD_TO_COMPARISON', payload: property.id });
@@ -72,7 +74,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
     <div className="sticky top-24 space-y-4">
       {/* Quick Actions Card */}
       <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
-        <h3 className="text-sm font-semibold text-neutral-600 mb-3 uppercase tracking-wide">Quick Actions</h3>
+        <h3 className="text-sm font-semibold text-neutral-600 mb-3 uppercase tracking-wide">{t('property:actions.quickActions')}</h3>
         <div className="grid grid-cols-2 gap-2">
           {/* Compare Button */}
           <button
@@ -86,7 +88,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <span className="text-xs font-medium">{isInComparison ? 'Comparing' : 'Compare'}</span>
+            <span className="text-xs font-medium">{isInComparison ? t('property:actions.comparing') : t('property:actions.compare')}</span>
           </button>
 
           {/* Print Button */}
@@ -97,7 +99,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
-            <span className="text-xs font-medium">Print</span>
+            <span className="text-xs font-medium">{t('property:actions.print')}</span>
           </button>
         </div>
 
@@ -110,14 +112,14 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            Schedule a Visit
+            {t('property:actions.scheduleVisit')}
           </button>
         )}
       </div>
 
       {/* Contact Seller Card */}
       <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
-        <h3 className="text-base sm:text-lg font-bold text-neutral-800 mb-4">Contact Seller</h3>
+        <h3 className="text-base sm:text-lg font-bold text-neutral-800 mb-4">{t('property:actions.contactSeller')}</h3>
 
         {/* Seller Info */}
         <div className="flex items-center gap-4 mb-4">
@@ -138,7 +140,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-green-100 text-green-700'
               }`}>
-                {property.seller?.type === 'agent' ? 'Agent' : 'Private Seller'}
+                {property.seller?.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
             </div>
           </div>
@@ -149,7 +151,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           {property.status === 'sold' ? (
             <div className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-neutral-300 rounded-xl shadow-sm text-sm font-medium text-neutral-400 bg-neutral-100 cursor-not-allowed">
               <PhoneIcon className="w-4 h-4" />
-              Property Sold
+              {t('property:actions.propertySold')}
             </div>
           ) : (
             <a
@@ -157,7 +159,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-primary hover:bg-primary-dark transition-colors"
             >
               <PhoneIcon className="w-4 h-4" />
-              Call Seller
+              {t('property:actions.callSeller')}
             </a>
           )}
           <button
@@ -169,10 +171,10 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             {isCreatingConversation
-              ? 'Starting Chat...'
+              ? t('property:actions.startingChat')
               : property.status === 'sold'
-              ? 'Property Sold'
-              : 'Message Seller'}
+              ? t('property:actions.propertySold')
+              : t('property:actions.messageSeller')}
           </button>
         </div>
       </div>

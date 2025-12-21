@@ -1,8 +1,10 @@
 {
   "title": "Choose Your Selling Plan",
-  "subtitle": "Select the perfect plan to list your property",
+  "subtitle": "Get your property in front of thousands of potential buyers",
   "loading": "Loading plans...",
   "limitedOffer": "Limited Time Offer Ends In:",
+  "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
+  "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
   "plans": {
     "free": {
       "name": "Free",
@@ -16,10 +18,10 @@
     "proYearly": {
       "name": "Pro Yearly",
       "description": "Save {{percent}}% with annual billing",
-      "badge": "Best Value"
+      "badge": "MOST POPULAR"
     },
     "enterprise": {
-      "name": "Enterprise",
+      "name": "Enterprise Plan",
       "description": "For agencies and professionals"
     }
   },
@@ -28,11 +30,27 @@
     "promotedListings": "Promote {{count}} ads for {{days}} days",
     "featuredListings": "{{count}} featured listings",
     "prioritySupport": "Priority support",
-    "analytics": "Advanced analytics",
+    "prioritySupportDesc": "Get help faster",
+    "analytics": "Advanced analytics dashboard",
+    "analyticsDesc": "Track your listing performance",
+    "premiumPlacement": "Premium listing placement",
+    "leadManagement": "Lead management system",
     "teamMembers": "Up to {{count}} team members",
     "apiAccess": "API access",
     "customBranding": "Custom branding",
-    "dedicatedManager": "Dedicated account manager"
+    "dedicatedManager": "Dedicated account manager",
+    "mobileApp": "Mobile app access",
+    "mobileAppDesc": "Manage on the go",
+    "dedicatedAgencyPage": "Dedicated Agency Page",
+    "dedicatedAgencyPageDesc": "Your own branded page on our platform",
+    "displayAgents": "Display All Agents & Properties",
+    "displayAgentsDesc": "Showcase your team and listings",
+    "featuredAds": "Featured in Rotating Ads",
+    "featuredAdsDesc": "Monthly homepage advertising rotation",
+    "fullContact": "Full Contact Information",
+    "fullContactDesc": "Email, phone, and direct inquiries",
+    "perfectForActive": "Perfect for active sellers",
+    "featuredBoost": "Featured placement boost"
   },
   "buttons": {
     "getStarted": "Get Started",
@@ -49,7 +67,11 @@
     "perMonth": "/month",
     "perYear": "/year",
     "billedAnnually": "Billed annually",
-    "billedMonthly": "Billed monthly"
+    "billedMonthly": "Billed monthly",
+    "youSave": "You save €{{amount}}!"
+  },
+  "discount": {
+    "off": "{{percent}}% OFF"
   },
   "benefits": {
     "moneyBack": "30-day money-back guarantee",
@@ -59,12 +81,13 @@
   },
   "enterprise": {
     "required": "Enterprise Plan Required",
-    "message": "To register as an agency, you need an Enterprise subscription.",
+    "message": "Subscribe to Enterprise to create your agency and showcase your team",
     "contactUs": "Contact us to learn more about our Enterprise plan."
   },
   "exitModal": {
     "title": "Are you sure you want to exit?",
-    "message": "If you exit now, all agency information you entered will be lost. Your subscription will remain active.",
+    "agencyMessage": "If you exit now, all agency information you entered will be lost and you'll need to start over.",
+    "offerMessage": "This is a one-time offer. If you leave now, you won't see these amazing discounts again.",
     "stay": "Stay & Save!",
     "leave": "Yes, Leave",
     "continueSetup": "Continue Setup"
@@ -72,6 +95,8 @@
   "success": {
     "title": "Congratulations!",
     "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
+    "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
+    "subscriptionActivated": "Subscription activated successfully!",
     "startListing": "Start Listing Properties"
   }
 }

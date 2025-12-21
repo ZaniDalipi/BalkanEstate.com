@@ -1,8 +1,10 @@
 {
   "title": "Izaberite Vaš Plan Prodaje",
-  "subtitle": "Izaberite savršen plan za objavljivanje vaše nekretnine",
+  "subtitle": "Postavite vašu nekretninu pred hiljade potencijalnih kupaca",
   "loading": "Učitavanje planova...",
   "limitedOffer": "Ograničena Ponuda Ističe Za:",
+  "offerTitle": "Čestitamo! Otključali Ste Ekskluzivne Popuste!",
+  "offerSubtitle": "Uživajte u ovoj jednokratnoj ponudi na naše planove prodaje kao znak zahvalnosti.",
   "plans": {
     "free": {
       "name": "Besplatno",
@@ -16,10 +18,10 @@
     "proYearly": {
       "name": "Pro Godišnje",
       "description": "Uštedite {{percent}}% sa godišnjim plaćanjem",
-      "badge": "Najbolja Vrednost"
+      "badge": "NAJPOPULARNIJE"
     },
     "enterprise": {
-      "name": "Preduzeće",
+      "name": "Plan Preduzeća",
       "description": "Za agencije i profesionalce"
     }
   },
@@ -28,11 +30,27 @@
     "promotedListings": "Promoviši {{count}} oglasa za {{days}} dana",
     "featuredListings": "{{count}} istaknutih oglasa",
     "prioritySupport": "Prioritetna podrška",
-    "analytics": "Napredna analitika",
+    "prioritySupportDesc": "Dobijte pomoć brže",
+    "analytics": "Napredna analitička tabla",
+    "analyticsDesc": "Pratite performanse vaših oglasa",
+    "premiumPlacement": "Premium pozicioniranje oglasa",
+    "leadManagement": "Sistem upravljanja potencijalnim klijentima",
     "teamMembers": "Do {{count}} članova tima",
     "apiAccess": "API pristup",
     "customBranding": "Prilagođen brending",
-    "dedicatedManager": "Posvećen menadžer naloga"
+    "dedicatedManager": "Posvećen menadžer naloga",
+    "mobileApp": "Pristup mobilnoj aplikaciji",
+    "mobileAppDesc": "Upravljajte u pokretu",
+    "dedicatedAgencyPage": "Posvećena Stranica Agencije",
+    "dedicatedAgencyPageDesc": "Vaša brendirana stranica na našoj platformi",
+    "displayAgents": "Prikaži Sve Agente i Nekretnine",
+    "displayAgentsDesc": "Predstavite vaš tim i oglase",
+    "featuredAds": "Istaknuto u Rotirajućim Reklamama",
+    "featuredAdsDesc": "Mesečno reklamiranje na početnoj stranici",
+    "fullContact": "Potpune Kontakt Informacije",
+    "fullContactDesc": "Email, telefon i direktni upiti",
+    "perfectForActive": "Savršeno za aktivne prodavce",
+    "featuredBoost": "Pojačanje istaknutog pozicioniranja"
   },
   "buttons": {
     "getStarted": "Započni",
@@ -49,7 +67,11 @@
     "perMonth": "/mesečno",
     "perYear": "/godišnje",
     "billedAnnually": "Naplaćuje se godišnje",
-    "billedMonthly": "Naplaćuje se mesečno"
+    "billedMonthly": "Naplaćuje se mesečno",
+    "youSave": "Uštedite €{{amount}}!"
+  },
+  "discount": {
+    "off": "{{percent}}% POPUST"
   },
   "benefits": {
     "moneyBack": "30-dnevna garancija povrata novca",
@@ -59,12 +81,13 @@
   },
   "enterprise": {
     "required": "Potreban Plan Preduzeća",
-    "message": "Da biste se registrovali kao agencija, potrebna vam je pretplata na Preduzeće.",
+    "message": "Pretplatite se na Preduzeće da kreirate vašu agenciju i predstavite vaš tim",
     "contactUs": "Kontaktirajte nas da saznate više o našem planu Preduzeće."
   },
   "exitModal": {
     "title": "Da li ste sigurni da želite da izađete?",
-    "message": "Ako sada izađete, sve informacije o agenciji koje ste uneli će biti izgubljene. Vaša pretplata će ostati aktivna.",
+    "agencyMessage": "Ako sada izađete, sve informacije o agenciji koje ste uneli će biti izgubljene i moraćete ponovo početi.",
+    "offerMessage": "Ovo je jednokratna ponuda. Ako sada odete, nećete više videti ove neverovatne popuste.",
     "stay": "Ostani i Sačuvaj!",
     "leave": "Da, Izađi",
     "continueSetup": "Nastavi Podešavanje"
@@ -72,6 +95,8 @@
   "success": {
     "title": "Čestitamo!",
     "message": "Vaša {{plan}} pretplata je aktivirana. Sada imate pristup svim premium funkcijama.",
+    "agencyMessage": "Vaša pretplata Preduzeće je aktivirana i vaša agencija je uspešno kreirana! Sada ste admin vaše agencije.",
+    "subscriptionActivated": "Pretplata uspešno aktivirana!",
     "startListing": "Započnite Objavljivanje Nekretnina"
   }
 }

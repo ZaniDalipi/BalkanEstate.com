@@ -9,10 +9,12 @@
       "loanAmount": "Shuma e Kredisë",
       "interestRate": "Norma e Interesit (%)",
       "loanTerm": "Afati i Kredisë",
-      "years": "vite"
+      "years": "vite",
+      "yrs": "vite"
     },
     "results": {
       "monthlyPayment": "Pagesa Mujore",
+      "estimatedMonthlyPayment": "Pagesa e Vlerësuar Mujore",
       "totalPayment": "Pagesa Totale",
       "totalInterest": "Interesi Total",
       "principal": "Principali",
@@ -23,22 +25,57 @@
       "monthly": "Mujore",
       "yearly": "Vjetore",
       "total": "Totale"
-    }
+    },
+    "disclaimer": "Ky është një vlerësim vetëm për qëllime informative. Konsultohuni me një profesionist financiar për normat dhe pagesat aktuale."
   },
   "rentVsBuy": {
     "title": "Qira vs Blerje",
     "description": "A duhet të merrni me qira apo të blini?",
     "fields": {
+      "planningToStay": "Planifikoni të qëndroni",
+      "estimatedMonthlyRent": "Qiraja e vlerësuar mujore",
       "monthlyRent": "Qiraja Mujore Aktuale",
       "rentIncrease": "Rritja Vjetore e Qirasë (%)",
       "propertyPrice": "Çmimi i Pronës",
       "downPayment": "Pagesa Fillestare",
       "mortgageRate": "Norma e Kredisë (%)",
       "propertyTax": "Tatimi i Pronës (%)",
-      "maintenance": "Mirëmbajtja (%)",
+      "homeInsurance": "Sigurimi i Shtëpisë",
+      "maintenance": "Mirëmbajtja",
+      "homeAppreciation": "Vlerësimi i Shtëpisë",
       "appreciation": "Vlerësimi i Pronës (%)",
+      "closingCosts": "Kostot e Mbylljes",
+      "sellingCosts": "Kostot e Shitjes",
+      "investmentReturn": "Kthimi i Investimit",
       "timeframe": "Periudha Kohore",
       "years": "vite"
+    },
+    "advanced": {
+      "title": "Cilësimet e Avancuara",
+      "downPayment": "Pagesa Fillestare",
+      "interestRate": "Norma e Interesit",
+      "loanTerm": "Afati i Kredisë",
+      "propertyTaxes": "Tatimet e Pronës",
+      "homeInsurance": "Sigurimi i Shtëpisë",
+      "maintenance": "Mirëmbajtja",
+      "homeAppreciation": "Vlerësimi i Shtëpisë",
+      "rentIncrease": "Rritja e Qirasë",
+      "closingCosts": "Kostot e Mbylljes",
+      "sellingCosts": "Kostot e Shitjes",
+      "investmentReturn": "Kthimi i Investimit"
+    },
+    "tooltips": {
+      "downPayment": "Përqindja e çmimit të shtëpisë e paguar paraprakisht",
+      "interestRate": "Norma vjetore e interesit të kredisë",
+      "loanTerm": "Kohëzgjatja e kredisë në vite",
+      "propertyTaxes": "Norma vjetore e tatimit të pronës (bazuar në vlerën e shtëpisë)",
+      "homeInsurance": "Kostoja vjetore e sigurimit të shtëpisë (bazuar në vlerën e shtëpisë)",
+      "maintenance": "Kostot vjetore të mirëmbajtjes dhe riparimeve (bazuar në vlerën e shtëpisë)",
+      "homeAppreciation": "Vlerësimi i pritur vjetor i vlerës së shtëpisë",
+      "rentIncrease": "Rritja e pritur vjetore e qirasë",
+      "closingCosts": "Kostot njëherëshe të mbylljes gjatë blerjes (përqindje e çmimit të shtëpisë)",
+      "sellingCosts": "Kostot gjatë shitjes së shtëpisë (komisione, tarifa)",
+      "investmentReturn": "Kthimi i pritur vjetor nëse investoni paratë në vend që të blini"
     },
     "results": {
       "recommendation": "Rekomandimi",
@@ -47,14 +84,26 @@
       "totalRentCost": "Kostoja Totale e Qirasë",
       "totalBuyCost": "Kostoja Totale e Blerjes",
       "savings": "Kursime Potenciale",
+      "estimatedSavings": "Kursimet e vlerësuara",
       "equityBuilt": "Kapitali i Ndërtuar",
-      "breakEvenPoint": "Pika e Barazimit"
-    }
+      "breakEvenPoint": "Pika e barazimit",
+      "cheaperTo": "Pas {{years}} viteve, është më lirë të",
+      "buy": "Blini",
+      "rent": "Qira",
+      "own": "Pronësoni",
+      "totalCostToRent": "Kostoja Totale për Qira",
+      "netCostToOwn": "Kostoja Neto për Pronësi",
+      "yearlyCostComparison": "Krahasimi Vjetor i Kostove",
+      "year": "Viti"
+    },
+    "calculating": "Duke llogaritur...",
+    "disclaimer": "Ky është një vlerësim për qëllime informative. Shumë faktorë mund të ndikojnë në kostot e blerjes dhe qirasë. Konsideroni konsultimin me një këshilltar financiar për vendime të mëdha."
   },
   "common": {
     "calculate": "Llogarit",
     "reset": "Rivendos",
     "perMonth": "/muaj",
-    "perYear": "/vit"
+    "perYear": "/vit",
+    "invalidValue": "Vlerë e pavlefshme"
   }
 }
