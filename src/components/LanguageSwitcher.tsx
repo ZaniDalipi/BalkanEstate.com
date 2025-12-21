@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { languages, changeLanguage, getCurrentLanguage, type LanguageCode } from '../i18n';
 
 interface LanguageSwitcherProps {
-  variant?: 'dropdown' | 'compact' | 'full';
+  variant?: 'dropdown' | 'compact' | 'full' | 'sidebar';
   className?: string;
 }
 
@@ -102,6 +102,51 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             <span>{lang.nativeName}</span>
           </button>
         ))}
+      </div>
+    );
+  }
+
+  // Sidebar variant - icon only when collapsed, full when expanded
+  if (variant === 'sidebar') {
+    return (
+      <div ref={dropdownRef} className={`relative ${className}`}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
+          aria-label="Change language"
+          aria-expanded={isOpen}
+        >
+          <span className="text-xl flex-shrink-0">{currentLang.flag}</span>
+          <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.nativeName}</span>
+        </button>
+
+        {isOpen && (
+          <div className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-neutral-200 py-2 z-[100] max-h-[70vh] overflow-y-auto">
+            <div className="px-3 py-1.5 text-xs font-semibold text-neutral-500 uppercase tracking-wide border-b border-neutral-100 mb-1">
+              Select Language
+            </div>
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleLanguageChange(lang.code as LanguageCode)}
+                className={`w-full px-3 py-2 text-left text-sm flex items-center space-x-3 hover:bg-neutral-50 transition-colors ${
+                  lang.code === currentLang.code ? 'bg-primary/10 text-primary' : 'text-neutral-700'
+                }`}
+              >
+                <span className="text-xl flex-shrink-0">{lang.flag}</span>
+                <div className="flex flex-col flex-grow min-w-0">
+                  <span className="font-medium truncate">{lang.nativeName}</span>
+                  <span className="text-xs text-neutral-500">{lang.name}</span>
+                </div>
+                {lang.code === currentLang.code && (
+                  <svg className="w-5 h-5 flex-shrink-0 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     );
   }

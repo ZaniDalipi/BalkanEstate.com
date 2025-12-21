@@ -181,11 +181,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </div>
                 </nav>
 
-                <div className="p-1.5 border-t border-neutral-200 flex-shrink-0">
+                <div className="p-1.5 border-t border-neutral-200 flex-shrink-0 space-y-0.5">
                     {/* Language Switcher */}
-                    <div className="px-3 py-2 mb-1">
-                        <LanguageSwitcher variant="dropdown" className="w-full" />
-                    </div>
+                    <LanguageSwitcher variant="sidebar" />
 
                     {isAuthenticated && currentUser ? (
                         <div className="space-y-0.5">
