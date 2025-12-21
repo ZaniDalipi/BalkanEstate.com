@@ -43,7 +43,7 @@ export const initSentry = (): void => {
     ],
 
     // Filter sensitive data
-    beforeSend(event) {
+    beforeSend(event: Sentry.ErrorEvent) {
       // Don't send in development unless explicitly enabled
       if (isDevelopment && !process.env.SENTRY_DEV_ENABLED) {
         return null;
