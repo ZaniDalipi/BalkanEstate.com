@@ -18,10 +18,11 @@ import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
 
 // Lazy loaded components (loaded on demand)
-const CityRecommendations = lazy(() => import('./components/BuyerFlow/CityRecommendations').then(m => ({ default: m.CityRecommendations })));
+// All these components use default exports
+const CityRecommendations = lazy(() => import('./components/BuyerFlow/CityRecommendations'));
 const CreateListingPage = lazy(() => import('./components/SellerFlow/SellerDashboard'));
 const PricingPlans = lazy(() => import('./components/SellerFlow/PricingPlans'));
-const SavedSearchesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedSearchesPage').then(m => ({ default: m.SavedSearchesPage })));
+const SavedSearchesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedSearchesPage'));
 const SavedPropertiesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedHomesPage'));
 const InboxPage = lazy(() => import('./components/BuyerFlow/Messaging/InboxPage'));
 const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
