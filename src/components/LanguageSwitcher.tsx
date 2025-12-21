@@ -106,17 +106,19 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     );
   }
 
-  // Default dropdown variant
+  // Default dropdown variant - opens upward for sidebar placement
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white hover:bg-neutral-100 transition-colors border border-neutral-200"
+        className="flex items-center justify-between w-full space-x-2 px-3 py-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors border border-neutral-200"
         aria-label="Change language"
         aria-expanded={isOpen}
       >
-        <span className="text-lg">{currentLang.flag}</span>
-        <span className="text-sm font-medium text-neutral-700">{currentLang.code.toUpperCase()}</span>
+        <div className="flex items-center space-x-2">
+          <span className="text-lg">{currentLang.flag}</span>
+          <span className="text-sm font-medium text-neutral-700">{currentLang.nativeName}</span>
+        </div>
         <svg
           className={`w-4 h-4 text-neutral-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
@@ -128,22 +130,25 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 z-50 max-h-80 overflow-y-auto">
+        <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-neutral-200 py-2 z-[100] max-h-[70vh] overflow-y-auto">
+          <div className="px-3 py-1.5 text-xs font-semibold text-neutral-500 uppercase tracking-wide border-b border-neutral-100 mb-1">
+            Select Language
+          </div>
           {languages.map((lang) => (
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code as LanguageCode)}
-              className={`w-full px-4 py-2.5 text-left text-sm flex items-center space-x-3 hover:bg-neutral-50 transition-colors ${
-                lang.code === currentLang.code ? 'bg-primary/5 text-primary font-medium' : 'text-neutral-700'
+              className={`w-full px-3 py-2 text-left text-sm flex items-center space-x-3 hover:bg-neutral-50 transition-colors ${
+                lang.code === currentLang.code ? 'bg-primary/10 text-primary' : 'text-neutral-700'
               }`}
             >
-              <span className="text-xl">{lang.flag}</span>
-              <div className="flex flex-col">
-                <span className="font-medium">{lang.nativeName}</span>
+              <span className="text-xl flex-shrink-0">{lang.flag}</span>
+              <div className="flex flex-col flex-grow min-w-0">
+                <span className="font-medium truncate">{lang.nativeName}</span>
                 <span className="text-xs text-neutral-500">{lang.name}</span>
               </div>
               {lang.code === currentLang.code && (
-                <svg className="w-4 h-4 ml-auto text-primary" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 flex-shrink-0 text-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               )}
