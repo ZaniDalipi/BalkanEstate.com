@@ -95,3 +95,67 @@ export const COUNTRY_OPTIONS = [
         label: country.name,
     })),
 ];
+
+/**
+ * Normalize a country string to match BALKAN_COUNTRIES keys
+ * Handles various formats:
+ * - "North Macedonia" → "north-macedonia"
+ * - "Bosnia and Herzegovina" → "bosnia-herzegovina"
+ * - "north macedonia" → "north-macedonia"
+ * - "Kosovo" → "kosovo"
+ */
+export const normalizeCountryKey = (country: string): string => {
+    if (!country) return '';
+
+    const normalized = country.toLowerCase().trim();
+
+    // Direct key match
+    if (BALKAN_COUNTRIES[normalized]) {
+        return normalized;
+    }
+
+    // Try to match by name
+    const byName = Object.entries(BALKAN_COUNTRIES).find(
+        ([_, data]) => data.name.toLowerCase() === normalized
+    );
+    if (byName) {
+        return byName[0];
+    }
+
+    // Handle space-to-hyphen conversion
+    const withHyphens = normalized.replace(/\s+/g, '-');
+    if (BALKAN_COUNTRIES[withHyphens]) {
+        return withHyphens;
+    }
+
+    // Handle "and" → hyphen for Bosnia
+    const withoutAnd = normalized.replace(/\s+and\s+/g, '-');
+    if (BALKAN_COUNTRIES[withoutAnd]) {
+        return withoutAnd;
+    }
+
+    // Try partial matches for common variations
+    const variations: Record<string, string> = {
+        'bosnia': 'bosnia-herzegovina',
+        'hercegovina': 'bosnia-herzegovina',
+        'bih': 'bosnia-herzegovina',
+        'macedonia': 'north-macedonia',
+        'fyrom': 'north-macedonia',
+    };
+
+    for (const [partial, key] of Object.entries(variations)) {
+        if (normalized.includes(partial)) {
+            return key;
+        }
+    }
+
+    return normalized;
+};
+
+/**
+ * Get country data by any format of country string
+ */
+export const getCountryData = (country: string): CountryData | null => {
+    const key = normalizeCountryKey(country);
+    return BALKAN_COUNTRIES[key] || null;
+};
