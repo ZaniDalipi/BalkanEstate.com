@@ -30,5 +30,14 @@
   "language": "Gjuha",
   "menu": "Menuja",
   "notifications": "Njoftimet",
-  "help": "Ndihmë"
+  "help": "Ndihmë",
+  "onboarding": {
+    "question": "Si mund t'ju ndihmojmë sot?",
+    "lookingToBuy": "Dua të blej",
+    "buyDescription": "Gjeni shtëpinë e ëndrrave me mjetet tona të fuqishme të kërkimit dhe njoftime në kohë reale.",
+    "startSearching": "Fillo Kërkimin",
+    "wantToSell": "Dua të shes",
+    "sellDescription": "Publikoni pronën tuaj, arrini mijëra blerës potencial dhe përdorni mjetet tona të mençura.",
+    "listProperty": "Listo Pronën Time"
+  }
 }

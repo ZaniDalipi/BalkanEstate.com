@@ -30,5 +30,14 @@
   "language": "Jezik",
   "menu": "Meni",
   "notifications": "Obaveštenja",
-  "help": "Pomoć"
+  "help": "Pomoć",
+  "onboarding": {
+    "question": "Kako vam možemo pomoći danas?",
+    "lookingToBuy": "Tražim da kupim",
+    "buyDescription": "Pronađite kuću svojih snova pomoću naših moćnih alata za pretragu i obaveštenja u realnom vremenu.",
+    "startSearching": "Započni Pretragu",
+    "wantToSell": "Želim da prodam",
+    "sellDescription": "Objavite vašu nekretninu, dosegnite hiljade potencijalnih kupaca i koristite naše pametne alate.",
+    "listProperty": "Objavi Nekretninu"
+  }
 }

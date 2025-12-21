@@ -30,5 +30,14 @@
   "language": "Language",
   "menu": "Menu",
   "notifications": "Notifications",
-  "help": "Help"
+  "help": "Help",
+  "onboarding": {
+    "question": "How can we help you today?",
+    "lookingToBuy": "I'm looking to buy",
+    "buyDescription": "Find your dream home with our powerful search tools and real-time alerts.",
+    "startSearching": "Start Searching",
+    "wantToSell": "I want to sell",
+    "sellDescription": "List your property, reach thousands of potential buyers, and use our smart tools.",
+    "listProperty": "List my Property"
+  }
 }
