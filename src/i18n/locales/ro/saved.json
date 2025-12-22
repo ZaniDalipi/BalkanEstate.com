@@ -1,0 +1,47 @@
+{
+  "page": {
+    "title": "Căutări Salvate",
+    "description": "Urmăriți căutările salvate pentru proprietăți și primiți actualizări despre anunțurile noi care corespund criteriilor dvs."
+  },
+  "hero": {
+    "title": "Căutări Salvate",
+    "subtitle": "Urmăriți criteriile preferate de căutare și primiți actualizări",
+    "searchCount": {
+      "singular": "Căutare Salvată",
+      "plural": "Căutări Salvate"
+    }
+  },
+  "loginRequired": {
+    "title": "Conectați-vă pentru a vedea căutările salvate",
+    "description": "Salvați criteriile preferate de căutare și primiți notificări despre anunțurile noi.",
+    "button": "Autentificare / Înregistrare"
+  },
+  "empty": {
+    "title": "Nu ați salvat încă nicio căutare.",
+    "description": "Efectuați o căutare și faceți clic pe \"Salvează Căutarea\" pentru a începe, sau salvați acest exemplu:",
+    "startSearch": "Sau, Începeți o Căutare Nouă"
+  },
+  "example": {
+    "label": "Exemplu",
+    "name": "Belgrad, sub €400k",
+    "save": "Salvează"
+  },
+  "sort": {
+    "newest": "Cele mai noi",
+    "name": "Nume",
+    "lastActive": "Ultima Activitate"
+  },
+  "accordion": {
+    "new": "noi",
+    "namePlaceholder": "Numele căutării",
+    "save": "Salvează",
+    "cancel": "Anulează",
+    "rename": "Redenumește căutarea",
+    "delete": "Șterge căutarea",
+    "noProperties": "Nicio proprietate nu corespunde momentan acestei căutări.",
+    "confirmDelete": "Sunteți sigur că doriți să ștergeți \"{{name}}\"?",
+    "deleteFailed": "Ștergerea căutării a eșuat. Vă rugăm să încercați din nou.",
+    "enterName": "Vă rugăm să introduceți un nume",
+    "renameFailed": "Redenumirea căutării a eșuat. Vă rugăm să încercați din nou."
+  }
+}

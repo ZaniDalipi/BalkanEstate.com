@@ -1,0 +1,47 @@
+{
+  "page": {
+    "title": "Spremljene Pretrage",
+    "description": "Pratite spremljene pretrage nekretnina i primajte obavijesti o novim oglasima koji odgovaraju vašim kriterijima."
+  },
+  "hero": {
+    "title": "Spremljene Pretrage",
+    "subtitle": "Pratite omiljene kriterije pretrage i primajte ažuriranja",
+    "searchCount": {
+      "singular": "Spremljena Pretraga",
+      "plural": "Spremljene Pretrage"
+    }
+  },
+  "loginRequired": {
+    "title": "Prijavite se za pregled spremljenih pretraga",
+    "description": "Spremite omiljene kriterije pretrage i primajte obavijesti o novim oglasima.",
+    "button": "Prijava / Registracija"
+  },
+  "empty": {
+    "title": "Još niste spremili nijednu pretragu.",
+    "description": "Izvršite pretragu i kliknite \"Spremi Pretragu\" za početak, ili spremite ovaj primjer:",
+    "startSearch": "Ili, Započnite Novu Pretragu"
+  },
+  "example": {
+    "label": "Primjer",
+    "name": "Beograd, ispod €400k",
+    "save": "Spremi"
+  },
+  "sort": {
+    "newest": "Najnovije",
+    "name": "Naziv",
+    "lastActive": "Posljednje Aktivno"
+  },
+  "accordion": {
+    "new": "novo",
+    "namePlaceholder": "Naziv pretrage",
+    "save": "Spremi",
+    "cancel": "Odustani",
+    "rename": "Preimenuj pretragu",
+    "delete": "Obriši pretragu",
+    "noProperties": "Nijedna nekretnina trenutno ne odgovara ovoj pretrazi.",
+    "confirmDelete": "Jeste li sigurni da želite obrisati \"{{name}}\"?",
+    "deleteFailed": "Brisanje pretrage nije uspjelo. Molimo pokušajte ponovno.",
+    "enterName": "Molimo unesite naziv",
+    "renameFailed": "Preimenovanje pretrage nije uspjelo. Molimo pokušajte ponovno."
+  }
+}

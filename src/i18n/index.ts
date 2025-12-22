@@ -38,6 +38,7 @@ import enSeller from './locales/en/seller.json';
 import enAgents from './locales/en/agents.json';
 import enModals from './locales/en/modals.json';
 import enPayment from './locales/en/payment.json';
+import enSaved from './locales/en/saved.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -57,6 +58,7 @@ import sqSeller from './locales/sq/seller.json';
 import sqAgents from './locales/sq/agents.json';
 import sqModals from './locales/sq/modals.json';
 import sqPayment from './locales/sq/payment.json';
+import sqSaved from './locales/sq/saved.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -76,8 +78,9 @@ import srSeller from './locales/sr/seller.json';
 import srAgents from './locales/sr/agents.json';
 import srModals from './locales/sr/modals.json';
 import srPayment from './locales/sr/payment.json';
+import srSaved from './locales/sr/saved.json';
 
-// Import translations - Serbian
+// Import translations - Bulgarian
 import bgCommon from './locales/bg/common.json';
 import bgNav from './locales/bg/nav.json';
 import bgProperty from './locales/bg/property.json';
@@ -94,6 +97,25 @@ import bgAccount from './locales/bg/account.json';
 import bgSeller from './locales/bg/seller.json';
 import bgAgents from './locales/bg/agents.json';
 import bgModals from './locales/bg/modals.json';
+import bgSaved from './locales/bg/saved.json';
+
+// Import translations - Croatian
+import hrSaved from './locales/hr/saved.json';
+
+// Import translations - Bosnian
+import bsSaved from './locales/bs/saved.json';
+
+// Import translations - Montenegrin
+import meSaved from './locales/me/saved.json';
+
+// Import translations - Macedonian
+import mkSaved from './locales/mk/saved.json';
+
+// Import translations - Romanian
+import roSaved from './locales/ro/saved.json';
+
+// Import translations - Greek
+import elSaved from './locales/el/saved.json';
 
 // Language configuration
 export const languages = [
@@ -132,6 +154,7 @@ const resources = {
     agents: enAgents,
     modals: enModals,
     payment: enPayment,
+    saved: enSaved,
   },
   sq: {
     common: sqCommon,
@@ -151,6 +174,7 @@ const resources = {
     agents: sqAgents,
     modals: sqModals,
     payment: sqPayment,
+    saved: sqSaved,
   },
   sr: {
     common: srCommon,
@@ -170,6 +194,7 @@ const resources = {
     agents: srAgents,
     modals: srModals,
     payment: srPayment,
+    saved: srSaved,
   },
   bg: {
     common: bgCommon,
@@ -188,6 +213,25 @@ const resources = {
     seller: bgSeller,
     agents: bgAgents,
     modals: bgModals,
+    saved: bgSaved,
+  },
+  hr: {
+    saved: hrSaved,
+  },
+  bs: {
+    saved: bsSaved,
+  },
+  me: {
+    saved: meSaved,
+  },
+  mk: {
+    saved: mkSaved,
+  },
+  ro: {
+    saved: roSaved,
+  },
+  el: {
+    saved: elSaved,
   },
   // Other languages will fallback to English until translations are added
 
@@ -201,7 +245,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved'],
 
     interpolation: {
       escapeValue: false, // React already escapes

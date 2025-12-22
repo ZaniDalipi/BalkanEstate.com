@@ -1,0 +1,47 @@
+{
+  "page": {
+    "title": "Kërkimet e Ruajtura",
+    "description": "Ndiqni kërkimet e ruajtura të pronave dhe merrni përditësime për listat e reja që përputhen me kriteret tuaja."
+  },
+  "hero": {
+    "title": "Kërkimet e Ruajtura",
+    "subtitle": "Ndiqni kriteret tuaja të preferuara të kërkimit dhe merrni përditësime",
+    "searchCount": {
+      "singular": "Kërkim i Ruajtur",
+      "plural": "Kërkime të Ruajtura"
+    }
+  },
+  "loginRequired": {
+    "title": "Identifikohuni për të parë kërkimet e ruajtura",
+    "description": "Ruani kriteret tuaja të preferuara të kërkimit dhe njoftohuni për listat e reja.",
+    "button": "Hyr / Regjistrohu"
+  },
+  "empty": {
+    "title": "Nuk keni ruajtur ende asnjë kërkim.",
+    "description": "Kryeni një kërkim dhe klikoni \"Ruaj Kërkimin\" për të filluar, ose ruani këtë shembull:",
+    "startSearch": "Ose, Filloni një Kërkim të Ri"
+  },
+  "example": {
+    "label": "Shembull",
+    "name": "Beograd, nën €400k",
+    "save": "Ruaj"
+  },
+  "sort": {
+    "newest": "Më të Rejat",
+    "name": "Emri",
+    "lastActive": "Aktiv së Fundmi"
+  },
+  "accordion": {
+    "new": "të reja",
+    "namePlaceholder": "Emri i kërkimit",
+    "save": "Ruaj",
+    "cancel": "Anulo",
+    "rename": "Riemëro kërkimin",
+    "delete": "Fshi kërkimin",
+    "noProperties": "Asnjë pronë nuk përputhet aktualisht me këtë kërkim.",
+    "confirmDelete": "Jeni të sigurt që dëshironi të fshini \"{{name}}\"?",
+    "deleteFailed": "Fshirja e kërkimit dështoi. Ju lutemi provoni përsëri.",
+    "enterName": "Ju lutemi shkruani një emër",
+    "renameFailed": "Riemërimi i kërkimit dështoi. Ju lutemi provoni përsëri."
+  }
+}
