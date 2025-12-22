@@ -2,6 +2,7 @@
 // AI-powered neighborhood information for properties
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../../context/AppContext';
 import { SparklesIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
@@ -35,6 +36,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
   city,
   country,
 }) => {
+  const { t } = useTranslation(['property']);
   const { state, dispatch } = useAppContext();
   const [insights, setInsights] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -98,12 +100,11 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
       return (
         <div className="text-center">
           <p className="text-neutral-600 mb-4">
-            Discover what's around this property. Our AI can provide details on nearby schools,
-            parks, and transport.
+            {t('neighborhood.description')}
           </p>
           {!isAuthenticated && (
             <p className="text-sm text-amber-600 mb-4 font-semibold">
-              🔒 Login required - Free users get 3 insights/month, premium users get 20/month
+              🔒 {t('neighborhood.loginRequired')}
             </p>
           )}
           <button
@@ -111,7 +112,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
             className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
           >
             <SparklesIcon className="w-5 h-5" />
-            {isAuthenticated ? 'Generate Insights' : 'Login & Generate Insights'}
+            {isAuthenticated ? t('neighborhood.generateInsights') : t('neighborhood.loginAndGenerate')}
           </button>
         </div>
       );
@@ -136,12 +137,12 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
           </p>
           {usage && (
             <p className="text-sm text-center mt-2">
-              Usage: {usage.used}/{usage.limit} insights used this month
+              {t('neighborhood.usageInfo', { used: usage.used, limit: usage.limit })}
             </p>
           )}
           <div className="text-center">
             <button onClick={fetchInsights} className="mt-3 text-sm font-semibold underline">
-              Try again
+              {t('neighborhood.tryAgain')}
             </button>
           </div>
         </div>
@@ -158,10 +159,10 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
           {usage && usage.remaining !== undefined && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800 text-center">
-                <strong>{usage.remaining}</strong> of {usage.limit} insights remaining this month
+                {t('neighborhood.remainingInfo', { remaining: usage.remaining, limit: usage.limit })}
                 {usage.remaining === 0 && !state.currentUser?.isSubscribed && (
                   <span className="block mt-1 text-xs">
-                    Upgrade to premium for more insights!
+                    {t('neighborhood.upgradePrompt')}
                   </span>
                 )}
               </p>
@@ -180,7 +181,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
         <div className="flex-shrink-0 w-8 h-8 mr-3 text-primary bg-primary-light rounded-full flex items-center justify-center">
           <SparklesIcon className="w-5 h-5" />
         </div>
-        <h3 className="text-lg sm:text-xl font-bold text-neutral-800">Neighborhood Insights</h3>
+        <h3 className="text-lg sm:text-xl font-bold text-neutral-800">{t('neighborhood.title')}</h3>
       </div>
       {renderContent()}
     </div>

@@ -230,5 +230,37 @@
       "villa": "Villa",
       "other": "Other"
     }
+  },
+  "neighborhood": {
+    "title": "Neighborhood Insights",
+    "description": "Discover what's around this property. Our AI can provide details on nearby schools, parks, and transport.",
+    "loginRequired": "Login required - Free users get 3 insights/month, premium users get 20/month",
+    "generateInsights": "Generate Insights",
+    "loginAndGenerate": "Login & Generate Insights",
+    "usageInfo": "Usage: {{used}}/{{limit}} insights used this month",
+    "remainingInfo": "{{remaining}} of {{limit}} insights remaining this month",
+    "upgradePrompt": "Upgrade to premium for more insights!",
+    "tryAgain": "Try again"
+  },
+  "photos": {
+    "title": "Photos",
+    "all": "All",
+    "categories": {
+      "exterior": "Exterior",
+      "interior": "Interior",
+      "kitchen": "Kitchen",
+      "bathroom": "Bathroom",
+      "bedroom": "Bedroom",
+      "living_room": "Living Room",
+      "garden": "Garden",
+      "pool": "Pool",
+      "view": "View",
+      "other": "Other"
+    }
+  },
+  "mapLink": {
+    "title": "View on Map",
+    "description": "Want to explore the area around this property?",
+    "button": "View on Search Map"
   }
 }

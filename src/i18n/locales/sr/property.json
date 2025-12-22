@@ -230,5 +230,37 @@
       "villa": "Vila",
       "other": "Ostalo"
     }
+  },
+  "neighborhood": {
+    "title": "Informacije o Okolini",
+    "description": "Otkrijte šta se nalazi u blizini ove nekretnine. Naša AI može dati detalje o školama, parkovima i prevozu.",
+    "loginRequired": "Potrebna prijava - Besplatni korisnici dobijaju 3 uvida/mesečno, premium korisnici 20/mesečno",
+    "generateInsights": "Generiši Uvide",
+    "loginAndGenerate": "Prijavi se i Generiši Uvide",
+    "usageInfo": "Korišćenje: {{used}}/{{limit}} uvida iskorišćeno ovog meseca",
+    "remainingInfo": "{{remaining}} od {{limit}} uvida preostalo ovog meseca",
+    "upgradePrompt": "Nadogradite na premium za više uvida!",
+    "tryAgain": "Pokušaj ponovo"
+  },
+  "photos": {
+    "title": "Fotografije",
+    "all": "Sve",
+    "categories": {
+      "exterior": "Eksterijer",
+      "interior": "Enterijer",
+      "kitchen": "Kuhinja",
+      "bathroom": "Kupatilo",
+      "bedroom": "Spavaća Soba",
+      "living_room": "Dnevna Soba",
+      "garden": "Bašta",
+      "pool": "Bazen",
+      "view": "Pogled",
+      "other": "Ostalo"
+    }
+  },
+  "mapLink": {
+    "title": "Pogledaj na Mapi",
+    "description": "Želite da istražite okolinu ove nekretnine?",
+    "button": "Pogledaj na Mapi Pretrage"
   }
 }

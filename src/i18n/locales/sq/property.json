@@ -230,5 +230,37 @@
       "villa": "Vilë",
       "other": "Tjetër"
     }
+  },
+  "neighborhood": {
+    "title": "Informacione për Lagjen",
+    "description": "Zbuloni çfarë ka rreth kësaj prone. AI-ja jonë mund të japë detaje për shkolla, parqe dhe transport.",
+    "loginRequired": "Kërkohet hyrja - Përdoruesit pa pagesë marrin 3 analiza/muaj, premium marrin 20/muaj",
+    "generateInsights": "Gjenero Analiza",
+    "loginAndGenerate": "Hyni dhe Gjenero Analiza",
+    "usageInfo": "Përdorimi: {{used}}/{{limit}} analiza të përdorura këtë muaj",
+    "remainingInfo": "{{remaining}} nga {{limit}} analiza të mbetura këtë muaj",
+    "upgradePrompt": "Kaloni në premium për më shumë analiza!",
+    "tryAgain": "Provo përsëri"
+  },
+  "photos": {
+    "title": "Foto",
+    "all": "Të Gjitha",
+    "categories": {
+      "exterior": "Jashtë",
+      "interior": "Brenda",
+      "kitchen": "Kuzhina",
+      "bathroom": "Banjo",
+      "bedroom": "Dhomë Gjumi",
+      "living_room": "Dhomë Ndenjeje",
+      "garden": "Kopshti",
+      "pool": "Pishinë",
+      "view": "Pamje",
+      "other": "Tjetër"
+    }
+  },
+  "mapLink": {
+    "title": "Shiko në Hartë",
+    "description": "Dëshironi të eksploroni zonën rreth kësaj prone?",
+    "button": "Shiko në Hartën e Kërkimit"
   }
 }
