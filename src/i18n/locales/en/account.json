@@ -26,7 +26,8 @@
     "phone": "Phone",
     "saveChanges": "Save Changes",
     "saving": "Saving...",
-    "saved": "Saved!"
+    "saved": "Saved!",
+    "failedToSave": "Failed to save changes. Please try again."
   },
   "agent": {
     "agentInformation": "Agent Information",
@@ -45,7 +46,12 @@
     "yearsOfExperienceHint": "How many years of experience do you have?",
     "serviceAreas": "Service Areas",
     "addServiceArea": "Add service area...",
-    "serviceAreasHint": "Add cities and countries where you operate"
+    "serviceAreasHint": "Add cities and countries where you operate",
+    "agencyCannotChange": "Agency affiliation can only be changed using an invitation code",
+    "agentIdCannotChange": "Agent ID is automatically generated and cannot be changed",
+    "licenseCannotChange": "License number can only be set during agent verification",
+    "areas": "areas",
+    "area": "area"
   },
   "security": {
     "title": "Security & Login Activity",
@@ -72,7 +78,24 @@
     "ip": "IP",
     "device": "Device",
     "reason": "Reason",
-    "loadingLoginHistory": "Loading login history..."
+    "loadingLoginHistory": "Loading login history...",
+    "unknown": "Unknown",
+    "unknownBrowser": "Unknown Browser"
   },
-  "logout": "Logout"
+  "logout": "Logout",
+  "joinAgency": {
+    "title": "Join Agency",
+    "invitationCode": "Invitation Code",
+    "enterCode": "Please enter an invitation code",
+    "joining": "Joining...",
+    "join": "Join",
+    "successMessage": "Successfully joined {{agency}}!"
+  },
+  "errors": {
+    "failedToSwitchRole": "Failed to switch role",
+    "selectImage": "Please select an image file",
+    "imageTooLarge": "Image size must be less than 5MB",
+    "failedToUpload": "Failed to upload avatar",
+    "failedToJoinAgency": "Failed to join agency"
+  }
 }

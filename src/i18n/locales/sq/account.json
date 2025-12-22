@@ -26,7 +26,8 @@
     "phone": "Telefoni",
     "saveChanges": "Ruaj Ndryshimet",
     "saving": "Duke ruajtur...",
-    "saved": "U Ruajt!"
+    "saved": "U Ruajt!",
+    "failedToSave": "Dështoi ruajtja e ndryshimeve. Ju lutemi provoni përsëri."
   },
   "agent": {
     "agentInformation": "Informacioni i Agjentit",
@@ -45,7 +46,12 @@
     "yearsOfExperienceHint": "Sa vite përvojë keni?",
     "serviceAreas": "Zonat e Shërbimit",
     "addServiceArea": "Shto zonë shërbimi...",
-    "serviceAreasHint": "Shtoni qytetet dhe vendet ku operoni"
+    "serviceAreasHint": "Shtoni qytetet dhe vendet ku operoni",
+    "agencyCannotChange": "Përkatësia e agjencisë mund të ndryshohet vetëm me kod ftese",
+    "agentIdCannotChange": "ID e agjentit gjenerohet automatikisht dhe nuk mund të ndryshohet",
+    "licenseCannotChange": "Numri i licencës mund të vendoset vetëm gjatë verifikimit të agjentit",
+    "areas": "zona",
+    "area": "zonë"
   },
   "security": {
     "title": "Siguria dhe Aktiviteti i Hyrjes",
@@ -72,7 +78,24 @@
     "ip": "IP",
     "device": "Pajisja",
     "reason": "Arsyeja",
-    "loadingLoginHistory": "Duke ngarkuar historinë e hyrjeve..."
+    "loadingLoginHistory": "Duke ngarkuar historinë e hyrjeve...",
+    "unknown": "E panjohur",
+    "unknownBrowser": "Shfletues i Panjohur"
   },
-  "logout": "Dil"
+  "logout": "Dil",
+  "joinAgency": {
+    "title": "Bashkohu me Agjenci",
+    "invitationCode": "Kodi i Ftesës",
+    "enterCode": "Ju lutemi shkruani kodin e ftesës",
+    "joining": "Duke u bashkuar...",
+    "join": "Bashkohu",
+    "successMessage": "U bashkuat me sukses me {{agency}}!"
+  },
+  "errors": {
+    "failedToSwitchRole": "Dështoi ndryshimi i rolit",
+    "selectImage": "Ju lutemi zgjidhni një skedar imazhi",
+    "imageTooLarge": "Madhësia e imazhit duhet të jetë më pak se 5MB",
+    "failedToUpload": "Dështoi ngarkimi i avatarit",
+    "failedToJoinAgency": "Dështoi bashkimi me agjenci"
+  }
 }

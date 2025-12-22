@@ -26,7 +26,8 @@
     "phone": "Telefon",
     "saveChanges": "Sačuvaj Izmene",
     "saving": "Čuvanje...",
-    "saved": "Sačuvano!"
+    "saved": "Sačuvano!",
+    "failedToSave": "Neuspelo čuvanje izmena. Molimo pokušajte ponovo."
   },
   "agent": {
     "agentInformation": "Informacije o Agentu",
@@ -45,7 +46,12 @@
     "yearsOfExperienceHint": "Koliko godina iskustva imate?",
     "serviceAreas": "Područja Usluga",
     "addServiceArea": "Dodaj područje usluga...",
-    "serviceAreasHint": "Dodajte gradove i zemlje gde radite"
+    "serviceAreasHint": "Dodajte gradove i zemlje gde radite",
+    "agencyCannotChange": "Pripadnost agenciji može se promeniti samo pomoću pozivnog koda",
+    "agentIdCannotChange": "ID agenta se automatski generiše i ne može se menjati",
+    "licenseCannotChange": "Broj licence može se postaviti samo tokom verifikacije agenta",
+    "areas": "područja",
+    "area": "područje"
   },
   "security": {
     "title": "Bezbednost i Aktivnost Prijavljivanja",
@@ -72,7 +78,24 @@
     "ip": "IP",
     "device": "Uređaj",
     "reason": "Razlog",
-    "loadingLoginHistory": "Učitavanje istorije prijavljivanja..."
+    "loadingLoginHistory": "Učitavanje istorije prijavljivanja...",
+    "unknown": "Nepoznato",
+    "unknownBrowser": "Nepoznat Pregledač"
   },
-  "logout": "Odjavi se"
+  "logout": "Odjavi se",
+  "joinAgency": {
+    "title": "Pridruži se Agenciji",
+    "invitationCode": "Pozivni Kod",
+    "enterCode": "Molimo unesite pozivni kod",
+    "joining": "Pridruživanje...",
+    "join": "Pridruži se",
+    "successMessage": "Uspešno ste se pridružili agenciji {{agency}}!"
+  },
+  "errors": {
+    "failedToSwitchRole": "Neuspela promena uloge",
+    "selectImage": "Molimo izaberite datoteku slike",
+    "imageTooLarge": "Veličina slike mora biti manja od 5MB",
+    "failedToUpload": "Neuspelo otpremanje avatara",
+    "failedToJoinAgency": "Neuspelo pridruživanje agenciji"
+  }
 }
