@@ -133,7 +133,13 @@
     "callSeller": "Thirr Shitësin",
     "messageSeller": "Dërgo Mesazh",
     "startingChat": "Duke Filluar Bisedën...",
-    "propertySold": "Prona Shitur"
+    "propertySold": "Prona Shitur",
+    "annotate": "Shëno",
+    "tour3d": "Tur 3D",
+    "tour360": "Tur 360°",
+    "photos": "Foto",
+    "streetView": "Pamje Rruge",
+    "all": "Të Gjitha"
   },
   "seller": {
     "seller": "Shitësi",

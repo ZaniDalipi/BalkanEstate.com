@@ -133,7 +133,13 @@
     "callSeller": "Call Seller",
     "messageSeller": "Message Seller",
     "startingChat": "Starting Chat...",
-    "propertySold": "Property Sold"
+    "propertySold": "Property Sold",
+    "annotate": "Annotate",
+    "tour3d": "3D Tour",
+    "tour360": "360° Tour",
+    "photos": "Photos",
+    "streetView": "Street View",
+    "all": "All"
   },
   "seller": {
     "seller": "Seller",

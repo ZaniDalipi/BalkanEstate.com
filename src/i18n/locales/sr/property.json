@@ -133,7 +133,13 @@
     "callSeller": "Pozovi Prodavca",
     "messageSeller": "Pošalji Poruku",
     "startingChat": "Pokretanje Razgovora...",
-    "propertySold": "Nekretnina Prodata"
+    "propertySold": "Nekretnina Prodata",
+    "annotate": "Označi",
+    "tour3d": "3D Tura",
+    "tour360": "360° Tura",
+    "photos": "Fotografije",
+    "streetView": "Ulični Prikaz",
+    "all": "Sve"
   },
   "seller": {
     "seller": "Prodavac",
