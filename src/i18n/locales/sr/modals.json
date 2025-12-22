@@ -92,5 +92,14 @@
     "verifyFailed": "Neuspela verifikacija koda za pozivnicu",
     "verifying": "Verifikujem...",
     "submit": "Pošalji Zahtev"
+  },
+  "imageEditor": {
+    "download": "Preuzmi",
+    "sending": "Slanje...",
+    "sendToAgent": "Pošalji Agentu",
+    "sentSuccessTitle": "Uspešno Poslato!",
+    "sentSuccessMessage": "Vaša označena slika je poslata agentu. Odgovoriće vam uskoro.",
+    "goToChat": "Idi na Poruke",
+    "failedToSend": "Slanje označene slike nije uspelo. Pokušajte ponovo."
   }
 }

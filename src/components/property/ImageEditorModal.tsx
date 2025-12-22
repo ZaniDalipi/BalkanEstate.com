@@ -2,6 +2,7 @@
 // Extracted from PropertyDetailsPage for better modularity
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { useAppContext } from '../../../context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../services/apiService';
@@ -35,6 +36,7 @@ interface ImageEditorModalProps {
  * ```
  */
 export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, property, onClose }) => {
+  const { t } = useTranslation(['modals']);
   const { dispatch, state } = useAppContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(new Image());
@@ -196,14 +198,14 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
           setShowSuccessDialog(true);
         } catch (error) {
           console.error('Failed to send to agent:', error);
-          alert('Failed to send annotated image. Please try again.');
+          alert(t('imageEditor.failedToSend'));
         } finally {
           setIsSending(false);
         }
       }, 'image/png');
     } catch (error) {
       console.error('Failed to send to agent:', error);
-      alert('Failed to send annotated image. Please try again.');
+      alert(t('imageEditor.failedToSend'));
       setIsSending(false);
     }
   };
@@ -259,7 +261,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
           >
             <ArrowDownTrayIcon className="w-5 h-5" />
-            Download
+            {t('imageEditor.download')}
           </button>
 
           <button
@@ -277,10 +279,10 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Sending...
+                {t('imageEditor.sending')}
               </>
             ) : (
-              'Send to Agent'
+              t('imageEditor.sendToAgent')
             )}
           </button>
         </div>
@@ -313,10 +315,10 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
 
             {/* Message */}
             <h3 className="text-xl font-semibold text-gray-900 text-center mb-2">
-              Sent Successfully!
+              {t('imageEditor.sentSuccessTitle')}
             </h3>
             <p className="text-gray-600 text-center mb-6">
-              Your annotated image has been sent to the agent. They will respond shortly.
+              {t('imageEditor.sentSuccessMessage')}
             </p>
 
             {/* Buttons */}
@@ -328,7 +330,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                Go to Chat
+                {t('imageEditor.goToChat')}
               </button>
               <button
                 onClick={() => {
@@ -337,7 +339,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
                 }}
                 className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-all duration-200"
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           </div>

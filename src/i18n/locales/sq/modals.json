@@ -92,5 +92,14 @@
     "verifyFailed": "Dështoi verifikimi i kodit të ftesës",
     "verifying": "Duke verifikuar...",
     "submit": "Dërgo Kërkesën"
+  },
+  "imageEditor": {
+    "download": "Shkarko",
+    "sending": "Duke dërguar...",
+    "sendToAgent": "Dërgo te Agjenti",
+    "sentSuccessTitle": "U Dërgua me Sukses!",
+    "sentSuccessMessage": "Imazhi juaj i shënuar u dërgua te agjenti. Ata do të përgjigjen së shpejti.",
+    "goToChat": "Shko te Biseda",
+    "failedToSend": "Dështoi dërgimi i imazhit të shënuar. Ju lutem provoni përsëri."
   }
 }

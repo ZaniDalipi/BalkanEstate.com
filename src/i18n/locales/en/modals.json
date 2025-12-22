@@ -92,5 +92,14 @@
     "verifyFailed": "Failed to verify invitation code",
     "verifying": "Verifying...",
     "submit": "Submit Request"
+  },
+  "imageEditor": {
+    "download": "Download",
+    "sending": "Sending...",
+    "sendToAgent": "Send to Agent",
+    "sentSuccessTitle": "Sent Successfully!",
+    "sentSuccessMessage": "Your annotated image has been sent to the agent. They will respond shortly.",
+    "goToChat": "Go to Chat",
+    "failedToSend": "Failed to send annotated image. Please try again."
   }
 }
