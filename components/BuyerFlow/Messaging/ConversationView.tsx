@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Conversation, Message } from '../../../types';
 import { useAppContext } from '../../../context/AppContext';
 import MessageInput from './MessageInput';
@@ -13,18 +14,19 @@ interface ConversationViewProps {
     onBack?: () => void; // Optional callback for mobile back button
 }
 
-const MessageImage: React.FC<{imageUrl: string}> = ({imageUrl}) => {
+const MessageImage: React.FC<{imageUrl: string; t: (key: string) => string}> = ({imageUrl, t}) => {
     const [error, setError] = useState(false);
     useEffect(() => { setError(false); }, [imageUrl]);
 
     if(error) {
-        return <div className="p-4 bg-neutral-200 rounded-lg text-neutral-500 text-xs">Image failed to load.</div>
+        return <div className="p-4 bg-neutral-200 rounded-lg text-neutral-500 text-xs">{t('inbox.imageFailedToLoad')}</div>
     }
 
     return <img src={imageUrl} alt="Annotated property" className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity" onError={() => setError(true)} onClick={() => window.open(imageUrl, '_blank')} />
 }
 
 const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBack }) => {
+    const { t } = useTranslation(['messages']);
     const { state, dispatch, deleteConversation } = useAppContext();
     const [imageError, setImageError] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -134,7 +136,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
     if (!property) {
         return (
             <div className="h-full flex items-center justify-center text-center text-neutral-500 p-4">
-                <p>Property data not found. It may have been removed.</p>
+                <p>{t('inbox.propertyNotFound')}</p>
             </div>
         );
     }
@@ -148,7 +150,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 imageUrl = await uploadMessageImage(conversation.id, imageFile);
             } catch (error) {
                 console.error('Failed to upload image:', error);
-                alert('Failed to upload image. Please try again.');
+                alert(t('inbox.failedToUploadImage'));
                 throw error;
             }
         }
@@ -188,13 +190,13 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
             }
         } catch (error) {
             console.error('Failed to send message:', error);
-            alert('Failed to send message. Please try again.');
+            alert(t('inbox.failedToSendMessage'));
             throw error;
         }
     };
 
     const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+        if (window.confirm(t('inbox.deleteConfirm'))) {
             try {
                 await deleteConversation(conversation.id);
                 // Go back if on mobile, otherwise conversation list will update
@@ -203,7 +205,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 }
             } catch (error) {
                 console.error('Failed to delete conversation:', error);
-                alert('Failed to delete conversation. Please try again.');
+                alert(t('inbox.failedToDeleteConversation'));
             }
         }
     };
@@ -232,12 +234,12 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                         onClick={() => dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id })}
                         className="hidden sm:block px-4 py-2 text-sm font-semibold bg-primary-light text-primary-dark rounded-full hover:bg-primary/20 transition-colors"
                     >
-                        View Property
+                        {t('inbox.viewProperty')}
                     </button>
                     <button
                         onClick={handleDelete}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                        title="Delete conversation"
+                        title={t('inbox.deleteConversation')}
                     >
                         <TrashIcon className="w-5 h-5" />
                     </button>
@@ -249,8 +251,8 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 flex items-start gap-2 animate-fade-in">
                     <ShieldExclamationIcon className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                     <div className="text-sm text-yellow-800">
-                        <p className="font-semibold">Sensitive information detected</p>
-                        <p className="text-xs mt-1">Credit card or financial information has been automatically redacted for your security.</p>
+                        <p className="font-semibold">{t('security.sensitiveInfoDetected')}</p>
+                        <p className="text-xs mt-1">{t('security.sensitiveInfoMessage')}</p>
                     </div>
                 </div>
             )}
@@ -261,7 +263,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     <details className="cursor-pointer">
                         <summary className="text-xs text-blue-800 font-semibold flex items-center gap-2">
                             <ShieldExclamationIcon className="w-4 h-4" />
-                            Security Notice - Click to read
+                            {t('security.noticeTitle')}
                         </summary>
                         <div className="mt-2 text-xs text-blue-700 whitespace-pre-line">
                             {securityWarning}
@@ -277,7 +279,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     </div>
                 ) : messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-neutral-400">
-                        <p className="text-sm">No messages yet. Start the conversation!</p>
+                        <p className="text-sm">{t('inbox.noMessages')} {t('inbox.noMessagesHint')}</p>
                     </div>
                 ) : (
                     <>
@@ -306,7 +308,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                     {msg.text && <p className="text-sm whitespace-pre-wrap">{msg.text}</p>}
                                     {msg.imageUrl && (
                                         <div className={msg.text ? 'mt-2' : ''}>
-                                            <MessageImage imageUrl={msg.imageUrl} />
+                                            <MessageImage imageUrl={msg.imageUrl} t={t} />
                                         </div>
                                     )}
                                 </div>
@@ -345,22 +347,22 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
             <div className="p-2 border-t border-neutral-200 flex-shrink-0">
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                     <button
-                        onClick={() => handleSendMessage("Hi! I'm interested in scheduling a tour of this property. When would be a good time?")}
+                        onClick={() => handleSendMessage(t('quickReplies.scheduleTourMessage'))}
                         className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-primary-dark bg-primary-light rounded-full hover:bg-primary/20 transition-colors"
                     >
-                       <CalendarIcon className="w-4 h-4"/> Schedule a Tour
+                       <CalendarIcon className="w-4 h-4"/> {t('quickReplies.scheduleTour')}
                    </button>
                     <button
-                        onClick={() => handleSendMessage("I'd like to request more information about this property. Could you provide additional details?")}
+                        onClick={() => handleSendMessage(t('quickReplies.requestInfoMessage'))}
                         className="px-3 py-1.5 text-xs font-semibold text-primary-dark bg-primary-light rounded-full hover:bg-primary/20 transition-colors"
                     >
-                        Request More Info
+                        {t('quickReplies.requestInfo')}
                     </button>
                     <button
-                        onClick={() => handleSendMessage("I'm interested in making an offer on this property. What's the process?")}
+                        onClick={() => handleSendMessage(t('quickReplies.makeOfferMessage'))}
                         className="px-3 py-1.5 text-xs font-semibold text-primary-dark bg-primary-light rounded-full hover:bg-primary/20 transition-colors"
                     >
-                        Make an Offer
+                        {t('quickReplies.makeOffer')}
                     </button>
                 </div>
             </div>

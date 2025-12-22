@@ -191,11 +191,16 @@
     "noSavedSearches": "No saved searches yet"
   },
   "ai": {
-    "title": "AI Search",
-    "aiPropertySearch": "AI Property Search",
-    "placeholder": "Describe your ideal property...",
-    "example": "e.g., A modern 3-bedroom apartment near the city center with a balcony and parking",
-    "searching": "Searching...",
-    "results": "AI found {{count}} matching properties"
+    "title": "Αναζήτηση AI",
+    "aiPropertySearch": "Αναζήτηση Ακινήτων με AI",
+    "placeholder": "Πείτε μου τι ψάχνετε...",
+    "example": "π.χ. Ένα μοντέρνο διαμέρισμα 3 υπνοδωματίων κοντά στο κέντρο της πόλης με μπαλκόνι και parking",
+    "searching": "Αναζήτηση...",
+    "results": "Το AI βρήκε {{count}} αντίστοιχα ακίνητα",
+    "connectionError": "Λυπάμαι, αντιμετωπίζω προβλήματα σύνδεσης αυτή τη στιγμή. Παρακαλώ δοκιμάστε ξανά σε λίγο.",
+    "proceed": "Συνέχεια",
+    "beds": "υπνοδωμάτια",
+    "baths": "μπάνια",
+    "living": "σαλόνια"
   }
 }

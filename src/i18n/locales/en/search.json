@@ -193,9 +193,14 @@
   "ai": {
     "title": "AI Search",
     "aiPropertySearch": "AI Property Search",
-    "placeholder": "Describe your ideal property...",
+    "placeholder": "Tell me what you're looking for...",
     "example": "e.g., A modern 3-bedroom apartment near the city center with a balcony and parking",
     "searching": "Searching...",
-    "results": "AI found {{count}} matching properties"
+    "results": "AI found {{count}} matching properties",
+    "connectionError": "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
+    "proceed": "Proceed",
+    "beds": "beds",
+    "baths": "baths",
+    "living": "living"
   }
 }

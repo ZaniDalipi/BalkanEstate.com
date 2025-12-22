@@ -11,9 +11,10 @@
     "loadingConversation": "Učitavanje razgovora...",
     "selectConversation": "Izaberite razgovor da vidite poruke.",
     "noMessages": "Nema poruka",
+    "noMessagesHint": "Započnite razgovor!",
     "startConversation": "Započnite razgovor kontaktiranjem prodavca",
     "newMessage": "Nova Poruka",
-    "typeMessage": "Ukucajte poruku...",
+    "typeMessage": "Ukucajte vašu poruku...",
     "send": "Pošalji",
     "online": "Online",
     "offline": "Offline",
@@ -24,9 +25,29 @@
     "unread": "Nepročitano",
     "markAsRead": "Označi kao pročitano",
     "deleteConversation": "Obriši Razgovor",
+    "deleteConfirm": "Da li ste sigurni da želite da obrišete ovaj razgovor? Ova radnja se ne može poništiti.",
     "blockUser": "Blokiraj Korisnika",
     "reportUser": "Prijavi Korisnika",
-    "aboutProperty": "O ovoj nekretnini"
+    "aboutProperty": "O ovoj nekretnini",
+    "viewProperty": "Pogledaj Nekretninu",
+    "propertyNotFound": "Podaci o nekretnini nisu pronađeni. Možda je uklonjena.",
+    "imageFailedToLoad": "Slika nije učitana.",
+    "failedToUploadImage": "Slanje slike nije uspelo. Pokušajte ponovo.",
+    "failedToSendMessage": "Slanje poruke nije uspelo. Pokušajte ponovo.",
+    "failedToDeleteConversation": "Brisanje razgovora nije uspelo. Pokušajte ponovo."
+  },
+  "quickReplies": {
+    "scheduleTour": "Zakaži Obilazak",
+    "scheduleTourMessage": "Zdravo! Zainteresovan/a sam za zakazivanje obilaska ove nekretnine. Kada bi odgovaralo?",
+    "requestInfo": "Zatražite Više Informacija",
+    "requestInfoMessage": "Želeo/la bih da zatražim više informacija o ovoj nekretnini. Možete li pružiti dodatne detalje?",
+    "makeOffer": "Dajte Ponudu",
+    "makeOfferMessage": "Zainteresovan/a sam za davanje ponude za ovu nekretninu. Koji je postupak?"
+  },
+  "security": {
+    "noticeTitle": "Bezbednosno Obaveštenje - Kliknite za čitanje",
+    "sensitiveInfoDetected": "Otkrivene osetljive informacije",
+    "sensitiveInfoMessage": "Informacije o kreditnoj kartici ili finansijske informacije su automatski redigovane za vašu bezbednost."
   },
   "success": {
     "saved": "Uspešno sačuvano",

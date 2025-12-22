@@ -191,11 +191,16 @@
     "noSavedSearches": "No saved searches yet"
   },
   "ai": {
-    "title": "AI Search",
-    "aiPropertySearch": "AI Property Search",
-    "placeholder": "Describe your ideal property...",
-    "example": "e.g., A modern 3-bedroom apartment near the city center with a balcony and parking",
-    "searching": "Searching...",
-    "results": "AI found {{count}} matching properties"
+    "title": "AI Пребарување",
+    "aiPropertySearch": "AI Пребарување на Недвижности",
+    "placeholder": "Кажете ми што барате...",
+    "example": "на пр. Модерен стан со 3 спални близу центарот на градот со балкон и паркинг",
+    "searching": "Пребарувам...",
+    "results": "AI пронајде {{count}} соодветни недвижности",
+    "connectionError": "Извинете, моментално имам проблем со поврзувањето. Ве молиме обидете се повторно по малку.",
+    "proceed": "Продолжи",
+    "beds": "спални",
+    "baths": "бањи",
+    "living": "дневни"
   }
 }

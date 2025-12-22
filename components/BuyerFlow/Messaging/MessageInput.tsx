@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PaperAirplaneIcon, PhotoIcon, XMarkIcon } from '../../../constants';
 
 interface MessageInputProps {
@@ -8,6 +9,7 @@ interface MessageInputProps {
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, disabled = false }) => {
+    const { t } = useTranslation(['messages']);
     const [text, setText] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -118,7 +120,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                             handleSubmit(e);
                         }
                     }}
-                    placeholder="Type your message..."
+                    placeholder={t('inbox.typeMessage')}
                     disabled={disabled || isSending}
                     rows={1}
                     className="block w-full text-base bg-white border border-neutral-300 rounded-full text-neutral-900 shadow-sm px-5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none disabled:bg-neutral-100 disabled:cursor-not-allowed"

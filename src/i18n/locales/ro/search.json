@@ -191,11 +191,16 @@
     "noSavedSearches": "No saved searches yet"
   },
   "ai": {
-    "title": "AI Search",
-    "aiPropertySearch": "AI Property Search",
-    "placeholder": "Describe your ideal property...",
-    "example": "e.g., A modern 3-bedroom apartment near the city center with a balcony and parking",
-    "searching": "Searching...",
-    "results": "AI found {{count}} matching properties"
+    "title": "Căutare AI",
+    "aiPropertySearch": "Căutare Proprietăți cu AI",
+    "placeholder": "Spuneți-mi ce căutați...",
+    "example": "de ex. Un apartament modern cu 3 dormitoare aproape de centrul orașului cu balcon și parcare",
+    "searching": "Se caută...",
+    "results": "AI a găsit {{count}} proprietăți potrivite",
+    "connectionError": "Îmi pare rău, am probleme cu conexiunea în acest moment. Vă rugăm să încercați din nou într-un moment.",
+    "proceed": "Continuă",
+    "beds": "dormitoare",
+    "baths": "băi",
+    "living": "camere de zi"
   }
 }

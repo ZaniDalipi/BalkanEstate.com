@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChatMessage, AiSearchQuery, Property } from '../../../types';
 import { getAiChatResponse } from '../../../services/geminiService';
 import { PaperAirplaneIcon, SparklesIcon } from '../../../constants';
@@ -18,6 +19,7 @@ const FilterPill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobile, history, onHistoryChange }) => {
+    const { t } = useTranslation(['search']);
     const [input, setInput] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [finalQuery, setFinalQuery] = useState<AiSearchQuery | null>(null);
@@ -53,7 +55,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
             }
         } catch (error) {
             console.error("AI chat error:", error);
-            const errorMessage: ChatMessage = { sender: 'ai', text: "Sorry, I'm having trouble connecting right now. Please try again in a moment." };
+            const errorMessage: ChatMessage = { sender: 'ai', text: t('ai.connectionError') };
             onHistoryChange([...newHistory, errorMessage]);
         } finally {
             setIsSearching(false);
@@ -75,9 +77,9 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         else if (query.minPrice) pills.push(<FilterPill key="price">≥ {formatCurrency(query.minPrice)}</FilterPill>);
         else if (query.maxPrice) pills.push(<FilterPill key="price">≤ {formatCurrency(query.maxPrice)}</FilterPill>);
         
-        if (query.beds) pills.push(<FilterPill key="beds">🛏️ {query.beds}+ beds</FilterPill>);
-        if (query.baths) pills.push(<FilterPill key="baths">🛁 {query.baths}+ baths</FilterPill>);
-        if (query.livingRooms) pills.push(<FilterPill key="lr">🛋️ {query.livingRooms}+ living</FilterPill>);
+        if (query.beds) pills.push(<FilterPill key="beds">🛏️ {query.beds}+ {t('ai.beds')}</FilterPill>);
+        if (query.baths) pills.push(<FilterPill key="baths">🛁 {query.baths}+ {t('ai.baths')}</FilterPill>);
+        if (query.livingRooms) pills.push(<FilterPill key="lr">🛋️ {query.livingRooms}+ {t('ai.living')}</FilterPill>);
 
         if (query.minSqft && query.maxSqft) pills.push(<FilterPill key="sqft">{query.minSqft}-{query.maxSqft} m²</FilterPill>);
         else if (query.minSqft) pills.push(<FilterPill key="sqft">≥ {query.minSqft} m²</FilterPill>);
@@ -140,13 +142,13 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Tell me what you're looking for..."
+                        placeholder={t('ai.placeholder')}
                         className="flex-grow px-5 py-3 text-base text-neutral-900 bg-neutral-100 border-neutral-200 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
                         disabled={isSearching}
                     />
                     {finalQuery ? (
                          <button type="button" onClick={handleApplyClick} className="px-6 py-3 bg-primary text-white font-bold rounded-full shadow-md hover:bg-primary-dark transition-colors whitespace-nowrap">
-                            Proceed
+                            {t('ai.proceed')}
                         </button>
                     ) : (
                         <button type="submit" disabled={isSearching || !input.trim()} className="bg-primary text-white rounded-full p-3.5 hover:bg-primary-dark disabled:bg-neutral-300 transition-colors flex-shrink-0">

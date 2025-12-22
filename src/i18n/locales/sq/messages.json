@@ -11,9 +11,10 @@
     "loadingConversation": "Duke ngarkuar bisedën...",
     "selectConversation": "Zgjidhni një bisedë për të parë mesazhet.",
     "noMessages": "Nuk ka mesazhe ende",
+    "noMessagesHint": "Filloni bisedën!",
     "startConversation": "Filloni një bisedë duke kontaktuar një shitës",
     "newMessage": "Mesazh i Ri",
-    "typeMessage": "Shkruani një mesazh...",
+    "typeMessage": "Shkruani mesazhin tuaj...",
     "send": "Dërgo",
     "online": "Në linjë",
     "offline": "Jashtë linje",
@@ -24,9 +25,29 @@
     "unread": "Pa lexuar",
     "markAsRead": "Shëno si të Lexuar",
     "deleteConversation": "Fshi Bisedën",
+    "deleteConfirm": "Jeni të sigurt që dëshironi ta fshini këtë bisedë? Ky veprim nuk mund të zhbëhet.",
     "blockUser": "Blloko Përdoruesin",
     "reportUser": "Raporto Përdoruesin",
-    "aboutProperty": "Rreth kësaj prone"
+    "aboutProperty": "Rreth kësaj prone",
+    "viewProperty": "Shiko Pronën",
+    "propertyNotFound": "Të dhënat e pronës nuk u gjetën. Mund të jetë hequr.",
+    "imageFailedToLoad": "Imazhi nuk u ngarkua.",
+    "failedToUploadImage": "Dështoi ngarkimi i imazhit. Ju lutem provoni përsëri.",
+    "failedToSendMessage": "Dështoi dërgimi i mesazhit. Ju lutem provoni përsëri.",
+    "failedToDeleteConversation": "Dështoi fshirja e bisedës. Ju lutem provoni përsëri."
+  },
+  "quickReplies": {
+    "scheduleTour": "Cakto një Vizitë",
+    "scheduleTourMessage": "Përshëndetje! Jam i/e interesuar për të caktuar një vizitë të kësaj prone. Kur do të ishte e përshtatshme?",
+    "requestInfo": "Kërkoni Më Shumë Info",
+    "requestInfoMessage": "Do të dëshiroja të kërkoja më shumë informacion për këtë pronë. A mund të jepni detaje shtesë?",
+    "makeOffer": "Bëni një Ofertë",
+    "makeOfferMessage": "Jam i/e interesuar të bëj një ofertë për këtë pronë. Cili është procesi?"
+  },
+  "security": {
+    "noticeTitle": "Njoftim Sigurie - Kliko për të lexuar",
+    "sensitiveInfoDetected": "U zbuluan informacione të ndjeshme",
+    "sensitiveInfoMessage": "Informacionet e kartës së kreditit ose financiare janë redaktuar automatikisht për sigurinë tuaj."
   },
   "notifications": {
     "title": "Njoftimet",

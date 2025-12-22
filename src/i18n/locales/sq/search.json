@@ -193,9 +193,14 @@
   "ai": {
     "title": "Kërkim me AI",
     "aiPropertySearch": "Kërkim Pronash me AI",
-    "placeholder": "Përshkruani pronën tuaj ideale...",
+    "placeholder": "Më trego çfarë po kërkoni...",
     "example": "p.sh., Një banesë moderne me 3 dhoma gjumi pranë qendrës së qytetit me ballkon dhe parking",
     "searching": "Duke kërkuar...",
-    "results": "AI gjeti {{count}} prona të përshtatshme"
+    "results": "AI gjeti {{count}} prona të përshtatshme",
+    "connectionError": "Na vjen keq, kam probleme me lidhjen tani. Ju lutemi provoni përsëri pas pak.",
+    "proceed": "Vazhdo",
+    "beds": "dhoma gjumi",
+    "baths": "banjo",
+    "living": "dhoma ndenjeje"
   }
 }

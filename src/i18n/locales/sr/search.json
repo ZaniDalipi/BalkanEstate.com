@@ -193,9 +193,14 @@
   "ai": {
     "title": "AI Pretraga",
     "aiPropertySearch": "AI Pretraga Nekretnina",
-    "placeholder": "Opišite vašu idealnu nekretninu...",
+    "placeholder": "Recite mi šta tražite...",
     "example": "npr., Moderan stan sa 3 spavaće sobe blizu centra grada sa balkonom i parkingom",
     "searching": "Pretražujem...",
-    "results": "AI pronašao {{count}} odgovarajućih nekretnina"
+    "results": "AI pronašao {{count}} odgovarajućih nekretnina",
+    "connectionError": "Izvinite, trenutno imam problem sa povezivanjem. Molimo pokušajte ponovo za trenutak.",
+    "proceed": "Nastavi",
+    "beds": "spavaćih soba",
+    "baths": "kupatila",
+    "living": "dnevnih"
   }
 }

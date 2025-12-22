@@ -191,11 +191,16 @@
     "noSavedSearches": "No saved searches yet"
   },
   "ai": {
-    "title": "AI Search",
-    "aiPropertySearch": "AI Property Search",
-    "placeholder": "Describe your ideal property...",
-    "example": "e.g., A modern 3-bedroom apartment near the city center with a balcony and parking",
-    "searching": "Searching...",
-    "results": "AI found {{count}} matching properties"
+    "title": "AI Pretraga",
+    "aiPropertySearch": "AI Pretraga Nekretnina",
+    "placeholder": "Recite mi što tražite...",
+    "example": "npr. Moderan stan s 3 spavaće sobe blizu centra grada s balkonom i parkingom",
+    "searching": "Pretražujem...",
+    "results": "AI pronašao {{count}} odgovarajućih nekretnina",
+    "connectionError": "Ispričavam se, trenutno imam problema s povezivanjem. Molimo pokušajte ponovno za trenutak.",
+    "proceed": "Nastavi",
+    "beds": "spavaćih soba",
+    "baths": "kupaonica",
+    "living": "dnevnih"
   }
 }
