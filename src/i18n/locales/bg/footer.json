@@ -1,29 +1,29 @@
 {
-  "tagline": "Finding perfect properties across the Balkans with premium service and modern technology.",
+  "tagline": "Намиране на перфектни имоти на Балканите с премиум обслужване и модерни технологии.",
   "sections": {
-    "forBuyers": "For Buyers",
-    "forSellers": "For Sellers",
-    "contact": "Contact"
+    "forBuyers": "За Купувачи",
+    "forSellers": "За Продавачи",
+    "contact": "Контакт"
   },
   "links": {
-    "searchProperties": "Search Properties",
-    "savedProperties": "Saved Properties",
-    "savedSearches": "Saved Searches",
-    "findAgents": "Find Agents",
-    "browseAgencies": "Browse Agencies",
-    "listProperty": "List Property",
-    "messages": "Messages",
-    "myAccount": "My Account"
+    "searchProperties": "Търсене на Имоти",
+    "savedProperties": "Запазени Имоти",
+    "savedSearches": "Запазени Търсения",
+    "findAgents": "Намерете Агенти",
+    "browseAgencies": "Разгледайте Агенции",
+    "listProperty": "Публикувайте Имот",
+    "messages": "Съобщения",
+    "myAccount": "Моят Профил"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",
     "email": "info@balkanestate.com"
   },
   "legal": {
-    "allRightsReserved": "All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
+    "allRightsReserved": "Всички права запазени.",
+    "privacyPolicy": "Политика за Поверителност",
+    "termsOfService": "Общи Условия",
+    "cookiePolicy": "Политика за Бисквитки",
     "disclaimer": "Disclaimer",
     "accessibility": "Accessibility"
   },

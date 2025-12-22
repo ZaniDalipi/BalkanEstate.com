@@ -1,40 +1,40 @@
 {
   "password": {
-    "minLength": "At least 8 characters",
-    "uppercase": "One uppercase letter",
-    "lowercase": "One lowercase letter",
-    "number": "One number",
-    "specialChar": "One special character (!@#$%...)",
-    "noSequential": "No sequential characters (123, abc, qwe)",
-    "notCommon": "Not a common password",
-    "mismatch": "Passwords do not match"
+    "minLength": "Поне 8 символа",
+    "uppercase": "Една главна буква",
+    "lowercase": "Една малка буква",
+    "number": "Една цифра",
+    "specialChar": "Един специален символ (!@#$%...)",
+    "noSequential": "Без последователни символи (123, abc, qwe)",
+    "notCommon": "Да не е често използвана парола",
+    "mismatch": "Паролите не съвпадат"
   },
   "email": {
-    "required": "Email is required",
-    "invalid": "Please enter a valid email address"
+    "required": "Имейлът е задължителен",
+    "invalid": "Моля, въведете валиден имейл адрес"
   },
   "phone": {
-    "required": "Phone number is required",
-    "invalid": "Please enter a valid phone number"
+    "required": "Телефонният номер е задължителен",
+    "invalid": "Моля, въведете валиден телефонен номер"
   },
-  "required": "This field is required",
-  "minLength": "Must be at least {{count}} characters",
-  "maxLength": "Must be no more than {{count}} characters",
-  "numeric": "Must be a number",
-  "positive": "Must be a positive number",
-  "url": "Please enter a valid URL",
+  "required": "Това поле е задължително",
+  "minLength": "Трябва да е поне {{count}} символа",
+  "maxLength": "Трябва да е не повече от {{count}} символа",
+  "numeric": "Трябва да е число",
+  "positive": "Трябва да е положително число",
+  "url": "Моля, въведете валиден URL адрес",
   "date": {
-    "invalid": "Please enter a valid date",
-    "future": "Date must be in the future",
-    "past": "Date must be in the past"
+    "invalid": "Моля, въведете валидна дата",
+    "future": "Датата трябва да е в бъдещето",
+    "past": "Датата трябва да е в миналото"
   },
   "file": {
-    "required": "Please select a file",
-    "size": "File size must be less than {{size}}MB",
-    "type": "Invalid file type. Allowed: {{types}}"
+    "required": "Моля, изберете файл",
+    "size": "Размерът на файла трябва да е под {{size}}MB",
+    "type": "Невалиден тип файл. Позволени: {{types}}"
   },
   "form": {
-    "hasErrors": "Please fix the errors before submitting",
-    "submitError": "An error occurred. Please try again."
+    "hasErrors": "Моля, коригирайте грешките преди изпращане",
+    "submitError": "Възникна грешка. Моля, опитайте отново."
   }
 }

@@ -9,7 +9,6 @@
  * - mk: Macedonian (Македонски)
  * - bs: Bosnian (Bosanski)
  * - hr: Croatian (Hrvatski)
- * - sl: Slovenian (Slovenščina)
  * - bg: Bulgarian (Български)
  * - ro: Romanian (Română)
  * - el: Greek (Ελληνικά)
@@ -228,7 +227,6 @@ export const languages = [
   { code: 'mk', name: 'Macedonian', nativeName: 'Македонски', flag: '🇲🇰' },
   { code: 'bs', name: 'Bosnian', nativeName: 'Bosanski', flag: '🇧🇦' },
   { code: 'hr', name: 'Croatian', nativeName: 'Hrvatski', flag: '🇭🇷' },
-  { code: 'sl', name: 'Slovenian', nativeName: 'Slovenščina', flag: '🇸🇮' },
   { code: 'bg', name: 'Bulgarian', nativeName: 'Български', flag: '🇧🇬' },
   { code: 'ro', name: 'Romanian', nativeName: 'Română', flag: '🇷🇴' },
   { code: 'el', name: 'Greek', nativeName: 'Ελληνικά', flag: '🇬🇷' },

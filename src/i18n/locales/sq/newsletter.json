@@ -1,25 +1,25 @@
 {
-  "title": "Never Miss a Property",
-  "subtitle": "Stay Updated",
-  "description": "Get instant alerts for new listings matching your criteria",
+  "title": "Mos Humbe Asnjë Pronë",
+  "subtitle": "Qëndro i Informuar",
+  "description": "Merr njoftime të menjëhershme për shpallje të reja sipas kritereve tuaja",
   "features": {
-    "newListings": "New listings matching your criteria",
-    "priceDrops": "Price drop alerts on saved properties",
-    "marketInsights": "Weekly market insights & trends"
+    "newListings": "Shpallje të reja sipas kritereve tuaja",
+    "priceDrops": "Njoftime për ulje çmimesh në pronat e ruajtura",
+    "marketInsights": "Informata javore mbi tregun & tendencat"
   },
   "form": {
-    "placeholder": "Enter your email",
-    "submit": "Subscribe",
-    "subscribing": "Subscribing..."
+    "placeholder": "Shkruani email-in tuaj",
+    "submit": "Abonohu",
+    "subscribing": "Duke u abonuar..."
   },
   "cta": {
-    "title": "Subscribe to Newsletter",
-    "button": "Subscribe for Free"
+    "title": "Abonohu në Buletinin",
+    "button": "Abonohu Falas"
   },
   "messages": {
-    "success": "Thank you for subscribing! Check your inbox for confirmation.",
-    "error": "Something went wrong. Please try again.",
-    "invalidEmail": "Please enter a valid email address"
+    "success": "Faleminderit për abonimin! Kontrolloni inbox-in për konfirmim.",
+    "error": "Diçka shkoi keq. Ju lutemi provoni përsëri.",
+    "invalidEmail": "Ju lutemi shkruani një adresë email të vlefshme"
   },
-  "privacy": "By subscribing, you agree to our Privacy Policy. Unsubscribe anytime."
+  "privacy": "Duke u abonuar, pajtoheni me Politikën e Privatësisë. Çabonohu në çdo kohë."
 }

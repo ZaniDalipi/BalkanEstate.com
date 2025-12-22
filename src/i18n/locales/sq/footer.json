@@ -1,29 +1,29 @@
 {
-  "tagline": "Finding perfect properties across the Balkans with premium service and modern technology.",
+  "tagline": "Gjetja e pronave perfekte nëpër Ballkan me shërbim premium dhe teknologji moderne.",
   "sections": {
-    "forBuyers": "For Buyers",
-    "forSellers": "For Sellers",
-    "contact": "Contact"
+    "forBuyers": "Për Blerësit",
+    "forSellers": "Për Shitësit",
+    "contact": "Kontakti"
   },
   "links": {
-    "searchProperties": "Search Properties",
-    "savedProperties": "Saved Properties",
-    "savedSearches": "Saved Searches",
-    "findAgents": "Find Agents",
-    "browseAgencies": "Browse Agencies",
-    "listProperty": "List Property",
-    "messages": "Messages",
-    "myAccount": "My Account"
+    "searchProperties": "Kërko Prona",
+    "savedProperties": "Prona të Ruajtura",
+    "savedSearches": "Kërkime të Ruajtura",
+    "findAgents": "Gjej Agjentë",
+    "browseAgencies": "Shfleto Agjencitë",
+    "listProperty": "Listo Pronën",
+    "messages": "Mesazhet",
+    "myAccount": "Llogaria Ime"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",
     "email": "info@balkanestate.com"
   },
   "legal": {
-    "allRightsReserved": "All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
+    "allRightsReserved": "Të gjitha të drejtat e rezervuara.",
+    "privacyPolicy": "Politika e Privatësisë",
+    "termsOfService": "Kushtet e Shërbimit",
+    "cookiePolicy": "Politika e Cookies",
     "disclaimer": "Disclaimer",
     "accessibility": "Accessibility"
   },

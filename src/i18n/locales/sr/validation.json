@@ -1,40 +1,40 @@
 {
   "password": {
-    "minLength": "At least 8 characters",
-    "uppercase": "One uppercase letter",
-    "lowercase": "One lowercase letter",
-    "number": "One number",
-    "specialChar": "One special character (!@#$%...)",
-    "noSequential": "No sequential characters (123, abc, qwe)",
-    "notCommon": "Not a common password",
-    "mismatch": "Passwords do not match"
+    "minLength": "Najmanje 8 karaktera",
+    "uppercase": "Jedno veliko slovo",
+    "lowercase": "Jedno malo slovo",
+    "number": "Jedan broj",
+    "specialChar": "Jedan specijalni karakter (!@#$%...)",
+    "noSequential": "Bez sekvencijalnih karaktera (123, abc, qwe)",
+    "notCommon": "Ne sme biti česta lozinka",
+    "mismatch": "Lozinke se ne podudaraju"
   },
   "email": {
-    "required": "Email is required",
-    "invalid": "Please enter a valid email address"
+    "required": "Email je obavezan",
+    "invalid": "Unesite važeću email adresu"
   },
   "phone": {
-    "required": "Phone number is required",
-    "invalid": "Please enter a valid phone number"
+    "required": "Broj telefona je obavezan",
+    "invalid": "Unesite važeći broj telefona"
   },
-  "required": "This field is required",
-  "minLength": "Must be at least {{count}} characters",
-  "maxLength": "Must be no more than {{count}} characters",
-  "numeric": "Must be a number",
-  "positive": "Must be a positive number",
-  "url": "Please enter a valid URL",
+  "required": "Ovo polje je obavezno",
+  "minLength": "Mora imati najmanje {{count}} karaktera",
+  "maxLength": "Ne sme imati više od {{count}} karaktera",
+  "numeric": "Mora biti broj",
+  "positive": "Mora biti pozitivan broj",
+  "url": "Unesite važeći URL",
   "date": {
-    "invalid": "Please enter a valid date",
-    "future": "Date must be in the future",
-    "past": "Date must be in the past"
+    "invalid": "Unesite važeći datum",
+    "future": "Datum mora biti u budućnosti",
+    "past": "Datum mora biti u prošlosti"
   },
   "file": {
-    "required": "Please select a file",
-    "size": "File size must be less than {{size}}MB",
-    "type": "Invalid file type. Allowed: {{types}}"
+    "required": "Izaberite fajl",
+    "size": "Veličina fajla mora biti manja od {{size}}MB",
+    "type": "Nevažeći tip fajla. Dozvoljeno: {{types}}"
   },
   "form": {
-    "hasErrors": "Please fix the errors before submitting",
-    "submitError": "An error occurred. Please try again."
+    "hasErrors": "Ispravite greške pre slanja",
+    "submitError": "Došlo je do greške. Pokušajte ponovo."
   }
 }
