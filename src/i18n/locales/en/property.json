@@ -215,5 +215,20 @@
     "parking": "Parking",
     "specialFeatures": "Special Features",
     "materials": "Materials"
+  },
+  "map": {
+    "beds": "Beds",
+    "baths": "Baths",
+    "area": "m²",
+    "living": "Living",
+    "parking": "Parking",
+    "clickForDetails": "Click for details →",
+    "legend": "Legend",
+    "propertyTypes": {
+      "house": "House",
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "other": "Other"
+    }
   }
 }

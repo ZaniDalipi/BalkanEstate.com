@@ -2,6 +2,7 @@
 // Property markers and popups for map display
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '../../../types';
@@ -147,6 +148,7 @@ const PropertyPopup: React.FC<{
   property: Property;
   onPopupClick: (id: string) => void;
 }> = ({ property, onPopupClick }) => {
+  const { t } = useTranslation(['property']);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const images =
@@ -225,15 +227,15 @@ const PropertyPopup: React.FC<{
       {/* Essential information */}
       <div className="grid grid-cols-3 gap-1.5 mb-2 text-center">
         <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">Beds</div>
+          <div className="text-xs text-neutral-500">{t('map.beds')}</div>
           <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
         </div>
         <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">Baths</div>
+          <div className="text-xs text-neutral-500">{t('map.baths')}</div>
           <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
         </div>
         <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">m²</div>
+          <div className="text-xs text-neutral-500">{t('map.area')}</div>
           <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
         </div>
       </div>
@@ -242,12 +244,12 @@ const PropertyPopup: React.FC<{
       <div className="flex flex-wrap gap-1 mb-1.5">
         {property.livingRooms > 0 && (
           <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
-            {property.livingRooms} Living
+            {property.livingRooms} {t('map.living')}
           </span>
         )}
         {property.parking > 0 && (
           <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
-            {property.parking} Parking
+            {property.parking} {t('map.parking')}
           </span>
         )}
         {property.yearBuilt && (
@@ -259,7 +261,7 @@ const PropertyPopup: React.FC<{
 
       {/* View details prompt */}
       <div className="text-center pt-1.5 border-t border-neutral-200">
-        <p className="text-xs font-semibold text-primary">Click for details →</p>
+        <p className="text-xs font-semibold text-primary">{t('map.clickForDetails')}</p>
       </div>
     </div>
   );
@@ -326,19 +328,25 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
  *
  * Shows color legend for different property types.
  */
-export const Legend: React.FC = () => (
-  <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-neutral-200 animate-fade-in">
-    <h4 className="font-bold text-sm mb-2 text-neutral-800">Legend</h4>
-    <div className="space-y-1.5">
-      {Object.entries(PROPERTY_TYPE_COLORS).map(([type, color]) => (
-        <div key={type} className="flex items-center gap-2">
-          <span
-            className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm"
-            style={{ backgroundColor: color }}
-          ></span>
-          <span className="text-xs font-semibold text-neutral-700 capitalize">{type}</span>
-        </div>
-      ))}
+export const Legend: React.FC = () => {
+  const { t } = useTranslation(['property']);
+
+  return (
+    <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-neutral-200 animate-fade-in">
+      <h4 className="font-bold text-sm mb-2 text-neutral-800">{t('map.legend')}</h4>
+      <div className="space-y-1.5">
+        {Object.entries(PROPERTY_TYPE_COLORS).map(([type, color]) => (
+          <div key={type} className="flex items-center gap-2">
+            <span
+              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm"
+              style={{ backgroundColor: color }}
+            ></span>
+            <span className="text-xs font-semibold text-neutral-700">
+              {t(`map.propertyTypes.${type}`)}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};

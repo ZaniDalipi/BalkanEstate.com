@@ -187,5 +187,20 @@
     "parking": "Паркинг",
     "specialFeatures": "Специални характеристики",
     "materials": "Материали"
+  },
+  "map": {
+    "beds": "Спални",
+    "baths": "Бани",
+    "area": "м²",
+    "living": "Хол",
+    "parking": "Паркинг",
+    "clickForDetails": "Кликнете за детайли →",
+    "legend": "Легенда",
+    "propertyTypes": {
+      "house": "Къща",
+      "apartment": "Апартамент",
+      "villa": "Вила",
+      "other": "Друго"
+    }
   }
 }

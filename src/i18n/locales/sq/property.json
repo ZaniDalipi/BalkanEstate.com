@@ -215,5 +215,20 @@
     "parking": "Parkim",
     "specialFeatures": "Veçori të Veçanta",
     "materials": "Materialet"
+  },
+  "map": {
+    "beds": "Dhoma",
+    "baths": "Banjo",
+    "area": "m²",
+    "living": "Ndenjeje",
+    "parking": "Parking",
+    "clickForDetails": "Kliko për detaje →",
+    "legend": "Legjenda",
+    "propertyTypes": {
+      "house": "Shtëpi",
+      "apartment": "Banesë",
+      "villa": "Vilë",
+      "other": "Tjetër"
+    }
   }
 }

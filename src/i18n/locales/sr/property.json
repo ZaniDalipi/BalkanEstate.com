@@ -215,5 +215,20 @@
     "parking": "Parking",
     "specialFeatures": "Posebne Karakteristike",
     "materials": "Materijali"
+  },
+  "map": {
+    "beds": "Sobe",
+    "baths": "Kupatila",
+    "area": "m²",
+    "living": "Dnevna",
+    "parking": "Parking",
+    "clickForDetails": "Klikni za detalje →",
+    "legend": "Legenda",
+    "propertyTypes": {
+      "house": "Kuća",
+      "apartment": "Stan",
+      "villa": "Vila",
+      "other": "Ostalo"
+    }
   }
 }
