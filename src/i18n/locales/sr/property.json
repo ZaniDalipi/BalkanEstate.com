@@ -262,5 +262,33 @@
     "title": "Pogledaj na Mapi",
     "description": "Želite da istražite okolinu ove nekretnine?",
     "button": "Pogledaj na Mapi Pretrage"
+  },
+  "guide": {
+    "messages": {
+      "welcome": "Zdravo! Ja sam Homey, vaš vodič za nekretnine. Dozvolite da vam pokažem!",
+      "mortgageHint": "Pitate se za mesečne rate? Kalkulator kredita može pomoći!",
+      "tourAvailable": "Pst! Ova nekretnina ima 3D turu. Kao da ste tamo bez napuštanja kauča!",
+      "goodCondition": "Oho, ova je u {{condition}} stanju! To je prilično retko ovde.",
+      "hasPool": "Da li je neko rekao bazen? Ova nekretnina ga ima!",
+      "nearBeach": "Upozorenje za ljubitelje plaže! Samo {{distance}}km do peska i talasa.",
+      "manyPhotos": "{{count}} fotografija za istraživanje! Kliknite na galeriju za potpunu turu.",
+      "floorPlan": "Ima plan stana! Savršeno za planiranje gde ide vaš kauč.",
+      "saveHint": "Sviđa vam se? Tapnite srce da sačuvate za kasnije!",
+      "contactHint": "Imate pitanja? Prodavac je samo poruku daleko!"
+    },
+    "actions": {
+      "calculate": "Izračunaj",
+      "takeTour": "Turi"
+    },
+    "quickActions": {
+      "save": "Sačuvaj",
+      "call": "Pozovi",
+      "top": "Vrh"
+    },
+    "tooltip": {
+      "minimize": "Kliknite za smanjivanje",
+      "tips": "Kliknite za savete!",
+      "rightClick": "Desni klik za akcije"
+    }
   }
 }

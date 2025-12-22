@@ -262,5 +262,33 @@
     "title": "Shiko në Hartë",
     "description": "Dëshironi të eksploroni zonën rreth kësaj prone?",
     "button": "Shiko në Hartën e Kërkimit"
+  },
+  "guide": {
+    "messages": {
+      "welcome": "Përshëndetje! Unë jam Homey, udhëzuesi juaj i pronave. Më lejoni t'ju tregoj!",
+      "mortgageHint": "Pyetje për pagesat mujore? Llogaritësi i kredisë mund të ndihmojë!",
+      "tourAvailable": "Pst! Kjo pronë ka tur 3D. Është sikur të jesh aty pa u larguar nga shtëpia!",
+      "goodCondition": "Oho, kjo është në gjendje {{condition}}! Kjo është mjaft e rrallë këtu.",
+      "hasPool": "A tha dikush pishinë? Kjo pronë ka një!",
+      "nearBeach": "Vëmendje për dashamirët e plazhit! Vetëm {{distance}}km deri te rëra dhe dallgët.",
+      "manyPhotos": "{{count}} foto për të eksploruar! Klikoni galerinë për turën e plotë.",
+      "floorPlan": "Ka plan kate! Perfekt për të planifikuar ku shkon divani juaj.",
+      "saveHint": "Ju pëlqen? Klikoni zemrën për ta ruajtur për më vonë!",
+      "contactHint": "Keni pyetje? Shitësi është vetëm një mesazh larg!"
+    },
+    "actions": {
+      "calculate": "Llogarit",
+      "takeTour": "Merr Tur"
+    },
+    "quickActions": {
+      "save": "Ruaj",
+      "call": "Thirr",
+      "top": "Lart"
+    },
+    "tooltip": {
+      "minimize": "Klikoni për të minimizuar",
+      "tips": "Klikoni për këshilla!",
+      "rightClick": "Kliko djathtas për veprime"
+    }
   }
 }

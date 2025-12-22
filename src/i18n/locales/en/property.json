@@ -262,5 +262,33 @@
     "title": "View on Map",
     "description": "Want to explore the area around this property?",
     "button": "View on Search Map"
+  },
+  "guide": {
+    "messages": {
+      "welcome": "Hey there! I'm Homey, your property guide. Let me show you around!",
+      "mortgageHint": "Wondering about monthly payments? The mortgage calculator can help!",
+      "tourAvailable": "Psst! This place has a 3D tour. It's like being there without leaving your couch!",
+      "goodCondition": "Ooh, this one's in {{condition}} condition! That's pretty rare around here.",
+      "hasPool": "Did someone say pool party? This property has one!",
+      "nearBeach": "Beach lovers alert! Only {{distance}}km to sand and waves.",
+      "manyPhotos": "{{count}} photos to explore! Click the gallery for the full tour.",
+      "floorPlan": "There's a floor plan! Perfect for planning where your couch goes.",
+      "saveHint": "Love it? Tap the heart to save it for later!",
+      "contactHint": "Got questions? The seller is just a message away!"
+    },
+    "actions": {
+      "calculate": "Calculate",
+      "takeTour": "Take Tour"
+    },
+    "quickActions": {
+      "save": "Save",
+      "call": "Call",
+      "top": "Top"
+    },
+    "tooltip": {
+      "minimize": "Click to minimize",
+      "tips": "Click for tips!",
+      "rightClick": "Right-click for actions"
+    }
   }
 }
