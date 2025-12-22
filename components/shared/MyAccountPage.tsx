@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import MyListings from './MyListings';
 import SubscriptionManagement from './SubscriptionManagement';
@@ -1199,6 +1200,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 };
 
 const MyAccountPage: React.FC = () => {
+    const { t } = useTranslation(['account']);
     const { state, dispatch, logout, logoutAllDevices } = useAppContext();
     const [activeTab, setActiveTab] = useState<AccountTab>('listings');
     const [performanceRefreshKey, setPerformanceRefreshKey] = useState(0);
@@ -1206,7 +1208,7 @@ const MyAccountPage: React.FC = () => {
     if (!state.currentUser) {
         return (
             <div className="p-8 text-center">
-                <p>You must be logged in to view this page.</p>
+                <p>{t('account:mustBeLoggedIn')}</p>
             </div>
         );
     }
@@ -1247,9 +1249,9 @@ const MyAccountPage: React.FC = () => {
     };
 
     const roleDisplayMap: Record<UserRole, string> = {
-        [UserRole.AGENT]: 'Agent',
-        [UserRole.PRIVATE_SELLER]: 'Private Seller',
-        [UserRole.BUYER]: 'Buyer',
+        [UserRole.AGENT]: t('account:roles.agent'),
+        [UserRole.PRIVATE_SELLER]: t('account:roles.privateSeller'),
+        [UserRole.BUYER]: t('account:roles.buyer'),
         [UserRole.ADMIN]: '',
         [UserRole.SUPER_ADMIN]: ''
     };
@@ -1275,8 +1277,8 @@ const MyAccountPage: React.FC = () => {
         <div className="bg-neutral-50 min-h-screen flex flex-col">
             {/* SEO - noindex for private page */}
             <SEO
-                title="My Account"
-                description="Manage your Balkan Estate account, listings, and subscription."
+                title={t('account:title')}
+                description={t('account:description')}
                 noindex={true}
             />
 
@@ -1309,23 +1311,23 @@ const MyAccountPage: React.FC = () => {
                                 {/* License Verified Badge */}
                                 {state.currentUser.role === UserRole.AGENT && state.currentUser.licenseVerified && (
                                     <div className="flex items-center gap-1 mt-2 px-3 py-1 bg-green-50 rounded-full border border-green-200">
-                                        <span className="text-xs font-semibold text-green-700">✓ Verified Agent</span>
+                                        <span className="text-xs font-semibold text-green-700">✓ {t('account:agent.verifiedAgent')}</span>
                                     </div>
                                 )}
                             </div>
                             <nav className="space-y-2">
                                 {isSellerProfile && (
                                     <>
-                                        <TabButton label="My Listings" icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} />
-                                        <TabButton label="Performance" icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} />
-                                        <TabButton label="Subscription" icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} />
+                                        <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} />
+                                        <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} />
+                                        <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} />
                                     </>
                                 )}
-                                <TabButton label="Profile Settings" icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
-                                <TabButton label="Security" icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} />
+                                <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+                                <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} />
                                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 mt-4">
                                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />
-                                    <span>Logout</span>
+                                    <span>{t('account:logout')}</span>
                                 </button>
                             </nav>
                         </div>
