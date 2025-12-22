@@ -1,4 +1,21 @@
 {
+  "property": {
+    "title": "Kalkulator Vrijednosti Nekretnine",
+    "description": "Procijenite vrijednost vaše nekretnine",
+    "fields": {
+      "location": "Lokacija",
+      "area": "Površina (m²)"
+    },
+    "calculating": "Izračunavanje...",
+    "results": {
+      "estimatedValue": "Procijenjena Vrijednost"
+    },
+    "errors": {
+      "selectLocation": "Molimo izaberite validnu lokaciju iz predloga.",
+      "locationNotDetermined": "Nije moguće odrediti grad i državu iz izabrane lokacije.",
+      "insufficientData": "Žao nam je, nemamo dovoljno podataka za {{city}} da pružimo pouzdanu procjenu."
+    }
+  },
   "mortgage": {
     "title": "Mortgage Calculator",
     "description": "Estimate your monthly payments",

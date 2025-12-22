@@ -1,4 +1,21 @@
 {
+  "property": {
+    "title": "Llogaritësi i Vlerës së Pronës",
+    "description": "Vlerësoni vlerën e pronës suaj",
+    "fields": {
+      "location": "Vendndodhja",
+      "area": "Sipërfaqja (m²)"
+    },
+    "calculating": "Duke llogaritur...",
+    "results": {
+      "estimatedValue": "Vlera e Vlerësuar"
+    },
+    "errors": {
+      "selectLocation": "Ju lutemi zgjidhni një vendndodhje të vlefshme nga sugjerimet.",
+      "locationNotDetermined": "Nuk u arrit të përcaktohet qyteti dhe shteti nga vendndodhja e zgjedhur.",
+      "insufficientData": "Na vjen keq, nuk kemi të dhëna të mjaftueshme për {{city}} për të ofruar një vlerësim të besueshëm."
+    }
+  },
   "mortgage": {
     "title": "Llogaritësi i Kredisë",
     "description": "Vlerësoni pagesat mujore",

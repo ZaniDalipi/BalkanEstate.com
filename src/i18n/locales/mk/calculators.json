@@ -1,4 +1,21 @@
 {
+  "property": {
+    "title": "Калкулатор за Вредност на Недвижност",
+    "description": "Проценете ја вредноста на вашата недвижност",
+    "fields": {
+      "location": "Локација",
+      "area": "Површина (м²)"
+    },
+    "calculating": "Пресметување...",
+    "results": {
+      "estimatedValue": "Проценета Вредност"
+    },
+    "errors": {
+      "selectLocation": "Ве молиме изберете валидна локација од предлозите.",
+      "locationNotDetermined": "Не може да се одреди градот и државата од избраната локација.",
+      "insufficientData": "Жал ни е, немаме доволно податоци за {{city}} да обезбедиме сигурна проценка."
+    }
+  },
   "mortgage": {
     "title": "Mortgage Calculator",
     "description": "Estimate your monthly payments",

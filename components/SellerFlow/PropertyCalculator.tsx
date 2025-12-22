@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatPrice } from '../../utils/currency';
 import { allProperties as dummyProperties } from '../../services/apiService';
 import { NominatimResult } from '../../types';
@@ -6,6 +7,7 @@ import { searchLocation } from '../../services/osmService';
 import { MapPinIcon, SpinnerIcon } from '../../constants';
 
 const PropertyCalculator: React.FC = () => {
+  const { t } = useTranslation(['calculators']);
   const [result, setResult] = useState<{value: number, country: string} | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,7 +64,7 @@ const PropertyCalculator: React.FC = () => {
     setError(null);
     
     if (!selectedLocation) {
-        setError('Please select a valid location from the suggestions.');
+        setError(t('property.errors.selectLocation'));
         setLoading(false);
         return;
     }
@@ -74,7 +76,7 @@ const PropertyCalculator: React.FC = () => {
     const country = selectedLocation.address?.country || '';
 
     if (!city || !country) {
-        setError('Could not determine city and country from selected location.');
+        setError(t('property.errors.locationNotDetermined'));
         setLoading(false);
         return;
     }
@@ -83,7 +85,7 @@ const PropertyCalculator: React.FC = () => {
         const propertiesInCity = dummyProperties.filter(p => p.city.toLowerCase() === city.toLowerCase());
 
         if (propertiesInCity.length < 3) {
-            setError(`Sorry, we don't have enough data for ${city} to provide a reliable estimate.`);
+            setError(t('property.errors.insufficientData', { city }));
             setLoading(false);
             return;
         }
@@ -111,7 +113,7 @@ const PropertyCalculator: React.FC = () => {
         <div className="space-y-8">
            <div className="relative" ref={locationContainerRef}>
                 <input type="text" name="location" id="location" className={floatingInputClasses} placeholder=" " required value={locationSearch} onChange={handleLocationChange} autoComplete="off" />
-                <label htmlFor="location" className={floatingLabelClasses}>Location</label>
+                <label htmlFor="location" className={floatingLabelClasses}>{t('property.fields.location')}</label>
                 {isSearching && <div className="absolute inset-y-0 right-0 flex items-center pr-3"><SpinnerIcon className="h-5 w-5 text-primary" /></div>}
                 {suggestions.length > 0 && (
                      <ul className="absolute z-20 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -126,10 +128,10 @@ const PropertyCalculator: React.FC = () => {
           </div>
           <div className="relative">
              <input type="number" name="sqft" id="sqft" min="0" defaultValue="100" className={floatingInputClasses} placeholder=" " required />
-             <label htmlFor="sqft" className={floatingLabelClasses}>Area (m²)</label>
+             <label htmlFor="sqft" className={floatingLabelClasses}>{t('property.fields.area')}</label>
           </div>
            <button type="submit" disabled={loading} className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary disabled:bg-opacity-50">
-            {loading ? 'Calculating...' : 'Calculate'}
+            {loading ? t('property.calculating') : t('common.calculate')}
           </button>
         </div>
       </form>
@@ -142,7 +144,7 @@ const PropertyCalculator: React.FC = () => {
 
       {result && !error && (
         <div className="mt-6 bg-secondary/10 p-4 rounded-lg text-center">
-            <p className="text-sm font-medium text-secondary/80">Estimated Value</p>
+            <p className="text-sm font-medium text-secondary/80">{t('property.results.estimatedValue')}</p>
             <p className="text-3xl font-bold text-secondary">{formatPrice(result.value, result.country)}</p>
         </div>
       )}
