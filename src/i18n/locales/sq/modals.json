@@ -81,5 +81,16 @@
     "joining": "Duke u bashkuar...",
     "verifyAndBecomeAgent": "Verifiko & Bëhu Agjent",
     "joinAgency": "Bashkohu me Agjenci"
+  },
+  "invitationCode": {
+    "title": "Futni Kodin e Ftesës",
+    "description": "Për t'u bashkuar me {{agencyName}}, keni nevojë për një kod ftese nga administratori i agjencisë.",
+    "label": "Kodi i Ftesës",
+    "placeholder": "AGY-XXXXXX-XXXXXX",
+    "formatHint": "Formati i kodit të ftesës: AGY-XXXXXX-XXXXXX",
+    "enterCode": "Ju lutemi futni kodin e ftesës",
+    "verifyFailed": "Dështoi verifikimi i kodit të ftesës",
+    "verifying": "Duke verifikuar...",
+    "submit": "Dërgo Kërkesën"
   }
 }

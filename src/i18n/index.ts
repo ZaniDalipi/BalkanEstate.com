@@ -37,6 +37,7 @@ import enAccount from './locales/en/account.json';
 import enSeller from './locales/en/seller.json';
 import enAgents from './locales/en/agents.json';
 import enModals from './locales/en/modals.json';
+import enPayment from './locales/en/payment.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -55,6 +56,7 @@ import sqAccount from './locales/sq/account.json';
 import sqSeller from './locales/sq/seller.json';
 import sqAgents from './locales/sq/agents.json';
 import sqModals from './locales/sq/modals.json';
+import sqPayment from './locales/sq/payment.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -73,6 +75,7 @@ import srAccount from './locales/sr/account.json';
 import srSeller from './locales/sr/seller.json';
 import srAgents from './locales/sr/agents.json';
 import srModals from './locales/sr/modals.json';
+import srPayment from './locales/sr/payment.json';
 
 // Import translations - Serbian
 import bgCommon from './locales/bg/common.json';
@@ -128,6 +131,7 @@ const resources = {
     seller: enSeller,
     agents: enAgents,
     modals: enModals,
+    payment: enPayment,
   },
   sq: {
     common: sqCommon,
@@ -146,6 +150,7 @@ const resources = {
     seller: sqSeller,
     agents: sqAgents,
     modals: sqModals,
+    payment: sqPayment,
   },
   sr: {
     common: srCommon,
@@ -164,6 +169,7 @@ const resources = {
     seller: srSeller,
     agents: srAgents,
     modals: srModals,
+    payment: srPayment,
   },
   bg: {
     common: bgCommon,
@@ -195,7 +201,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment'],
 
     interpolation: {
       escapeValue: false, // React already escapes

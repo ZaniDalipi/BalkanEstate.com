@@ -1,0 +1,38 @@
+{
+  "success": {
+    "verifying": "Duke Verifikuar Pagesën...",
+    "verifyingDescription": "Ju lutemi prisni derisa të konfirmojmë transaksionin tuaj",
+    "verificationFailed": "Verifikimi i Pagesës Dështoi",
+    "returnToAccount": "Kthehu në Llogari",
+    "title": "Pagesa e Suksesshme!",
+    "description": "Faleminderit për blerjen tuaj. Abonimi juaj është aktivizuar.",
+    "details": "Detajet e Pagesës",
+    "status": "Statusi",
+    "paid": "Paguar",
+    "amount": "Shuma",
+    "email": "Email",
+    "sessionId": "ID e Sesionit",
+    "whatsNext": "Çfarë të Bëni Tani?",
+    "subscriptionActive": "Abonimi juaj tani është aktiv",
+    "premiumAccess": "Keni akses në të gjitha veçoritë premium",
+    "confirmationSent": "Një email konfirmimi është dërguar",
+    "goToAccount": "Shko në Llogarinë Time",
+    "browseProperties": "Shfleto Pronat",
+    "noSessionFound": "Nuk u gjet sesion pagese",
+    "loginToVerify": "Ju lutemi identifikohuni për të verifikuar pagesën tuaj"
+  },
+  "cancel": {
+    "title": "Pagesa u Anulua",
+    "description": "Pagesa juaj nuk u përfundua. Nuk u bënë asnjë tarifim.",
+    "whyHappened": "Pse ndodhi kjo?",
+    "clickedCancel": "Klikuat butonin kthehu ose anulo",
+    "windowClosed": "Dritarja e pagesës u mbyll",
+    "sessionTimeout": "Sesioni përfundoi",
+    "goodNews": "Lajm i mirë!",
+    "noCharges": "Informacioni juaj i pagesës nuk u ruajt dhe nuk u bënë tarifa. Mund të provoni përsëri kur të jeni gati.",
+    "tryAgain": "Provo Përsëri",
+    "returnHome": "Kthehu në Fillim",
+    "havingTrouble": "Keni probleme?",
+    "contactSupport": "Kontaktoni Mbështetjen"
+  }
+}

@@ -81,5 +81,16 @@
     "joining": "Joining...",
     "verifyAndBecomeAgent": "Verify & Become Agent",
     "joinAgency": "Join Agency"
+  },
+  "invitationCode": {
+    "title": "Enter Invitation Code",
+    "description": "To join {{agencyName}}, you need an invitation code from the agency admin.",
+    "label": "Invitation Code",
+    "placeholder": "AGY-XXXXXX-XXXXXX",
+    "formatHint": "The invitation code format: AGY-XXXXXX-XXXXXX",
+    "enterCode": "Please enter an invitation code",
+    "verifyFailed": "Failed to verify invitation code",
+    "verifying": "Verifying...",
+    "submit": "Submit Request"
   }
 }
