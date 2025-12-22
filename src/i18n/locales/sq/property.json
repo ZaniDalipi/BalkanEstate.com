@@ -132,10 +132,28 @@
     "listedDaysAgo": "Publikuar {{days}} ditë më parë",
     "listedToday": "Publikuar sot",
     "listedYesterday": "Publikuar dje",
-    "views": "Shikime",
+    "listedWeeksAgo": "Publikuar {{weeks}} javë më parë",
+    "listedWeeksAgoPlural": "Publikuar {{weeks}} javë më parë",
+    "listedMonthsAgo": "Publikuar {{months}} muaj më parë",
+    "listedMonthsAgoPlural": "Publikuar {{months}} muaj më parë",
+    "views": "shikime",
+    "viewsCount": "{{count}} shikime",
     "inquiries": "Kërkesa",
     "id": "ID e Shpalljes"
   },
+  "navigation": {
+    "back": "Kthehu",
+    "goBackToSearch": "Kthehu te rezultatet e kërkimit"
+  },
+  "toast": {
+    "linkCopied": "Linku u kopjua në clipboard"
+  },
+  "virtualTour": {
+    "title": "Tur Virtual 360°",
+    "description": "Eksploroni këtë pronë në 360° imersive",
+    "openInNewTab": "Hap në skedë të re për përvojë të plotë"
+  },
+  "featuredAgencies": "Agjenci të Zgjedhura",
   "status": {
     "new": "E re",
     "reduced": "Çmim i Ulur",

@@ -132,10 +132,28 @@
     "listedDaysAgo": "Listed {{days}} days ago",
     "listedToday": "Listed today",
     "listedYesterday": "Listed yesterday",
-    "views": "Views",
+    "listedWeeksAgo": "Listed {{weeks}} week ago",
+    "listedWeeksAgoPlural": "Listed {{weeks}} weeks ago",
+    "listedMonthsAgo": "Listed {{months}} month ago",
+    "listedMonthsAgoPlural": "Listed {{months}} months ago",
+    "views": "views",
+    "viewsCount": "{{count}} views",
     "inquiries": "Inquiries",
     "id": "Listing ID"
   },
+  "navigation": {
+    "back": "Back",
+    "goBackToSearch": "Go back to search results"
+  },
+  "toast": {
+    "linkCopied": "Link copied to clipboard"
+  },
+  "virtualTour": {
+    "title": "360° Virtual Tour",
+    "description": "Explore this property in immersive 360°",
+    "openInNewTab": "Open in new tab for full experience"
+  },
+  "featuredAgencies": "Featured Agencies",
   "status": {
     "new": "New",
     "reduced": "Price Reduced",

@@ -132,10 +132,28 @@
     "listedDaysAgo": "Objavljeno pre {{days}} dana",
     "listedToday": "Objavljeno danas",
     "listedYesterday": "Objavljeno juče",
-    "views": "Pregleda",
+    "listedWeeksAgo": "Objavljeno pre {{weeks}} nedelje",
+    "listedWeeksAgoPlural": "Objavljeno pre {{weeks}} nedelja",
+    "listedMonthsAgo": "Objavljeno pre {{months}} meseca",
+    "listedMonthsAgoPlural": "Objavljeno pre {{months}} meseci",
+    "views": "pregleda",
+    "viewsCount": "{{count}} pregleda",
     "inquiries": "Upita",
     "id": "ID Oglasa"
   },
+  "navigation": {
+    "back": "Nazad",
+    "goBackToSearch": "Povratak na rezultate pretrage"
+  },
+  "toast": {
+    "linkCopied": "Link kopiran u clipboard"
+  },
+  "virtualTour": {
+    "title": "360° Virtuelna Tura",
+    "description": "Istražite ovu nekretninu u imerzivnom 360°",
+    "openInNewTab": "Otvori u novom tabu za potpuno iskustvo"
+  },
+  "featuredAgencies": "Istaknute Agencije",
   "status": {
     "new": "Novo",
     "reduced": "Snižena Cena",

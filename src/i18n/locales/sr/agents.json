@@ -1,0 +1,127 @@
+{
+  "page": {
+    "title": "Pronađite Agente za Nekretnine na Balkanu",
+    "description": "Pregledajte {{count}}+ verifikovanih agenata za nekretnine širom Srbije, Crne Gore, Hrvatske i Balkana. Pronađite pouzdane profesionalce koji će vam pomoći da kupite ili prodate nekretninu."
+  },
+  "loading": "Učitavanje agenata...",
+  "hero": {
+    "badge": "Povezujemo Vas sa Stručnjacima",
+    "title": "Pronađite Svog Savršenog",
+    "titleHighlight": "Partnera za Nekretnine",
+    "subtitle": "Povežite se sa najbolje ocenjenim agentima na Balkanu koji se specijalizuju za vaše lokalno tržište i imaju stručnost da vas vode do vašeg doma."
+  },
+  "search": {
+    "title": "Pronađite Svog Idealnog Agenta",
+    "subtitle": "Pretražite {{count}}+ verifikovanih profesionalaca širom Balkana",
+    "tabs": {
+      "location": "Lokacija",
+      "name": "Ime Agenta",
+      "specialization": "Specijalizacija"
+    },
+    "placeholders": {
+      "location": "Pretražite po gradu, naselju ili državi...",
+      "name": "Pretražite po imenu agenta...",
+      "specialization": "Pretražite po specijalizaciji (npr., Luksuz, Komercijalno)..."
+    },
+    "clearSearch": "Obriši pretragu",
+    "searchButton": "Pretraži",
+    "popularSearches": "Popularne pretrage:",
+    "viewAll": "Prikaži Sve"
+  },
+  "stats": {
+    "verifiedAgents": "Verifikovanih Agenata",
+    "professionalAgencies": "Profesionalnih Agencija",
+    "successfulTransactions": "Uspešnih Transakcija"
+  },
+  "filters": {
+    "sortBy": "Sortiraj po:",
+    "highestRated": "Najviše Ocenjeni",
+    "mostExperienced": "Najviše Iskustva",
+    "mostSales": "Najviše Prodaja",
+    "nameAZ": "Ime (A-Z)",
+    "showFilters": "Prikaži Filtere",
+    "hideFilters": "Sakrij Filtere",
+    "specialization": "Specijalizacija",
+    "minimumRating": "Minimalna Ocena",
+    "anyRating": "Bilo Koja Ocena",
+    "stars": "{{count}}+ Zvezdica",
+    "experience": "Iskustvo",
+    "anyExperience": "Bilo Koje Iskustvo",
+    "yearsPlus": "{{count}}+ Godina",
+    "priceRangeFocus": "Fokus Cenovnog Raspona",
+    "allPriceRanges": "Svi Cenovni Rasponi",
+    "affordable": "Pristupačno (<€150K)",
+    "midRange": "Srednji Rang (€150K-€500K)",
+    "luxury": "Luksuz (>€500K)",
+    "clearAllFilters": "Obriši sve filtere",
+    "types": {
+      "luxury": "Luksuz",
+      "commercial": "Komercijalno",
+      "residential": "Stambeno",
+      "investment": "Investicija",
+      "newConstruction": "Nova Gradnja",
+      "foreclosures": "Zaplene"
+    }
+  },
+  "results": {
+    "title": "Agenti za Nekretnine na Balkanu",
+    "description": "Sa preko {{count}} agenata iz svih vodećih agencija, lokalni agent poznaje vaše tržište i može vam pomoći da pronađete savršen dom.",
+    "showingMatching": "Prikazuje se {{count}} agent koji odgovara \"{{query}}\"",
+    "showingMatchingPlural": "Prikazuje se {{count}} agenata koji odgovaraju \"{{query}}\"",
+    "noAgentsFound": "Nisu pronađeni agenti",
+    "tryAdjusting": "Pokušajte promeniti kriterijume pretrage",
+    "viewMore": "Prikaži više"
+  },
+  "agencies": {
+    "title": "Vodeće Agencije za Nekretnine",
+    "subtitle": "Pregledajte agencije sa iskusnim profesionalcima",
+    "viewAll": "Pogledaj sve agencije →"
+  },
+  "contact": {
+    "title": "Dobijte pomoć u pronalaženju agenta",
+    "subtitle": "Uparićemo vas sa BalkanEstate Premier Agentom koji poznaje vaše tržište.",
+    "successTitle": "Zahtev Poslat!",
+    "successMessage": "Hvala! Uparićemo vas sa lokalnim agentima i oni će vas uskoro kontaktirati.",
+    "emailLabel": "Email Adresa *",
+    "emailPlaceholder": "vas.email@example.com",
+    "phoneLabel": "Broj Telefona *",
+    "phonePlaceholder": "+381 11 234 5678",
+    "locationLabel": "Lokacija / Adresa *",
+    "locationPlaceholder": "Beograd, Srbija",
+    "propertyDescriptionLabel": "Opis Nekretnine *",
+    "propertyDescriptionPlaceholder": "Opišite nekretninu koju tražite (tip, veličina, budžet, karakteristike, itd.)",
+    "submitButton": "Povežite se sa lokalnim agentom",
+    "submitting": "Slanje..."
+  },
+  "faq": {
+    "title": "Često postavljana pitanja",
+    "questions": {
+      "findAgent": {
+        "question": "Kako pronaći dobrog agenta za nekretnine u mojoj blizini?",
+        "answer": "Počnite pretragom agenata u vašoj oblasti koristeći pretragu po lokaciji. Tražite agente sa visokim ocenama, jakim prodajnim rezultatima i preporukama od skorašnjih klijenata."
+      },
+      "pickAgent": {
+        "question": "Kako odabrati agenta za nekretnine?",
+        "answer": "Razmotrite njihovo iskustvo, poznavanje lokalnog tržišta, prodajne rezultate, recenzije klijenata i stil komunikacije. Zakažite konsultacije sa više agenata pre donošenja odluke."
+      },
+      "contactAgent": {
+        "question": "Kako kontaktirati agenta za nekretnine?",
+        "answer": "Možete pogledati profil agenta da biste pronašli kontakt informacije, uključujući broj telefona i email. Mnogi agenti takođe nude praktično online zakazivanje konsultacija."
+      },
+      "leaveReview": {
+        "question": "Kako da ostavim recenziju za agenta za nekretnine?",
+        "answer": "Posetite stranicu profila agenta i kliknite na dugme \"Napiši Recenziju\". Podelite svoje iskustvo da biste pomogli drugima da donesu informisane odluke."
+      },
+      "agentVsBroker": {
+        "question": "Koja je razlika između agenta i brokera?",
+        "answer": "Agent za nekretnine je licenciran da pomogne klijentima da kupe i prodaju nekretninu, dok broker ima dodatnu obuku i sertifikaciju. Brokeri mogu raditi nezavisno i upravljati svojim agencijama."
+      }
+    }
+  },
+  "cta": {
+    "title": "Da li ste agent za nekretnine?",
+    "description": "Pridružite se BalkanEstate-u da pokažete svoju stručnost, povežete se sa potencijalnim klijentima i razvijete svoj posao. Dobijte pristup premium alatima i mogućnostima oglašavanja kako biste uspeli na tržištu nekretnina na Balkanu.",
+    "getStarted": "Započnite",
+    "browseAgencies": "Pregledaj Agencije"
+  }
+}

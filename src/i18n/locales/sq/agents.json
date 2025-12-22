@@ -1,0 +1,127 @@
+{
+  "page": {
+    "title": "Gjeni Agjentë Imobiliarë në Ballkan",
+    "description": "Shfletoni {{count}}+ agjentë të verifikuar në Serbi, Mal të Zi, Kroaci dhe Ballkan. Gjeni profesionistë të besuar për t'ju ndihmuar të blini ose shisni pronë."
+  },
+  "loading": "Duke ngarkuar agjentët...",
+  "hero": {
+    "badge": "Ju Lidhim me Ekspertët",
+    "title": "Gjeni Partnerin Tuaj",
+    "titleHighlight": "Ideal të Pasurive të Patundshme",
+    "subtitle": "Lidhuni me agjentët më të vlerësuar në Ballkan që specializohen në tregun tuaj lokal dhe kanë ekspertizën për t'ju udhëhequr."
+  },
+  "search": {
+    "title": "Gjeni Agjentin Tuaj Ideal",
+    "subtitle": "Kërkoni {{count}}+ profesionistë të verifikuar në Ballkan",
+    "tabs": {
+      "location": "Vendndodhja",
+      "name": "Emri i Agjentit",
+      "specialization": "Specializimi"
+    },
+    "placeholders": {
+      "location": "Kërkoni sipas qytetit, lagjes, ose shtetit...",
+      "name": "Kërkoni sipas emrit të agjentit...",
+      "specialization": "Kërkoni sipas specializimit (p.sh., Luksoze, Komerciale)..."
+    },
+    "clearSearch": "Pastro kërkimin",
+    "searchButton": "Kërko",
+    "popularSearches": "Kërkime të njohura:",
+    "viewAll": "Shiko të Gjitha"
+  },
+  "stats": {
+    "verifiedAgents": "Agjentë të Verifikuar",
+    "professionalAgencies": "Agjenci Profesionale",
+    "successfulTransactions": "Transaksione të Suksesshme"
+  },
+  "filters": {
+    "sortBy": "Rendit sipas:",
+    "highestRated": "Më të Vlerësuarit",
+    "mostExperienced": "Më me Përvojë",
+    "mostSales": "Më Shumë Shitje",
+    "nameAZ": "Emri (A-Z)",
+    "showFilters": "Trego Filtrat",
+    "hideFilters": "Fshih Filtrat",
+    "specialization": "Specializimi",
+    "minimumRating": "Vlerësimi Minimal",
+    "anyRating": "Çdo Vlerësim",
+    "stars": "{{count}}+ Yje",
+    "experience": "Përvoja",
+    "anyExperience": "Çdo Përvojë",
+    "yearsPlus": "{{count}}+ Vite",
+    "priceRangeFocus": "Fokusi i Çmimit",
+    "allPriceRanges": "Të Gjitha Çmimet",
+    "affordable": "Të Përballueshme (<€150K)",
+    "midRange": "Mesatare (€150K-€500K)",
+    "luxury": "Luksoze (>€500K)",
+    "clearAllFilters": "Pastro të gjithë filtrat",
+    "types": {
+      "luxury": "Luksoze",
+      "commercial": "Komerciale",
+      "residential": "Rezidenciale",
+      "investment": "Investim",
+      "newConstruction": "Ndërtim i Ri",
+      "foreclosures": "Sekuestrime"
+    }
+  },
+  "results": {
+    "title": "Agjentë Imobiliarë në Ballkan",
+    "description": "Me mbi {{count}} agjentë nga të gjitha agjencitë kryesore, një agjent lokal njeh tregun tuaj dhe mund t'ju ndihmojë të gjeni shtëpinë perfekte.",
+    "showingMatching": "Duke treguar {{count}} agjent që përputhet me \"{{query}}\"",
+    "showingMatchingPlural": "Duke treguar {{count}} agjentë që përputhen me \"{{query}}\"",
+    "noAgentsFound": "Nuk u gjetën agjentë",
+    "tryAdjusting": "Provoni të ndryshoni kriteret e kërkimit",
+    "viewMore": "Shiko më shumë"
+  },
+  "agencies": {
+    "title": "Agjencitë Kryesore të Pasurive",
+    "subtitle": "Shfletoni agjencitë me profesionistë me përvojë",
+    "viewAll": "Shiko të gjitha agjencitë →"
+  },
+  "contact": {
+    "title": "Merrni ndihmë për të gjetur një agjent",
+    "subtitle": "Do t'ju lidhim me një Agjent Premier BalkanEstate që njeh mirë tregun tuaj.",
+    "successTitle": "Kërkesa u Dorëzua!",
+    "successMessage": "Faleminderit! Do t'ju përputhim me agjentë lokalë dhe ata do t'ju kontaktojnë së shpejti.",
+    "emailLabel": "Adresa Email *",
+    "emailPlaceholder": "email.juaj@example.com",
+    "phoneLabel": "Numri i Telefonit *",
+    "phonePlaceholder": "+355 44 123 4567",
+    "locationLabel": "Vendndodhja / Adresa *",
+    "locationPlaceholder": "Tiranë, Shqipëri",
+    "propertyDescriptionLabel": "Përshkrimi i Pronës *",
+    "propertyDescriptionPlaceholder": "Përshkruani pronën që kërkoni (lloji, madhësia, buxheti, veçoritë, etj.)",
+    "submitButton": "Lidhu me një agjent lokal",
+    "submitting": "Duke dorëzuar..."
+  },
+  "faq": {
+    "title": "Pyetje të bëra shpesh",
+    "questions": {
+      "findAgent": {
+        "question": "Si të gjej një agjent të mirë imobiliar afër meje?",
+        "answer": "Filloni duke kërkuar agjentë në zonën tuaj duke përdorur kërkimin sipas vendndodhjes. Kërkoni agjentë me vlerësime të larta, rekorde të forta shitjesh dhe dëshmi nga klientët e fundit."
+      },
+      "pickAgent": {
+        "question": "Si të zgjedh një agjent imobiliar?",
+        "answer": "Merrni parasysh përvojën e tyre, njohurinë e tregut lokal, rekordin e shitjeve, vlerësimet e klientëve dhe stilin e komunikimit. Planifikoni konsultime me disa agjentë para se të merrni vendimin."
+      },
+      "contactAgent": {
+        "question": "Si të kontaktoj një agjent imobiliar?",
+        "answer": "Mund të shikoni profilin e agjentit për të gjetur informacionin e kontaktit, përfshirë numrin e telefonit dhe emailin. Shumë agjentë ofrojnë gjithashtu rezervim online të përshtatshëm për konsultime."
+      },
+      "leaveReview": {
+        "question": "Si mund të lë një vlerësim për një agjent imobiliar?",
+        "answer": "Vizitoni faqen e profilit të agjentit dhe klikoni butonin \"Shkruaj një Vlerësim\". Ndani përvojën tuaj për të ndihmuar të tjerët të marrin vendime të informuara."
+      },
+      "agentVsBroker": {
+        "question": "Cila është ndryshimi midis një agjenti dhe një ndërmjetësi?",
+        "answer": "Një agjent imobiliar është i licencuar për të ndihmuar klientët të blejnë dhe shesin pronë, ndërsa një ndërmjetës ka trajnim dhe certifikim shtesë. Ndërmjetësit mund të punojnë në mënyrë të pavarur dhe të menaxhojnë agjencitë e tyre."
+      }
+    }
+  },
+  "cta": {
+    "title": "Jeni agjent imobiliar?",
+    "description": "Bashkohuni me BalkanEstate për të treguar ekspertizën tuaj, për t'u lidhur me klientë potencialë dhe për të rritur biznesin tuaj. Merrni qasje në mjete premium dhe mundësi reklamimi për t'ju ndihmuar të keni sukses në tregun e pasurive të patundshme të Ballkanit.",
+    "getStarted": "Fillo",
+    "browseAgencies": "Shfleto Agjencitë"
+  }
+}
