@@ -176,16 +176,63 @@
     "featuredAgencies": "Featured Agencies"
   },
   "comparison": {
-    "title": "Compare Properties",
-    "feature": "Feature",
-    "price": "Price",
-    "beds": "Beds",
-    "baths": "Baths",
-    "livingRooms": "Living Rooms",
-    "area": "Area (m²)",
-    "yearBuilt": "Year Built",
+    "title": "Uporedi Nekretnine",
+    "feature": "Karakteristika",
+    "price": "Cijena",
+    "beds": "Spavaće Sobe",
+    "baths": "Kupatila",
+    "livingRooms": "Dnevne Sobe",
+    "area": "Površina (m²)",
+    "yearBuilt": "Godina Izgradnje",
     "parking": "Parking",
-    "specialFeatures": "Special Features",
-    "materials": "Materials"
+    "specialFeatures": "Posebne Karakteristike",
+    "materials": "Materijali"
+  },
+  "map": {
+    "beds": "Sobe",
+    "baths": "Kupatila",
+    "area": "m²",
+    "living": "Dnevna",
+    "parking": "Parking",
+    "clickForDetails": "Klikni za detalje →",
+    "legend": "Legenda",
+    "propertyTypes": {
+      "house": "Kuća",
+      "apartment": "Stan",
+      "villa": "Vila",
+      "other": "Ostalo"
+    }
+  },
+  "neighborhood": {
+    "title": "Informacije o Okolini",
+    "description": "Otkrijte šta se nalazi u blizini ove nekretnine. Naša AI može dati detalje o školama, parkovima i prevozu.",
+    "loginRequired": "Potrebna prijava - Besplatni korisnici dobijaju 3 uvida/mjesečno, premium korisnici 20/mjesečno",
+    "generateInsights": "Generiši Uvide",
+    "loginAndGenerate": "Prijavi se i Generiši Uvide",
+    "usageInfo": "Korištenje: {{used}}/{{limit}} uvida iskorišteno ovog mjeseca",
+    "remainingInfo": "{{remaining}} od {{limit}} uvida preostalo ovog mjeseca",
+    "upgradePrompt": "Nadogradite na premium za više uvida!",
+    "tryAgain": "Pokušaj ponovo"
+  },
+  "photos": {
+    "title": "Fotografije",
+    "all": "Sve",
+    "categories": {
+      "exterior": "Eksterijer",
+      "interior": "Enterijer",
+      "kitchen": "Kuhinja",
+      "bathroom": "Kupatilo",
+      "bedroom": "Spavaća Soba",
+      "living_room": "Dnevna Soba",
+      "garden": "Bašta",
+      "pool": "Bazen",
+      "view": "Pogled",
+      "other": "Ostalo"
+    }
+  },
+  "mapLink": {
+    "title": "Pogledaj na Mapi",
+    "description": "Želite da istražite okolinu ove nekretnine?",
+    "button": "Pogledaj na Mapi Pretrage"
   }
 }

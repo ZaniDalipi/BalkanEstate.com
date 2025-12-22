@@ -77,9 +77,29 @@
     "selectAgencyRequired": "Please select an agency to use the invitation code",
     "enterInvitationCode": "Enter the invitation code provided by your agency",
     "leaveEmptyForIndependent": "Leave empty to register as an independent agent",
-    "verifying": "Verifying...",
-    "joining": "Joining...",
-    "verifyAndBecomeAgent": "Verify & Become Agent",
-    "joinAgency": "Join Agency"
+    "verifying": "Верификување...",
+    "joining": "Придружување...",
+    "verifyAndBecomeAgent": "Верификувај и Стани Агент",
+    "joinAgency": "Придружи се на Агенција"
+  },
+  "invitationCode": {
+    "title": "Внесете Код за Покана",
+    "description": "За да се придружите на {{agencyName}}, потребен ви е код за покана од администраторот на агенцијата.",
+    "label": "Код за Покана",
+    "placeholder": "AGY-XXXXXX-XXXXXX",
+    "formatHint": "Формат на кодот за покана: AGY-XXXXXX-XXXXXX",
+    "enterCode": "Ве молиме внесете код за покана",
+    "verifyFailed": "Верификацијата на кодот за покана не успеа",
+    "verifying": "Верификување...",
+    "submit": "Испрати Барање"
+  },
+  "imageEditor": {
+    "download": "Преземи",
+    "sending": "Испраќање...",
+    "sendToAgent": "Испрати до Агент",
+    "sentSuccessTitle": "Успешно Испратено!",
+    "sentSuccessMessage": "Вашата означена слика е испратена до агентот. Тие ќе одговорат наскоро.",
+    "goToChat": "Оди на Пораки",
+    "failedToSend": "Испраќањето на означената слика не успеа. Обидете се повторно."
   }
 }

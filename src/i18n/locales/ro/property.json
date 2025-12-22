@@ -176,16 +176,63 @@
     "featuredAgencies": "Featured Agencies"
   },
   "comparison": {
-    "title": "Compare Properties",
-    "feature": "Feature",
-    "price": "Price",
-    "beds": "Beds",
-    "baths": "Baths",
-    "livingRooms": "Living Rooms",
-    "area": "Area (m²)",
-    "yearBuilt": "Year Built",
-    "parking": "Parking",
-    "specialFeatures": "Special Features",
-    "materials": "Materials"
+    "title": "Compară Proprietăți",
+    "feature": "Caracteristică",
+    "price": "Preț",
+    "beds": "Dormitoare",
+    "baths": "Băi",
+    "livingRooms": "Camere de Zi",
+    "area": "Suprafață (m²)",
+    "yearBuilt": "An Construcție",
+    "parking": "Parcare",
+    "specialFeatures": "Caracteristici Speciale",
+    "materials": "Materiale"
+  },
+  "map": {
+    "beds": "Camere",
+    "baths": "Băi",
+    "area": "m²",
+    "living": "Living",
+    "parking": "Parcare",
+    "clickForDetails": "Click pentru detalii →",
+    "legend": "Legendă",
+    "propertyTypes": {
+      "house": "Casă",
+      "apartment": "Apartament",
+      "villa": "Vilă",
+      "other": "Altele"
+    }
+  },
+  "neighborhood": {
+    "title": "Informații despre Zonă",
+    "description": "Descoperiți ce se află în jurul acestei proprietăți. AI-ul nostru poate oferi detalii despre școli, parcuri și transport.",
+    "loginRequired": "Autentificare necesară - Utilizatorii gratuiți primesc 3 analize/lună, premium primesc 20/lună",
+    "generateInsights": "Generează Analize",
+    "loginAndGenerate": "Autentifică-te și Generează Analize",
+    "usageInfo": "Utilizare: {{used}}/{{limit}} analize folosite luna aceasta",
+    "remainingInfo": "{{remaining}} din {{limit}} analize rămase luna aceasta",
+    "upgradePrompt": "Treceți la premium pentru mai multe analize!",
+    "tryAgain": "Încearcă din nou"
+  },
+  "photos": {
+    "title": "Fotografii",
+    "all": "Toate",
+    "categories": {
+      "exterior": "Exterior",
+      "interior": "Interior",
+      "kitchen": "Bucătărie",
+      "bathroom": "Baie",
+      "bedroom": "Dormitor",
+      "living_room": "Camera de Zi",
+      "garden": "Grădină",
+      "pool": "Piscină",
+      "view": "Vedere",
+      "other": "Altele"
+    }
+  },
+  "mapLink": {
+    "title": "Vezi pe Hartă",
+    "description": "Doriți să explorați zona din jurul acestei proprietăți?",
+    "button": "Vezi pe Harta de Căutare"
   }
 }

@@ -77,9 +77,29 @@
     "selectAgencyRequired": "Please select an agency to use the invitation code",
     "enterInvitationCode": "Enter the invitation code provided by your agency",
     "leaveEmptyForIndependent": "Leave empty to register as an independent agent",
-    "verifying": "Verifying...",
-    "joining": "Joining...",
-    "verifyAndBecomeAgent": "Verify & Become Agent",
-    "joinAgency": "Join Agency"
+    "verifying": "Se verifică...",
+    "joining": "Se alătură...",
+    "verifyAndBecomeAgent": "Verifică și Devino Agent",
+    "joinAgency": "Alătură-te Agenției"
+  },
+  "invitationCode": {
+    "title": "Introduceți Codul de Invitație",
+    "description": "Pentru a vă alătura {{agencyName}}, aveți nevoie de un cod de invitație de la administratorul agenției.",
+    "label": "Cod de Invitație",
+    "placeholder": "AGY-XXXXXX-XXXXXX",
+    "formatHint": "Formatul codului de invitație: AGY-XXXXXX-XXXXXX",
+    "enterCode": "Vă rugăm să introduceți codul de invitație",
+    "verifyFailed": "Verificarea codului de invitație a eșuat",
+    "verifying": "Se verifică...",
+    "submit": "Trimite Cererea"
+  },
+  "imageEditor": {
+    "download": "Descarcă",
+    "sending": "Se trimite...",
+    "sendToAgent": "Trimite la Agent",
+    "sentSuccessTitle": "Trimis cu Succes!",
+    "sentSuccessMessage": "Imaginea dvs. adnotată a fost trimisă agentului. Vor răspunde în curând.",
+    "goToChat": "Mergi la Chat",
+    "failedToSend": "Trimiterea imaginii adnotate a eșuat. Încercați din nou."
   }
 }

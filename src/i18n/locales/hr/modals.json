@@ -77,9 +77,29 @@
     "selectAgencyRequired": "Please select an agency to use the invitation code",
     "enterInvitationCode": "Enter the invitation code provided by your agency",
     "leaveEmptyForIndependent": "Leave empty to register as an independent agent",
-    "verifying": "Verifying...",
-    "joining": "Joining...",
-    "verifyAndBecomeAgent": "Verify & Become Agent",
-    "joinAgency": "Join Agency"
+    "verifying": "Verificiranje...",
+    "joining": "Pridruživanje...",
+    "verifyAndBecomeAgent": "Verificiraj i Postani Agent",
+    "joinAgency": "Pridruži se Agenciji"
+  },
+  "invitationCode": {
+    "title": "Unesite Kod za Pozivnicu",
+    "description": "Za pridruživanje {{agencyName}}, potreban vam je kod za pozivnicu od administratora agencije.",
+    "label": "Kod za Pozivnicu",
+    "placeholder": "AGY-XXXXXX-XXXXXX",
+    "formatHint": "Format koda za pozivnicu: AGY-XXXXXX-XXXXXX",
+    "enterCode": "Molimo unesite kod za pozivnicu",
+    "verifyFailed": "Verifikacija koda za pozivnicu nije uspjela",
+    "verifying": "Verificiranje...",
+    "submit": "Pošalji Zahtjev"
+  },
+  "imageEditor": {
+    "download": "Preuzmi",
+    "sending": "Slanje...",
+    "sendToAgent": "Pošalji Agentu",
+    "sentSuccessTitle": "Uspješno Poslano!",
+    "sentSuccessMessage": "Vaša označena slika je poslana agentu. Odgovorit će vam uskoro.",
+    "goToChat": "Idi na Poruke",
+    "failedToSend": "Slanje označene slike nije uspjelo. Pokušajte ponovno."
   }
 }

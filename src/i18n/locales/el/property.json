@@ -176,16 +176,63 @@
     "featuredAgencies": "Featured Agencies"
   },
   "comparison": {
-    "title": "Compare Properties",
-    "feature": "Feature",
-    "price": "Price",
-    "beds": "Beds",
-    "baths": "Baths",
-    "livingRooms": "Living Rooms",
-    "area": "Area (m²)",
-    "yearBuilt": "Year Built",
+    "title": "Σύγκριση Ακινήτων",
+    "feature": "Χαρακτηριστικό",
+    "price": "Τιμή",
+    "beds": "Υπνοδωμάτια",
+    "baths": "Μπάνια",
+    "livingRooms": "Σαλόνια",
+    "area": "Εμβαδόν (τ.μ.)",
+    "yearBuilt": "Έτος Κατασκευής",
     "parking": "Parking",
-    "specialFeatures": "Special Features",
-    "materials": "Materials"
+    "specialFeatures": "Ειδικά Χαρακτηριστικά",
+    "materials": "Υλικά"
+  },
+  "map": {
+    "beds": "Δωμάτια",
+    "baths": "Μπάνια",
+    "area": "τ.μ.",
+    "living": "Σαλόνι",
+    "parking": "Parking",
+    "clickForDetails": "Κλικ για λεπτομέρειες →",
+    "legend": "Υπόμνημα",
+    "propertyTypes": {
+      "house": "Σπίτι",
+      "apartment": "Διαμέρισμα",
+      "villa": "Βίλα",
+      "other": "Άλλο"
+    }
+  },
+  "neighborhood": {
+    "title": "Πληροφορίες Γειτονιάς",
+    "description": "Ανακαλύψτε τι υπάρχει γύρω από αυτό το ακίνητο. Η AI μας μπορεί να παρέχει λεπτομέρειες για σχολεία, πάρκα και μεταφορές.",
+    "loginRequired": "Απαιτείται σύνδεση - Δωρεάν χρήστες λαμβάνουν 3 αναλύσεις/μήνα, premium λαμβάνουν 20/μήνα",
+    "generateInsights": "Δημιουργία Αναλύσεων",
+    "loginAndGenerate": "Σύνδεση και Δημιουργία Αναλύσεων",
+    "usageInfo": "Χρήση: {{used}}/{{limit}} αναλύσεις χρησιμοποιήθηκαν αυτό τον μήνα",
+    "remainingInfo": "{{remaining}} από {{limit}} αναλύσεις απομένουν αυτό τον μήνα",
+    "upgradePrompt": "Αναβαθμίστε σε premium για περισσότερες αναλύσεις!",
+    "tryAgain": "Προσπαθήστε ξανά"
+  },
+  "photos": {
+    "title": "Φωτογραφίες",
+    "all": "Όλες",
+    "categories": {
+      "exterior": "Εξωτερικό",
+      "interior": "Εσωτερικό",
+      "kitchen": "Κουζίνα",
+      "bathroom": "Μπάνιο",
+      "bedroom": "Υπνοδωμάτιο",
+      "living_room": "Σαλόνι",
+      "garden": "Κήπος",
+      "pool": "Πισίνα",
+      "view": "Θέα",
+      "other": "Άλλο"
+    }
+  },
+  "mapLink": {
+    "title": "Δείτε στο Χάρτη",
+    "description": "Θέλετε να εξερευνήσετε την περιοχή γύρω από αυτό το ακίνητο;",
+    "button": "Δείτε στο Χάρτη Αναζήτησης"
   }
 }

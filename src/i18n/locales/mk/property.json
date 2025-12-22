@@ -176,16 +176,63 @@
     "featuredAgencies": "Featured Agencies"
   },
   "comparison": {
-    "title": "Compare Properties",
-    "feature": "Feature",
-    "price": "Price",
-    "beds": "Beds",
-    "baths": "Baths",
-    "livingRooms": "Living Rooms",
-    "area": "Area (m²)",
-    "yearBuilt": "Year Built",
-    "parking": "Parking",
-    "specialFeatures": "Special Features",
-    "materials": "Materials"
+    "title": "Споредба на Недвижности",
+    "feature": "Карактеристика",
+    "price": "Цена",
+    "beds": "Спални",
+    "baths": "Бањи",
+    "livingRooms": "Дневни Соби",
+    "area": "Површина (м²)",
+    "yearBuilt": "Година на Изградба",
+    "parking": "Паркинг",
+    "specialFeatures": "Посебни Карактеристики",
+    "materials": "Материјали"
+  },
+  "map": {
+    "beds": "Соби",
+    "baths": "Бањи",
+    "area": "м²",
+    "living": "Дневна",
+    "parking": "Паркинг",
+    "clickForDetails": "Кликни за детали →",
+    "legend": "Легенда",
+    "propertyTypes": {
+      "house": "Куќа",
+      "apartment": "Стан",
+      "villa": "Вила",
+      "other": "Друго"
+    }
+  },
+  "neighborhood": {
+    "title": "Информации за Околината",
+    "description": "Откријте што има во близина на овој имот. Нашата AI може да даде детали за училишта, паркови и превоз.",
+    "loginRequired": "Потребна е најава - Бесплатни корисници добиваат 3 анализи/месечно, премиум добиваат 20/месечно",
+    "generateInsights": "Генерирај Анализи",
+    "loginAndGenerate": "Најави се и Генерирај Анализи",
+    "usageInfo": "Користење: {{used}}/{{limit}} анализи искористени овој месец",
+    "remainingInfo": "{{remaining}} од {{limit}} анализи преостанати овој месец",
+    "upgradePrompt": "Надоградете на премиум за повеќе анализи!",
+    "tryAgain": "Обиди се повторно"
+  },
+  "photos": {
+    "title": "Фотографии",
+    "all": "Сите",
+    "categories": {
+      "exterior": "Надворешност",
+      "interior": "Внатрешност",
+      "kitchen": "Кујна",
+      "bathroom": "Бања",
+      "bedroom": "Спална Соба",
+      "living_room": "Дневна Соба",
+      "garden": "Градина",
+      "pool": "Базен",
+      "view": "Поглед",
+      "other": "Друго"
+    }
+  },
+  "mapLink": {
+    "title": "Погледај на Мапа",
+    "description": "Сакате да ја истражите околината на овој имот?",
+    "button": "Погледај на Мапата за Пребарување"
   }
 }

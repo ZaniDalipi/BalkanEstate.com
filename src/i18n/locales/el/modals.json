@@ -77,9 +77,29 @@
     "selectAgencyRequired": "Please select an agency to use the invitation code",
     "enterInvitationCode": "Enter the invitation code provided by your agency",
     "leaveEmptyForIndependent": "Leave empty to register as an independent agent",
-    "verifying": "Verifying...",
-    "joining": "Joining...",
-    "verifyAndBecomeAgent": "Verify & Become Agent",
-    "joinAgency": "Join Agency"
+    "verifying": "Επαλήθευση...",
+    "joining": "Εγγραφή...",
+    "verifyAndBecomeAgent": "Επαλήθευση & Γίνε Πράκτορας",
+    "joinAgency": "Εγγραφή στο Πρακτορείο"
+  },
+  "invitationCode": {
+    "title": "Εισάγετε Κωδικό Πρόσκλησης",
+    "description": "Για να εγγραφείτε στο {{agencyName}}, χρειάζεστε κωδικό πρόσκλησης από τον διαχειριστή του πρακτορείου.",
+    "label": "Κωδικός Πρόσκλησης",
+    "placeholder": "AGY-XXXXXX-XXXXXX",
+    "formatHint": "Μορφή κωδικού πρόσκλησης: AGY-XXXXXX-XXXXXX",
+    "enterCode": "Παρακαλώ εισάγετε τον κωδικό πρόσκλησης",
+    "verifyFailed": "Η επαλήθευση του κωδικού πρόσκλησης απέτυχε",
+    "verifying": "Επαλήθευση...",
+    "submit": "Υποβολή Αιτήματος"
+  },
+  "imageEditor": {
+    "download": "Λήψη",
+    "sending": "Αποστολή...",
+    "sendToAgent": "Αποστολή στον Πράκτορα",
+    "sentSuccessTitle": "Στάλθηκε Επιτυχώς!",
+    "sentSuccessMessage": "Η σημειωμένη εικόνα σας στάλθηκε στον πράκτορα. Θα απαντήσουν σύντομα.",
+    "goToChat": "Μετάβαση στη Συνομιλία",
+    "failedToSend": "Η αποστολή της σημειωμένης εικόνας απέτυχε. Παρακαλώ δοκιμάστε ξανά."
   }
 }
