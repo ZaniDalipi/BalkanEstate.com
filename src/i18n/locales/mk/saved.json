@@ -1,47 +1,47 @@
 {
   "page": {
-    "title": "Зачувани Пребарувања",
-    "description": "Следете ги зачуваните пребарувања за недвижности и добивајте известувања за нови огласи што одговараат на вашите критериуми."
+    "title": "Saved Searches",
+    "description": "Track your saved property searches and get updates on new listings that match your criteria."
   },
   "hero": {
-    "title": "Зачувани Пребарувања",
-    "subtitle": "Следете ги омилените критериуми за пребарување и добивајте ажурирања",
+    "title": "Saved Searches",
+    "subtitle": "Track your favorite search criteria and get updates",
     "searchCount": {
-      "singular": "Зачувано Пребарување",
-      "plural": "Зачувани Пребарувања"
+      "singular": "Saved Search",
+      "plural": "Saved Searches"
     }
   },
   "loginRequired": {
-    "title": "Најавете се за да ги видите зачуваните пребарувања",
-    "description": "Зачувајте ги омилените критериуми за пребарување и добивајте известувања за нови огласи.",
-    "button": "Најава / Регистрација"
+    "title": "Log in to view your saved searches",
+    "description": "Save your favorite search criteria and get notified about new listings.",
+    "button": "Login / Register"
   },
   "empty": {
-    "title": "Сè уште немате зачувани пребарувања.",
-    "description": "Извршете пребарување и кликнете \"Зачувај Пребарување\" за да започнете, или зачувајте го овој пример:",
-    "startSearch": "Или, Започнете Ново Пребарување"
+    "title": "You haven't saved any searches yet.",
+    "description": "Perform a search and click \"Save Search\" to get started, or save this example:",
+    "startSearch": "Or, Start a New Search"
   },
   "example": {
-    "label": "Пример",
-    "name": "Белград, под €400k",
-    "save": "Зачувај"
+    "label": "Example",
+    "name": "Belgrade, under €400k",
+    "save": "Save"
   },
   "sort": {
-    "newest": "Најнови",
-    "name": "Име",
-    "lastActive": "Последно Активно"
+    "newest": "Newest",
+    "name": "Name",
+    "lastActive": "Last Active"
   },
   "accordion": {
-    "new": "нови",
-    "namePlaceholder": "Име на пребарување",
-    "save": "Зачувај",
-    "cancel": "Откажи",
-    "rename": "Преименувај пребарување",
-    "delete": "Избриши пребарување",
-    "noProperties": "Моментално нема недвижности што одговараат на ова пребарување.",
-    "confirmDelete": "Дали сте сигурни дека сакате да избришете \"{{name}}\"?",
-    "deleteFailed": "Бришењето на пребарувањето не успеа. Ве молиме обидете се повторно.",
-    "enterName": "Ве молиме внесете име",
-    "renameFailed": "Преименувањето на пребарувањето не успеа. Ве молиме обидете се повторно."
+    "new": "new",
+    "namePlaceholder": "Search name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "rename": "Rename search",
+    "delete": "Delete search",
+    "noProperties": "No properties currently match this search.",
+    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
+    "deleteFailed": "Failed to delete saved search. Please try again.",
+    "enterName": "Please enter a name",
+    "renameFailed": "Failed to rename saved search. Please try again."
   }
 }

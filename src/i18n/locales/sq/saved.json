@@ -1,47 +1,47 @@
 {
   "page": {
-    "title": "Kërkimet e Ruajtura",
-    "description": "Ndiqni kërkimet e ruajtura të pronave dhe merrni përditësime për listat e reja që përputhen me kriteret tuaja."
+    "title": "Saved Searches",
+    "description": "Track your saved property searches and get updates on new listings that match your criteria."
   },
   "hero": {
-    "title": "Kërkimet e Ruajtura",
-    "subtitle": "Ndiqni kriteret tuaja të preferuara të kërkimit dhe merrni përditësime",
+    "title": "Saved Searches",
+    "subtitle": "Track your favorite search criteria and get updates",
     "searchCount": {
-      "singular": "Kërkim i Ruajtur",
-      "plural": "Kërkime të Ruajtura"
+      "singular": "Saved Search",
+      "plural": "Saved Searches"
     }
   },
   "loginRequired": {
-    "title": "Identifikohuni për të parë kërkimet e ruajtura",
-    "description": "Ruani kriteret tuaja të preferuara të kërkimit dhe njoftohuni për listat e reja.",
-    "button": "Hyr / Regjistrohu"
+    "title": "Log in to view your saved searches",
+    "description": "Save your favorite search criteria and get notified about new listings.",
+    "button": "Login / Register"
   },
   "empty": {
-    "title": "Nuk keni ruajtur ende asnjë kërkim.",
-    "description": "Kryeni një kërkim dhe klikoni \"Ruaj Kërkimin\" për të filluar, ose ruani këtë shembull:",
-    "startSearch": "Ose, Filloni një Kërkim të Ri"
+    "title": "You haven't saved any searches yet.",
+    "description": "Perform a search and click \"Save Search\" to get started, or save this example:",
+    "startSearch": "Or, Start a New Search"
   },
   "example": {
-    "label": "Shembull",
-    "name": "Beograd, nën €400k",
-    "save": "Ruaj"
+    "label": "Example",
+    "name": "Belgrade, under €400k",
+    "save": "Save"
   },
   "sort": {
-    "newest": "Më të Rejat",
-    "name": "Emri",
-    "lastActive": "Aktiv së Fundmi"
+    "newest": "Newest",
+    "name": "Name",
+    "lastActive": "Last Active"
   },
   "accordion": {
-    "new": "të reja",
-    "namePlaceholder": "Emri i kërkimit",
-    "save": "Ruaj",
-    "cancel": "Anulo",
-    "rename": "Riemëro kërkimin",
-    "delete": "Fshi kërkimin",
-    "noProperties": "Asnjë pronë nuk përputhet aktualisht me këtë kërkim.",
-    "confirmDelete": "Jeni të sigurt që dëshironi të fshini \"{{name}}\"?",
-    "deleteFailed": "Fshirja e kërkimit dështoi. Ju lutemi provoni përsëri.",
-    "enterName": "Ju lutemi shkruani një emër",
-    "renameFailed": "Riemërimi i kërkimit dështoi. Ju lutemi provoni përsëri."
+    "new": "new",
+    "namePlaceholder": "Search name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "rename": "Rename search",
+    "delete": "Delete search",
+    "noProperties": "No properties currently match this search.",
+    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
+    "deleteFailed": "Failed to delete saved search. Please try again.",
+    "enterName": "Please enter a name",
+    "renameFailed": "Failed to rename saved search. Please try again."
   }
 }

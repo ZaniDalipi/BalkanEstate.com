@@ -1,102 +1,102 @@
 {
-  "title": "Изберете план за продажба",
-  "subtitle": "Покажете имота си пред хиляди потенциални купувачи",
-  "loading": "Зареждане на планове...",
-  "limitedOffer": "Офертата за ограничено време изтича след:",
-  "offerTitle": "Поздравления! Отключихте ексклузивни отстъпки!",
-  "offerSubtitle": "Възползвайте се от тази еднократна оферта за нашите планове за продажба като благодарност.",
+  "title": "Choose Your Selling Plan",
+  "subtitle": "Get your property in front of thousands of potential buyers",
+  "loading": "Loading plans...",
+  "limitedOffer": "Limited Time Offer Ends In:",
+  "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
+  "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
   "plans": {
     "free": {
-      "name": "Безплатен",
-      "description": "Перфектен за начало"
+      "name": "Free",
+      "description": "Perfect for getting started"
     },
     "proMonthly": {
-      "name": "Pro месечен",
-      "description": "Най-подходящ за активни продавачи",
-      "badge": "Популярен"
+      "name": "Pro Monthly",
+      "description": "Best for active sellers",
+      "badge": "Popular"
     },
     "proYearly": {
-      "name": "Pro годишен",
-      "description": "Спестете {{percent}}% с годишно плащане",
-      "badge": "НАЙ-ПОПУЛЯРЕН"
+      "name": "Pro Yearly",
+      "description": "Save {{percent}}% with annual billing",
+      "badge": "MOST POPULAR"
     },
     "enterprise": {
-      "name": "Enterprise план",
-      "description": "За агенции и професионалисти"
+      "name": "Enterprise Plan",
+      "description": "For agencies and professionals"
     }
   },
   "features": {
-    "activeListings": "До {{count}} активни обяви за имоти",
-    "promotedListings": "Промотирайте {{count}} обяви за {{days}} дни",
-    "featuredListings": "{{count}} избрани обяви",
-    "prioritySupport": "Приоритетна поддръжка",
-    "prioritySupportDesc": "Получавайте помощ по-бързо",
-    "analytics": "Разширено аналитично табло",
-    "analyticsDesc": "Следете представянето на вашите обяви",
-    "premiumPlacement": "Премиум позициониране на обяви",
-    "leadManagement": "Система за управление на запитвания",
-    "teamMembers": "До {{count}} членове на екипа",
-    "apiAccess": "Достъп до API",
-    "customBranding": "Персонализиран брандинг",
-    "dedicatedManager": "Персонален акаунт мениджър",
-    "mobileApp": "Достъп до мобилно приложение",
-    "mobileAppDesc": "Управлявайте отвсякъде",
-    "dedicatedAgencyPage": "Отделна страница за агенцията",
-    "dedicatedAgencyPageDesc": "Собствена брандирана страница в платформата",
-    "displayAgents": "Показване на всички агенти и имоти",
-    "displayAgentsDesc": "Представете екипа и обявите си",
-    "featuredAds": "Включване в ротационни реклами",
-    "featuredAdsDesc": "Месечна рекламна ротация на началната страница",
-    "fullContact": "Пълна контактна информация",
-    "fullContactDesc": "Имейл, телефон и директни запитвания",
-    "perfectForActive": "Идеален за активни продавачи",
-    "featuredBoost": "Буст за избрано позициониране"
+    "activeListings": "Up to {{count}} active property ads",
+    "promotedListings": "Promote {{count}} ads for {{days}} days",
+    "featuredListings": "{{count}} featured listings",
+    "prioritySupport": "Priority support",
+    "prioritySupportDesc": "Get help faster",
+    "analytics": "Advanced analytics dashboard",
+    "analyticsDesc": "Track your listing performance",
+    "premiumPlacement": "Premium listing placement",
+    "leadManagement": "Lead management system",
+    "teamMembers": "Up to {{count}} team members",
+    "apiAccess": "API access",
+    "customBranding": "Custom branding",
+    "dedicatedManager": "Dedicated account manager",
+    "mobileApp": "Mobile app access",
+    "mobileAppDesc": "Manage on the go",
+    "dedicatedAgencyPage": "Dedicated Agency Page",
+    "dedicatedAgencyPageDesc": "Your own branded page on our platform",
+    "displayAgents": "Display All Agents & Properties",
+    "displayAgentsDesc": "Showcase your team and listings",
+    "featuredAds": "Featured in Rotating Ads",
+    "featuredAdsDesc": "Monthly homepage advertising rotation",
+    "fullContact": "Full Contact Information",
+    "fullContactDesc": "Email, phone, and direct inquiries",
+    "perfectForActive": "Perfect for active sellers",
+    "featuredBoost": "Featured placement boost"
   },
   "buttons": {
-    "getStarted": "Започни",
-    "getPro": "Вземи Pro",
-    "getProAnnual": "Вземи Pro годишен",
-    "getProMonthly": "Вземи Pro месечен",
-    "getEnterprise": "Вземи Enterprise",
-    "contactSales": "Свържи се с продажби",
-    "currentPlan": "Текущ план"
+    "getStarted": "Get Started",
+    "getPro": "Get Pro",
+    "getProAnnual": "Get Pro Annual",
+    "getProMonthly": "Get Pro Monthly",
+    "getEnterprise": "Get Enterprise",
+    "contactSales": "Contact Sales",
+    "currentPlan": "Current Plan"
   },
   "billing": {
-    "monthly": "Месечно",
-    "yearly": "Годишно",
-    "perMonth": "/месец",
-    "perYear": "/година",
-    "billedAnnually": "Таксувано годишно",
-    "billedMonthly": "Таксувано месечно",
-    "youSave": "Спестявате €{{amount}}!"
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "billedAnnually": "Billed annually",
+    "billedMonthly": "Billed monthly",
+    "youSave": "You save €{{amount}}!"
   },
   "discount": {
-    "off": "{{percent}}% ОТСТЪПКА"
+    "off": "{{percent}}% OFF"
   },
   "benefits": {
-    "moneyBack": "30-дневна гаранция за връщане на парите",
-    "moreViews": "{{multiplier}} пъти повече преглеждания от безплатните обяви",
-    "instantActivation": "Моментална активация",
-    "cancelAnytime": "Откажете по всяко време"
+    "moneyBack": "30-day money-back guarantee",
+    "moreViews": "{{multiplier}}x more views than free listings",
+    "instantActivation": "Instant activation",
+    "cancelAnytime": "Cancel anytime"
   },
   "enterprise": {
-    "required": "Изисква се Enterprise план",
-    "message": "Абонирайте се за Enterprise, за да създадете агенция и да представите екипа си",
-    "contactUs": "Свържете се с нас, за да научите повече за Enterprise плана."
+    "required": "Enterprise Plan Required",
+    "message": "Subscribe to Enterprise to create your agency and showcase your team",
+    "contactUs": "Contact us to learn more about our Enterprise plan."
   },
   "exitModal": {
-    "title": "Сигурни ли сте, че искате да излезете?",
-    "agencyMessage": "Ако излезете сега, цялата въведена информация за агенцията ще бъде загубена и ще трябва да започнете отначало.",
-    "offerMessage": "Това е еднократна оферта. Ако излезете сега, няма да видите тези отстъпки отново.",
-    "stay": "Остани и спести!",
-    "leave": "Да, излез",
-    "continueSetup": "Продължи настройката"
+    "title": "Are you sure you want to exit?",
+    "agencyMessage": "If you exit now, all agency information you entered will be lost and you'll need to start over.",
+    "offerMessage": "This is a one-time offer. If you leave now, you won't see these amazing discounts again.",
+    "stay": "Stay & Save!",
+    "leave": "Yes, Leave",
+    "continueSetup": "Continue Setup"
   },
   "success": {
-    "title": "Поздравления!",
-    "message": "Вашият абонамент {{plan}} е активиран. Вече имате достъп до всички премиум функции.",
-    "agencyMessage": "Вашият Enterprise абонамент е активиран и агенцията ви е създадена успешно! Вече сте администратор на агенцията.",
-    "subscriptionActivated": "Абонаментът е активиран успешно!",
-    "startListing": "Започни да публикуваш имоти"
+    "title": "Congratulations!",
+    "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
+    "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
+    "subscriptionActivated": "Subscription activated successfully!",
+    "startListing": "Start Listing Properties"
   }
 }

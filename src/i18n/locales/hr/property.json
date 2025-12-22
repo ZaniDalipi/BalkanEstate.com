@@ -73,8 +73,28 @@
     "heating": "Heating Type",
     "energyRating": "Energy Rating",
     "view": "View",
+    "viewType": "{{type}} View",
     "orientation": "Orientation",
-    "materials": "Building Materials"
+    "materials": "Building Materials",
+    "furnishing": "Furnishing",
+    "specialFeatures": "Special Features",
+    "notListed": "Not listed",
+    "viewFloorPlan": "View Interactive Floor Plan",
+    "soldMessage": "This property has been sold and is no longer available.",
+    "amenitiesFeatures": "Amenities & Features",
+    "propertyAmenities": "Property Amenities",
+    "propertyFeatures": "Property Features",
+    "distanceInfo": "Distance Information",
+    "balconyTerrace": "Balcony/Terrace",
+    "gardenYard": "Garden/Yard",
+    "yes": "Yes",
+    "no": "No",
+    "none": "None",
+    "spot": "spot",
+    "spots": "spots",
+    "livingRoom": "living room",
+    "livingRoomPlural": "living rooms",
+    "petsAllowed": "Pets Allowed"
   },
   "distances": {
     "title": "Distances",
@@ -98,7 +118,9 @@
     "saveProperty": "Save Property",
     "removeFromSaved": "Remove from Saved",
     "share": "Share",
+    "shareThisProperty": "Share this Property",
     "copyLink": "Copy Link",
+    "linkCopied": "Link Copied!",
     "print": "Print",
     "report": "Report Listing",
     "compare": "Compare",
@@ -113,7 +135,13 @@
     "callSeller": "Call Seller",
     "messageSeller": "Message Seller",
     "startingChat": "Starting Chat...",
-    "propertySold": "Property Sold"
+    "propertySold": "Property Sold",
+    "annotate": "Annotate",
+    "tour3d": "3D Tour",
+    "tour360": "360° Tour",
+    "photos": "Photos",
+    "streetView": "Street View",
+    "all": "All"
   },
   "seller": {
     "seller": "Seller",
@@ -176,63 +204,91 @@
     "featuredAgencies": "Featured Agencies"
   },
   "comparison": {
-    "title": "Usporedi Nekretnine",
-    "feature": "Značajka",
-    "price": "Cijena",
-    "beds": "Spavaće Sobe",
-    "baths": "Kupaonice",
-    "livingRooms": "Dnevni Boravci",
-    "area": "Površina (m²)",
-    "yearBuilt": "Godina Izgradnje",
+    "title": "Compare Properties",
+    "feature": "Feature",
+    "price": "Price",
+    "beds": "Beds",
+    "baths": "Baths",
+    "livingRooms": "Living Rooms",
+    "area": "Area (m²)",
+    "yearBuilt": "Year Built",
     "parking": "Parking",
-    "specialFeatures": "Posebne Značajke",
-    "materials": "Materijali"
+    "specialFeatures": "Special Features",
+    "materials": "Materials"
   },
   "map": {
-    "beds": "Sobe",
-    "baths": "Kupaonice",
+    "beds": "Beds",
+    "baths": "Baths",
     "area": "m²",
-    "living": "Dnevni",
+    "living": "Living",
     "parking": "Parking",
-    "clickForDetails": "Klikni za detalje →",
-    "legend": "Legenda",
+    "clickForDetails": "Click for details →",
+    "legend": "Legend",
     "propertyTypes": {
-      "house": "Kuća",
-      "apartment": "Stan",
-      "villa": "Vila",
-      "other": "Ostalo"
+      "house": "House",
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "other": "Other"
     }
   },
   "neighborhood": {
-    "title": "Informacije o Okolici",
-    "description": "Otkrijte što se nalazi u blizini ove nekretnine. Naša AI može pružiti detalje o školama, parkovima i prijevozu.",
-    "loginRequired": "Potrebna prijava - Besplatni korisnici dobivaju 3 uvida/mjesečno, premium korisnici 20/mjesečno",
-    "generateInsights": "Generiraj Uvide",
-    "loginAndGenerate": "Prijavi se i Generiraj Uvide",
-    "usageInfo": "Korištenje: {{used}}/{{limit}} uvida iskorišteno ovog mjeseca",
-    "remainingInfo": "{{remaining}} od {{limit}} uvida preostalo ovog mjeseca",
-    "upgradePrompt": "Nadogradite na premium za više uvida!",
-    "tryAgain": "Pokušaj ponovno"
+    "title": "Neighborhood Insights",
+    "description": "Discover what's around this property. Our AI can provide details on nearby schools, parks, and transport.",
+    "loginRequired": "Login required - Free users get 3 insights/month, premium users get 20/month",
+    "generateInsights": "Generate Insights",
+    "loginAndGenerate": "Login & Generate Insights",
+    "usageInfo": "Usage: {{used}}/{{limit}} insights used this month",
+    "remainingInfo": "{{remaining}} of {{limit}} insights remaining this month",
+    "upgradePrompt": "Upgrade to premium for more insights!",
+    "tryAgain": "Try again"
   },
   "photos": {
-    "title": "Fotografije",
-    "all": "Sve",
+    "title": "Photos",
+    "all": "All",
     "categories": {
-      "exterior": "Eksterijer",
-      "interior": "Interijer",
-      "kitchen": "Kuhinja",
-      "bathroom": "Kupaonica",
-      "bedroom": "Spavaća Soba",
-      "living_room": "Dnevni Boravak",
-      "garden": "Vrt",
-      "pool": "Bazen",
-      "view": "Pogled",
-      "other": "Ostalo"
+      "exterior": "Exterior",
+      "interior": "Interior",
+      "kitchen": "Kitchen",
+      "bathroom": "Bathroom",
+      "bedroom": "Bedroom",
+      "living_room": "Living Room",
+      "garden": "Garden",
+      "pool": "Pool",
+      "view": "View",
+      "other": "Other"
     }
   },
   "mapLink": {
-    "title": "Pogledaj na Karti",
-    "description": "Želite istražiti okolicu ove nekretnine?",
-    "button": "Pogledaj na Karti Pretrage"
+    "title": "View on Map",
+    "description": "Want to explore the area around this property?",
+    "button": "View on Search Map"
+  },
+  "guide": {
+    "messages": {
+      "welcome": "Hey there! I'm Homey, your property guide. Let me show you around!",
+      "mortgageHint": "Wondering about monthly payments? The mortgage calculator can help!",
+      "tourAvailable": "Psst! This place has a 3D tour. It's like being there without leaving your couch!",
+      "goodCondition": "Ooh, this one's in {{condition}} condition! That's pretty rare around here.",
+      "hasPool": "Did someone say pool party? This property has one!",
+      "nearBeach": "Beach lovers alert! Only {{distance}}km to sand and waves.",
+      "manyPhotos": "{{count}} photos to explore! Click the gallery for the full tour.",
+      "floorPlan": "There's a floor plan! Perfect for planning where your couch goes.",
+      "saveHint": "Love it? Tap the heart to save it for later!",
+      "contactHint": "Got questions? The seller is just a message away!"
+    },
+    "actions": {
+      "calculate": "Calculate",
+      "takeTour": "Take Tour"
+    },
+    "quickActions": {
+      "save": "Save",
+      "call": "Call",
+      "top": "Top"
+    },
+    "tooltip": {
+      "minimize": "Click to minimize",
+      "tips": "Click for tips!",
+      "rightClick": "Right-click for actions"
+    }
   }
 }

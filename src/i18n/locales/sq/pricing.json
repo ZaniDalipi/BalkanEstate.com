@@ -1,102 +1,102 @@
 {
-  "title": "Zgjidhni Planin Tuaj të Shitjes",
-  "subtitle": "Vendosni pronën tuaj përpara mijëra blerësve potencialë",
-  "loading": "Duke ngarkuar planet...",
-  "limitedOffer": "Oferta e Kufizuar Përfundon Në:",
-  "offerTitle": "Urime! Keni Hapur Zbritje Ekskluzive!",
-  "offerSubtitle": "Shijoni këtë ofertë një herë në planet tona të shitjes si falënderim.",
+  "title": "Choose Your Selling Plan",
+  "subtitle": "Get your property in front of thousands of potential buyers",
+  "loading": "Loading plans...",
+  "limitedOffer": "Limited Time Offer Ends In:",
+  "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
+  "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
   "plans": {
     "free": {
-      "name": "Falas",
-      "description": "Perfekt për të filluar"
+      "name": "Free",
+      "description": "Perfect for getting started"
     },
     "proMonthly": {
-      "name": "Pro Mujor",
-      "description": "Më i miri për shitës aktivë",
-      "badge": "Popullor"
+      "name": "Pro Monthly",
+      "description": "Best for active sellers",
+      "badge": "Popular"
     },
     "proYearly": {
-      "name": "Pro Vjetor",
-      "description": "Kurse {{percent}}% me faturim vjetor",
-      "badge": "MË POPULLORI"
+      "name": "Pro Yearly",
+      "description": "Save {{percent}}% with annual billing",
+      "badge": "MOST POPULAR"
     },
     "enterprise": {
-      "name": "Plani Ndërmarrje",
-      "description": "Për agjenci dhe profesionistë"
+      "name": "Enterprise Plan",
+      "description": "For agencies and professionals"
     }
   },
   "features": {
-    "activeListings": "Deri në {{count}} shpallje aktive",
-    "promotedListings": "Promovo {{count}} shpallje për {{days}} ditë",
-    "featuredListings": "{{count}} shpallje të veçuara",
-    "prioritySupport": "Mbështetje prioritare",
-    "prioritySupportDesc": "Merrni ndihmë më shpejt",
-    "analytics": "Panel analitike i avancuar",
-    "analyticsDesc": "Ndiqni performancën e shpalljeve tuaja",
-    "premiumPlacement": "Vendosje premium e shpalljeve",
-    "leadManagement": "Sistem menaxhimi i klientëve",
-    "teamMembers": "Deri në {{count}} anëtarë ekipi",
-    "apiAccess": "Qasje në API",
-    "customBranding": "Brendim i personalizuar",
-    "dedicatedManager": "Menaxher i dedikuar",
-    "mobileApp": "Qasje në aplikacionin celular",
-    "mobileAppDesc": "Menaxhoni në lëvizje",
-    "dedicatedAgencyPage": "Faqe e Dedikuar e Agjencisë",
-    "dedicatedAgencyPageDesc": "Faqja juaj e brenduar në platformën tonë",
-    "displayAgents": "Shfaq të Gjithë Agjentët & Pronat",
-    "displayAgentsDesc": "Ekspozoni ekipin dhe listimet tuaja",
-    "featuredAds": "Të Veçuar në Reklamat Rrotulluese",
-    "featuredAdsDesc": "Reklamim mujor në faqen kryesore",
-    "fullContact": "Informacione të Plota Kontakti",
-    "fullContactDesc": "Email, telefon, dhe kërkesa direkte",
-    "perfectForActive": "Perfekt për shitës aktivë",
-    "featuredBoost": "Rritje e vendosjes së veçuar"
+    "activeListings": "Up to {{count}} active property ads",
+    "promotedListings": "Promote {{count}} ads for {{days}} days",
+    "featuredListings": "{{count}} featured listings",
+    "prioritySupport": "Priority support",
+    "prioritySupportDesc": "Get help faster",
+    "analytics": "Advanced analytics dashboard",
+    "analyticsDesc": "Track your listing performance",
+    "premiumPlacement": "Premium listing placement",
+    "leadManagement": "Lead management system",
+    "teamMembers": "Up to {{count}} team members",
+    "apiAccess": "API access",
+    "customBranding": "Custom branding",
+    "dedicatedManager": "Dedicated account manager",
+    "mobileApp": "Mobile app access",
+    "mobileAppDesc": "Manage on the go",
+    "dedicatedAgencyPage": "Dedicated Agency Page",
+    "dedicatedAgencyPageDesc": "Your own branded page on our platform",
+    "displayAgents": "Display All Agents & Properties",
+    "displayAgentsDesc": "Showcase your team and listings",
+    "featuredAds": "Featured in Rotating Ads",
+    "featuredAdsDesc": "Monthly homepage advertising rotation",
+    "fullContact": "Full Contact Information",
+    "fullContactDesc": "Email, phone, and direct inquiries",
+    "perfectForActive": "Perfect for active sellers",
+    "featuredBoost": "Featured placement boost"
   },
   "buttons": {
-    "getStarted": "Fillo Tani",
-    "getPro": "Merr Pro",
-    "getProAnnual": "Merr Pro Vjetor",
-    "getProMonthly": "Merr Pro Mujor",
-    "getEnterprise": "Merr Ndërmarrje",
-    "contactSales": "Kontakto Shitjet",
-    "currentPlan": "Plani Aktual"
+    "getStarted": "Get Started",
+    "getPro": "Get Pro",
+    "getProAnnual": "Get Pro Annual",
+    "getProMonthly": "Get Pro Monthly",
+    "getEnterprise": "Get Enterprise",
+    "contactSales": "Contact Sales",
+    "currentPlan": "Current Plan"
   },
   "billing": {
-    "monthly": "Mujor",
-    "yearly": "Vjetor",
-    "perMonth": "/muaj",
-    "perYear": "/vit",
-    "billedAnnually": "Faturohet vjetërisht",
-    "billedMonthly": "Faturohet mujorisht",
-    "youSave": "Ju kurseni €{{amount}}!"
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "billedAnnually": "Billed annually",
+    "billedMonthly": "Billed monthly",
+    "youSave": "You save €{{amount}}!"
   },
   "discount": {
-    "off": "{{percent}}% ZBRITJE"
+    "off": "{{percent}}% OFF"
   },
   "benefits": {
-    "moneyBack": "Garanci kthimi parash 30-ditore",
-    "moreViews": "{{multiplier}}x më shumë shikime se shpalljet falas",
-    "instantActivation": "Aktivizim i menjëhershëm",
-    "cancelAnytime": "Anulo në çdo kohë"
+    "moneyBack": "30-day money-back guarantee",
+    "moreViews": "{{multiplier}}x more views than free listings",
+    "instantActivation": "Instant activation",
+    "cancelAnytime": "Cancel anytime"
   },
   "enterprise": {
-    "required": "Kërkohet Plani Ndërmarrje",
-    "message": "Abonohu në Ndërmarrje për të krijuar agjencin tuaj dhe për të ekspozuar ekipin tuaj",
-    "contactUs": "Na kontaktoni për të mësuar më shumë rreth planit tonë Ndërmarrje."
+    "required": "Enterprise Plan Required",
+    "message": "Subscribe to Enterprise to create your agency and showcase your team",
+    "contactUs": "Contact us to learn more about our Enterprise plan."
   },
   "exitModal": {
-    "title": "A jeni i sigurt që dëshironi të dilni?",
-    "agencyMessage": "Nëse dilni tani, të gjitha informacionet e agjencisë do të humbasin dhe do t'ju duhet të filloni përsëri.",
-    "offerMessage": "Kjo është një ofertë një herë. Nëse largoheni tani, nuk do t'i shihni më këto zbritje mahnitëse.",
-    "stay": "Qëndro & Ruaj!",
-    "leave": "Po, Dil",
-    "continueSetup": "Vazhdo Konfigurimin"
+    "title": "Are you sure you want to exit?",
+    "agencyMessage": "If you exit now, all agency information you entered will be lost and you'll need to start over.",
+    "offerMessage": "This is a one-time offer. If you leave now, you won't see these amazing discounts again.",
+    "stay": "Stay & Save!",
+    "leave": "Yes, Leave",
+    "continueSetup": "Continue Setup"
   },
   "success": {
-    "title": "Urime!",
-    "message": "Abonimi juaj {{plan}} është aktivizuar. Tani keni qasje në të gjitha veçoritë premium.",
-    "agencyMessage": "Abonimi juaj Ndërmarrje është aktivizuar dhe agjencia juaj është krijuar me sukses! Tani jeni admini i agjencisë suaj.",
-    "subscriptionActivated": "Abonimi u aktivizua me sukses!",
-    "startListing": "Fillo të Listosh Prona"
+    "title": "Congratulations!",
+    "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
+    "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
+    "subscriptionActivated": "Subscription activated successfully!",
+    "startListing": "Start Listing Properties"
   }
 }

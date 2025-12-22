@@ -77,29 +77,203 @@
     "selectAgencyRequired": "Please select an agency to use the invitation code",
     "enterInvitationCode": "Enter the invitation code provided by your agency",
     "leaveEmptyForIndependent": "Leave empty to register as an independent agent",
-    "verifying": "Se verifică...",
-    "joining": "Se alătură...",
-    "verifyAndBecomeAgent": "Verifică și Devino Agent",
-    "joinAgency": "Alătură-te Agenției"
+    "verifying": "Verifying...",
+    "joining": "Joining...",
+    "verifyAndBecomeAgent": "Verify & Become Agent",
+    "joinAgency": "Join Agency"
   },
   "invitationCode": {
-    "title": "Introduceți Codul de Invitație",
-    "description": "Pentru a vă alătura {{agencyName}}, aveți nevoie de un cod de invitație de la administratorul agenției.",
-    "label": "Cod de Invitație",
+    "title": "Enter Invitation Code",
+    "description": "To join {{agencyName}}, you need an invitation code from the agency admin.",
+    "label": "Invitation Code",
     "placeholder": "AGY-XXXXXX-XXXXXX",
-    "formatHint": "Formatul codului de invitație: AGY-XXXXXX-XXXXXX",
-    "enterCode": "Vă rugăm să introduceți codul de invitație",
-    "verifyFailed": "Verificarea codului de invitație a eșuat",
-    "verifying": "Se verifică...",
-    "submit": "Trimite Cererea"
+    "formatHint": "The invitation code format: AGY-XXXXXX-XXXXXX",
+    "enterCode": "Please enter an invitation code",
+    "verifyFailed": "Failed to verify invitation code",
+    "verifying": "Verifying...",
+    "submit": "Submit Request"
   },
   "imageEditor": {
-    "download": "Descarcă",
-    "sending": "Se trimite...",
-    "sendToAgent": "Trimite la Agent",
-    "sentSuccessTitle": "Trimis cu Succes!",
-    "sentSuccessMessage": "Imaginea dvs. adnotată a fost trimisă agentului. Vor răspunde în curând.",
-    "goToChat": "Mergi la Chat",
-    "failedToSend": "Trimiterea imaginii adnotate a eșuat. Încercați din nou."
+    "download": "Download",
+    "sending": "Sending...",
+    "sendToAgent": "Send to Agent",
+    "sentSuccessTitle": "Sent Successfully!",
+    "sentSuccessMessage": "Your annotated image has been sent to the agent. They will respond shortly.",
+    "goToChat": "Go to Chat",
+    "failedToSend": "Failed to send annotated image. Please try again.",
+    "tools": {
+      "draw": "Draw",
+      "text": "Add Text",
+      "arrow": "Arrow",
+      "rectangle": "Rectangle",
+      "circle": "Circle",
+      "highlight": "Highlight",
+      "blur": "Blur",
+      "crop": "Crop",
+      "rotate": "Rotate",
+      "undo": "Undo",
+      "redo": "Redo",
+      "clear": "Clear All"
+    },
+    "colors": {
+      "red": "Red",
+      "blue": "Blue",
+      "green": "Green",
+      "yellow": "Yellow",
+      "black": "Black",
+      "white": "White"
+    }
+  },
+  "confirmation": {
+    "deleteProperty": {
+      "title": "Delete Property",
+      "message": "Are you sure you want to delete this property? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "deleteAccount": {
+      "title": "Delete Account",
+      "message": "This will permanently delete your account and all associated data. This action cannot be undone.",
+      "confirm": "Delete Account",
+      "cancel": "Cancel"
+    },
+    "logout": {
+      "title": "Log Out",
+      "message": "Are you sure you want to log out?",
+      "confirm": "Log Out",
+      "cancel": "Cancel"
+    },
+    "unsavedChanges": {
+      "title": "Unsaved Changes",
+      "message": "You have unsaved changes. Are you sure you want to leave?",
+      "confirm": "Leave",
+      "cancel": "Stay"
+    },
+    "cancelSubscription": {
+      "title": "Cancel Subscription",
+      "message": "Are you sure you want to cancel your subscription? You will lose access to premium features.",
+      "confirm": "Cancel Subscription",
+      "cancel": "Keep Subscription"
+    }
+  },
+  "share": {
+    "title": "Share Property",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied to clipboard!",
+    "shareVia": "Share via",
+    "facebook": "Facebook",
+    "twitter": "Twitter",
+    "linkedin": "LinkedIn",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram",
+    "email": "Email",
+    "embedCode": "Embed Code",
+    "copyEmbed": "Copy Embed Code"
+  },
+  "report": {
+    "title": "Report Listing",
+    "reason": "Reason for reporting",
+    "reasons": {
+      "spam": "Spam or Misleading",
+      "scam": "Scam or Fraud",
+      "inappropriate": "Inappropriate Content",
+      "duplicate": "Duplicate Listing",
+      "wrongInfo": "Incorrect Information",
+      "soldRented": "Already Sold/Rented",
+      "other": "Other"
+    },
+    "details": "Additional details",
+    "detailsPlaceholder": "Please provide more information...",
+    "submit": "Submit Report",
+    "submitting": "Submitting...",
+    "submitted": "Report submitted successfully",
+    "thankYou": "Thank you for helping keep our platform safe!"
+  },
+  "contact": {
+    "title": "Contact Seller",
+    "name": "Your Name",
+    "email": "Your Email",
+    "phone": "Your Phone",
+    "message": "Your Message",
+    "messagePlaceholder": "Hi, I'm interested in this property...",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "sent": "Message sent successfully!",
+    "scheduleViewing": "Schedule Viewing",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
+    "notes": "Additional Notes"
+  },
+  "gallery": {
+    "title": "Photo Gallery",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "close": "Close",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "download": "Download",
+    "zoom": "Zoom",
+    "thumbnails": "Show Thumbnails"
+  },
+  "virtualTour": {
+    "title": "Virtual Tour",
+    "loading": "Loading virtual tour...",
+    "controls": {
+      "moveForward": "Move Forward",
+      "moveBackward": "Move Backward",
+      "lookAround": "Look Around",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fullscreen": "Fullscreen",
+      "exitFullscreen": "Exit Fullscreen"
+    },
+    "hotspots": "Hotspots",
+    "rooms": "Rooms",
+    "info": "Information"
+  },
+  "floorPlan": {
+    "title": "Floor Plan",
+    "loading": "Loading floor plan...",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "reset": "Reset View",
+    "download": "Download Floor Plan",
+    "interactive": "Click on rooms for details"
+  },
+  "calculator": {
+    "title": "Mortgage Calculator",
+    "calculate": "Calculate",
+    "reset": "Reset",
+    "results": "Results",
+    "monthlyPayment": "Monthly Payment",
+    "totalPayment": "Total Payment",
+    "totalInterest": "Total Interest",
+    "disclaimer": "This is an estimate. Please consult a financial advisor for accurate calculations."
+  },
+  "login": {
+    "title": "Log In",
+    "subtitle": "Welcome back!",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password?"
+  },
+  "signup": {
+    "title": "Create Account",
+    "subtitle": "Join BalkanEstate today",
+    "haveAccount": "Already have an account?",
+    "logIn": "Log In"
+  },
+  "cookie": {
+    "title": "Cookie Consent",
+    "message": "We use cookies to enhance your browsing experience and analyze site traffic. By clicking 'Accept All', you consent to our use of cookies.",
+    "acceptAll": "Accept All",
+    "rejectAll": "Reject All",
+    "customize": "Customize",
+    "necessary": "Necessary (Required)",
+    "analytics": "Analytics",
+    "marketing": "Marketing",
+    "savePreferences": "Save Preferences",
+    "learnMore": "Learn More"
   }
 }

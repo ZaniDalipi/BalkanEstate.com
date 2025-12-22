@@ -1,25 +1,25 @@
 {
-  "title": "Nikad Ne Propustite Nekretninu",
-  "subtitle": "Budite u Toku",
-  "description": "Dobijte instant obaveštenja za nove oglase koji odgovaraju vašim kriterijumima",
+  "title": "Never Miss a Property",
+  "subtitle": "Stay Updated",
+  "description": "Get instant alerts for new listings matching your criteria",
   "features": {
-    "newListings": "Novi oglasi koji odgovaraju vašim kriterijumima",
-    "priceDrops": "Obaveštenja o sniženju cena sačuvanih nekretnina",
-    "marketInsights": "Nedeljni uvidi i trendovi na tržištu"
+    "newListings": "New listings matching your criteria",
+    "priceDrops": "Price drop alerts on saved properties",
+    "marketInsights": "Weekly market insights & trends"
   },
   "form": {
-    "placeholder": "Unesite vaš email",
-    "submit": "Pretplati se",
-    "subscribing": "Pretplaćivanje..."
+    "placeholder": "Enter your email",
+    "submit": "Subscribe",
+    "subscribing": "Subscribing..."
   },
   "cta": {
-    "title": "Pretplatite se na Bilten",
-    "button": "Pretplatite se Besplatno"
+    "title": "Subscribe to Newsletter",
+    "button": "Subscribe for Free"
   },
   "messages": {
-    "success": "Hvala na pretplati! Proverite inbox za potvrdu.",
-    "error": "Nešto je pošlo naopako. Pokušajte ponovo.",
-    "invalidEmail": "Unesite važeću email adresu"
+    "success": "Thank you for subscribing! Check your inbox for confirmation.",
+    "error": "Something went wrong. Please try again.",
+    "invalidEmail": "Please enter a valid email address"
   },
-  "privacy": "Pretplatom se slažete sa Politikom Privatnosti. Možete se odjaviti u bilo kom trenutku."
+  "privacy": "By subscribing, you agree to our Privacy Policy. Unsubscribe anytime."
 }

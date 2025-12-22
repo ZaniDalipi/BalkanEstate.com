@@ -1,126 +1,126 @@
 {
   "property": {
-    "title": "Калкулатор на Стойността на Имота",
-    "description": "Оценете стойността на вашия имот",
+    "title": "Property Value Calculator",
+    "description": "Estimate your property's value",
     "fields": {
-      "location": "Местоположение",
-      "area": "Площ (м²)"
+      "location": "Location",
+      "area": "Area (m²)"
     },
-    "calculating": "Изчисляване...",
+    "calculating": "Calculating...",
     "results": {
-      "estimatedValue": "Приблизителна Стойност"
+      "estimatedValue": "Estimated Value"
     },
     "errors": {
-      "selectLocation": "Моля, изберете валидно местоположение от предложенията.",
-      "locationNotDetermined": "Не може да се определи градът и държавата от избраното местоположение.",
-      "insufficientData": "Съжаляваме, нямаме достатъчно данни за {{city}}, за да предоставим надеждна оценка."
+      "selectLocation": "Please select a valid location from the suggestions.",
+      "locationNotDetermined": "Could not determine city and country from selected location.",
+      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate."
     }
   },
   "mortgage": {
-    "title": "Калкулатор за ипотеки",
-    "description": "Изчислете вашите месечни плащания",
+    "title": "Mortgage Calculator",
+    "description": "Estimate your monthly payments",
     "fields": {
-      "propertyPrice": "Цена на имота",
-      "downPayment": "Първоначална вноска",
-      "downPaymentPercent": "Първоначална вноска (%)",
-      "loanAmount": "Размер на кредита",
-      "interestRate": "Лихвен процент (%)",
-      "loanTerm": "Срок на кредита",
-      "years": "години",
-      "yrs": "г."
+      "propertyPrice": "Property Price",
+      "downPayment": "Down Payment",
+      "downPaymentPercent": "Down Payment (%)",
+      "loanAmount": "Loan Amount",
+      "interestRate": "Interest Rate (%)",
+      "loanTerm": "Loan Term",
+      "years": "years",
+      "yrs": "yrs"
     },
     "results": {
-      "monthlyPayment": "Месечно плащане",
-      "estimatedMonthlyPayment": "Очаквано месечно плащане",
-      "totalPayment": "Общо плащане",
-      "totalInterest": "Общо лихви",
-      "principal": "Главница",
-      "interest": "Лихви"
+      "monthlyPayment": "Monthly Payment",
+      "estimatedMonthlyPayment": "Estimated Monthly Payment",
+      "totalPayment": "Total Payment",
+      "totalInterest": "Total Interest",
+      "principal": "Principal",
+      "interest": "Interest"
     },
     "breakdown": {
-      "title": "Разпределение на плащането",
-      "monthly": "Месечно",
-      "yearly": "Годишно",
-      "total": "Общо"
+      "title": "Payment Breakdown",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "total": "Total"
     },
-    "disclaimer": "Това е приблизителна оценка само за информационни цели. Консултирайте се с финансов специалист за реални проценти и плащания."
+    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments."
   },
   "rentVsBuy": {
-    "title": "Калкулатор: Наем срещу покупка",
-    "description": "Дали да наемате или да купувате?",
+    "title": "Rent vs. Buy Calculator",
+    "description": "Should you rent or buy?",
     "fields": {
-      "planningToStay": "Планирате да останете",
-      "estimatedMonthlyRent": "Очакван месечен наем",
-      "monthlyRent": "Текущ месечен наем",
-      "rentIncrease": "Годишно увеличение на наема (%)",
-      "propertyPrice": "Цена на имота",
-      "downPayment": "Първоначална вноска",
-      "mortgageRate": "Ипотечен лихвен процент (%)",
-      "propertyTax": "Данък върху имота (%)",
-      "homeInsurance": "Застраховка на дома",
-      "maintenance": "Поддръжка",
-      "homeAppreciation": "Увеличение на стойността на дома",
-      "appreciation": "Увеличение на стойността на имота (%)",
-      "closingCosts": "Такси при покупката",
-      "sellingCosts": "Такси при продажбата",
-      "investmentReturn": "Възвращаемост на инвестицията",
-      "timeframe": "Времеви период",
-      "years": "години"
+      "planningToStay": "Planning to stay",
+      "estimatedMonthlyRent": "Estimated monthly rent",
+      "monthlyRent": "Current Monthly Rent",
+      "rentIncrease": "Annual Rent Increase (%)",
+      "propertyPrice": "Property Price",
+      "downPayment": "Down Payment",
+      "mortgageRate": "Mortgage Rate (%)",
+      "propertyTax": "Property Tax (%)",
+      "homeInsurance": "Home Insurance",
+      "maintenance": "Maintenance",
+      "homeAppreciation": "Home Appreciation",
+      "appreciation": "Property Appreciation (%)",
+      "closingCosts": "Closing Costs",
+      "sellingCosts": "Selling Costs",
+      "investmentReturn": "Investment Return",
+      "timeframe": "Timeframe",
+      "years": "years"
     },
     "advanced": {
-      "title": "Разширени настройки",
-      "downPayment": "Първоначална вноска",
-      "interestRate": "Лихвен процент",
-      "loanTerm": "Срок на кредита",
-      "propertyTaxes": "Данъци върху имота",
-      "homeInsurance": "Застраховка на дома",
-      "maintenance": "Поддръжка",
-      "homeAppreciation": "Увеличение на стойността на дома",
-      "rentIncrease": "Увеличение на наема",
-      "closingCosts": "Такси при покупката",
-      "sellingCosts": "Такси при продажбата",
-      "investmentReturn": "Възвращаемост на инвестицията"
+      "title": "Advanced Settings",
+      "downPayment": "Down Payment",
+      "interestRate": "Interest Rate",
+      "loanTerm": "Loan Term",
+      "propertyTaxes": "Property Taxes",
+      "homeInsurance": "Home Insurance",
+      "maintenance": "Maintenance",
+      "homeAppreciation": "Home Appreciation",
+      "rentIncrease": "Rent Increase",
+      "closingCosts": "Closing Costs",
+      "sellingCosts": "Selling Costs",
+      "investmentReturn": "Investment Return"
     },
     "tooltips": {
-      "downPayment": "Процент от цената на дома, платен предварително",
-      "interestRate": "Годишен ипотечен лихвен процент",
-      "loanTerm": "Срок на ипотеката в години",
-      "propertyTaxes": "Годишен данък върху имота (въз основа на стойността на дома)",
-      "homeInsurance": "Годишна застрахователна премия за дома (въз основа на стойността на дома)",
-      "maintenance": "Годишни разходи за поддръжка и ремонт (въз основа на стойността на дома)",
-      "homeAppreciation": "Очаквано годишно увеличение на стойността на дома",
-      "rentIncrease": "Очаквано годишно увеличение на наема",
-      "closingCosts": "Еднократни разходи при покупката (процент от цената на дома)",
-      "sellingCosts": "Разходи при продажбата на дома (комисиони на агенти, такси)",
-      "investmentReturn": "Очаквана годишна възвръщаемост, ако инвестирате парите вместо да купувате"
+      "downPayment": "Percentage of home price paid upfront",
+      "interestRate": "Annual mortgage interest rate",
+      "loanTerm": "Length of mortgage in years",
+      "propertyTaxes": "Annual property tax rate (based on home value)",
+      "homeInsurance": "Annual home insurance cost (based on home value)",
+      "maintenance": "Annual maintenance and repair costs (based on home value)",
+      "homeAppreciation": "Expected annual home value appreciation",
+      "rentIncrease": "Expected annual rent increase",
+      "closingCosts": "One-time closing costs when buying (percentage of home price)",
+      "sellingCosts": "Costs when selling home (real estate commissions, fees)",
+      "investmentReturn": "Expected annual return if investing money instead of buying"
     },
     "results": {
-      "recommendation": "Препоръка",
-      "buyingIsBetter": "По-добре е да купите",
-      "rentingIsBetter": "По-добре е да наемате",
-      "totalRentCost": "Обща цена за наем",
-      "totalBuyCost": "Обща цена за покупка",
-      "savings": "Възможни спестявания",
-      "estimatedSavings": "Очаквани спестявания",
-      "equityBuilt": "Изградена собственост",
-      "breakEvenPoint": "Точка на изравняване",
-      "cheaperTo": "След {{years}} години е по-евтино да",
-      "buy": "купите",
-      "rent": "наемете",
-      "own": "притежавате",
-      "totalCostToRent": "Обща цена за наемане",
-      "netCostToOwn": "Нето цена за притежание",
-      "yearlyCostComparison": "Годишно сравнение на разходите",
-      "year": "Година"
+      "recommendation": "Recommendation",
+      "buyingIsBetter": "Buying is Better",
+      "rentingIsBetter": "Renting is Better",
+      "totalRentCost": "Total Rent Cost",
+      "totalBuyCost": "Total Buying Cost",
+      "savings": "Potential Savings",
+      "estimatedSavings": "Estimated savings",
+      "equityBuilt": "Equity Built",
+      "breakEvenPoint": "Break-even point",
+      "cheaperTo": "After {{years}} years, it's cheaper to",
+      "buy": "Buy",
+      "rent": "Rent",
+      "own": "Own",
+      "totalCostToRent": "Total Cost to Rent",
+      "netCostToOwn": "Net Cost to Own",
+      "yearlyCostComparison": "Yearly Cost Comparison",
+      "year": "Year"
     },
-    "calculating": "Изчисляване...",
-    "disclaimer": "Това е приблизителна оценка за информационни цели. Много фактори могат да повлияят на разходите за покупка и наем. Помислете за консултация с финансов съветник при важни решения."
+    "calculating": "Calculating...",
+    "disclaimer": "This is an estimate for informational purposes. Many factors can influence the costs of buying and renting. Consider consulting with a financial advisor for major decisions."
   },
   "common": {
-    "calculate": "Изчисли",
-    "reset": "Нулиране",
-    "perMonth": "/месец",
-    "perYear": "/година",
-    "invalidValue": "Невалидна стойност"
+    "calculate": "Calculate",
+    "reset": "Reset",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "invalidValue": "Invalid value"
   }
 }

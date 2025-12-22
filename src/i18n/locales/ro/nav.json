@@ -41,5 +41,39 @@
     "wantToSell": "I want to sell",
     "sellDescription": "List your property, reach thousands of potential buyers, and use our smart tools.",
     "listProperty": "List my Property"
+  },
+  "mobile": {
+    "menu": "Menu",
+    "close": "Close Menu",
+    "back": "Back"
+  },
+  "user": {
+    "greeting": "Hello, {{name}}",
+    "viewProfile": "View Profile",
+    "accountSettings": "Account Settings",
+    "myProperties": "My Properties",
+    "myFavorites": "My Favorites",
+    "myMessages": "My Messages",
+    "notifications": "Notifications",
+    "helpCenter": "Help Center",
+    "logout": "Log Out"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "search": "Search",
+    "property": "Property",
+    "agents": "Agents",
+    "agencies": "Agencies",
+    "account": "My Account",
+    "messages": "Messages",
+    "savedSearches": "Saved Searches",
+    "savedProperties": "Saved Properties",
+    "createListing": "Create Listing",
+    "editListing": "Edit Listing"
+  },
+  "skipLinks": {
+    "mainContent": "Skip to main content",
+    "navigation": "Skip to navigation",
+    "footer": "Skip to footer"
   }
 }

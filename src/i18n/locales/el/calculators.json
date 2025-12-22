@@ -1,19 +1,19 @@
 {
   "property": {
-    "title": "Υπολογιστής Αξίας Ακινήτου",
-    "description": "Εκτιμήστε την αξία του ακινήτου σας",
+    "title": "Property Value Calculator",
+    "description": "Estimate your property's value",
     "fields": {
-      "location": "Τοποθεσία",
-      "area": "Εμβαδόν (τ.μ.)"
+      "location": "Location",
+      "area": "Area (m²)"
     },
-    "calculating": "Υπολογισμός...",
+    "calculating": "Calculating...",
     "results": {
-      "estimatedValue": "Εκτιμώμενη Αξία"
+      "estimatedValue": "Estimated Value"
     },
     "errors": {
-      "selectLocation": "Παρακαλώ επιλέξτε μια έγκυρη τοποθεσία από τις προτάσεις.",
-      "locationNotDetermined": "Δεν ήταν δυνατός ο προσδιορισμός της πόλης και της χώρας από την επιλεγμένη τοποθεσία.",
-      "insufficientData": "Λυπούμαστε, δεν έχουμε αρκετά δεδομένα για {{city}} για να παρέχουμε αξιόπιστη εκτίμηση."
+      "selectLocation": "Please select a valid location from the suggestions.",
+      "locationNotDetermined": "Could not determine city and country from selected location.",
+      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate."
     }
   },
   "mortgage": {

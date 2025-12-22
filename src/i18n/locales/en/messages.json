@@ -84,5 +84,83 @@
     "listingsHint": "Create your first property listing",
     "searches": "No saved searches",
     "searchesHint": "Save searches to get notified about new properties"
+  },
+  "compose": {
+    "title": "New Message",
+    "to": "To",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send",
+    "sending": "Sending...",
+    "sent": "Message Sent!",
+    "cancel": "Cancel",
+    "attachFile": "Attach File",
+    "attachImage": "Attach Image",
+    "removeAttachment": "Remove Attachment",
+    "maxFileSize": "Max file size: {{size}}MB",
+    "invalidFileType": "Invalid file type",
+    "recipientRequired": "Please select a recipient",
+    "messageRequired": "Please enter a message"
+  },
+  "attachment": {
+    "image": "Image",
+    "document": "Document",
+    "downloading": "Downloading...",
+    "download": "Download",
+    "preview": "Preview",
+    "remove": "Remove"
+  },
+  "status": {
+    "sending": "Sending...",
+    "sent": "Sent",
+    "delivered": "Delivered",
+    "read": "Read",
+    "failed": "Failed to send"
+  },
+  "actions": {
+    "reply": "Reply",
+    "forward": "Forward",
+    "delete": "Delete",
+    "archive": "Archive",
+    "markAsRead": "Mark as Read",
+    "markAsUnread": "Mark as Unread",
+    "block": "Block User",
+    "unblock": "Unblock User",
+    "report": "Report",
+    "mute": "Mute Notifications",
+    "unmute": "Unmute Notifications"
+  },
+  "filter": {
+    "all": "All",
+    "unread": "Unread",
+    "read": "Read",
+    "archived": "Archived",
+    "blocked": "Blocked"
+  },
+  "search": {
+    "placeholder": "Search messages...",
+    "noResults": "No messages found",
+    "searchIn": "Search in conversations"
+  },
+  "report": {
+    "title": "Report Message",
+    "reason": "Reason for reporting",
+    "spam": "Spam",
+    "harassment": "Harassment",
+    "inappropriate": "Inappropriate Content",
+    "scam": "Scam or Fraud",
+    "other": "Other",
+    "details": "Additional details (optional)",
+    "detailsPlaceholder": "Provide more context...",
+    "submit": "Submit Report",
+    "submitted": "Report submitted. Thank you!",
+    "submitting": "Submitting..."
+  },
+  "errors": {
+    "loadFailed": "Failed to load messages",
+    "sendFailed": "Failed to send message",
+    "deleteFailed": "Failed to delete message",
+    "connectionLost": "Connection lost. Reconnecting...",
+    "reconnected": "Connected!"
   }
 }

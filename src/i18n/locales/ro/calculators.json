@@ -1,19 +1,19 @@
 {
   "property": {
-    "title": "Calculator Valoare Proprietate",
-    "description": "Estimați valoarea proprietății dvs.",
+    "title": "Property Value Calculator",
+    "description": "Estimate your property's value",
     "fields": {
-      "location": "Locație",
-      "area": "Suprafață (m²)"
+      "location": "Location",
+      "area": "Area (m²)"
     },
-    "calculating": "Se calculează...",
+    "calculating": "Calculating...",
     "results": {
-      "estimatedValue": "Valoare Estimată"
+      "estimatedValue": "Estimated Value"
     },
     "errors": {
-      "selectLocation": "Vă rugăm să selectați o locație validă din sugestii.",
-      "locationNotDetermined": "Nu s-a putut determina orașul și țara din locația selectată.",
-      "insufficientData": "Ne pare rău, nu avem suficiente date pentru {{city}} pentru a oferi o estimare fiabilă."
+      "selectLocation": "Please select a valid location from the suggestions.",
+      "locationNotDetermined": "Could not determine city and country from selected location.",
+      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate."
     }
   },
   "mortgage": {

@@ -23,6 +23,48 @@
     "allRightsReserved": "All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy"
+    "cookiePolicy": "Cookie Policy",
+    "disclaimer": "Disclaimer",
+    "accessibility": "Accessibility"
+  },
+  "social": {
+    "followUs": "Follow Us",
+    "facebook": "Facebook",
+    "twitter": "Twitter",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "youtube": "YouTube"
+  },
+  "app": {
+    "downloadApp": "Download Our App",
+    "availableOn": "Available on",
+    "appStore": "App Store",
+    "playStore": "Google Play"
+  },
+  "newsletter": {
+    "title": "Subscribe to Newsletter",
+    "placeholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribed": "Thank you for subscribing!"
+  },
+  "support": {
+    "title": "Support",
+    "helpCenter": "Help Center",
+    "contactUs": "Contact Us",
+    "faq": "FAQ",
+    "feedback": "Give Feedback"
+  },
+  "company": {
+    "title": "Company",
+    "aboutUs": "About Us",
+    "careers": "Careers",
+    "press": "Press",
+    "blog": "Blog"
+  },
+  "partners": {
+    "title": "Partners",
+    "becomePartner": "Become a Partner",
+    "affiliates": "Affiliates",
+    "developers": "For Developers"
   }
 }

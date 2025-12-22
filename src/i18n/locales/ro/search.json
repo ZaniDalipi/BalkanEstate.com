@@ -191,16 +191,131 @@
     "noSavedSearches": "No saved searches yet"
   },
   "ai": {
-    "title": "Căutare AI",
-    "aiPropertySearch": "Căutare Proprietăți cu AI",
-    "placeholder": "Spuneți-mi ce căutați...",
-    "example": "de ex. Un apartament modern cu 3 dormitoare aproape de centrul orașului cu balcon și parcare",
-    "searching": "Se caută...",
-    "results": "AI a găsit {{count}} proprietăți potrivite",
-    "connectionError": "Îmi pare rău, am probleme cu conexiunea în acest moment. Vă rugăm să încercați din nou într-un moment.",
-    "proceed": "Continuă",
-    "beds": "dormitoare",
-    "baths": "băi",
-    "living": "camere de zi"
+    "title": "AI Search",
+    "aiPropertySearch": "AI Property Search",
+    "placeholder": "Tell me what you're looking for...",
+    "example": "e.g., A modern 3-bedroom apartment near the city center with a balcony and parking",
+    "searching": "Searching...",
+    "results": "AI found {{count}} matching properties",
+    "connectionError": "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
+    "proceed": "Proceed",
+    "beds": "beds",
+    "baths": "baths",
+    "living": "living",
+    "noResults": "No properties match your description",
+    "tryDifferent": "Try describing what you're looking for differently",
+    "suggestions": "Suggestions",
+    "recentSearches": "Recent Searches",
+    "clearHistory": "Clear History"
+  },
+  "energyRatings": {
+    "any": "Any",
+    "aPlus": "A+",
+    "a": "A",
+    "b": "B",
+    "c": "C",
+    "d": "D",
+    "e": "E",
+    "f": "F",
+    "g": "G"
+  },
+  "sellerTypes": {
+    "any": "Any",
+    "agent": "Agent",
+    "private": "Private Seller",
+    "agency": "Agency",
+    "developer": "Developer"
+  },
+  "parkingOptions": {
+    "any": "Any",
+    "none": "None",
+    "one": "1 Space",
+    "two": "2 Spaces",
+    "threePlus": "3+ Spaces",
+    "garage": "Garage",
+    "street": "Street Parking"
+  },
+  "floorOptions": {
+    "any": "Any",
+    "ground": "Ground Floor",
+    "first": "1st Floor",
+    "second": "2nd Floor",
+    "third": "3rd Floor",
+    "fourthPlus": "4th Floor+",
+    "top": "Top Floor",
+    "penthouse": "Penthouse"
+  },
+  "view": {
+    "title": "View Options",
+    "list": "List View",
+    "grid": "Grid View",
+    "compact": "Compact View",
+    "detailed": "Detailed View"
+  },
+  "pagination": {
+    "first": "First",
+    "previous": "Previous",
+    "next": "Next",
+    "last": "Last",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results",
+    "perPage": "Per page",
+    "goToPage": "Go to page"
+  },
+  "quickFilters": {
+    "newListings": "New Listings",
+    "priceReduced": "Price Reduced",
+    "openHouse": "Open House",
+    "virtualTour": "Virtual Tour Available",
+    "petFriendly": "Pet Friendly",
+    "furnished": "Furnished",
+    "withPool": "With Pool",
+    "seaView": "Sea View",
+    "newConstruction": "New Construction"
+  },
+  "compare": {
+    "title": "Compare Properties",
+    "add": "Add to Compare",
+    "remove": "Remove from Compare",
+    "clear": "Clear All",
+    "viewComparison": "View Comparison",
+    "maxProperties": "You can compare up to {{max}} properties",
+    "noProperties": "Add properties to compare",
+    "selected": "{{count}} selected"
+  },
+  "alerts": {
+    "title": "Property Alerts",
+    "create": "Create Alert",
+    "manage": "Manage Alerts",
+    "frequency": {
+      "instant": "Instant",
+      "daily": "Daily",
+      "weekly": "Weekly"
+    },
+    "created": "Alert created successfully",
+    "deleted": "Alert deleted",
+    "updated": "Alert updated"
+  },
+  "empty": {
+    "title": "No Properties Found",
+    "description": "We couldn't find any properties matching your criteria.",
+    "suggestions": {
+      "title": "Suggestions",
+      "expandArea": "Try expanding your search area",
+      "adjustPrice": "Adjust your price range",
+      "fewerFilters": "Use fewer filters",
+      "differentLocation": "Try a different location"
+    },
+    "browseAll": "Browse All Properties",
+    "modifySearch": "Modify Search"
+  },
+  "loading": {
+    "searching": "Searching properties...",
+    "loadingMore": "Loading more properties...",
+    "updating": "Updating results...",
+    "applyingFilters": "Applying filters..."
   }
 }
