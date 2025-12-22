@@ -156,5 +156,18 @@
     "clickHeart": "Kliknite na ikonu srca na bilo kojoj nekretnini da je sačuvate ovde.",
     "popularProperties": "Evo nekih popularnih nekretnina",
     "featuredAgencies": "Istaknute Agencije"
+  },
+  "comparison": {
+    "title": "Uporedi Nekretnine",
+    "feature": "Karakteristika",
+    "price": "Cena",
+    "beds": "Spavaće Sobe",
+    "baths": "Kupatila",
+    "livingRooms": "Dnevne Sobe",
+    "area": "Površina (m²)",
+    "yearBuilt": "Godina Izgradnje",
+    "parking": "Parking",
+    "specialFeatures": "Posebne Karakteristike",
+    "materials": "Materijali"
   }
 }

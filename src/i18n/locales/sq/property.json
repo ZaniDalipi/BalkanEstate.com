@@ -156,5 +156,18 @@
     "clickHeart": "Klikoni ikonën e zemrës në çdo pronë për ta ruajtur këtu.",
     "popularProperties": "Ja disa prona të njohura",
     "featuredAgencies": "Agjenci të Zgjedhura"
+  },
+  "comparison": {
+    "title": "Krahaso Pronat",
+    "feature": "Karakteristika",
+    "price": "Çmimi",
+    "beds": "Dhoma Gjumi",
+    "baths": "Banjo",
+    "livingRooms": "Dhoma Ndenjeje",
+    "area": "Sipërfaqja (m²)",
+    "yearBuilt": "Viti i Ndërtimit",
+    "parking": "Parkim",
+    "specialFeatures": "Veçori të Veçanta",
+    "materials": "Materialet"
   }
 }

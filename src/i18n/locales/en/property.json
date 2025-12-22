@@ -156,5 +156,18 @@
     "clickHeart": "Click the heart icon on any property to save it here.",
     "popularProperties": "Here are some popular properties",
     "featuredAgencies": "Featured Agencies"
+  },
+  "comparison": {
+    "title": "Compare Properties",
+    "feature": "Feature",
+    "price": "Price",
+    "beds": "Beds",
+    "baths": "Baths",
+    "livingRooms": "Living Rooms",
+    "area": "Area (m²)",
+    "yearBuilt": "Year Built",
+    "parking": "Parking",
+    "specialFeatures": "Special Features",
+    "materials": "Materials"
   }
 }

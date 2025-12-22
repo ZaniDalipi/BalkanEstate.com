@@ -33,6 +33,7 @@ import enCalculators from './locales/en/calculators.json';
 import enPricing from './locales/en/pricing.json';
 import enValidation from './locales/en/validation.json';
 import enAdmin from './locales/en/admin.json';
+import enAccount from './locales/en/account.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -47,6 +48,7 @@ import sqCalculators from './locales/sq/calculators.json';
 import sqPricing from './locales/sq/pricing.json';
 import sqValidation from './locales/sq/validation.json';
 import sqAdmin from './locales/sq/admin.json';
+import sqAccount from './locales/sq/account.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -61,6 +63,7 @@ import srCalculators from './locales/sr/calculators.json';
 import srPricing from './locales/sr/pricing.json';
 import srValidation from './locales/sr/validation.json';
 import srAdmin from './locales/sr/admin.json';
+import srAccount from './locales/sr/account.json';
 
 // Language configuration
 export const languages = [
@@ -94,6 +97,7 @@ const resources = {
     pricing: enPricing,
     validation: enValidation,
     admin: enAdmin,
+    account: enAccount,
   },
   sq: {
     common: sqCommon,
@@ -108,6 +112,7 @@ const resources = {
     pricing: sqPricing,
     validation: sqValidation,
     admin: sqAdmin,
+    account: sqAccount,
   },
   sr: {
     common: srCommon,
@@ -122,6 +127,7 @@ const resources = {
     pricing: srPricing,
     validation: srValidation,
     admin: srAdmin,
+    account: srAccount,
   },
   // Other languages will fallback to English until translations are added
 };
@@ -134,7 +140,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account'],
 
     interpolation: {
       escapeValue: false, // React already escapes
