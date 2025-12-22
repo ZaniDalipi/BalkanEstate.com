@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Agency } from '../types';
 import { Agent } from '../types';
 import { Property } from '../types';
@@ -33,6 +34,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 type SearchTab = 'city' | 'name';
 
 const AgenciesListPage: React.FC = () => {
+  const { t } = useTranslation(['agents']);
   const { dispatch, state } = useAppContext();
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -41,7 +43,7 @@ const AgenciesListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'featured' | 'myAgency'>('all');
   const [sortBy, setSortBy] = useState<'properties' | 'agents' | 'years' | 'name'>('properties');
-  
+
   // New search state
   const [searchTab, setSearchTab] = useState<SearchTab>('city');
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,7 +109,7 @@ const AgenciesListPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch agencies:', error);
-      setError('Unable to load agencies. Please try again later.');
+      setError(t('agencies.unableToLoad'));
       setAgencies([]);
     } finally {
       setLoading(false);
@@ -190,13 +192,13 @@ const AgenciesListPage: React.FC = () => {
                   {agency.isFeatured && (
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-50 to-amber-100 text-amber-800 rounded-full text-xs font-semibold border border-amber-200">
                       <SparklesIcon className="w-3 h-3" />
-                      Featured
+                      {t('agencies.featured')}
                     </span>
                   )}
                   {(agency as any).certifications?.length > 0 && (
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-green-50 to-green-100 text-green-800 rounded-full text-xs font-semibold border border-green-200">
                       <CheckBadgeIcon className="w-3 h-3" />
-                      Certified
+                      {t('agencies.certified')}
                     </span>
                   )}
                 </div>
@@ -223,7 +225,7 @@ const AgenciesListPage: React.FC = () => {
                       ))}
                       {(agency as any).specialties.length > 3 && (
                         <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium">
-                          +{(agency as any).specialties.length - 3} more
+                          {t('agencies.more', { count: (agency as any).specialties.length - 3 })}
                         </span>
                       )}
                     </div>
@@ -249,7 +251,7 @@ const AgenciesListPage: React.FC = () => {
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-sm sm:text-base md:text-lg text-gray-900">{agency.totalProperties || 0}</div>
-                  <div className="text-xs text-gray-500">Properties</div>
+                  <div className="text-xs text-gray-500">{t('agencies.properties')}</div>
                 </div>
               </div>
 
@@ -259,7 +261,7 @@ const AgenciesListPage: React.FC = () => {
                 </div>
                 <div className="min-w-0">
                   <div className="font-bold text-sm sm:text-base md:text-lg text-gray-900">{agency.totalAgents || 0}</div>
-                  <div className="text-xs text-gray-500">Agents</div>
+                  <div className="text-xs text-gray-500">{t('agencies.agents')}</div>
                 </div>
               </div>
 
@@ -270,7 +272,7 @@ const AgenciesListPage: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <div className="font-bold text-sm sm:text-base md:text-lg text-gray-900">{agency.yearsInBusiness}+</div>
-                    <div className="text-xs text-gray-500">Years</div>
+                    <div className="text-xs text-gray-500">{t('agencies.years')}</div>
                   </div>
                 </div>
               ) : (
@@ -280,7 +282,7 @@ const AgenciesListPage: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <div className="font-bold text-sm sm:text-base md:text-lg text-gray-900">{(agency as any).certifications?.length || 0}</div>
-                    <div className="text-xs text-gray-500">Certs</div>
+                    <div className="text-xs text-gray-500">{t('agencies.certs')}</div>
                   </div>
                 </div>
               )}
@@ -296,7 +298,7 @@ const AgenciesListPage: React.FC = () => {
                     className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 rounded-lg text-xs sm:text-sm transition-all border border-gray-200 hover:border-blue-300"
                   >
                     <PhoneIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline font-medium">Call</span>
+                    <span className="hidden sm:inline font-medium">{t('agencies.call')}</span>
                   </a>
                 )}
                 {agency.email && (
@@ -306,7 +308,7 @@ const AgenciesListPage: React.FC = () => {
                     className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-gray-50 hover:bg-green-50 text-gray-700 hover:text-green-600 rounded-lg text-xs sm:text-sm transition-all border border-gray-200 hover:border-green-300"
                   >
                     <EnvelopeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline font-medium">Email</span>
+                    <span className="hidden sm:inline font-medium">{t('agencies.email')}</span>
                   </a>
                 )}
                 {(agency as any).website && (
@@ -318,14 +320,14 @@ const AgenciesListPage: React.FC = () => {
                     className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-gray-50 hover:bg-purple-50 text-gray-700 hover:text-purple-600 rounded-lg text-xs sm:text-sm transition-all border border-gray-200 hover:border-purple-300"
                   >
                     <GlobeAltIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline font-medium">Website</span>
+                    <span className="hidden sm:inline font-medium">{t('agencies.website')}</span>
                   </a>
                 )}
               </div>
 
               <button className="px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold hover:shadow-xl hover:scale-105 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0">
-                <span className="hidden xs:inline">View Profile</span>
-                <span className="xs:hidden">View</span>
+                <span className="hidden xs:inline">{t('agencies.viewProfile')}</span>
+                <span className="xs:hidden">{t('agencies.view')}</span>
                 <ChevronRightIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
@@ -405,19 +407,19 @@ const AgenciesListPage: React.FC = () => {
             <div className="text-center max-w-4xl mx-auto mb-8 animate-fade-in-up">
               <div className="inline-flex items-center justify-center px-4 py-2 bg-primary/10 rounded-full mb-6">
                 <span className="text-primary font-semibold text-sm uppercase tracking-wider">
-                  Premier Real Estate Networks
+                  {t('agencies.badge')}
                 </span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
-                Top Real Estate
+                {t('agencies.heroTitle')}
                 <span className="block mt-3 animate-gradient-x">
-                  Agencies in Balkans
+                  {t('agencies.heroTitleHighlight')}
                 </span>
               </h1>
-              
+
               <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-                Connect with professional agencies that bring expertise, trust, and results to your property journey.
+                {t('agencies.heroSubtitle')}
               </p>
             </div>
 
@@ -425,10 +427,10 @@ const AgenciesListPage: React.FC = () => {
             <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl border border-neutral-100 p-6 sm:p-8 animate-fade-in-up animation-delay-200 mt-8">
               <div className="text-center mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
-                  Find Your Ideal Agency
+                  {t('agencies.findIdealAgency')}
                 </h2>
                 <p className="text-neutral-600 text-sm sm:text-base">
-                  Search {agencies.length} + professional agencies across the Balkans
+                  {t('agencies.searchAgencies', { count: agencies.length })}
                 </p>
               </div>
 
@@ -449,7 +451,7 @@ const AgenciesListPage: React.FC = () => {
                 >
                   <span className="flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
                     <MapPinIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                    City
+                    {t('agencies.searchByCity')}
                   </span>
                 </button>
                 <button
@@ -460,14 +462,14 @@ const AgenciesListPage: React.FC = () => {
                       : 'text-neutral-600 hover:text-neutral-900 hover:bg-white'
                   }`}
                   style={{
-                    background: searchTab === 'name' 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' 
+                    background: searchTab === 'name'
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'
                       : 'transparent'
                   }}
                 >
                   <span className="flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
                     <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Agency Name
+                    {t('agencies.searchByName')}
                   </span>
                 </button>
               </div>
@@ -483,9 +485,9 @@ const AgenciesListPage: React.FC = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={searchTab === 'city' 
-                    ? 'Search by city or location...' 
-                    : "Search by agency name..."}
+                  placeholder={searchTab === 'city'
+                    ? t('agencies.searchByCityPlaceholder')
+                    : t('agencies.searchByNamePlaceholder')}
                   className="w-full pl-12 pr-32 sm:pl-14 sm:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
@@ -518,7 +520,7 @@ const AgenciesListPage: React.FC = () => {
               {!searchQuery && (
                 <div className="mb-4">
                   <p className="text-center text-xs sm:text-sm text-neutral-600 mb-3">
-                    Popular searches:
+                    {t('agencies.popularSearches')}
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {searchTab === 'city' ? (
@@ -572,13 +574,13 @@ const AgenciesListPage: React.FC = () => {
                           onClick={() => setSearchQuery('Top Rated')}
                           className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
                         >
-                          Top Rated
+                          {t('agencies.topRated')}
                         </button>
                         <button
                           onClick={() => setSearchQuery('Luxury')}
                           className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
                         >
-                          Luxury Specialists
+                          {t('agencies.luxurySpecialists')}
                         </button>
                       </>
                     )}
@@ -595,7 +597,7 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                     <div>
                       <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{agencies.length}</div>
-                      <div className="text-green-700 text-xs sm:text-sm font-medium">Professional Agencies</div>
+                      <div className="text-green-700 text-xs sm:text-sm font-medium">{t('agencies.professionalAgencies')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 bg-gradient-to-br from-blue-50 to-indigo-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100">
@@ -604,7 +606,7 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                     <div>
                       <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{totalStats.totalAgents}</div>
-                      <div className="text-blue-700 text-xs sm:text-sm font-medium">Expert Agents</div>
+                      <div className="text-blue-700 text-xs sm:text-sm font-medium">{t('agencies.expertAgents')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 bg-gradient-to-br from-purple-50 to-violet-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-purple-100">
@@ -613,7 +615,7 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                     <div>
                       <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{totalStats.totalProperties.toLocaleString()}</div>
-                      <div className="text-purple-700 text-xs sm:text-sm font-medium">Listed Properties</div>
+                      <div className="text-purple-700 text-xs sm:text-sm font-medium">{t('agencies.listedProperties')}</div>
                     </div>
                   </div>
                 </div>
@@ -640,7 +642,7 @@ const AgenciesListPage: React.FC = () => {
                   }`}
                 >
                   <FilterIcon className="w-4 h-4" />
-                  All Agencies
+                  {t('agencies.filterAll')}
                 </button>
                 <button
                   onClick={() => setFilter('featured')}
@@ -651,7 +653,7 @@ const AgenciesListPage: React.FC = () => {
                   }`}
                 >
                   <StarIcon className="w-4 h-4" />
-                  Featured
+                  {t('agencies.filterFeatured')}
                 </button>
                 {hasAgency && (
                   <button
@@ -663,7 +665,7 @@ const AgenciesListPage: React.FC = () => {
                     }`}
                   >
                     <BuildingOfficeIcon className="w-4 h-4" />
-                    My Agency
+                    {t('agencies.filterMyAgency')}
                   </button>
                 )}
               </div>
@@ -675,10 +677,10 @@ const AgenciesListPage: React.FC = () => {
                   onChange={(e) => setSortBy(e.target.value as any)}
                   className="w-full lg:w-auto bg-gray-50 border-0 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-white transition-all"
                 >
-                  <option value="properties">Most Properties</option>
-                  <option value="agents">Most Agents</option>
-                  <option value="years">Most Experienced</option>
-                  <option value="name">Alphabetical</option>
+                  <option value="properties">{t('agencies.sortMostProperties')}</option>
+                  <option value="agents">{t('agencies.sortMostAgents')}</option>
+                  <option value="years">{t('agencies.sortMostExperienced')}</option>
+                  <option value="name">{t('agencies.sortAlphabetical')}</option>
                 </select>
               </div>
             </div>
@@ -691,18 +693,18 @@ const AgenciesListPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">
-                    {filter === 'myAgency' ? 'Your Agency' : 
-                     filter === 'featured' ? 'Featured Agencies' : 
-                     'Top Real Estate Agencies'}
+                    {filter === 'myAgency' ? t('agencies.yourAgency') :
+                     filter === 'featured' ? t('agencies.featuredAgencies') :
+                     t('agencies.topRealEstateAgencies')}
                   </h2>
                   <p className="text-neutral-600 text-sm sm:text-base">
-                    {searchQuery 
-                      ? `Showing ${agencies.length} agencies matching "${searchQuery}"`
-                      : `Browse professional agencies with experienced teams`}
+                    {searchQuery
+                      ? t('agencies.showingMatching', { count: agencies.length, query: searchQuery })
+                      : t('agencies.browseAgencies')}
                   </p>
                 </div>
                 <div className="text-sm text-neutral-600">
-                  <span className="font-bold text-primary">{agencies.length}</span> agencies found
+                  <span className="font-bold text-primary">{agencies.length}</span> {t('agencies.agenciesFound')}
                 </div>
               </div>
               
@@ -715,11 +717,11 @@ const AgenciesListPage: React.FC = () => {
                         <div className="text-3xl font-bold text-gray-900">
                           {Math.max(...agencies.map(a => a.totalProperties || 0))}
                         </div>
-                        <div className="text-sm text-gray-600">Most Properties</div>
+                        <div className="text-sm text-gray-600">{t('agencies.mostProperties')}</div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-6">
                     <div className="flex items-center gap-4">
                       <UsersIcon className="w-8 h-8 text-green-600" />
@@ -727,11 +729,11 @@ const AgenciesListPage: React.FC = () => {
                         <div className="text-3xl font-bold text-gray-900">
                           {Math.max(...agencies.map(a => a.totalAgents || 0))}
                         </div>
-                        <div className="text-sm text-gray-600">Most Agents</div>
+                        <div className="text-sm text-gray-600">{t('agencies.mostAgents')}</div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-2xl p-6">
                     <div className="flex items-center gap-4">
                       <CalendarIcon className="w-8 h-8 text-purple-600" />
@@ -739,7 +741,7 @@ const AgenciesListPage: React.FC = () => {
                         <div className="text-3xl font-bold text-gray-900">
                           {Math.max(...agencies.map(a => a.yearsInBusiness || 0))}
                         </div>
-                        <div className="text-sm text-gray-600">Most Experience</div>
+                        <div className="text-sm text-gray-600">{t('agencies.mostExperience')}</div>
                       </div>
                     </div>
                   </div>
@@ -753,13 +755,13 @@ const AgenciesListPage: React.FC = () => {
                 <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-50 rounded-full flex items-center justify-center">
                   <span className="text-4xl">⚠️</span>
                 </div>
-                <h3 className="text-2xl font-bold text-red-900 mb-3">Unable to Load Agencies</h3>
+                <h3 className="text-2xl font-bold text-red-900 mb-3">{t('agencies.unableToLoad')}</h3>
                 <p className="text-red-700 mb-6 max-w-md mx-auto">{error}</p>
                 <button
                   onClick={fetchAgencies}
                   className="inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-2xl font-semibold hover:shadow-lg transition-all"
                 >
-                  Try Again
+                  {t('agencies.tryAgain')}
                 </button>
               </div>
             ) : loading ? (
@@ -772,10 +774,10 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                   </div>
                   <h3 className="text-2xl font-bold text-center text-gray-900 mb-3">
-                    Finding Agencies...
+                    {t('agencies.findingAgencies')}
                   </h3>
                   <p className="text-center text-gray-600">
-                    Searching through our network of professional real estate agencies
+                    {t('agencies.searchingNetwork')}
                   </p>
                   <div className="flex justify-center gap-2 mt-4">
                     <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
@@ -796,22 +798,22 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    {searchQuery ? 'No Agencies Found' :
-                     filter === 'myAgency' ? 'No Agency Found' : 'No Agencies Yet'}
+                    {searchQuery ? t('agencies.noAgenciesFound') :
+                     filter === 'myAgency' ? t('agencies.noAgencyFound') : t('agencies.noAgenciesYet')}
                   </h3>
                   <p className="text-gray-600 mb-8 max-w-md mx-auto">
                     {searchQuery
-                      ? "Try adjusting your search criteria or browse all agencies."
+                      ? t('agencies.adjustCriteria')
                       : filter === 'myAgency'
-                        ? "You haven't created an agency yet. Start your journey today!"
-                        : "Be the first to create an agency and showcase your properties!"}
+                        ? t('agencies.noAgencyCreated')
+                        : t('agencies.beFirstAgency')}
                   </p>
                   <button
                     onClick={handleCreateEnterprise}
                     className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-xl hover:scale-105 transition-all"
                   >
                     <BuildingOfficeIcon className="w-5 h-5" />
-                    Create Agency
+                    {t('agencies.createAgency')}
                   </button>
                 </div>
               </div>
@@ -834,7 +836,7 @@ const AgenciesListPage: React.FC = () => {
                         </div>
                         <div className="relative flex justify-center">
                           <span className="px-6 bg-white text-gray-500 text-sm font-medium">
-                            More Agencies
+                            {t('agencies.moreAgencies')}
                           </span>
                         </div>
                       </div>
@@ -858,18 +860,17 @@ const AgenciesListPage: React.FC = () => {
                 <BuildingOfficeIcon className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-neutral-900 mb-4">
-                Ready to Grow Your Agency?
+                {t('agencies.readyToGrow')}
               </h3>
               <p className="text-neutral-600 mb-8 max-w-2xl mx-auto">
-                Join our network of premier real estate agencies and get featured to thousands of potential clients.
-                Showcase your properties, connect with buyers, and expand your reach.
+                {t('agencies.joinNetwork')}
               </p>
               <button
                 onClick={handleCreateEnterprise}
                 className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-xl transition-all hover:scale-105"
               >
                 <SparklesIcon className="w-5 h-5" />
-                Create Your Agency Today
+                {t('agencies.createAgencyToday')}
               </button>
             </div>
           </div>
