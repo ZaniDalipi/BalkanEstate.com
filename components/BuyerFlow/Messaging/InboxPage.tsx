@@ -151,7 +151,6 @@ const InboxPage: React.FC = () => {
                     )}
                 </div>
             </main>
-            <Footer />
         </div>
     );
 };

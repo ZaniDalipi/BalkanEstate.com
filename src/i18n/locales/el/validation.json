@@ -1,0 +1,40 @@
+{
+  "password": {
+    "minLength": "At least 8 characters",
+    "uppercase": "One uppercase letter",
+    "lowercase": "One lowercase letter",
+    "number": "One number",
+    "specialChar": "One special character (!@#$%...)",
+    "noSequential": "No sequential characters (123, abc, qwe)",
+    "notCommon": "Not a common password",
+    "mismatch": "Passwords do not match"
+  },
+  "email": {
+    "required": "Email is required",
+    "invalid": "Please enter a valid email address"
+  },
+  "phone": {
+    "required": "Phone number is required",
+    "invalid": "Please enter a valid phone number"
+  },
+  "required": "This field is required",
+  "minLength": "Must be at least {{count}} characters",
+  "maxLength": "Must be no more than {{count}} characters",
+  "numeric": "Must be a number",
+  "positive": "Must be a positive number",
+  "url": "Please enter a valid URL",
+  "date": {
+    "invalid": "Please enter a valid date",
+    "future": "Date must be in the future",
+    "past": "Date must be in the past"
+  },
+  "file": {
+    "required": "Please select a file",
+    "size": "File size must be less than {{size}}MB",
+    "type": "Invalid file type. Allowed: {{types}}"
+  },
+  "form": {
+    "hasErrors": "Please fix the errors before submitting",
+    "submitError": "An error occurred. Please try again."
+  }
+}

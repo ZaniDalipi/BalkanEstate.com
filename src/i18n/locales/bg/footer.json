@@ -1,0 +1,28 @@
+{
+  "tagline": "Намиране на перфектни имоти на Балканите с премиум обслужване и модерни технологии.",
+  "sections": {
+    "forBuyers": "За Купувачи",
+    "forSellers": "За Продавачи",
+    "contact": "Контакт"
+  },
+  "links": {
+    "searchProperties": "Търсене на Имоти",
+    "savedProperties": "Запазени Имоти",
+    "savedSearches": "Запазени Търсения",
+    "findAgents": "Намерете Агенти",
+    "browseAgencies": "Разгледайте Агенции",
+    "listProperty": "Публикувайте Имот",
+    "messages": "Съобщения",
+    "myAccount": "Моят Профил"
+  },
+  "contact": {
+    "phone": "+383 XX XXX XXX",
+    "email": "info@balkanestate.com"
+  },
+  "legal": {
+    "allRightsReserved": "Всички права запазени.",
+    "privacyPolicy": "Политика за Поверителност",
+    "termsOfService": "Общи Условия",
+    "cookiePolicy": "Политика за Бисквитки"
+  }
+}

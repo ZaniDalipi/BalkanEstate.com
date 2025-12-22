@@ -74,6 +74,24 @@ import srSeller from './locales/sr/seller.json';
 import srAgents from './locales/sr/agents.json';
 import srModals from './locales/sr/modals.json';
 
+// Import translations - Serbian
+import bgCommon from './locales/bg/common.json';
+import bgNav from './locales/bg/nav.json';
+import bgProperty from './locales/bg/property.json';
+import bgAuth from './locales/bg/auth.json';
+import bgSearch from './locales/bg/search.json';
+import bgMessages from './locales/bg/messages.json';
+import bgFooter from './locales/bg/footer.json';
+import bgNewsletter from './locales/bg/newsletter.json';
+import bgCalculators from './locales/bg/calculators.json';
+import bgPricing from './locales/bg/pricing.json';
+import bgValidation from './locales/bg/validation.json';
+import bgAdmin from './locales/bg/admin.json';
+import bgAccount from './locales/bg/account.json';
+import bgSeller from './locales/bg/seller.json';
+import bgAgents from './locales/bg/agents.json';
+import bgModals from './locales/bg/modals.json';
+
 // Language configuration
 export const languages = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
@@ -147,7 +165,26 @@ const resources = {
     agents: srAgents,
     modals: srModals,
   },
+  bg: {
+    common: bgCommon,
+    nav: bgNav,
+    property: bgProperty,
+    auth: bgAuth,
+    search: bgSearch,
+    messages: bgMessages,
+    footer: bgFooter,
+    newsletter: bgNewsletter,
+    calculators: bgCalculators,
+    pricing: bgPricing,
+    validation: bgValidation,
+    admin: bgAdmin,
+    account: bgAccount,
+    seller: bgSeller,
+    agents: bgAgents,
+    modals: bgModals,
+  },
   // Other languages will fallback to English until translations are added
+
 };
 
 // Initialize i18next

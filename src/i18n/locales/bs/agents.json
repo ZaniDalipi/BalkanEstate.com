@@ -1,0 +1,127 @@
+{
+  "page": {
+    "title": "Find Real Estate Agents in the Balkans",
+    "description": "Browse {{count}}+ verified real estate agents across Serbia, Montenegro, Croatia, and the Balkans. Find trusted professionals to help you buy or sell property."
+  },
+  "loading": "Loading agents...",
+  "hero": {
+    "badge": "Connecting You with Experts",
+    "title": "Find Your Perfect",
+    "titleHighlight": "Real Estate Partner",
+    "subtitle": "Connect with top-rated agents in the Balkans who specialize in your local market and have the expertise to guide you home."
+  },
+  "search": {
+    "title": "Find Your Ideal Agent",
+    "subtitle": "Search {{count}}+ verified professionals across the Balkans",
+    "tabs": {
+      "location": "Location",
+      "name": "Agent Name",
+      "specialization": "Specialization"
+    },
+    "placeholders": {
+      "location": "Search by city, neighborhood, or country...",
+      "name": "Search by agent's name...",
+      "specialization": "Search by specialization (e.g., Luxury, Commercial)..."
+    },
+    "clearSearch": "Clear search",
+    "searchButton": "Search",
+    "popularSearches": "Popular searches:",
+    "viewAll": "View All"
+  },
+  "stats": {
+    "verifiedAgents": "Verified Agents",
+    "professionalAgencies": "Professional Agencies",
+    "successfulTransactions": "Successful Transactions"
+  },
+  "filters": {
+    "sortBy": "Sort by:",
+    "highestRated": "Highest Rated",
+    "mostExperienced": "Most Experienced",
+    "mostSales": "Most Sales",
+    "nameAZ": "Name (A-Z)",
+    "showFilters": "Show Filters",
+    "hideFilters": "Hide Filters",
+    "specialization": "Specialization",
+    "minimumRating": "Minimum Rating",
+    "anyRating": "Any Rating",
+    "stars": "{{count}}+ Stars",
+    "experience": "Experience",
+    "anyExperience": "Any Experience",
+    "yearsPlus": "{{count}}+ Years",
+    "priceRangeFocus": "Price Range Focus",
+    "allPriceRanges": "All Price Ranges",
+    "affordable": "Affordable (<€150K)",
+    "midRange": "Mid-Range (€150K-€500K)",
+    "luxury": "Luxury (>€500K)",
+    "clearAllFilters": "Clear all filters",
+    "types": {
+      "luxury": "Luxury",
+      "commercial": "Commercial",
+      "residential": "Residential",
+      "investment": "Investment",
+      "newConstruction": "New Construction",
+      "foreclosures": "Foreclosures"
+    }
+  },
+  "results": {
+    "title": "Real Estate Agents in the Balkans",
+    "description": "With over {{count}} agents from all the top brokerages, a local agent knows your market and can help you find the perfect home.",
+    "showingMatching": "Showing {{count}} agent matching \"{{query}}\"",
+    "showingMatchingPlural": "Showing {{count}} agents matching \"{{query}}\"",
+    "noAgentsFound": "No agents found",
+    "tryAdjusting": "Try adjusting your search criteria",
+    "viewMore": "View more"
+  },
+  "agencies": {
+    "title": "Top Real Estate Agencies",
+    "subtitle": "Browse agencies with experienced professionals",
+    "viewAll": "View all agencies →"
+  },
+  "contact": {
+    "title": "Get help finding an agent",
+    "subtitle": "We'll pair you with a BalkanEstate Premier Agent who has the inside scoop on your market.",
+    "successTitle": "Request Submitted!",
+    "successMessage": "Thank you! We'll match you with local agents and they'll contact you soon.",
+    "emailLabel": "Email Address *",
+    "emailPlaceholder": "your.email@example.com",
+    "phoneLabel": "Phone Number *",
+    "phonePlaceholder": "+381 11 234 5678",
+    "locationLabel": "Location / Address *",
+    "locationPlaceholder": "Belgrade, Serbia",
+    "propertyDescriptionLabel": "Property Description *",
+    "propertyDescriptionPlaceholder": "Describe the property you're looking for (type, size, budget, features, etc.)",
+    "submitButton": "Connect with a local agent",
+    "submitting": "Submitting..."
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "questions": {
+      "findAgent": {
+        "question": "How to find a good real estate agent near me?",
+        "answer": "Start by searching for agents in your area using our location search. Look for agents with high ratings, strong sales records, and testimonials from recent clients."
+      },
+      "pickAgent": {
+        "question": "How to pick a real estate agent?",
+        "answer": "Consider their experience, local market knowledge, sales track record, client reviews, and communication style. Schedule consultations with multiple agents before making your decision."
+      },
+      "contactAgent": {
+        "question": "How to contact a real estate agent?",
+        "answer": "You can view an agent's profile to find their contact information, including phone number and email. Many agents also offer convenient online booking for consultations."
+      },
+      "leaveReview": {
+        "question": "How do I leave a review for a real estate agent?",
+        "answer": "Visit the agent's profile page and click on the \"Write a Review\" button. Share your experience to help others make informed decisions."
+      },
+      "agentVsBroker": {
+        "question": "What is the difference between an agent and a broker?",
+        "answer": "A real estate agent is licensed to help clients buy and sell property, while a broker has additional training and certification. Brokers can work independently and manage their own agencies."
+      }
+    }
+  },
+  "cta": {
+    "title": "Are you a real estate agent?",
+    "description": "Join BalkanEstate to showcase your expertise, connect with potential clients, and grow your business. Get access to premium tools and advertising opportunities to help you succeed in the Balkan real estate market.",
+    "getStarted": "Get Started",
+    "browseAgencies": "Browse Agencies"
+  }
+}

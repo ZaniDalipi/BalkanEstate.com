@@ -1,0 +1,124 @@
+{
+  "dashboard": {
+    "title": "Admin Dashboard",
+    "welcome": "Welcome, {{name}}",
+    "overview": "Overview"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "users": "Users",
+    "agencies": "Agencies",
+    "discountCodes": "Discount Codes",
+    "promotions": "Promotions",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "properties": {
+    "title": "Property Manager",
+    "loading": "Loading properties...",
+    "noProperties": "No properties found",
+    "addNew": "Add New Property",
+    "edit": "Edit Property",
+    "delete": "Delete Property",
+    "deleteConfirm": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+    "updateSuccess": "Property updated successfully",
+    "deleteSuccess": "Property deleted successfully",
+    "loadError": "Failed to load properties",
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "sold": "Sold",
+      "inactive": "Inactive"
+    }
+  },
+  "users": {
+    "title": "User Manager",
+    "loading": "Loading users...",
+    "noUsers": "No users found",
+    "addNew": "Add New User",
+    "edit": "Edit User",
+    "delete": "Delete User",
+    "deleteConfirm": "Are you sure you want to delete this user? This action cannot be undone.",
+    "roles": {
+      "admin": "Admin",
+      "agent": "Agent",
+      "buyer": "Buyer",
+      "seller": "Seller"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "pending": "Pending Verification"
+    }
+  },
+  "agencies": {
+    "title": "Agency Manager",
+    "loading": "Loading agencies...",
+    "noAgencies": "No agencies found",
+    "addNew": "Add New Agency",
+    "edit": "Edit Agency",
+    "delete": "Delete Agency",
+    "deleteConfirm": "Are you sure you want to delete this agency? This action cannot be undone.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "status": {
+      "active": "Active",
+      "pending": "Pending Approval",
+      "suspended": "Suspended"
+    }
+  },
+  "discountCodes": {
+    "title": "Discount Code Manager",
+    "loading": "Loading discount codes...",
+    "noCodes": "No discount codes found",
+    "addNew": "Create New Code",
+    "edit": "Edit Code",
+    "delete": "Delete Code",
+    "deleteConfirm": "Are you sure you want to delete this discount code?",
+    "code": "Code",
+    "discount": "Discount",
+    "usageLimit": "Usage Limit",
+    "usedCount": "Times Used",
+    "validFrom": "Valid From",
+    "validTo": "Valid To",
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "disabled": "Disabled"
+    }
+  },
+  "promotions": {
+    "title": "Promotion Manager",
+    "loading": "Loading promotions...",
+    "noPromotions": "No promotions found",
+    "addNew": "Create New Promotion",
+    "edit": "Edit Promotion",
+    "delete": "Delete Promotion"
+  },
+  "common": {
+    "actions": "Actions",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "search": "Search...",
+    "filter": "Filter",
+    "export": "Export",
+    "refresh": "Refresh",
+    "showing": "Showing {{from}} to {{to}} of {{total}} results",
+    "noResults": "No results found",
+    "confirmDelete": "Confirm Delete",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "errors": {
+    "notAuthenticated": "Not authenticated",
+    "accessDenied": "Access Denied",
+    "adminRequired": "Admin access required",
+    "connectionFailed": "Failed to connect to admin panel",
+    "pleaseLogin": "Please log in to access the admin panel.",
+    "goHome": "Go to Home"
+  }
+}

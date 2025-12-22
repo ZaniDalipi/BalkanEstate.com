@@ -1,0 +1,28 @@
+{
+  "tagline": "Finding perfect properties across the Balkans with premium service and modern technology.",
+  "sections": {
+    "forBuyers": "For Buyers",
+    "forSellers": "For Sellers",
+    "contact": "Contact"
+  },
+  "links": {
+    "searchProperties": "Search Properties",
+    "savedProperties": "Saved Properties",
+    "savedSearches": "Saved Searches",
+    "findAgents": "Find Agents",
+    "browseAgencies": "Browse Agencies",
+    "listProperty": "List Property",
+    "messages": "Messages",
+    "myAccount": "My Account"
+  },
+  "contact": {
+    "phone": "+383 XX XXX XXX",
+    "email": "info@balkanestate.com"
+  },
+  "legal": {
+    "allRightsReserved": "All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "cookiePolicy": "Cookie Policy"
+  }
+}
