@@ -2,6 +2,7 @@
 // Social sharing functionality for properties
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import {
   FacebookIcon,
@@ -31,6 +32,7 @@ interface SharePopoverProps {
  * ```
  */
 export const SharePopover: React.FC<SharePopoverProps> = ({ property, onClose }) => {
+  const { t } = useTranslation(['property']);
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = () => {
@@ -77,13 +79,13 @@ export const SharePopover: React.FC<SharePopoverProps> = ({ property, onClose })
 
   return (
     <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-neutral-200 p-4 z-20 animate-fade-in">
-      <h4 className="font-bold text-neutral-800 mb-3 text-center">Share this Property</h4>
+      <h4 className="font-bold text-neutral-800 mb-3 text-center">{t('actions.shareThisProperty')}</h4>
 
       <button
         onClick={handleCopyLink}
         className="w-full text-left px-3 py-2 rounded-md hover:bg-neutral-100 font-semibold text-neutral-700 mb-2"
       >
-        {copied ? '✅ Link Copied!' : '📋 Copy Link'}
+        {copied ? `✅ ${t('actions.linkCopied')}` : `📋 ${t('actions.copyLink')}`}
       </button>
 
       <div className="border-t border-neutral-200 pt-2 flex items-center justify-around">
