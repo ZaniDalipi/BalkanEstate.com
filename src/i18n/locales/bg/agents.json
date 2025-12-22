@@ -333,5 +333,178 @@
     "updateDescription": "Update Description",
     "socialLinks": "Social Media Links",
     "contactInfo": "Contact Information"
+  },
+  "profilePage": {
+    "header": {
+      "back": "Back",
+      "backToAgents": "Back to Agents",
+      "viewAgencyProfile": "View Agency Profile →",
+      "save": "Save",
+      "saved": "Saved",
+      "share": "Share",
+      "independentAgent": "Independent Agent"
+    },
+    "stats": {
+      "propertiesSold": "Properties Sold",
+      "yearsExperience": "Years Experience",
+      "activeListings": "Active Listings",
+      "reviews": "reviews"
+    },
+    "badges": {
+      "topAgent": "Top Agent"
+    },
+    "agencyCard": {
+      "memberOf": "Member of",
+      "agents": "Agents",
+      "properties": "Properties",
+      "visitAgency": "Visit Agency"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "listings": "Listings",
+      "reviews": "Reviews"
+    },
+    "about": {
+      "title": "About {{name}}",
+      "defaultBio": "{{name}} is a dedicated real estate professional with {{years}} years of experience in the industry{{agency}}. {{name}} specializes in helping clients achieve their real estate goals through expert market knowledge and personalized service.",
+      "asPartOf": " as part of the {{agencyName}} team"
+    },
+    "performance": {
+      "title": "Performance & Statistics",
+      "sold": "Sold",
+      "active": "Active",
+      "rating": "Rating",
+      "years": "Years",
+      "reviews": "Reviews",
+      "team": "Team"
+    },
+    "credentials": {
+      "title": "Credentials & Certifications",
+      "licensedAgent": "Licensed Real Estate Agent",
+      "authorizedToPractice": "Authorized to practice in {{city}}, {{country}}",
+      "professionalCertifications": "Professional Certifications",
+      "memberOfAssociation": "Member of National Association",
+      "awardsRecognition": "Awards & Recognition",
+      "noAwards": "No awards listed"
+    },
+    "marketInsights": {
+      "title": "Local Market Insights",
+      "avgDaysOnMarket": "Avg. Days on Market",
+      "days": "days",
+      "fasterThanAverage": "Faster than average",
+      "priceGrowthYoY": "Price Growth (YoY)",
+      "healthyAppreciation": "Healthy appreciation",
+      "marketActivity": "Market Activity",
+      "strongDemand": "Strong demand",
+      "requestFullReport": "Request Full Market Report",
+      "getDetailedInsights": "Get detailed insights about the {{city}} real estate market"
+    },
+    "propertiesMap": {
+      "title": "Properties Map",
+      "active": "active",
+      "sold": "sold",
+      "forSale": "For Sale",
+      "soldLabel": "Sold",
+      "viewSoldProperty": "View Sold Property",
+      "viewDetails": "View Details",
+      "beds": "beds",
+      "baths": "baths"
+    },
+    "serviceArea": {
+      "title": "Service Area Location",
+      "call": "Call",
+      "email": "Email"
+    },
+    "expertise": {
+      "title": "Areas of Expertise",
+      "residential": "Residential Properties",
+      "firstTimeBuyers": "First Time Homebuyers",
+      "propertyManagement": "Property Management"
+    },
+    "languages": {
+      "title": "Languages Spoken"
+    },
+    "listingsTab": {
+      "properties": "{{name}}'s Properties",
+      "activeListingsCount": "{{active}} active listings • {{sold}} sold properties",
+      "searchAllProperties": "Search all properties",
+      "activeListings": "Active Listings",
+      "soldProperties": "Sold Properties",
+      "soldBadge": "SOLD"
+    },
+    "reviewsTab": {
+      "verifiedReviews": "verified reviews",
+      "topPerformer": "{{name}} is rated as a Top Performer Agent",
+      "reliableAgent": "{{name}} is rated as a Reliable Agent",
+      "writeReview": "Write a Review",
+      "verifiedBuyer": "Verified Buyer",
+      "recently": "Recently",
+      "responseFrom": "Response from {{name}}",
+      "noReviews": "No reviews yet",
+      "beFirstToReview": "Be the first to review {{name}}'s services"
+    },
+    "contact": {
+      "title": "Contact {{name}}",
+      "callDirect": "Call Direct",
+      "sendEmail": "Send Email"
+    },
+    "appraisal": {
+      "title": "Get a Free Property Appraisal",
+      "description": "Curious what your property is worth? {{name}} can provide a free, no-obligation market appraisal.",
+      "requestAppraisal": "Request Appraisal",
+      "freeNoObligation": "Free • No obligation"
+    },
+    "similarAgents": {
+      "fromSameAgency": "Agents from Same Agency",
+      "otherInArea": "Other Agents in Area",
+      "noSimilarAgents": "No similar agents found",
+      "viewMoreIn": "View more agents in {{city}} →",
+      "viewMoreGeneric": "View more agents in this area →"
+    },
+    "bottomCta": {
+      "readyToWork": "Ready to work with {{name}}?",
+      "contactToday": "Contact {{name}} today for expert real estate advice and personalized service.",
+      "callNow": "Call Now: {{phone}}",
+      "contactForNumber": "(Contact for number)",
+      "scheduleConsultation": "Schedule Consultation"
+    },
+    "featuredAgencies": "Featured Agencies",
+    "linkCopied": "Link copied to clipboard!",
+    "appraisalModal": {
+      "title": "Request Property Appraisal",
+      "propertyAddress": "Property Address *",
+      "enterAddress": "Enter property address",
+      "propertyType": "Property Type *",
+      "selectType": "Select property type",
+      "apartment": "Apartment",
+      "house": "House",
+      "villa": "Villa",
+      "land": "Land",
+      "commercial": "Commercial",
+      "other": "Other",
+      "additionalNotes": "Additional Notes",
+      "additionalInfo": "Any additional information about the property...",
+      "cancel": "Cancel",
+      "sending": "Sending...",
+      "submitRequest": "Submit Request"
+    },
+    "consultationModal": {
+      "title": "Schedule Consultation",
+      "preferredDate": "Preferred Date *",
+      "preferredTime": "Preferred Time *",
+      "selectTime": "Select time",
+      "topic": "Topic *",
+      "selectTopic": "Select topic",
+      "buyingProperty": "Buying a Property",
+      "sellingProperty": "Selling a Property",
+      "realEstateInvestment": "Real Estate Investment",
+      "marketAnalysis": "Market Analysis",
+      "other": "Other",
+      "additionalNotes": "Additional Notes",
+      "whatToDiscuss": "What would you like to discuss?",
+      "cancel": "Cancel",
+      "scheduling": "Scheduling...",
+      "scheduleConsultation": "Schedule Consultation"
+    }
   }
 }
