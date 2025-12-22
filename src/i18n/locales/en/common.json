@@ -75,5 +75,14 @@
     "help": "Help Center",
     "faq": "FAQ",
     "copyright": "© {{year}} BalkanEstate. All rights reserved."
+  },
+  "advertisement": {
+    "loadingFeatured": "Loading featured agencies...",
+    "notAvailable": "Agency Banners Not Available",
+    "featuredAgency": "FEATURED AGENCY",
+    "viewAgency": "View Agency",
+    "properties": "Properties",
+    "agents": "Agents",
+    "dismiss": "Dismiss advertisement"
   }
 }

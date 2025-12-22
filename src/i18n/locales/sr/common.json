@@ -75,5 +75,14 @@
     "help": "Centar za Pomoć",
     "faq": "Često Postavljana Pitanja",
     "copyright": "© {{year}} BalkanEstate. Sva prava zadržana."
+  },
+  "advertisement": {
+    "loadingFeatured": "Učitavanje istaknutih agencija...",
+    "notAvailable": "Baneri Agencija Nisu Dostupni",
+    "featuredAgency": "ISTAKNUTA AGENCIJA",
+    "viewAgency": "Pogledaj Agenciju",
+    "properties": "Nekretnine",
+    "agents": "Agenti",
+    "dismiss": "Odbaci reklamu"
   }
 }

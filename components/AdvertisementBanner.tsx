@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getFeaturedAgencies } from '../services/apiService';
 import { XMarkIcon, BuildingOfficeIcon } from '../constants';
 import { useAppContext } from '../context/AppContext';
@@ -23,6 +24,7 @@ interface AdvertisementBannerProps {
 }
 
 const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 'top', disableGameTrigger = false }) => {
+  const { t } = useTranslation(['common']);
   const { dispatch } = useAppContext();
   const [currentAd, setCurrentAd] = useState<FeaturedAgency | null>(null);
   const [ads, setAds] = useState<FeaturedAgency[]>([]);
@@ -126,7 +128,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
   if (isLoading) {
     return (
       <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg p-4 text-center">
-        <div className="animate-pulse">Loading featured agencies...</div>
+        <div className="animate-pulse">{t('advertisement.loadingFeatured')}</div>
       </div>
     );
   }
@@ -141,7 +143,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
         >
           <XMarkIcon className="w-5 h-5" />
         </button>
-        <div className="font-semibold">⚠️ Agency Banners Not Available</div>
+        <div className="font-semibold">⚠️ {t('advertisement.notAvailable')}</div>
         <div className="text-sm mt-1">{error}</div>
       </div>
     );
@@ -160,7 +162,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
         <button
           onClick={() => setIsDismissed(true)}
           className="absolute top-2 right-2 text-white/80 hover:text-white z-10"
-          aria-label="Dismiss advertisement"
+          aria-label={t('advertisement.dismiss')}
         >
           <XMarkIcon className="w-4 h-4" />
         </button>
@@ -176,7 +178,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
             <BuildingOfficeIcon className="w-16 h-16 mb-3" />
           )}
 
-          <div className="text-xs font-bold mb-1 opacity-80">FEATURED AGENCY</div>
+          <div className="text-xs font-bold mb-1 opacity-80">{t('advertisement.featuredAgency')}</div>
           <h3 className="font-bold text-sm mb-2">{currentAd.name}</h3>
 
           {currentAd.description && (
@@ -187,7 +189,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
             onClick={handleViewAgency}
             className="bg-white text-amber-600 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-amber-50 transition-colors w-full"
           >
-            View Agency
+            {t('advertisement.viewAgency')}
           </button>
 
           {ads.length > 1 && (
@@ -212,7 +214,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
       <button
         onClick={() => setIsDismissed(true)}
         className="absolute top-2 right-2 md:top-3 md:right-4 text-white/80 hover:text-white z-10"
-        aria-label="Dismiss advertisement"
+        aria-label={t('advertisement.dismiss')}
       >
         <XMarkIcon className="w-5 h-5" />
       </button>
@@ -232,7 +234,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold opacity-80">FEATURED AGENCY</span>
+            <span className="text-xs font-bold opacity-80">{t('advertisement.featuredAgency')}</span>
             <span className="text-white/60">|</span>
             <span className="text-sm font-bold">{currentAd.name}</span>
           </div>
@@ -245,10 +247,10 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
 
           <div className="flex gap-3 mt-1 text-xs opacity-80">
             {currentAd.totalProperties > 0 && (
-              <span>{currentAd.totalProperties} Properties</span>
+              <span>{currentAd.totalProperties} {t('advertisement.properties')}</span>
             )}
             {currentAd.totalAgents > 0 && (
-              <span>{currentAd.totalAgents} Agents</span>
+              <span>{currentAd.totalAgents} {t('advertisement.agents')}</span>
             )}
             {currentAd.city && (
               <span>{currentAd.city}</span>
@@ -261,7 +263,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
           onClick={handleViewAgency}
           className="flex-shrink-0 bg-white text-amber-600 px-4 md:px-6 py-2 rounded-full font-bold text-sm hover:bg-amber-50 transition-colors"
         >
-          View Agency
+          {t('advertisement.viewAgency')}
         </button>
 
         {/* Indicators */}
