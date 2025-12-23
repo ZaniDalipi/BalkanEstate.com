@@ -847,6 +847,12 @@ function transformBackendProperty(backendProp: any): Property {
     distanceToSea: backendProp.distanceToSea,
     distanceToSchool: backendProp.distanceToSchool,
     distanceToHospital: backendProp.distanceToHospital,
+    // Promotion fields
+    isPromoted: backendProp.isPromoted || false,
+    promotionTier: backendProp.promotionTier,
+    promotionStartDate: backendProp.promotionStartDate ? new Date(backendProp.promotionStartDate).getTime() : undefined,
+    promotionEndDate: backendProp.promotionEndDate ? new Date(backendProp.promotionEndDate).getTime() : undefined,
+    hasUrgentBadge: backendProp.hasUrgentBadge || false,
   };
 }
 
@@ -1234,38 +1240,41 @@ export const validateCoupon = async (
   promotionTier: string,
   price: number
 ): Promise<CouponValidationResult> => {
-  const response = await apiRequest<{
-    valid: boolean;
-    coupon?: {
-      code: string;
-      description?: string;
-      discountType: 'percentage' | 'fixed';
-      discountValue: number;
-    };
-    discount?: {
-      amount: number;
-      originalPrice: number;
-      finalPrice: number;
-      savings: number;
-      savingsPercentage: number;
-    };
-    message?: string;
-  }>('/coupons/validate', {
-    method: 'POST',
-    body: { couponCode, promotionTier, price },
-    requiresAuth: true,
-  });
+  try {
+    const response = await apiRequest<{
+      valid: boolean;
+      couponCode?: string;
+      discount?: number;
+      finalPrice?: number;
+      discountType?: 'percentage' | 'fixed';
+      discountValue?: number;
+      message?: string;
+      error?: string;
+    }>('/coupons/validate', {
+      method: 'POST',
+      body: { couponCode, promotionTier, price },
+      requiresAuth: true,
+    });
 
-  // Map backend response to frontend interface
-  return {
-    isValid: response.valid,
-    discount: response.discount?.amount || 0,
-    discountType: response.coupon?.discountType || 'fixed',
-    discountValue: response.coupon?.discountValue || 0,
-    message: response.valid
-      ? response.coupon?.description
-      : response.message,
-  };
+    // Map backend response to frontend interface
+    return {
+      isValid: response.valid === true,
+      discount: response.discount || 0,
+      discountType: response.discountType || 'fixed',
+      discountValue: response.discountValue || 0,
+      message: response.valid
+        ? `Coupon applied: ${couponCode.toUpperCase()}`
+        : response.error || response.message || 'Invalid coupon',
+    };
+  } catch (error: any) {
+    return {
+      isValid: false,
+      discount: 0,
+      discountType: 'fixed',
+      discountValue: 0,
+      message: error.message || 'Failed to validate coupon',
+    };
+  }
 };
 
 /**

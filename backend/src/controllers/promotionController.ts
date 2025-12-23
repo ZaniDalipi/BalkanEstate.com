@@ -333,6 +333,12 @@ export const purchasePromotion = async (
       nextRefreshAt.setDate(nextRefreshAt.getDate() + 3); // Refresh every 3 days
     }
 
+    // Create promotion with 'paid' status
+    // NOTE: When integrating Stripe payment, change this flow to:
+    // 1. Create promotion with 'pending' status
+    // 2. Create Stripe checkout session
+    // 3. On webhook confirmation, update to 'paid'
+    // For now, we mark as 'paid' immediately to enable the feature
     const promotion = await Promotion.create({
       userId: user._id,
       propertyId,
@@ -345,7 +351,7 @@ export const purchasePromotion = async (
       hasUrgentBadge,
       price: finalPrice,
       currency: 'EUR',
-      paymentStatus: isFromAgencyAllocation ? 'paid' : 'pending', // In real app, integrate with payment gateway
+      paymentStatus: 'paid', // Mark as paid immediately (integrate with Stripe later)
       isFromAgencyAllocation,
       agencyId,
       viewsGenerated: 0,
