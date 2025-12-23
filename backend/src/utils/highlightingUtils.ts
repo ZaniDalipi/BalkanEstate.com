@@ -26,11 +26,13 @@ export type PromotionTierType = keyof typeof PROMOTION_TIER_SCORES;
 export const URGENT_BONUS = 5;
 
 // Tier rotation intervals (in hours)
-export const TIER_ROTATION_INTERVALS = {
+// Standard tier doesn't rotate (uses default of 1 hour)
+export const TIER_ROTATION_INTERVALS: Record<string, number> = {
   premium: 2,    // Premium rotates every 2 hours
   highlight: 1,  // Highlight rotates every hour
   featured: 0.5, // Featured rotates every 30 minutes
-} as const;
+  standard: 1,   // Standard rotates hourly (default)
+};
 
 /**
  * Get a deterministic rotation slot based on property ID and time
