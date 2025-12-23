@@ -7,17 +7,207 @@
     "valueCalculator": "Kalkulatori i Vlerës",
     "valueDescription": "Merrni një vlerësim të shpejtë të vlerës së tregut të pronës tuaj bazuar në vendndodhje dhe veçori.",
     "steps": {
-      "photos": "Photos",
-      "basicInfo": "Basic Info",
-      "details": "Details",
-      "features": "Features",
-      "location": "Location",
-      "review": "Review"
+      "photos": "Foto",
+      "basicInfo": "Info Bazë",
+      "details": "Detaje",
+      "features": "Veçori",
+      "location": "Vendndodhje",
+      "review": "Rishikim"
     },
-    "progress": "Step {{current}} of {{total}}",
-    "nextStep": "Next Step",
-    "previousStep": "Previous Step",
-    "skipToManual": "Skip to Manual Entry"
+    "progress": "Hapi {{current}} nga {{total}}",
+    "nextStep": "Hapi Tjetër",
+    "previousStep": "Hapi i Mëparshëm",
+    "skipToManual": "Kalo te Plotësimi Manual",
+    "photoTips": {
+      "title": "Këshilla për Foto",
+      "description": "Për rezultate më të mira, përfshini foto të ndriçuara mirë dhe me rezolucion të lartë të eksterierit, kuzhinës, dhomave të ndenjjes, dhomave të gjumit dhe banjove. Sa më shumë detaje të tregoni, aq më e mirë do të jetë shpallja e gjeneruar nga AI!"
+    },
+    "mode": {
+      "aiCreator": "Krijues AI",
+      "manualEntry": "Plotësim Manual"
+    },
+    "roleSelector": {
+      "postingAs": "Duke postuar si"
+    },
+    "language": {
+      "label": "Gjuha e Përshkrimit",
+      "english": "Anglisht",
+      "albanian": "Shqip",
+      "macedonian": "Maqedonisht",
+      "serbian": "Serbisht",
+      "bosnian": "Boshnjakisht",
+      "croatian": "Kroatisht",
+      "montenegrin": "Malazezisht",
+      "greek": "Greqisht",
+      "bulgarian": "Bullgarisht",
+      "romanian": "Rumanisht"
+    },
+    "upload": {
+      "clickToUpload": "Kliko për të ngarkuar foto",
+      "dragAndDrop": "ose tërhiq dhe lësho",
+      "fileTypes": "PNG, JPG ose WEBP",
+      "imagesSelected": "{{count}} foto të zgjedhura",
+      "uploadMore": "Ngarko më shumë ose zëvendëso",
+      "uploadProperty": "Ngarko foto të pronës",
+      "uploadFloorplan": "Ngarko planimetrinë",
+      "maxImages": "Maksimumi 30 foto",
+      "canAddMore": "Vetëm {{count}} foto mund të shtohen",
+      "removeBeforeAdding": "Ju lutem largoni disa foto para se të shtoni më shumë"
+    },
+    "imageManagement": {
+      "title": "Menaxhimi i Fotove",
+      "dragToReorder": "Tërhiq dhe lësho fotot për t'i rirenditur. Fotoja e parë do të jetë fotoja kryesore e shpalljes.",
+      "selectTag": "Zgjedh Etiketën"
+    },
+    "generate": "Gjenero Shpalljen",
+    "location": {
+      "country": "Shteti",
+      "selectCountry": "Zgjedh Shtetin",
+      "city": "Qyteti",
+      "selectCity": "Zgjedh Qytetin",
+      "address": "Adresa",
+      "addressHint": "Kjo do të plotësohet automatikisht nga Vendndodhja e Pronës që zgjidhni në hartë",
+      "addressExamples": "Shembuj: Rr. Muharrem Fejza 23 • Bulevar Kralja Aleksandra 45 • Ul. Makedonija 12 • Trg Krešimira Ćosića 7"
+    },
+    "fields": {
+      "listingTitle": "Titulli i Shpalljes",
+      "titleHint": "Titull i shkurtër dhe tërheqës (p.sh., \"Vilë Luksoze me Pamje Deti\", \"Studio Komode në Qendër\")",
+      "price": "Çmimi",
+      "bedrooms": "Dhoma Gjumi",
+      "bathrooms": "Banjo",
+      "livingRooms": "Dhoma Ndenjeje",
+      "area": "Sipërfaqja (m²)",
+      "yearBuilt": "Viti i Ndërtimit",
+      "parkingSpots": "Vende Parkimi",
+      "floorNumber": "Numri i Katit",
+      "totalFloors": "Katet Gjithsej",
+      "specialFeatures": "Veçori të Veçanta",
+      "materials": "Materialet",
+      "amenities": "Komoditetet",
+      "amenitiesHint": "Shto komoditeteve në stil hashtag që blerësit mund t'i kërkojnë",
+      "amenitiesPlaceholder": "p.sh., #palester, #pishine, #parkim, #wifi",
+      "description": "Përshkrimi"
+    },
+    "propertyFeatures": {
+      "title": "Veçoritë e Pronës",
+      "balconyTerrace": "Ballkon/Tarracë",
+      "gardenYard": "Kopsht/Oborr",
+      "elevator": "Ashensor",
+      "securitySystem": "Sistem Sigurie",
+      "airConditioning": "Kondicionim Ajri",
+      "swimmingPool": "Pishinë",
+      "petsAllowed": "Kafshë Shtëpiake të Lejuara",
+      "hint": "Zgjidhni \"Po\" nëse disponohet, \"Jo\" nëse nuk disponohet, ose lini si \"Çdo\" për ta kaluar",
+      "no": "Jo",
+      "any": "Çdo",
+      "yes": "Po"
+    },
+    "advancedDetails": {
+      "title": "Detaje të Avancuara të Pronës",
+      "hint": "Jepni informacion të detajuar të pronës për t'i ndihmuar blerësit të gjejnë shpalljen tuaj përmes filtrave të avancuar",
+      "furnishing": {
+        "label": "Mobilimi",
+        "notSpecified": "Nuk është Specifikuar",
+        "furnished": "I Mobiluar Plotësisht",
+        "semiFurnished": "Gjysmë i Mobiluar",
+        "unfurnished": "Pa Mobilje"
+      },
+      "heatingType": {
+        "label": "Lloji i Ngrohjes",
+        "notSpecified": "Nuk është Specifikuar",
+        "central": "Ngrohje Qendrore",
+        "electric": "Elektrike",
+        "gas": "Gaz",
+        "oil": "Vaj",
+        "heatPump": "Pompë Nxehtësie",
+        "solar": "Diellore",
+        "wood": "Dru/Oxhak",
+        "none": "Pa Ngrohje"
+      },
+      "condition": {
+        "label": "Gjendja",
+        "notSpecified": "Nuk është Specifikuar",
+        "new": "Ndërtim i Ri",
+        "excellent": "E Shkëlqyer",
+        "good": "E Mirë",
+        "fair": "E Pranueshme",
+        "needsRenovation": "Ka Nevojë për Rinovim"
+      },
+      "viewType": {
+        "label": "Lloji i Pamjes",
+        "notSpecified": "Nuk është Specifikuar",
+        "sea": "Pamje Deti",
+        "mountain": "Pamje Mali",
+        "city": "Pamje Qyteti",
+        "park": "Pamje Parku",
+        "garden": "Pamje Kopshti",
+        "street": "Pamje Rruge"
+      },
+      "energyRating": {
+        "label": "Vlerësimi Energjetik",
+        "notSpecified": "Nuk është Specifikuar",
+        "aPlus": "A+ (Më Efikase)",
+        "a": "A",
+        "b": "B",
+        "c": "C",
+        "d": "D",
+        "e": "E",
+        "f": "F",
+        "g": "G (Më Pak Efikase)"
+      }
+    },
+    "floorPlan": {
+      "title": "Planimetri (Opsionale)"
+    },
+    "virtualTour": {
+      "title": "Tur Virtual 360° (Opsional)",
+      "description": "Shtoni një tur virtual 360° për t'u ndihmuar blerësve të eksplorojnë pronën tuaj në distancë. Mbështet Matterport, Kuula, Zillow 3D Home dhe ofrues të tjerë turne 360.",
+      "label": "URL e Turit 360°",
+      "placeholder": "https://my.matterport.com/show/?m=... ose https://kuula.co/share/...",
+      "hint": "Ngjitni URL-në e embed ose share nga ofruesi juaj i turit 360. Turi do të shfaqet si iframe interaktiv në shpalljen tuaj."
+    },
+    "progress": {
+      "compressing": "Duke kompresuar fotot...",
+      "uploading": "Duke ngarkuar në cloud...",
+      "creating": "Duke krijuar shpalljen..."
+    },
+    "promotion": {
+      "title": "Promovo Shpalljen Tuaj",
+      "description": "Merrni më shumë dukshmëri dhe pyetje me vendosje të promovuar",
+      "checkbox": "Dua të promovoj këtë shpallje",
+      "hint": "Do të zgjidhni planin e promovimit dhe do të përfundoni pagesën në faqen tjetër para publikimit.",
+      "selected": "Promovimi i zgjedhur",
+      "selectedHint": "Në faqen tjetër, do të zgjidhni nivelin e promovimit (nga €1.99), kohëzgjatjen, dhe do të aplikoni çdo kupon zbritjeje para publikimit."
+    },
+    "buttons": {
+      "publishListing": "Publiko Shpalljen",
+      "updateListing": "Përditëso Shpalljen",
+      "continueToPayment": "Vazhdo te Pagesa",
+      "saving": "Duke ruajtur..."
+    },
+    "success": {
+      "title": "Shpallja u {{action}} me Sukses!",
+      "published": "Publikua",
+      "updated": "Përditësua",
+      "redirecting": "Duke ju ridrejtuar te paneli juaj..."
+    },
+    "errors": {
+      "locationRequired": "Ju lutem zgjidhni shtetin dhe qytetin.",
+      "validLocationRequired": "Ju lutem zgjidhni një qytet të vlefshëm për të caktuar vendndodhjen.",
+      "invalidFloorNumber": "Për apartamente, ju lutem vendosni një numër kati të vlefshëm (1 ose më shumë).",
+      "invalidTotalFloors": "Për shtëpi dhe vila, ju lutem vendosni numrin total të kateve (1 ose më shumë).",
+      "imagesRequired": "Ju lutem ngarkoni të paktën një foto.",
+      "noNewImages": "Asnjë foto e re nuk u ngarkua për t'u analizuar. Ju lutem shtoni skedarë të rinj fotosh.",
+      "aiGenerationFailed": "Gjenerimi AI është përkohësisht i padisponueshëm. Mund të vazhdoni me plotësimin manual.",
+      "uploadFailed": "Ngarkimi i fotove dështoi. Ju lutem provoni përsëri.",
+      "listingFailed": "Dërgimi i shpalljes dështoi."
+    },
+    "limits": {
+      "freeReached": "Keni arritur limitin tuaj falas prej 3 shpalljesh aktive. Abonohuni në Pro për 25 shpallje aktive!",
+      "proReached": "Keni arritur limitin tuaj Pro të shpalljeve.",
+      "agentProRequired": "Agjentët duhet të kenë një abonim Pro aktiv për të postuar shpallje. Abonohuni tani për 25 shpallje aktive!",
+      "buyerCannotCreate": "Blerësit nuk mund të krijojnë shpallje pronash. Ju lutem ndërroni në rolin Shitës Privat ose Agjent për të krijuar shpallje."
+    }
   },
   "myListings": {
     "title": "Shpalljet e Mia",
