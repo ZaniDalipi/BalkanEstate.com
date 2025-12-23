@@ -463,7 +463,26 @@ i18n
     react: {
       useSuspense: false,
     },
+  })
+  .then(() => {
+    // Set initial html lang attribute for SEO and accessibility
+    document.documentElement.lang = i18n.language || 'en';
   });
+
+// Listen for language changes to update html lang attribute
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng;
+  // Update meta og:locale for social sharing
+  const ogLocale = document.querySelector('meta[property="og:locale"]');
+  if (ogLocale) {
+    const localeMap: Record<string, string> = {
+      en: 'en_US', sq: 'sq_AL', sr: 'sr_RS', bg: 'bg_BG',
+      hr: 'hr_HR', bs: 'bs_BA', mk: 'mk_MK', me: 'sr_ME',
+      ro: 'ro_RO', el: 'el_GR'
+    };
+    ogLocale.setAttribute('content', localeMap[lng] || 'en_US');
+  }
+});
 
 // Helper function to change language
 export const changeLanguage = (lng: LanguageCode): Promise<void> => {

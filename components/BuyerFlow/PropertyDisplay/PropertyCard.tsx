@@ -135,7 +135,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
             <img
               src={property.imageUrl}
-              alt={property.address}
+              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
+              loading="lazy"
+              decoding="async"
               className={`w-full h-full object-cover transition-transform duration-700 ${
                 isHovered && !isSold ? 'scale-110' : 'scale-100'
               } ${isSold ? 'grayscale' : ''}`}
@@ -301,7 +303,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               {property.seller.avatarUrl ? (
                 <img
                   src={property.seller.avatarUrl}
-                  alt={property.seller.name}
+                  alt={`${property.seller.name} - Real Estate ${property.seller.type === 'agent' ? 'Agent' : 'Seller'}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-8 h-8 rounded-full object-cover border-2 border-white shadow"
                 />
               ) : (
@@ -330,7 +334,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                 {property.seller.agencyLogo ? (
                   <img
                     src={property.seller.agencyLogo}
-                    alt={property.seller.agencyName}
+                    alt={`${property.seller.agencyName} - Real Estate Agency`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-6 h-6 rounded object-contain bg-white"
                   />
                 ) : (

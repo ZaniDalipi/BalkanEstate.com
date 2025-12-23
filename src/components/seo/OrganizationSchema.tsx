@@ -57,9 +57,11 @@ export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
       { '@type': 'Country', name: 'North Macedonia' },
       { '@type': 'Country', name: 'Albania' },
       { '@type': 'Country', name: 'Kosovo' },
-      { '@type': 'Country', name: 'Slovenia' },
+      { '@type': 'Country', name: 'Bulgaria' },
+      { '@type': 'Country', name: 'Romania' },
+      { '@type': 'Country', name: 'Greece' },
     ],
-    knowsLanguage: ['en', 'sr', 'hr', 'bs', 'mk', 'sq', 'sl'],
+    knowsLanguage: ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'],
     slogan: 'Find Your Dream Property in the Balkans',
     priceRange: '€€-€€€€',
   };
