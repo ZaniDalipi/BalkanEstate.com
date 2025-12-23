@@ -38,6 +38,7 @@ import enAgents from './locales/en/agents.json';
 import enModals from './locales/en/modals.json';
 import enPayment from './locales/en/payment.json';
 import enSaved from './locales/en/saved.json';
+import enExploreCities from './locales/en/exploreCities.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -58,6 +59,7 @@ import sqAgents from './locales/sq/agents.json';
 import sqModals from './locales/sq/modals.json';
 import sqPayment from './locales/sq/payment.json';
 import sqSaved from './locales/sq/saved.json';
+import sqExploreCities from './locales/sq/exploreCities.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -78,6 +80,7 @@ import srAgents from './locales/sr/agents.json';
 import srModals from './locales/sr/modals.json';
 import srPayment from './locales/sr/payment.json';
 import srSaved from './locales/sr/saved.json';
+import srExploreCities from './locales/sr/exploreCities.json';
 
 // Import translations - Bulgarian
 import bgCommon from './locales/bg/common.json';
@@ -98,6 +101,7 @@ import bgAgents from './locales/bg/agents.json';
 import bgModals from './locales/bg/modals.json';
 import bgPayment from './locales/bg/payment.json';
 import bgSaved from './locales/bg/saved.json';
+import bgExploreCities from './locales/bg/exploreCities.json';
 
 // Import translations - Croatian
 import hrCommon from './locales/hr/common.json';
@@ -118,6 +122,7 @@ import hrAgents from './locales/hr/agents.json';
 import hrModals from './locales/hr/modals.json';
 import hrPayment from './locales/hr/payment.json';
 import hrSaved from './locales/hr/saved.json';
+import hrExploreCities from './locales/hr/exploreCities.json';
 
 // Import translations - Bosnian
 import bsCommon from './locales/bs/common.json';
@@ -138,6 +143,7 @@ import bsAgents from './locales/bs/agents.json';
 import bsModals from './locales/bs/modals.json';
 import bsPayment from './locales/bs/payment.json';
 import bsSaved from './locales/bs/saved.json';
+import bsExploreCities from './locales/bs/exploreCities.json';
 
 // Import translations - Montenegrin
 import meCommon from './locales/me/common.json';
@@ -158,6 +164,7 @@ import meAgents from './locales/me/agents.json';
 import meModals from './locales/me/modals.json';
 import mePayment from './locales/me/payment.json';
 import meSaved from './locales/me/saved.json';
+import meExploreCities from './locales/me/exploreCities.json';
 
 // Import translations - Macedonian
 import mkCommon from './locales/mk/common.json';
@@ -178,6 +185,7 @@ import mkAgents from './locales/mk/agents.json';
 import mkModals from './locales/mk/modals.json';
 import mkPayment from './locales/mk/payment.json';
 import mkSaved from './locales/mk/saved.json';
+import mkExploreCities from './locales/mk/exploreCities.json';
 
 // Import translations - Romanian
 import roCommon from './locales/ro/common.json';
@@ -198,6 +206,7 @@ import roAgents from './locales/ro/agents.json';
 import roModals from './locales/ro/modals.json';
 import roPayment from './locales/ro/payment.json';
 import roSaved from './locales/ro/saved.json';
+import roExploreCities from './locales/ro/exploreCities.json';
 
 // Import translations - Greek
 import elCommon from './locales/el/common.json';
@@ -218,6 +227,7 @@ import elAgents from './locales/el/agents.json';
 import elModals from './locales/el/modals.json';
 import elPayment from './locales/el/payment.json';
 import elSaved from './locales/el/saved.json';
+import elExploreCities from './locales/el/exploreCities.json';
 
 // Language configuration
 export const languages = [
@@ -256,6 +266,7 @@ const resources = {
     modals: enModals,
     payment: enPayment,
     saved: enSaved,
+    exploreCities: enExploreCities,
   },
   sq: {
     common: sqCommon,
@@ -276,6 +287,7 @@ const resources = {
     modals: sqModals,
     payment: sqPayment,
     saved: sqSaved,
+    exploreCities: sqExploreCities,
   },
   sr: {
     common: srCommon,
@@ -296,6 +308,7 @@ const resources = {
     modals: srModals,
     payment: srPayment,
     saved: srSaved,
+    exploreCities: srExploreCities,
   },
   bg: {
     common: bgCommon,
@@ -316,6 +329,7 @@ const resources = {
     modals: bgModals,
     payment: bgPayment,
     saved: bgSaved,
+    exploreCities: bgExploreCities,
   },
   hr: {
     common: hrCommon,
@@ -336,6 +350,7 @@ const resources = {
     modals: hrModals,
     payment: hrPayment,
     saved: hrSaved,
+    exploreCities: hrExploreCities,
   },
   bs: {
     common: bsCommon,
@@ -356,6 +371,7 @@ const resources = {
     modals: bsModals,
     payment: bsPayment,
     saved: bsSaved,
+    exploreCities: bsExploreCities,
   },
   me: {
     common: meCommon,
@@ -376,6 +392,7 @@ const resources = {
     modals: meModals,
     payment: mePayment,
     saved: meSaved,
+    exploreCities: meExploreCities,
   },
   mk: {
     common: mkCommon,
@@ -396,6 +413,7 @@ const resources = {
     modals: mkModals,
     payment: mkPayment,
     saved: mkSaved,
+    exploreCities: mkExploreCities,
   },
   ro: {
     common: roCommon,
@@ -416,6 +434,7 @@ const resources = {
     modals: roModals,
     payment: roPayment,
     saved: roSaved,
+    exploreCities: roExploreCities,
   },
   el: {
     common: elCommon,
@@ -436,6 +455,7 @@ const resources = {
     modals: elModals,
     payment: elPayment,
     saved: elSaved,
+    exploreCities: elExploreCities,
   }
 
 };
@@ -448,7 +468,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities'],
 
     interpolation: {
       escapeValue: false, // React already escapes
