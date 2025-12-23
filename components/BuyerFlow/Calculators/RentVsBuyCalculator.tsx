@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatPrice, getCurrencySymbol } from '../../../utils/currency';
 import { ScaleIcon, ChevronDownIcon, ChevronUpIcon, KeyIcon, BuildingOfficeIcon } from '../../../constants';
 import { InfoIcon } from 'lucide-react';
@@ -68,17 +69,18 @@ const AdvancedInput: React.FC<{
   unit: string;
   tooltip?: string;
   validate?: (value: number) => boolean;
-}> = ({ label, value, onChange, placeholder, unit, tooltip, validate }) => {
+  invalidValueText?: string;
+}> = ({ label, value, onChange, placeholder, unit, tooltip, validate, invalidValueText = 'Invalid value' }) => {
   const id = `rvb-${label.toLowerCase().replace(/\s/g, '-')}`;
   const [error, setError] = useState('');
 
   const handleChange = (newValue: string) => {
     onChange(newValue);
-    
+
     if (validate) {
       const numValue = Number(newValue);
       if (newValue && !validate(numValue)) {
-        setError('Invalid value');
+        setError(invalidValueText);
       } else {
         setError('');
       }
@@ -113,6 +115,7 @@ const AdvancedInput: React.FC<{
 };
 
 const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice, country }) => {
+  const { t } = useTranslation(['calculators']);
   // --- Basic Inputs ---
   const suggestedRent = useMemo(() => Math.round(propertyPrice / 300), [propertyPrice]);
   const [estimatedRent, setEstimatedRent] = useState('');
@@ -339,31 +342,31 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
     <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 animate-fade-in">
       <div className="flex items-center gap-2 mb-3">
         <ScaleIcon className="w-5 h-5 text-primary" />
-        <h3 className="text-base font-bold text-neutral-800">Rent vs. Buy Calculator</h3>
+        <h3 className="text-base font-bold text-neutral-800">{t('calculators:rentVsBuy.title')}</h3>
       </div>
-      
+
       <div className="space-y-4">
         <div>
           <div className="flex justify-between items-baseline mb-1">
             <label htmlFor="planning-to-stay" className="text-xs font-semibold text-neutral-700">
-              Planning to stay
+              {t('calculators:rentVsBuy.fields.planningToStay')}
             </label>
-            <span className="text-base font-bold text-neutral-900">{planningToStay} years</span>
+            <span className="text-base font-bold text-neutral-900">{planningToStay} {t('calculators:rentVsBuy.fields.years')}</span>
           </div>
-          <input 
+          <input
             id="planning-to-stay"
-            type="range" 
-            min={1} 
+            type="range"
+            min={1}
             max={30}
-            value={planningToStay} 
+            value={planningToStay}
             onChange={e => setPlanningToStay(e.target.valueAsNumber)}
             className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
           />
         </div>
-        
+
         <div className="relative">
-          <input 
-            type="number" 
+          <input
+            type="number"
             id="estimated-rent"
             value={estimatedRent}
             onChange={e => setEstimatedRent(e.target.value)}
@@ -371,119 +374,130 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
             className="w-full text-sm font-semibold bg-neutral-100 border-neutral-200 border rounded-md p-2 text-neutral-900"
           />
           <label htmlFor="estimated-rent" className="block text-xs font-semibold text-neutral-700 mb-1 absolute -top-2.5 left-3 bg-white px-1 text-[11px]">
-            Estimated monthly rent
+            {t('calculators:rentVsBuy.fields.estimatedMonthlyRent')}
           </label>
         </div>
 
         <div>
-          <button 
-            onClick={() => setShowAdvanced(!showAdvanced)} 
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
             className="flex justify-between items-center w-full text-xs font-semibold text-neutral-700 p-2 hover:bg-neutral-50 rounded-md transition-colors"
           >
-            <span>Advanced Settings</span>
+            <span>{t('calculators:rentVsBuy.advanced.title')}</span>
             {showAdvanced ? <ChevronUpIcon className="w-4 h-4"/> : <ChevronDownIcon className="w-4 h-4"/>}
           </button>
           
           {showAdvanced && (
             <div className="mt-3 space-y-3 pt-3 border-t animate-fade-in">
-              <AdvancedInput 
-                label="Down Payment" 
-                value={downPaymentPercent} 
-                onChange={setDownPaymentPercent} 
-                placeholder="e.g., 20" 
-                unit="%" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.downPayment')}
+                value={downPaymentPercent}
+                onChange={setDownPaymentPercent}
+                placeholder="e.g., 20"
+                unit="%"
                 validate={validatePercentage}
-                tooltip="Percentage of home price paid upfront"
+                tooltip={t('calculators:rentVsBuy.tooltips.downPayment')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Interest Rate" 
-                value={interestRate} 
-                onChange={setInterestRate} 
-                placeholder="e.g., 3.5" 
-                unit="%" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.interestRate')}
+                value={interestRate}
+                onChange={setInterestRate}
+                placeholder="e.g., 3.5"
+                unit="%"
                 validate={validatePercentage}
-                tooltip="Annual mortgage interest rate"
+                tooltip={t('calculators:rentVsBuy.tooltips.interestRate')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Loan Term" 
-                value={loanTerm} 
-                onChange={setLoanTerm} 
-                placeholder="e.g., 30" 
-                unit="yrs" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.loanTerm')}
+                value={loanTerm}
+                onChange={setLoanTerm}
+                placeholder="e.g., 30"
+                unit={t('calculators:mortgage.fields.yrs')}
                 validate={validatePositive}
-                tooltip="Length of mortgage in years"
+                tooltip={t('calculators:rentVsBuy.tooltips.loanTerm')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Property Taxes" 
-                value={propertyTaxes} 
-                onChange={setPropertyTaxes} 
-                placeholder="e.g., 1.2" 
-                unit="%/yr" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.propertyTaxes')}
+                value={propertyTaxes}
+                onChange={setPropertyTaxes}
+                placeholder="e.g., 1.2"
+                unit="%/yr"
                 validate={validatePercentage}
-                tooltip="Annual property tax rate (based on home value)"
+                tooltip={t('calculators:rentVsBuy.tooltips.propertyTaxes')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Home Insurance" 
-                value={homeInsurance} 
-                onChange={setHomeInsurance} 
-                placeholder="e.g., 0.4" 
-                unit="%/yr" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.homeInsurance')}
+                value={homeInsurance}
+                onChange={setHomeInsurance}
+                placeholder="e.g., 0.4"
+                unit="%/yr"
                 validate={validatePercentage}
-                tooltip="Annual home insurance cost (based on home value)"
+                tooltip={t('calculators:rentVsBuy.tooltips.homeInsurance')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Maintenance" 
-                value={maintenance} 
-                onChange={setMaintenance} 
-                placeholder="e.g., 1.0" 
-                unit="%/yr" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.maintenance')}
+                value={maintenance}
+                onChange={setMaintenance}
+                placeholder="e.g., 1.0"
+                unit="%/yr"
                 validate={validatePercentage}
-                tooltip="Annual maintenance and repair costs (based on home value)"
+                tooltip={t('calculators:rentVsBuy.tooltips.maintenance')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Home Appreciation" 
-                value={homeAppreciation} 
-                onChange={setHomeAppreciation} 
-                placeholder="e.g., 3.0" 
-                unit="%/yr" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.homeAppreciation')}
+                value={homeAppreciation}
+                onChange={setHomeAppreciation}
+                placeholder="e.g., 3.0"
+                unit="%/yr"
                 validate={validatePercentage}
-                tooltip="Expected annual home value appreciation"
+                tooltip={t('calculators:rentVsBuy.tooltips.homeAppreciation')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Rent Increase" 
-                value={rentIncrease} 
-                onChange={setRentIncrease} 
-                placeholder="e.g., 2.5" 
-                unit="%/yr" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.rentIncrease')}
+                value={rentIncrease}
+                onChange={setRentIncrease}
+                placeholder="e.g., 2.5"
+                unit="%/yr"
                 validate={validatePercentage}
-                tooltip="Expected annual rent increase"
+                tooltip={t('calculators:rentVsBuy.tooltips.rentIncrease')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Closing Costs" 
-                value={closingCostsPercent} 
-                onChange={setClosingCostsPercent} 
-                placeholder="e.g., 3.0" 
-                unit="%" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.closingCosts')}
+                value={closingCostsPercent}
+                onChange={setClosingCostsPercent}
+                placeholder="e.g., 3.0"
+                unit="%"
                 validate={validatePercentage}
-                tooltip="One-time closing costs when buying (percentage of home price)"
+                tooltip={t('calculators:rentVsBuy.tooltips.closingCosts')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Selling Costs" 
-                value={sellingCostsPercent} 
-                onChange={setSellingCostsPercent} 
-                placeholder="e.g., 6.0" 
-                unit="%" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.sellingCosts')}
+                value={sellingCostsPercent}
+                onChange={setSellingCostsPercent}
+                placeholder="e.g., 6.0"
+                unit="%"
                 validate={validatePercentage}
-                tooltip="Costs when selling home (real estate commissions, fees)"
+                tooltip={t('calculators:rentVsBuy.tooltips.sellingCosts')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
-              <AdvancedInput 
-                label="Investment Return" 
-                value={investmentReturnPercent} 
-                onChange={setInvestmentReturnPercent} 
-                placeholder="e.g., 7.0" 
-                unit="%/yr" 
+              <AdvancedInput
+                label={t('calculators:rentVsBuy.advanced.investmentReturn')}
+                value={investmentReturnPercent}
+                onChange={setInvestmentReturnPercent}
+                placeholder="e.g., 7.0"
+                unit="%/yr"
                 validate={validatePercentage}
-                tooltip="Expected annual return if investing money instead of buying"
+                tooltip={t('calculators:rentVsBuy.tooltips.investmentReturn')}
+                invalidValueText={t('calculators:common.invalidValue')}
               />
             </div>
           )}
@@ -495,22 +509,22 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
             <div className="flex items-center justify-center h-32">
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                <p className="text-xs text-neutral-500 mt-2">Calculating...</p>
+                <p className="text-xs text-neutral-500 mt-2">{t('calculators:rentVsBuy.calculating')}</p>
               </div>
             </div>
           ) : results && verdict ? (
             <div className="border-t border-neutral-200 pt-3 text-center">
-              <p className="text-xs font-semibold text-neutral-600">After {planningToStay} years, it's cheaper to</p>
+              <p className="text-xs font-semibold text-neutral-600">{t('calculators:rentVsBuy.results.cheaperTo', { years: planningToStay })}</p>
               <p className={`text-3xl font-extrabold my-0.5 ${verdict.color}`}>
-                {verdict.decision}
+                {verdict.decision === 'Buy' ? t('calculators:rentVsBuy.results.buy') : t('calculators:rentVsBuy.results.rent')}
               </p>
               <p className="text-sm font-semibold text-neutral-700">
-                Estimated savings: {formatPrice(verdict.savings, country)}
+                {t('calculators:rentVsBuy.results.estimatedSavings')}: {formatPrice(verdict.savings, country)}
               </p>
 
               {verdict.breakEvenYear && verdict.breakEvenYear <= planningToStay && (
                 <p className="text-xs text-neutral-500 mt-1">
-                  Break-even point: {verdict.breakEvenYear} years
+                  {t('calculators:rentVsBuy.results.breakEvenPoint')}: {verdict.breakEvenYear} {t('calculators:rentVsBuy.fields.years')}
                 </p>
               )}
 
@@ -518,9 +532,9 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 <div className={`p-2 rounded-lg border ${!isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${!isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
                     <BuildingOfficeIcon className="w-4 h-4"/>
-                    <p className="text-sm">Rent</p>
+                    <p className="text-sm">{t('calculators:rentVsBuy.results.rent')}</p>
                   </div>
-                  <p className="text-[11px] text-neutral-500 mt-0.5">Total Cost to Rent</p>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.totalCostToRent')}</p>
                   <p className={`text-base font-bold ${!isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
                     {formatPrice(results.totalRentCost, country)}
                   </p>
@@ -528,9 +542,9 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 <div className={`p-2 rounded-lg border ${isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
                     <KeyIcon className="w-4 h-4"/>
-                    <p className="text-sm">Own</p>
+                    <p className="text-sm">{t('calculators:rentVsBuy.results.own')}</p>
                   </div>
-                  <p className="text-[11px] text-neutral-500 mt-0.5">Net Cost to Own</p>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.netCostToOwn')}</p>
                   <p className={`text-base font-bold ${isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
                     {formatPrice(results.netBuyCost, country)}
                   </p>
@@ -540,18 +554,18 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               {/* Yearly Breakdown Chart - Scrollable within fixed container */}
               {results.yearlyBreakdown.length > 0 && (
                 <div className="mt-4 text-left">
-                  <p className="text-xs font-semibold text-neutral-700 mb-2">Yearly Cost Comparison</p>
+                  <p className="text-xs font-semibold text-neutral-700 mb-2">{t('calculators:rentVsBuy.results.yearlyCostComparison')}</p>
                   <div className="space-y-1 max-h-32 overflow-y-auto border border-neutral-200 rounded-lg p-2 bg-neutral-50">
                     <div className="flex justify-between items-center text-xs font-semibold text-neutral-600 pb-1 border-b border-neutral-200">
-                      <span>Year</span>
+                      <span>{t('calculators:rentVsBuy.results.year')}</span>
                       <div className="flex gap-4">
-                        <span className="w-20 text-right">Rent</span>
-                        <span className="w-20 text-right">Buy</span>
+                        <span className="w-20 text-right">{t('calculators:rentVsBuy.results.rent')}</span>
+                        <span className="w-20 text-right">{t('calculators:rentVsBuy.results.buy')}</span>
                       </div>
                     </div>
                     {results.yearlyBreakdown.map(({ year, rentCost, buyCost }) => (
                       <div key={year} className="flex justify-between items-center text-xs py-1">
-                        <span className="text-neutral-600 font-medium">Year {year}</span>
+                        <span className="text-neutral-600 font-medium">{t('calculators:rentVsBuy.results.year')} {year}</span>
                         <div className="flex gap-4">
                           <span className={`w-20 text-right ${rentCost < buyCost ? 'text-green-600 font-semibold' : 'text-neutral-500'}`}>
                             {formatPrice(rentCost, country)}
@@ -604,8 +618,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
       </div>
 
       <p className="text-center text-[10px] text-neutral-400 mt-4">
-        This is an estimate for informational purposes. Many factors can influence the costs of buying and renting.
-        Consider consulting with a financial advisor for major decisions.
+        {t('calculators:rentVsBuy.disclaimer')}
       </p>
     </div>
   );

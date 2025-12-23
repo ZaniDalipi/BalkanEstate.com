@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView } from '../../types';
 import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '../../constants';
 
 const BottomNav: React.FC = () => {
+    const { t } = useTranslation(['nav']);
     const { state, dispatch } = useAppContext();
     const { activeView, isAuthenticated, currentUser, conversations } = state;
 
@@ -37,11 +39,11 @@ const BottomNav: React.FC = () => {
     };
 
     const navItems = [
-        { view: 'search' as AppView, label: 'Search', icon: SearchIcon },
-        { view: 'saved-properties' as AppView, label: 'Saved', icon: HeartIcon },
-        { view: 'create-listing' as AppView, label: 'Sell', icon: PencilIcon, isSpecial: true },
-        { view: 'inbox' as AppView, label: 'Inbox', icon: EnvelopeIcon, badge: totalUnreadCount },
-        { view: 'account' as AppView, label: 'Account', icon: UserCircleIcon },
+        { view: 'search' as AppView, label: t('nav:search'), icon: SearchIcon },
+        { view: 'saved-properties' as AppView, label: t('nav:saved'), icon: HeartIcon },
+        { view: 'create-listing' as AppView, label: t('nav:sell'), icon: PencilIcon, isSpecial: true },
+        { view: 'inbox' as AppView, label: t('nav:inbox'), icon: EnvelopeIcon, badge: totalUnreadCount },
+        { view: 'account' as AppView, label: t('nav:account'), icon: UserCircleIcon },
     ];
 
     return (

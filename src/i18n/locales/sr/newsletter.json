@@ -1,0 +1,25 @@
+{
+  "title": "Nikad Ne Propustite Nekretninu",
+  "subtitle": "Budite u Toku",
+  "description": "Dobijte instant obaveštenja za nove oglase koji odgovaraju vašim kriterijumima",
+  "features": {
+    "newListings": "Novi oglasi koji odgovaraju vašim kriterijumima",
+    "priceDrops": "Obaveštenja o sniženju cena sačuvanih nekretnina",
+    "marketInsights": "Nedeljni uvidi i trendovi na tržištu"
+  },
+  "form": {
+    "placeholder": "Unesite vaš email",
+    "submit": "Pretplati se",
+    "subscribing": "Pretplaćivanje..."
+  },
+  "cta": {
+    "title": "Pretplatite se na Bilten",
+    "button": "Pretplatite se Besplatno"
+  },
+  "messages": {
+    "success": "Hvala na pretplati! Proverite inbox za potvrdu.",
+    "error": "Nešto je pošlo naopako. Pokušajte ponovo.",
+    "invalidEmail": "Unesite važeću email adresu"
+  },
+  "privacy": "Pretplatom se slažete sa Politikom Privatnosti. Možete se odjaviti u bilo kom trenutku."
+}

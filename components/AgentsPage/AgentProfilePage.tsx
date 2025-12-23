@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Agent } from '../../types';
 import { Agency } from '../../types';
 import AgencyBadge from '../shared/AgencyBadge';
@@ -79,6 +80,7 @@ const ProfileAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
 };
 
 const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
+    const { t } = useTranslation(['agents']);
     const { state, dispatch, createConversation } = useAppContext();
     const { isLoadingProperties, currentUser } = state;
     const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'reviews'>('overview');
@@ -395,7 +397,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     className="flex items-center gap-2 text-white/90 hover:text-white font-medium transition-colors group"
                                 >
                                     <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                                    <span className="hidden sm:inline">Back</span>
+                                    <span className="hidden sm:inline">{t('profilePage.header.back')}</span>
                                 </button>
 
                                 {/* Agency Brand - Center */}
@@ -418,7 +420,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     )}
                                     <div className="text-left">
                                         <p className="text-sm sm:text-base font-bold text-white leading-tight drop-shadow-sm">{agent.agencyName}</p>
-                                        <p className="text-xs text-white/80 hidden sm:block">View Agency Profile →</p>
+                                        <p className="text-xs text-white/80 hidden sm:block">{t('profilePage.header.viewAgencyProfile')}</p>
                                     </div>
                                 </button>
 
@@ -429,14 +431,14 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         className="flex items-center gap-2 px-2 sm:px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                                     >
                                         <HeartIcon className={`w-5 h-5 ${savedAgent ? 'fill-red-400 text-red-400' : ''}`} />
-                                        <span className="hidden md:inline text-sm font-medium">{savedAgent ? 'Saved' : 'Save'}</span>
+                                        <span className="hidden md:inline text-sm font-medium">{savedAgent ? t('profilePage.header.saved') : t('profilePage.header.save')}</span>
                                     </button>
                                     <button
                                         onClick={handleShareAgent}
                                         className="flex items-center gap-2 px-2 sm:px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                                     >
                                         <ShareIcon className="w-5 h-5" />
-                                        <span className="hidden md:inline text-sm font-medium">Share</span>
+                                        <span className="hidden md:inline text-sm font-medium">{t('profilePage.header.share')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -457,12 +459,12 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     className="flex items-center gap-2 text-white/90 hover:text-white font-medium transition-colors group"
                                 >
                                     <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                                    <span>Back to Agents</span>
+                                    <span>{t('profilePage.header.backToAgents')}</span>
                                 </button>
 
                                 <div className="flex items-center gap-3">
                                     <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                                        <span className="text-white font-semibold text-sm">Independent Agent</span>
+                                        <span className="text-white font-semibold text-sm">{t('profilePage.header.independentAgent')}</span>
                                     </div>
                                 </div>
 
@@ -472,14 +474,14 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         className="flex items-center gap-2 px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                                     >
                                         <HeartIcon className={`w-5 h-5 ${savedAgent ? 'fill-red-400 text-red-400' : ''}`} />
-                                        <span className="hidden sm:inline text-sm font-medium">{savedAgent ? 'Saved' : 'Save'}</span>
+                                        <span className="hidden sm:inline text-sm font-medium">{savedAgent ? t('profilePage.header.saved') : t('profilePage.header.save')}</span>
                                     </button>
                                     <button
                                         onClick={handleShareAgent}
                                         className="flex items-center gap-2 px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                                     >
                                         <ShareIcon className="w-5 h-5" />
-                                        <span className="hidden sm:inline text-sm font-medium">Share</span>
+                                        <span className="hidden sm:inline text-sm font-medium">{t('profilePage.header.share')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -520,7 +522,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 {stats.rating >= 4.5 && (
                                     <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-semibold">
                                         <FireIcon className="w-4 h-4" />
-                                        Top Agent
+                                        {t('profilePage.badges.topAgent')}
                                     </span>
                                 )}
                             </div>
@@ -557,7 +559,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         ))}
                                     </div>
                                     <span className="text-xl font-bold text-gray-900">{stats.rating.toFixed(1)}</span>
-                                    <span className="text-gray-500">({stats.reviews} reviews)</span>
+                                    <span className="text-gray-500">({stats.reviews} {t('profilePage.stats.reviews')})</span>
                                 </div>
                             </div>
 
@@ -565,15 +567,15 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             <div className="flex flex-wrap justify-center lg:justify-start gap-3">
                                 <div className="bg-blue-50 border border-blue-100 px-4 py-2.5 rounded-xl">
                                     <span className="text-2xl font-bold text-blue-700">{stats.totalSales}</span>
-                                    <span className="text-blue-600/80 ml-2 text-sm font-medium">Properties Sold</span>
+                                    <span className="text-blue-600/80 ml-2 text-sm font-medium">{t('profilePage.stats.propertiesSold')}</span>
                                 </div>
                                 <div className="bg-green-50 border border-green-100 px-4 py-2.5 rounded-xl">
                                     <span className="text-2xl font-bold text-green-700">{stats.yearsExperience}+</span>
-                                    <span className="text-green-600/80 ml-2 text-sm font-medium">Years Experience</span>
+                                    <span className="text-green-600/80 ml-2 text-sm font-medium">{t('profilePage.stats.yearsExperience')}</span>
                                 </div>
                                 <div className="bg-purple-50 border border-purple-100 px-4 py-2.5 rounded-xl">
                                     <span className="text-2xl font-bold text-purple-700">{activeListings.length}</span>
-                                    <span className="text-purple-600/80 ml-2 text-sm font-medium">Active Listings</span>
+                                    <span className="text-purple-600/80 ml-2 text-sm font-medium">{t('profilePage.stats.activeListings')}</span>
                                 </div>
                             </div>
                         </div>
@@ -599,7 +601,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-medium text-white/80 mb-1">Member of</p>
+                                                    <p className="text-xs font-medium text-white/80 mb-1">{t('profilePage.agencyCard.memberOf')}</p>
                                                     <h3 className="text-lg font-bold text-white truncate">{agencyData.name}</h3>
                                                 </div>
                                             </div>
@@ -612,14 +614,14 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                             <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <UsersIcon className="w-4 h-4 text-blue-600" />
-                                                    <span className="text-xs text-gray-600 font-medium">Agents</span>
+                                                    <span className="text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.agents')}</span>
                                                 </div>
                                                 <p className="text-2xl font-bold text-gray-900">{agencyData.totalAgents || 0}</p>
                                             </div>
                                             <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <HomeIcon className="w-4 h-4 text-green-600" />
-                                                    <span className="text-xs text-gray-600 font-medium">Properties</span>
+                                                    <span className="text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.properties')}</span>
                                                 </div>
                                                 <p className="text-2xl font-bold text-gray-900">{agencyData.totalProperties || 0}</p>
                                             </div>
@@ -639,7 +641,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
                                         >
                                             <BuildingOfficeIcon className="w-5 h-5" />
-                                            <span>Visit Agency</span>
+                                            <span>{t('profilePage.agencyCard.visitAgency')}</span>
                                             <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                         </button>
                                     </div>
@@ -664,7 +666,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 >
                                     <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                                         <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        <span className="text-xs sm:text-sm md:text-base">Overview</span>
+                                        <span className="text-xs sm:text-sm md:text-base">{t('profilePage.tabs.overview')}</span>
                                     </div>
                                 </button>
                                 <button
@@ -673,7 +675,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 >
                                     <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                                         <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        <span className="text-xs sm:text-sm md:text-base">Listings ({activeListings.length})</span>
+                                        <span className="text-xs sm:text-sm md:text-base">{t('profilePage.tabs.listings')} ({activeListings.length})</span>
                                     </div>
                                 </button>
                                 <button
@@ -682,7 +684,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 >
                                     <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                                         <StarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        <span className="text-xs sm:text-sm md:text-base">Reviews ({stats.reviews})</span>
+                                        <span className="text-xs sm:text-sm md:text-base">{t('profilePage.tabs.reviews')} ({stats.reviews})</span>
                                     </div>
                                 </button>
                             </div>
@@ -694,7 +696,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         {/* About Section */}
                                         <div>
                                             <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">
-                                                About {firstName}
+                                                {t('profilePage.about.title', { name: firstName })}
                                             </h2>
                                             <div className="prose prose-lg text-gray-700 leading-relaxed">
                                                 {agent.bio || (
@@ -712,32 +714,32 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         <div>
                                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                                 <TrendingUpIcon className="w-6 h-6 text-blue-600" />
-                                                Performance & Statistics
+                                                {t('profilePage.performance.title')}
                                             </h3>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
                                                     <div className="text-2xl font-bold text-blue-700">{stats.totalSales}</div>
-                                                    <div className="text-xs font-semibold text-blue-800">Sold</div>
+                                                    <div className="text-xs font-semibold text-blue-800">{t('profilePage.performance.sold')}</div>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
                                                     <div className="text-2xl font-bold text-green-700">{activeListings.length}</div>
-                                                    <div className="text-xs font-semibold text-green-800">Active</div>
+                                                    <div className="text-xs font-semibold text-green-800">{t('profilePage.performance.active')}</div>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
                                                     <div className="text-2xl font-bold text-purple-700">{stats.rating.toFixed(1)}</div>
-                                                    <div className="text-xs font-semibold text-purple-800">Rating</div>
+                                                    <div className="text-xs font-semibold text-purple-800">{t('profilePage.performance.rating')}</div>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
                                                     <div className="text-2xl font-bold text-orange-700">{stats.yearsExperience}+</div>
-                                                    <div className="text-xs font-semibold text-orange-800">Years</div>
+                                                    <div className="text-xs font-semibold text-orange-800">{t('profilePage.performance.years')}</div>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
                                                     <div className="text-2xl font-bold text-red-700">{stats.reviews}</div>
-                                                    <div className="text-xs font-semibold text-red-800">Reviews</div>
+                                                    <div className="text-xs font-semibold text-red-800">{t('profilePage.performance.reviews')}</div>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200">
                                                     <div className="text-2xl font-bold text-indigo-700">{stats.teamMembers}</div>
-                                                    <div className="text-xs font-semibold text-indigo-800">Team</div>
+                                                    <div className="text-xs font-semibold text-indigo-800">{t('profilePage.performance.team')}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -746,7 +748,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         <div>
                                             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                                                 <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
-                                                Credentials & Certifications
+                                                {t('profilePage.credentials.title')}
                                             </h3>
 
                                             <div className="space-y-4">
@@ -757,12 +759,12 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             <CheckBadgeIcon className="w-6 h-6" />
                                                         </div>
                                                         <div className="flex-1">
-                                                            <h4 className="font-bold text-gray-900 text-lg mb-1">Licensed Real Estate Agent</h4>
+                                                            <h4 className="font-bold text-gray-900 text-lg mb-1">{t('profilePage.credentials.licensedAgent')}</h4>
                                                             <p className="text-blue-700 font-mono text-sm font-semibold">
                                                                 {agent.licenseNumber || `${agent.country?.substring(0, 2).toUpperCase() || 'XX'}-REA-${Math.floor(10000 + Math.random() * 90000)}`}
                                                             </p>
                                                             <p className="text-gray-600 text-sm mt-1">
-                                                                Authorized to practice in {agent.city}, {agent.country}
+                                                                {t('profilePage.credentials.authorizedToPractice', { city: agent.city, country: agent.country })}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -775,7 +777,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             <AcademicCapIcon className="w-6 h-6" />
                                                         </div>
                                                         <div className="flex-1">
-                                                            <h4 className="font-bold text-gray-900 mb-2">Professional Certifications</h4>
+                                                            <h4 className="font-bold text-gray-900 mb-2">{t('profilePage.credentials.professionalCertifications')}</h4>
                                                             {agent.certifications && Array.isArray(agent.certifications) && agent.certifications.length > 0 ? (
                                                                 <ul className="space-y-2">
                                                                     {agent.certifications.map((cert, idx) => (
@@ -786,7 +788,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                     ))}
                                                                 </ul>
                                                             ) : (
-                                                                <p className="text-gray-600">Member of National Association</p>
+                                                                <p className="text-gray-600">{t('profilePage.credentials.memberOfAssociation')}</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -799,7 +801,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             <TrophyIcon className="w-6 h-6" />
                                                         </div>
                                                         <div className="flex-1">
-                                                            <h4 className="font-bold text-gray-900 mb-2">Awards & Recognition</h4>
+                                                            <h4 className="font-bold text-gray-900 mb-2">{t('profilePage.credentials.awardsRecognition')}</h4>
                                                             {agent.awards && Array.isArray(agent.awards) && agent.awards.length > 0 ? (
                                                                 <ul className="space-y-2">
                                                                     {agent.awards.map((award, idx) => (
@@ -810,7 +812,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                     ))}
                                                                 </ul>
                                                             ) : (
-                                                                <p className="text-gray-600">No awards listed</p>
+                                                                <p className="text-gray-600">{t('profilePage.credentials.noAwards')}</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -822,7 +824,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         <div>
                                             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                                                 <ChartBarIcon className="w-6 h-6 text-blue-600" />
-                                                Local Market Insights
+                                                {t('profilePage.marketInsights.title')}
                                                 <span className="text-sm font-normal text-gray-600 ml-2">({agent.city})</span>
                                             </h3>
 
@@ -835,13 +837,13 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <ClockIcon className="w-5 h-5 text-blue-600" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-600 font-medium">Avg. Days on Market</p>
+                                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.avgDaysOnMarket')}</p>
                                                                 <p className="text-2xl font-bold text-gray-900">
-                                                                    {agent.marketStats?.avgDaysOnMarket || '24'} <span className="text-sm font-normal text-gray-600">days</span>
+                                                                    {agent.marketStats?.avgDaysOnMarket || '24'} <span className="text-sm font-normal text-gray-600">{t('profilePage.marketInsights.days')}</span>
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <p className="text-xs text-gray-500">Faster than average</p>
+                                                        <p className="text-xs text-gray-500">{t('profilePage.marketInsights.fasterThanAverage')}</p>
                                                     </div>
 
                                                     {/* Price Growth */}
@@ -851,13 +853,13 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-600 font-medium">Price Growth (YoY)</p>
+                                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.priceGrowthYoY')}</p>
                                                                 <p className="text-2xl font-bold text-green-600">
                                                                     +{agent.marketStats?.priceGrowthYoY || '5.2'}%
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <p className="text-xs text-gray-500">Healthy appreciation</p>
+                                                        <p className="text-xs text-gray-500">{t('profilePage.marketInsights.healthyAppreciation')}</p>
                                                     </div>
 
                                                     {/* Market Activity */}
@@ -867,13 +869,13 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <FireIcon className="w-5 h-5 text-purple-600" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-600 font-medium">Market Activity</p>
+                                                                <p className="text-xs text-gray-600 font-medium">{t('profilePage.marketInsights.marketActivity')}</p>
                                                                 <p className="text-2xl font-bold text-purple-600">
                                                                     {agent.marketStats?.activityLevel || 'High'}
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <p className="text-xs text-gray-500">Strong demand</p>
+                                                        <p className="text-xs text-gray-500">{t('profilePage.marketInsights.strongDemand')}</p>
                                                     </div>
                                                 </div>
 
@@ -883,11 +885,11 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                     className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
                                                 >
                                                     <DocumentTextIcon className="w-5 h-5" />
-                                                    <span>Request Full Market Report</span>
+                                                    <span>{t('profilePage.marketInsights.requestFullReport')}</span>
                                                     <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                 </button>
                                                 <p className="text-center text-xs text-gray-600 mt-3">
-                                                    Get detailed insights about the {agent.city} real estate market
+                                                    {t('profilePage.marketInsights.getDetailedInsights', { city: agent.city })}
                                                 </p>
                                             </div>
                                         </div>
@@ -897,9 +899,9 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                             <div>
                                                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                                     <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-                                                    Properties Map
+                                                    {t('profilePage.propertiesMap.title')}
                                                     <span className="text-sm font-normal text-gray-600 ml-2">
-                                                        ({activeListings.length} active, {soldProperties.length} sold)
+                                                        ({activeListings.length} {t('profilePage.propertiesMap.active')}, {soldProperties.length} {t('profilePage.propertiesMap.sold')})
                                                     </span>
                                                 </h3>
                                                 <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
@@ -939,9 +941,9 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                         <p className="text-xs text-gray-600 mb-2">{property.city}, {property.country}</p>
                                                                         <p className="font-bold text-blue-600 mb-2">{formatPrice(property.price, property.country)}</p>
                                                                         <div className="flex gap-2 text-xs text-gray-600 mb-3">
-                                                                            <span>{property.beds} beds</span>
+                                                                            <span>{property.beds} {t('profilePage.propertiesMap.beds')}</span>
                                                                             <span>•</span>
-                                                                            <span>{property.baths} baths</span>
+                                                                            <span>{property.baths} {t('profilePage.propertiesMap.baths')}</span>
                                                                             <span>•</span>
                                                                             <span>{property.sqft} m²</span>
                                                                         </div>
@@ -952,7 +954,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                             }}
                                                                             className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                                                                         >
-                                                                            {property.status === 'sold' ? 'View Sold Property' : 'View Details'}
+                                                                            {property.status === 'sold' ? t('profilePage.propertiesMap.viewSoldProperty') : t('profilePage.propertiesMap.viewDetails')}
                                                                         </button>
                                                                     </div>
                                                                 </Popup>
@@ -963,11 +965,11 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                 <div className="mt-3 flex items-center justify-center gap-6 text-sm">
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                                                        <span className="text-gray-600">For Sale ({activeListings.length})</span>
+                                                        <span className="text-gray-600">{t('profilePage.propertiesMap.forSale')} ({activeListings.length})</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                                                        <span className="text-gray-600">Sold ({soldProperties.length})</span>
+                                                        <span className="text-gray-600">{t('profilePage.propertiesMap.soldLabel')} ({soldProperties.length})</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -978,7 +980,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                                     <MapPinIcon className="w-6 h-6 text-blue-600" />
-                                                    Service Area Location
+                                                    {t('profilePage.serviceArea.title')}
                                                 </h3>
                                                 <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
                                                     <MapContainer
@@ -1066,7 +1068,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
 
                                         {/* Specializations Grid */}
                                         <div>
-                                            <h3 className="text-xl font-bold text-gray-900 mb-6">Areas of Expertise</h3>
+                                            <h3 className="text-xl font-bold text-gray-900 mb-6">{t('profilePage.expertise.title')}</h3>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                                 {agent.specializations && agent.specializations.length > 0 ? (
                                                     agent.specializations.map((spec) => (
@@ -1089,7 +1091,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <div className="p-2 bg-blue-100 rounded-lg">
                                                                     <HomeModernIcon className="w-5 h-5 text-blue-600" />
                                                                 </div>
-                                                                <span className="font-semibold text-gray-800">Residential Properties</span>
+                                                                <span className="font-semibold text-gray-800">{t('profilePage.expertise.residential')}</span>
                                                             </div>
                                                         </div>
                                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
@@ -1097,7 +1099,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <div className="p-2 bg-green-100 rounded-lg">
                                                                     <UserIcon className="w-5 h-5 text-green-600" />
                                                                 </div>
-                                                                <span className="font-semibold text-gray-800">First Time Homebuyers</span>
+                                                                <span className="font-semibold text-gray-800">{t('profilePage.expertise.firstTimeBuyers')}</span>
                                                             </div>
                                                         </div>
                                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
@@ -1105,7 +1107,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <div className="p-2 bg-purple-100 rounded-lg">
                                                                     <BuildingLibraryIcon className="w-5 h-5 text-purple-600" />
                                                                 </div>
-                                                                <span className="font-semibold text-gray-800">Property Management</span>
+                                                                <span className="font-semibold text-gray-800">{t('profilePage.expertise.propertyManagement')}</span>
                                                             </div>
                                                         </div>
                                                     </>
@@ -1116,7 +1118,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         {/* Languages Section */}
                                         {agent.languages && agent.languages.length > 0 && (
                                             <div>
-                                                <h3 className="text-xl font-bold text-gray-900 mb-4">Languages Spoken</h3>
+                                                <h3 className="text-xl font-bold text-gray-900 mb-4">{t('profilePage.languages.title')}</h3>
                                                 <div className="flex flex-wrap gap-2">
                                                     {agent.languages.map((lang) => (
                                                         <span key={lang} className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
@@ -1135,10 +1137,10 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                                    {firstName}'s Properties
+                                                    {t('profilePage.listingsTab.properties', { name: firstName })}
                                                 </h2>
                                                 <p className="text-gray-600">
-                                                    {activeListings.length} active listings • {soldProperties.length} sold properties
+                                                    {t('profilePage.listingsTab.activeListingsCount', { active: activeListings.length, sold: soldProperties.length })}
                                                 </p>
                                             </div>
                                             <button
@@ -1146,14 +1148,14 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
                                             >
                                                 <MagnifyingGlassIcon className="w-5 h-5" />
-                                                Search all properties
+                                                {t('profilePage.listingsTab.searchAllProperties')}
                                             </button>
                                         </div>
 
                                         {/* Active Listings */}
                                         {activeListings.length > 0 && (
                                             <div>
-                                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Active Listings</h3>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
                                                 {isLoadingProperties ? (
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                                         <PropertyCardSkeleton />
@@ -1173,13 +1175,13 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     
                                         {soldProperties.length > 0 && (
                                             <div>
-                                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Sold Properties ({soldProperties.length})</h3>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.soldProperties')} ({soldProperties.length})</h3>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                                     {soldProperties.map(prop => (
                                                         <div key={prop.id} className="relative">
                                                             <PropertyCard property={prop} />
                                                             <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
-                                                                SOLD
+                                                                {t('profilePage.listingsTab.soldBadge')}
                                                             </div>
                                                         </div>
                                                     ))}
@@ -1201,7 +1203,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                     </div>
                                                     <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                                                         <StarRating rating={agent.rating || 0} />
-                                                        <span className="text-gray-600">({stats.reviews} verified reviews)</span>
+                                                        <span className="text-gray-600">({stats.reviews} {t('profilePage.reviewsTab.verifiedReviews')})</span>
                                                     </div>
                                                     <p className="text-gray-700">
                                                         {firstName} is rated as a {agent.rating && agent.rating >= 4.5 ? 'Top Performer' : 'Reliable'} Agent
@@ -1213,7 +1215,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                         onClick={() => setShowReviewForm(true)}
                                                         className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-xl font-semibold transition-colors shadow-sm hover:shadow-md"
                                                     >
-                                                        Write a Review
+                                                        {t('profilePage.reviewsTab.writeReview')}
                                                     </button>
                                                 )}
                                             </div>
@@ -1285,8 +1287,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         ) : (
                                             <div className="text-center py-12">
                                                 <StarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                                <p className="text-gray-600 text-lg mb-2">No reviews yet</p>
-                                                <p className="text-gray-500">Be the first to review {firstName}'s services</p>
+                                                <p className="text-gray-600 text-lg mb-2">{t('profilePage.reviewsTab.noReviews')}</p>
+                                                <p className="text-gray-500">{t('profilePage.reviewsTab.beFirstToReview', { name: firstName })}</p>
                                             </div>
                                         )}
                                     </div>
@@ -1299,7 +1301,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                     <div className="lg:w-1/3">
                         {/* Contact Agent Card */}
                         <div className="bg-gradient-to-b from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-6 mb-6 text-white">
-                            <h3 className="text-xl font-bold mb-4">Contact {firstName}</h3>
+                            <h3 className="text-xl font-bold mb-4">{t('profilePage.contact.title', { name: firstName })}</h3>
                             
                             {agent.phone && (
                                 <a 
@@ -1308,7 +1310,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 >
                                     <PhoneIcon className="w-6 h-6" />
                                     <div>
-                                        <div className="font-semibold">Call Direct</div>
+                                        <div className="font-semibold">{t('profilePage.contact.callDirect')}</div>
                                         <div className="text-lg font-bold">{agent.phone}</div>
                                     </div>
                                 </a>
@@ -1321,7 +1323,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 >
                                     <EnvelopeIcon className="w-6 h-6" />
                                     <div>
-                                        <div className="font-semibold">Send Email</div>
+                                        <div className="font-semibold">{t('profilePage.contact.sendEmail')}</div>
                                         <div className="text-sm truncate">{agent.email}</div>
                                     </div>
                                 </a>
@@ -1330,19 +1332,19 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
 
                         {/* Request Appraisal Card */}
                         <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-4">Get a Free Property Appraisal</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">{t('profilePage.appraisal.title')}</h3>
                             <p className="text-gray-600 mb-4">
-                                Curious what your property is worth? {firstName} can provide a free, no-obligation market appraisal.
+                                {t('profilePage.appraisal.description', { name: firstName })}
                             </p>
                             <button
                                 onClick={handleRequestAppraisal}
                                 className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg"
                             >
-                                Request Appraisal
+                                {t('profilePage.appraisal.requestAppraisal')}
                             </button>
                             <div className="text-center text-sm text-gray-500 mt-3">
                                 <CheckCircleIcon className="w-4 h-4 inline mr-1 text-green-500" />
-                                Free • No obligation
+                                {t('profilePage.appraisal.freeNoObligation')}
                             </div>
                         </div>
 
@@ -1350,7 +1352,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                         <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <UsersIcon className="w-5 h-5 text-blue-600" />
-                                {isAgencyAgent ? 'Agents from Same Agency' : 'Other Agents in Area'}
+                                {isAgencyAgent ? t('profilePage.similarAgents.fromSameAgency') : t('profilePage.similarAgents.otherInArea')}
                             </h3>
                             {loadingSimilarAgents ? (
                                 <div className="space-y-4">
@@ -1400,14 +1402,14 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             ) : (
                                 <div className="text-center py-6">
                                     <UsersIcon className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                                    <p className="text-gray-600 font-medium">No similar agents found</p>
+                                    <p className="text-gray-600 font-medium">{t('profilePage.similarAgents.noSimilarAgents')}</p>
                                 </div>
                             )}
                             <button
                                 onClick={handleViewMoreAgents}
                                 className="w-full mt-4 text-center text-blue-600 hover:text-blue-700 font-semibold text-sm py-2"
                             >
-                                View more agents in {agent.city || 'this area'} →
+                                {agent.city ? t('profilePage.similarAgents.viewMoreIn', { city: agent.city }) : t('profilePage.similarAgents.viewMoreGeneric')}
                             </button>
                         </div>
 
@@ -1474,22 +1476,22 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             {/* Bottom CTA */}
             <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl font-bold mb-4">Ready to work with {firstName}?</h2>
+                    <h2 className="text-3xl font-bold mb-4">{t('profilePage.bottomCta.readyToWork', { name: firstName })}</h2>
                     <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                        Contact {firstName} today for expert real estate advice and personalized service.
+                        {t('profilePage.bottomCta.contactToday', { name: firstName })}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <a
                             href={`tel:${agent.phone || ''}`}
                             className="bg-white text-gray-900 hover:bg-gray-100 font-bold py-3 px-8 rounded-xl transition-colors shadow-lg"
                         >
-                            Call Now: {agent.phone || '(Contact for number)'}
+                            {agent.phone ? t('profilePage.bottomCta.callNow', { phone: agent.phone }) : t('profilePage.bottomCta.contactForNumber')}
                         </a>
                         <button
                             onClick={handleScheduleConsultation}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-colors"
                         >
-                            Schedule Consultation
+                            {t('profilePage.bottomCta.scheduleConsultation')}
                         </button>
                     </div>
                 </div>
@@ -1498,7 +1500,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             {/* Featured Agencies */}
             <div className="bg-neutral-50 py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h3 className="text-xl font-bold text-neutral-800 mb-4">Featured Agencies</h3>
+                    <h3 className="text-xl font-bold text-neutral-800 mb-4">{t('profilePage.featuredAgencies')}</h3>
                     <FeaturedAgencies />
                 </div>
             </div>
@@ -1507,7 +1509,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             {showShareToast && (
                 <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-xl z-50 flex items-center gap-3 animate-fade-in">
                     <CheckCircleIcon className="w-5 h-5 text-green-400" />
-                    <span>Link copied to clipboard!</span>
+                    <span>{t('profilePage.linkCopied')}</span>
                 </div>
             )}
 
@@ -1516,7 +1518,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900">Request Property Appraisal</h3>
+                            <h3 className="text-xl font-bold text-gray-900">{t('profilePage.appraisalModal.title')}</h3>
                             <button
                                 onClick={() => setShowAppraisalModal(false)}
                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1527,7 +1529,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                         <form onSubmit={handleSubmitAppraisal} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Property Address *
+                                    {t('profilePage.appraisalModal.propertyAddress')}
                                 </label>
                                 <input
                                     type="text"
@@ -1535,12 +1537,12 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     value={appraisalForm.address}
                                     onChange={(e) => setAppraisalForm({ ...appraisalForm, address: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter property address"
+                                    placeholder={t('profilePage.appraisalModal.enterAddress')}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Property Type *
+                                    {t('profilePage.appraisalModal.propertyType')}
                                 </label>
                                 <select
                                     required
@@ -1548,25 +1550,25 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     onChange={(e) => setAppraisalForm({ ...appraisalForm, propertyType: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
-                                    <option value="">Select property type</option>
-                                    <option value="apartment">Apartment</option>
-                                    <option value="house">House</option>
-                                    <option value="villa">Villa</option>
-                                    <option value="land">Land</option>
-                                    <option value="commercial">Commercial</option>
-                                    <option value="other">Other</option>
+                                    <option value="">{t('profilePage.appraisalModal.selectType')}</option>
+                                    <option value="apartment">{t('profilePage.appraisalModal.apartment')}</option>
+                                    <option value="house">{t('profilePage.appraisalModal.house')}</option>
+                                    <option value="villa">{t('profilePage.appraisalModal.villa')}</option>
+                                    <option value="land">{t('profilePage.appraisalModal.land')}</option>
+                                    <option value="commercial">{t('profilePage.appraisalModal.commercial')}</option>
+                                    <option value="other">{t('profilePage.appraisalModal.other')}</option>
                                 </select>
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Additional Notes
+                                    {t('profilePage.appraisalModal.additionalNotes')}
                                 </label>
                                 <textarea
                                     value={appraisalForm.notes}
                                     onChange={(e) => setAppraisalForm({ ...appraisalForm, notes: e.target.value })}
                                     rows={3}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                    placeholder="Any additional information about the property..."
+                                    placeholder={t('profilePage.appraisalModal.additionalInfo')}
                                 />
                             </div>
                             <div className="flex gap-3 pt-4">
@@ -1575,7 +1577,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     onClick={() => setShowAppraisalModal(false)}
                                     className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
                                 >
-                                    Cancel
+                                    {t('profilePage.appraisalModal.cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -1585,10 +1587,10 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     {isSubmitting ? (
                                         <>
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                            Sending...
+                                            {t('profilePage.appraisalModal.sending')}
                                         </>
                                     ) : (
-                                        'Submit Request'
+                                        t('profilePage.appraisalModal.submitRequest')
                                     )}
                                 </button>
                             </div>
@@ -1602,7 +1604,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900">Schedule Consultation</h3>
+                            <h3 className="text-xl font-bold text-gray-900">{t('profilePage.consultationModal.title')}</h3>
                             <button
                                 onClick={() => setShowConsultationModal(false)}
                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1614,7 +1616,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Preferred Date *
+                                        {t('profilePage.consultationModal.preferredDate')}
                                     </label>
                                     <input
                                         type="date"
@@ -1627,7 +1629,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Preferred Time *
+                                        {t('profilePage.consultationModal.preferredTime')}
                                     </label>
                                     <select
                                         required
@@ -1635,7 +1637,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         onChange={(e) => setConsultationForm({ ...consultationForm, time: e.target.value })}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     >
-                                        <option value="">Select time</option>
+                                        <option value="">{t('profilePage.consultationModal.selectTime')}</option>
                                         <option value="09:00">09:00 AM</option>
                                         <option value="10:00">10:00 AM</option>
                                         <option value="11:00">11:00 AM</option>
@@ -1650,7 +1652,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Topic *
+                                    {t('profilePage.consultationModal.topic')}
                                 </label>
                                 <select
                                     required
@@ -1658,24 +1660,24 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     onChange={(e) => setConsultationForm({ ...consultationForm, topic: e.target.value })}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
-                                    <option value="">Select topic</option>
-                                    <option value="buying">Buying a Property</option>
-                                    <option value="selling">Selling a Property</option>
-                                    <option value="investing">Real Estate Investment</option>
-                                    <option value="market">Market Analysis</option>
-                                    <option value="other">Other</option>
+                                    <option value="">{t('profilePage.consultationModal.selectTopic')}</option>
+                                    <option value="buying">{t('profilePage.consultationModal.buyingProperty')}</option>
+                                    <option value="selling">{t('profilePage.consultationModal.sellingProperty')}</option>
+                                    <option value="investing">{t('profilePage.consultationModal.realEstateInvestment')}</option>
+                                    <option value="market">{t('profilePage.consultationModal.marketAnalysis')}</option>
+                                    <option value="other">{t('profilePage.consultationModal.other')}</option>
                                 </select>
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Additional Notes
+                                    {t('profilePage.consultationModal.additionalNotes')}
                                 </label>
                                 <textarea
                                     value={consultationForm.notes}
                                     onChange={(e) => setConsultationForm({ ...consultationForm, notes: e.target.value })}
                                     rows={3}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                    placeholder="What would you like to discuss?"
+                                    placeholder={t('profilePage.consultationModal.whatToDiscuss')}
                                 />
                             </div>
                             <div className="flex gap-3 pt-4">
@@ -1684,7 +1686,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     onClick={() => setShowConsultationModal(false)}
                                     className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
                                 >
-                                    Cancel
+                                    {t('profilePage.consultationModal.cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -1694,10 +1696,10 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     {isSubmitting ? (
                                         <>
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                            Scheduling...
+                                            {t('profilePage.consultationModal.scheduling')}
                                         </>
                                     ) : (
-                                        'Schedule Consultation'
+                                        t('profilePage.consultationModal.scheduleConsultation')
                                     )}
                                 </button>
                             </div>

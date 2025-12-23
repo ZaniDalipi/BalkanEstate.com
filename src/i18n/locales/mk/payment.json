@@ -1,0 +1,38 @@
+{
+  "success": {
+    "verifying": "Verifying Payment...",
+    "verifyingDescription": "Please wait while we confirm your transaction",
+    "verificationFailed": "Payment Verification Failed",
+    "returnToAccount": "Return to Account",
+    "title": "Payment Successful!",
+    "description": "Thank you for your purchase. Your subscription has been activated.",
+    "details": "Payment Details",
+    "status": "Status",
+    "paid": "Paid",
+    "amount": "Amount",
+    "email": "Email",
+    "sessionId": "Session ID",
+    "whatsNext": "What's Next?",
+    "subscriptionActive": "Your subscription is now active",
+    "premiumAccess": "You have access to all premium features",
+    "confirmationSent": "A confirmation email has been sent",
+    "goToAccount": "Go to My Account",
+    "browseProperties": "Browse Properties",
+    "noSessionFound": "No payment session found",
+    "loginToVerify": "Please log in to verify your payment"
+  },
+  "cancel": {
+    "title": "Payment Cancelled",
+    "description": "Your payment was not completed. No charges were made.",
+    "whyHappened": "Why did this happen?",
+    "clickedCancel": "You clicked the back or cancel button",
+    "windowClosed": "The payment window was closed",
+    "sessionTimeout": "The session timed out",
+    "goodNews": "Good news!",
+    "noCharges": "Your payment information was not saved and no charges were made. You can try again whenever you're ready.",
+    "tryAgain": "Try Again",
+    "returnHome": "Return to Home",
+    "havingTrouble": "Having trouble?",
+    "contactSupport": "Contact Support"
+  }
+}

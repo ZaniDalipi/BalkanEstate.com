@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from '../../shared/Modal';
 import PaymentWindow from '../../shared/PaymentWindow';
 import { AtSymbolIcon, UserIcon, BuildingOfficeIcon, CheckCircleIcon } from '../../../constants';
@@ -12,6 +13,7 @@ interface SubscriptionModalProps {
 }
 
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, initialEmail }) => {
+  const { t } = useTranslation(['modals']);
   const { state, dispatch } = useAppContext();
   const [activeTab, setActiveTab] = useState<'buyer' | 'seller'>('buyer');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
@@ -113,7 +115,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
         {loading ? (
           <div className="col-span-2 text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-neutral-600">Loading plans...</p>
+            <p className="mt-4 text-neutral-600">{t('modals:subscription.loadingPlans')}</p>
           </div>
         ) : (
           <>
@@ -121,7 +123,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
                <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{buyerName}</h3>
                <div className="mt-4">
                   <span className="text-3xl sm:text-4xl font-extrabold text-primary">€{buyerPrice}</span>
-                  <span className="text-base sm:text-lg font-semibold text-neutral-500">/month</span>
+                  <span className="text-base sm:text-lg font-semibold text-neutral-500">{t('modals:subscription.perMonth')}</span>
                </div>
                <p className="text-neutral-600 mt-3 text-sm sm:text-base">{buyerProduct?.description || 'Never miss a new listing! Get notified the moment a property matching your criteria hits the market.'}</p>
               <ul className="mt-8 space-y-4 text-neutral-700 text-sm sm:text-base">
@@ -136,7 +138,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
         <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
              <form onSubmit={handleSubscribeClick}>
                 <div className="mb-6">
-                    <label htmlFor="email_sub" className="block text-neutral-700 font-semibold mb-3 text-sm">Email Address</label>
+                    <label htmlFor="email_sub" className="block text-neutral-700 font-semibold mb-3 text-sm">{t('modals:subscription.emailAddress')}</label>
                     <div className="relative">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                             <AtSymbolIcon className="h-5 w-5 text-neutral-400" />
@@ -153,10 +155,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
                     </div>
                 </div>
                 <button type="submit" className="w-full bg-gradient-to-r from-secondary to-secondary/90 text-white py-3.5 rounded-lg font-bold hover:shadow-xl hover:scale-[1.02] transition-all shadow-md">
-                    Continue to Payment
+                    {t('modals:subscription.continueToPayment')}
                 </button>
                 <p className="text-xs text-neutral-500 text-center mt-4">
-                  Secure payment powered by Stripe
+                  {t('modals:subscription.securePayment')}
                 </p>
             </form>
         </div>
@@ -169,9 +171,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     <div className="animate-fade-in p-4 sm:p-6">
         <div className="text-center mb-6">
             <BuildingOfficeIcon className="w-12 h-12 text-primary mx-auto mb-3" />
-            <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">Listing Promotion Plans</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('modals:subscription.sellerPromotion.title')}</h3>
             <p className="text-neutral-600 mt-2 max-w-md mx-auto text-sm">
-                Boost your property listings to get more visibility and inquiries
+                {t('modals:subscription.sellerPromotion.description')}
             </p>
         </div>
 
@@ -275,13 +277,13 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
                 onClick={handleViewSellerPlans}
                 className="flex-1 px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-gray-400 hover:shadow transition-all"
             >
-                View Subscription Plans
+                {t('modals:subscription.sellerPromotion.viewSubscriptionPlans')}
             </button>
             <button
                 onClick={onClose}
                 className="flex-1 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors"
             >
-                Start Creating Listing
+                {t('modals:subscription.sellerPromotion.startCreatingListing')}
             </button>
         </div>
     </div>
@@ -290,21 +292,21 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl" title="Choose Your Plan">
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl" title={t('modals:subscription.title')}>
           <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-md mx-auto mb-8">
               <button
                   onClick={() => setActiveTab('buyer')}
                   className={`w-1/2 px-4 py-2.5 rounded-full text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'buyer' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}
               >
                   <UserIcon className="w-5 h-5"/>
-                  For Buyers
+                  {t('modals:subscription.forBuyers')}
               </button>
               <button
                   onClick={() => setActiveTab('seller')}
                   className={`w-1/2 px-4 py-2.5 rounded-full text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'seller' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}
               >
                   <BuildingOfficeIcon className="w-5 h-5"/>
-                  For Sellers
+                  {t('modals:subscription.forSellers')}
               </button>
           </div>
 
@@ -312,7 +314,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
 
           <div className="text-center mt-8 pt-4">
               <button onClick={onClose} className="text-sm font-semibold text-neutral-500 hover:text-neutral-700 transition-colors">
-                  Maybe later
+                  {t('modals:common.maybeLater')}
               </button>
           </div>
       </Modal>

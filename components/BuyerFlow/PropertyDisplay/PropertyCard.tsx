@@ -1,8 +1,10 @@
 import React, { useState, useCallback, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
 import { formatPrice } from '../../../utils/currency';
+import { BALKAN_COUNTRIES } from '../../../constants/countries';
 
 interface PropertyCardProps {
   property: Property;
@@ -11,7 +13,8 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
-  const { state, dispatch, toggleSavedHome } = useAppContext();
+  const { t } = useTranslation(['property', 'common']);
+  const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
@@ -58,14 +61,48 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       }
   }, [isInComparison, dispatch, property.id, state.comparisonList.length, showToast]);
 
-  // Property type labels (short versions for mobile)
-  const propertyTypeLabel = {
-    apartment: 'Apt',
-    house: 'House',
-    villa: 'Villa',
-    land: 'Land',
-    commercial: 'Comm',
-  }[property.propertyType] || 'Property';
+  // Handle location click to navigate to search with city/country filter
+  const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
+    e.stopPropagation();
+
+    // Find the country key from BALKAN_COUNTRIES
+    const countryKey = Object.keys(BALKAN_COUNTRIES).find(
+      key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
+    ) || '';
+
+    if (type === 'city') {
+      // Navigate to search with city filter
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: property.city,
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
+    } else {
+      // Navigate to search with country filter only
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: '',
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
+    }
+  }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
+
+  // Property type labels
+  const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
   // Determine card styles based on promotion tier
   const getCardStyles = () => {
@@ -98,7 +135,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
             <img
               src={property.imageUrl}
-              alt={property.address}
+              alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
+              loading="lazy"
+              decoding="async"
               className={`w-full h-full object-cover transition-transform duration-700 ${
                 isHovered && !isSold ? 'scale-110' : 'scale-100'
               } ${isSold ? 'grayscale' : ''}`}
@@ -116,7 +155,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             {isSold && (
               <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                SOLD
+                {t('property:sold').toUpperCase()}
               </div>
             )}
 
@@ -127,7 +166,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
                 </span>
-                NEW
+                {t('property:status.new').toUpperCase()}
               </div>
             )}
 
@@ -143,9 +182,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   : 'bg-gradient-to-r from-gray-600 to-gray-700'
               }`}>
                 <span className="text-xs">✨</span>
-                {promotionTier === 'premium' && 'PREMIUM'}
+                {promotionTier === 'premium' && t('common:premium').toUpperCase()}
                 {promotionTier === 'highlight' && 'HIGHLIGHT'}
-                {promotionTier === 'featured' && 'FEATURED'}
+                {promotionTier === 'featured' && t('common:featured').toUpperCase()}
                 {promotionTier === 'standard' && 'PROMOTED'}
               </div>
             )}
@@ -153,7 +192,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             {/* Urgent Badge */}
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
               <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg animate-pulse flex items-center gap-1">
-                🔥 URGENT
+                🔥 {t('property:status.urgent').toUpperCase()}
               </div>
             )}
 
@@ -212,29 +251,43 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </h3>
         )}
 
-        {/* Location */}
+        {/* Location - Clickable for navigation */}
         <div className="flex items-center gap-1.5 mb-3">
           <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-          <span className="text-xs sm:text-sm text-neutral-600 truncate">
-            {property.city}, {property.country}
-          </span>
+          <div className="text-xs sm:text-sm text-neutral-600 truncate flex items-center gap-1">
+            <button
+              onClick={(e) => handleLocationClick(e, 'city')}
+              className="hover:text-primary hover:underline transition-colors cursor-pointer"
+              title={`View all properties in ${property.city}`}
+            >
+              {property.city}
+            </button>
+            <span>,</span>
+            <button
+              onClick={(e) => handleLocationClick(e, 'country')}
+              className="hover:text-primary hover:underline transition-colors cursor-pointer"
+              title={`View all properties in ${property.country}`}
+            >
+              {property.country}
+            </button>
+          </div>
         </div>
 
         {/* Property Stats - Grid layout for better fit */}
         <div className="grid grid-cols-4 gap-1.5 mb-3">
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} bedrooms`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} ${t('property:features.bedrooms')}`}>
             <BedIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.beds}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} bathrooms`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} ${t('property:features.bathrooms')}`}>
             <BathIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.baths}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} living rooms`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
             <LivingRoomIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.livingRooms}</span>
           </div>
-          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} m²`}>
+          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
             <SqftIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-primary">{property.sqft}</span>
           </div>
@@ -250,7 +303,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               {property.seller.avatarUrl ? (
                 <img
                   src={property.seller.avatarUrl}
-                  alt={property.seller.name}
+                  alt={`${property.seller.name} - Real Estate ${property.seller.type === 'agent' ? 'Agent' : 'Seller'}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-8 h-8 rounded-full object-cover border-2 border-white shadow"
                 />
               ) : (
@@ -269,7 +324,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   ? 'bg-blue-500 text-white'
                   : 'bg-neutral-200 text-neutral-600'
               }`}>
-                {property.seller.type === 'agent' ? 'Agent' : 'Private'}
+                {property.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
             </div>
 
@@ -279,14 +334,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                 {property.seller.agencyLogo ? (
                   <img
                     src={property.seller.agencyLogo}
-                    alt={property.seller.agencyName}
+                    alt={`${property.seller.agencyName} - Real Estate Agency`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-6 h-6 rounded object-contain bg-white"
                   />
                 ) : (
                   <BuildingOfficeIcon className="w-5 h-5 text-primary" />
                 )}
                 <div className="hidden sm:block">
-                  <p className="text-[9px] text-neutral-500 leading-none">Agency</p>
+                  <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
                   <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[60px]">{property.seller.agencyName}</p>
                 </div>
               </div>
@@ -304,7 +361,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               }`}
             >
               <ScaleIcon className="w-4 h-4" />
-              <span>{isInComparison ? 'In Compare' : 'Add to Compare'}</span>
+              <span>{isInComparison ? t('property:actions.removeFromCompare') : t('property:actions.addToCompare')}</span>
             </button>
           )}
         </div>

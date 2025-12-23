@@ -1,0 +1,102 @@
+{
+  "title": "Zgjidhni Planin Tuaj të Shitjes",
+  "subtitle": "Vendosni pronën tuaj përpara mijëra blerësve potencialë",
+  "loading": "Duke ngarkuar planet...",
+  "limitedOffer": "Oferta e Kufizuar Përfundon Në:",
+  "offerTitle": "Urime! Keni Hapur Zbritje Ekskluzive!",
+  "offerSubtitle": "Shijoni këtë ofertë një herë në planet tona të shitjes si falënderim.",
+  "plans": {
+    "free": {
+      "name": "Falas",
+      "description": "Perfekt për të filluar"
+    },
+    "proMonthly": {
+      "name": "Pro Mujor",
+      "description": "Më i miri për shitës aktivë",
+      "badge": "Popullor"
+    },
+    "proYearly": {
+      "name": "Pro Vjetor",
+      "description": "Kurse {{percent}}% me faturim vjetor",
+      "badge": "MË POPULLORI"
+    },
+    "enterprise": {
+      "name": "Plani Ndërmarrje",
+      "description": "Për agjenci dhe profesionistë"
+    }
+  },
+  "features": {
+    "activeListings": "Deri në {{count}} shpallje aktive",
+    "promotedListings": "Promovo {{count}} shpallje për {{days}} ditë",
+    "featuredListings": "{{count}} shpallje të veçuara",
+    "prioritySupport": "Mbështetje prioritare",
+    "prioritySupportDesc": "Merrni ndihmë më shpejt",
+    "analytics": "Panel analitike i avancuar",
+    "analyticsDesc": "Ndiqni performancën e shpalljeve tuaja",
+    "premiumPlacement": "Vendosje premium e shpalljeve",
+    "leadManagement": "Sistem menaxhimi i klientëve",
+    "teamMembers": "Deri në {{count}} anëtarë ekipi",
+    "apiAccess": "Qasje në API",
+    "customBranding": "Brendim i personalizuar",
+    "dedicatedManager": "Menaxher i dedikuar",
+    "mobileApp": "Qasje në aplikacionin celular",
+    "mobileAppDesc": "Menaxhoni në lëvizje",
+    "dedicatedAgencyPage": "Faqe e Dedikuar e Agjencisë",
+    "dedicatedAgencyPageDesc": "Faqja juaj e brenduar në platformën tonë",
+    "displayAgents": "Shfaq të Gjithë Agjentët & Pronat",
+    "displayAgentsDesc": "Ekspozoni ekipin dhe listimet tuaja",
+    "featuredAds": "Të Veçuar në Reklamat Rrotulluese",
+    "featuredAdsDesc": "Reklamim mujor në faqen kryesore",
+    "fullContact": "Informacione të Plota Kontakti",
+    "fullContactDesc": "Email, telefon, dhe kërkesa direkte",
+    "perfectForActive": "Perfekt për shitës aktivë",
+    "featuredBoost": "Rritje e vendosjes së veçuar"
+  },
+  "buttons": {
+    "getStarted": "Fillo Tani",
+    "getPro": "Merr Pro",
+    "getProAnnual": "Merr Pro Vjetor",
+    "getProMonthly": "Merr Pro Mujor",
+    "getEnterprise": "Merr Ndërmarrje",
+    "contactSales": "Kontakto Shitjet",
+    "currentPlan": "Plani Aktual"
+  },
+  "billing": {
+    "monthly": "Mujor",
+    "yearly": "Vjetor",
+    "perMonth": "/muaj",
+    "perYear": "/vit",
+    "billedAnnually": "Faturohet vjetërisht",
+    "billedMonthly": "Faturohet mujorisht",
+    "youSave": "Ju kurseni €{{amount}}!"
+  },
+  "discount": {
+    "off": "{{percent}}% ZBRITJE"
+  },
+  "benefits": {
+    "moneyBack": "Garanci kthimi parash 30-ditore",
+    "moreViews": "{{multiplier}}x më shumë shikime se shpalljet falas",
+    "instantActivation": "Aktivizim i menjëhershëm",
+    "cancelAnytime": "Anulo në çdo kohë"
+  },
+  "enterprise": {
+    "required": "Kërkohet Plani Ndërmarrje",
+    "message": "Abonohu në Ndërmarrje për të krijuar agjencin tuaj dhe për të ekspozuar ekipin tuaj",
+    "contactUs": "Na kontaktoni për të mësuar më shumë rreth planit tonë Ndërmarrje."
+  },
+  "exitModal": {
+    "title": "A jeni i sigurt që dëshironi të dilni?",
+    "agencyMessage": "Nëse dilni tani, të gjitha informacionet e agjencisë do të humbasin dhe do t'ju duhet të filloni përsëri.",
+    "offerMessage": "Kjo është një ofertë një herë. Nëse largoheni tani, nuk do t'i shihni më këto zbritje mahnitëse.",
+    "stay": "Qëndro & Ruaj!",
+    "leave": "Po, Dil",
+    "continueSetup": "Vazhdo Konfigurimin"
+  },
+  "success": {
+    "title": "Urime!",
+    "message": "Abonimi juaj {{plan}} është aktivizuar. Tani keni qasje në të gjitha veçoritë premium.",
+    "agencyMessage": "Abonimi juaj Ndërmarrje është aktivizuar dhe agjencia juaj është krijuar me sukses! Tani jeni admini i agjencisë suaj.",
+    "subscriptionActivated": "Abonimi u aktivizua me sukses!",
+    "startListing": "Fillo të Listosh Prona"
+  }
+}

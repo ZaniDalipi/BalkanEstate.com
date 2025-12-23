@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../../context/AppContext';
 import { Property } from '../../../types';
 import PropertyCard from '../PropertyDisplay/PropertyCard';
@@ -12,6 +13,7 @@ import FeaturedAgencies from '../../FeaturedAgencies';
 import Footer from '../../shared/Footer';
 
 const SavedPropertiesPage: React.FC = () => {
+  const { t } = useTranslation(['property', 'nav']);
   const { state, dispatch } = useAppContext();
   const { savedHomes, comparisonList, properties, isAuthenticated, isLoadingUserData } = state;
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
@@ -47,13 +49,13 @@ const SavedPropertiesPage: React.FC = () => {
         return (
             <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
                 <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-neutral-800">Log in to view your saved homes</h3>
-                <p className="text-neutral-500 mt-2">Save your favorite properties and access them anytime, anywhere.</p>
+                <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.loginToView')}</h3>
+                <p className="text-neutral-500 mt-2">{t('property:saved.saveDescription')}</p>
                 <button
                     onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
                     className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
                 >
-                    Login / Register
+                    {t('nav:loginRegister')}
                 </button>
             </div>
         );
@@ -101,11 +103,11 @@ const SavedPropertiesPage: React.FC = () => {
             <>
                 <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
                     <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-neutral-800">You haven't saved any homes yet.</h3>
-                  <p className="text-neutral-500 mt-2">Click the heart icon on any property to save it here.</p>
+                  <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.noSaved')}</h3>
+                  <p className="text-neutral-500 mt-2">{t('property:saved.clickHeart')}</p>
                 </div>
                 <div className="mt-8">
-                    <h2 className="text-xl font-bold text-neutral-800 mb-4 text-center">Here are some popular properties</h2>
+                    <h2 className="text-xl font-bold text-neutral-800 mb-4 text-center">{t('property:saved.popularProperties')}</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {exampleProperties.map((property) => (
                             <PropertyCard
@@ -143,16 +145,16 @@ const SavedPropertiesPage: React.FC = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4">
             <HeartIcon className="w-10 h-10 text-white fill-current" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">Saved Properties</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-3">{t('property:saved.title')}</h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            Your favorite properties, all in one place
+            {t('property:saved.subtitle')}
           </p>
           {savedHomes.length > 0 && (
             <div className="mt-6 inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
               <span className="text-2xl font-bold text-white">{savedHomes.length}</span>
               <div className="h-6 w-px bg-white/30"></div>
               <span className="text-sm font-semibold text-white/90">
-                {savedHomes.length === 1 ? 'Property Saved' : 'Properties Saved'}
+                {savedHomes.length === 1 ? t('property:saved.propertySaved') : t('property:saved.propertiesSaved')}
               </span>
             </div>
           )}
@@ -176,7 +178,7 @@ const SavedPropertiesPage: React.FC = () => {
       {/* Featured Agencies */}
       <div className="bg-neutral-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-xl font-bold text-neutral-800 mb-4">Featured Agencies</h3>
+          <h3 className="text-xl font-bold text-neutral-800 mb-4">{t('property:saved.featuredAgencies')}</h3>
           <FeaturedAgencies />
         </div>
       </div>

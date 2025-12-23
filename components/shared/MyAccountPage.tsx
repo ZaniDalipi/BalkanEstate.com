@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import MyListings from './MyListings';
 import SubscriptionManagement from './SubscriptionManagement';
@@ -11,6 +12,7 @@ import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile
 import Footer from './Footer';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../SellerFlow/MapLocationPicker';
+import { SEO } from '../../src/components/seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -47,10 +49,11 @@ const RoleSelector: React.FC<{
     originalRole: UserRole;
     onChange: (role: UserRole) => void;
 }> = ({ selectedRole, originalRole, onChange }) => {
-    const roles: { id: UserRole, label: string }[] = [
-        { id: UserRole.BUYER, label: 'Buyer' },
-        { id: UserRole.PRIVATE_SELLER, label: 'Private Seller' },
-        { id: UserRole.AGENT, label: 'Agent' }
+    const { t } = useTranslation(['account']);
+    const roles: { id: UserRole, labelKey: string }[] = [
+        { id: UserRole.BUYER, labelKey: 'roles.buyer' },
+        { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller' },
+        { id: UserRole.AGENT, labelKey: 'roles.agent' }
     ];
 
     // Agents cannot switch to buyer
@@ -67,19 +70,19 @@ const RoleSelector: React.FC<{
                 <button
                     key={role.id}
                     type="button"
-                    onClick={() => !isDisabled(role.id) && onChange(role.id)} 
-                    disabled={isDisabled(role.id)} 
+                    onClick={() => !isDisabled(role.id) && onChange(role.id)}
+                    disabled={isDisabled(role.id)}
                     className={`px-2.5 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 flex-grow text-center ${
                         selectedRole === role.id
                         ? 'bg-white text-primary shadow'
-                        : isDisabled(role.id) 
+                        : isDisabled(role.id)
                         ? 'text-neutral-400 cursor-not-allowed opacity-50'
                         : 'text-neutral-600 hover:bg-neutral-200'
                     }`
                 }
-                    title={isDisabled(role.id) ? 'Agents cannot switch to Buyer role' : ''} 
+                    title={isDisabled(role.id) ? t('roles.agentCannotSwitchToBuyer') : ''}
                 >
-                    {role.label}
+                    {t(role.labelKey)}
                 </button>
             ))}
         </div>
@@ -88,6 +91,7 @@ const RoleSelector: React.FC<{
 
 
 const LoginHistorySection: React.FC = () => {
+    const { t } = useTranslation(['account']);
     const [loginHistory, setLoginHistory] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showAll, setShowAll] = useState(false);
@@ -122,18 +126,18 @@ const LoginHistorySection: React.FC = () => {
     };
 
     const getBrowserInfo = (userAgent?: string) => {
-        if (!userAgent) return 'Unknown';
+        if (!userAgent) return t('security.unknown');
         if (userAgent.includes('Chrome')) return 'Chrome';
         if (userAgent.includes('Firefox')) return 'Firefox';
         if (userAgent.includes('Safari')) return 'Safari';
         if (userAgent.includes('Edge')) return 'Edge';
-        return 'Unknown Browser';
+        return t('security.unknownBrowser');
     };
 
     if (isLoading) {
         return (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-700">Loading login history...</p>
+                <p className="text-sm text-blue-700">{t('security.loadingLoginHistory')}</p>
             </div>
         );
     }
@@ -145,9 +149,9 @@ const LoginHistorySection: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <div className="flex-1">
-                    <h4 className="font-semibold text-blue-800 text-sm mb-2">Recent Login Activity</h4>
+                    <h4 className="font-semibold text-blue-800 text-sm mb-2">{t('security.recentLoginActivity')}</h4>
                     {loginHistory.length === 0 ? (
-                        <p className="text-sm text-blue-700">No login history available.</p>
+                        <p className="text-sm text-blue-700">{t('security.noLoginHistory')}</p>
                     ) : (
                         <>
                             <div className="space-y-2">
@@ -158,25 +162,25 @@ const LoginHistorySection: React.FC = () => {
                                                 <div className="flex items-center gap-2">
                                                     {entry.success ? (
                                                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                            ✓ Success
+                                                            ✓ {t('security.success')}
                                                         </span>
                                                     ) : (
                                                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                                                            ✗ Failed
+                                                            ✗ {t('security.failed')}
                                                         </span>
                                                     )}
                                                     <span className="text-xs text-gray-600">{formatTimestamp(entry.timestamp)}</span>
                                                 </div>
                                                 <div className="mt-1 text-xs text-gray-600">
                                                     <p className="flex items-center gap-1">
-                                                        <span className="font-medium">IP:</span> {entry.ipAddress || 'Unknown'}
+                                                        <span className="font-medium">{t('security.ip')}:</span> {entry.ipAddress || t('security.unknown')}
                                                     </p>
                                                     <p className="flex items-center gap-1">
-                                                        <span className="font-medium">Device:</span> {getBrowserInfo(entry.userAgent)}
+                                                        <span className="font-medium">{t('security.device')}:</span> {getBrowserInfo(entry.userAgent)}
                                                     </p>
                                                     {!entry.success && entry.failureReason && (
                                                         <p className="flex items-center gap-1 text-red-600">
-                                                            <span className="font-medium">Reason:</span> {entry.failureReason}
+                                                            <span className="font-medium">{t('security.reason')}:</span> {entry.failureReason}
                                                         </p>
                                                     )}
                                                 </div>
@@ -191,7 +195,7 @@ const LoginHistorySection: React.FC = () => {
                                     onClick={() => setShowAll(!showAll)}
                                     className="mt-3 text-sm text-blue-700 hover:text-blue-800 font-medium"
                                 >
-                                    {showAll ? 'Show less' : `Show all ${loginHistory.length} entries`}
+                                    {showAll ? t('security.showLess') : t('security.showAll', { count: loginHistory.length })}
                                 </button>
                             )}
                         </>
@@ -203,6 +207,7 @@ const LoginHistorySection: React.FC = () => {
 };
 
 const ChangePasswordSection: React.FC = () => {
+    const { t } = useTranslation(['account']);
     const { state, dispatch } = useAppContext();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -223,7 +228,7 @@ const ChangePasswordSection: React.FC = () => {
         setSuccess(null);
 
         if (newPassword !== confirmPassword) {
-            setError('New passwords do not match');
+            setError(t('security.passwordsDoNotMatch'));
             return;
         }
 
@@ -233,7 +238,7 @@ const ChangePasswordSection: React.FC = () => {
             const { changePassword } = await import('../../services/apiService');
             await changePassword(currentPassword, newPassword);
 
-            setSuccess('Password changed successfully! You have been logged out for security. Please log in again with your new password.');
+            setSuccess(t('security.passwordChangedSuccess'));
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
@@ -259,9 +264,9 @@ const ChangePasswordSection: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div>
-                        <h4 className="font-semibold text-blue-800 text-sm">Social Login Account</h4>
+                        <h4 className="font-semibold text-blue-800 text-sm">{t('security.socialLoginAccount')}</h4>
                         <p className="text-sm text-blue-700 mt-1">
-                            You're signed in with a social provider. Password management is handled by your social account.
+                            {t('security.socialLoginDescription')}
                         </p>
                     </div>
                 </div>
@@ -271,7 +276,7 @@ const ChangePasswordSection: React.FC = () => {
 
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-neutral-800 mb-4">Change Password</h3>
+            <h3 className="text-lg font-semibold text-neutral-800 mb-4">{t('security.changePassword')}</h3>
 
             {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
@@ -295,7 +300,7 @@ const ChangePasswordSection: React.FC = () => {
                 {/* Current Password */}
                 <div>
                     <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        Current Password
+                        {t('security.currentPassword')}
                     </label>
                     <div className="relative">
                         <input
@@ -329,7 +334,7 @@ const ChangePasswordSection: React.FC = () => {
                 {/* New Password */}
                 <div>
                     <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        New Password
+                        {t('security.newPassword')}
                     </label>
                     <div className="relative">
                         <input
@@ -359,14 +364,14 @@ const ChangePasswordSection: React.FC = () => {
                         </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                        Must be at least 8 characters with uppercase, lowercase, number, special character, no sequential chars, and not a common password
+                        {t('security.passwordRequirements')}
                     </p>
                 </div>
 
                 {/* Confirm New Password */}
                 <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        Confirm New Password
+                        {t('security.confirmNewPassword')}
                     </label>
                     <div className="relative">
                         <input
@@ -403,7 +408,7 @@ const ChangePasswordSection: React.FC = () => {
                     disabled={isLoading}
                     className="w-full px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {isLoading ? 'Changing Password...' : 'Change Password'}
+                    {isLoading ? t('security.changingPassword') : t('security.changePassword')}
                 </button>
             </form>
         </div>
@@ -411,13 +416,14 @@ const ChangePasswordSection: React.FC = () => {
 };
 
 const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({ logoutAllDevices }) => {
+    const { t } = useTranslation(['account']);
     const { dispatch } = useAppContext();
 
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-neutral-800 mb-2">Security & Login Activity</h2>
-                <p className="text-neutral-600">Manage your account security and view login history</p>
+                <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('security.title')}</h2>
+                <p className="text-neutral-600">{t('security.description')}</p>
             </div>
 
             {/* Change Password */}
@@ -430,21 +436,21 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div className="flex-1">
-                        <h4 className="font-semibold text-yellow-800 text-sm">Logout from All Devices</h4>
+                        <h4 className="font-semibold text-yellow-800 text-sm">{t('security.logoutAllDevices')}</h4>
                         <p className="text-sm text-yellow-700 mt-1">
-                            Use this option to sign out from all devices where you're currently logged in. This is useful if you suspect unauthorized access to your account.
+                            {t('security.logoutAllDevicesDescription')}
                         </p>
                         <button
                             type="button"
                             onClick={async () => {
-                                if (window.confirm('Are you sure you want to logout from all devices? This will sign you out everywhere, including this device.')) {
+                                if (window.confirm(t('security.confirmLogoutAllDevices'))) {
                                     await logoutAllDevices();
                                     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
                                 }
                             }}
                             className="mt-3 px-4 py-2 bg-yellow-600 text-white font-medium rounded-lg hover:bg-yellow-700 transition-colors text-sm"
                         >
-                            Logout from All Devices
+                            {t('security.logoutAllDevices')}
                         </button>
                     </div>
                 </div>
@@ -457,6 +463,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
 };
 
 const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
+    const { t } = useTranslation(['account']);
     const { updateUser, dispatch } = useAppContext();
     const [formData, setFormData] = useState<User>(user);
     const [isSaving, setIsSaving] = useState(false);
@@ -794,7 +801,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 
     const handleJoinByInvitationCode = async () => {
         if (!invitationCode.trim()) {
-            setError('Please enter an invitation code');
+            setError(t('joinAgency.enterCode'));
             return;
         }
 
@@ -843,12 +850,12 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            setError('Please select an image file');
+            setError(t('errors.selectImage'));
             return;
         }
 
         if (file.size > 5 * 1024 * 1024) {
-            setError('Image size must be less than 5MB');
+            setError(t('errors.imageTooLarge'));
             return;
         }
 
@@ -901,7 +908,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         <>
             <form onSubmit={handleSaveChanges}>
                 <fieldset>
-                    <legend className="block text-sm font-medium text-neutral-700 mb-2">Your Role</legend>
+                    <legend className="block text-sm font-medium text-neutral-700 mb-2">{t('roles.yourRole')}</legend>
                     <RoleSelector selectedRole={formData.role} originalRole={user.role} onChange={handleRoleChange} />
                     {error && (
                         <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
@@ -912,7 +919,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 
             {/* Avatar Upload Section */}
             <fieldset className="border-t pt-6">
-                <legend className="block text-sm font-medium text-neutral-700 mb-4">Profile Picture</legend>
+                <legend className="block text-sm font-medium text-neutral-700 mb-4">{t('profile.profilePicture')}</legend>
                 <div className="flex items-center gap-6">
                     <div className="relative">
                         {avatarPreview || formData.avatarUrl ? (
@@ -945,10 +952,10 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 isUploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                         >
-                            {isUploadingAvatar ? 'Uploading...' : 'Change Picture'}
+                            {isUploadingAvatar ? t('profile.uploading') : t('profile.changePicture')}
                         </label>
                         <p className="text-xs text-neutral-500 mt-2">
-                            JPG, PNG or GIF. Max size 5MB.
+                            {t('profile.imageRequirements')}
                         </p>
                     </div>
                 </div>
@@ -958,25 +965,25 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 <legend className="sr-only">Personal Information</legend>
                 <div className="relative">
                     <input type="text" id="name" value={formData.name} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
-                    <label htmlFor="name" className={floatingLabelClasses}>Full Name</label>
+                    <label htmlFor="name" className={floatingLabelClasses}>{t('profile.fullName')}</label>
                 </div>
                 <div className="relative">
                     <input type="email" id="email" value={formData.email} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
-                    <label htmlFor="email" className={floatingLabelClasses}>Email</label>
+                    <label htmlFor="email" className={floatingLabelClasses}>{t('profile.email')}</label>
                 </div>
                 <div className="relative md:col-span-2">
                     <input type="tel" id="phone" value={formData.phone} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
-                    <label htmlFor="phone" className={floatingLabelClasses}>Phone</label>
+                    <label htmlFor="phone" className={floatingLabelClasses}>{t('profile.phone')}</label>
                 </div>
             </fieldset>
 
             {formData.role === UserRole.AGENT && (
                 <fieldset className="space-y-6 animate-fade-in border-t pt-8">
                      <div className="flex items-center justify-between -mt-2 mb-4">
-                        <legend className="text-lg font-semibold text-neutral-700">Agent Information</legend>
+                        <legend className="text-lg font-semibold text-neutral-700">{t('agent.agentInformation')}</legend>
                         {formData.licenseVerified && (
                             <span className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full font-medium">
-                                ✓ License Verified
+                                ✓ {t('agent.licenseVerified')}
                             </span>
                         )}
                      </div>
@@ -1008,13 +1015,13 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 <input
                                     type="text"
                                     id="agencyName"
-                                    value={formData.agencyName || 'Independent Agent'}
+                                    value={formData.agencyName || t('agent.independentAgent')}
                                     className={floatingInputClasses}
                                     placeholder=" "
                                     disabled
-                                    title="Agency affiliation can only be changed using an invitation code"
+                                    title={t('agent.agencyCannotChange')}
                                 />
-                                <label htmlFor="agencyName" className={floatingLabelClasses}>Agency Name</label>
+                                <label htmlFor="agencyName" className={floatingLabelClasses}>{t('agent.agencyName')}</label>
                             </div>
 
                             {/* View Agency Button */}
@@ -1025,7 +1032,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                     className="mt-2 text-sm text-primary hover:text-primary-dark font-semibold flex items-center gap-1"
                                 >
                                     <BuildingOfficeIcon className="w-4 h-4" />
-                                    View Agency Details →
+                                    {t('agent.viewAgencyDetails')}
                                 </button>
                             )}
                         </div>
@@ -1037,9 +1044,9 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 className={floatingInputClasses}
                                 placeholder=" "
                                 disabled
-                                title="Agent ID is automatically generated and cannot be changed"
+                                title={t('agent.agentIdCannotChange')}
                             />
-                            <label htmlFor="agentId" className={floatingLabelClasses}>Agent ID</label>
+                            <label htmlFor="agentId" className={floatingLabelClasses}>{t('agent.agentId')}</label>
                         </div>
                         <div className="relative md:col-span-2">
                             <input
@@ -1049,15 +1056,15 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 className={floatingInputClasses}
                                 placeholder=" "
                                 disabled
-                                title="License number can only be set during agent verification"
+                                title={t('agent.licenseCannotChange')}
                             />
-                            <label htmlFor="licenseNumber" className={floatingLabelClasses}>License Number</label>
+                            <label htmlFor="licenseNumber" className={floatingLabelClasses}>{t('agent.licenseNumber')}</label>
                         </div>
                     </div>
 
                     {/* Languages */}
                     <div className="space-y-3">
-                        <label className="block text-sm font-medium text-neutral-700">Languages Spoken</label>
+                        <label className="block text-sm font-medium text-neutral-700">{t('agent.languagesSpoken')}</label>
                         <div className="flex flex-wrap gap-2">
                             {BALKAN_LANGUAGES.map((language) => (
                                 <button
@@ -1078,21 +1085,21 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 
                     {/* Specializations */}
                     <div>
-                        <label htmlFor="specializations" className="block text-sm font-medium text-neutral-700 mb-2">Specializations</label>
+                        <label htmlFor="specializations" className="block text-sm font-medium text-neutral-700 mb-2">{t('agent.specializations')}</label>
                         <textarea
                             id="specializations"
                             value={agentData.specializations}
                             onChange={(e) => setAgentData(prev => ({ ...prev, specializations: e.target.value }))}
-                            placeholder="e.g., Residential, Commercial, Luxury Properties, Investment Properties"
+                            placeholder={t('agent.specializationsPlaceholder')}
                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                             rows={2}
                         />
-                        <p className="text-xs text-neutral-500 mt-1">Enter comma-separated specializations</p>
+                        <p className="text-xs text-neutral-500 mt-1">{t('agent.specializationsHint')}</p>
                     </div>
 
                     {/* Years of Experience */}
                     <div>
-                        <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-neutral-700 mb-2">Years of Experience</label>
+                        <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-neutral-700 mb-2">{t('agent.yearsOfExperience')}</label>
                         <input
                             id="yearsOfExperience"
                             type="number"
@@ -1103,7 +1110,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             placeholder="e.g., 5"
                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                         />
-                        <p className="text-xs text-neutral-500 mt-1">How many years of experience do you have?</p>
+                        <p className="text-xs text-neutral-500 mt-1">{t('agent.yearsOfExperienceHint')}</p>
                     </div>
 
                     {/* Main Location with Map Picker */}
@@ -1123,10 +1130,10 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                     {/* Service Areas */}
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <label className="block text-sm font-medium text-neutral-700">Service Areas</label>
+                            <label className="block text-sm font-medium text-neutral-700">{t('agent.serviceAreas')}</label>
                             {agentData.serviceAreas.length > 0 && (
                                 <span className="text-xs bg-primary text-white px-2 py-1 rounded-full">
-                                    {agentData.serviceAreas.length} area{agentData.serviceAreas.length !== 1 ? 's' : ''}
+                                    {agentData.serviceAreas.length} {agentData.serviceAreas.length !== 1 ? t('agent.areas') : t('agent.area')}
                                 </span>
                             )}
                         </div>
@@ -1160,7 +1167,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             }}
                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                         >
-                            <option value="">Add service area...</option>
+                            <option value="">{t('agent.addServiceArea')}</option>
                             {BALKAN_LOCATIONS.map((location) => (
                                 <option
                                     key={`${location.name}-${location.country}`}
@@ -1171,14 +1178,14 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 </option>
                             ))}
                         </select>
-                        <p className="text-xs text-neutral-500 mt-1">Add cities and countries where you operate</p>
+                        <p className="text-xs text-neutral-500 mt-1">{t('agent.serviceAreasHint')}</p>
                     </div>
                 </fieldset>
             )}
 
             <div className="flex justify-end pt-4">
                 <button type="submit" disabled={isSaving} className="px-6 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors w-36 disabled:opacity-50">
-                    {isSaving ? 'Saving...' : (isSaved ? 'Saved!' : 'Save Changes')}
+                    {isSaving ? t('profile.saving') : (isSaved ? t('profile.saved') : t('profile.saveChanges'))}
                 </button>
             </div>
         </form>
@@ -1198,6 +1205,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 };
 
 const MyAccountPage: React.FC = () => {
+    const { t } = useTranslation(['account']);
     const { state, dispatch, logout, logoutAllDevices } = useAppContext();
     const [activeTab, setActiveTab] = useState<AccountTab>('listings');
     const [performanceRefreshKey, setPerformanceRefreshKey] = useState(0);
@@ -1205,7 +1213,7 @@ const MyAccountPage: React.FC = () => {
     if (!state.currentUser) {
         return (
             <div className="p-8 text-center">
-                <p>You must be logged in to view this page.</p>
+                <p>{t('account:mustBeLoggedIn')}</p>
             </div>
         );
     }
@@ -1246,9 +1254,9 @@ const MyAccountPage: React.FC = () => {
     };
 
     const roleDisplayMap: Record<UserRole, string> = {
-        [UserRole.AGENT]: 'Agent',
-        [UserRole.PRIVATE_SELLER]: 'Private Seller',
-        [UserRole.BUYER]: 'Buyer',
+        [UserRole.AGENT]: t('account:roles.agent'),
+        [UserRole.PRIVATE_SELLER]: t('account:roles.privateSeller'),
+        [UserRole.BUYER]: t('account:roles.buyer'),
         [UserRole.ADMIN]: '',
         [UserRole.SUPER_ADMIN]: ''
     };
@@ -1272,6 +1280,13 @@ const MyAccountPage: React.FC = () => {
 
     return (
         <div className="bg-neutral-50 min-h-screen flex flex-col">
+            {/* SEO - noindex for private page */}
+            <SEO
+                title={t('account:title')}
+                description={t('account:description')}
+                noindex={true}
+            />
+
             <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex-grow">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar */}
@@ -1301,23 +1316,23 @@ const MyAccountPage: React.FC = () => {
                                 {/* License Verified Badge */}
                                 {state.currentUser.role === UserRole.AGENT && state.currentUser.licenseVerified && (
                                     <div className="flex items-center gap-1 mt-2 px-3 py-1 bg-green-50 rounded-full border border-green-200">
-                                        <span className="text-xs font-semibold text-green-700">✓ Verified Agent</span>
+                                        <span className="text-xs font-semibold text-green-700">✓ {t('account:agent.verifiedAgent')}</span>
                                     </div>
                                 )}
                             </div>
                             <nav className="space-y-2">
                                 {isSellerProfile && (
                                     <>
-                                        <TabButton label="My Listings" icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} />
-                                        <TabButton label="Performance" icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} />
-                                        <TabButton label="Subscription" icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} />
+                                        <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} />
+                                        <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} />
+                                        <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} />
                                     </>
                                 )}
-                                <TabButton label="Profile Settings" icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
-                                <TabButton label="Security" icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} />
+                                <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+                                <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} />
                                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 mt-4">
                                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />
-                                    <span>Logout</span>
+                                    <span>{t('account:logout')}</span>
                                 </button>
                             </nav>
                         </div>

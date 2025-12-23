@@ -1,0 +1,40 @@
+{
+  "password": {
+    "minLength": "Najmanje 8 karaktera",
+    "uppercase": "Jedno veliko slovo",
+    "lowercase": "Jedno malo slovo",
+    "number": "Jedan broj",
+    "specialChar": "Jedan specijalni karakter (!@#$%...)",
+    "noSequential": "Bez sekvencijalnih karaktera (123, abc, qwe)",
+    "notCommon": "Ne sme biti česta lozinka",
+    "mismatch": "Lozinke se ne podudaraju"
+  },
+  "email": {
+    "required": "Email je obavezan",
+    "invalid": "Unesite važeću email adresu"
+  },
+  "phone": {
+    "required": "Broj telefona je obavezan",
+    "invalid": "Unesite važeći broj telefona"
+  },
+  "required": "Ovo polje je obavezno",
+  "minLength": "Mora imati najmanje {{count}} karaktera",
+  "maxLength": "Ne sme imati više od {{count}} karaktera",
+  "numeric": "Mora biti broj",
+  "positive": "Mora biti pozitivan broj",
+  "url": "Unesite važeći URL",
+  "date": {
+    "invalid": "Unesite važeći datum",
+    "future": "Datum mora biti u budućnosti",
+    "past": "Datum mora biti u prošlosti"
+  },
+  "file": {
+    "required": "Izaberite fajl",
+    "size": "Veličina fajla mora biti manja od {{size}}MB",
+    "type": "Nevažeći tip fajla. Dozvoljeno: {{types}}"
+  },
+  "form": {
+    "hasErrors": "Ispravite greške pre slanja",
+    "submitError": "Došlo je do greške. Pokušajte ponovo."
+  }
+}

@@ -2,6 +2,7 @@
 // Navigate to search map focused on property location
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { MapPinIcon } from '../../../constants';
 
@@ -31,16 +32,18 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
   property,
   onNavigateToMap,
 }) => {
+  const { t } = useTranslation(['property']);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
-      <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4">View on Map</h3>
-      <p className="text-neutral-600 mb-4">Want to explore the area around this property?</p>
+      <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4">{t('mapLink.title')}</h3>
+      <p className="text-neutral-600 mb-4">{t('mapLink.description')}</p>
       <button
         onClick={onNavigateToMap}
         className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
       >
         <MapPinIcon className="w-5 h-5" />
-        View on Search Map
+        {t('mapLink.button')}
       </button>
     </div>
   );

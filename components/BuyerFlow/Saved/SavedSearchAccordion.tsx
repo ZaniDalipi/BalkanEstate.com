@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SavedSearch } from '../../../types';
 import PropertyCard from '../PropertyDisplay/PropertyCard';
 import { ChevronUpIcon, ChevronDownIcon, TrashIcon, PencilIcon, CheckCircleIcon, XMarkIcon } from '../../../constants';
@@ -15,6 +16,7 @@ interface SavedSearchAccordionProps {
 }
 
 const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onOpen }) => {
+  const { t } = useTranslation(['saved']);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -97,7 +99,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent accordion from toggling
 
-    if (!confirm(`Are you sure you want to delete "${search.name}"?`)) {
+    if (!confirm(t('accordion.confirmDelete', { name: search.name }))) {
       return;
     }
 
@@ -107,7 +109,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       dispatch({ type: 'REMOVE_SAVED_SEARCH', payload: search.id });
     } catch (error) {
       console.error('Failed to delete saved search:', error);
-      alert('Failed to delete saved search. Please try again.');
+      alert(t('accordion.deleteFailed'));
     } finally {
       setIsDeleting(false);
     }
@@ -129,7 +131,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
     e.stopPropagation();
 
     if (!newName.trim()) {
-      alert('Please enter a name');
+      alert(t('accordion.enterName'));
       return;
     }
 
@@ -140,7 +142,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       setIsRenaming(false);
     } catch (error) {
       console.error('Failed to rename saved search:', error);
-      alert('Failed to rename saved search. Please try again.');
+      alert(t('accordion.renameFailed'));
     } finally {
       setIsUpdating(false);
     }
@@ -161,7 +163,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
               onChange={(e) => setNewName(e.target.value)}
               onClick={(e) => e.stopPropagation()}
               className="flex-1 px-3 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-lg font-bold"
-              placeholder="Search name"
+              placeholder={t('accordion.namePlaceholder')}
             />
           ) : (
             <h3 className="text-lg font-bold text-neutral-800">{search.name}</h3>
@@ -169,7 +171,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
           <div className="flex items-center gap-2">
             {newPropertyCount > 0 && (
               <div className="bg-red-500 text-white rounded-full px-3 py-1.5">
-                <span className="text-sm font-bold">{newPropertyCount} new</span>
+                <span className="text-sm font-bold">{newPropertyCount} {t('accordion.new')}</span>
               </div>
             )}
             <div className="flex items-center bg-indigo-600 text-white rounded-full transition-colors hover:bg-indigo-700">
@@ -189,7 +191,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 onClick={handleSaveRename}
                 disabled={isUpdating}
                 className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors disabled:opacity-50"
-                title="Save"
+                title={t('accordion.save')}
               >
                 <CheckCircleIcon className="w-5 h-5" />
               </button>
@@ -197,7 +199,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 onClick={handleCancelRename}
                 disabled={isUpdating}
                 className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-full transition-colors disabled:opacity-50"
-                title="Cancel"
+                title={t('accordion.cancel')}
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -207,7 +209,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
               <button
                 onClick={handleStartRename}
                 className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors"
-                title="Rename search"
+                title={t('accordion.rename')}
               >
                 <PencilIcon className="w-5 h-5" />
               </button>
@@ -215,7 +217,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
-                title="Delete search"
+                title={t('accordion.delete')}
               >
                 <TrashIcon className="w-5 h-5" />
               </button>
@@ -275,7 +277,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
               ))}
             </div>
           ) : (
-            <p className="text-center text-neutral-500 py-4">No properties currently match this search.</p>
+            <p className="text-center text-neutral-500 py-4">{t('accordion.noProperties')}</p>
           )}
         </div>
       )}

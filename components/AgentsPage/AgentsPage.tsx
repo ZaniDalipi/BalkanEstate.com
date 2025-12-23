@@ -1,16 +1,19 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { Agent, Agency } from '../../types';
 import { getAllAgents, getAgencies } from '../../services/apiService';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
-import AgencyBadge from '../shared/AgencyBadge'; // Added import
+import AgencyBadge from '../shared/AgencyBadge';
 import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon } from '../../constants';
 import Footer from '../shared/Footer';
+import { SEO } from '../../src/components/seo';
 type SearchTab = 'location' | 'name' | 'specialization';
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 
 const AgentsPage: React.FC = () => {
+  const { t } = useTranslation(['agents', 'common']);
   const { state, dispatch } = useAppContext();
   const { selectedAgentId, activeView } = state;
 
@@ -209,24 +212,24 @@ const AgentsPage: React.FC = () => {
 
   const faqs = [
     {
-      question: 'How to find a good real estate agent near me?',
-      answer: 'Start by searching for agents in your area using our location search. Look for agents with high ratings, strong sales records, and testimonials from recent clients.'
+      question: t('agents:faq.questions.findAgent.question'),
+      answer: t('agents:faq.questions.findAgent.answer')
     },
     {
-      question: 'How to pick a real estate agent?',
-      answer: 'Consider their experience, local market knowledge, sales track record, client reviews, and communication style. Schedule consultations with multiple agents before making your decision.'
+      question: t('agents:faq.questions.pickAgent.question'),
+      answer: t('agents:faq.questions.pickAgent.answer')
     },
     {
-      question: 'How to contact a real estate agent?',
-      answer: 'You can view an agent\'s profile to find their contact information, including phone number and email. Many agents also offer convenient online booking for consultations.'
+      question: t('agents:faq.questions.contactAgent.question'),
+      answer: t('agents:faq.questions.contactAgent.answer')
     },
     {
-      question: 'How do I leave a review for a real estate agent?',
-      answer: 'Visit the agent\'s profile page and click on the "Write a Review" button. Share your experience to help others make informed decisions.'
+      question: t('agents:faq.questions.leaveReview.question'),
+      answer: t('agents:faq.questions.leaveReview.answer')
     },
     {
-      question: 'What is the difference between an agent and a broker?',
-      answer: 'A real estate agent is licensed to help clients buy and sell property, while a broker has additional training and certification. Brokers can work independently and manage their own agencies.'
+      question: t('agents:faq.questions.agentVsBroker.question'),
+      answer: t('agents:faq.questions.agentVsBroker.answer')
     }
   ];
 
@@ -239,7 +242,7 @@ const AgentsPage: React.FC = () => {
       <div className="bg-neutral-50 min-h-full flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading agents...</p>
+          <p className="text-neutral-600">{t('agents:loading')}</p>
         </div>
       </div>
     );
@@ -247,6 +250,14 @@ const AgentsPage: React.FC = () => {
 
   return (
     <div className="bg-neutral-50 min-h-screen flex flex-col">
+      {/* SEO Meta Tags */}
+      <SEO
+        title={t('agents:page.title')}
+        description={t('agents:page.description', { count: agents.length })}
+        canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agents`}
+        type="website"
+      />
+
       {/* Add CSS animations */}
       <style>{`
         @keyframes fadeInUp {
@@ -360,20 +371,19 @@ const AgentsPage: React.FC = () => {
             <div className="text-center max-w-4xl mx-auto mb-8 animate-fade-in-up">
               <div className="inline-flex items-center justify-center px-4 py-2 bg-primary/10 rounded-full mb-6">
                 <span className="text-primary font-semibold text-sm uppercase tracking-wider">
-                  Connecting You with Experts
+                  {t('agents:hero.badge')}
                 </span>
               </div>
-              
+
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-neutral-900 mb-4 sm:mb-6 leading-tight">
-                Find Your Perfect
+                {t('agents:hero.title')}
                 <span className="block mt-2 sm:mt-3 animate-gradient-x">
-                  Real Estate Partner
+                  {t('agents:hero.titleHighlight')}
                 </span>
               </h1>
 
               <p className="text-sm sm:text-base md:text-lg lg:text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
-                Connect with top-rated agents in the Balkans who specialize in your local market
-                and have the expertise to guide you home.
+                {t('agents:hero.subtitle')}
               </p>
             </div>
 
@@ -381,10 +391,10 @@ const AgentsPage: React.FC = () => {
             <div className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-neutral-100 p-4 sm:p-6 md:p-8 animate-fade-in-up animation-delay-200 mt-6 sm:mt-8">
               <div className="text-center mb-4 sm:mb-6">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-1.5 sm:mb-2">
-                  Find Your Ideal Agent
+                  {t('agents:search.title')}
                 </h2>
                 <p className="text-neutral-600 text-xs sm:text-sm md:text-base">
-                  Search {agents.length}+ verified professionals across the Balkans
+                  {t('agents:search.subtitle', { count: agents.length })}
                 </p>
               </div>
 
@@ -408,7 +418,7 @@ const AgentsPage: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Location
+                    {t('agents:search.tabs.location')}
                   </span>
                 </button>
                 <button
@@ -428,7 +438,7 @@ const AgentsPage: React.FC = () => {
                     <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Agent Name
+                    {t('agents:search.tabs.name')}
                   </span>
                 </button>
                 <button
@@ -448,7 +458,7 @@ const AgentsPage: React.FC = () => {
                     <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    Specialization
+                    {t('agents:search.tabs.specialization')}
                   </span>
                 </button>
               </div>
@@ -466,10 +476,10 @@ const AgentsPage: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={
                     searchTab === 'location'
-                      ? 'Search by city, neighborhood, or country...'
+                      ? t('agents:search.placeholders.location')
                       : searchTab === 'name'
-                      ? "Search by agent's name..."
-                      : 'Search by specialization (e.g., Luxury, Commercial)...'
+                      ? t('agents:search.placeholders.name')
+                      : t('agents:search.placeholders.specialization')
                   }
                   className="w-full pl-10 sm:pl-12 pr-20 sm:pr-32 md:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
                 />
@@ -503,7 +513,7 @@ const AgentsPage: React.FC = () => {
               {!searchQuery && (
                 <div className="mb-4">
                   <p className="text-center text-xs sm:text-sm text-neutral-600 mb-3">
-                    Popular searches:
+                    {t('agents:search.popularSearches')}
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {searchTab === 'location' ? (
@@ -536,16 +546,10 @@ const AgentsPage: React.FC = () => {
                     ) : searchTab === 'name' ? (
                       <>
                         <button
-                          onClick={() => setSearchQuery('John')}
+                          onClick={() => setSearchQuery('')}
                           className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
                         >
-                          Popular Names
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Agent')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          View All
+                          {t('agents:search.viewAll')}
                         </button>
                       </>
                     ) : (
@@ -554,25 +558,25 @@ const AgentsPage: React.FC = () => {
                           onClick={() => setSearchQuery('Residential')}
                           className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
                         >
-                          Residential
+                          {t('agents:filters.types.residential')}
                         </button>
                         <button
                           onClick={() => setSearchQuery('Luxury')}
                           className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
                         >
-                          Luxury
+                          {t('agents:filters.types.luxury')}
                         </button>
                         <button
                           onClick={() => setSearchQuery('Commercial')}
                           className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
                         >
-                          Commercial
+                          {t('agents:filters.types.commercial')}
                         </button>
                         <button
                           onClick={() => setSearchQuery('Investment')}
                           className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
                         >
-                          Investment
+                          {t('agents:filters.types.investment')}
                         </button>
                       </>
                     )}
@@ -587,21 +591,21 @@ const AgentsPage: React.FC = () => {
                     <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
                     <div className="text-center">
                       <div className="font-bold text-lg sm:text-2xl text-neutral-900">{agents.length}+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">Verified Agents</div>
+                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.verifiedAgents')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
                     <div className="text-center">
                       <div className="font-bold text-lg sm:text-2xl text-neutral-900">{agencies.length}+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">Professional Agencies</div>
+                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.professionalAgencies')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-pulse"></div>
                     <div className="text-center">
                       <div className="font-bold text-lg sm:text-2xl text-neutral-900">5000+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">Successful Transactions</div>
+                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.successfulTransactions')}</div>
                     </div>
                   </div>
                 </div>
@@ -620,16 +624,16 @@ const AgentsPage: React.FC = () => {
               {/* Top Row: Sort and Filters Toggle */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-sm font-medium text-gray-700">Sort by:</span>
+                  <span className="text-sm font-medium text-gray-700">{t('agents:filters.sortBy')}</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
                     className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                   >
-                    <option value="rating">Highest Rated</option>
-                    <option value="experience">Most Experienced</option>
-                    <option value="sales">Most Sales</option>
-                    <option value="name">Name (A-Z)</option>
+                    <option value="rating">{t('agents:filters.highestRated')}</option>
+                    <option value="experience">{t('agents:filters.mostExperienced')}</option>
+                    <option value="sales">{t('agents:filters.mostSales')}</option>
+                    <option value="name">{t('agents:filters.nameAZ')}</option>
                   </select>
                 </div>
                 <button
@@ -639,7 +643,7 @@ const AgentsPage: React.FC = () => {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
-                  {showFilters ? 'Hide Filters' : 'Show Filters'}
+                  {showFilters ? t('agents:filters.hideFilters') : t('agents:filters.showFilters')}
                   {(filters.propertyTypes.length > 0 || filters.minRating > 0 || filters.minExperience > 0 || filters.languages.length > 0 || filters.priceRange !== 'all') && (
                     <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {[filters.propertyTypes.length, filters.minRating > 0 ? 1 : 0, filters.minExperience > 0 ? 1 : 0, filters.languages.length, filters.priceRange !== 'all' ? 1 : 0].reduce((a, b) => a + b, 0)}
@@ -653,7 +657,7 @@ const AgentsPage: React.FC = () => {
                 <div className="border-t border-gray-200 pt-4 space-y-4 animate-fade-in-up">
                   {/* Property Types */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Specialization</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">{t('agents:filters.specialization')}</label>
                     <div className="flex flex-wrap gap-2">
                       {['Luxury', 'Commercial', 'Residential', 'Investment', 'New Construction', 'Foreclosures'].map(type => (
                         <button
@@ -681,47 +685,47 @@ const AgentsPage: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Rating Filter */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum Rating</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">{t('agents:filters.minimumRating')}</label>
                       <select
                         value={filters.minRating}
                         onChange={(e) => setFilters(prev => ({ ...prev, minRating: Number(e.target.value) }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                       >
-                        <option value="0">Any Rating</option>
-                        <option value="3">3+ Stars</option>
-                        <option value="4">4+ Stars</option>
-                        <option value="4.5">4.5+ Stars</option>
+                        <option value="0">{t('agents:filters.anyRating')}</option>
+                        <option value="3">{t('agents:filters.stars', { count: 3 })}</option>
+                        <option value="4">{t('agents:filters.stars', { count: 4 })}</option>
+                        <option value="4.5">{t('agents:filters.stars', { count: 4.5 })}</option>
                       </select>
                     </div>
 
                     {/* Experience Filter */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Experience</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">{t('agents:filters.experience')}</label>
                       <select
                         value={filters.minExperience}
                         onChange={(e) => setFilters(prev => ({ ...prev, minExperience: Number(e.target.value) }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                       >
-                        <option value="0">Any Experience</option>
-                        <option value="1">1+ Years</option>
-                        <option value="3">3+ Years</option>
-                        <option value="5">5+ Years</option>
-                        <option value="10">10+ Years</option>
+                        <option value="0">{t('agents:filters.anyExperience')}</option>
+                        <option value="1">{t('agents:filters.yearsPlus', { count: 1 })}</option>
+                        <option value="3">{t('agents:filters.yearsPlus', { count: 3 })}</option>
+                        <option value="5">{t('agents:filters.yearsPlus', { count: 5 })}</option>
+                        <option value="10">{t('agents:filters.yearsPlus', { count: 10 })}</option>
                       </select>
                     </div>
 
                     {/* Price Range Filter */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Price Range Focus</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">{t('agents:filters.priceRangeFocus')}</label>
                       <select
                         value={filters.priceRange}
                         onChange={(e) => setFilters(prev => ({ ...prev, priceRange: e.target.value as any }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                       >
-                        <option value="all">All Price Ranges</option>
-                        <option value="affordable">Affordable ({"<"}€150K)</option>
-                        <option value="mid">Mid-Range (€150K-€500K)</option>
-                        <option value="luxury">Luxury ({">"}€500K)</option>
+                        <option value="all">{t('agents:filters.allPriceRanges')}</option>
+                        <option value="affordable">{t('agents:filters.affordable')}</option>
+                        <option value="mid">{t('agents:filters.midRange')}</option>
+                        <option value="luxury">{t('agents:filters.luxury')}</option>
                       </select>
                     </div>
                   </div>
@@ -739,7 +743,7 @@ const AgentsPage: React.FC = () => {
                         })}
                         className="text-sm text-primary hover:text-primary-dark font-medium"
                       >
-                        Clear all filters
+                        {t('agents:filters.clearAllFilters')}
                       </button>
                     </div>
                   )}
@@ -751,25 +755,26 @@ const AgentsPage: React.FC = () => {
           {/* Section Header */}
           <div className="mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">
-              Real Estate Agents in the Balkans
+              {t('agents:results.title')}
             </h2>
             <p className="text-neutral-600 text-sm sm:text-base">
               {searchQuery ? (
                 <>
-                  Showing <span className="font-bold text-primary">{filteredAgents.length}</span> agent{filteredAgents.length !== 1 ? 's' : ''} matching "{searchQuery}"
+                  {filteredAgents.length !== 1
+                    ? t('agents:results.showingMatchingPlural', { count: filteredAgents.length, query: searchQuery })
+                    : t('agents:results.showingMatching', { count: filteredAgents.length, query: searchQuery })}
                   {filteredAgents.length > 0 && (
                     <button
                       onClick={() => setSearchQuery('')}
                       className="ml-2 text-primary hover:underline font-semibold"
                     >
-                      Clear search
+                      {t('agents:search.clearSearch')}
                     </button>
                   )}
                 </>
               ) : (
                 <>
-                  With over {agents.length} agents from all the top brokerages, a local agent knows your market and
-                  can help you find the perfect home.
+                  {t('agents:results.description', { count: agents.length })}
                 </>
               )}
             </p>
@@ -779,9 +784,9 @@ const AgentsPage: React.FC = () => {
           {filteredAgents.length === 0 ? (
             <div className="bg-white rounded-xl shadow-md border p-8 sm:p-12 text-center">
               <UserGroupIcon className="w-12 h-12 sm:w-16 sm:h-16 text-neutral-300 mx-auto mb-4" />
-              <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-2">No agents found</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-2">{t('agents:results.noAgentsFound')}</h3>
               <p className="text-neutral-600 text-sm sm:text-base">
-                Try adjusting your search criteria
+                {t('agents:results.tryAdjusting')}
               </p>
             </div>
           ) : (
@@ -802,7 +807,7 @@ const AgentsPage: React.FC = () => {
                 }}
                 className="px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-primary text-primary font-semibold rounded-md hover:bg-primary hover:text-white transition-colors text-sm sm:text-base"
               >
-                View more
+                {t('agents:results.viewMore')}
               </button>
             </div>
           )}
@@ -812,14 +817,14 @@ const AgentsPage: React.FC = () => {
             <div className="mb-12 sm:mb-16">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">Top Real Estate Agencies</h2>
-                  <p className="text-neutral-600 text-sm sm:text-base">Browse agencies with experienced professionals</p>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">{t('agents:agencies.title')}</h2>
+                  <p className="text-neutral-600 text-sm sm:text-base">{t('agents:agencies.subtitle')}</p>
                 </div>
                 <button
                   onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' })}
                   className="text-primary font-semibold hover:underline text-sm sm:text-base"
                 >
-                  View all agencies →
+                  {t('agents:agencies.viewAll')}
                 </button>
               </div>
               <div className="flex flex-wrap gap-3 sm:gap-4">
@@ -865,18 +870,18 @@ const AgentsPage: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-neutral-900/80 to-neutral-900/70"></div>
             <div className="relative w-full px-4 sm:px-8 py-8 sm:py-12">
               <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3">Get help finding an agent</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3">{t('agents:contact.title')}</h2>
                 <p className="text-white/90 text-sm sm:text-lg">
-                  We'll pair you with a BalkanEstate Premier Agent who has the inside scoop on your market.
+                  {t('agents:contact.subtitle')}
                 </p>
               </div>
 
               {contactSubmitSuccess ? (
                 <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 sm:p-6 text-center max-w-2xl mx-auto">
                   <div className="text-green-600 text-4xl sm:text-5xl mb-2 sm:mb-3">✓</div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-green-900 mb-1 sm:mb-2">Request Submitted!</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-green-900 mb-1 sm:mb-2">{t('agents:contact.successTitle')}</h3>
                   <p className="text-green-800 text-sm sm:text-base">
-                    Thank you! We'll match you with local agents and they'll contact you soon.
+                    {t('agents:contact.successMessage')}
                   </p>
                 </div>
               ) : (
@@ -884,7 +889,7 @@ const AgentsPage: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                     <div>
                       <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-neutral-700 mb-1 sm:mb-2">
-                        Email Address *
+                        {t('agents:contact.emailLabel')}
                       </label>
                       <input
                         type="email"
@@ -893,12 +898,12 @@ const AgentsPage: React.FC = () => {
                         value={contactForm.email}
                         onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                         className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
-                        placeholder="your.email@example.com"
+                        placeholder={t('agents:contact.emailPlaceholder')}
                       />
                     </div>
                     <div>
                       <label htmlFor="phone" className="block text-xs sm:text-sm font-semibold text-neutral-700 mb-1 sm:mb-2">
-                        Phone Number *
+                        {t('agents:contact.phoneLabel')}
                       </label>
                       <input
                         type="tel"
@@ -907,14 +912,14 @@ const AgentsPage: React.FC = () => {
                         value={contactForm.phone}
                         onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                         className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
-                        placeholder="+381 11 234 5678"
+                        placeholder={t('agents:contact.phonePlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div className="mb-3 sm:mb-4">
                     <label htmlFor="location" className="block text-xs sm:text-sm font-semibold text-neutral-700 mb-1 sm:mb-2">
-                      Location / Address *
+                      {t('agents:contact.locationLabel')}
                     </label>
                     <input
                       type="text"
@@ -923,13 +928,13 @@ const AgentsPage: React.FC = () => {
                       value={contactForm.location}
                       onChange={(e) => setContactForm({ ...contactForm, location: e.target.value })}
                       className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
-                      placeholder="Belgrade, Serbia"
+                      placeholder={t('agents:contact.locationPlaceholder')}
                     />
                   </div>
 
                   <div className="mb-4 sm:mb-6">
                     <label htmlFor="propertyDescription" className="block text-xs sm:text-sm font-semibold text-neutral-700 mb-1 sm:mb-2">
-                      Property Description *
+                      {t('agents:contact.propertyDescriptionLabel')}
                     </label>
                     <textarea
                       id="propertyDescription"
@@ -938,7 +943,7 @@ const AgentsPage: React.FC = () => {
                       value={contactForm.propertyDescription}
                       onChange={(e) => setContactForm({ ...contactForm, propertyDescription: e.target.value })}
                       className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-sm sm:text-base"
-                      placeholder="Describe the property you're looking for (type, size, budget, features, etc.)"
+                      placeholder={t('agents:contact.propertyDescriptionPlaceholder')}
                     />
                   </div>
 
@@ -950,12 +955,12 @@ const AgentsPage: React.FC = () => {
                     {isSubmittingContact ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
-                        Submitting...
+                        {t('agents:contact.submitting')}
                       </>
                     ) : (
                       <>
                         <PhoneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        Connect with a local agent
+                        {t('agents:contact.submitButton')}
                       </>
                     )}
                   </button>
@@ -966,7 +971,7 @@ const AgentsPage: React.FC = () => {
 
           {/* FAQ Section */}
           <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-xl p-6 sm:p-8 md:p-12 text-white mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">Frequently asked questions</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center">{t('agents:faq.title')}</h2>
             <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
               {faqs.map((faq, index) => (
                 <div
@@ -997,11 +1002,10 @@ const AgentsPage: React.FC = () => {
           {/* Are you a real estate agent Section */}
           <div className="bg-white rounded-xl shadow-md border p-6 sm:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-3 sm:mb-4 text-center">
-              Are you a real estate agent?
+              {t('agents:cta.title')}
             </h3>
             <p className="text-center text-neutral-600 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
-              Join BalkanEstate to showcase your expertise, connect with potential clients, and grow your business.
-              Get access to premium tools and advertising opportunities to help you succeed in the Balkan real estate market.
+              {t('agents:cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
@@ -1010,13 +1014,13 @@ const AgentsPage: React.FC = () => {
                 }}
                 className="px-4 sm:px-6 py-2.5 sm:py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary-dark transition-colors text-sm sm:text-base"
               >
-                Get Started
+                {t('agents:cta.getStarted')}
               </button>
               <button
                 onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' })}
                 className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-primary text-primary rounded-md font-semibold hover:bg-primary hover:text-white transition-colors text-sm sm:text-base"
               >
-                Browse Agencies
+                {t('agents:cta.browseAgencies')}
               </button>
             </div>
           </div>

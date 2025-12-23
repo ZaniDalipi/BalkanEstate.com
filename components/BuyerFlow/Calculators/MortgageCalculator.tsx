@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatPrice, getCurrencySymbol } from '../../../utils/currency';
 import { CurrencyDollarIcon } from '../../../constants';
 
@@ -7,7 +8,7 @@ interface MortgageCalculatorProps {
   country: string;
 }
 
-const TermButton: React.FC<{ term: number, selectedTerm: number, onClick: (term: number) => void }> = ({ term, selectedTerm, onClick }) => (
+const TermButton: React.FC<{ term: number, selectedTerm: number, onClick: (term: number) => void, yrsLabel: string }> = ({ term, selectedTerm, onClick, yrsLabel }) => (
     <button
         type="button"
         onClick={() => onClick(term)}
@@ -17,11 +18,12 @@ const TermButton: React.FC<{ term: number, selectedTerm: number, onClick: (term:
             : 'text-neutral-600 hover:bg-neutral-200'
         }`}
     >
-        {term} yrs
+        {term} {yrsLabel}
     </button>
 );
 
 const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, country }) => {
+    const { t } = useTranslation(['calculators']);
     const [downPayment, setDownPayment] = useState(20);
     const [downPaymentType, setDownPaymentType] = useState<'percent' | 'amount'>('percent');
     const [interestRate, setInterestRate] = useState(3.5);
@@ -80,35 +82,35 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
         <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 animate-fade-in">
             <div className="flex items-center gap-2 mb-3">
                 <CurrencyDollarIcon className="w-5 h-5 text-primary" />
-                <h3 className="text-base font-bold text-neutral-800">Mortgage Calculator</h3>
+                <h3 className="text-base font-bold text-neutral-800">{t('calculators:mortgage.title')}</h3>
             </div>
-            
+
             <div className="space-y-4">
                 <div>
-                    <label className="text-xs font-medium text-neutral-500">Property Price</label>
+                    <label className="text-xs font-medium text-neutral-500">{t('calculators:mortgage.fields.propertyPrice')}</label>
                     <p className="text-lg font-bold text-neutral-800">{formatPrice(propertyPrice, country)}</p>
                 </div>
 
                 <div>
                     <div className="flex justify-between items-center mb-1">
-                        <label className="text-xs font-semibold text-neutral-700">Down Payment</label>
+                        <label className="text-xs font-semibold text-neutral-700">{t('calculators:mortgage.fields.downPayment')}</label>
                         <div className="bg-neutral-100 p-0.5 rounded-full flex items-center text-xs font-semibold">
                             <button onClick={() => handleDownPaymentTypeChange('percent')} className={`px-2 py-0.5 rounded-full ${downPaymentType === 'percent' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}>%</button>
                             <button onClick={() => handleDownPaymentTypeChange('amount')} className={`px-2 py-0.5 rounded-full ${downPaymentType === 'amount' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'}`}>{currencySymbol}</button>
                         </div>
                     </div>
                      <div className="flex items-center gap-2">
-                        <input 
-                            type="range" 
-                            min={0} 
+                        <input
+                            type="range"
+                            min={0}
                             max={downPaymentType === 'percent' ? 100 : propertyPrice}
                             step={downPaymentType === 'percent' ? 1 : 1000}
-                            value={downPayment} 
+                            value={downPayment}
                             onChange={handleDownPaymentChange}
                             className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
                         />
-                         <input 
-                            type="number" 
+                         <input
+                            type="number"
                             value={downPayment}
                             onChange={handleDownPaymentChange}
                             className="w-20 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-md p-1 text-center text-neutral-900"
@@ -116,38 +118,38 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                     </div>
                     <p className="text-[11px] text-right text-neutral-500 mt-1">({formatPrice(downPaymentAmount, country)})</p>
                 </div>
-                
+
                  <div>
-                    <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Loan Term</label>
+                    <label className="block text-xs font-semibold text-neutral-700 mb-1.5">{t('calculators:mortgage.fields.loanTerm')}</label>
                     <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
                         {[15, 20, 25, 30].map(term => (
-                            <TermButton key={term} term={term} selectedTerm={loanTerm} onClick={setLoanTerm} />
+                            <TermButton key={term} term={term} selectedTerm={loanTerm} onClick={setLoanTerm} yrsLabel={t('calculators:mortgage.fields.yrs')} />
                         ))}
                     </div>
                 </div>
 
                 <div>
-                    <label htmlFor="interest-rate" className="block text-xs font-semibold text-neutral-700 mb-1">Interest Rate (%)</label>
-                    <input 
+                    <label htmlFor="interest-rate" className="block text-xs font-semibold text-neutral-700 mb-1">{t('calculators:mortgage.fields.interestRate')}</label>
+                    <input
                         id="interest-rate"
-                        type="number" 
-                        step="0.01" 
-                        value={interestRate} 
+                        type="number"
+                        step="0.01"
+                        value={interestRate}
                         onChange={e => setInterestRate(e.target.valueAsNumber || 0)}
                         className="w-full text-sm font-semibold bg-neutral-50 border border-neutral-200 rounded-md p-1.5 text-neutral-900"
                     />
                 </div>
 
                 <div className="border-t border-neutral-200 pt-3 text-center">
-                    <p className="text-xs font-semibold text-neutral-600">Estimated Monthly Payment</p>
+                    <p className="text-xs font-semibold text-neutral-600">{t('calculators:mortgage.results.estimatedMonthlyPayment')}</p>
                     <p className="text-2xl font-extrabold text-primary mt-0.5">
                         {formatPrice(monthlyPayment, country)}
                     </p>
                 </div>
             </div>
-            
+
             <p className="text-center text-[10px] text-neutral-400 mt-4">
-                This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments.
+                {t('calculators:mortgage.disclaimer')}
             </p>
         </div>
     );

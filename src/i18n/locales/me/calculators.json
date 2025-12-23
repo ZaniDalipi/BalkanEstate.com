@@ -1,0 +1,126 @@
+{
+  "property": {
+    "title": "Property Value Calculator",
+    "description": "Estimate your property's value",
+    "fields": {
+      "location": "Location",
+      "area": "Area (m²)"
+    },
+    "calculating": "Calculating...",
+    "results": {
+      "estimatedValue": "Estimated Value"
+    },
+    "errors": {
+      "selectLocation": "Please select a valid location from the suggestions.",
+      "locationNotDetermined": "Could not determine city and country from selected location.",
+      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate."
+    }
+  },
+  "mortgage": {
+    "title": "Mortgage Calculator",
+    "description": "Estimate your monthly payments",
+    "fields": {
+      "propertyPrice": "Property Price",
+      "downPayment": "Down Payment",
+      "downPaymentPercent": "Down Payment (%)",
+      "loanAmount": "Loan Amount",
+      "interestRate": "Interest Rate (%)",
+      "loanTerm": "Loan Term",
+      "years": "years",
+      "yrs": "yrs"
+    },
+    "results": {
+      "monthlyPayment": "Monthly Payment",
+      "estimatedMonthlyPayment": "Estimated Monthly Payment",
+      "totalPayment": "Total Payment",
+      "totalInterest": "Total Interest",
+      "principal": "Principal",
+      "interest": "Interest"
+    },
+    "breakdown": {
+      "title": "Payment Breakdown",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "total": "Total"
+    },
+    "disclaimer": "This is an estimate for informational purposes only. Consult with a financial professional for actual rates and payments."
+  },
+  "rentVsBuy": {
+    "title": "Rent vs. Buy Calculator",
+    "description": "Should you rent or buy?",
+    "fields": {
+      "planningToStay": "Planning to stay",
+      "estimatedMonthlyRent": "Estimated monthly rent",
+      "monthlyRent": "Current Monthly Rent",
+      "rentIncrease": "Annual Rent Increase (%)",
+      "propertyPrice": "Property Price",
+      "downPayment": "Down Payment",
+      "mortgageRate": "Mortgage Rate (%)",
+      "propertyTax": "Property Tax (%)",
+      "homeInsurance": "Home Insurance",
+      "maintenance": "Maintenance",
+      "homeAppreciation": "Home Appreciation",
+      "appreciation": "Property Appreciation (%)",
+      "closingCosts": "Closing Costs",
+      "sellingCosts": "Selling Costs",
+      "investmentReturn": "Investment Return",
+      "timeframe": "Timeframe",
+      "years": "years"
+    },
+    "advanced": {
+      "title": "Advanced Settings",
+      "downPayment": "Down Payment",
+      "interestRate": "Interest Rate",
+      "loanTerm": "Loan Term",
+      "propertyTaxes": "Property Taxes",
+      "homeInsurance": "Home Insurance",
+      "maintenance": "Maintenance",
+      "homeAppreciation": "Home Appreciation",
+      "rentIncrease": "Rent Increase",
+      "closingCosts": "Closing Costs",
+      "sellingCosts": "Selling Costs",
+      "investmentReturn": "Investment Return"
+    },
+    "tooltips": {
+      "downPayment": "Percentage of home price paid upfront",
+      "interestRate": "Annual mortgage interest rate",
+      "loanTerm": "Length of mortgage in years",
+      "propertyTaxes": "Annual property tax rate (based on home value)",
+      "homeInsurance": "Annual home insurance cost (based on home value)",
+      "maintenance": "Annual maintenance and repair costs (based on home value)",
+      "homeAppreciation": "Expected annual home value appreciation",
+      "rentIncrease": "Expected annual rent increase",
+      "closingCosts": "One-time closing costs when buying (percentage of home price)",
+      "sellingCosts": "Costs when selling home (real estate commissions, fees)",
+      "investmentReturn": "Expected annual return if investing money instead of buying"
+    },
+    "results": {
+      "recommendation": "Recommendation",
+      "buyingIsBetter": "Buying is Better",
+      "rentingIsBetter": "Renting is Better",
+      "totalRentCost": "Total Rent Cost",
+      "totalBuyCost": "Total Buying Cost",
+      "savings": "Potential Savings",
+      "estimatedSavings": "Estimated savings",
+      "equityBuilt": "Equity Built",
+      "breakEvenPoint": "Break-even point",
+      "cheaperTo": "After {{years}} years, it's cheaper to",
+      "buy": "Buy",
+      "rent": "Rent",
+      "own": "Own",
+      "totalCostToRent": "Total Cost to Rent",
+      "netCostToOwn": "Net Cost to Own",
+      "yearlyCostComparison": "Yearly Cost Comparison",
+      "year": "Year"
+    },
+    "calculating": "Calculating...",
+    "disclaimer": "This is an estimate for informational purposes. Many factors can influence the costs of buying and renting. Consider consulting with a financial advisor for major decisions."
+  },
+  "common": {
+    "calculate": "Calculate",
+    "reset": "Reset",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "invalidValue": "Invalid value"
+  }
+}

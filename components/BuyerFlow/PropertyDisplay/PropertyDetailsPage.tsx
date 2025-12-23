@@ -2,12 +2,15 @@
 // Orchestrates all property detail subcomponents
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import { useAppContext } from '../../../context/AppContext';
 import { ArrowLeftIcon } from '../../../constants';
 import ImageViewerModal from '../Modals/ImageViewerModal';
 import FloorPlanViewerModal from '../Modals/FloorPlanViewerModal';
 import FeaturedAgencies from '../../FeaturedAgencies';
+import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '../../../src/components/seo';
+import { SocialShare } from '../../../src/components/marketing/SocialShare';
 import {
   ImageEditorModal,
   PropertyGallery,
@@ -33,6 +36,7 @@ import {
  * All major sections have been extracted into focused components <200 lines.
  */
 const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => {
+  const { t } = useTranslation(['property']);
   const { state, dispatch, createConversation, toggleSavedHome } = useAppContext();
 
   // State for image gallery
@@ -65,12 +69,20 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   // Format days listed text
   const daysListedText = React.useMemo(() => {
     if (daysListed === null) return null;
-    if (daysListed === 0) return 'Listed today';
-    if (daysListed === 1) return 'Listed yesterday';
-    if (daysListed < 7) return `Listed ${daysListed} days ago`;
-    if (daysListed < 30) return `Listed ${Math.floor(daysListed / 7)} week${Math.floor(daysListed / 7) > 1 ? 's' : ''} ago`;
-    return `Listed ${Math.floor(daysListed / 30)} month${Math.floor(daysListed / 30) > 1 ? 's' : ''} ago`;
-  }, [daysListed]);
+    if (daysListed === 0) return t('property:listing.listedToday');
+    if (daysListed === 1) return t('property:listing.listedYesterday');
+    if (daysListed < 7) return t('property:listing.listedDaysAgo', { days: daysListed });
+    if (daysListed < 30) {
+      const weeks = Math.floor(daysListed / 7);
+      return weeks > 1
+        ? t('property:listing.listedWeeksAgoPlural', { weeks })
+        : t('property:listing.listedWeeksAgo', { weeks });
+    }
+    const months = Math.floor(daysListed / 30);
+    return months > 1
+      ? t('property:listing.listedMonthsAgoPlural', { months })
+      : t('property:listing.listedMonthsAgo', { months });
+  }, [daysListed, t]);
 
   // Get current image URL for editor
   const allImages = React.useMemo(() => {
@@ -194,8 +206,37 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     return () => window.removeEventListener('popstate', handlePopState);
   }, [dispatch]);
 
+  // Generate SEO description
+  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.type || 'property'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 100) || ''}`;
+
+  // Get all images for SEO
+  const seoImages = allImages.map(img => img.url).filter(Boolean);
+
   return (
     <div className="bg-neutral-50 h-full overflow-y-auto animate-fade-in">
+      {/* SEO Meta Tags */}
+      <SEO
+        title={`${property.address}, ${property.city} - €${property.price?.toLocaleString()}`}
+        description={seoDescription}
+        canonical={`${window.location.origin}/property/${property.id}`}
+        image={property.imageUrl}
+        type="product"
+        property={{
+          price: property.price,
+          currency: 'EUR',
+          bedrooms: property.beds,
+          bathrooms: property.baths,
+          sqft: property.sqft,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+          propertyType: property.type,
+          images: seoImages,
+          latitude: property.lat,
+          longitude: property.lng,
+        }}
+      />
+
       {/* Modals */}
       {isEditorOpen && (
         <ImageEditorModal
@@ -230,20 +271,32 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
       {/* Copied Toast */}
       {showCopiedToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-neutral-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium animate-fade-in">
-          Link copied to clipboard
+          {t('property:toast.linkCopied')}
         </div>
       )}
 
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
-        <div className="p-4 flex items-center justify-between">
+        {/* Breadcrumbs */}
+        <div className="px-4 pt-3 pb-1">
+          <Breadcrumbs
+            items={generatePropertyBreadcrumbs({
+              id: property.id,
+              address: property.address,
+              city: property.city,
+              country: property.country,
+            })}
+          />
+        </div>
+
+        <div className="p-4 pt-2 flex items-center justify-between">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-primary font-semibold hover:underline"
-            aria-label="Go back to search results"
+            aria-label={t('property:navigation.goBackToSearch')}
           >
             <ArrowLeftIcon className="w-5 h-5" />
-            Back
+            {t('property:navigation.back')}
           </button>
 
           <div className="flex items-center gap-2">
@@ -251,8 +304,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             <button
               onClick={handleShare}
               className="bg-white p-2 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
-              aria-label="Share this property"
-              title="Share"
+              aria-label={t('property:actions.share')}
+              title={t('property:actions.share')}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -320,7 +373,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                {property.views.toLocaleString()} views
+                {property.views.toLocaleString()} {t('property:listing.views')}
               </span>
             )}
           </div>
@@ -354,8 +407,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-neutral-800">360° Virtual Tour</h3>
-                      <p className="text-sm text-neutral-600">Explore this property in immersive 360°</p>
+                      <h3 className="text-lg font-bold text-neutral-800">{t('property:virtualTour.title')}</h3>
+                      <p className="text-sm text-neutral-600">{t('property:virtualTour.description')}</p>
                     </div>
                   </div>
                 </div>
@@ -376,7 +429,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                     rel="noopener noreferrer"
                     className="text-sm text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1"
                   >
-                    <span>Open in new tab for full experience</span>
+                    <span>{t('property:virtualTour.openInNewTab')}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
@@ -419,7 +472,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
             {/* Featured Agencies */}
             <div className="mt-4 sm:mt-6 lg:mt-8 animate-slide-up" style={{ animationDelay: '500ms' }}>
-              <h3 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-3 sm:mb-4">Featured Agencies</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-3 sm:mb-4">{t('property:featuredAgencies')}</h3>
               <FeaturedAgencies />
             </div>
           </div>

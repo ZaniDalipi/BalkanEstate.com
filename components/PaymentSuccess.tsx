@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/AppContext';
 import { CheckCircleIcon, ArrowLeftIcon } from '../constants';
 
@@ -9,6 +10,7 @@ interface PaymentDetails {
 }
 
 const PaymentSuccess: React.FC = () => {
+  const { t } = useTranslation(['payment']);
   const { dispatch } = useAppContext();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
@@ -24,7 +26,7 @@ const PaymentSuccess: React.FC = () => {
       setSessionId(sid);
       verifyPayment(sid);
     } else {
-      setError('No payment session found');
+      setError(t('success.noSessionFound'));
       setIsVerifying(false);
     }
   }, []);
@@ -34,7 +36,7 @@ const PaymentSuccess: React.FC = () => {
       const token = localStorage.getItem('balkan_estate_token');
 
       if (!token) {
-        throw new Error('Please log in to verify your payment');
+        throw new Error(t('success.loginToVerify'));
       }
 
       const response = await fetch(`http://localhost:5001/api/payments/verify-session/${sessionId}`, {
@@ -74,8 +76,8 @@ const PaymentSuccess: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-neutral-800 mb-2">Verifying Payment...</h2>
-          <p className="text-neutral-600">Please wait while we confirm your transaction</p>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('success.verifying')}</h2>
+          <p className="text-neutral-600">{t('success.verifyingDescription')}</p>
         </div>
       </div>
     );
@@ -88,15 +90,15 @@ const PaymentSuccess: React.FC = () => {
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-4xl">❌</span>
           </div>
-          <h2 className="text-2xl font-bold text-neutral-800 mb-2">Payment Verification Failed</h2>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('success.verificationFailed')}</h2>
           <p className="text-neutral-600 mb-6">{error}</p>
           <button
             onClick={handleReturnHome}
             className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors flex items-center gap-2 mx-auto"
-            aria-label="Return to my account"
+            aria-label={t('success.returnToAccount')}
           >
             <ArrowLeftIcon className="w-5 h-5" />
-            Return to Account
+            {t('success.returnToAccount')}
           </button>
         </div>
       </div>
@@ -118,25 +120,25 @@ const PaymentSuccess: React.FC = () => {
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-neutral-800 mb-2">Payment Successful!</h1>
+          <h1 className="text-3xl font-bold text-neutral-800 mb-2">{t('success.title')}</h1>
           <p className="text-lg text-neutral-600 mb-6">
-            Thank you for your purchase. Your subscription has been activated.
+            {t('success.description')}
           </p>
 
           {/* Payment Details */}
           {paymentDetails && (
             <div className="bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-xl p-6 mb-6 text-left border border-neutral-200">
-              <h3 className="font-semibold text-neutral-800 mb-3">Payment Details</h3>
+              <h3 className="font-semibold text-neutral-800 mb-3">{t('success.details')}</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-neutral-600">Status:</span>
+                  <span className="text-neutral-600">{t('success.status')}:</span>
                   <span className="font-semibold text-green-600 capitalize">
-                    {paymentDetails.paymentStatus || 'Paid'}
+                    {paymentDetails.paymentStatus || t('success.paid')}
                   </span>
                 </div>
                 {paymentDetails.amountTotal && (
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Amount:</span>
+                    <span className="text-neutral-600">{t('success.amount')}:</span>
                     <span className="font-semibold text-neutral-800">
                       €{paymentDetails.amountTotal.toFixed(2)}
                     </span>
@@ -144,7 +146,7 @@ const PaymentSuccess: React.FC = () => {
                 )}
                 {paymentDetails.customerEmail && (
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Email:</span>
+                    <span className="text-neutral-600">{t('success.email')}:</span>
                     <span className="font-medium text-neutral-800 truncate ml-2">
                       {paymentDetails.customerEmail}
                     </span>
@@ -152,7 +154,7 @@ const PaymentSuccess: React.FC = () => {
                 )}
                 {sessionId && (
                   <div className="flex justify-between mt-4 pt-4 border-t border-neutral-300">
-                    <span className="text-neutral-500 text-xs">Session ID:</span>
+                    <span className="text-neutral-500 text-xs">{t('success.sessionId')}:</span>
                     <span className="font-mono text-xs text-neutral-400 truncate ml-2 max-w-[200px]">
                       {sessionId}
                     </span>
@@ -164,19 +166,19 @@ const PaymentSuccess: React.FC = () => {
 
           {/* What's Next */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
-            <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
+            <h3 className="font-semibold text-blue-900 mb-2">{t('success.whatsNext')}</h3>
             <ul className="text-sm text-blue-700 space-y-1">
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-0.5">✓</span>
-                <span>Your subscription is now active</span>
+                <span>{t('success.subscriptionActive')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-0.5">✓</span>
-                <span>You have access to all premium features</span>
+                <span>{t('success.premiumAccess')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-0.5">✓</span>
-                <span>A confirmation email has been sent</span>
+                <span>{t('success.confirmationSent')}</span>
               </li>
             </ul>
           </div>
@@ -187,7 +189,7 @@ const PaymentSuccess: React.FC = () => {
               onClick={handleReturnHome}
               className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 px-6 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >
-              Go to My Account
+              {t('success.goToAccount')}
             </button>
             <button
               onClick={() => {
@@ -196,7 +198,7 @@ const PaymentSuccess: React.FC = () => {
               }}
               className="w-full text-neutral-600 hover:text-neutral-800 font-medium transition-colors py-2"
             >
-              Browse Properties
+              {t('success.browseProperties')}
             </button>
           </div>
         </div>

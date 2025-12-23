@@ -1,0 +1,38 @@
+{
+  "success": {
+    "verifying": "Verifikacija Plaćanja...",
+    "verifyingDescription": "Molimo sačekajte dok potvrdimo vašu transakciju",
+    "verificationFailed": "Verifikacija Plaćanja Neuspešna",
+    "returnToAccount": "Povratak na Nalog",
+    "title": "Plaćanje Uspešno!",
+    "description": "Hvala na kupovini. Vaša pretplata je aktivirana.",
+    "details": "Detalji Plaćanja",
+    "status": "Status",
+    "paid": "Plaćeno",
+    "amount": "Iznos",
+    "email": "Email",
+    "sessionId": "ID Sesije",
+    "whatsNext": "Šta Dalje?",
+    "subscriptionActive": "Vaša pretplata je sada aktivna",
+    "premiumAccess": "Imate pristup svim premium funkcijama",
+    "confirmationSent": "Email potvrde je poslat",
+    "goToAccount": "Idi na Moj Nalog",
+    "browseProperties": "Pregledaj Nekretnine",
+    "noSessionFound": "Sesija plaćanja nije pronađena",
+    "loginToVerify": "Molimo prijavite se da biste verifikovali plaćanje"
+  },
+  "cancel": {
+    "title": "Plaćanje Otkazano",
+    "description": "Vaše plaćanje nije završeno. Nije naplaćeno ništa.",
+    "whyHappened": "Zašto se ovo desilo?",
+    "clickedCancel": "Kliknuli ste dugme nazad ili otkaži",
+    "windowClosed": "Prozor za plaćanje je zatvoren",
+    "sessionTimeout": "Sesija je istekla",
+    "goodNews": "Dobra vest!",
+    "noCharges": "Vaši podaci o plaćanju nisu sačuvani i nije naplaćeno ništa. Možete pokušati ponovo kad god budete spremni.",
+    "tryAgain": "Pokušaj Ponovo",
+    "returnHome": "Povratak na Početnu",
+    "havingTrouble": "Imate problema?",
+    "contactSupport": "Kontaktirajte Podršku"
+  }
+}

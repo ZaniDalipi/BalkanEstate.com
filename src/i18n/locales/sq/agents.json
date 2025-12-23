@@ -1,0 +1,510 @@
+{
+  "page": {
+    "title": "Gjeni Agjentë Imobiliarë në Ballkan",
+    "description": "Shfletoni {{count}}+ agjentë të verifikuar në Serbi, Mal të Zi, Kroaci dhe Ballkan. Gjeni profesionistë të besuar për t'ju ndihmuar të blini ose shisni pronë."
+  },
+  "loading": "Duke ngarkuar agjentët...",
+  "hero": {
+    "badge": "Ju Lidhim me Ekspertët",
+    "title": "Gjeni Partnerin Tuaj",
+    "titleHighlight": "Ideal të Pasurive të Patundshme",
+    "subtitle": "Lidhuni me agjentët më të vlerësuar në Ballkan që specializohen në tregun tuaj lokal dhe kanë ekspertizën për t'ju udhëhequr."
+  },
+  "search": {
+    "title": "Gjeni Agjentin Tuaj Ideal",
+    "subtitle": "Kërkoni {{count}}+ profesionistë të verifikuar në Ballkan",
+    "tabs": {
+      "location": "Vendndodhja",
+      "name": "Emri i Agjentit",
+      "specialization": "Specializimi"
+    },
+    "placeholders": {
+      "location": "Kërkoni sipas qytetit, lagjes, ose shtetit...",
+      "name": "Kërkoni sipas emrit të agjentit...",
+      "specialization": "Kërkoni sipas specializimit (p.sh., Luksoze, Komerciale)..."
+    },
+    "clearSearch": "Pastro kërkimin",
+    "searchButton": "Kërko",
+    "popularSearches": "Kërkime të njohura:",
+    "viewAll": "Shiko të Gjitha"
+  },
+  "stats": {
+    "verifiedAgents": "Agjentë të Verifikuar",
+    "professionalAgencies": "Agjenci Profesionale",
+    "successfulTransactions": "Transaksione të Suksesshme"
+  },
+  "filters": {
+    "sortBy": "Rendit sipas:",
+    "highestRated": "Më të Vlerësuarit",
+    "mostExperienced": "Më me Përvojë",
+    "mostSales": "Më Shumë Shitje",
+    "nameAZ": "Emri (A-Z)",
+    "showFilters": "Trego Filtrat",
+    "hideFilters": "Fshih Filtrat",
+    "specialization": "Specializimi",
+    "minimumRating": "Vlerësimi Minimal",
+    "anyRating": "Çdo Vlerësim",
+    "stars": "{{count}}+ Yje",
+    "experience": "Përvoja",
+    "anyExperience": "Çdo Përvojë",
+    "yearsPlus": "{{count}}+ Vite",
+    "priceRangeFocus": "Fokusi i Çmimit",
+    "allPriceRanges": "Të Gjitha Çmimet",
+    "affordable": "Të Përballueshme (<€150K)",
+    "midRange": "Mesatare (€150K-€500K)",
+    "luxury": "Luksoze (>€500K)",
+    "clearAllFilters": "Pastro të gjithë filtrat",
+    "types": {
+      "luxury": "Luksoze",
+      "commercial": "Komerciale",
+      "residential": "Rezidenciale",
+      "investment": "Investim",
+      "newConstruction": "Ndërtim i Ri",
+      "foreclosures": "Sekuestrime"
+    }
+  },
+  "results": {
+    "title": "Agjentë Imobiliarë në Ballkan",
+    "description": "Me mbi {{count}} agjentë nga të gjitha agjencitë kryesore, një agjent lokal njeh tregun tuaj dhe mund t'ju ndihmojë të gjeni shtëpinë perfekte.",
+    "showingMatching": "Duke treguar {{count}} agjent që përputhet me \"{{query}}\"",
+    "showingMatchingPlural": "Duke treguar {{count}} agjentë që përputhen me \"{{query}}\"",
+    "noAgentsFound": "Nuk u gjetën agjentë",
+    "tryAdjusting": "Provoni të ndryshoni kriteret e kërkimit",
+    "viewMore": "Shiko më shumë"
+  },
+  "agencies": {
+    "title": "Agjencitë Kryesore të Pasurive",
+    "subtitle": "Shfletoni agjencitë me profesionistë me përvojë",
+    "viewAll": "Shiko të gjitha agjencitë →",
+    "pageTitle": "Agjenci Pasurishë në Ballkan",
+    "pageDescription": "Zbuloni {{count}}+ agjenci të besueshme të pasurive në Serbi, Mal të Zi, Kroaci, Bosnjë dhe Ballkan.",
+    "badge": "Rrjetet Kryesore të Pasurive",
+    "heroTitle": "Agjencitë Kryesore",
+    "heroTitleHighlight": "të Pasurive në Ballkan",
+    "heroSubtitle": "Lidhuni me agjenci profesionale që sjellin ekspertizë, besim dhe rezultate në udhëtimin tuaj të pasurive.",
+    "findIdealAgency": "Gjeni Agjëncinë Tuaj Ideale",
+    "searchAgencies": "Kërkoni {{count}}+ agjenci profesionale në Ballkan",
+    "searchByCity": "Qyteti",
+    "searchByName": "Emri i Agjencisë",
+    "searchByCityPlaceholder": "Kërkoni sipas qytetit ose vendndodhjes...",
+    "searchByNamePlaceholder": "Kërkoni sipas emrit të agjencisë...",
+    "popularSearches": "Kërkime të njohura:",
+    "luxurySpecialists": "Specialistë Luksi",
+    "topRated": "Më të Vlerësuarat",
+    "professionalAgencies": "Agjenci Profesionale",
+    "expertAgents": "Agjentë Ekspertë",
+    "listedProperties": "Prona të Listuara",
+    "filterAll": "Të Gjitha Agjencitë",
+    "filterFeatured": "Të Promovuara",
+    "filterMyAgency": "Agjencia Ime",
+    "sortMostProperties": "Më Shumë Prona",
+    "sortMostAgents": "Më Shumë Agjentë",
+    "sortMostExperienced": "Më me Përvojë",
+    "sortAlphabetical": "Alfabetik",
+    "yourAgency": "Agjencia Juaj",
+    "featuredAgencies": "Agjenci të Promovuara",
+    "topRealEstateAgencies": "Agjencitë Kryesore të Pasurive",
+    "showingMatching": "Duke treguar {{count}} agjenci që përputhen me \"{{query}}\"",
+    "browseAgencies": "Shfletoni agjenci profesionale me ekipe me përvojë",
+    "agenciesFound": "agjenci u gjetën",
+    "mostProperties": "Më Shumë Prona",
+    "mostAgents": "Më Shumë Agjentë",
+    "mostExperience": "Më Shumë Përvojë",
+    "unableToLoad": "Nuk mund të ngarkohen agjencitë",
+    "tryAgain": "Provoni Përsëri",
+    "findingAgencies": "Duke Gjetur Agjenci...",
+    "searchingNetwork": "Duke kërkuar nëpër rrjetin tonë të agjencive profesionale",
+    "noAgenciesFound": "Nuk u Gjetën Agjenci",
+    "noAgencyFound": "Nuk u Gjet Agjencia",
+    "noAgenciesYet": "Ende Nuk Ka Agjenci",
+    "adjustCriteria": "Provoni të ndryshoni kriteret e kërkimit ose shfletoni të gjitha agjencitë.",
+    "noAgencyCreated": "Ende nuk keni krijuar një agjenci. Filloni udhëtimin tuaj sot!",
+    "beFirstAgency": "Bëhuni i pari që krijon një agjenci dhe prezanton pronat tuaja!",
+    "createAgency": "Krijo Agjenci",
+    "moreAgencies": "Më Shumë Agjenci",
+    "readyToGrow": "Gati të Zgjeroni Agjëncinë Tuaj?",
+    "joinNetwork": "Bashkohuni me rrjetin tonë të agjencive kryesore dhe merrni ekspozim ndaj mijëra klientëve potencialë.",
+    "createAgencyToday": "Krijoni Agjëncinë Tuaj Sot",
+    "featured": "E Promovuar",
+    "certified": "E Certifikuar",
+    "properties": "Prona",
+    "agents": "Agjentë",
+    "years": "Vite",
+    "certs": "Certifikata",
+    "call": "Thirr",
+    "email": "Email",
+    "website": "Faqe",
+    "viewProfile": "Shiko Profilin",
+    "view": "Shiko",
+    "more": "+{{count}} më shumë"
+  },
+  "contact": {
+    "title": "Merrni ndihmë për të gjetur një agjent",
+    "subtitle": "Do t'ju lidhim me një Agjent Premier BalkanEstate që njeh mirë tregun tuaj.",
+    "successTitle": "Kërkesa u Dorëzua!",
+    "successMessage": "Faleminderit! Do t'ju përputhim me agjentë lokalë dhe ata do t'ju kontaktojnë së shpejti.",
+    "emailLabel": "Adresa Email *",
+    "emailPlaceholder": "email.juaj@example.com",
+    "phoneLabel": "Numri i Telefonit *",
+    "phonePlaceholder": "+355 44 123 4567",
+    "locationLabel": "Vendndodhja / Adresa *",
+    "locationPlaceholder": "Tiranë, Shqipëri",
+    "propertyDescriptionLabel": "Përshkrimi i Pronës *",
+    "propertyDescriptionPlaceholder": "Përshkruani pronën që kërkoni (lloji, madhësia, buxheti, veçoritë, etj.)",
+    "submitButton": "Lidhu me një agjent lokal",
+    "submitting": "Duke dorëzuar..."
+  },
+  "faq": {
+    "title": "Pyetje të bëra shpesh",
+    "questions": {
+      "findAgent": {
+        "question": "Si të gjej një agjent të mirë imobiliar afër meje?",
+        "answer": "Filloni duke kërkuar agjentë në zonën tuaj duke përdorur kërkimin sipas vendndodhjes. Kërkoni agjentë me vlerësime të larta, rekorde të forta shitjesh dhe dëshmi nga klientët e fundit."
+      },
+      "pickAgent": {
+        "question": "Si të zgjedh një agjent imobiliar?",
+        "answer": "Merrni parasysh përvojën e tyre, njohurinë e tregut lokal, rekordin e shitjeve, vlerësimet e klientëve dhe stilin e komunikimit. Planifikoni konsultime me disa agjentë para se të merrni vendimin."
+      },
+      "contactAgent": {
+        "question": "Si të kontaktoj një agjent imobiliar?",
+        "answer": "Mund të shikoni profilin e agjentit për të gjetur informacionin e kontaktit, përfshirë numrin e telefonit dhe emailin. Shumë agjentë ofrojnë gjithashtu rezervim online të përshtatshëm për konsultime."
+      },
+      "leaveReview": {
+        "question": "Si mund të lë një vlerësim për një agjent imobiliar?",
+        "answer": "Vizitoni faqen e profilit të agjentit dhe klikoni butonin \"Shkruaj një Vlerësim\". Ndani përvojën tuaj për të ndihmuar të tjerët të marrin vendime të informuara."
+      },
+      "agentVsBroker": {
+        "question": "Cila është ndryshimi midis një agjenti dhe një ndërmjetësi?",
+        "answer": "Një agjent imobiliar është i licencuar për të ndihmuar klientët të blejnë dhe shesin pronë, ndërsa një ndërmjetës ka trajnim dhe certifikim shtesë. Ndërmjetësit mund të punojnë në mënyrë të pavarur dhe të menaxhojnë agjencitë e tyre."
+      }
+    }
+  },
+  "cta": {
+    "title": "Jeni agjent imobiliar?",
+    "description": "Bashkohuni me BalkanEstate për të treguar ekspertizën tuaj, për t'u lidhur me klientë potencialë dhe për të rritur biznesin tuaj. Merrni qasje në mjete premium dhe mundësi reklamimi për t'ju ndihmuar të keni sukses në tregun e pasurive të patundshme të Ballkanit.",
+    "getStarted": "Fillo",
+    "browseAgencies": "Shfleto Agjencitë"
+  },
+  "profile": {
+    "title": "Agent Profile",
+    "about": "About",
+    "experience": "Experience",
+    "specializations": "Specializations",
+    "languages": "Languages",
+    "serviceAreas": "Service Areas",
+    "listings": "Active Listings",
+    "soldProperties": "Sold Properties",
+    "reviews": "Reviews",
+    "rating": "Rating",
+    "totalSales": "Total Sales",
+    "responseTime": "Response Time",
+    "responseRate": "Response Rate",
+    "memberSince": "Member Since",
+    "verified": "Verified Agent",
+    "contactAgent": "Contact Agent",
+    "sendMessage": "Send Message",
+    "callAgent": "Call Agent",
+    "scheduleCall": "Schedule a Call",
+    "requestCallback": "Request Callback",
+    "viewListings": "View All Listings",
+    "writeReview": "Write a Review",
+    "share": "Share Profile",
+    "report": "Report Agent"
+  },
+  "reviews": {
+    "title": "Agent Reviews",
+    "writeReview": "Write a Review",
+    "yourRating": "Your Rating",
+    "yourReview": "Your Review",
+    "reviewPlaceholder": "Share your experience working with this agent...",
+    "submitReview": "Submit Review",
+    "submitting": "Submitting...",
+    "thankYou": "Thank you for your review!",
+    "helpful": "Helpful",
+    "notHelpful": "Not Helpful",
+    "reportReview": "Report Review",
+    "verifiedClient": "Verified Client",
+    "allReviews": "All Reviews",
+    "sortBy": "Sort by",
+    "newest": "Newest",
+    "highest": "Highest Rating",
+    "lowest": "Lowest Rating",
+    "mostHelpful": "Most Helpful",
+    "noReviews": "No reviews yet",
+    "beFirst": "Be the first to review this agent"
+  },
+  "card": {
+    "properties": "Properties",
+    "years": "Years Exp.",
+    "rating": "Rating",
+    "reviews": "Reviews",
+    "viewProfile": "View Profile",
+    "contact": "Contact",
+    "verified": "Verified",
+    "topRated": "Top Rated",
+    "featured": "Featured"
+  },
+  "agencyProfile": {
+    "title": "Agency Profile",
+    "about": "About Us",
+    "ourTeam": "Our Team",
+    "ourListings": "Our Listings",
+    "services": "Services",
+    "achievements": "Achievements",
+    "certifications": "Certifications",
+    "awards": "Awards",
+    "founded": "Founded",
+    "headquarters": "Headquarters",
+    "branches": "Branches",
+    "totalAgents": "Total Agents",
+    "totalListings": "Total Listings",
+    "soldThisYear": "Sold This Year",
+    "contactAgency": "Contact Agency",
+    "visitWebsite": "Visit Website",
+    "followUs": "Follow Us",
+    "workWithUs": "Work With Us",
+    "joinOurTeam": "Join Our Team",
+    "careerOpportunities": "Career Opportunities"
+  },
+  "verification": {
+    "title": "Agent Verification",
+    "description": "Verify your identity and license to become a verified agent",
+    "benefits": {
+      "title": "Benefits of Verification",
+      "trust": "Increased trust from clients",
+      "badge": "Verified badge on your profile",
+      "priority": "Priority in search results",
+      "features": "Access to premium features"
+    },
+    "requirements": {
+      "title": "Requirements",
+      "validLicense": "Valid real estate license",
+      "idDocument": "Government-issued ID",
+      "photo": "Professional photo",
+      "contact": "Verified contact information"
+    },
+    "status": {
+      "pending": "Verification Pending",
+      "approved": "Verified",
+      "rejected": "Verification Rejected",
+      "expired": "Verification Expired"
+    },
+    "startVerification": "Start Verification",
+    "uploadDocuments": "Upload Documents",
+    "pendingReview": "Your documents are under review"
+  },
+  "invite": {
+    "title": "Invite Agent",
+    "description": "Invite an agent to join your agency",
+    "email": "Agent Email",
+    "emailPlaceholder": "Enter agent's email address",
+    "message": "Personal Message",
+    "messagePlaceholder": "Add a personal message (optional)",
+    "send": "Send Invitation",
+    "sending": "Sending...",
+    "sent": "Invitation Sent!",
+    "pending": "Pending Invitations",
+    "resend": "Resend",
+    "cancel": "Cancel Invitation",
+    "expired": "Expired",
+    "accepted": "Accepted"
+  },
+  "manage": {
+    "title": "Manage Agency",
+    "teamMembers": "Team Members",
+    "addMember": "Add Team Member",
+    "removeMember": "Remove Member",
+    "changeRole": "Change Role",
+    "roles": {
+      "admin": "Admin",
+      "manager": "Manager",
+      "agent": "Agent"
+    },
+    "invitationCodes": "Invitation Codes",
+    "generateCode": "Generate New Code",
+    "codeGenerated": "Code Generated",
+    "copyCode": "Copy Code",
+    "codeCopied": "Code Copied!",
+    "codeExpiry": "Expires in {{days}} days",
+    "revokeCode": "Revoke Code",
+    "agencySettings": "Agency Settings",
+    "updateLogo": "Update Logo",
+    "updateCover": "Update Cover Photo",
+    "updateDescription": "Update Description",
+    "socialLinks": "Social Media Links",
+    "contactInfo": "Contact Information"
+  },
+  "profilePage": {
+    "header": {
+      "back": "Back",
+      "backToAgents": "Back to Agents",
+      "viewAgencyProfile": "View Agency Profile →",
+      "save": "Save",
+      "saved": "Saved",
+      "share": "Share",
+      "independentAgent": "Independent Agent"
+    },
+    "stats": {
+      "propertiesSold": "Properties Sold",
+      "yearsExperience": "Years Experience",
+      "activeListings": "Active Listings",
+      "reviews": "reviews"
+    },
+    "badges": {
+      "topAgent": "Top Agent"
+    },
+    "agencyCard": {
+      "memberOf": "Member of",
+      "agents": "Agents",
+      "properties": "Properties",
+      "visitAgency": "Visit Agency"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "listings": "Listings",
+      "reviews": "Reviews"
+    },
+    "about": {
+      "title": "About {{name}}",
+      "defaultBio": "{{name}} is a dedicated real estate professional with {{years}} years of experience in the industry{{agency}}. {{name}} specializes in helping clients achieve their real estate goals through expert market knowledge and personalized service.",
+      "asPartOf": " as part of the {{agencyName}} team"
+    },
+    "performance": {
+      "title": "Performance & Statistics",
+      "sold": "Sold",
+      "active": "Active",
+      "rating": "Rating",
+      "years": "Years",
+      "reviews": "Reviews",
+      "team": "Team"
+    },
+    "credentials": {
+      "title": "Credentials & Certifications",
+      "licensedAgent": "Licensed Real Estate Agent",
+      "authorizedToPractice": "Authorized to practice in {{city}}, {{country}}",
+      "professionalCertifications": "Professional Certifications",
+      "memberOfAssociation": "Member of National Association",
+      "awardsRecognition": "Awards & Recognition",
+      "noAwards": "No awards listed"
+    },
+    "marketInsights": {
+      "title": "Local Market Insights",
+      "avgDaysOnMarket": "Avg. Days on Market",
+      "days": "days",
+      "fasterThanAverage": "Faster than average",
+      "priceGrowthYoY": "Price Growth (YoY)",
+      "healthyAppreciation": "Healthy appreciation",
+      "marketActivity": "Market Activity",
+      "strongDemand": "Strong demand",
+      "requestFullReport": "Request Full Market Report",
+      "getDetailedInsights": "Get detailed insights about the {{city}} real estate market"
+    },
+    "propertiesMap": {
+      "title": "Properties Map",
+      "active": "active",
+      "sold": "sold",
+      "forSale": "For Sale",
+      "soldLabel": "Sold",
+      "viewSoldProperty": "View Sold Property",
+      "viewDetails": "View Details",
+      "beds": "beds",
+      "baths": "baths"
+    },
+    "serviceArea": {
+      "title": "Service Area Location",
+      "call": "Call",
+      "email": "Email"
+    },
+    "expertise": {
+      "title": "Areas of Expertise",
+      "residential": "Residential Properties",
+      "firstTimeBuyers": "First Time Homebuyers",
+      "propertyManagement": "Property Management"
+    },
+    "languages": {
+      "title": "Languages Spoken"
+    },
+    "listingsTab": {
+      "properties": "{{name}}'s Properties",
+      "activeListingsCount": "{{active}} active listings • {{sold}} sold properties",
+      "searchAllProperties": "Search all properties",
+      "activeListings": "Active Listings",
+      "soldProperties": "Sold Properties",
+      "soldBadge": "SOLD"
+    },
+    "reviewsTab": {
+      "verifiedReviews": "verified reviews",
+      "topPerformer": "{{name}} is rated as a Top Performer Agent",
+      "reliableAgent": "{{name}} is rated as a Reliable Agent",
+      "writeReview": "Write a Review",
+      "verifiedBuyer": "Verified Buyer",
+      "recently": "Recently",
+      "responseFrom": "Response from {{name}}",
+      "noReviews": "No reviews yet",
+      "beFirstToReview": "Be the first to review {{name}}'s services"
+    },
+    "contact": {
+      "title": "Contact {{name}}",
+      "callDirect": "Call Direct",
+      "sendEmail": "Send Email"
+    },
+    "appraisal": {
+      "title": "Get a Free Property Appraisal",
+      "description": "Curious what your property is worth? {{name}} can provide a free, no-obligation market appraisal.",
+      "requestAppraisal": "Request Appraisal",
+      "freeNoObligation": "Free • No obligation"
+    },
+    "similarAgents": {
+      "fromSameAgency": "Agents from Same Agency",
+      "otherInArea": "Other Agents in Area",
+      "noSimilarAgents": "No similar agents found",
+      "viewMoreIn": "View more agents in {{city}} →",
+      "viewMoreGeneric": "View more agents in this area →"
+    },
+    "bottomCta": {
+      "readyToWork": "Ready to work with {{name}}?",
+      "contactToday": "Contact {{name}} today for expert real estate advice and personalized service.",
+      "callNow": "Call Now: {{phone}}",
+      "contactForNumber": "(Contact for number)",
+      "scheduleConsultation": "Schedule Consultation"
+    },
+    "featuredAgencies": "Featured Agencies",
+    "linkCopied": "Link copied to clipboard!",
+    "appraisalModal": {
+      "title": "Request Property Appraisal",
+      "propertyAddress": "Property Address *",
+      "enterAddress": "Enter property address",
+      "propertyType": "Property Type *",
+      "selectType": "Select property type",
+      "apartment": "Apartment",
+      "house": "House",
+      "villa": "Villa",
+      "land": "Land",
+      "commercial": "Commercial",
+      "other": "Other",
+      "additionalNotes": "Additional Notes",
+      "additionalInfo": "Any additional information about the property...",
+      "cancel": "Cancel",
+      "sending": "Sending...",
+      "submitRequest": "Submit Request"
+    },
+    "consultationModal": {
+      "title": "Schedule Consultation",
+      "preferredDate": "Preferred Date *",
+      "preferredTime": "Preferred Time *",
+      "selectTime": "Select time",
+      "topic": "Topic *",
+      "selectTopic": "Select topic",
+      "buyingProperty": "Buying a Property",
+      "sellingProperty": "Selling a Property",
+      "realEstateInvestment": "Real Estate Investment",
+      "marketAnalysis": "Market Analysis",
+      "other": "Other",
+      "additionalNotes": "Additional Notes",
+      "whatToDiscuss": "What would you like to discuss?",
+      "cancel": "Cancel",
+      "scheduling": "Scheduling...",
+      "scheduleConsultation": "Schedule Consultation"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "page": {
+    "title": "Saved Searches",
+    "description": "Track your saved property searches and get updates on new listings that match your criteria."
+  },
+  "hero": {
+    "title": "Saved Searches",
+    "subtitle": "Track your favorite search criteria and get updates",
+    "searchCount": {
+      "singular": "Saved Search",
+      "plural": "Saved Searches"
+    }
+  },
+  "loginRequired": {
+    "title": "Log in to view your saved searches",
+    "description": "Save your favorite search criteria and get notified about new listings.",
+    "button": "Login / Register"
+  },
+  "empty": {
+    "title": "You haven't saved any searches yet.",
+    "description": "Perform a search and click \"Save Search\" to get started, or save this example:",
+    "startSearch": "Or, Start a New Search"
+  },
+  "example": {
+    "label": "Example",
+    "name": "Belgrade, under €400k",
+    "save": "Save"
+  },
+  "sort": {
+    "newest": "Newest",
+    "name": "Name",
+    "lastActive": "Last Active"
+  },
+  "accordion": {
+    "new": "new",
+    "namePlaceholder": "Search name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "rename": "Rename search",
+    "delete": "Delete search",
+    "noProperties": "No properties currently match this search.",
+    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
+    "deleteFailed": "Failed to delete saved search. Please try again.",
+    "enterName": "Please enter a name",
+    "renameFailed": "Failed to rename saved search. Please try again."
+  }
+}

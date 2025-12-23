@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from '../../shared/Modal';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
@@ -37,6 +38,8 @@ const CompareModalImage: React.FC<{ property: Property }> = ({ property }) => {
 }
 
 const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, properties }) => {
+    const { t } = useTranslation(['property']);
+
     if (properties.length === 0) return null;
 
     const findBestValue = (key: keyof Property, direction: 'min' | 'max') => {
@@ -54,24 +57,24 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, prop
     const bestParking = findBestValue('parking', 'max');
 
     const rows = [
-        { label: 'Price', key: 'price', bestValue: bestPrice, format: (p: Property) => formatPrice(p.price, p.country) },
-        { label: 'Beds', key: 'beds', bestValue: bestBeds, format: (p: Property) => p.beds },
-        { label: 'Baths', key: 'baths', bestValue: bestBaths, format: (p: Property) => p.baths },
-        { label: 'Living Rooms', key: 'livingRooms', bestValue: bestLivingRooms, format: (p: Property) => p.livingRooms },
-        { label: 'Area (m²)', key: 'sqft', bestValue: bestSqft, format: (p: Property) => p.sqft },
-        { label: 'Year Built', key: 'yearBuilt', bestValue: bestYear, format: (p: Property) => p.yearBuilt },
-        { label: 'Parking', key: 'parking', bestValue: bestParking, format: (p: Property) => p.parking },
-        { label: 'Special Features', key: 'specialFeatures', format: (p: Property) => p.specialFeatures },
-        { label: 'Materials', key: 'materials', format: (p: Property) => p.materials },
+        { label: t('property:comparison.price'), key: 'price', bestValue: bestPrice, format: (p: Property) => formatPrice(p.price, p.country) },
+        { label: t('property:comparison.beds'), key: 'beds', bestValue: bestBeds, format: (p: Property) => p.beds },
+        { label: t('property:comparison.baths'), key: 'baths', bestValue: bestBaths, format: (p: Property) => p.baths },
+        { label: t('property:comparison.livingRooms'), key: 'livingRooms', bestValue: bestLivingRooms, format: (p: Property) => p.livingRooms },
+        { label: t('property:comparison.area'), key: 'sqft', bestValue: bestSqft, format: (p: Property) => p.sqft },
+        { label: t('property:comparison.yearBuilt'), key: 'yearBuilt', bestValue: bestYear, format: (p: Property) => p.yearBuilt },
+        { label: t('property:comparison.parking'), key: 'parking', bestValue: bestParking, format: (p: Property) => p.parking },
+        { label: t('property:comparison.specialFeatures'), key: 'specialFeatures', format: (p: Property) => p.specialFeatures },
+        { label: t('property:comparison.materials'), key: 'materials', format: (p: Property) => p.materials },
     ];
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="5xl" title="Compare Properties">
+        <Modal isOpen={isOpen} onClose={onClose} size="5xl" title={t('property:comparison.title')}>
             <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="border-b-2 border-neutral-200">
-                            <th className="p-4 text-left font-bold text-neutral-800 w-[15%] sticky left-0 bg-white z-10">Feature</th>
+                            <th className="p-4 text-left font-bold text-neutral-800 w-[15%] sticky left-0 bg-white z-10">{t('property:comparison.feature')}</th>
                             {properties.map(p => (
                                 <th key={p.id} className="p-4 w-[21.25%]">
                                     <CompareModalImage property={p} />

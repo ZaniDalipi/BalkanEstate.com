@@ -2,6 +2,7 @@
 // A friendly mascot guide inspired by Duolingo that helps users navigate the property details
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 
 interface PropertyGuideProps {
@@ -37,6 +38,7 @@ type MascotMood = 'happy' | 'excited' | 'thinking' | 'waving';
  * ```
  */
 export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismiss }) => {
+  const { t } = useTranslation(['property']);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [mood, setMood] = useState<MascotMood>('waving');
   const [isVisible, setIsVisible] = useState(false);
@@ -48,16 +50,16 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
   // Generate contextual messages based on property
   const getMessages = useCallback((): GuideMessage[] => {
     const messages: GuideMessage[] = [
-      { text: "Hey there! I'm Homey, your property guide. Let me show you around!", emoji: "👋" },
+      { text: t('guide.messages.welcome'), emoji: "👋" },
     ];
 
     // Price insight
     if (property.price) {
       messages.push({
-        text: "Wondering about monthly payments? The mortgage calculator can help!",
+        text: t('guide.messages.mortgageHint'),
         emoji: "💰",
         action: {
-          label: "Calculate",
+          label: t('guide.actions.calculate'),
           onClick: () => {
             document.querySelector('[class*="MortgageCalculator"]')?.scrollIntoView({ behavior: 'smooth' });
           }
@@ -68,10 +70,10 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     // Tour available
     if (property.tourUrl) {
       messages.push({
-        text: "Psst! This place has a 3D tour. It's like being there without leaving your couch!",
+        text: t('guide.messages.tourAvailable'),
         emoji: "🎥",
         action: {
-          label: "Take Tour",
+          label: t('guide.actions.takeTour'),
           onClick: () => window.open(property.tourUrl, '_blank')
         }
       });
@@ -80,7 +82,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     // Good condition
     if (property.condition === 'new' || property.condition === 'excellent') {
       messages.push({
-        text: `Ooh, this one's in ${property.condition} condition! That's pretty rare around here.`,
+        text: t('guide.messages.goodCondition', { condition: property.condition }),
         emoji: "✨"
       });
     }
@@ -88,7 +90,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     // Has pool
     if (property.hasPool) {
       messages.push({
-        text: "Did someone say pool party? This property has one! 🎉",
+        text: t('guide.messages.hasPool'),
         emoji: "🏊"
       });
     }
@@ -96,7 +98,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     // Near beach
     if (property.distanceToSea && property.distanceToSea < 5) {
       messages.push({
-        text: `Beach lovers alert! Only ${property.distanceToSea.toFixed(1)}km to sand and waves.`,
+        text: t('guide.messages.nearBeach', { distance: property.distanceToSea.toFixed(1) }),
         emoji: "🏖️"
       });
     }
@@ -104,7 +106,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     // Multiple images
     if (property.images && property.images.length > 5) {
       messages.push({
-        text: `${property.images.length} photos to explore! Click the gallery for the full tour.`,
+        text: t('guide.messages.manyPhotos', { count: property.images.length }),
         emoji: "📸"
       });
     }
@@ -112,24 +114,24 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     // Floor plan available
     if (property.floorplanUrl) {
       messages.push({
-        text: "There's a floor plan! Perfect for planning where your couch goes.",
+        text: t('guide.messages.floorPlan'),
         emoji: "📐"
       });
     }
 
     // General tips
     messages.push({
-      text: "Love it? Tap the heart to save it for later!",
+      text: t('guide.messages.saveHint'),
       emoji: "❤️"
     });
 
     messages.push({
-      text: "Got questions? The seller is just a message away!",
+      text: t('guide.messages.contactHint'),
       emoji: "💬"
     });
 
     return messages;
-  }, [property]);
+  }, [property, t]);
 
   const messages = getMessages();
 
@@ -320,19 +322,19 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
               onClick={() => document.querySelector('.heart-button, [aria-label*="favorite"]')?.dispatchEvent(new Event('click', { bubbles: true }))}
               className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-lg border border-neutral-200 hover:bg-red-50 hover:border-red-200 transition-all text-sm font-medium"
             >
-              <span>❤️</span> Save
+              <span>❤️</span> {t('guide.quickActions.save')}
             </button>
             <button
               onClick={() => document.querySelector('[href^="tel:"]')?.dispatchEvent(new Event('click', { bubbles: true }))}
               className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-lg border border-neutral-200 hover:bg-green-50 hover:border-green-200 transition-all text-sm font-medium"
             >
-              <span>📞</span> Call
+              <span>📞</span> {t('guide.quickActions.call')}
             </button>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-lg border border-neutral-200 hover:bg-blue-50 hover:border-blue-200 transition-all text-sm font-medium"
             >
-              <span>⬆️</span> Top
+              <span>⬆️</span> {t('guide.quickActions.top')}
             </button>
           </div>
         </div>
@@ -482,8 +484,8 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
           {/* Hover tooltip */}
           <div className={`absolute bottom-full right-1/2 translate-x-1/2 mb-2 transition-all duration-200 pointer-events-none ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
             <div className="bg-neutral-800 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
-              {showBubble ? 'Click to minimize' : 'Click for tips!'}
-              <div className="text-neutral-400 text-[10px]">Right-click for actions</div>
+              {showBubble ? t('guide.tooltip.minimize') : t('guide.tooltip.tips')}
+              <div className="text-neutral-400 text-[10px]">{t('guide.tooltip.rightClick')}</div>
             </div>
           </div>
         </button>

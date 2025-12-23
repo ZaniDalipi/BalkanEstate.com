@@ -2,6 +2,7 @@
 // Photo gallery with category filters and thumbnails
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import { Thumbnail } from './PropertyCommon';
 
@@ -39,6 +40,8 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
   onCategorySelect,
   onImageSelect,
 }) => {
+  const { t } = useTranslation(['property']);
+
   // Combine all images with main image
   const allImages = useMemo(() => {
     const images = property.images || [];
@@ -69,7 +72,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
-      <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4">Photos</h3>
+      <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4">{t('photos.title')}</h3>
 
       {/* Category Filters */}
       <div className="flex flex-wrap gap-2 border-b border-neutral-200 pb-4 mb-4">
@@ -81,19 +84,19 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
               : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
           }`}
         >
-          All
+          {t('photos.all')}
         </button>
         {Object.keys(categorizedImages).map((tag) => (
           <button
             key={tag}
             onClick={() => onCategorySelect(tag as PropertyImageTag)}
-            className={`capitalize px-4 py-2 text-sm font-semibold rounded-full transition-colors ${
+            className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors ${
               activeCategory === tag
                 ? 'bg-primary text-white'
                 : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
             }`}
           >
-            {tag.replace('_', ' ')}
+            {t(`photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })}
           </button>
         ))}
       </div>

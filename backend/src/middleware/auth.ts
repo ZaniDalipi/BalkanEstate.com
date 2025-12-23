@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 import User from '../models/User';
 
 export const protect = async (
@@ -19,7 +19,7 @@ export const protect = async (
     }
 
     if (!token) {
-      res.status(401).json({ message: 'Not authorized, no token' });
+      res.status(401).json({ message: 'Not authorized, no token', code: 'NO_TOKEN' });
       return;
     }
 
@@ -32,7 +32,7 @@ export const protect = async (
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
-      res.status(401).json({ message: 'Not authorized, user not found' });
+      res.status(401).json({ message: 'Not authorized, user not found', code: 'USER_NOT_FOUND' });
       return;
     }
 
@@ -40,7 +40,25 @@ export const protect = async (
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    res.status(401).json({ message: 'Not authorized, token failed' });
+
+    // Handle specific JWT errors
+    if (error instanceof TokenExpiredError) {
+      res.status(401).json({
+        message: 'Session expired, please login again',
+        code: 'TOKEN_EXPIRED'
+      });
+      return;
+    }
+
+    if (error instanceof JsonWebTokenError) {
+      res.status(401).json({
+        message: 'Invalid token, please login again',
+        code: 'INVALID_TOKEN'
+      });
+      return;
+    }
+
+    res.status(401).json({ message: 'Not authorized, token failed', code: 'AUTH_FAILED' });
   }
 };
 

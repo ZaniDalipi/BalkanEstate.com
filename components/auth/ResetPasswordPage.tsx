@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { resetPassword as resetPasswordApi } from '../../services/apiService';
 import { LogoIcon, EyeIcon } from '../../constants';
@@ -59,7 +60,7 @@ const checkPasswordRequirements = (password: string): PasswordRequirements => {
     };
 };
 
-const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequirements }> = ({ requirements }) => {
+const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequirements; t: (key: string) => string }> = ({ requirements, t }) => {
     const RequirementItem: React.FC<{ met: boolean; text: string }> = ({ met, text }) => (
         <div className="flex items-center gap-2">
             <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all ${met ? 'bg-green-500' : 'bg-gray-300'}`}>
@@ -77,19 +78,20 @@ const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequiremen
 
     return (
         <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
-            <p className="text-xs font-semibold text-gray-700 mb-2">Password requirements:</p>
-            <RequirementItem met={requirements.minLength} text="At least 8 characters" />
-            <RequirementItem met={requirements.hasUppercase} text="One uppercase letter (A-Z)" />
-            <RequirementItem met={requirements.hasLowercase} text="One lowercase letter (a-z)" />
-            <RequirementItem met={requirements.hasNumber} text="One number (0-9)" />
-            <RequirementItem met={requirements.hasSpecialChar} text="One special character (!@#$%...)" />
-            <RequirementItem met={requirements.noSequential} text="No sequential characters (123, abc, qwe)" />
-            <RequirementItem met={requirements.notCommon} text="Not a common password" />
+            <p className="text-xs font-semibold text-gray-700 mb-2">{t('resetPassword.requirements.title')}</p>
+            <RequirementItem met={requirements.minLength} text={t('resetPassword.requirements.minLength')} />
+            <RequirementItem met={requirements.hasUppercase} text={t('resetPassword.requirements.hasUppercase')} />
+            <RequirementItem met={requirements.hasLowercase} text={t('resetPassword.requirements.hasLowercase')} />
+            <RequirementItem met={requirements.hasNumber} text={t('resetPassword.requirements.hasNumber')} />
+            <RequirementItem met={requirements.hasSpecialChar} text={t('resetPassword.requirements.hasSpecialChar')} />
+            <RequirementItem met={requirements.noSequential} text={t('resetPassword.requirements.noSequential')} />
+            <RequirementItem met={requirements.notCommon} text={t('resetPassword.requirements.notCommon')} />
         </div>
     );
 };
 
 const ResetPasswordPage: React.FC = () => {
+    const { t } = useTranslation(['auth']);
     const { dispatch } = useAppContext();
     const [token, setToken] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -109,7 +111,7 @@ const ResetPasswordPage: React.FC = () => {
         if (tokenParam) {
             setToken(tokenParam);
         } else {
-            setError('Invalid or missing reset token. Please request a new password reset link.');
+            setError(t('resetPassword.errors.invalidToken'));
         }
     }, []);
 
@@ -133,7 +135,7 @@ const ResetPasswordPage: React.FC = () => {
 
         // Validate passwords match
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            setError(t('resetPassword.errors.passwordsMismatch'));
             return;
         }
 
@@ -142,12 +144,12 @@ const ResetPasswordPage: React.FC = () => {
         if (!requirements.minLength || !requirements.hasUppercase || !requirements.hasLowercase ||
             !requirements.hasNumber || !requirements.hasSpecialChar || !requirements.noSequential ||
             !requirements.notCommon) {
-            setError('Please ensure all password requirements are met');
+            setError(t('resetPassword.errors.requirementsFailed'));
             return;
         }
 
         if (!token) {
-            setError('Invalid reset token');
+            setError(t('resetPassword.errors.tokenInvalid'));
             return;
         }
 
@@ -167,7 +169,7 @@ const ResetPasswordPage: React.FC = () => {
                 window.history.pushState({}, '', '/');
             }, 2000);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to reset password. Please try again or request a new reset link.');
+            setError(err instanceof Error ? err.message : t('resetPassword.errors.failedToReset'));
         } finally {
             setIsLoading(false);
         }
@@ -189,9 +191,9 @@ const ResetPasswordPage: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Password Reset Successful!</h3>
-                        <p className="text-gray-600 mb-4">Your password has been changed successfully.</p>
-                        <p className="text-sm text-gray-500">Redirecting you to the home page...</p>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('resetPassword.successTitle')}</h3>
+                        <p className="text-gray-600 mb-4">{t('resetPassword.successMessage')}</p>
+                        <p className="text-sm text-gray-500">{t('resetPassword.redirecting')}</p>
                     </div>
                 </div>
             </div>
@@ -205,8 +207,8 @@ const ResetPasswordPage: React.FC = () => {
                     <LogoIcon className="w-12 h-12" />
                 </div>
 
-                <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">Reset Your Password</h2>
-                <p className="text-center text-gray-600 mb-6">Enter your new password below</p>
+                <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">{t('resetPassword.title')}</h2>
+                <p className="text-center text-gray-600 mb-6">{t('resetPassword.subtitle')}</p>
 
                 {error && (
                     <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -227,7 +229,7 @@ const ResetPasswordPage: React.FC = () => {
                             required
                             disabled={!token}
                         />
-                        <label htmlFor="password" className={floatingLabelClasses}>New Password</label>
+                        <label htmlFor="password" className={floatingLabelClasses}>{t('resetPassword.newPassword')}</label>
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
@@ -238,7 +240,7 @@ const ResetPasswordPage: React.FC = () => {
                     </div>
 
                     {/* Password Requirements */}
-                    {password && <PasswordRequirementsIndicator requirements={passwordRequirements} />}
+                    {password && <PasswordRequirementsIndicator requirements={passwordRequirements} t={t} />}
 
                     {/* Confirm Password */}
                     <div className="relative">
@@ -252,7 +254,7 @@ const ResetPasswordPage: React.FC = () => {
                             required
                             disabled={!token}
                         />
-                        <label htmlFor="confirmPassword" className={floatingLabelClasses}>Confirm New Password</label>
+                        <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('resetPassword.confirmPassword')}</label>
                         <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -268,7 +270,7 @@ const ResetPasswordPage: React.FC = () => {
                         disabled={isLoading || !token}
                         className="w-full py-3 px-4 rounded-lg shadow-sm text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        {isLoading ? 'Resetting Password...' : 'Reset Password'}
+                        {isLoading ? t('resetPassword.submitting') : t('resetPassword.submit')}
                     </button>
 
                     {/* Back to Login */}
@@ -281,7 +283,7 @@ const ResetPasswordPage: React.FC = () => {
                         }}
                         className="w-full text-sm font-semibold text-primary hover:underline mt-4"
                     >
-                        Back to Login
+                        {t('resetPassword.backToLogin')}
                     </button>
                 </form>
             </div>

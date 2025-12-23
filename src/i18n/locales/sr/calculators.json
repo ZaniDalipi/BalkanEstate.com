@@ -1,0 +1,126 @@
+{
+  "property": {
+    "title": "Kalkulator Vrednosti Nekretnine",
+    "description": "Procenite vrednost vaše nekretnine",
+    "fields": {
+      "location": "Lokacija",
+      "area": "Površina (m²)"
+    },
+    "calculating": "Izračunavanje...",
+    "results": {
+      "estimatedValue": "Procenjena Vrednost"
+    },
+    "errors": {
+      "selectLocation": "Molimo izaberite validnu lokaciju iz predloga.",
+      "locationNotDetermined": "Nije moguće odrediti grad i državu iz izabrane lokacije.",
+      "insufficientData": "Žao nam je, nemamo dovoljno podataka za {{city}} da pružimo pouzdanu procenu."
+    }
+  },
+  "mortgage": {
+    "title": "Kalkulator Kredita",
+    "description": "Izračunajte mesečne rate",
+    "fields": {
+      "propertyPrice": "Cena Nekretnine",
+      "downPayment": "Učešće",
+      "downPaymentPercent": "Učešće (%)",
+      "loanAmount": "Iznos Kredita",
+      "interestRate": "Kamatna Stopa (%)",
+      "loanTerm": "Period Otplate",
+      "years": "godina",
+      "yrs": "god"
+    },
+    "results": {
+      "monthlyPayment": "Mesečna Rata",
+      "estimatedMonthlyPayment": "Procenjena Mesečna Rata",
+      "totalPayment": "Ukupna Isplata",
+      "totalInterest": "Ukupna Kamata",
+      "principal": "Glavnica",
+      "interest": "Kamata"
+    },
+    "breakdown": {
+      "title": "Raspored Plaćanja",
+      "monthly": "Mesečno",
+      "yearly": "Godišnje",
+      "total": "Ukupno"
+    },
+    "disclaimer": "Ovo je procena samo u informativne svrhe. Konsultujte se sa finansijskim stručnjakom za stvarne stope i uplate."
+  },
+  "rentVsBuy": {
+    "title": "Kirija vs Kupovina",
+    "description": "Da li da iznajmite ili kupite?",
+    "fields": {
+      "planningToStay": "Planirate da ostanete",
+      "estimatedMonthlyRent": "Procenjena mesečna kirija",
+      "monthlyRent": "Trenutna Mesečna Kirija",
+      "rentIncrease": "Godišnje Povećanje Kirije (%)",
+      "propertyPrice": "Cena Nekretnine",
+      "downPayment": "Učešće",
+      "mortgageRate": "Kamatna Stopa (%)",
+      "propertyTax": "Porez na Imovinu (%)",
+      "homeInsurance": "Osiguranje Nekretnine",
+      "maintenance": "Održavanje",
+      "homeAppreciation": "Rast Vrednosti",
+      "appreciation": "Rast Vrednosti Nekretnine (%)",
+      "closingCosts": "Troškovi Zatvaranja",
+      "sellingCosts": "Troškovi Prodaje",
+      "investmentReturn": "Prinos Investicije",
+      "timeframe": "Vremenski Period",
+      "years": "godina"
+    },
+    "advanced": {
+      "title": "Napredna Podešavanja",
+      "downPayment": "Učešće",
+      "interestRate": "Kamatna Stopa",
+      "loanTerm": "Period Otplate",
+      "propertyTaxes": "Porezi na Imovinu",
+      "homeInsurance": "Osiguranje Nekretnine",
+      "maintenance": "Održavanje",
+      "homeAppreciation": "Rast Vrednosti",
+      "rentIncrease": "Povećanje Kirije",
+      "closingCosts": "Troškovi Zatvaranja",
+      "sellingCosts": "Troškovi Prodaje",
+      "investmentReturn": "Prinos Investicije"
+    },
+    "tooltips": {
+      "downPayment": "Procenat cene nekretnine plaćen unapred",
+      "interestRate": "Godišnja kamatna stopa kredita",
+      "loanTerm": "Dužina kredita u godinama",
+      "propertyTaxes": "Godišnja stopa poreza na imovinu (na osnovu vrednosti nekretnine)",
+      "homeInsurance": "Godišnji trošak osiguranja (na osnovu vrednosti nekretnine)",
+      "maintenance": "Godišnji troškovi održavanja i popravki (na osnovu vrednosti nekretnine)",
+      "homeAppreciation": "Očekivani godišnji rast vrednosti nekretnine",
+      "rentIncrease": "Očekivano godišnje povećanje kirije",
+      "closingCosts": "Jednokratni troškovi zatvaranja pri kupovini (procenat cene nekretnine)",
+      "sellingCosts": "Troškovi pri prodaji nekretnine (provizije, naknade)",
+      "investmentReturn": "Očekivani godišnji prinos ako investirate novac umesto kupovine"
+    },
+    "results": {
+      "recommendation": "Preporuka",
+      "buyingIsBetter": "Kupovina je Bolja",
+      "rentingIsBetter": "Iznajmljivanje je Bolje",
+      "totalRentCost": "Ukupni Trošak Kirije",
+      "totalBuyCost": "Ukupni Trošak Kupovine",
+      "savings": "Potencijalne Uštede",
+      "estimatedSavings": "Procenjene uštede",
+      "equityBuilt": "Izgrađeni Kapital",
+      "breakEvenPoint": "Tačka rentabilnosti",
+      "cheaperTo": "Posle {{years}} godina, jeftinije je da",
+      "buy": "Kupite",
+      "rent": "Kirija",
+      "own": "Posedujete",
+      "totalCostToRent": "Ukupni Trošak Kirije",
+      "netCostToOwn": "Neto Trošak Vlasništva",
+      "yearlyCostComparison": "Godišnje Poređenje Troškova",
+      "year": "Godina"
+    },
+    "calculating": "Računanje...",
+    "disclaimer": "Ovo je procena u informativne svrhe. Mnogi faktori mogu uticati na troškove kupovine i iznajmljivanja. Razmotrite konsultaciju sa finansijskim savetnikom za važne odluke."
+  },
+  "common": {
+    "calculate": "Izračunaj",
+    "reset": "Resetuj",
+    "perMonth": "/mesečno",
+    "perYear": "/godišnje",
+    "invalidValue": "Nevažeća vrednost"
+  }
+}

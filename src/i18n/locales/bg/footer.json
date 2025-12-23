@@ -1,0 +1,70 @@
+{
+  "tagline": "Намиране на перфектни имоти на Балканите с премиум обслужване и модерни технологии.",
+  "sections": {
+    "forBuyers": "За Купувачи",
+    "forSellers": "За Продавачи",
+    "contact": "Контакт"
+  },
+  "links": {
+    "searchProperties": "Търсене на Имоти",
+    "savedProperties": "Запазени Имоти",
+    "savedSearches": "Запазени Търсения",
+    "findAgents": "Намерете Агенти",
+    "browseAgencies": "Разгледайте Агенции",
+    "listProperty": "Публикувайте Имот",
+    "messages": "Съобщения",
+    "myAccount": "Моят Профил"
+  },
+  "contact": {
+    "phone": "+383 XX XXX XXX",
+    "email": "info@balkanestate.com"
+  },
+  "legal": {
+    "allRightsReserved": "Всички права запазени.",
+    "privacyPolicy": "Политика за Поверителност",
+    "termsOfService": "Общи Условия",
+    "cookiePolicy": "Политика за Бисквитки",
+    "disclaimer": "Disclaimer",
+    "accessibility": "Accessibility"
+  },
+  "social": {
+    "followUs": "Follow Us",
+    "facebook": "Facebook",
+    "twitter": "Twitter",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "youtube": "YouTube"
+  },
+  "app": {
+    "downloadApp": "Download Our App",
+    "availableOn": "Available on",
+    "appStore": "App Store",
+    "playStore": "Google Play"
+  },
+  "newsletter": {
+    "title": "Subscribe to Newsletter",
+    "placeholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribed": "Thank you for subscribing!"
+  },
+  "support": {
+    "title": "Support",
+    "helpCenter": "Help Center",
+    "contactUs": "Contact Us",
+    "faq": "FAQ",
+    "feedback": "Give Feedback"
+  },
+  "company": {
+    "title": "Company",
+    "aboutUs": "About Us",
+    "careers": "Careers",
+    "press": "Press",
+    "blog": "Blog"
+  },
+  "partners": {
+    "title": "Partners",
+    "becomePartner": "Become a Partner",
+    "affiliates": "Affiliates",
+    "developers": "For Developers"
+  }
+}

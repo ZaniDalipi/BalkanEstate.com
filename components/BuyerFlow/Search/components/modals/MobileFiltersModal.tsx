@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '../../../../../constants';
 import { Filters } from '../../../../../types';
 
@@ -27,6 +28,8 @@ const MobileFiltersModal: React.FC<MobileFiltersModalProps> = ({
     searchMode,
     children
 }) => {
+    const { t } = useTranslation(['search']);
+
     if (!isOpen) return null;
 
     return (
@@ -36,7 +39,7 @@ const MobileFiltersModal: React.FC<MobileFiltersModalProps> = ({
                 <div className="absolute inset-0 bg-white" onClick={e => e.stopPropagation()}>
                     <div className="bg-white h-full w-full flex flex-col">
                         <div className="flex-shrink-0 p-4 border-b border-neutral-200 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-neutral-800">Filters</h2>
+                            <h2 className="text-lg font-bold text-neutral-800">{t('filters.title')}</h2>
                             <button onClick={onClose} className="p-2 text-neutral-500 hover:text-neutral-800">
                                 <XMarkIcon className="w-6 h-6" />
                             </button>
@@ -45,13 +48,13 @@ const MobileFiltersModal: React.FC<MobileFiltersModalProps> = ({
                         {searchMode === 'manual' && (
                             <div className="flex-shrink-0 p-4 border-t border-neutral-200 bg-white flex items-center gap-2">
                                 <button onClick={onReset} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">
-                                    Reset
+                                    {t('filters.reset')}
                                 </button>
                                 <button onClick={onSave} disabled={isSaving} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">
-                                    Save Search
+                                    {t('filters.save')}
                                 </button>
                                 <button onClick={onApply} className="flex-grow px-3 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark">
-                                    Show Results
+                                    {t('showResults')}
                                 </button>
                             </div>
                         )}

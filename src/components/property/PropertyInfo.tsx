@@ -1,7 +1,8 @@
 // PropertyInfo Component
 // Displays property details, description, and amenities
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
 import {
@@ -19,6 +20,8 @@ import {
   CheckCircleIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
+import { useAppContext } from '../../../context/AppContext';
+import { BALKAN_COUNTRIES } from '../../../constants/countries';
 
 interface PropertyInfoProps {
   property: Property;
@@ -45,6 +48,50 @@ interface PropertyInfoProps {
  * ```
  */
 export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloorPlan }) => {
+  const { t } = useTranslation(['property']);
+  const { state, dispatch, updateSearchPageState } = useAppContext();
+
+  // Handle location click to navigate to search with city/country filter
+  const handleLocationClick = useCallback((e: React.MouseEvent, type: 'city' | 'country') => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Find the country key from BALKAN_COUNTRIES
+    const countryKey = Object.keys(BALKAN_COUNTRIES).find(
+      key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
+    ) || '';
+
+    if (type === 'city') {
+      // Navigate to search with city filter
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: property.city,
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
+    } else {
+      // Navigate to search with country filter only
+      const newFilters = {
+        ...state.searchPageState.filters,
+        query: '',
+        country: countryKey,
+      };
+      updateSearchPageState({
+        filters: newFilters,
+        activeFilters: newFilters,
+      });
+      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
+    }
+  }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
+
   return (
     <>
       {/* Price, Address, and Key Stats */}
@@ -54,10 +101,10 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             <div className="mb-4 p-4 bg-gradient-to-r from-neutral-100 to-neutral-200 border-l-4 border-neutral-600 rounded-lg">
               <div className="flex items-center gap-2">
                 <CheckCircleIcon className="w-6 h-6 text-neutral-700" />
-                <span className="font-bold text-lg text-neutral-800">Property Sold</span>
+                <span className="font-bold text-lg text-neutral-800">{t('actions.propertySold')}</span>
               </div>
               <p className="text-sm text-neutral-600 mt-1">
-                This property has been sold and is no longer available.
+                {t('details.soldMessage')}
               </p>
             </div>
           )}
@@ -66,37 +113,55 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             {formatPrice(property.price, property.country)}
           </p>
 
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-neutral-600 mt-2 group"
-            title="Open in Google Maps"
-          >
-            <MapPinIcon className="w-5 h-5 mr-2 text-neutral-400 group-hover:text-primary transition-colors" />
-            <span className="text-sm sm:text-base lg:text-lg group-hover:underline group-hover:text-primary transition-colors">
-              {property.address}, {property.city}, {property.country}
+          <div className="inline-flex items-center text-neutral-600 mt-2 flex-wrap">
+            <MapPinIcon className="w-5 h-5 mr-2 text-neutral-400 flex-shrink-0" />
+            <span className="text-sm sm:text-base lg:text-lg">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline hover:text-primary transition-colors"
+                title="Open in Google Maps"
+              >
+                {property.address}
+              </a>
+              <span>, </span>
+              <button
+                onClick={(e) => handleLocationClick(e, 'city')}
+                className="hover:underline hover:text-primary transition-colors cursor-pointer"
+                title={`View all properties in ${property.city}`}
+              >
+                {property.city}
+              </button>
+              <span>, </span>
+              <button
+                onClick={(e) => handleLocationClick(e, 'country')}
+                className="hover:underline hover:text-primary transition-colors cursor-pointer"
+                title={`View all properties in ${property.country}`}
+              >
+                {property.country}
+              </button>
             </span>
-          </a>
+          </div>
 
           <div className="mt-6 flex flex-wrap justify-around text-base sm:text-lg text-neutral-800 border-t border-neutral-200 pt-4 gap-4">
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
               <BedIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
               <span>
-                <span className="font-bold">{property.beds}</span> beds
+                <span className="font-bold">{property.beds}</span> {t('features.beds').toLowerCase()}
               </span>
             </div>
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
               <BathIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
               <span>
-                <span className="font-bold">{property.baths}</span> baths
+                <span className="font-bold">{property.baths}</span> {t('features.baths').toLowerCase()}
               </span>
             </div>
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
               <LivingRoomIcon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
               <span>
                 <span className="font-bold">{property.livingRooms}</span>{' '}
-                {property.livingRooms === 1 ? 'living room' : 'living rooms'}
+                {property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}
               </span>
             </div>
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary-light/50 transition-all duration-200 cursor-default group">
@@ -111,7 +176,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
 
       {/* About This Home */}
       <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
-        <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4">About This Home</h3>
+        <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4">{t('details.about')}</h3>
         <div className="prose prose-sm max-w-none text-neutral-700 whitespace-pre-wrap">
           {property.description}
         </div>
@@ -119,31 +184,31 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
 
       {/* Property Details */}
       <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
-        <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-6">Property Details</h3>
+        <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-6">{t('details.title')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-4">
-          <DetailItem icon={<CalendarIcon />} label="Year Built">
+          <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
             {property.yearBuilt}
           </DetailItem>
-          <DetailItem icon={<ParkingIcon />} label="Parking">
+          <DetailItem icon={<ParkingIcon />} label={t('features.parking')}>
             {property.parking > 0
-              ? `${property.parking} ${property.parking === 1 ? 'spot' : 'spots'}`
-              : 'None'}
+              ? `${property.parking} ${property.parking === 1 ? t('details.spot') : t('details.spots')}`
+              : t('details.none')}
           </DetailItem>
 
           {property.propertyType === 'apartment' && property.floorNumber && (
-            <DetailItem icon={<BuildingOfficeIcon />} label="Floor">
+            <DetailItem icon={<BuildingOfficeIcon />} label={t('features.floor')}>
               {property.floorNumber}
             </DetailItem>
           )}
           {(property.propertyType === 'house' || property.propertyType === 'villa') &&
             property.totalFloors && (
-              <DetailItem icon={<BuildingOfficeIcon />} label="Floors">
+              <DetailItem icon={<BuildingOfficeIcon />} label={t('features.floors')}>
                 {property.totalFloors}
               </DetailItem>
             )}
 
           {property.furnishing && property.furnishing !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">🛋️</span>} label="Furnishing">
+            <DetailItem icon={<span className="text-2xl">🛋️</span>} label={t('details.furnishing')}>
               <span className="capitalize">{property.furnishing.replace('-', ' ')}</span>
             </DetailItem>
           )}
@@ -151,44 +216,44 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           {property.heatingType &&
             property.heatingType !== 'any' &&
             property.heatingType !== 'none' && (
-              <DetailItem icon={<span className="text-2xl">🔥</span>} label="Heating">
+              <DetailItem icon={<span className="text-2xl">🔥</span>} label={t('details.heating')}>
                 <span className="capitalize">{property.heatingType.replace('-', ' ')}</span>
               </DetailItem>
             )}
 
           {property.condition && property.condition !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">⭐</span>} label="Condition">
+            <DetailItem icon={<span className="text-2xl">⭐</span>} label={t('details.condition')}>
               <span className="capitalize">{property.condition.replace('-', ' ')}</span>
             </DetailItem>
           )}
 
           {property.viewType && property.viewType !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">👁️</span>} label="View">
-              <span className="capitalize">{property.viewType} View</span>
+            <DetailItem icon={<span className="text-2xl">👁️</span>} label={t('details.view')}>
+              <span className="capitalize">{t('details.viewType', { type: property.viewType })}</span>
             </DetailItem>
           )}
 
           {property.energyRating && property.energyRating !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">⚡</span>} label="Energy Rating">
+            <DetailItem icon={<span className="text-2xl">⚡</span>} label={t('details.energyRating')}>
               <span className="font-bold text-lg">{property.energyRating}</span>
             </DetailItem>
           )}
 
           {property.floorplanUrl && (
             <div className="sm:col-span-2">
-              <DetailItem icon={<CubeTransparentIcon />} label="Floor Plan">
+              <DetailItem icon={<CubeTransparentIcon />} label={t('actions.floorPlan')}>
                 <button
                   onClick={onOpenFloorPlan}
                   className="px-4 py-2 bg-primary-light text-primary-dark font-semibold rounded-lg hover:bg-primary/20 transition-colors"
                 >
-                  View Interactive Floor Plan
+                  {t('details.viewFloorPlan')}
                 </button>
               </DetailItem>
             </div>
           )}
 
           <div className="sm:col-span-2">
-            <DetailItem icon={<StarIcon />} label="Special Features">
+            <DetailItem icon={<StarIcon />} label={t('details.specialFeatures')}>
               {Array.isArray(property.specialFeatures) && property.specialFeatures.length > 0 ? (
                 <ul className="list-disc list-inside space-y-1">
                   {property.specialFeatures.map((feature) => (
@@ -196,12 +261,12 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   ))}
                 </ul>
               ) : (
-                'Not listed'
+                t('details.notListed')
               )}
             </DetailItem>
           </div>
           <div className="sm:col-span-2">
-            <DetailItem icon={<CubeIcon />} label="Materials">
+            <DetailItem icon={<CubeIcon />} label={t('details.materials')}>
               {Array.isArray(property.materials) && property.materials.length > 0 ? (
                 <ul className="list-disc list-inside space-y-1">
                   {property.materials.map((material) => (
@@ -209,7 +274,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   ))}
                 </ul>
               ) : (
-                'Not listed'
+                t('details.notListed')
               )}
             </DetailItem>
           </div>
@@ -231,13 +296,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         property.distanceToHospital !== undefined) && (
         <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
           <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-6">
-            Amenities & Features
+            {t('details.amenitiesFeatures')}
           </h3>
 
           {/* Hashtag-style Amenities */}
           {property.amenities && property.amenities.length > 0 && (
             <div className="mb-6">
-              <h4 className="text-md font-semibold text-neutral-700 mb-3">Property Amenities</h4>
+              <h4 className="text-md font-semibold text-neutral-700 mb-3">{t('details.propertyAmenities')}</h4>
               <div className="flex flex-wrap gap-2">
                 {property.amenities.map((amenity, index) => (
                   <span
@@ -260,7 +325,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             property.hasPool !== undefined ||
             property.petsAllowed !== undefined) && (
             <div className="mb-6">
-              <h4 className="text-md font-semibold text-neutral-700 mb-3">Property Features</h4>
+              <h4 className="text-md font-semibold text-neutral-700 mb-3">{t('details.propertyFeatures')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {property.hasBalcony !== undefined && (
                   <div
@@ -272,13 +337,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   >
                     <span className="text-2xl">{property.hasBalcony ? '✓' : '✗'}</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Balcony/Terrace</span>
+                      <span className="font-medium text-neutral-800">{t('details.balconyTerrace')}</span>
                       <span
                         className={`block text-xs ${
                           property.hasBalcony ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasBalcony ? 'Available' : 'Not available'}
+                        {property.hasBalcony ? t('available') : t('pending')}
                       </span>
                     </div>
                   </div>
@@ -293,13 +358,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   >
                     <span className="text-2xl">{property.hasGarden ? '✓' : '✗'}</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Garden/Yard</span>
+                      <span className="font-medium text-neutral-800">{t('details.gardenYard')}</span>
                       <span
                         className={`block text-xs ${
                           property.hasGarden ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasGarden ? 'Available' : 'Not available'}
+                        {property.hasGarden ? t('available') : t('pending')}
                       </span>
                     </div>
                   </div>
@@ -314,13 +379,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   >
                     <span className="text-2xl">{property.hasElevator ? '✓' : '✗'}</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Elevator</span>
+                      <span className="font-medium text-neutral-800">{t('amenities.elevator')}</span>
                       <span
                         className={`block text-xs ${
                           property.hasElevator ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasElevator ? 'Available' : 'Not available'}
+                        {property.hasElevator ? t('available') : t('pending')}
                       </span>
                     </div>
                   </div>
@@ -335,13 +400,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   >
                     <span className="text-2xl">{property.hasSecurity ? '✓' : '✗'}</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Security System</span>
+                      <span className="font-medium text-neutral-800">{t('amenities.security')}</span>
                       <span
                         className={`block text-xs ${
                           property.hasSecurity ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasSecurity ? 'Available' : 'Not available'}
+                        {property.hasSecurity ? t('available') : t('pending')}
                       </span>
                     </div>
                   </div>
@@ -356,13 +421,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   >
                     <span className="text-2xl">{property.hasAirConditioning ? '✓' : '✗'}</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Air Conditioning</span>
+                      <span className="font-medium text-neutral-800">{t('amenities.airConditioning')}</span>
                       <span
                         className={`block text-xs ${
                           property.hasAirConditioning ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasAirConditioning ? 'Available' : 'Not available'}
+                        {property.hasAirConditioning ? t('available') : t('pending')}
                       </span>
                     </div>
                   </div>
@@ -375,13 +440,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   >
                     <span className="text-2xl">{property.hasPool ? '✓' : '✗'}</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Swimming Pool</span>
+                      <span className="font-medium text-neutral-800">{t('amenities.pool')}</span>
                       <span
                         className={`block text-xs ${
                           property.hasPool ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.hasPool ? 'Available' : 'Not available'}
+                        {property.hasPool ? t('available') : t('pending')}
                       </span>
                     </div>
                   </div>
@@ -396,13 +461,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   >
                     <span className="text-2xl">{property.petsAllowed ? '✓' : '✗'}</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Pets Allowed</span>
+                      <span className="font-medium text-neutral-800">{t('details.petsAllowed')}</span>
                       <span
                         className={`block text-xs ${
                           property.petsAllowed ? 'text-green-700' : 'text-red-700'
                         }`}
                       >
-                        {property.petsAllowed ? 'Yes' : 'No'}
+                        {property.petsAllowed ? t('details.yes') : t('details.no')}
                       </span>
                     </div>
                   </div>
@@ -418,14 +483,14 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             property.distanceToHospital !== undefined) && (
             <div>
               <h4 className="text-md font-semibold text-neutral-700 mb-3">
-                Distance Information
+                {t('details.distanceInfo')}
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {property.distanceToCenter !== undefined && (
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
                     <span className="text-2xl">🏙️</span>
                     <div>
-                      <span className="font-medium text-neutral-800">City Center</span>
+                      <span className="font-medium text-neutral-800">{t('distances.cityCenter')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">
                         {property.distanceToCenter.toFixed(1)} km
                       </span>
@@ -436,7 +501,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
                     <span className="text-2xl">🌊</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Sea/Beach</span>
+                      <span className="font-medium text-neutral-800">{t('distances.sea')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">
                         {property.distanceToSea.toFixed(1)} km
                       </span>
@@ -447,7 +512,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
                     <span className="text-2xl">🏫</span>
                     <div>
-                      <span className="font-medium text-neutral-800">School</span>
+                      <span className="font-medium text-neutral-800">{t('distances.school')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">
                         {property.distanceToSchool.toFixed(1)} km
                       </span>
@@ -458,7 +523,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
                     <span className="text-2xl">🏥</span>
                     <div>
-                      <span className="font-medium text-neutral-800">Hospital</span>
+                      <span className="font-medium text-neutral-800">{t('distances.hospital')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">
                         {property.distanceToHospital.toFixed(1)} km
                       </span>

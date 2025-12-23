@@ -1,0 +1,25 @@
+{
+  "title": "Mos Humbe Asnjë Pronë",
+  "subtitle": "Qëndro i Informuar",
+  "description": "Merr njoftime të menjëhershme për shpallje të reja sipas kritereve tuaja",
+  "features": {
+    "newListings": "Shpallje të reja sipas kritereve tuaja",
+    "priceDrops": "Njoftime për ulje çmimesh në pronat e ruajtura",
+    "marketInsights": "Informata javore mbi tregun & tendencat"
+  },
+  "form": {
+    "placeholder": "Shkruani email-in tuaj",
+    "submit": "Abonohu",
+    "subscribing": "Duke u abonuar..."
+  },
+  "cta": {
+    "title": "Abonohu në Buletinin",
+    "button": "Abonohu Falas"
+  },
+  "messages": {
+    "success": "Faleminderit për abonimin! Kontrolloni inbox-in për konfirmim.",
+    "error": "Diçka shkoi keq. Ju lutemi provoni përsëri.",
+    "invalidEmail": "Ju lutemi shkruani një adresë email të vlefshme"
+  },
+  "privacy": "Duke u abonuar, pajtoheni me Politikën e Privatësisë. Çabonohu në çdo kohë."
+}

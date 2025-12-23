@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../../context/AppContext';
 import ConversationList from './ConversationList';
 import ConversationView from './ConversationView';
 import { EnvelopeIcon } from '../../../constants';
 import PropertyCard from '../PropertyDisplay/PropertyCard';
 import Footer from '../../shared/Footer';
+import { SEO } from '../../../src/components/seo';
 
 const InboxPage: React.FC = () => {
+    const { t } = useTranslation(['messages', 'nav']);
     const { state, dispatch } = useAppContext();
     const { conversations, properties, isAuthenticated, activeConversationId } = state;
 
@@ -59,16 +62,15 @@ const InboxPage: React.FC = () => {
         return (
             <div className="w-full flex flex-col items-center justify-center p-4 sm:p-8 text-center h-full">
                 <EnvelopeIcon className="w-16 h-16 text-neutral-300 mb-4" />
-                <h2 className="text-2xl font-bold text-neutral-800">Log in to view your messages</h2>
+                <h2 className="text-2xl font-bold text-neutral-800">{t('messages:inbox.loginToView')}</h2>
                 <p className="text-neutral-600 mt-2 max-w-md">
-                    Communicate with sellers and agents about your favorite properties.
+                    {t('messages:inbox.communicateWithSellers')}
                 </p>
                 <button
-                    // FIX: The payload for TOGGLE_AUTH_MODAL must be an object.
                     onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
                     className="mt-8 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
                 >
-                    Login / Register
+                    {t('nav:loginRegister')}
                 </button>
             </div>
         );
@@ -78,12 +80,12 @@ const InboxPage: React.FC = () => {
         return (
             <div className="w-full flex flex-col items-center justify-center p-4 sm:p-8 text-center">
                 <EnvelopeIcon className="w-16 h-16 text-neutral-300 mb-4" />
-                <h2 className="text-2xl font-bold text-neutral-800">Your Inbox is Empty</h2>
+                <h2 className="text-2xl font-bold text-neutral-800">{t('messages:inbox.emptyInbox')}</h2>
                 <p className="text-neutral-600 mt-2 max-w-md">
-                    Inquire about a property to get started!
+                    {t('messages:inbox.inquireToStart')}
                 </p>
                 <div className="mt-8 w-full max-w-4xl">
-                    <h3 className="text-lg font-semibold text-neutral-700 mb-4">Here are a few properties:</h3>
+                    <h3 className="text-lg font-semibold text-neutral-700 mb-4">{t('messages:inbox.featuredProperties')}</h3>
                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {featuredProperties.map(prop => (
                             <PropertyCard key={prop.id} property={prop} />
@@ -100,7 +102,7 @@ const InboxPage: React.FC = () => {
             <div className="h-full w-full flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                    <p className="text-neutral-600">Creating conversation...</p>
+                    <p className="text-neutral-600">{t('messages:inbox.creatingConversation')}</p>
                 </div>
             </div>
         );
@@ -108,6 +110,13 @@ const InboxPage: React.FC = () => {
 
     return (
         <div className="h-full w-full flex flex-col bg-neutral-50 overflow-y-auto">
+            {/* SEO - noindex for private page */}
+            <SEO
+                title={t('messages:inbox.inboxTitle')}
+                description={t('messages:inbox.communicateWithSellers')}
+                noindex={true}
+            />
+
             <main className="flex-grow flex flex-row overflow-hidden">
                 <div className={`
                     ${isMobile && selectedConversationId ? 'hidden' : 'block'}
@@ -132,17 +141,16 @@ const InboxPage: React.FC = () => {
                         <div className="h-full flex items-center justify-center text-center">
                             <div className="flex flex-col items-center gap-4">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                                <p className="text-neutral-600">Loading conversation...</p>
+                                <p className="text-neutral-600">{t('messages:inbox.loadingConversation')}</p>
                             </div>
                         </div>
                     ) : (
                         <div className="h-full hidden md:flex items-center justify-center text-center text-neutral-500">
-                            <p>Select a conversation to view messages.</p>
+                            <p>{t('messages:inbox.selectConversation')}</p>
                         </div>
                     )}
                 </div>
             </main>
-            <Footer />
         </div>
     );
 };
