@@ -1,57 +1,57 @@
 {
-  "page": {
-    "title": "Explore Balkan Cities",
-    "description": "AI-powered market insights for {{count}} major cities across 10 countries"
-  },
-  "hero": {
-    "title": "Explore Balkan Cities",
-    "subtitle": "AI-powered market insights for {{count}} major cities across 10 countries",
-    "discoverSubtitle": "Discover the best real estate markets across the Balkans"
-  },
-  "empty": {
-    "title": "No City Data Available",
-    "message": "Market data will be updated soon. Check back later!"
-  },
-  "stats": {
-    "totalCities": "Total Cities",
-    "countries": "Countries",
-    "avgGrowth": "Avg. Growth",
-    "totalListings": "Total Listings"
-  },
-  "filters": {
-    "allCountries": "All Countries"
-  },
-  "cityCard": {
-    "demand": "Demand",
-    "investment": "Investment",
-    "avgPricePerSqm": "Avg. Price/m²",
-    "medianPrice": "Median Price",
-    "yoyGrowth": "YoY Growth",
-    "rentalYield": "Rental Yield",
-    "daysOnMarket": "Days on Market",
-    "days": "days"
-  },
-  "sections": {
-    "topNeighborhoods": "Top Neighborhoods",
-    "marketInsights": "Market Insights"
-  },
-  "footer": {
-    "listings": "listings",
-    "soldPerMonth": "sold/mo"
-  },
-  "trends": {
-    "rising": "rising",
-    "declining": "declining",
-    "stable": "stable"
-  },
-  "aiInsights": {
-    "title": "AI-Powered Market Intelligence",
-    "description": "Our market data is powered by Gemini AI and updated twice monthly (1st and 15th). We analyze real-time market trends, property prices, demand indicators, and local insights across {{count}} major cities in the Balkans.",
-    "lastUpdated": "Last updated: {{date}}",
-    "dataSource": "Data source: Gemini AI + Local Property Databases"
-  },
-  "loading": {
-    "title": "Loading Cities...",
-    "message": "Fetching market data for Balkan cities"
-  }
+"page": {
+"title": "Eksploroni Qytetet Ballkanike",
+"description": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende"
+},
+"hero": {
+"title": "Eksploroni Qytetet Ballkanike",
+"subtitle": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende",
+"discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në të gjithë Ballkanin"
+},
+"empty": {
+"title": "Nuk ka të dhëna për Qytetin",
+"message": "Të dhënat e tregut do të përditësohen së shpejti. Kontrolloni më vonë!"
+},
+"stats": {
+"totalCities": "Gjithsej Qytete",
+"countries": "Vende",
+"avgGrowth": "Rritja Mesatare",
+"totalListings": "Gjithsej Listime"
+},
+"filters": {
+"allCountries": "Të Gjitha Vendet"
+},
+"cityCard": {
+"demand": "Kërkesa",
+"investment": "Investim",
+"avgPricePerSqm": "Çmimi Mesatar/m²",
+"medianPrice": "Çmimi Mesatar",
+"yoyGrowth": "Rritje Vjetore",
+"rentalYield": "Rendimenti me Qira",
+"daysOnMarket": "Ditë në Treg",
+"days": "ditë"
+},
+"sections": {
+"topNeighborhoods": "Lagjet Më të Mira",
+"marketInsights": "Njohuri të Tregut"
+},
+"footer": {
+"listings": "listime",
+"soldPerMonth": "shitur/muaj"
+},
+"trends": {
+"rising": "në rritje",
+"declining": "në rënie",
+"stable": "stabile"
+},
+"aiInsights": {
+"title": "Inteligjencë e Tregut e Fuqizuar nga AI",
+"description": "Të dhënat tona të tregut janë fuqizuar nga Gemini AI dhe përditësohen dy herë në muaj (1 dhe 15). Ne analizojmë trendet në kohë reale të tregut, çmimet e pasurive, treguesit e kërkesës dhe njohuritë lokale në {{count}} qytete kryesore në Ballkan.",
+"lastUpdated": "Përditësuar së fundmi: {{date}}",
+"dataSource": "Burimi i të dhënave: Gemini AI + Bazat e të Dhënave Lokale të Pasurive"
+},
+"loading": {
+"title": "Po ngarkohen Qytetet...",
+"message": "Po merren të dhënat e tregut për qytetet ballkanike"
+}
 }
