@@ -18,7 +18,9 @@ import {
   ZoomBasedTileSwitch,
   MapDrawEvents,
 } from '../../../src/components/map/MapHelpers';
-import { Markers, Legend } from '../../../src/components/map/MapPropertyMarker';
+import { Markers, Legend, HighlightedPropertyMarkers } from '../../../src/components/map/MapPropertyMarker';
+import MapAgentAvatar, { MapAgentAvatarInner } from '../../../src/components/map/MapAgentAvatar';
+import { HighlightedPropertiesProvider } from '../../../src/context/HighlightedPropertiesContext';
 
 // Fix for default icon issue with bundlers
 let DefaultIcon = L.icon({
@@ -134,44 +136,47 @@ const MapComponent: React.FC<MapComponentProps> = ({
   };
 
   return (
-    <div className="w-full h-full relative">
-      <MapContainer
-        center={center}
-        zoom={zoom}
-        scrollWheelZoom={true}
-        className="w-full h-full"
-        maxZoom={18}
-        minZoom={7}
-        zoomControl={false}
-        maxBounds={BALKAN_BOUNDS}
-        maxBoundsViscosity={1.0}
-        preferCanvas={true}
-        updateWhenIdle={true}
-        updateWhenZooming={false}
-        keepBuffer={2}
-      >
-        <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
-        <MapEvents onMove={onMapMove} mapBounds={mapBounds} searchMode={searchMode} />
-        <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
-        <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
-        {drawnBounds && !isDrawing && (
-          <Rectangle
-            bounds={drawnBounds}
-            pathOptions={{ color: '#0252CD', weight: 3, fillOpacity: 0.2 }}
-          />
-        )}
-        <TileLayer
-          key={mapType}
-          attribution={TILE_LAYERS[mapType].attribution}
-          url={TILE_LAYERS[mapType].url}
-          keepBuffer={2}
+    <HighlightedPropertiesProvider properties={propertiesInView}>
+      <div className="w-full h-full relative">
+        <MapContainer
+          center={center}
+          zoom={zoom}
+          scrollWheelZoom={true}
+          className="w-full h-full"
+          maxZoom={18}
+          minZoom={7}
+          zoomControl={false}
+          maxBounds={BALKAN_BOUNDS}
+          maxBoundsViscosity={1.0}
+          preferCanvas={true}
           updateWhenIdle={true}
           updateWhenZooming={false}
-          updateInterval={150}
-        />
-        <CadastreLayer enabled={showCadastre && mapType === 'satellite'} opacity={0.7} />
-        <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} />
-      </MapContainer>
+          keepBuffer={2}
+        >
+          <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
+          <MapEvents onMove={onMapMove} mapBounds={mapBounds} searchMode={searchMode} />
+          <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
+          <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
+          {drawnBounds && !isDrawing && (
+            <Rectangle
+              bounds={drawnBounds}
+              pathOptions={{ color: '#0252CD', weight: 3, fillOpacity: 0.2 }}
+            />
+          )}
+          <TileLayer
+            key={mapType}
+            attribution={TILE_LAYERS[mapType].attribution}
+            url={TILE_LAYERS[mapType].url}
+            keepBuffer={2}
+            updateWhenIdle={true}
+            updateWhenZooming={false}
+            updateInterval={150}
+          />
+          <CadastreLayer enabled={showCadastre && mapType === 'satellite'} opacity={0.7} />
+          <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} />
+          <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
+          <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
+        </MapContainer>
 
       {!isMobile && (
         <>
@@ -290,7 +295,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           </button>
         </div>
       )}
-    </div>
+      </div>
+    </HighlightedPropertiesProvider>
   );
 };
 

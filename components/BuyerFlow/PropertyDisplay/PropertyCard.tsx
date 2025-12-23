@@ -174,17 +174,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             {!isSold && isActivelyPromoted && promotionTier && (
               <div className={`text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 ${
                 promotionTier === 'premium'
-                  ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600'
+                  ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 animate-pulse'
                   : promotionTier === 'highlight'
                   ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500'
                   : promotionTier === 'featured'
                   ? 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500'
                   : 'bg-gradient-to-r from-gray-600 to-gray-700'
               }`}>
-                <span className="text-xs">✨</span>
-                {promotionTier === 'premium' && t('common:premium').toUpperCase()}
-                {promotionTier === 'highlight' && 'HIGHLIGHT'}
-                {promotionTier === 'featured' && t('common:featured').toUpperCase()}
+                <span className="text-xs">{promotionTier === 'premium' ? '👑' : promotionTier === 'highlight' ? '💎' : '⭐'}</span>
+                {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
+                {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
+                {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
                 {promotionTier === 'standard' && 'PROMOTED'}
               </div>
             )}

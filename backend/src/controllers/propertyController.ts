@@ -11,6 +11,7 @@ import {
   deleteImages,
   deleteFolder,
 } from '../services/cloudinaryService';
+import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -173,38 +174,19 @@ export const getProperties = async (
       .skip(skip)
       .limit(fetchLimit);
 
-    // Custom sort: Prioritize promoted properties by tier
-    // Order: Premium (active) > Highlight (active) > Featured (active) > Urgent > Standard
-    properties.sort((a, b) => {
-      const aIsPromoted = a.isPromoted && a.promotionEndDate && a.promotionEndDate > new Date();
-      const bIsPromoted = b.isPromoted && b.promotionEndDate && b.promotionEndDate > new Date();
+    // Use centralized highlighting utility for sorting
+    // This handles:
+    // - Priority order: Premium > Highlight > Featured > Standard
+    // - Hourly rotation within same tier for fair exposure
+    // - Urgent badge bonus points
+    const currentHour = new Date().getHours();
+    properties = sortPropertiesWithHighlighting(properties, currentHour);
 
-      // Both promoted or both not promoted - use tier scoring
-      if (aIsPromoted && bIsPromoted) {
-        const tierScores: Record<string, number> = {
-          premium: 100,
-          highlight: 70,
-          featured: 40,
-          standard: 10,
-        };
-
-        const aScore = (tierScores[a.promotionTier || 'standard'] || 0) + (a.hasUrgentBadge ? 5 : 0);
-        const bScore = (tierScores[b.promotionTier || 'standard'] || 0) + (b.hasUrgentBadge ? 5 : 0);
-
-        if (aScore !== bScore) {
-          return bScore - aScore; // Higher score first
-        }
-        // If same tier, use original sort order
-        return 0;
-      }
-
-      // One is promoted, one isn't - promoted comes first
-      if (aIsPromoted && !bIsPromoted) return -1;
-      if (!aIsPromoted && bIsPromoted) return 1;
-
-      // Neither promoted - use original sort order
-      return 0;
-    });
+    // Log highlighting stats for monitoring
+    const stats = getHighlightingStats(properties);
+    if (stats.activePromotions > 0) {
+      console.log(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
+    }
 
     // Trim to requested limit after sorting
     properties = properties.slice(0, limitNum);
