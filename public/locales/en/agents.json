@@ -1,0 +1,49 @@
+{
+  "hero": {
+    "badge": "Professional Real Estate Agents",
+    "title": "Find Your",
+    "titleHighlight": "Perfect Agent",
+    "subtitle": "Connect with verified professionals who bring expertise, dedication, and results to your property journey."
+  },
+  "search": {
+    "title": "Find Your Ideal Agent",
+    "subtitle": "Search {count} professional agents across the Balkans",
+    "tabs": {
+      "city": "City",
+      "agentName": "Agent Name"
+    },
+    "placeholder": {
+      "city": "Search by city or location...",
+      "name": "Search by agent name..."
+    }
+  },
+  "stats": {
+    "professionalAgents": "Professional Agents",
+    "totalSales": "Total Sales",
+    "activeListings": "Active Listings"
+  },
+  "filters": {
+    "allAgents": "All Agents",
+    "topRated": "Top Rated",
+    "mostExperienced": "Most Experienced"
+  },
+  "sort": {
+    "rating": "Highest Rated",
+    "sales": "Most Sales",
+    "listings": "Most Listings",
+    "alphabetical": "Alphabetical"
+  },
+  "results": {
+    "title": "Top Real Estate Agents",
+    "agentsFound": "agents found",
+    "showingMatching": "Showing {count} agents matching \"{query}\""
+  },
+  "empty": {
+    "noAgentsTitle": "No Agents Found",
+    "adjustSearch": "Try adjusting your search criteria or browse all agents."
+  },
+  "loading": {
+    "title": "Finding Agents...",
+    "message": "Searching through our network of professional real estate agents"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "title": "Explore Balkan Cities",
+  "subtitle": "AI-powered market insights for {count} major cities across 10 countries",
+  "discoverSubtitle": "Discover the best real estate markets across the Balkans",
+  "noCitiesTitle": "No City Data Available",
+  "noCitiesMessage": "Market data will be updated soon. Check back later!",
+  "stats": {
+    "totalCities": "Total Cities",
+    "countries": "Countries",
+    "avgGrowth": "Avg. Growth",
+    "totalListings": "Total Listings"
+  },
+  "filters": {
+    "allCountries": "All Countries"
+  },
+  "cityCard": {
+    "demand": "Demand",
+    "investment": "Investment",
+    "avgPricePerSqm": "Avg. Price/m²",
+    "medianPrice": "Median Price",
+    "yoyGrowth": "YoY Growth",
+    "rentalYield": "Rental Yield",
+    "daysOnMarket": "Days on Market",
+    "days": "days"
+  },
+  "sections": {
+    "topNeighborhoods": "Top Neighborhoods",
+    "marketInsights": "Market Insights"
+  },
+  "footer": {
+    "listings": "listings",
+    "soldPerMonth": "sold/mo"
+  },
+  "trends": {
+    "rising": "rising",
+    "declining": "declining",
+    "stable": "stable"
+  },
+  "aiInsights": {
+    "title": "AI-Powered Market Intelligence",
+    "description": "Our market data is powered by Gemini AI and updated twice monthly (1st and 15th). We analyze real-time market trends, property prices, demand indicators, and local insights across {count} major cities in the Balkans.",
+    "lastUpdated": "Last updated: {date}",
+    "dataSource": "Data source: Gemini AI + Local Property Databases"
+  }
+}
