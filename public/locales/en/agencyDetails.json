@@ -1,0 +1,161 @@
+{
+  "navigation": {
+    "back": "Back"
+  },
+  "banner": {
+    "gradients": "Gradients",
+    "uploadImage": "Upload Image",
+    "uploading": "Uploading...",
+    "chooseGradient": "Choose Gradient",
+    "customImageHint": "Or upload a custom image using the button above",
+    "changeLogo": "Change Logo"
+  },
+  "gradientPresets": {
+    "oceanBlue": "Ocean Blue",
+    "sunset": "Sunset",
+    "forest": "Forest",
+    "royalPurple": "Royal Purple",
+    "fire": "Fire",
+    "nightSky": "Night Sky",
+    "mintFresh": "Mint Fresh",
+    "roseGold": "Rose Gold"
+  },
+  "stats": {
+    "totalListings": "Total Listings",
+    "totalAgents": "Total Agents",
+    "yearsInBusiness": "Years in Business",
+    "rating": "Rating",
+    "notAvailable": "N/A"
+  },
+  "salesPerformance": {
+    "title": "Sales Performance",
+    "salesLast12Months": "Sales last 12 months",
+    "totalSales": "Total sales",
+    "priceRange": "Price range",
+    "averagePrice": "Average price"
+  },
+  "about": {
+    "title": "About {agencyName}",
+    "contactInfo": "Contact Information",
+    "specialties": "Specialties",
+    "specializations": "Specializations",
+    "serviceAreas": "Service Areas",
+    "languagesSpoken": "Languages Spoken"
+  },
+  "invitationCode": {
+    "title": "Agency Invitation Code",
+    "description": "Share this code with agents you want to join your agency",
+    "copy": "Copy"
+  },
+  "actions": {
+    "editAgency": "Edit Agency",
+    "manageJoinRequests": "Manage Join Requests",
+    "requestToJoin": "Request to Join Agency"
+  },
+  "featuredSubscription": {
+    "title": "Featured Subscription",
+    "subtitle": "Boost Your Visibility",
+    "proTip": "Pro Tip:",
+    "proTipMessage": "Featured agencies get up to 5x more visibility and appear at the top of search results!"
+  },
+  "teamMembers": {
+    "title": "Team Members",
+    "showTopPerformers": "Show Top Performers",
+    "showAllMembers": "Show All Members",
+    "rankedByPerformance": "Ranked by Performance",
+    "topAgent": "Top Agent",
+    "secondPlace": "2nd Place",
+    "thirdPlace": "3rd Place",
+    "owner": "Owner",
+    "admin": "Admin",
+    "license": "License",
+    "totalSales": "Total Sales",
+    "propertiesSold": "Properties Sold",
+    "activeListings": "Active Listings",
+    "removeAdmin": "Remove Admin",
+    "makeAdmin": "Make Admin",
+    "remove": "Remove",
+    "removing": "Removing...",
+    "leaveAgency": "Leave Agency",
+    "leaving": "Leaving...",
+    "noAgentsFound": "No agents found for this agency"
+  },
+  "properties": {
+    "activeListings": "ACTIVE LISTINGS",
+    "soldProperties": "SOLD PROPERTIES",
+    "activeListingsTitle": "Active Listings",
+    "soldPropertiesTitle": "Sold Properties",
+    "propertiesCount": "{count} properties",
+    "noActiveListings": "No active listings at the moment",
+    "noSoldProperties": "No sold properties yet",
+    "checkBackSoon": "Check back soon for new properties",
+    "soldWillAppear": "Sold properties will appear here"
+  },
+  "editModal": {
+    "title": "Edit Agency",
+    "basicInfo": "Basic Information",
+    "agencyName": "Agency Name",
+    "description": "Description",
+    "email": "Email",
+    "phone": "Phone",
+    "website": "Website",
+    "yearsInBusiness": "Years in Business",
+    "location": "Location",
+    "address": "Address",
+    "city": "City",
+    "country": "Country",
+    "zipCode": "Zip Code",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "socialMedia": "Social Media",
+    "facebookUrl": "Facebook URL",
+    "instagramUrl": "Instagram URL",
+    "linkedinUrl": "LinkedIn URL",
+    "twitterUrl": "Twitter URL",
+    "specialtiesCerts": "Specialties & Certifications",
+    "specialtiesLabel": "Specialties (comma-separated)",
+    "specialtiesPlaceholder": "Residential, Commercial, Luxury Properties",
+    "certificationsLabel": "Certifications (comma-separated)",
+    "certificationsPlaceholder": "Licensed Real Estate Agency, ISO Certified",
+    "languagesLabel": "Languages Spoken (comma-separated)",
+    "languagesPlaceholder": "English, Serbian, Croatian, Albanian",
+    "languagesHint": "Languages are auto-synced when agents join/leave",
+    "businessHours": "Business Hours",
+    "businessHoursPlaceholder": "9:00 AM - 6:00 PM",
+    "saveChanges": "Save Changes"
+  },
+  "confirmations": {
+    "removeAgent": "Are you sure you want to remove {name} from {agency}?",
+    "removeAgentDetails": "This will:\n- Remove them from your agency\n- Clear their agency affiliation\n- Keep their properties and reviews intact",
+    "leaveAgency": "Are you sure you want to leave {agency}?",
+    "leaveAgencyDetails": "This will:\n- Remove you from this agency\n- Clear your agency affiliation\n- Keep your properties and reviews intact\n- Change your status to Independent Agent",
+    "toggleAdmin": "Are you sure you want to {action} {name}?",
+    "removeAdminRights": "remove admin rights from",
+    "makeAdminRights": "make admin"
+  },
+  "messages": {
+    "logoUpdated": "Logo updated successfully!",
+    "coverUpdated": "Cover image updated successfully!",
+    "gradientUpdated": "Banner gradient updated successfully!",
+    "agencyUpdated": "Agency updated successfully!",
+    "agentRemoved": "{name} has been removed from the agency successfully.",
+    "leftAgency": "You have successfully left {agency}",
+    "invitationCopied": "Invitation code copied to clipboard!",
+    "joinRequestSent": "Join request sent successfully! The agency admin will review your request.",
+    "adminAdded": "{name} is now an admin!",
+    "adminRemoved": "{name} is no longer an admin.",
+    "onlyOwnerCanManage": "Only the agency owner can manage admins",
+    "onlyAdminCanRemove": "Only agency admins can remove agents",
+    "selectImageFile": "Please select an image file",
+    "imageSizeLimit": "Image size must be less than 5MB"
+  },
+  "weekdays": {
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  }
+}

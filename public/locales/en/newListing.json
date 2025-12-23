@@ -1,0 +1,229 @@
+{
+  "pageTitle": "Create New Listing",
+  "editTitle": "Edit Listing",
+  "steps": {
+    "init": "Get Started",
+    "loading": "Analyzing...",
+    "form": "Property Details",
+    "floorplan": "Floor Plan",
+    "payment": "Payment",
+    "success": "Published!"
+  },
+  "modes": {
+    "ai": "AI-Powered",
+    "aiDescription": "Upload photos and let AI generate your listing",
+    "manual": "Manual Entry",
+    "manualDescription": "Fill in all property details yourself"
+  },
+  "imageUpload": {
+    "title": "Upload Property Photos",
+    "subtitle": "Drag and drop images or click to browse",
+    "hint": "Upload at least 3 photos for best results",
+    "maxImages": "Maximum {count} images",
+    "dragDrop": "Drag & drop images here",
+    "orClick": "or click to browse",
+    "supportedFormats": "Supported formats: JPG, PNG, WebP",
+    "compressing": "Compressing images...",
+    "uploading": "Uploading images...",
+    "uploadProgress": "Upload Progress"
+  },
+  "imageTags": {
+    "title": "Image Tags",
+    "selectTag": "Select Tag",
+    "exterior": "Exterior",
+    "livingRoom": "Living Room",
+    "kitchen": "Kitchen",
+    "bedroom": "Bedroom",
+    "bathroom": "Bathroom",
+    "other": "Other"
+  },
+  "propertyDetails": {
+    "title": "Property Details",
+    "basicInfo": "Basic Information",
+    "propertyTitle": "Title",
+    "propertyTitlePlaceholder": "Enter a descriptive title for your property",
+    "streetAddress": "Street Address",
+    "streetAddressPlaceholder": "Enter the street address",
+    "price": "Price",
+    "pricePlaceholder": "Enter the asking price",
+    "propertyType": "Property Type",
+    "propertyTypes": {
+      "house": "House",
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "other": "Other"
+    }
+  },
+  "location": {
+    "title": "Location",
+    "selectCountry": "Select Country",
+    "selectCity": "Select City",
+    "searchAddress": "Search for address",
+    "dragPin": "Drag the pin to set exact location",
+    "coordinates": "Coordinates"
+  },
+  "roomDetails": {
+    "title": "Room Details",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "livingRooms": "Living Rooms",
+    "floorNumber": "Floor Number",
+    "totalFloors": "Total Floors"
+  },
+  "sizeAndAge": {
+    "title": "Size & Age",
+    "sqMeters": "Square Meters",
+    "yearBuilt": "Year Built",
+    "parkingSpots": "Parking Spots"
+  },
+  "amenities": {
+    "title": "Amenities",
+    "hasBalcony": "Balcony",
+    "hasGarden": "Garden",
+    "hasElevator": "Elevator",
+    "hasSecurity": "Security",
+    "hasAirConditioning": "Air Conditioning",
+    "hasPool": "Pool",
+    "petsAllowed": "Pets Allowed",
+    "states": {
+      "no": "No",
+      "any": "Any",
+      "yes": "Yes"
+    }
+  },
+  "advancedFeatures": {
+    "title": "Advanced Features",
+    "furnishing": "Furnishing Status",
+    "furnishingOptions": {
+      "any": "Any",
+      "unfurnished": "Unfurnished",
+      "partlyFurnished": "Partly Furnished",
+      "fullyFurnished": "Fully Furnished"
+    },
+    "heatingType": "Heating Type",
+    "heatingOptions": {
+      "any": "Any",
+      "central": "Central Heating",
+      "electric": "Electric",
+      "gas": "Gas",
+      "wood": "Wood",
+      "solar": "Solar",
+      "geothermal": "Geothermal",
+      "none": "None"
+    },
+    "condition": "Property Condition",
+    "conditionOptions": {
+      "any": "Any",
+      "new": "New",
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "needsRenovation": "Needs Renovation"
+    },
+    "viewType": "View Type",
+    "viewOptions": {
+      "any": "Any",
+      "sea": "Sea View",
+      "mountain": "Mountain View",
+      "city": "City View",
+      "garden": "Garden View",
+      "park": "Park View",
+      "lake": "Lake View",
+      "river": "River View",
+      "none": "No Special View"
+    },
+    "energyRating": "Energy Rating",
+    "energyOptions": {
+      "any": "Any",
+      "aPlus": "A+",
+      "a": "A",
+      "b": "B",
+      "c": "C",
+      "d": "D",
+      "e": "E",
+      "f": "F",
+      "g": "G"
+    }
+  },
+  "description": {
+    "title": "Description",
+    "descriptionLabel": "Property Description",
+    "descriptionPlaceholder": "Describe your property in detail...",
+    "specialFeatures": "Special Features",
+    "specialFeaturesPlaceholder": "Add special features...",
+    "materials": "Building Materials",
+    "materialsPlaceholder": "Add materials...",
+    "additionalAmenities": "Additional Amenities",
+    "additionalAmenitiesPlaceholder": "Add amenities...",
+    "addTagHint": "Press Enter or comma to add"
+  },
+  "virtualTour": {
+    "title": "Virtual Tour",
+    "tourUrl": "Video Tour URL",
+    "tourUrlPlaceholder": "Enter YouTube or Vimeo URL",
+    "virtualTour360": "360° Virtual Tour URL",
+    "virtualTour360Placeholder": "Enter Matterport, Kuula, or other 360 tour URL"
+  },
+  "floorplan": {
+    "title": "Floor Plan",
+    "uploadFloorplan": "Upload Floor Plan",
+    "optional": "Optional - Add a floor plan image",
+    "skip": "Skip Floor Plan"
+  },
+  "language": {
+    "title": "Listing Language",
+    "selectLanguage": "Select Language",
+    "languages": {
+      "english": "English",
+      "albanian": "Albanian",
+      "macedonian": "Macedonian",
+      "serbian": "Serbian",
+      "bosnian": "Bosnian",
+      "croatian": "Croatian",
+      "montenegrin": "Montenegrin",
+      "greek": "Greek",
+      "bulgarian": "Bulgarian",
+      "romanian": "Romanian"
+    }
+  },
+  "role": {
+    "title": "Listing As",
+    "selectRole": "Select your role for this listing",
+    "privateSeller": "Private Seller",
+    "agent": "Real Estate Agent"
+  },
+  "promotion": {
+    "title": "Promote Your Listing",
+    "wantToPromote": "I want to promote my listing",
+    "selectPromotion": "Select Promotion Type"
+  },
+  "actions": {
+    "generateWithAi": "Generate with AI",
+    "analyzing": "Analyzing images...",
+    "saveDraft": "Save Draft",
+    "preview": "Preview",
+    "publish": "Publish Listing",
+    "update": "Update Listing",
+    "publishing": "Publishing...",
+    "goBack": "Go Back"
+  },
+  "validation": {
+    "required": "This field is required",
+    "minImages": "Please upload at least {count} images",
+    "selectCountry": "Please select a country",
+    "selectCity": "Please select a city",
+    "setLocation": "Please set the property location on the map",
+    "invalidPrice": "Please enter a valid price"
+  },
+  "success": {
+    "title": "Listing Published!",
+    "message": "Your property listing has been successfully published.",
+    "viewListing": "View Listing",
+    "createAnother": "Create Another Listing"
+  },
+  "errors": {
+    "aiGenerationFailed": "AI generation failed. Please try again or use manual mode.",
+    "uploadFailed": "Failed to upload images. Please try again.",
+    "publishFailed": "Failed to publish listing. Please try again."
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "badges": {
+    "agency": "AGENCY",
+    "premierAgent": "Premier Agent",
+    "topAgent": "Top Agent",
+    "verified": "Verified"
+  },
+  "stats": {
+    "priceRange": "Price Range",
+    "contactForPricing": "Contact for pricing",
+    "agencyRates": "Agency rates",
+    "sales": "Sales",
+    "active": "Active",
+    "hot": "Hot",
+    "available": "Available",
+    "last12Months": "last 12 months",
+    "currentListings": "current listings"
+  },
+  "agencyNetwork": {
+    "title": "Agency Network",
+    "combinedSales": "combined sales in {city}"
+  },
+  "reviews": {
+    "review": "review",
+    "reviews": "reviews",
+    "noReviews": "No reviews"
+  },
+  "actions": {
+    "viewProfile": "View Profile"
+  },
+  "performanceScore": {
+    "label": "Performance"
+  }
+}

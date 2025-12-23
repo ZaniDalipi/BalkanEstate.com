@@ -1,0 +1,127 @@
+{
+  "navigation": {
+    "home": "Home",
+    "search": "Search",
+    "agencies": "Agencies",
+    "agents": "Agents",
+    "exploreCities": "Explore Cities",
+    "myListings": "My Listings",
+    "createListing": "Create Listing",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "buttons": {
+    "search": "Search",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "viewMore": "View More",
+    "viewAll": "View All",
+    "viewProfile": "View Profile",
+    "viewDetails": "View Details",
+    "contactUs": "Contact Us",
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "tryAgain": "Try Again",
+    "maybeLater": "Maybe Later",
+    "continue": "Continue",
+    "apply": "Apply"
+  },
+  "labels": {
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "error": "An error occurred",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "required": "Required",
+    "optional": "Optional",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No",
+    "any": "Any",
+    "or": "or",
+    "and": "and"
+  },
+  "time": {
+    "day": "day",
+    "days": "days",
+    "week": "week",
+    "weeks": "weeks",
+    "month": "month",
+    "months": "months",
+    "year": "year",
+    "years": "years",
+    "ago": "ago",
+    "left": "left",
+    "remaining": "remaining"
+  },
+  "contact": {
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "address": "Address",
+    "call": "Call",
+    "message": "Message"
+  },
+  "location": {
+    "city": "City",
+    "country": "Country",
+    "region": "Region",
+    "address": "Address",
+    "zipCode": "Zip Code",
+    "latitude": "Latitude",
+    "longitude": "Longitude"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "featured": "Featured",
+    "verified": "Verified",
+    "certified": "Certified"
+  },
+  "sort": {
+    "sortBy": "Sort by",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "priceAsc": "Price: Low to High",
+    "priceDesc": "Price: High to Low",
+    "nameAsc": "Name: A to Z",
+    "nameDesc": "Name: Z to A",
+    "rating": "Rating",
+    "mostPopular": "Most Popular"
+  },
+  "filters": {
+    "filter": "Filter",
+    "filters": "Filters",
+    "clearFilters": "Clear Filters",
+    "applyFilters": "Apply Filters",
+    "searchPlaceholder": "Search..."
+  },
+  "footer": {
+    "aboutUs": "About Us",
+    "contactUs": "Contact Us",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "© {year} BalkanEstate. All rights reserved."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "Not found",
+    "unauthorized": "You are not authorized to perform this action",
+    "networkError": "Network error. Please check your connection.",
+    "validationError": "Please check the form for errors"
+  }
+}
