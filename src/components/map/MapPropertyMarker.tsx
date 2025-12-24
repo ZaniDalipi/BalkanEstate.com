@@ -1,12 +1,81 @@
 // MapPropertyMarker
 // Property markers and popups for map display
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
+import { BuildingOfficeIcon } from '../../../constants';
+
+// Inject CSS animations for map markers
+const injectMapMarkerStyles = () => {
+  const styleId = 'map-marker-animations';
+  if (document.getElementById(styleId)) return;
+
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+    @keyframes markerGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px var(--glow-color)) drop-shadow(0 0 16px var(--glow-color)); }
+      50% { filter: drop-shadow(0 0 16px var(--glow-color)) drop-shadow(0 0 28px var(--glow-color)); }
+    }
+
+    @keyframes markerBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes markerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .promoted-marker-premium {
+      --glow-color: rgba(192, 132, 252, 0.7);
+      animation: markerGlow 2s ease-in-out infinite, markerBounce 3s ease-in-out infinite;
+    }
+
+    .promoted-marker-highlight {
+      --glow-color: rgba(251, 191, 36, 0.7);
+      animation: markerGlow 2s ease-in-out infinite, markerBounce 3s ease-in-out infinite;
+    }
+
+    .promoted-marker-featured {
+      --glow-color: rgba(96, 165, 250, 0.7);
+      animation: markerGlow 2.5s ease-in-out infinite, markerPulse 2s ease-in-out infinite;
+    }
+
+    .promoted-marker-standard {
+      --glow-color: rgba(156, 163, 175, 0.5);
+      animation: markerPulse 3s ease-in-out infinite;
+    }
+
+    /* Enhanced popup styles for promoted properties */
+    .promoted-property-popup .leaflet-popup-content-wrapper {
+      padding: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .promoted-property-popup .leaflet-popup-content {
+      margin: 0;
+      width: 100% !important;
+    }
+
+    .promoted-property-popup .leaflet-popup-tip {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+// Initialize styles
+if (typeof window !== 'undefined') {
+  injectMapMarkerStyles();
+}
 
 const ZOOM_THRESHOLD = 12;
 
@@ -34,6 +103,24 @@ const formatMarkerPrice = (price: number): string => {
 };
 
 /**
+ * Get animation class for promoted property markers
+ */
+const getPromotedMarkerClass = (property: Property): string => {
+  const isActivelyPromoted = property.isPromoted &&
+    property.promotionEndDate &&
+    property.promotionEndDate > Date.now();
+
+  if (!isActivelyPromoted) return '';
+
+  switch (property.promotionTier) {
+    case 'premium': return 'promoted-marker-premium';
+    case 'highlight': return 'promoted-marker-highlight';
+    case 'featured': return 'promoted-marker-featured';
+    default: return 'promoted-marker-standard';
+  }
+};
+
+/**
  * Create simple circular marker for zoomed out view
  */
 const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) => {
@@ -48,15 +135,20 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) 
   // Get ring color based on promotion tier or property type
   let ringColor = 'none';
   let ringWidth = 2;
+  let glowFilter = '';
   if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
       ringColor = '#c084fc'; // purple-400
+      glowFilter = 'drop-shadow(0 0 12px rgba(192, 132, 252, 0.8))';
     } else if (property.promotionTier === 'highlight') {
       ringColor = '#fbbf24'; // amber-400
+      glowFilter = 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.8))';
     } else if (property.promotionTier === 'featured') {
       ringColor = '#60a5fa'; // blue-400
+      glowFilter = 'drop-shadow(0 0 10px rgba(96, 165, 250, 0.7))';
     } else {
       ringColor = '#9ca3af'; // gray-400
+      glowFilter = 'drop-shadow(0 0 8px rgba(156, 163, 175, 0.5))';
     }
     ringWidth = isHovered ? 4 : 3;
   } else if (isHovered) {
@@ -64,16 +156,23 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) 
     ringWidth = 4;
   }
 
+  const baseFilter = 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
+  const filterStyle = glowFilter ? `${baseFilter} ${glowFilter}` : baseFilter;
+
   const svgHtml = `
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${filterStyle}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${color}" stroke="${ringColor !== 'none' ? ringColor : '#FFFFFF'}" stroke-width="${ringWidth}"/>
             <text x="15" y="16" font-family="Inter, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
     `;
 
+  const promotedClass = getPromotedMarkerClass(property);
+  const hoverClass = isHovered ? 'scale-150 drop-shadow-lg' : '';
+  const className = [promotedClass, hoverClass].filter(Boolean).join(' ');
+
   return L.divIcon({
     html: svgHtml,
-    className: isHovered ? 'scale-150 drop-shadow-lg' : '',
+    className: className,
     iconSize: [30, 30],
     iconAnchor: [15, isHovered ? 5 : 15],
     popupAnchor: [0, -15],
@@ -95,15 +194,20 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   // Get stroke color based on promotion tier or property type
   let strokeColor = '#FFFFFF';
   let strokeWidth = 2;
+  let glowFilter = '';
   if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
       strokeColor = '#c084fc'; // purple-400
+      glowFilter = 'drop-shadow(0 0 16px rgba(192, 132, 252, 0.8)) drop-shadow(0 0 24px rgba(192, 132, 252, 0.4))';
     } else if (property.promotionTier === 'highlight') {
       strokeColor = '#fbbf24'; // amber-400
+      glowFilter = 'drop-shadow(0 0 16px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 24px rgba(251, 191, 36, 0.4))';
     } else if (property.promotionTier === 'featured') {
       strokeColor = '#60a5fa'; // blue-400
+      glowFilter = 'drop-shadow(0 0 14px rgba(96, 165, 250, 0.7)) drop-shadow(0 0 20px rgba(96, 165, 250, 0.3))';
     } else {
       strokeColor = '#9ca3af'; // gray-400
+      glowFilter = 'drop-shadow(0 0 10px rgba(156, 163, 175, 0.5))';
     }
     strokeWidth = isHovered ? 4 : 3;
   } else if (isHovered) {
@@ -112,17 +216,24 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   }
 
   const scale = isHovered ? 1.25 : 1;
+  const baseFilter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))';
+  const filterStyle = glowFilter ? `${baseFilter} ${glowFilter}` : baseFilter;
+
   const svgHtml = `
-        <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${filterStyle}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <path d="M35 56L25 44H45L35 56Z" fill="#003A96" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
             <text x="35" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
     `;
 
+  const promotedClass = getPromotedMarkerClass(property);
+  const hoverClass = isHovered ? 'drop-shadow-xl' : '';
+  const className = [promotedClass, hoverClass].filter(Boolean).join(' ');
+
   return L.divIcon({
     html: svgHtml,
-    className: isHovered ? 'drop-shadow-xl' : '',
+    className: className,
     iconSize: [45, 36],
     iconAnchor: [22.5, isHovered ? 20 : 36],
     popupAnchor: [0, -36],
@@ -139,10 +250,19 @@ const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boo
   return createDetailedMarkerIcon(property, isHovered);
 };
 
+// Tier badge configurations for popup
+const POPUP_TIER_CONFIG: Record<string, { bg: string; border: string; icon: string; label: string }> = {
+  premium: { bg: 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600', border: 'border-purple-300', icon: '👑', label: 'PREMIUM' },
+  highlight: { bg: 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500', border: 'border-amber-300', icon: '💎', label: 'HIGHLIGHT' },
+  featured: { bg: 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500', border: 'border-blue-300', icon: '⭐', label: 'FEATURED' },
+  standard: { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', border: 'border-gray-300', icon: '✨', label: 'PROMOTED' },
+};
+
 /**
  * PropertyPopup Component
  *
  * Displays property information in map popup with image carousel.
+ * Enhanced version for promoted properties with 3-image gallery.
  */
 const PropertyPopup: React.FC<{
   property: Property;
@@ -150,22 +270,191 @@ const PropertyPopup: React.FC<{
 }> = ({ property, onPopupClick }) => {
   const { t } = useTranslation(['property']);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
+  // Check if property is actively promoted
+  const isActivelyPromoted = property.isPromoted &&
+    property.promotionEndDate &&
+    property.promotionEndDate > Date.now();
+
+  const promotionTier = property.promotionTier || 'standard';
+  const tierConfig = POPUP_TIER_CONFIG[promotionTier] || POPUP_TIER_CONFIG.standard;
+
+  // For promoted properties, show up to 3 images; for regular, show all
   const images =
     property.images && property.images.length > 0
-      ? property.images.map((img) => img.url)
+      ? property.images.slice(0, isActivelyPromoted ? 3 : property.images.length).map((img) => typeof img === 'string' ? img : img.url)
       : [property.imageUrl];
 
-  const nextImage = (e: React.MouseEvent) => {
+  const nextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
+  }, [images.length]);
 
-  const prevImage = (e: React.MouseEvent) => {
+  const prevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  }, [images.length]);
 
+  const handleImageError = useCallback((index: number) => {
+    setImageErrors(prev => new Set(prev).add(index));
+  }, []);
+
+  // Auto-advance for promoted properties
+  useEffect(() => {
+    if (!isActivelyPromoted || images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [isActivelyPromoted, images.length]);
+
+  // Enhanced popup for promoted properties
+  if (isActivelyPromoted) {
+    return (
+      <div
+        className={`w-72 cursor-pointer rounded-lg overflow-hidden border-2 ${tierConfig.border}`}
+        onClick={() => onPopupClick(property.id)}
+      >
+        {/* Image carousel - larger for promoted */}
+        <div className="relative">
+          <div className="relative h-40 overflow-hidden">
+            {images.map((imgUrl, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 transition-opacity duration-500 ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {imageErrors.has(index) ? (
+                  <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+                    <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+                  </div>
+                ) : (
+                  <img
+                    src={imgUrl}
+                    alt={`${property.title || property.address} - ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={() => handleImageError(index)}
+                  />
+                )}
+              </div>
+            ))}
+
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          </div>
+
+          {/* Promotion tier badge */}
+          <div className={`absolute top-2 left-2 ${tierConfig.bg} text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5`}>
+            <span>{tierConfig.icon}</span>
+            {tierConfig.label}
+          </div>
+
+          {/* Image navigation for promoted */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-700 rounded-full w-7 h-7 flex items-center justify-center transition-colors shadow-lg"
+              >
+                ‹
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-700 rounded-full w-7 h-7 flex items-center justify-center transition-colors shadow-lg"
+              >
+                ›
+              </button>
+
+              {/* Image dots indicator */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(index);
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === currentImageIndex
+                        ? 'bg-white w-4'
+                        : 'bg-white/50 hover:bg-white/80'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Image counter */}
+              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+                {currentImageIndex + 1}/{images.length}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Content section */}
+        <div className="p-3 bg-white">
+          {/* Price with gradient */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="bg-gradient-to-r from-primary to-primary-dark text-white font-bold px-3 py-1 rounded-lg text-base shadow">
+              {formatPrice(property.price, property.country)}
+            </span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
+              {property.propertyType}
+            </span>
+          </div>
+
+          {/* Title */}
+          {property.title && (
+            <p className="font-bold text-sm text-neutral-900 mb-1 line-clamp-1">
+              {property.title}
+            </p>
+          )}
+
+          {/* Address */}
+          <p className="text-xs text-neutral-500 mb-2 line-clamp-1">
+            📍 {property.address}, {property.city}
+          </p>
+
+          {/* Property stats - enhanced grid */}
+          <div className="grid grid-cols-4 gap-1.5 mb-2">
+            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+              <div className="font-bold text-sm text-primary">{property.beds}</div>
+              <div className="text-[9px] text-primary/70">{t('map.beds')}</div>
+            </div>
+            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+              <div className="font-bold text-sm text-primary">{property.baths}</div>
+              <div className="text-[9px] text-primary/70">{t('map.baths')}</div>
+            </div>
+            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+              <div className="font-bold text-sm text-primary">{property.livingRooms}</div>
+              <div className="text-[9px] text-primary/70">{t('map.living')}</div>
+            </div>
+            <div className="bg-primary/10 rounded-lg py-1.5 px-1 text-center border border-primary/20">
+              <div className="font-bold text-sm text-primary">{property.sqft}</div>
+              <div className="text-[9px] text-primary/70">m²</div>
+            </div>
+          </div>
+
+          {/* View details button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onPopupClick(property.id);
+            }}
+            className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-semibold py-2 rounded-lg transition-colors shadow-md"
+          >
+            {t('map.clickForDetails')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard popup for non-promoted properties
   return (
     <div className="w-56 cursor-pointer" onClick={() => onPopupClick(property.id)}>
       {/* Image carousel */}
@@ -301,24 +590,36 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
     });
   }, [hoveredPropertyId, zoom, properties]);
 
+  // Helper to check if property is actively promoted
+  const isPropertyPromoted = (prop: Property) =>
+    prop.isPromoted && prop.promotionEndDate && prop.promotionEndDate > Date.now();
+
   return (
     <>
-      {properties.map((prop) => (
-        <Marker
-          key={prop.id}
-          position={[prop.lat, prop.lng]}
-          icon={createCustomMarkerIcon(prop, zoom, prop.id === hoveredPropertyId)}
-          ref={(marker) => {
-            if (marker) {
-              markerRefsMap.current.set(prop.id, marker);
-            }
-          }}
-        >
-          <Popup maxWidth={230} minWidth={220}>
-            <PropertyPopup property={prop} onPopupClick={onPopupClick} />
-          </Popup>
-        </Marker>
-      ))}
+      {properties.map((prop) => {
+        const isPromoted = isPropertyPromoted(prop);
+        return (
+          <Marker
+            key={prop.id}
+            position={[prop.lat, prop.lng]}
+            icon={createCustomMarkerIcon(prop, zoom, prop.id === hoveredPropertyId)}
+            ref={(marker) => {
+              if (marker) {
+                markerRefsMap.current.set(prop.id, marker);
+              }
+            }}
+            zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
+          >
+            <Popup
+              maxWidth={isPromoted ? 300 : 230}
+              minWidth={isPromoted ? 288 : 220}
+              className={isPromoted ? 'promoted-property-popup' : ''}
+            >
+              <PropertyPopup property={prop} onPopupClick={onPopupClick} />
+            </Popup>
+          </Marker>
+        );
+      })}
     </>
   );
 };
