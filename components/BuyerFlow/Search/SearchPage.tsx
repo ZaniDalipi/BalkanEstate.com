@@ -108,6 +108,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const debounceTimer = useRef<number | null>(null);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
+    const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
 
 
     useEffect(() => {
@@ -157,6 +158,9 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             activeFilters: newFilters,
             drawnBoundsJSON: null, // Clear any drawn bounds - show all visible properties
         });
+
+        // User is searching for a specific location, so show only map-visible properties
+        setShowAllOnMobile(false);
 
         // Fly to the location's center - mapBounds will update automatically
         // and properties visible on the map will show in the list
@@ -443,9 +447,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             return withinDrawn;
         }
 
-        // On mobile, when no drawn bounds and no specific search query, show ALL properties
-        // This ensures that after reset filters, users see all available properties
-        if (isMobile && !activeFilters.query && activeFilters.country === 'any') {
+        // On mobile, show ALL properties only when filters were explicitly reset
+        // This ensures users see all available properties after reset, but
+        // when they move the map or search a location, it shows only visible properties
+        if (isMobile && showAllOnMobile) {
             return baseFilteredProperties;
         }
 
@@ -456,7 +461,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         }
         // Fallback to all filtered properties if no bounds set
         return baseFilteredProperties;
-    }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, activeFilters.query, activeFilters.country]);
+    }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
 
 
     const handleFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
@@ -514,6 +519,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         };
         if (isMobile) {
             resetState.isFiltersOpen = false;
+            // On mobile, after reset filters, show ALL properties regardless of map position
+            setShowAllOnMobile(true);
         }
         updateSearchPageState(resetState);
         setLocalFilters(initialFilters);
@@ -595,10 +602,15 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     
     const handleMapMove = useCallback((newBounds: L.LatLngBounds, newCenter: L.LatLng) => {
         if (isMobile && isFiltersOpen) return;
-        
+
+        // User moved the map, so go back to showing only map-visible properties
+        if (isMobile && showAllOnMobile) {
+            setShowAllOnMobile(false);
+        }
+
         const newState: Partial<SearchPageState> = { mapBoundsJSON: JSON.stringify(newBounds) };
         updateSearchPageState(newState);
-    }, [isMobile, isFiltersOpen, updateSearchPageState]);
+    }, [isMobile, isFiltersOpen, showAllOnMobile, updateSearchPageState]);
 
 
     const handleRecenterOnUser = () => {
