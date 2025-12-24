@@ -8,6 +8,7 @@ import {
 } from '../src/features/view-stats/hooks';
 import { Period, Insight } from '../src/data/api/ViewStatsApiClient';
 import { formatPrice } from '../utils/currency';
+import { AppView } from '../types';
 import {
   ChartBarIcon,
   EyeIcon,
@@ -35,7 +36,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   InformationCircleIcon,
-} from '@heroicons/react/24/outline';
+} from '../constants';
 
 const PERIOD_OPTIONS: { value: Period; label: string }[] = [
   { value: '7d', label: 'Last 7 days' },
@@ -242,7 +243,7 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, onClick }) =>
           {getStatusBadge(property.status)}
           {property.price && (
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {formatPrice(property.price)}
+              {formatPrice(property.price, 'Serbia')}
             </span>
           )}
         </div>
@@ -299,7 +300,7 @@ const AnalyticsPage: React.FC = () => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
   };
 
-  const navigateToView = (view: string) => {
+  const navigateToView = (view: AppView) => {
     window.history.pushState({}, '', `/${view}`);
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
   };
