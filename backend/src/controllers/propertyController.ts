@@ -829,7 +829,7 @@ export const getMyListings = async (
 
     const properties = await Property.find(query)
       .populate('sellerId', 'name email phone avatarUrl role agencyName')
-      .sort({ createdAt: -1 });
+      .sort({ lastRenewed: -1, createdAt: -1 }); // Renewed listings appear first
 
     console.log(`✅ Found ${properties.length} listings`);
     res.json({ properties });
