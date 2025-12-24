@@ -97,7 +97,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
   // Tier-specific styles with glowing borders
-  // Premium = Rich Gold, Highlight = Cyan/Teal, Featured = Soft Purple
+  // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Pink (3rd)
   const getTierStyles = () => {
     switch (promotionTier) {
       case 'premium':
@@ -110,18 +110,18 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         };
       case 'highlight':
         return {
-          border: 'ring-2 ring-cyan-400 border-cyan-400',
-          badge: 'bg-gradient-to-r from-cyan-500 via-teal-400 to-cyan-400',
+          border: 'ring-2 ring-sky-400 border-sky-400',
+          badge: 'bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400',
           icon: '💎',
-          glow: 'shadow-[0_0_20px_rgba(0,206,209,0.4)] hover:shadow-[0_0_30px_rgba(0,206,209,0.6)]',
+          glow: 'shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:shadow-[0_0_30px_rgba(14,165,233,0.6)]',
           label: t('property:map.tiers.highlight', 'HIGHLIGHT')
         };
       case 'featured':
         return {
-          border: 'ring-2 ring-purple-400 border-purple-300',
-          badge: 'bg-gradient-to-r from-purple-500 via-violet-400 to-purple-400',
+          border: 'ring-2 ring-pink-400 border-pink-400',
+          badge: 'bg-gradient-to-r from-pink-500 via-pink-400 to-rose-400',
           icon: '⭐',
-          glow: 'shadow-[0_0_15px_rgba(147,112,219,0.35)] hover:shadow-[0_0_25px_rgba(147,112,219,0.5)]',
+          glow: 'shadow-[0_0_15px_rgba(236,72,153,0.35)] hover:shadow-[0_0_25px_rgba(236,72,153,0.5)]',
           label: t('property:map.tiers.featured', 'FEATURED')
         };
       default:
