@@ -32,15 +32,58 @@ import {
   MagnifyingGlassIcon,
   EnvelopeIcon,
   CurrencyEuroIcon,
+  FireIcon,
 } from '../constants';
 
 const PERIOD_OPTIONS: { value: Period; label: string }[] = [
-  { value: '7d', label: 'Last 7 days' },
-  { value: '30d', label: 'Last 30 days' },
-  { value: '90d', label: 'Last 90 days' },
+  { value: '7d', label: '7 days' },
+  { value: '30d', label: '30 days' },
+  { value: '90d', label: '90 days' },
 ];
 
-// Stat Card Component
+// Truncate text helper
+const truncateText = (text: string, maxLength: number = 25) => {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+};
+
+// Progress Bar Component
+const ProgressBar: React.FC<{ value: number; max: number; color?: string }> = ({
+  value,
+  max,
+  color = 'bg-primary'
+}) => {
+  const percentage = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  return (
+    <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+      <div
+        className={`h-full ${color} rounded-full transition-all duration-500`}
+        style={{ width: `${percentage}%` }}
+      />
+    </div>
+  );
+};
+
+// Mini Bar Chart Component
+const MiniBarChart: React.FC<{ data: number[]; color?: string }> = ({ data, color = 'bg-primary' }) => {
+  const max = Math.max(...data, 1);
+  return (
+    <div className="flex items-end gap-0.5 h-8">
+      {data.map((value, i) => (
+        <div
+          key={i}
+          className={`flex-1 ${color} rounded-t opacity-${60 + Math.floor((i / data.length) * 40)}`}
+          style={{
+            height: `${Math.max((value / max) * 100, 8)}%`,
+            opacity: 0.4 + (i / data.length) * 0.6
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Stat Card with Visual
 interface StatCardProps {
   title: string;
   value: number | string;
@@ -49,6 +92,7 @@ interface StatCardProps {
   icon: React.ComponentType<{ className?: string }>;
   loading?: boolean;
   color?: 'blue' | 'green' | 'purple' | 'orange';
+  chartData?: number[];
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -59,53 +103,55 @@ const StatCard: React.FC<StatCardProps> = ({
   icon: Icon,
   loading,
   color = 'blue',
+  chartData,
 }) => {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    purple: 'bg-purple-50 text-purple-600',
-    orange: 'bg-orange-50 text-orange-600',
+    blue: { bg: 'bg-blue-50', text: 'text-blue-600', bar: 'bg-blue-500' },
+    green: { bg: 'bg-green-50', text: 'text-green-600', bar: 'bg-green-500' },
+    purple: { bg: 'bg-purple-50', text: 'text-purple-600', bar: 'bg-purple-500' },
+    orange: { bg: 'bg-orange-50', text: 'text-orange-600', bar: 'bg-orange-500' },
   };
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 animate-pulse">
-        <div className="flex items-center justify-between mb-3">
-          <div className="h-4 bg-neutral-200 rounded w-24" />
-          <div className="h-10 w-10 bg-neutral-200 rounded-lg" />
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 animate-pulse">
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-3 bg-neutral-200 rounded w-16" />
+          <div className="h-8 w-8 bg-neutral-200 rounded-lg" />
         </div>
-        <div className="h-8 bg-neutral-200 rounded w-20" />
+        <div className="h-7 bg-neutral-200 rounded w-14 mb-2" />
+        <div className="h-2 bg-neutral-200 rounded w-full" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-medium text-neutral-600">{title}</p>
-        <div className={`p-2.5 rounded-lg ${colorClasses[color]}`}>
-          <Icon className="h-5 w-5" />
+    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">{title}</p>
+        <div className={`p-2 rounded-lg ${colorClasses[color].bg}`}>
+          <Icon className={`h-4 w-4 ${colorClasses[color].text}`} />
         </div>
       </div>
-      <div className="flex items-baseline gap-2">
+      <div className="flex items-baseline gap-2 mb-2">
         <p className="text-2xl font-bold text-neutral-900">{value}</p>
         {change !== undefined && (
-          <span className={`flex items-center text-sm font-semibold ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {change >= 0 ? (
-              <ArrowTrendingUpIcon className="h-4 w-4 mr-0.5" />
-            ) : (
-              <ArrowTrendingDownIcon className="h-4 w-4 mr-0.5" />
-            )}
+          <span className={`flex items-center text-xs font-semibold ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {change >= 0 ? <ArrowTrendingUpIcon className="h-3 w-3" /> : <ArrowTrendingDownIcon className="h-3 w-3" />}
             {Math.abs(change)}%
           </span>
         )}
       </div>
-      {subtitle && <p className="text-sm text-neutral-500 mt-1">{subtitle}</p>}
+      {chartData && chartData.length > 0 ? (
+        <MiniBarChart data={chartData} color={colorClasses[color].bar} />
+      ) : subtitle ? (
+        <p className="text-xs text-neutral-500">{subtitle}</p>
+      ) : null}
     </div>
   );
 };
 
-// Insight Card Component
+// Insight Card
 interface InsightCardProps {
   insight: Insight;
   onAction?: (propertyId: string) => void;
@@ -119,47 +165,43 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
     exclamation: ExclamationTriangleIcon,
     clock: ClockIcon,
     currency: CurrencyEuroIcon,
+    fire: FireIcon,
   };
 
-  const priorityStyles = {
-    success: 'border-green-200 bg-green-50',
-    warning: 'border-yellow-200 bg-yellow-50',
-    error: 'border-red-200 bg-red-50',
-    info: 'border-blue-200 bg-blue-50',
+  const priorityConfig = {
+    success: { border: 'border-green-300', bg: 'bg-green-50', icon: 'text-green-600', accent: 'bg-green-500' },
+    warning: { border: 'border-amber-300', bg: 'bg-amber-50', icon: 'text-amber-600', accent: 'bg-amber-500' },
+    error: { border: 'border-red-300', bg: 'bg-red-50', icon: 'text-red-600', accent: 'bg-red-500' },
+    info: { border: 'border-blue-300', bg: 'bg-blue-50', icon: 'text-blue-600', accent: 'bg-blue-500' },
   };
 
-  const iconStyles = {
-    success: 'text-green-600',
-    warning: 'text-yellow-600',
-    error: 'text-red-600',
-    info: 'text-blue-600',
-  };
-
+  const config = priorityConfig[insight.priority];
   const Icon = iconMap[insight.icon] || LightBulbIcon;
 
   return (
-    <div className={`rounded-xl border-2 p-4 ${priorityStyles[insight.priority]}`}>
-      <div className="flex items-start gap-3">
-        <div className={`p-2 rounded-lg bg-white ${iconStyles[insight.priority]}`}>
-          <Icon className="h-5 w-5" />
+    <div className={`rounded-xl border ${config.border} ${config.bg} p-4 relative overflow-hidden`}>
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${config.accent}`} />
+      <div className="flex items-start gap-3 pl-2">
+        <div className={`p-2 rounded-lg bg-white shadow-sm ${config.icon}`}>
+          <Icon className="h-4 w-4" />
         </div>
-        <div className="flex-1">
-          <h4 className="font-semibold text-neutral-900">{insight.title}</h4>
-          <p className="text-sm text-neutral-600 mt-1">{insight.message}</p>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-neutral-900 text-sm">{insight.title}</h4>
+          <p className="text-xs text-neutral-600 mt-0.5 leading-relaxed">{insight.message}</p>
           {insight.properties && insight.properties.length > 0 && (
-            <div className="mt-3 space-y-2">
-              {insight.properties.map((prop) => (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {insight.properties.slice(0, 2).map((prop) => (
                 <button
                   key={prop.id}
                   onClick={() => onAction?.(prop.id)}
-                  className="flex items-center justify-between w-full px-3 py-2 bg-white rounded-lg hover:bg-neutral-100 transition-colors text-left"
+                  className="text-xs px-2 py-1 bg-white rounded-full border border-neutral-200 hover:border-primary hover:text-primary transition-colors truncate max-w-[120px]"
                 >
-                  <span className="text-sm font-medium text-neutral-700 truncate">{prop.title}</span>
-                  {prop.views !== undefined && (
-                    <span className="text-xs text-neutral-500 ml-2">{prop.views} views</span>
-                  )}
+                  {truncateText(prop.title, 15)}
                 </button>
               ))}
+              {insight.properties.length > 2 && (
+                <span className="text-xs px-2 py-1 text-neutral-500">+{insight.properties.length - 2} more</span>
+              )}
             </div>
           )}
         </div>
@@ -168,68 +210,72 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
   );
 };
 
-// Property Row Component
+// Property Row with Visual Indicators
 interface PropertyRowProps {
   property: {
     propertyId: string;
     title: string;
     status?: string;
     isPromoted?: boolean;
-    promotionTier?: string;
     price?: number;
     periodViews: number;
     periodUniqueViews?: number;
     totalViews: number;
   };
   rank: number;
+  maxViews: number;
   onClick?: () => void;
 }
 
-const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, onClick }) => {
-  const getStatusBadge = (status?: string) => {
-    switch (status) {
-      case 'active':
-        return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>;
-      case 'sold':
-        return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Sold</span>;
-      case 'pending':
-        return <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Pending</span>;
-      default:
-        return null;
-    }
-  };
+const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, onClick }) => {
+  const performanceLevel = maxViews > 0 ? (property.periodViews / maxViews) : 0;
+  const performanceColor = performanceLevel > 0.7 ? 'text-green-600' : performanceLevel > 0.3 ? 'text-amber-600' : 'text-neutral-500';
+  const barColor = performanceLevel > 0.7 ? 'bg-green-500' : performanceLevel > 0.3 ? 'bg-amber-500' : 'bg-neutral-300';
 
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-4 p-4 bg-white rounded-lg border border-neutral-200 hover:shadow-md cursor-pointer transition-all"
+      className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 cursor-pointer transition-all group"
     >
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-        rank <= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-neutral-100 text-neutral-600'
+      {/* Rank Badge */}
+      <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+        rank === 1 ? 'bg-yellow-100 text-yellow-700' :
+        rank === 2 ? 'bg-neutral-200 text-neutral-600' :
+        rank === 3 ? 'bg-orange-100 text-orange-700' :
+        'bg-neutral-100 text-neutral-500'
       }`}>
-        {rank}
+        {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank}
       </div>
+
+      {/* Property Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="font-medium text-neutral-900 truncate">{property.title}</h4>
+          <h4 className="font-medium text-neutral-900 text-sm truncate max-w-[180px] group-hover:text-primary transition-colors">
+            {truncateText(property.title, 28)}
+          </h4>
           {property.isPromoted && (
-            <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-800 flex items-center gap-1">
-              <SparklesIcon className="h-3 w-3" />
-              Promoted
+            <span className="flex-shrink-0 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-purple-100 text-purple-700 flex items-center gap-0.5">
+              <SparklesIcon className="h-2.5 w-2.5" />
+              PRO
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          {getStatusBadge(property.status)}
+
+        {/* Progress Bar */}
+        <div className="mt-1.5 flex items-center gap-2">
+          <div className="flex-1 max-w-[120px]">
+            <ProgressBar value={property.periodViews} max={maxViews} color={barColor} />
+          </div>
           {property.price && (
-            <span className="text-sm text-neutral-500">{formatPrice(property.price, 'Serbia')}</span>
+            <span className="text-[10px] text-neutral-400">{formatPrice(property.price, 'Serbia')}</span>
           )}
         </div>
       </div>
+
+      {/* Stats */}
       <div className="flex-shrink-0 text-right">
-        <p className="text-xl font-bold text-primary">{property.periodViews}</p>
-        <p className="text-xs text-neutral-500">
-          {property.periodUniqueViews !== undefined && `${property.periodUniqueViews} unique · `}
+        <p className={`text-lg font-bold ${performanceColor}`}>{property.periodViews}</p>
+        <p className="text-[10px] text-neutral-400">
           {property.totalViews} total
         </p>
       </div>
@@ -237,22 +283,78 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, onClick }) =>
   );
 };
 
-// Premium Upgrade Banner
-const PremiumUpgradeBanner: React.FC<{ message?: string; onUpgradeClick: () => void }> = ({ message, onUpgradeClick }) => (
-  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white">
-    <div className="flex flex-col md:flex-row md:items-center gap-4">
-      <div className="p-3 bg-white/20 rounded-lg w-fit">
-        <LockClosedIcon className="h-8 w-8" />
+// Device Distribution Chart
+const DeviceChart: React.FC<{ desktop: number; mobile: number; tablet: number }> = ({ desktop, mobile, tablet }) => {
+  const total = desktop + mobile + tablet || 1;
+  const segments = [
+    { label: 'Desktop', value: desktop, color: 'bg-blue-500', icon: ComputerDesktopIcon },
+    { label: 'Mobile', value: mobile, color: 'bg-green-500', icon: DevicePhoneMobileIcon },
+    { label: 'Tablet', value: tablet, color: 'bg-purple-500', icon: GlobeAltIcon },
+  ];
+
+  return (
+    <div className="space-y-2">
+      <div className="flex h-2 rounded-full overflow-hidden bg-neutral-100">
+        {segments.map((seg, i) => (
+          <div
+            key={i}
+            className={`${seg.color} transition-all`}
+            style={{ width: `${(seg.value / total) * 100}%` }}
+          />
+        ))}
+      </div>
+      <div className="flex justify-between text-[10px]">
+        {segments.map((seg, i) => (
+          <div key={i} className="flex items-center gap-1 text-neutral-500">
+            <seg.icon className="h-3 w-3" />
+            <span>{Math.round((seg.value / total) * 100)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Traffic Sources Chart
+const TrafficChart: React.FC<{ direct: number; search: number; social: number; email: number }> = ({ direct, search, social, email }) => {
+  const total = direct + search + social + email || 1;
+  const sources = [
+    { label: 'Direct', value: direct, color: 'bg-blue-500' },
+    { label: 'Search', value: search, color: 'bg-green-500' },
+    { label: 'Social', value: social, color: 'bg-pink-500' },
+    { label: 'Email', value: email, color: 'bg-amber-500' },
+  ];
+
+  return (
+    <div className="space-y-1.5">
+      {sources.map((source, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="text-[10px] text-neutral-500 w-12">{source.label}</span>
+          <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+            <div className={`h-full ${source.color} rounded-full`} style={{ width: `${(source.value / total) * 100}%` }} />
+          </div>
+          <span className="text-[10px] font-medium text-neutral-600 w-8 text-right">{Math.round((source.value / total) * 100)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Premium Banner
+const PremiumUpgradeBanner: React.FC<{ onUpgradeClick: () => void }> = ({ onUpgradeClick }) => (
+  <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 rounded-xl p-5 text-white relative overflow-hidden">
+    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
+    <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
+        <LockClosedIcon className="h-6 w-6" />
       </div>
       <div className="flex-1">
-        <h3 className="text-lg font-bold">Unlock Premium Analytics</h3>
-        <p className="text-white/80 text-sm mt-1">
-          {message || 'Upgrade to Pro to access detailed analytics, smart insights, traffic sources, and downloadable reports.'}
-        </p>
+        <h3 className="font-bold">Unlock Premium Analytics</h3>
+        <p className="text-white/80 text-sm mt-0.5">Get insights, traffic sources, device stats & CSV exports</p>
       </div>
       <button
         onClick={onUpgradeClick}
-        className="px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-neutral-100 transition-colors w-full md:w-auto"
+        className="px-5 py-2.5 bg-white text-purple-600 font-semibold rounded-lg hover:bg-neutral-100 transition-colors text-sm"
       >
         Upgrade Now
       </button>
@@ -260,12 +362,11 @@ const PremiumUpgradeBanner: React.FC<{ message?: string; onUpgradeClick: () => v
   </div>
 );
 
-// Main Analytics Page Component
+// Main Component
 const AnalyticsPage: React.FC = () => {
   const { t } = useTranslation(['analytics', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser } = state;
-
   const [period, setPeriod] = useState<Period>('30d');
 
   const navigateToProperty = (propertyId: string) => {
@@ -278,17 +379,8 @@ const AnalyticsPage: React.FC = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
   };
 
-  const navigateBack = () => {
-    window.history.back();
-  };
-
-  const openPricingModal = () => {
-    dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true } });
-  };
-
-  const openAuthModal = () => {
-    dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
-  };
+  const openPricingModal = () => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true } });
+  const openAuthModal = () => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
 
   const { data: dashboard, isLoading: dashboardLoading, error: dashboardError } = useDashboardOverview();
   const { data: propertiesStats, isLoading: propertiesLoading } = useMyPropertiesViewStats(period);
@@ -296,29 +388,23 @@ const AnalyticsPage: React.FC = () => {
 
   const isLoading = dashboardLoading || propertiesLoading;
   const isPremium = dashboard?.subscriptionInfo?.isPremium ?? false;
+  const maxViews = propertiesStats?.propertiesStats?.reduce((max, p) => Math.max(max, p.periodViews), 0) || 1;
 
-  const handlePropertyClick = (propertyId: string) => {
-    navigateToProperty(propertyId);
-  };
-
-  const handleDownloadReport = async () => {
-    try {
-      await downloadReport.mutateAsync(period);
-    } catch {
-      // Error handling is done by the mutation
-    }
-  };
+  // Mock chart data for demo
+  const weeklyData = [12, 19, 15, 25, 22, 30, 28];
 
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-        <div className="text-center bg-white rounded-xl shadow-sm border border-neutral-200 p-8 max-w-md w-full">
-          <LockClosedIcon className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-neutral-900 mb-2">Sign in Required</h2>
-          <p className="text-neutral-500 mb-6">Please sign in to view your analytics.</p>
+        <div className="text-center bg-white rounded-2xl shadow-lg border border-neutral-200 p-8 max-w-sm w-full">
+          <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <LockClosedIcon className="h-8 w-8 text-neutral-400" />
+          </div>
+          <h2 className="text-lg font-bold text-neutral-900 mb-2">Sign in Required</h2>
+          <p className="text-neutral-500 text-sm mb-6">Please sign in to view your analytics dashboard.</p>
           <button
             onClick={openAuthModal}
-            className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors"
+            className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors"
           >
             Sign In
           </button>
@@ -329,63 +415,64 @@ const AnalyticsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50 overflow-y-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button
-              onClick={navigateBack}
+              onClick={() => window.history.back()}
               className="p-2 rounded-lg bg-white border border-neutral-200 hover:bg-neutral-50 transition-colors"
             >
-              <ArrowLeftIcon className="h-5 w-5 text-neutral-600" />
+              <ArrowLeftIcon className="h-4 w-4 text-neutral-600" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                <ChartBarIcon className="h-6 w-6 text-primary" />
-                Analytics Dashboard
+              <h1 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                <ChartBarIcon className="h-5 w-5 text-primary" />
+                Analytics
               </h1>
-              <p className="text-sm text-neutral-500">Track your listings performance</p>
+              <p className="text-xs text-neutral-500">Track performance & insights</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white rounded-lg border border-neutral-200 px-3 py-2">
-              <CalendarIcon className="h-4 w-4 text-neutral-400" />
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value as Period)}
-                className="bg-transparent border-none text-sm font-medium text-neutral-700 focus:ring-0 cursor-pointer"
-              >
-                {PERIOD_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+          <div className="flex items-center gap-2">
+            <div className="flex bg-white rounded-lg border border-neutral-200 p-0.5">
+              {PERIOD_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setPeriod(opt.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    period === opt.value
+                      ? 'bg-primary text-white'
+                      : 'text-neutral-600 hover:bg-neutral-100'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
 
             {isPremium && (
               <button
-                onClick={handleDownloadReport}
+                onClick={() => downloadReport.mutateAsync(period)}
                 disabled={downloadReport.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                className="p-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
               >
                 <DocumentArrowDownIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">{downloadReport.isPending ? 'Downloading...' : 'Export CSV'}</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Error State */}
         {dashboardError && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-            <p className="text-red-600">Failed to load analytics. Please try again later.</p>
+            <p className="text-red-600 text-sm">Failed to load analytics. Please try again.</p>
           </div>
         )}
 
-        {/* Overview Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           <StatCard
-            title="Total Properties"
+            title="Properties"
             value={dashboard?.overview?.totalProperties || 0}
             subtitle={`${dashboard?.overview?.activeProperties || 0} active`}
             icon={HomeIcon}
@@ -393,15 +480,15 @@ const AnalyticsPage: React.FC = () => {
             color="blue"
           />
           <StatCard
-            title="Monthly Views"
+            title="Monthly"
             value={dashboard?.overview?.monthlyViews || 0}
-            subtitle={`${dashboard?.overview?.monthlyUniqueViews || 0} unique`}
             icon={EyeIcon}
             loading={isLoading}
             color="green"
+            chartData={weeklyData}
           />
           <StatCard
-            title="Weekly Views"
+            title="Weekly"
             value={dashboard?.overview?.weeklyViews || 0}
             subtitle="Last 7 days"
             icon={ChartBarIcon}
@@ -409,7 +496,7 @@ const AnalyticsPage: React.FC = () => {
             color="purple"
           />
           <StatCard
-            title="Avg. Views"
+            title="Avg/Property"
             value={dashboard?.overview?.avgViewsPerProperty || 0}
             subtitle={`${dashboard?.overview?.promotedProperties || 0} promoted`}
             icon={StarIcon}
@@ -418,23 +505,23 @@ const AnalyticsPage: React.FC = () => {
           />
         </div>
 
-        {/* Premium Upgrade Banner */}
+        {/* Premium Banner */}
         {!isPremium && !isLoading && (
           <div className="mb-6">
-            <PremiumUpgradeBanner message={propertiesStats?.upgradeMessage} onUpgradeClick={openPricingModal} />
+            <PremiumUpgradeBanner onUpgradeClick={openPricingModal} />
           </div>
         )}
 
-        {/* Smart Insights */}
+        {/* Insights */}
         {isPremium && dashboard?.insights && dashboard.insights.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              <LightBulbIcon className="h-5 w-5 text-yellow-500" />
-              Smart Insights
+            <h2 className="text-sm font-bold text-neutral-900 mb-3 flex items-center gap-2">
+              <LightBulbIcon className="h-4 w-4 text-amber-500" />
+              Insights
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {dashboard.insights.map((insight, index) => (
-                <InsightCard key={index} insight={insight} onAction={handlePropertyClick} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {dashboard.insights.slice(0, 3).map((insight, i) => (
+                <InsightCard key={i} insight={insight} onAction={navigateToProperty} />
               ))}
             </div>
           </div>
@@ -444,14 +531,23 @@ const AnalyticsPage: React.FC = () => {
           {/* Properties List */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
-              <div className="px-5 py-4 border-b border-neutral-200 flex items-center justify-between">
-                <h2 className="font-bold text-neutral-900">Property Performance</h2>
-                <span className="text-sm text-neutral-500">Sorted by views</span>
+              <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
+                <h2 className="font-bold text-neutral-900 text-sm">Properties</h2>
+                <span className="text-xs text-neutral-400">{propertiesStats?.propertiesStats?.length || 0} listings</span>
               </div>
-              <div className="p-4 space-y-3 max-h-[500px] overflow-y-auto">
+              <div className="divide-y divide-neutral-50 max-h-[400px] overflow-y-auto">
                 {isLoading ? (
                   Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-20 bg-neutral-100 rounded-lg animate-pulse" />
+                    <div key={i} className="p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 bg-neutral-100 rounded-full animate-pulse" />
+                        <div className="flex-1">
+                          <div className="h-4 bg-neutral-100 rounded w-3/4 mb-2 animate-pulse" />
+                          <div className="h-1.5 bg-neutral-100 rounded w-1/2 animate-pulse" />
+                        </div>
+                        <div className="h-6 w-10 bg-neutral-100 rounded animate-pulse" />
+                      </div>
+                    </div>
                   ))
                 ) : propertiesStats?.propertiesStats && propertiesStats.propertiesStats.length > 0 ? (
                   propertiesStats.propertiesStats.map((property, index) => (
@@ -459,18 +555,19 @@ const AnalyticsPage: React.FC = () => {
                       key={property.propertyId}
                       property={property}
                       rank={index + 1}
-                      onClick={() => handlePropertyClick(property.propertyId)}
+                      maxViews={maxViews}
+                      onClick={() => navigateToProperty(property.propertyId)}
                     />
                   ))
                 ) : (
                   <div className="text-center py-10">
-                    <HomeIcon className="h-12 w-12 text-neutral-300 mx-auto mb-3" />
-                    <p className="text-neutral-500 mb-4">No properties yet</p>
+                    <HomeIcon className="h-10 w-10 text-neutral-200 mx-auto mb-3" />
+                    <p className="text-neutral-500 text-sm mb-4">No properties yet</p>
                     <button
                       onClick={() => navigateToView('create-listing')}
-                      className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                      className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors"
                     >
-                      List Your First Property
+                      Add Property
                     </button>
                   </div>
                 )}
@@ -479,119 +576,86 @@ const AnalyticsPage: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Top Performers */}
+          <div className="space-y-4">
+            {/* Top 3 */}
             {dashboard?.topPerformers && dashboard.topPerformers.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5">
-                <h3 className="font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                  <TrophyIcon className="h-5 w-5 text-yellow-500" />
-                  Top Performers
+              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
+                <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
+                  <TrophyIcon className="h-4 w-4 text-yellow-500" />
+                  Top 3
                 </h3>
-                <div className="space-y-3">
-                  {dashboard.topPerformers.slice(0, 3).map((property, index) => (
+                <div className="space-y-2">
+                  {dashboard.topPerformers.slice(0, 3).map((prop, i) => (
                     <div
-                      key={property.id}
-                      onClick={() => handlePropertyClick(property.id)}
-                      className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg cursor-pointer hover:bg-neutral-100 transition-colors"
+                      key={prop.id}
+                      onClick={() => navigateToProperty(prop.id)}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-50 cursor-pointer"
                     >
-                      <span className="text-lg font-bold text-yellow-600">{index + 1}</span>
-                      <p className="flex-1 font-medium text-neutral-900 truncate text-sm">{property.title}</p>
-                      <span className="font-bold text-primary">{property.monthlyViews}</span>
+                      <span className="text-sm">{['🥇', '🥈', '🥉'][i]}</span>
+                      <span className="flex-1 text-sm text-neutral-700 truncate">{truncateText(prop.title, 20)}</span>
+                      <span className="text-sm font-bold text-primary">{prop.monthlyViews}</span>
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Device Stats (Premium) */}
+            {isPremium && (
+              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
+                <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
+                  <ComputerDesktopIcon className="h-4 w-4 text-blue-500" />
+                  Devices
+                </h3>
+                <DeviceChart desktop={55} mobile={35} tablet={10} />
+              </div>
+            )}
+
+            {/* Traffic Sources (Premium) */}
+            {isPremium && (
+              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
+                <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
+                  <GlobeAltIcon className="h-4 w-4 text-green-500" />
+                  Traffic
+                </h3>
+                <TrafficChart direct={40} search={35} social={15} email={10} />
               </div>
             )}
 
             {/* Needs Attention */}
             {dashboard?.needsAttention && dashboard.needsAttention.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5">
-                <h3 className="font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                  <ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />
-                  Needs Attention
+              <div className="bg-orange-50 rounded-xl border border-orange-200 p-4">
+                <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
+                  <ExclamationTriangleIcon className="h-4 w-4 text-orange-500" />
+                  Low Views
                 </h3>
-                <div className="space-y-3">
-                  {dashboard.needsAttention.slice(0, 3).map((property) => (
+                <div className="space-y-2">
+                  {dashboard.needsAttention.slice(0, 2).map((prop) => (
                     <div
-                      key={property.id}
-                      onClick={() => handlePropertyClick(property.id)}
-                      className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors"
+                      key={prop.id}
+                      onClick={() => navigateToProperty(prop.id)}
+                      className="flex items-center justify-between p-2 bg-white rounded-lg cursor-pointer hover:shadow-sm transition-shadow"
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-neutral-900 truncate text-sm">{property.title}</p>
-                        <p className="text-xs text-orange-600">Only {property.monthlyViews} views</p>
-                      </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigateToProperty(property.id); }}
-                        className="px-3 py-1 bg-orange-600 text-white text-xs font-medium rounded-full hover:bg-orange-700 transition-colors"
-                      >
-                        Promote
-                      </button>
+                      <span className="text-xs text-neutral-700 truncate flex-1">{truncateText(prop.title, 18)}</span>
+                      <span className="text-xs text-orange-600 font-medium ml-2">{prop.monthlyViews} views</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Recent Activity */}
-            {isPremium && dashboard?.recentActivity && dashboard.recentActivity.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5">
-                <h3 className="font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                  <ClockIcon className="h-5 w-5 text-blue-500" />
-                  Recent Activity
-                </h3>
-                <div className="space-y-3">
-                  {dashboard.recentActivity.slice(0, 5).map((activity, index) => (
-                    <div key={index} className="flex items-center gap-3 text-sm">
-                      <div className="p-1.5 bg-neutral-100 rounded">
-                        {activity.deviceType === 'mobile' ? (
-                          <DevicePhoneMobileIcon className="h-4 w-4 text-neutral-500" />
-                        ) : activity.deviceType === 'tablet' ? (
-                          <GlobeAltIcon className="h-4 w-4 text-neutral-500" />
-                        ) : (
-                          <ComputerDesktopIcon className="h-4 w-4 text-neutral-500" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-neutral-900 truncate">{activity.propertyTitle}</p>
-                        <p className="text-xs text-neutral-500 flex items-center gap-1">
-                          {activity.referrerType === 'search' && <><MagnifyingGlassIcon className="h-3 w-3" /> Search</>}
-                          {activity.referrerType === 'social' && <><UserGroupIcon className="h-3 w-3" /> Social</>}
-                          {activity.referrerType === 'email' && <><EnvelopeIcon className="h-3 w-3" /> Email</>}
-                          {activity.referrerType === 'direct' && <><GlobeAltIcon className="h-3 w-3" /> Direct</>}
-                          {' · '}
-                          {new Date(activity.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {/* Subscription */}
+            <div className={`rounded-xl p-4 ${isPremium ? 'bg-gradient-to-br from-purple-500 to-blue-600 text-white' : 'bg-white border border-neutral-200'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                {isPremium ? <StarIcon className="h-5 w-5 text-yellow-300" /> : <LockClosedIcon className="h-5 w-5 text-neutral-400" />}
+                <h3 className="font-bold text-sm">{isPremium ? 'Pro Active' : 'Free Plan'}</h3>
               </div>
-            )}
-
-            {/* Subscription Status */}
-            <div className={`rounded-xl p-5 ${isPremium ? 'bg-gradient-to-br from-purple-500 to-blue-600' : 'bg-white border border-neutral-200'}`}>
-              <div className="flex items-center gap-3 mb-3">
-                {isPremium ? (
-                  <StarIcon className="h-6 w-6 text-yellow-300" />
-                ) : (
-                  <LockClosedIcon className="h-6 w-6 text-neutral-400" />
-                )}
-                <h3 className={`font-bold ${isPremium ? 'text-white' : 'text-neutral-900'}`}>
-                  {isPremium ? 'Pro Analytics Active' : 'Free Plan'}
-                </h3>
-              </div>
-              <p className={`text-sm ${isPremium ? 'text-white/80' : 'text-neutral-500'}`}>
-                {isPremium
-                  ? 'You have access to all premium analytics features.'
-                  : 'Upgrade to unlock detailed analytics and reports.'}
+              <p className={`text-xs ${isPremium ? 'text-white/80' : 'text-neutral-500'}`}>
+                {isPremium ? 'Full access to all features' : 'Upgrade for advanced analytics'}
               </p>
               {!isPremium && (
-                <button
-                  onClick={openPricingModal}
-                  className="mt-4 w-full px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors"
-                >
-                  Upgrade to Pro
+                <button onClick={openPricingModal} className="mt-3 w-full px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors">
+                  Upgrade
                 </button>
               )}
             </div>
