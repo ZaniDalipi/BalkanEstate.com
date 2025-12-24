@@ -4,10 +4,26 @@
   "mustBeLoggedIn": "You must be logged in to view this page.",
   "tabs": {
     "myListings": "My Listings",
+    "promotions": "My Promotions",
     "performance": "Performance",
     "subscription": "Subscription",
     "profileSettings": "Profile Settings",
     "security": "Security"
+  },
+  "promotions": {
+    "title": "My Promotions",
+    "subtitle": "Manage your promoted listings",
+    "noActive": "No Active Promotions",
+    "noExpired": "No Expired Promotions",
+    "noPromotions": "No Promotions Yet",
+    "promoteHint": "Promote your listings to get more visibility!",
+    "historyHint": "Your promotion history will appear here.",
+    "promoteButton": "Promote a Listing",
+    "viewListing": "View Listing",
+    "extend": "Extend",
+    "timeRemaining": "Time Remaining",
+    "expired": "Expired",
+    "activePromotions": "Active Promotions"
   },
   "roles": {
     "buyer": "Buyer",

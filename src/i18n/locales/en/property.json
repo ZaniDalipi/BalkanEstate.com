@@ -317,5 +317,10 @@
       "tips": "Click for tips!",
       "rightClick": "Right-click for actions"
     }
+  },
+  "sections": {
+    "highlighted": "Featured Properties",
+    "highlightedCount": "premium listings",
+    "moreListings": "More Listings"
   }
 }
