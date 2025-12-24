@@ -126,11 +126,11 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
   const tierConfig = getTierConfig();
 
   return (
-    <div className="absolute top-20 md:top-4 right-2 md:right-4 z-[999] flex flex-col items-end gap-2">
+    <div className="absolute bottom-24 md:bottom-auto md:top-16 right-2 md:right-3 z-[999] flex flex-col items-end gap-2">
       {/* Recommendation Panel */}
       {showPanel && currentMapFeatured && (
         <div
-          className="animate-fade-in w-[260px] md:w-[280px] bg-white/95 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden max-h-[70vh] md:max-h-none overflow-y-auto"
+          className="animate-fade-in w-[240px] md:w-[260px] bg-white/95 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden max-h-[50vh] md:max-h-[60vh] overflow-y-auto"
           style={{
             border: `2px solid ${tierConfig.color}`,
             boxShadow: `0 6px 24px ${tierConfig.color}25, 0 2px 8px rgba(0,0,0,0.1)`,
@@ -158,13 +158,13 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
           </div>
 
           {/* Property Card */}
-          <div className="p-3">
+          <div className="p-2.5">
             {/* Image */}
             <div className="relative rounded-lg overflow-hidden mb-2 group cursor-pointer" onClick={handleViewProperty}>
               <img
                 src={currentMapFeatured.imageUrl}
                 alt={currentMapFeatured.title || currentMapFeatured.address}
-                className="w-full h-28 object-cover transition-transform duration-500 group-hover:scale-110"
+                className="w-full h-24 object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
@@ -288,24 +288,24 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
       >
         {/* Pulsing ring */}
         <div
-          className="absolute inset-0 rounded-full animate-ping opacity-25"
-          style={{ backgroundColor: tierConfig.color, animationDuration: '2.5s' }}
+          className="absolute inset-0 rounded-full animate-ping opacity-20"
+          style={{ backgroundColor: tierConfig.color, animationDuration: '3s' }}
         />
 
         {/* Main button */}
         <div
-          className="relative w-11 h-11 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden"
+          className="relative w-10 h-10 md:w-11 md:h-11 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden"
           style={{
             border: `2px solid ${tierConfig.color}`,
-            boxShadow: `0 2px 12px ${tierConfig.color}35`,
+            boxShadow: `0 2px 10px ${tierConfig.color}30`,
           }}
         >
           {/* Agent icon */}
-          <div className="text-xl md:text-2xl">🏠</div>
+          <div className="text-lg md:text-xl">🏠</div>
 
           {/* Tier badge */}
           <div
-            className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-sm"
+            className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[10px] shadow-sm"
             style={{ backgroundColor: tierConfig.color }}
           >
             {tierConfig.icon}
@@ -313,13 +313,13 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
         </div>
 
         {/* Count badge */}
-        <div className="absolute -bottom-0.5 -left-0.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow">
+        <div className="absolute -bottom-0.5 -left-0.5 bg-red-500 text-white text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center shadow">
           {highlightedProperties.length}
         </div>
 
         {/* Tooltip - hidden on mobile */}
         {isExpanded && !showPanel && (
-          <div className="hidden md:block absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[10px] px-2 py-1.5 rounded-md whitespace-nowrap animate-fade-in">
+          <div className="hidden lg:block absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[9px] px-2 py-1 rounded whitespace-nowrap animate-fade-in">
             {highlightedProperties.length} Promoted
             <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
           </div>
