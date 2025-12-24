@@ -134,7 +134,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
   }
 
   return (
-    <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-2">
+    <div className="absolute top-20 right-4 z-[1000] flex flex-col items-end gap-2">
       {/* Speech Bubble */}
       {showSpeechBubble && currentMapFeatured?.agentRecommendation && (
         <div
