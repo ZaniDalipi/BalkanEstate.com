@@ -12,6 +12,7 @@ import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyA
 import { Agency } from '../types';
 import { socketService } from '../services/socketService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
+import { useTrackView } from '../src/features/view-stats/hooks';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -49,6 +50,14 @@ const GRADIENT_PRESETS = [
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
+
+  // Track page view for analytics
+  useTrackView({
+    entityType: 'agency',
+    entityId: agency._id || agency.id,
+    enabled: !!(agency._id || agency.id),
+  });
+
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agencyProperties, setAgencyProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

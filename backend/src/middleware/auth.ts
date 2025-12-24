@@ -73,3 +73,45 @@ export const restrictTo = (...roles: string[]) => {
     next();
   };
 };
+
+/**
+ * Optional authentication middleware
+ * Attaches user to request if valid token is present, but doesn't block unauthenticated requests
+ */
+export const optionalAuth = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    let token: string | undefined;
+
+    // Check for token in Authorization header
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (token) {
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
+        id: string;
+      };
+
+      // Get user from token
+      const user = await User.findById(decoded.id).select('-password');
+
+      if (user) {
+        req.user = user;
+      }
+    }
+
+    // Always continue to next middleware, even if no token
+    next();
+  } catch {
+    // Token invalid or expired - continue without user
+    next();
+  }
+};

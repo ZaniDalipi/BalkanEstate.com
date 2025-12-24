@@ -9,6 +9,17 @@ export interface IAgencyCoupon {
   status: 'available' | 'used' | 'expired';
 }
 
+export interface IAgencyViewStats {
+  totalViews: number;
+  uniqueViews: number;
+  viewsThisWeek: number;
+  viewsThisMonth: number;
+  viewsLastMonth: number;
+  inquiriesFromViews: number;
+  conversionRate: number; // inquiries / views
+  lastViewedAt?: Date;
+}
+
 export interface IAgency extends Document {
   ownerId: mongoose.Types.ObjectId; // User who owns the agency
   name: string;
@@ -98,6 +109,10 @@ export interface IAgency extends Document {
   subscriptionPlan?: string;
   subscriptionStatus?: string;
   subscriptionExpiresAt?: Date;
+
+  // View statistics
+  views: number;
+  viewStats: IAgencyViewStats;
 
   // Featured/advertising settings
   isFeatured: boolean;
@@ -439,6 +454,44 @@ const AgencySchema: Schema = new Schema(
     },
     subscriptionExpiresAt: {
       type: Date,
+    },
+    // View statistics
+    views: {
+      type: Number,
+      default: 0,
+    },
+    viewStats: {
+      totalViews: {
+        type: Number,
+        default: 0,
+      },
+      uniqueViews: {
+        type: Number,
+        default: 0,
+      },
+      viewsThisWeek: {
+        type: Number,
+        default: 0,
+      },
+      viewsThisMonth: {
+        type: Number,
+        default: 0,
+      },
+      viewsLastMonth: {
+        type: Number,
+        default: 0,
+      },
+      inquiriesFromViews: {
+        type: Number,
+        default: 0,
+      },
+      conversionRate: {
+        type: Number,
+        default: 0,
+      },
+      lastViewedAt: {
+        type: Date,
+      },
     },
     isFeatured: {
       type: Boolean,

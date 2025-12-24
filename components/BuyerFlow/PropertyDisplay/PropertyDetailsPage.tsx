@@ -20,6 +20,7 @@ import {
   PropertyMapLink,
   NeighborhoodInsights,
 } from '../../../src/components/property';
+import { useTrackView } from '../../../src/features/view-stats/hooks';
 
 /**
  * PropertyDetailsPage Component
@@ -38,6 +39,13 @@ import {
 const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => {
   const { t } = useTranslation(['property']);
   const { state, dispatch, createConversation, toggleSavedHome } = useAppContext();
+
+  // Track page view for analytics
+  useTrackView({
+    entityType: 'property',
+    entityId: property.id,
+    enabled: !!property.id,
+  });
 
   // State for image gallery
   const [activeCategory, setActiveCategory] = useState<PropertyImageTag | 'all'>('all');

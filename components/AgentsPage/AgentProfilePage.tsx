@@ -56,6 +56,7 @@ import AgentReviewForm from '../shared/AgentReviewForm';
 import FeaturedAgencies from '../FeaturedAgencies';
 import { slugify } from '../../utils/slug';
 import { getAgencyAgents, getAllAgents } from '../../services/apiService';
+import { useTrackView } from '../../src/features/view-stats/hooks';
 
 
 interface AgentProfilePageProps {
@@ -83,6 +84,13 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const { t } = useTranslation(['agents']);
     const { state, dispatch, createConversation } = useAppContext();
     const { isLoadingProperties, currentUser } = state;
+
+    // Track page view for analytics
+    useTrackView({
+        entityType: 'agent',
+        entityId: agent.id,
+        enabled: !!agent.id,
+    });
     const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'reviews'>('overview');
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [savedAgent, setSavedAgent] = useState(false);

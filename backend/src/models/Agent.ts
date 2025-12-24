@@ -9,6 +9,17 @@ export interface ITestimonial {
   createdAt: Date;
 }
 
+export interface IAgentStats {
+  totalViews: number;
+  uniqueViews: number;
+  viewsThisWeek: number;
+  viewsThisMonth: number;
+  viewsLastMonth: number;
+  inquiriesFromViews: number;
+  conversionRate: number; // inquiries / views
+  lastViewedAt?: Date;
+}
+
 export interface IAgent extends Document {
   userId: mongoose.Types.ObjectId;
   agencyName: string;
@@ -37,6 +48,9 @@ export interface IAgent extends Document {
   totalSales: number;
   totalSalesValue: number;
   activeListings: number;
+  // View statistics
+  views: number;
+  viewStats: IAgentStats;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -180,6 +194,44 @@ const AgentSchema: Schema = new Schema(
     activeListings: {
       type: Number,
       default: 0,
+    },
+    // View statistics
+    views: {
+      type: Number,
+      default: 0,
+    },
+    viewStats: {
+      totalViews: {
+        type: Number,
+        default: 0,
+      },
+      uniqueViews: {
+        type: Number,
+        default: 0,
+      },
+      viewsThisWeek: {
+        type: Number,
+        default: 0,
+      },
+      viewsThisMonth: {
+        type: Number,
+        default: 0,
+      },
+      viewsLastMonth: {
+        type: Number,
+        default: 0,
+      },
+      inquiriesFromViews: {
+        type: Number,
+        default: 0,
+      },
+      conversionRate: {
+        type: Number,
+        default: 0,
+      },
+      lastViewedAt: {
+        type: Date,
+      },
     },
     isActive: {
       type: Boolean,

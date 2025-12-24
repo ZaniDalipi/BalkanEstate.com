@@ -8,3 +8,4 @@ export * from './AgencyApiClient';
 export * from './ConversationApiClient';
 export * from './UserApiClient';
 export * from './PaymentApiClient';
+export * from './ViewStatsApiClient';
