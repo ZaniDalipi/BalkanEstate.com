@@ -443,6 +443,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             return withinDrawn;
         }
 
+        // On mobile, when no drawn bounds and no specific search query, show ALL properties
+        // This ensures that after reset filters, users see all available properties
+        if (isMobile && !activeFilters.query && activeFilters.country === 'any') {
+            return baseFilteredProperties;
+        }
+
         // Filter to show only properties visible in the current map view
         if (mapBounds) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
@@ -450,7 +456,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         }
         // Fallback to all filtered properties if no bounds set
         return baseFilteredProperties;
-    }, [baseFilteredProperties, drawnBounds, mapBounds]);
+    }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, activeFilters.query, activeFilters.country]);
 
 
     const handleFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
