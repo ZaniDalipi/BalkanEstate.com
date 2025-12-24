@@ -367,6 +367,12 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     // Populate form if editing
     useEffect(() => {
         if (propertyToEdit) {
+            console.log('📝 [Edit Mode] Loading property for editing:', {
+                id: propertyToEdit.id,
+                hasImages: propertyToEdit.images !== undefined,
+                imagesCount: propertyToEdit.images?.length || 0,
+                sampleImage: propertyToEdit.images?.[0]?.url?.substring(0, 50) || propertyToEdit.images?.[0]
+            });
             setMode('manual');
             setStep('form');
 
@@ -402,7 +408,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 propertyType: propertyToEdit.propertyType || 'house',
                 floorNumber: propertyToEdit.floorNumber || 0,
                 totalFloors: propertyToEdit.totalFloors || 0,
-                image_tags: (propertyToEdit.images || []).map((img, index) => ({ index, tag: img.tag })),
+                image_tags: (propertyToEdit.images || []).map((img, index) => ({
+                    index,
+                    tag: (typeof img === 'object' && img?.tag) || 'other'
+                })),
                 lat: originalLat,
                 lng: originalLng,
                 hasBalcony: propertyToEdit.hasBalcony,
@@ -430,8 +439,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 setAvailableCities(country.cities);
             }
 
-            const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => ({ file: null, previewUrl: img.url }));
+            // Robustly load existing images - handle both object and string formats
+            const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => {
+                // Handle both {url: string} objects and plain string URLs
+                const imageUrl = typeof img === 'string' ? img : (img?.url || img?.previewUrl || '');
+                return { file: null, previewUrl: imageUrl };
+            }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
+            console.log(`📸 Loaded ${existingImages.length} existing images for editing`);
             if (propertyToEdit.floorplanUrl) {
                 setFloorplanImage({ file: null, previewUrl: propertyToEdit.floorplanUrl });
             }
@@ -800,10 +815,22 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Step 1: Upload images to Cloudinary before creating the property
             let imageUrls: PropertyImage[] = [];
 
+            // Debug: Log current images state
+            console.log('🔍 [handleSubmit] Images state:', {
+                totalImages: images.length,
+                images: images.map((img, i) => ({
+                    index: i,
+                    hasFile: img.file !== null,
+                    previewUrl: img.previewUrl?.substring(0, 50) + '...'
+                }))
+            });
+
             // Get all image files that need to be uploaded (new images with file objects)
             const imagesToUpload = images
                 .map((img, index) => ({ img, index }))
                 .filter(({ img }) => img.file !== null);
+
+            console.log('📤 [handleSubmit] Images to upload:', imagesToUpload.length);
 
             // Check if we have new images to upload
             if (imagesToUpload.length > 0) {
@@ -856,6 +883,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 }
             } else if (images.length > 0) {
                 // All images are existing (editing mode), just use the preview URLs
+                console.log('📷 [handleSubmit] Using existing images (no new uploads)');
                 imageUrls = images.map((img, index) => {
                     const tagInfo = listingData.image_tags.find(t => t.index === index);
                     return {
@@ -863,6 +891,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         tag: (tagInfo?.tag as PropertyImageTag) || 'other',
                     };
                 });
+                console.log('📷 [handleSubmit] Existing imageUrls:', imageUrls.length, imageUrls.map(i => i.url?.substring(0, 50)));
+            } else {
+                console.warn('⚠️ [handleSubmit] No images found in state!');
             }
 
             const { lat, lng } = listingData;
@@ -907,7 +938,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             const newProperty: Property = {
                 id: propertyToEdit ? propertyToEdit.id : `prop-${Date.now()}`,
                 sellerId: currentUser.id,
-                status: 'active',
+                status: propertyToEdit ? propertyToEdit.status : 'active',
                 title: listingData.title.trim() || undefined,
                 price: Number(listingData.price),
                 address: finalAddress,

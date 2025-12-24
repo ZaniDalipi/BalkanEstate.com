@@ -4,8 +4,9 @@ import { useAppContext } from '../../context/AppContext';
 import MyListings from './MyListings';
 import SubscriptionManagement from './SubscriptionManagement';
 import ProfileStatistics from './ProfileStatistics';
+import MyPromotions from './MyPromotions';
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon } from '../../constants';
+import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
 import AgentLicenseModal from './AgentLicenseModal';
 import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile } from '../../services/apiService';
@@ -23,7 +24,7 @@ const BALKAN_LANGUAGES = [
   'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security';
+type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions';
 
 const TabButton: React.FC<{
     label: string;
@@ -1221,7 +1222,7 @@ const MyAccountPage: React.FC = () => {
     const isSellerProfile = state.currentUser.role === UserRole.AGENT || state.currentUser.role === UserRole.PRIVATE_SELLER;
 
     useEffect(() => {
-        if (!isSellerProfile && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription')) {
+        if (!isSellerProfile && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions')) {
             setActiveTab('profile');
         }
     }, [isSellerProfile, activeTab]);
@@ -1265,6 +1266,8 @@ const MyAccountPage: React.FC = () => {
         switch (activeTab) {
             case 'listings':
                 return isSellerProfile ? <MyListings sellerId={state.currentUser!.id} /> : null;
+            case 'promotions':
+                return isSellerProfile ? <MyPromotions /> : null;
             case 'profile':
                 return <ProfileSettings user={state.currentUser!} />;
             case 'performance':
@@ -1324,6 +1327,7 @@ const MyAccountPage: React.FC = () => {
                                 {isSellerProfile && (
                                     <>
                                         <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} />
+                                        <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} />
                                         <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} />
                                         <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} />
                                     </>

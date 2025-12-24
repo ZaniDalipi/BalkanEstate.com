@@ -61,7 +61,9 @@ const ListingCard: React.FC<{
     onMarkAsSold: (id: string) => void,
     onDelete: (id: string) => void,
     onPromote: (id: string) => void,
-}> = ({ property, onRenew, onMarkAsSold, onDelete, onPromote }) => {
+    onExtend: (id: string) => void,
+    renewalStatus: { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number } | null,
+}> = ({ property, onRenew, onMarkAsSold, onDelete, onPromote, onExtend, renewalStatus }) => {
     const { dispatch } = useAppContext();
     const [imageError, setImageError] = useState(false);
 
@@ -76,6 +78,10 @@ const ListingCard: React.FC<{
     };
 
     const isActionable = property.status === 'active' || property.status === 'pending';
+    const isPromoted = property.isPromoted && property.promotionEndDate && new Date(property.promotionEndDate) > new Date();
+
+    // Check if can renew (24hr cooldown)
+    const canRenew = renewalStatus?.canRenew ?? true;
 
     return (
     <div className="bg-white p-4 rounded-xl border border-neutral-200 hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row gap-5">
@@ -128,25 +134,38 @@ const ListingCard: React.FC<{
             </div>
 
              <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
-                <button
-                    onClick={(e) => { e.stopPropagation(); onPromote(property.id); }}
-                    disabled={!isActionable}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white bg-neutral-900 rounded hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Promote
-                </button>
+                {isPromoted ? (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onExtend(property.id); }}
+                        disabled={!isActionable}
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <ClockIcon className="w-4 h-4" />
+                        Extend Promotion
+                    </button>
+                ) : (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onPromote(property.id); }}
+                        disabled={!isActionable}
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg hover:from-violet-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <SparklesIcon className="w-4 h-4" />
+                        Promote
+                    </button>
+                )}
                 <button
                     onClick={(e) => { e.stopPropagation(); onRenew(property.id); }}
-                    disabled={!isActionable}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-700 bg-neutral-100 border border-neutral-200 rounded hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!isActionable || !canRenew}
+                    title={!canRenew && renewalStatus ? `Can renew in ${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : 'Renew listing to appear at top'}
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-700 bg-neutral-100 border border-neutral-200 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <ArrowPathIcon className="w-4 h-4" />
-                    Renew
+                    {!canRenew && renewalStatus ? `${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : 'Renew'}
                 </button>
                 <button
                     onClick={(e) => { e.stopPropagation(); onMarkAsSold(property.id); }}
                     disabled={!isActionable}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <CheckCircleIcon className="w-4 h-4" />
                     Mark as Sold
@@ -186,8 +205,31 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [roleFilter, setRoleFilter] = useState<'all' | 'private_seller' | 'agent'>('all');
     const [showPromotionModal, setShowPromotionModal] = useState(false);
     const [propertyToPromote, setPropertyToPromote] = useState<Property | null>(null);
+    const [isExtensionMode, setIsExtensionMode] = useState(false);
     const [myProperties, setMyProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
+
+    // Calculate renewal status based on lastRenewed
+    const calculateRenewalStatus = (lastRenewed?: Date) => {
+        if (!lastRenewed) return { canRenew: true };
+
+        const COOLDOWN_HOURS = 24;
+        const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
+        const lastRenewedTime = new Date(lastRenewed).getTime();
+        const now = Date.now();
+        const timeSinceRenewal = now - lastRenewedTime;
+
+        if (timeSinceRenewal >= cooldownMs) {
+            return { canRenew: true };
+        }
+
+        const timeRemaining = cooldownMs - timeSinceRenewal;
+        const hoursRemaining = Math.floor(timeRemaining / (60 * 60 * 1000));
+        const minutesRemaining = Math.ceil((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
+
+        return { canRenew: false, hoursRemaining, minutesRemaining };
+    };
 
     // Fetch ALL listings (no role filter) - we filter on the frontend for better UX
     useEffect(() => {
@@ -201,6 +243,13 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 console.log(`✅ Fetched ${listings.length} total listings`);
 
                 setMyProperties(listings);
+
+                // Calculate renewal statuses
+                const statuses: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
+                listings.forEach(p => {
+                    statuses[p.id] = calculateRenewalStatus(p.lastRenewed);
+                });
+                setRenewalStatuses(statuses);
             } catch (error) {
                 console.error('Failed to fetch listings:', error);
                 setMyProperties([]);
@@ -210,6 +259,19 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         };
 
         fetchMyListings();
+
+        // Update renewal statuses every minute
+        const interval = setInterval(() => {
+            setRenewalStatuses(prev => {
+                const updated: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
+                myProperties.forEach(p => {
+                    updated[p.id] = calculateRenewalStatus(p.lastRenewed);
+                });
+                return updated;
+            });
+        }, 60000);
+
+        return () => clearInterval(interval);
     }, []); // Fetch once on mount
 
     // Calculate counts for each role
@@ -254,13 +316,39 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         });
     }, [myProperties, statusFilter, roleFilter]);
 
-    const handleRenew = (id: string) => {
-        dispatch({ type: 'RENEW_PROPERTY', payload: id });
+    const handleRenew = async (id: string) => {
+        try {
+            const result = await api.renewProperty(id);
 
-        // Update local state with new lastRenewed timestamp
-        setMyProperties(prev => prev.map(p =>
-            p.id === id ? { ...p, lastRenewed: new Date() } : p
-        ));
+            if (result.success) {
+                // Update local state with new lastRenewed timestamp
+                const newLastRenewed = new Date(result.lastRenewed!);
+                setMyProperties(prev => prev.map(p =>
+                    p.id === id ? { ...p, lastRenewed: newLastRenewed } : p
+                ));
+
+                // Update renewal status
+                setRenewalStatuses(prev => ({
+                    ...prev,
+                    [id]: calculateRenewalStatus(newLastRenewed),
+                }));
+
+                dispatch({ type: 'RENEW_PROPERTY', payload: id });
+            }
+        } catch (error: any) {
+            if (error.code === 'RENEWAL_COOLDOWN') {
+                // Update the status with the server response
+                setRenewalStatuses(prev => ({
+                    ...prev,
+                    [id]: {
+                        canRenew: false,
+                        hoursRemaining: error.hoursRemaining,
+                        minutesRemaining: error.minutesRemaining,
+                    },
+                }));
+            }
+            console.error('Failed to renew property:', error);
+        }
     };
 
     const handleMarkAsSoldClick = (id: string) => {
@@ -324,6 +412,16 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         const property = myProperties.find(p => p.id === id);
         if (property) {
             setPropertyToPromote(property);
+            setIsExtensionMode(false);
+            setShowPromotionModal(true);
+        }
+    };
+
+    const handleExtend = (id: string) => {
+        const property = myProperties.find(p => p.id === id);
+        if (property) {
+            setPropertyToPromote(property);
+            setIsExtensionMode(true);
             setShowPromotionModal(true);
         }
     };
@@ -385,10 +483,14 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     onClose={() => {
                         setShowPromotionModal(false);
                         setPropertyToPromote(null);
+                        setIsExtensionMode(false);
                     }}
                     propertyId={propertyToPromote.id}
                     propertyTitle={propertyToPromote.title || `${propertyToPromote.address}, ${propertyToPromote.city}`}
                     onSuccess={handlePromotionSuccess}
+                    isExtension={isExtensionMode}
+                    currentTier={propertyToPromote.promotionTier as 'featured' | 'highlight' | 'premium' | undefined}
+                    currentEndDate={propertyToPromote.promotionEndDate ? new Date(propertyToPromote.promotionEndDate) : undefined}
                 />
             )}
 
@@ -479,6 +581,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             onMarkAsSold={handleMarkAsSoldClick}
                             onDelete={handleDeleteClick}
                             onPromote={handlePromote}
+                            onExtend={handleExtend}
+                            renewalStatus={renewalStatuses[prop.id] || null}
                         />
                     )}
                 </div>

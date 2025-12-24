@@ -229,6 +229,33 @@
       "apartment": "Apartment",
       "villa": "Villa",
       "other": "Other"
+    },
+    "promotedListings": "Promoted Listings",
+    "agentHint": "Click for recommendations!",
+    "tiers": {
+      "premium": "Premium",
+      "highlight": "Highlight",
+      "featured": "Featured"
+    },
+    "agentRecommendations": {
+      "premium": {
+        "1": "This premium property is our top pick for you!",
+        "2": "Exclusive listing! Don't miss this premium opportunity.",
+        "3": "Our most recommended property in this area.",
+        "4": "Premium choice with exceptional value!"
+      },
+      "highlight": {
+        "1": "Highlighted for quick sale - worth a look!",
+        "2": "Popular choice! This property is getting lots of attention.",
+        "3": "Seller motivated - highlighted for visibility!",
+        "4": "Great opportunity - check this highlighted listing!"
+      },
+      "featured": {
+        "1": "Featured listing with special amenities.",
+        "2": "This property stands out in the neighborhood.",
+        "3": "Worth considering - featured by the owner.",
+        "4": "Take a closer look at this featured home!"
+      }
     }
   },
   "neighborhood": {
@@ -290,5 +317,10 @@
       "tips": "Click for tips!",
       "rightClick": "Right-click for actions"
     }
+  },
+  "sections": {
+    "highlighted": "Featured Properties",
+    "highlightedCount": "premium listings",
+    "moreListings": "More Listings"
   }
 }

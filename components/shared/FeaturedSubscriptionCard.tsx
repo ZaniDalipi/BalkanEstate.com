@@ -237,6 +237,15 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
             </div>
           </div>
         </div>
+        {/* Boost Your Visibility link */}
+        {onUpgrade && (
+          <button
+            onClick={onUpgrade}
+            className="text-sm text-primary hover:text-primary-dark font-medium hover:underline transition-colors"
+          >
+            Boost Your Visibility
+          </button>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -337,6 +346,38 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
             <p className="text-sm text-yellow-800">
               ⚠️ Subscription will be canceled at the end of the current period
             </p>
+          </div>
+        )}
+
+        {/* Renewal button for expired/canceled subscriptions */}
+        {(subscription.status === 'expired' || subscription.status === 'canceled') && onUpgrade && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-neutral-800">
+                    🔄 Renew Your Featured Status
+                  </p>
+                  <p className="text-xs text-neutral-600 mt-1">
+                    Continue enjoying enhanced visibility and top placement in search results.
+                  </p>
+                </div>
+                <button
+                  onClick={onUpgrade}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                  Renew Now
+                </button>
+              </div>
+            </div>
+
+            {/* Pro Tip for expired subscriptions */}
+            <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-sm text-amber-800">
+                <span className="font-semibold">💡 Pro Tip:</span> Featured agencies get up to 5x more visibility and appear at the top of search results!
+              </p>
+            </div>
           </div>
         )}
       </div>

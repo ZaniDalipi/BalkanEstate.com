@@ -252,13 +252,9 @@ export const generalRateLimiter = rateLimit({
     // Skip rate limiting for health checks
     return req.path === '/health';
   },
-  keyGenerator: (req: Request) => {
-    // Use X-Forwarded-For header if behind proxy
-    return (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-           req.ip ||
-           req.socket.remoteAddress ||
-           'unknown';
-  },
+  // Use default keyGenerator which handles IPv6 properly
+  // If behind a proxy, ensure 'trust proxy' is set in Express
+  validate: { xForwardedForHeader: false },
 });
 
 /**
@@ -361,31 +357,41 @@ export const mongoSanitization = (req: Request, _res: Response, next: NextFuncti
  * Sanitizes user input to prevent XSS attacks
  */
 export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): void => {
+  // Fields that should NOT be sanitized (contain URLs or special content)
+  const skipFields = new Set([
+    'password', 'currentPassword', 'newPassword',
+    'url', 'imageUrl', 'previewUrl', 'floorplanUrl', 'tourUrl',
+    'virtualTour360Url', 'avatarUrl', 'publicId', 'images'
+  ]);
+
   // Recursive function to sanitize strings
-  const sanitize = (obj: any): any => {
+  const sanitize = (obj: any, key?: string): any => {
+    // Skip fields that contain URLs or sensitive data
+    if (key && skipFields.has(key)) {
+      return obj;
+    }
+
     if (typeof obj === 'string') {
+      // Don't sanitize strings that look like URLs
+      if (obj.startsWith('http://') || obj.startsWith('https://') || obj.startsWith('data:')) {
+        return obj;
+      }
       return obj
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#x27;')
-        .replace(/\//g, '&#x2F;')
-        .replace(/`/g, '&#96;')
-        .replace(/\$/g, '&#36;');
+        .replace(/`/g, '&#96;');
+      // Note: Removed slash replacement as it breaks URLs and is not needed for XSS prevention
     }
     if (Array.isArray(obj)) {
-      return obj.map(sanitize);
+      return obj.map((item) => sanitize(item, key));
     }
     if (obj !== null && typeof obj === 'object') {
       const sanitized: Record<string, any> = {};
-      for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-          // Skip password fields from sanitization (they get hashed anyway)
-          if (key === 'password' || key === 'currentPassword' || key === 'newPassword') {
-            sanitized[key] = obj[key];
-          } else {
-            sanitized[key] = sanitize(obj[key]);
-          }
+      for (const objKey in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, objKey)) {
+          sanitized[objKey] = sanitize(obj[objKey], objKey);
         }
       }
       return sanitized;

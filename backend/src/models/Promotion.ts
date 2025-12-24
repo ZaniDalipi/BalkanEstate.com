@@ -29,6 +29,14 @@ export interface IPromotion extends Document {
   lastRefreshedAt?: Date;
   nextRefreshAt?: Date;
   refreshCount: number;
+  // Auto-extend feature
+  autoExtend: boolean; // Whether to auto-extend when promotion ends
+  autoExtendDuration?: number; // Duration in days for auto-extend
+  autoExtendStatus: 'none' | 'pending' | 'completed' | 'failed'; // Status of auto-extend
+  autoExtendSessionId?: string; // Stripe session ID for pending auto-extend
+  autoExtendCheckoutUrl?: string; // Stripe checkout URL for user to complete payment
+  autoExtendAttempts: number; // Number of auto-extend attempts
+  lastAutoExtendAttempt?: Date; // When last auto-extend was attempted
   // Additional metadata
   purchasedVia: 'web' | 'mobile' | 'api';
   notes?: string;
@@ -139,6 +147,32 @@ const PromotionSchema: Schema = new Schema(
     refreshCount: {
       type: Number,
       default: 0,
+    },
+    autoExtend: {
+      type: Boolean,
+      default: false,
+    },
+    autoExtendDuration: {
+      type: Number,
+      default: 30, // Default to 30 days if auto-extend is enabled
+    },
+    autoExtendStatus: {
+      type: String,
+      enum: ['none', 'pending', 'completed', 'failed'],
+      default: 'none',
+    },
+    autoExtendSessionId: {
+      type: String,
+    },
+    autoExtendCheckoutUrl: {
+      type: String,
+    },
+    autoExtendAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lastAutoExtendAttempt: {
+      type: Date,
     },
     purchasedVia: {
       type: String,

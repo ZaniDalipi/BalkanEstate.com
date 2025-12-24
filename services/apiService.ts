@@ -847,12 +847,26 @@ function transformBackendProperty(backendProp: any): Property {
     distanceToSea: backendProp.distanceToSea,
     distanceToSchool: backendProp.distanceToSchool,
     distanceToHospital: backendProp.distanceToHospital,
+    // Promotion fields
+    isPromoted: backendProp.isPromoted || false,
+    promotionTier: backendProp.promotionTier,
+    promotionStartDate: backendProp.promotionStartDate ? new Date(backendProp.promotionStartDate).getTime() : undefined,
+    promotionEndDate: backendProp.promotionEndDate ? new Date(backendProp.promotionEndDate).getTime() : undefined,
+    hasUrgentBadge: backendProp.hasUrgentBadge || false,
   };
 }
 
 // Transform frontend Property to backend format
 function transformToBackendProperty(frontendProp: Property): any {
-  return {
+  console.log('🔄 [transformToBackendProperty] Input images:', {
+    hasImages: frontendProp.images !== undefined,
+    imagesCount: frontendProp.images?.length || 0,
+    sampleImage: frontendProp.images?.[0]?.url?.substring(0, 50)
+  });
+
+  // Build the property object, only including fields with meaningful values
+  // This ensures we don't accidentally overwrite existing data with empty/undefined values
+  const result: any = {
     status: frontendProp.status,
     title: frontendProp.title,
     price: frontendProp.price,
@@ -869,37 +883,79 @@ function transformToBackendProperty(frontendProp: Property): any {
     specialFeatures: frontendProp.specialFeatures,
     materials: frontendProp.materials,
     amenities: frontendProp.amenities,
-    tourUrl: frontendProp.tourUrl,
-    virtualTour360Url: frontendProp.virtualTour360Url,
-    hasVirtualTour360: frontendProp.hasVirtualTour360 || false,
     imageUrl: frontendProp.imageUrl,
     images: frontendProp.images,
     lat: frontendProp.lat,
     lng: frontendProp.lng,
     propertyType: frontendProp.propertyType,
-    floorNumber: frontendProp.floorNumber,
-    totalFloors: frontendProp.totalFloors,
-    floorplanUrl: frontendProp.floorplanUrl,
     // Dual-role system
     createdAsRole: frontendProp.createdAsRole,
-    // Advanced property features
-    furnishing: frontendProp.furnishing,
-    heatingType: frontendProp.heatingType,
-    condition: frontendProp.condition,
-    viewType: frontendProp.viewType,
-    energyRating: frontendProp.energyRating,
-    hasBalcony: frontendProp.hasBalcony,
-    hasGarden: frontendProp.hasGarden,
-    hasElevator: frontendProp.hasElevator,
-    hasSecurity: frontendProp.hasSecurity,
-    hasAirConditioning: frontendProp.hasAirConditioning,
-    hasPool: frontendProp.hasPool,
-    petsAllowed: frontendProp.petsAllowed,
-    distanceToCenter: frontendProp.distanceToCenter,
-    distanceToSea: frontendProp.distanceToSea,
-    distanceToSchool: frontendProp.distanceToSchool,
-    distanceToHospital: frontendProp.distanceToHospital,
   };
+
+  // Only include URL fields if they have actual values (preserve existing data)
+  if (frontendProp.tourUrl) {
+    result.tourUrl = frontendProp.tourUrl;
+  }
+  if (frontendProp.virtualTour360Url) {
+    result.virtualTour360Url = frontendProp.virtualTour360Url;
+    result.hasVirtualTour360 = true;
+  } else if (frontendProp.hasVirtualTour360 !== undefined) {
+    // Only explicitly set to false if hasVirtualTour360 was explicitly set
+    result.hasVirtualTour360 = frontendProp.hasVirtualTour360;
+  }
+  if (frontendProp.floorplanUrl) {
+    result.floorplanUrl = frontendProp.floorplanUrl;
+  }
+
+  // Only include floor info if explicitly set
+  if (frontendProp.floorNumber !== undefined && frontendProp.floorNumber > 0) {
+    result.floorNumber = frontendProp.floorNumber;
+  }
+  if (frontendProp.totalFloors !== undefined && frontendProp.totalFloors > 0) {
+    result.totalFloors = frontendProp.totalFloors;
+  }
+
+  // Advanced property features - only include if explicitly set (not 'any' or undefined)
+  if (frontendProp.furnishing && frontendProp.furnishing !== 'any') {
+    result.furnishing = frontendProp.furnishing;
+  }
+  if (frontendProp.heatingType && frontendProp.heatingType !== 'any') {
+    result.heatingType = frontendProp.heatingType;
+  }
+  if (frontendProp.condition && frontendProp.condition !== 'any') {
+    result.condition = frontendProp.condition;
+  }
+  if (frontendProp.viewType && frontendProp.viewType !== 'any') {
+    result.viewType = frontendProp.viewType;
+  }
+  if (frontendProp.energyRating && frontendProp.energyRating !== 'any') {
+    result.energyRating = frontendProp.energyRating;
+  }
+
+  // Boolean amenities - only include if explicitly set (not undefined)
+  if (frontendProp.hasBalcony !== undefined) result.hasBalcony = frontendProp.hasBalcony;
+  if (frontendProp.hasGarden !== undefined) result.hasGarden = frontendProp.hasGarden;
+  if (frontendProp.hasElevator !== undefined) result.hasElevator = frontendProp.hasElevator;
+  if (frontendProp.hasSecurity !== undefined) result.hasSecurity = frontendProp.hasSecurity;
+  if (frontendProp.hasAirConditioning !== undefined) result.hasAirConditioning = frontendProp.hasAirConditioning;
+  if (frontendProp.hasPool !== undefined) result.hasPool = frontendProp.hasPool;
+  if (frontendProp.petsAllowed !== undefined) result.petsAllowed = frontendProp.petsAllowed;
+
+  // Distance fields - only include if explicitly set
+  if (frontendProp.distanceToCenter !== undefined) {
+    result.distanceToCenter = frontendProp.distanceToCenter;
+  }
+  if (frontendProp.distanceToSea !== undefined) {
+    result.distanceToSea = frontendProp.distanceToSea;
+  }
+  if (frontendProp.distanceToSchool !== undefined) {
+    result.distanceToSchool = frontendProp.distanceToSchool;
+  }
+  if (frontendProp.distanceToHospital !== undefined) {
+    result.distanceToHospital = frontendProp.distanceToHospital;
+  }
+
+  return result;
 }
 
 // Transform backend saved search to frontend SavedSearch type
@@ -1227,6 +1283,50 @@ export const purchasePromotion = async (params: PurchasePromotionParams): Promis
 };
 
 /**
+ * Create Stripe checkout session for promotion purchase
+ */
+export const createPromotionCheckout = async (params: {
+  propertyId: string;
+  promotionTier: string;
+  duration: number;
+  hasUrgentBadge?: boolean;
+  couponCode?: string;
+}): Promise<{
+  success: boolean;
+  sessionId?: string;
+  url?: string;
+  promotion?: any;
+  isFree?: boolean;
+  pricing?: {
+    originalPrice: number;
+    discount: number;
+    finalPrice: number;
+    currency: string;
+  };
+}> => {
+  return await apiRequest('/promotions/checkout', {
+    method: 'POST',
+    body: params,
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Confirm promotion payment after Stripe checkout
+ */
+export const confirmPromotionPayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+}> => {
+  return await apiRequest('/promotions/confirm-payment', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
  * Validate a coupon code and get discount information
  */
 export const validateCoupon = async (
@@ -1234,38 +1334,41 @@ export const validateCoupon = async (
   promotionTier: string,
   price: number
 ): Promise<CouponValidationResult> => {
-  const response = await apiRequest<{
-    valid: boolean;
-    coupon?: {
-      code: string;
-      description?: string;
-      discountType: 'percentage' | 'fixed';
-      discountValue: number;
-    };
-    discount?: {
-      amount: number;
-      originalPrice: number;
-      finalPrice: number;
-      savings: number;
-      savingsPercentage: number;
-    };
-    message?: string;
-  }>('/coupons/validate', {
-    method: 'POST',
-    body: { couponCode, promotionTier, price },
-    requiresAuth: true,
-  });
+  try {
+    const response = await apiRequest<{
+      valid: boolean;
+      couponCode?: string;
+      discount?: number;
+      finalPrice?: number;
+      discountType?: 'percentage' | 'fixed';
+      discountValue?: number;
+      message?: string;
+      error?: string;
+    }>('/coupons/validate', {
+      method: 'POST',
+      body: { couponCode, promotionTier, price },
+      requiresAuth: true,
+    });
 
-  // Map backend response to frontend interface
-  return {
-    isValid: response.valid,
-    discount: response.discount?.amount || 0,
-    discountType: response.coupon?.discountType || 'fixed',
-    discountValue: response.coupon?.discountValue || 0,
-    message: response.valid
-      ? response.coupon?.description
-      : response.message,
-  };
+    // Map backend response to frontend interface
+    return {
+      isValid: response.valid === true,
+      discount: response.discount || 0,
+      discountType: response.discountType || 'fixed',
+      discountValue: response.discountValue || 0,
+      message: response.valid
+        ? `Coupon applied: ${couponCode.toUpperCase()}`
+        : response.error || response.message || 'Invalid coupon',
+    };
+  } catch (error: any) {
+    return {
+      isValid: false,
+      discount: 0,
+      discountType: 'fixed',
+      discountValue: 0,
+      message: error.message || 'Failed to validate coupon',
+    };
+  }
 };
 
 /**
@@ -1283,6 +1386,209 @@ export const getMyPromotions = async (): Promise<any> => {
 export const cancelPromotion = async (promotionId: string): Promise<any> => {
   return await apiRequest(`/promotions/${promotionId}`, {
     method: 'DELETE',
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Extend an existing promotion by adding more days
+ * Can pass either promotionId or propertyId
+ */
+export const extendPromotion = async (params: {
+  promotionId?: string;
+  propertyId?: string;
+  duration: number;
+  couponCode?: string;
+}): Promise<{
+  success: boolean;
+  sessionId?: string;
+  url?: string;
+  newEndDate?: string;
+  isFree?: boolean;
+  pricing?: {
+    originalPrice: number;
+    discount: number;
+    finalPrice: number;
+    currency: string;
+  };
+}> => {
+  const id = params.promotionId || params.propertyId;
+  if (!id) throw new Error('Either promotionId or propertyId is required');
+
+  return await apiRequest(`/promotions/${id}/extend`, {
+    method: 'POST',
+    body: { duration: params.duration, couponCode: params.couponCode },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Confirm extension payment after Stripe checkout
+ */
+export const confirmExtensionPayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+  newEndDate?: string;
+}> => {
+  return await apiRequest('/promotions/confirm-extension', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Add urgent badge to existing promotion
+ */
+export const addUrgentBadge = async (promotionId: string): Promise<{
+  success: boolean;
+  isFree?: boolean;
+  url?: string;
+  sessionId?: string;
+  price?: number;
+  message?: string;
+  promotion?: any;
+}> => {
+  return await apiRequest(`/promotions/${promotionId}/add-urgent`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Confirm urgent badge payment after Stripe checkout
+ */
+export const confirmUrgentBadgePayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+}> => {
+  return await apiRequest('/promotions/confirm-urgent', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Get promotion history for a property
+ */
+export const getPromotionHistory = async (propertyId: string): Promise<{
+  history: Array<{
+    _id: string;
+    tier: string;
+    tierInfo: any;
+    startDate: string;
+    endDate: string;
+    duration: number;
+    hasUrgentBadge: boolean;
+    price: number;
+    isActive: boolean;
+    isExpired: boolean;
+    daysRemaining: number;
+    paymentStatus: string;
+    isFromAgencyAllocation: boolean;
+    autoExtend: boolean;
+    performance: {
+      views: number;
+      inquiries: number;
+      saves: number;
+    };
+    createdAt: string;
+  }>;
+  totals: {
+    totalPromotions: number;
+    totalSpent: number;
+    totalDaysPromoted: number;
+    totalViews: number;
+    totalInquiries: number;
+  };
+  property: {
+    id: string;
+    title: string;
+  };
+}> => {
+  return await apiRequest(`/promotions/property/${propertyId}/history`, {
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Update auto-extend settings for a promotion
+ */
+export const updateAutoExtend = async (
+  promotionId: string,
+  settings: {
+    autoExtend: boolean;
+    autoExtendDuration?: number;
+  }
+): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: {
+    _id: string;
+    autoExtend: boolean;
+    autoExtendDuration: number;
+  };
+}> => {
+  return await apiRequest(`/promotions/${promotionId}/auto-extend`, {
+    method: 'PUT',
+    body: settings,
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Confirm auto-extend payment
+ */
+export const confirmAutoExtendPayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+  newEndDate?: string;
+}> => {
+  return await apiRequest('/promotions/confirm-auto-extend', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Get pending auto-extend checkout URL
+ */
+export const getAutoExtendCheckout = async (promotionId: string): Promise<{
+  success: boolean;
+  url?: string;
+  sessionId?: string;
+  promotion?: {
+    _id: string;
+    promotionTier: string;
+    autoExtendDuration: number;
+    endDate: string;
+  };
+}> => {
+  return await apiRequest(`/promotions/${promotionId}/auto-extend-checkout`, {
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Renew a property listing (puts it at top, 24hr cooldown)
+ */
+export const renewProperty = async (propertyId: string): Promise<{
+  success: boolean;
+  message: string;
+  property?: Property;
+  lastRenewed?: string;
+  canRenewAt?: string;
+  code?: string;
+  hoursRemaining?: number;
+  minutesRemaining?: number;
+}> => {
+  return await apiRequest(`/properties/${propertyId}/renew`, {
+    method: 'PATCH',
     requiresAuth: true,
   });
 };

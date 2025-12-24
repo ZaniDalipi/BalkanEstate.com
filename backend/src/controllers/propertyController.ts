@@ -11,6 +11,7 @@ import {
   deleteImages,
   deleteFolder,
 } from '../services/cloudinaryService';
+import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -173,38 +174,19 @@ export const getProperties = async (
       .skip(skip)
       .limit(fetchLimit);
 
-    // Custom sort: Prioritize promoted properties by tier
-    // Order: Premium (active) > Highlight (active) > Featured (active) > Urgent > Standard
-    properties.sort((a, b) => {
-      const aIsPromoted = a.isPromoted && a.promotionEndDate && a.promotionEndDate > new Date();
-      const bIsPromoted = b.isPromoted && b.promotionEndDate && b.promotionEndDate > new Date();
+    // Use centralized highlighting utility for sorting
+    // This handles:
+    // - Priority order: Premium > Highlight > Featured > Standard
+    // - Hourly rotation within same tier for fair exposure
+    // - Urgent badge bonus points
+    const currentHour = new Date().getHours();
+    properties = sortPropertiesWithHighlighting(properties, currentHour);
 
-      // Both promoted or both not promoted - use tier scoring
-      if (aIsPromoted && bIsPromoted) {
-        const tierScores: Record<string, number> = {
-          premium: 100,
-          highlight: 70,
-          featured: 40,
-          standard: 10,
-        };
-
-        const aScore = (tierScores[a.promotionTier || 'standard'] || 0) + (a.hasUrgentBadge ? 5 : 0);
-        const bScore = (tierScores[b.promotionTier || 'standard'] || 0) + (b.hasUrgentBadge ? 5 : 0);
-
-        if (aScore !== bScore) {
-          return bScore - aScore; // Higher score first
-        }
-        // If same tier, use original sort order
-        return 0;
-      }
-
-      // One is promoted, one isn't - promoted comes first
-      if (aIsPromoted && !bIsPromoted) return -1;
-      if (!aIsPromoted && bIsPromoted) return 1;
-
-      // Neither promoted - use original sort order
-      return 0;
-    });
+    // Log highlighting stats for monitoring
+    const stats = getHighlightingStats(properties);
+    if (stats.activePromotions > 0) {
+      console.log(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
+    }
 
     // Trim to requested limit after sorting
     properties = properties.slice(0, limitNum);
@@ -605,8 +587,39 @@ export const updateProperty = async (
       console.warn(`⚠️ Blocked attempt to change immutable fields: ${attemptedImmutableChanges.join(', ')}`);
     }
 
-    // Update property with only mutable fields
-    Object.assign(property, updateData);
+    // Debug: Log what images are being received
+    console.log('🔍 [updateProperty] Received images:', {
+      hasImages: updateData.images !== undefined,
+      imagesCount: updateData.images?.length || 0,
+      existingImagesCount: property.images?.length || 0,
+      sampleImage: updateData.images?.[0]?.url?.substring(0, 50)
+    });
+
+    // IMPORTANT: Only update fields that are explicitly provided and not undefined
+    // This preserves existing data when fields are not included in the update
+    const fieldsToUpdate = [
+      'status', 'title', 'price', 'address', 'city', 'country',
+      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
+      'description', 'specialFeatures', 'materials', 'amenities',
+      'tourUrl', 'virtualTour360Url', 'hasVirtualTour360',
+      'imageUrl', 'images', 'lat', 'lng',
+      'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl',
+      'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating',
+      'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
+      'hasAirConditioning', 'hasPool', 'petsAllowed',
+      'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
+    ];
+
+    let updatedFields: string[] = [];
+    fieldsToUpdate.forEach(field => {
+      if (updateData[field] !== undefined) {
+        (property as any)[field] = updateData[field];
+        updatedFields.push(field);
+      }
+    });
+
+    console.log(`📝 Updated property ${property._id} fields: ${updatedFields.join(', ') || 'none'}`);
+
     await property.save();
 
     // Populate seller info
@@ -816,7 +829,7 @@ export const getMyListings = async (
 
     const properties = await Property.find(query)
       .populate('sellerId', 'name email phone avatarUrl role agencyName')
-      .sort({ createdAt: -1 });
+      .sort({ lastRenewed: -1, createdAt: -1 }); // Renewed listings appear first
 
     console.log(`✅ Found ${properties.length} listings`);
     res.json({ properties });
@@ -972,7 +985,7 @@ export const markAsSold = async (
   }
 };
 
-// @desc    Renew property listing
+// @desc    Renew property listing (puts listing at top, once per 24 hours)
 // @route   PATCH /api/properties/:id/renew
 // @access  Private
 export const renewProperty = async (
@@ -998,10 +1011,45 @@ export const renewProperty = async (
       return;
     }
 
-    property.lastRenewed = new Date();
+    // Check 24hr cooldown
+    const COOLDOWN_HOURS = 24;
+    const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
+    const now = new Date();
+
+    if (property.lastRenewed) {
+      const lastRenewedTime = new Date(property.lastRenewed).getTime();
+      const timeSinceRenewal = now.getTime() - lastRenewedTime;
+
+      if (timeSinceRenewal < cooldownMs) {
+        const canRenewAt = new Date(lastRenewedTime + cooldownMs);
+        const hoursRemaining = Math.ceil((cooldownMs - timeSinceRenewal) / (60 * 60 * 1000));
+        const minutesRemaining = Math.ceil((cooldownMs - timeSinceRenewal) / (60 * 1000)) % 60;
+
+        res.status(429).json({
+          message: `You can only renew once every ${COOLDOWN_HOURS} hours`,
+          code: 'RENEWAL_COOLDOWN',
+          canRenewAt: canRenewAt.toISOString(),
+          hoursRemaining,
+          minutesRemaining,
+          lastRenewed: property.lastRenewed,
+        });
+        return;
+      }
+    }
+
+    property.lastRenewed = now;
     await property.save();
 
-    res.json({ property });
+    // Calculate when they can renew next
+    const canRenewAt = new Date(now.getTime() + cooldownMs);
+
+    res.json({
+      success: true,
+      message: 'Property renewed successfully! It will appear at the top of search results.',
+      property,
+      lastRenewed: now.toISOString(),
+      canRenewAt: canRenewAt.toISOString(),
+    });
   } catch (error: any) {
     console.error('Renew property error:', error);
     res.status(500).json({ message: 'Error renewing property', error: error.message });

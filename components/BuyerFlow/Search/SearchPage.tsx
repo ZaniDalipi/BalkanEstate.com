@@ -108,6 +108,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const debounceTimer = useRef<number | null>(null);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
+    const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
 
 
     useEffect(() => {
@@ -149,14 +150,19 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const handleSuggestionClick = (suggestion: NominatimResult) => {
         setSuggestions([]);
 
-        // Clear the search input - we're navigating to the location visually
-        const newFilters = { ...filters, query: '' };
+        // Keep a shortened version of the location in the search bar
+        // Use the first part of the display name (city/area name)
+        const shortName = suggestion.display_name.split(',').slice(0, 2).join(',').trim();
+        const newFilters = { ...filters, query: shortName };
 
         updateSearchPageState({
             filters: newFilters,
             activeFilters: newFilters,
             drawnBoundsJSON: null, // Clear any drawn bounds - show all visible properties
         });
+
+        // User is searching for a specific location, so show only map-visible properties
+        setShowAllOnMobile(false);
 
         // Fly to the location's center - mapBounds will update automatically
         // and properties visible on the map will show in the list
@@ -384,12 +390,55 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
     const baseFilteredProperties = useMemo(() => {
         const filtered = filterProperties(properties, activeFilters);
+        const now = Date.now();
+
+        // Helper to calculate promotion priority score
+        // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Pink (3rd)
+        const getPromotionScore = (p: Property) => {
+            const isActivelyPromoted = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
+            if (!isActivelyPromoted) return 0;
+
+            const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
+            const tierScore = tierScores[p.promotionTier || 'standard'] || 0;
+            const urgentBonus = p.hasUrgentBadge ? 5 : 0; // Urgent listings first within tier
+            return tierScore + urgentBonus;
+        };
+
+        // First sort by promotion score, then apply user's selected sort
+        const promotionSorted = [...filtered].sort((a, b) => {
+            const scoreA = getPromotionScore(a);
+            const scoreB = getPromotionScore(b);
+            if (scoreA !== scoreB) return scoreB - scoreA; // Higher score first
+            return 0; // Keep original order for same score
+        });
+
+        // Then apply user's sorting preference (maintaining promotion priority)
         switch (activeFilters.sortBy) {
-            case 'price_asc': return filtered.sort((a, b) => a.price - b.price);
-            case 'price_desc': return filtered.sort((a, b) => b.price - a.price);
-            case 'beds_desc': return filtered.sort((a, b) => b.beds - a.beds);
-            case 'newest': return filtered.sort((a, b) => (Math.max(b.createdAt || 0, b.lastRenewed || 0)) - (Math.max(a.createdAt || 0, a.lastRenewed || 0)));
-            default: return filtered;
+            case 'price_asc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return a.price - b.price;
+            });
+            case 'price_desc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return b.price - a.price;
+            });
+            case 'beds_desc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return b.beds - a.beds;
+            });
+            case 'newest': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return (Math.max(b.createdAt || 0, b.lastRenewed || 0)) - (Math.max(a.createdAt || 0, a.lastRenewed || 0));
+            });
+            default: return promotionSorted;
         }
     }, [properties, activeFilters]);
 
@@ -400,6 +449,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             return withinDrawn;
         }
 
+        // On mobile, show ALL properties only when filters were explicitly reset
+        // This ensures users see all available properties after reset, but
+        // when they move the map or search a location, it shows only visible properties
+        if (isMobile && showAllOnMobile) {
+            return baseFilteredProperties;
+        }
+
         // Filter to show only properties visible in the current map view
         if (mapBounds) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
@@ -407,7 +463,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         }
         // Fallback to all filtered properties if no bounds set
         return baseFilteredProperties;
-    }, [baseFilteredProperties, drawnBounds, mapBounds]);
+    }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
 
 
     const handleFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
@@ -465,6 +521,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         };
         if (isMobile) {
             resetState.isFiltersOpen = false;
+            // On mobile, after reset filters, show ALL properties regardless of map position
+            setShowAllOnMobile(true);
         }
         updateSearchPageState(resetState);
         setLocalFilters(initialFilters);
@@ -546,10 +604,15 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     
     const handleMapMove = useCallback((newBounds: L.LatLngBounds, newCenter: L.LatLng) => {
         if (isMobile && isFiltersOpen) return;
-        
+
+        // User moved the map, so go back to showing only map-visible properties
+        if (isMobile && showAllOnMobile) {
+            setShowAllOnMobile(false);
+        }
+
         const newState: Partial<SearchPageState> = { mapBoundsJSON: JSON.stringify(newBounds) };
         updateSearchPageState(newState);
-    }, [isMobile, isFiltersOpen, updateSearchPageState]);
+    }, [isMobile, isFiltersOpen, showAllOnMobile, updateSearchPageState]);
 
 
     const handleRecenterOnUser = () => {

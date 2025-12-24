@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import Stripe from 'stripe';
 import Promotion from '../models/Promotion';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
@@ -15,6 +16,11 @@ import {
   PromotionTierType,
   PromotionDuration,
 } from '../config/promotionTiers';
+
+// Initialize Stripe for promotion payments
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+  apiVersion: '2025-10-29.clover',
+});
 
 /**
  * @desc    Get available promotion tiers and pricing
@@ -333,6 +339,12 @@ export const purchasePromotion = async (
       nextRefreshAt.setDate(nextRefreshAt.getDate() + 3); // Refresh every 3 days
     }
 
+    // Create promotion with 'paid' status
+    // NOTE: When integrating Stripe payment, change this flow to:
+    // 1. Create promotion with 'pending' status
+    // 2. Create Stripe checkout session
+    // 3. On webhook confirmation, update to 'paid'
+    // For now, we mark as 'paid' immediately to enable the feature
     const promotion = await Promotion.create({
       userId: user._id,
       propertyId,
@@ -345,7 +357,7 @@ export const purchasePromotion = async (
       hasUrgentBadge,
       price: finalPrice,
       currency: 'EUR',
-      paymentStatus: isFromAgencyAllocation ? 'paid' : 'pending', // In real app, integrate with payment gateway
+      paymentStatus: 'paid', // Mark as paid immediately (integrate with Stripe later)
       isFromAgencyAllocation,
       agencyId,
       viewsGenerated: 0,
@@ -632,5 +644,1048 @@ export const getPromotionStats = async (
   } catch (error: any) {
     console.error('Get promotion stats error:', error);
     res.status(500).json({ message: 'Error fetching promotion stats', error: error.message });
+  }
+};
+
+/**
+ * @desc    Create Stripe checkout session for promotion purchase
+ * @route   POST /api/promotions/checkout
+ * @access  Private
+ */
+export const createPromotionCheckout = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const {
+      propertyId,
+      promotionTier,
+      duration,
+      hasUrgentBadge = false,
+      couponCode,
+    } = req.body;
+
+    // Validation
+    if (!propertyId || !promotionTier || !duration) {
+      res.status(400).json({
+        message: 'Property ID, promotion tier, and duration are required',
+        code: 'MISSING_REQUIRED_FIELDS',
+      });
+      return;
+    }
+
+    const validTiers: PromotionTierType[] = ['featured', 'highlight', 'premium'];
+    if (!validTiers.includes(promotionTier)) {
+      res.status(400).json({
+        message: 'Invalid promotion tier',
+        code: 'INVALID_TIER',
+      });
+      return;
+    }
+
+    const validDurations: PromotionDuration[] = [7, 15, 30, 60, 90];
+    if (!validDurations.includes(duration)) {
+      res.status(400).json({
+        message: 'Invalid duration',
+        code: 'INVALID_DURATION',
+      });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const user = await User.findById(String(currentUser._id));
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Check if property exists and belongs to user
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    if (property.sellerId.toString() !== String(currentUser._id)) {
+      res.status(403).json({
+        message: 'You can only promote your own properties',
+        code: 'NOT_PROPERTY_OWNER',
+      });
+      return;
+    }
+
+    // Check if property is already promoted
+    const existingPromotion = await Promotion.findOne({
+      propertyId,
+      isActive: true,
+      endDate: { $gt: new Date() },
+    });
+
+    if (existingPromotion) {
+      res.status(400).json({
+        message: 'This property is already promoted',
+        code: 'ALREADY_PROMOTED',
+      });
+      return;
+    }
+
+    // Calculate price
+    let finalPrice = getPromotionPrice(promotionTier, duration, hasUrgentBadge);
+    let couponDiscount = 0;
+    let appliedCouponCode: string | undefined;
+
+    // Apply coupon if provided
+    if (couponCode && finalPrice > 0) {
+      const coupon = await (PromotionCoupon as any).findValidCoupon(couponCode);
+
+      if (coupon) {
+        const canUse = await coupon.canBeUsedBy(user._id);
+        if (canUse) {
+          if (!coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes(promotionTier)) {
+            if (!coupon.minimumPurchaseAmount || finalPrice >= coupon.minimumPurchaseAmount) {
+              couponDiscount = coupon.calculateDiscount(finalPrice);
+              finalPrice = Math.max(0, finalPrice - couponDiscount);
+              appliedCouponCode = couponCode;
+            }
+          }
+        }
+      }
+    }
+
+    // If price is 0 (free with coupon), process directly
+    if (finalPrice === 0) {
+      // Create promotion directly
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + duration);
+
+      const promotion = await Promotion.create({
+        userId: user._id,
+        propertyId,
+        startDate,
+        endDate,
+        isActive: true,
+        promotionType: promotionTier === 'highlight' ? 'highlighted' : promotionTier,
+        promotionTier,
+        duration,
+        hasUrgentBadge,
+        price: 0,
+        currency: 'EUR',
+        paymentStatus: 'paid',
+        purchasedVia: 'web',
+        notes: appliedCouponCode ? `Free with coupon: ${appliedCouponCode}` : undefined,
+      });
+
+      // Update property
+      property.isPromoted = true;
+      // Cast to property's tier type (excludes 'urgent' which is only a badge modifier)
+      property.promotionTier = promotionTier as 'standard' | 'featured' | 'highlight' | 'premium';
+      property.promotionStartDate = startDate;
+      property.promotionEndDate = endDate;
+      property.hasUrgentBadge = hasUrgentBadge;
+      await property.save();
+
+      res.status(201).json({
+        success: true,
+        message: 'Promotion activated (free with coupon)',
+        promotion,
+        isFree: true,
+      });
+      return;
+    }
+
+    // Create Stripe checkout session
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const validatedTier = promotionTier as PromotionTierType;
+    const tierInfo = PROMOTION_TIERS[validatedTier];
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: `${tierInfo.name} Promotion`,
+              description: `${duration}-day promotion for "${property.title}"${hasUrgentBadge ? ' + Urgent Badge' : ''}`,
+            },
+            unit_amount: Math.round(finalPrice * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${baseUrl}/promotions/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/promotions/cancel?property_id=${propertyId}`,
+      client_reference_id: String(user._id),
+      metadata: {
+        userId: String(user._id),
+        propertyId: String(propertyId),
+        promotionTier: String(promotionTier),
+        duration: String(duration),
+        hasUrgentBadge: String(hasUrgentBadge),
+        couponCode: appliedCouponCode ?? '',
+        couponDiscount: String(couponDiscount),
+        originalPrice: String(finalPrice + couponDiscount),
+        userEmail: user.email ?? '',
+        propertyTitle: property.title ?? '',
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      sessionId: session.id,
+      url: session.url,
+      pricing: {
+        originalPrice: finalPrice + couponDiscount,
+        discount: couponDiscount,
+        finalPrice,
+        currency: 'EUR',
+      },
+    });
+  } catch (error: any) {
+    console.error('Create promotion checkout error:', error);
+    res.status(500).json({ message: 'Error creating checkout session', error: error.message });
+  }
+};
+
+/**
+ * @desc    Handle successful promotion payment (webhook or verification)
+ * @route   POST /api/promotions/confirm-payment
+ * @access  Private
+ */
+export const confirmPromotionPayment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ message: 'Session ID is required' });
+      return;
+    }
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      res.status(400).json({ message: 'Payment not completed' });
+      return;
+    }
+
+    // Check if promotion already exists for this session
+    const existingPromotion = await Promotion.findOne({ transactionId: sessionId });
+    if (existingPromotion) {
+      res.status(200).json({
+        success: true,
+        message: 'Promotion already activated',
+        promotion: existingPromotion,
+      });
+      return;
+    }
+
+    // Extract metadata
+    const {
+      userId,
+      propertyId,
+      promotionTier,
+      duration,
+      hasUrgentBadge,
+      couponCode,
+      couponDiscount,
+    } = session.metadata || {};
+
+    if (!userId || !propertyId || !promotionTier || !duration) {
+      res.status(400).json({ message: 'Invalid session metadata' });
+      return;
+    }
+
+    // Create promotion
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + parseInt(duration));
+
+    let nextRefreshAt = null;
+    if (promotionTier === 'highlight') {
+      nextRefreshAt = new Date(startDate);
+      nextRefreshAt.setDate(nextRefreshAt.getDate() + 3);
+    }
+
+    const promotion = await Promotion.create({
+      userId,
+      propertyId,
+      startDate,
+      endDate,
+      isActive: true,
+      promotionType: promotionTier === 'highlight' ? 'highlighted' : promotionTier,
+      promotionTier,
+      duration: parseInt(duration),
+      hasUrgentBadge: hasUrgentBadge === 'true',
+      price: (session.amount_total || 0) / 100,
+      currency: 'EUR',
+      paymentStatus: 'paid',
+      transactionId: sessionId,
+      paymentId: session.payment_intent as string,
+      purchasedVia: 'web',
+      lastRefreshedAt: startDate,
+      nextRefreshAt,
+      refreshCount: 0,
+      notes: couponCode ? `Coupon applied: ${couponCode} (€${couponDiscount} discount)` : undefined,
+    });
+
+    // Update property
+    const property = await Property.findById(propertyId);
+    if (property) {
+      property.isPromoted = true;
+      // Cast to property's tier type (excludes 'urgent' which is only a badge modifier)
+      property.promotionTier = promotionTier as 'standard' | 'featured' | 'highlight' | 'premium';
+      property.promotionStartDate = startDate;
+      property.promotionEndDate = endDate;
+      property.hasUrgentBadge = hasUrgentBadge === 'true';
+      await property.save();
+    }
+
+    // Update user's promoted ads count
+    const user = await User.findById(userId);
+    if (user) {
+      user.promotedAdsCount = (user.promotedAdsCount || 0) + 1;
+      await user.save();
+    }
+
+    // Record coupon usage if applied
+    if (couponCode && parseFloat(couponDiscount || '0') > 0) {
+      const coupon = await (PromotionCoupon as any).findValidCoupon(couponCode);
+      if (coupon) {
+        await coupon.recordUsage(userId, promotion._id, parseFloat(couponDiscount));
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Promotion activated successfully',
+      promotion,
+    });
+  } catch (error: any) {
+    console.error('Confirm promotion payment error:', error);
+    res.status(500).json({ message: 'Error confirming payment', error: error.message });
+  }
+};
+
+/**
+ * @desc    Extend an existing promotion by adding more days
+ * @route   POST /api/promotions/:id/extend (id can be promotionId or propertyId)
+ * @access  Private
+ */
+export const extendPromotion = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { duration, couponCode } = req.body;
+    const idParam = req.params.id;
+
+    const validDurations: PromotionDuration[] = [7, 15, 30, 60, 90];
+    if (!validDurations.includes(duration)) {
+      res.status(400).json({ message: 'Invalid duration', code: 'INVALID_DURATION' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+
+    // Try to find promotion by ID first, then by propertyId
+    let promotion = await Promotion.findById(idParam);
+    if (!promotion) {
+      // Try finding by propertyId (for active promotions)
+      promotion = await Promotion.findOne({
+        propertyId: idParam,
+        isActive: true,
+        endDate: { $gt: new Date() },
+      });
+    }
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Verify ownership
+    if (promotion.userId.toString() !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Not authorized to extend this promotion' });
+      return;
+    }
+
+    // Get property
+    const property = await Property.findById(promotion.propertyId);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    // Calculate extension price
+    const promotionTier = promotion.promotionTier as PromotionTierType;
+    let extensionPrice = getPromotionPrice(promotionTier, duration, false); // No urgent badge on extension
+    let couponDiscount = 0;
+    let appliedCouponCode: string | undefined;
+
+    // Apply coupon if provided
+    if (couponCode && extensionPrice > 0) {
+      const coupon = await (PromotionCoupon as any).findValidCoupon(couponCode);
+      if (coupon) {
+        const canUse = await coupon.canBeUsedBy(currentUser._id);
+        if (canUse) {
+          if (!coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes(promotionTier)) {
+            couponDiscount = coupon.calculateDiscount(extensionPrice);
+            extensionPrice = Math.max(0, extensionPrice - couponDiscount);
+            appliedCouponCode = couponCode;
+          }
+        }
+      }
+    }
+
+    // If free with coupon, extend directly
+    if (extensionPrice === 0) {
+      // Calculate new end date from current end date (or now if expired)
+      const currentEndDate = new Date(promotion.endDate);
+      const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
+      const newEndDate = new Date(baseDate);
+      newEndDate.setDate(newEndDate.getDate() + duration);
+
+      // Update promotion
+      promotion.endDate = newEndDate;
+      promotion.duration = promotion.duration + duration;
+      promotion.isActive = true;
+      if (appliedCouponCode) {
+        promotion.notes = (promotion.notes || '') + ` | Extended with coupon: ${appliedCouponCode}`;
+      }
+      await promotion.save();
+
+      // Update property
+      property.promotionEndDate = newEndDate;
+      property.isPromoted = true;
+      await property.save();
+
+      // Record coupon usage
+      if (appliedCouponCode && couponDiscount > 0) {
+        const coupon = await (PromotionCoupon as any).findValidCoupon(appliedCouponCode);
+        if (coupon) {
+          await coupon.recordUsage(currentUser._id, promotion._id, couponDiscount);
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Promotion extended successfully (free with coupon)',
+        promotion,
+        newEndDate: newEndDate.toISOString(),
+        isFree: true,
+      });
+      return;
+    }
+
+    // Create Stripe checkout for paid extension
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const tierInfo = PROMOTION_TIERS[promotionTier];
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: `Extend ${tierInfo.name} Promotion`,
+              description: `Add ${duration} days to promotion for "${property.title}"`,
+            },
+            unit_amount: Math.round(extensionPrice * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${baseUrl}/promotions/extend-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/promotions/cancel?property_id=${property._id}`,
+      client_reference_id: String(currentUser._id),
+      metadata: {
+        type: 'extension',
+        userId: String(currentUser._id),
+        promotionId: String(promotion._id),
+        propertyId: String(property._id),
+        duration: String(duration),
+        couponCode: appliedCouponCode ?? '',
+        couponDiscount: String(couponDiscount),
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      sessionId: session.id,
+      url: session.url,
+      pricing: {
+        originalPrice: extensionPrice + couponDiscount,
+        discount: couponDiscount,
+        finalPrice: extensionPrice,
+        currency: 'EUR',
+      },
+    });
+  } catch (error: any) {
+    console.error('Extend promotion error:', error);
+    res.status(500).json({ message: 'Error extending promotion', error: error.message });
+  }
+};
+
+/**
+ * @desc    Confirm extension payment (from Stripe redirect)
+ * @route   POST /api/promotions/confirm-extension
+ * @access  Private
+ */
+export const confirmExtensionPayment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ message: 'Session ID is required' });
+      return;
+    }
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      res.status(400).json({ message: 'Payment not completed' });
+      return;
+    }
+
+    const { promotionId, duration } = session.metadata || {};
+
+    if (!promotionId || !duration) {
+      res.status(400).json({ message: 'Invalid session metadata' });
+      return;
+    }
+
+    // Find and update promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check if already processed
+    if (promotion.notes?.includes(sessionId)) {
+      res.status(200).json({
+        success: true,
+        message: 'Extension already processed',
+        promotion,
+      });
+      return;
+    }
+
+    // Calculate new end date
+    const currentEndDate = new Date(promotion.endDate);
+    const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
+    const newEndDate = new Date(baseDate);
+    newEndDate.setDate(newEndDate.getDate() + parseInt(duration));
+
+    // Update promotion
+    promotion.endDate = newEndDate;
+    promotion.duration = promotion.duration + parseInt(duration);
+    promotion.isActive = true;
+    promotion.notes = (promotion.notes || '') + ` | Extended: +${duration} days (${sessionId})`;
+    await promotion.save();
+
+    // Update property
+    const property = await Property.findById(promotion.propertyId);
+    if (property) {
+      property.promotionEndDate = newEndDate;
+      property.isPromoted = true;
+      await property.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Promotion extended successfully',
+      promotion,
+      newEndDate: newEndDate.toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Confirm extension payment error:', error);
+    res.status(500).json({ message: 'Error confirming extension', error: error.message });
+  }
+};
+
+/**
+ * @desc    Add urgent badge to existing promotion
+ * @route   POST /api/promotions/:id/add-urgent
+ * @access  Private (Owner only)
+ */
+export const addUrgentBadge = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const promotionId = req.params.id;
+    const userId = String((req.user as IUser)._id);
+
+    // Find promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check ownership
+    if (promotion.userId.toString() !== userId) {
+      res.status(403).json({ message: 'Not authorized to modify this promotion' });
+      return;
+    }
+
+    // Check if promotion is still active
+    if (!promotion.isActive || promotion.endDate <= new Date()) {
+      res.status(400).json({ message: 'Cannot add urgent badge to expired promotion' });
+      return;
+    }
+
+    // Check if already has urgent badge
+    if (promotion.hasUrgentBadge) {
+      res.status(400).json({ message: 'Promotion already has urgent badge' });
+      return;
+    }
+
+    // Create Stripe checkout for urgent badge payment
+    const urgentPrice = URGENT_MODIFIER.price;
+
+    // If price is 0, add badge directly
+    if (urgentPrice === 0) {
+      promotion.hasUrgentBadge = true;
+      await promotion.save();
+
+      // Update property
+      const property = await Property.findById(promotion.propertyId);
+      if (property) {
+        property.hasUrgentBadge = true;
+        await property.save();
+      }
+
+      res.status(200).json({
+        success: true,
+        isFree: true,
+        message: 'Urgent badge added successfully',
+        promotion,
+      });
+      return;
+    }
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Urgent Badge',
+              description: `Add urgent badge to your ${promotion.promotionTier} promotion`,
+            },
+            unit_amount: Math.round(urgentPrice * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        type: 'add_urgent_badge',
+        promotionId: String(promotion._id),
+        userId,
+      },
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?tab=promotions&urgent_added=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?tab=promotions&urgent_cancelled=true`,
+    });
+
+    res.status(200).json({
+      success: true,
+      isFree: false,
+      url: session.url,
+      sessionId: session.id,
+      price: urgentPrice,
+    });
+  } catch (error: any) {
+    console.error('Add urgent badge error:', error);
+    res.status(500).json({ message: 'Error adding urgent badge', error: error.message });
+  }
+};
+
+/**
+ * @desc    Confirm urgent badge payment
+ * @route   POST /api/promotions/confirm-urgent
+ * @access  Public (Stripe webhook or redirect)
+ */
+export const confirmUrgentBadgePayment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ message: 'Session ID is required' });
+      return;
+    }
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      res.status(400).json({ message: 'Payment not completed' });
+      return;
+    }
+
+    const { promotionId, type } = session.metadata || {};
+
+    if (type !== 'add_urgent_badge' || !promotionId) {
+      res.status(400).json({ message: 'Invalid session metadata' });
+      return;
+    }
+
+    // Find promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check if already processed
+    if (promotion.hasUrgentBadge) {
+      res.status(200).json({
+        success: true,
+        message: 'Urgent badge already added',
+        promotion,
+      });
+      return;
+    }
+
+    // Add urgent badge
+    promotion.hasUrgentBadge = true;
+    promotion.notes = (promotion.notes || '') + ` | Urgent badge added (${sessionId})`;
+    await promotion.save();
+
+    // Update property
+    const property = await Property.findById(promotion.propertyId);
+    if (property) {
+      property.hasUrgentBadge = true;
+      await property.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Urgent badge added successfully',
+      promotion,
+    });
+  } catch (error: any) {
+    console.error('Confirm urgent badge payment error:', error);
+    res.status(500).json({ message: 'Error confirming urgent badge', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get promotion history for a property
+ * @route   GET /api/promotions/property/:propertyId/history
+ * @access  Private (Owner only)
+ */
+export const getPromotionHistory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const propertyId = req.params.propertyId;
+    const userId = String((req.user as IUser)._id);
+
+    // Verify property ownership
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    if (property.sellerId.toString() !== userId) {
+      res.status(403).json({ message: 'Not authorized to view this property\'s history' });
+      return;
+    }
+
+    // Get all promotions for this property (active and inactive)
+    const promotions = await Promotion.find({ propertyId })
+      .sort({ createdAt: -1 });
+
+    // Enrich with tier info and status
+    const history = promotions.map(promo => {
+      const isExpired = promo.endDate <= new Date();
+      const daysRemaining = isExpired
+        ? 0
+        : Math.ceil((promo.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+      return {
+        _id: promo._id,
+        tier: promo.promotionTier,
+        tierInfo: PROMOTION_TIERS[promo.promotionTier as PromotionTierType],
+        startDate: promo.startDate,
+        endDate: promo.endDate,
+        duration: promo.duration,
+        hasUrgentBadge: promo.hasUrgentBadge,
+        price: promo.price,
+        isActive: promo.isActive && !isExpired,
+        isExpired,
+        daysRemaining,
+        paymentStatus: promo.paymentStatus,
+        isFromAgencyAllocation: promo.isFromAgencyAllocation,
+        autoExtend: promo.autoExtend,
+        performance: {
+          views: promo.viewsGenerated,
+          inquiries: promo.inquiriesGenerated,
+          saves: promo.savesGenerated,
+        },
+        createdAt: promo.createdAt,
+      };
+    });
+
+    // Calculate totals
+    const totals = {
+      totalPromotions: history.length,
+      totalSpent: promotions.reduce((sum, p) => sum + (p.price || 0), 0),
+      totalDaysPromoted: promotions.reduce((sum, p) => sum + (p.duration || 0), 0),
+      totalViews: promotions.reduce((sum, p) => sum + (p.viewsGenerated || 0), 0),
+      totalInquiries: promotions.reduce((sum, p) => sum + (p.inquiriesGenerated || 0), 0),
+    };
+
+    res.status(200).json({
+      history,
+      totals,
+      property: {
+        id: property._id,
+        title: property.title,
+      },
+    });
+  } catch (error: any) {
+    console.error('Get promotion history error:', error);
+    res.status(500).json({ message: 'Error fetching promotion history', error: error.message });
+  }
+};
+
+/**
+ * @desc    Update auto-extend settings for a promotion
+ * @route   PUT /api/promotions/:id/auto-extend
+ * @access  Private (Owner only)
+ */
+export const updateAutoExtend = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const promotionId = req.params.id;
+    const userId = String((req.user as IUser)._id);
+    const { autoExtend, autoExtendDuration } = req.body;
+
+    // Find promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check ownership
+    if (promotion.userId.toString() !== userId) {
+      res.status(403).json({ message: 'Not authorized to modify this promotion' });
+      return;
+    }
+
+    // Check if promotion is still active
+    if (!promotion.isActive || promotion.endDate <= new Date()) {
+      res.status(400).json({ message: 'Cannot modify settings for expired promotion' });
+      return;
+    }
+
+    // Update settings
+    if (typeof autoExtend === 'boolean') {
+      promotion.autoExtend = autoExtend;
+    }
+
+    if (autoExtendDuration && [7, 15, 30, 60, 90].includes(autoExtendDuration)) {
+      promotion.autoExtendDuration = autoExtendDuration;
+    }
+
+    await promotion.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Auto-extend ${promotion.autoExtend ? 'enabled' : 'disabled'}`,
+      promotion: {
+        _id: promotion._id,
+        autoExtend: promotion.autoExtend,
+        autoExtendDuration: promotion.autoExtendDuration,
+      },
+    });
+  } catch (error: any) {
+    console.error('Update auto-extend error:', error);
+    res.status(500).json({ message: 'Error updating auto-extend', error: error.message });
+  }
+};
+
+/**
+ * @desc    Confirm auto-extend payment
+ * @route   POST /api/promotions/confirm-auto-extend
+ * @access  Private
+ */
+export const confirmAutoExtendPayment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ message: 'Session ID is required' });
+      return;
+    }
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      res.status(400).json({ message: 'Payment not completed' });
+      return;
+    }
+
+    const { type, promotionId, duration } = session.metadata || {};
+
+    if (type !== 'auto-extend' || !promotionId || !duration) {
+      res.status(400).json({ message: 'Invalid session metadata' });
+      return;
+    }
+
+    // Find promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check if already processed
+    if (promotion.autoExtendStatus === 'completed' && promotion.autoExtendSessionId === sessionId) {
+      res.status(200).json({
+        success: true,
+        message: 'Auto-extend already processed',
+        promotion,
+      });
+      return;
+    }
+
+    // Calculate new end date from current end date (or now if expired)
+    const currentEndDate = new Date(promotion.endDate);
+    const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
+    const newEndDate = new Date(baseDate);
+    newEndDate.setDate(newEndDate.getDate() + parseInt(duration));
+
+    // Update promotion
+    promotion.endDate = newEndDate;
+    promotion.duration = promotion.duration + parseInt(duration);
+    promotion.isActive = true;
+    promotion.autoExtendStatus = 'completed';
+    promotion.notes = (promotion.notes || '') + ` | Auto-extended: +${duration} days (${sessionId})`;
+    await promotion.save();
+
+    // Update property
+    const property = await Property.findById(promotion.propertyId);
+    if (property) {
+      property.promotionEndDate = newEndDate;
+      property.isPromoted = true;
+      await property.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Promotion auto-extended successfully',
+      promotion,
+      newEndDate: newEndDate.toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Confirm auto-extend payment error:', error);
+    res.status(500).json({ message: 'Error confirming auto-extend', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get pending auto-extend checkout URL
+ * @route   GET /api/promotions/:id/auto-extend-checkout
+ * @access  Private (Owner only)
+ */
+export const getAutoExtendCheckout = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const promotionId = req.params.id;
+    const userId = String((req.user as IUser)._id);
+
+    // Find promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check ownership
+    if (promotion.userId.toString() !== userId) {
+      res.status(403).json({ message: 'Not authorized to view this promotion' });
+      return;
+    }
+
+    // Check if there's a pending auto-extend
+    if (promotion.autoExtendStatus !== 'pending' || !promotion.autoExtendCheckoutUrl) {
+      res.status(404).json({ message: 'No pending auto-extend found' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      url: promotion.autoExtendCheckoutUrl,
+      sessionId: promotion.autoExtendSessionId,
+      promotion: {
+        _id: promotion._id,
+        promotionTier: promotion.promotionTier,
+        autoExtendDuration: promotion.autoExtendDuration,
+        endDate: promotion.endDate,
+      },
+    });
+  } catch (error: any) {
+    console.error('Get auto-extend checkout error:', error);
+    res.status(500).json({ message: 'Error getting auto-extend checkout', error: error.message });
   }
 };

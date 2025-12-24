@@ -8,6 +8,11 @@ interface PromotionModalProps {
   propertyId: string;
   propertyTitle?: string;
   onSuccess?: () => void;
+  // Extension mode props
+  isExtension?: boolean;
+  promotionId?: string;
+  currentTier?: 'featured' | 'highlight' | 'premium';
+  currentEndDate?: Date;
 }
 
 const PromotionModal: React.FC<PromotionModalProps> = ({
@@ -16,6 +21,10 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
   propertyId,
   propertyTitle,
   onSuccess,
+  isExtension = false,
+  promotionId,
+  currentTier,
+  currentEndDate,
 }) => {
   const handleSuccess = () => {
     if (onSuccess) {
@@ -39,6 +48,10 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
         onSuccess={handleSuccess}
         onSkip={handleSkip}
         inModal={true}
+        isExtension={isExtension}
+        promotionId={promotionId}
+        currentTier={currentTier}
+        currentEndDate={currentEndDate}
       />
     </Modal>
   );
