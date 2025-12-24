@@ -809,10 +809,22 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Step 1: Upload images to Cloudinary before creating the property
             let imageUrls: PropertyImage[] = [];
 
+            // Debug: Log current images state
+            console.log('🔍 [handleSubmit] Images state:', {
+                totalImages: images.length,
+                images: images.map((img, i) => ({
+                    index: i,
+                    hasFile: img.file !== null,
+                    previewUrl: img.previewUrl?.substring(0, 50) + '...'
+                }))
+            });
+
             // Get all image files that need to be uploaded (new images with file objects)
             const imagesToUpload = images
                 .map((img, index) => ({ img, index }))
                 .filter(({ img }) => img.file !== null);
+
+            console.log('📤 [handleSubmit] Images to upload:', imagesToUpload.length);
 
             // Check if we have new images to upload
             if (imagesToUpload.length > 0) {
@@ -865,6 +877,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 }
             } else if (images.length > 0) {
                 // All images are existing (editing mode), just use the preview URLs
+                console.log('📷 [handleSubmit] Using existing images (no new uploads)');
                 imageUrls = images.map((img, index) => {
                     const tagInfo = listingData.image_tags.find(t => t.index === index);
                     return {
@@ -872,6 +885,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         tag: (tagInfo?.tag as PropertyImageTag) || 'other',
                     };
                 });
+                console.log('📷 [handleSubmit] Existing imageUrls:', imageUrls.length, imageUrls.map(i => i.url?.substring(0, 50)));
+            } else {
+                console.warn('⚠️ [handleSubmit] No images found in state!');
             }
 
             const { lat, lng } = listingData;

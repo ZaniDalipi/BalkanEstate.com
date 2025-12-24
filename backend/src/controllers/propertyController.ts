@@ -587,6 +587,14 @@ export const updateProperty = async (
       console.warn(`⚠️ Blocked attempt to change immutable fields: ${attemptedImmutableChanges.join(', ')}`);
     }
 
+    // Debug: Log what images are being received
+    console.log('🔍 [updateProperty] Received images:', {
+      hasImages: updateData.images !== undefined,
+      imagesCount: updateData.images?.length || 0,
+      existingImagesCount: property.images?.length || 0,
+      sampleImage: updateData.images?.[0]?.url?.substring(0, 50)
+    });
+
     // IMPORTANT: Only update fields that are explicitly provided and not undefined
     // This preserves existing data when fields are not included in the update
     const fieldsToUpdate = [
