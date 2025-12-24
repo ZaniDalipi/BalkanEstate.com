@@ -8,13 +8,16 @@ interface HighlightedPropertiesSectionProps {
   showToast?: (message: string, type: 'success' | 'error') => void;
 }
 
-// Priority scores for sorting
+// Priority scores for sorting - Premium (1st) > Highlight (2nd) > Featured (3rd)
 const TIER_PRIORITY: Record<string, number> = {
   premium: 100,
   highlight: 70,
   featured: 40,
   standard: 10,
 };
+
+// Urgent bonus score - urgent listings appear first within their tier
+const URGENT_BONUS = 5;
 
 const HighlightedPropertiesSection: React.FC<HighlightedPropertiesSectionProps> = ({
   properties,
@@ -34,15 +37,21 @@ const HighlightedPropertiesSection: React.FC<HighlightedPropertiesSectionProps> 
       p.promotionEndDate > now
     );
 
-    // Sort by tier priority, then by rotation based on hour
+    // Sort by tier priority, then urgent first, then by rotation based on hour
     return promoted
       .sort((a, b) => {
         const tierA = a.promotionTier || 'standard';
         const tierB = b.promotionTier || 'standard';
-        const priorityA = TIER_PRIORITY[tierA] || 0;
-        const priorityB = TIER_PRIORITY[tierB] || 0;
+        const basePriorityA = TIER_PRIORITY[tierA] || 0;
+        const basePriorityB = TIER_PRIORITY[tierB] || 0;
 
-        // Primary sort: by tier priority (descending)
+        // Add urgent bonus - urgent listings appear first within their tier
+        const urgentBonusA = a.hasUrgentBadge ? URGENT_BONUS : 0;
+        const urgentBonusB = b.hasUrgentBadge ? URGENT_BONUS : 0;
+        const priorityA = basePriorityA + urgentBonusA;
+        const priorityB = basePriorityB + urgentBonusB;
+
+        // Primary sort: by tier priority + urgent bonus (descending)
         if (priorityA !== priorityB) {
           return priorityB - priorityA;
         }

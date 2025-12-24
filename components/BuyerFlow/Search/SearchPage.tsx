@@ -384,12 +384,55 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
     const baseFilteredProperties = useMemo(() => {
         const filtered = filterProperties(properties, activeFilters);
+        const now = Date.now();
+
+        // Helper to calculate promotion priority score
+        // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Pink (3rd)
+        const getPromotionScore = (p: Property) => {
+            const isActivelyPromoted = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
+            if (!isActivelyPromoted) return 0;
+
+            const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
+            const tierScore = tierScores[p.promotionTier || 'standard'] || 0;
+            const urgentBonus = p.hasUrgentBadge ? 5 : 0; // Urgent listings first within tier
+            return tierScore + urgentBonus;
+        };
+
+        // First sort by promotion score, then apply user's selected sort
+        const promotionSorted = [...filtered].sort((a, b) => {
+            const scoreA = getPromotionScore(a);
+            const scoreB = getPromotionScore(b);
+            if (scoreA !== scoreB) return scoreB - scoreA; // Higher score first
+            return 0; // Keep original order for same score
+        });
+
+        // Then apply user's sorting preference (maintaining promotion priority)
         switch (activeFilters.sortBy) {
-            case 'price_asc': return filtered.sort((a, b) => a.price - b.price);
-            case 'price_desc': return filtered.sort((a, b) => b.price - a.price);
-            case 'beds_desc': return filtered.sort((a, b) => b.beds - a.beds);
-            case 'newest': return filtered.sort((a, b) => (Math.max(b.createdAt || 0, b.lastRenewed || 0)) - (Math.max(a.createdAt || 0, a.lastRenewed || 0)));
-            default: return filtered;
+            case 'price_asc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return a.price - b.price;
+            });
+            case 'price_desc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return b.price - a.price;
+            });
+            case 'beds_desc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return b.beds - a.beds;
+            });
+            case 'newest': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return (Math.max(b.createdAt || 0, b.lastRenewed || 0)) - (Math.max(a.createdAt || 0, a.lastRenewed || 0));
+            });
+            default: return promotionSorted;
         }
     }, [properties, activeFilters]);
 

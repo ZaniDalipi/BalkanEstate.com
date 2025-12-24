@@ -105,12 +105,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
   // Determine card styles based on promotion tier
+  // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Pink (3rd)
   const getCardStyles = () => {
     if (isSold) return 'border-neutral-300 opacity-80';
     if (isActivelyPromoted) {
-      if (promotionTier === 'premium') return 'ring-2 ring-purple-400 border-purple-200 shadow-purple-100';
-      if (promotionTier === 'highlight') return 'ring-2 ring-amber-400 border-amber-200 shadow-amber-100';
-      if (promotionTier === 'featured') return 'ring-2 ring-blue-400 border-blue-200 shadow-blue-100';
+      if (promotionTier === 'premium') return 'ring-2 ring-amber-400 border-amber-200 shadow-amber-100';
+      if (promotionTier === 'highlight') return 'ring-2 ring-sky-400 border-sky-200 shadow-sky-100';
+      if (promotionTier === 'featured') return 'ring-2 ring-pink-400 border-pink-200 shadow-pink-100';
       return 'ring-1 ring-gray-400 border-gray-200';
     }
     return 'border-neutral-200 hover:border-primary/30';
@@ -170,15 +171,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               </div>
             )}
 
-            {/* Promotion Badges */}
+            {/* Promotion Badges - Premium = Gold, Highlight = Light Blue, Featured = Pink */}
             {!isSold && isActivelyPromoted && promotionTier && (
               <div className={`text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 ${
                 promotionTier === 'premium'
-                  ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 animate-pulse'
+                  ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400 animate-pulse'
                   : promotionTier === 'highlight'
-                  ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500'
+                  ? 'bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400'
                   : promotionTier === 'featured'
-                  ? 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500'
+                  ? 'bg-gradient-to-r from-pink-500 via-pink-400 to-rose-400'
                   : 'bg-gradient-to-r from-gray-600 to-gray-700'
               }`}>
                 <span className="text-xs">{promotionTier === 'premium' ? '👑' : promotionTier === 'highlight' ? '💎' : '⭐'}</span>
