@@ -1,11 +1,10 @@
 /**
- * MapAgentAvatar - Interactive 3D Agent Avatar for Map Recommendations
+ * MapAgentAvatar - Interactive Agent Assistant for Map Recommendations
  *
- * This component displays an animated agent avatar on the map that:
- * - Points to highlighted/promoted properties
- * - Shows recommendations with speech bubbles
- * - Navigates between featured properties
- * - Has 3D-like animated effects
+ * A polished, modern agent avatar that:
+ * - Shows property recommendations with beautiful cards
+ * - Navigates between featured properties with map fly-to
+ * - Has smooth animations and tier-specific styling
  *
  * @module MapAgentAvatar
  */
@@ -14,58 +13,32 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMap } from 'react-leaflet';
 import { useHighlightedProperties, PROMOTION_TIER_COLORS } from '../../context/HighlightedPropertiesContext';
+import { formatPrice } from '../../../utils/currency';
 
 interface MapAgentAvatarProps {
   onPropertySelect: (propertyId: string) => void;
 }
 
-/**
- * Create SVG for pointing arrow from agent to property
- */
-const createPointingLine = (
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
-  color: string
-): string => {
-  const dx = endX - startX;
-  const dy = endY - startY;
-  const length = Math.sqrt(dx * dx + dy * dy);
-
-  // Create a curved path
-  const midX = (startX + endX) / 2;
-  const midY = (startY + endY) / 2 - 20; // Curve upward
-
-  return `
-    <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999;">
-      <defs>
-        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:${color};stop-opacity:0.3" />
-          <stop offset="100%" style="stop-color:${color};stop-opacity:1" />
-        </linearGradient>
-        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="${color}" />
-        </marker>
-      </defs>
-      <path
-        d="M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}"
-        stroke="url(#lineGradient)"
-        stroke-width="3"
-        fill="none"
-        stroke-dasharray="8,4"
-        marker-end="url(#arrowhead)"
-      >
-        <animate
-          attributeName="stroke-dashoffset"
-          from="24"
-          to="0"
-          dur="1s"
-          repeatCount="indefinite"
-        />
-      </path>
-    </svg>
-  `;
+// Tier configuration with colors and labels
+const TIER_CONFIG: Record<string, { color: string; gradient: string; icon: string; label: string }> = {
+  premium: {
+    color: '#FFB800',
+    gradient: 'from-amber-500 via-yellow-400 to-orange-400',
+    icon: '👑',
+    label: 'Premium'
+  },
+  highlight: {
+    color: '#0EA5E9',
+    gradient: 'from-sky-500 via-sky-400 to-cyan-400',
+    icon: '💎',
+    label: 'Highlight'
+  },
+  featured: {
+    color: '#EC4899',
+    gradient: 'from-pink-500 via-pink-400 to-rose-400',
+    icon: '⭐',
+    label: 'Featured'
+  },
 };
 
 const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => {
@@ -80,285 +53,300 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
   } = useHighlightedProperties();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isWaving, setIsWaving] = useState(false);
-  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  // Auto-show speech bubble for new recommendations
-  useEffect(() => {
-    if (currentMapFeatured) {
-      setShowSpeechBubble(true);
-      const timer = setTimeout(() => setShowSpeechBubble(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentMapFeatured?.id]);
+  // Get tier config for current property
+  const getTierConfig = useCallback(() => {
+    const tier = currentMapFeatured?.promotionTier || 'featured';
+    return TIER_CONFIG[tier] || TIER_CONFIG.featured;
+  }, [currentMapFeatured?.promotionTier]);
 
-  // Wave animation trigger
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsWaving(true);
-      setTimeout(() => setIsWaving(false), 1000);
-    }, 10000); // Wave every 10 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Navigate map to featured property
-  const handleNavigateToProperty = useCallback(() => {
-    if (currentMapFeatured && currentMapFeatured.lat && currentMapFeatured.lng) {
-      map.flyTo([currentMapFeatured.lat, currentMapFeatured.lng], 15, {
-        duration: 1.5,
+  // Fly map to property location
+  const flyToProperty = useCallback((property: typeof currentMapFeatured) => {
+    if (property && property.lat && property.lng) {
+      setIsAnimating(true);
+      map.flyTo([property.lat, property.lng], 15, {
+        duration: 1.2,
+        easeLinearity: 0.25,
       });
+      setTimeout(() => setIsAnimating(false), 1200);
+    }
+  }, [map]);
+
+  // Navigate to next property and fly to it
+  const handleNext = useCallback(() => {
+    navigateToNextFeatured();
+    // Get the next property (after state update)
+    const nextIndex = (currentFeaturedIndex + 1) % highlightedProperties.length;
+    const nextProperty = highlightedProperties[nextIndex];
+    if (nextProperty) {
+      flyToProperty(nextProperty);
+    }
+  }, [navigateToNextFeatured, currentFeaturedIndex, highlightedProperties, flyToProperty]);
+
+  // Navigate to previous property and fly to it
+  const handlePrev = useCallback(() => {
+    navigateToPrevFeatured();
+    // Get the previous property (after state update)
+    const prevIndex = currentFeaturedIndex === 0 ? highlightedProperties.length - 1 : currentFeaturedIndex - 1;
+    const prevProperty = highlightedProperties[prevIndex];
+    if (prevProperty) {
+      flyToProperty(prevProperty);
+    }
+  }, [navigateToPrevFeatured, currentFeaturedIndex, highlightedProperties, flyToProperty]);
+
+  // View property details
+  const handleViewProperty = useCallback(() => {
+    if (currentMapFeatured) {
+      flyToProperty(currentMapFeatured);
       onPropertySelect(currentMapFeatured.id);
     }
-  }, [currentMapFeatured, map, onPropertySelect]);
+  }, [currentMapFeatured, flyToProperty, onPropertySelect]);
 
-  // Get tier color
-  const getTierColor = () => {
-    if (!currentMapFeatured?.promotionTier) return PROMOTION_TIER_COLORS.featured;
-    return PROMOTION_TIER_COLORS[currentMapFeatured.promotionTier] || PROMOTION_TIER_COLORS.featured;
-  };
+  // Auto-show panel initially
+  useEffect(() => {
+    if (highlightedProperties.length > 0 && !showPanel) {
+      const timer = setTimeout(() => setShowPanel(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedProperties.length]);
 
-  // Get tier badge
-  const getTierBadge = () => {
-    if (!currentMapFeatured?.promotionTier) return null;
-    const badges: Record<string, string> = {
-      premium: '👑',
-      highlight: '💎',
-      featured: '⭐',
-    };
-    return badges[currentMapFeatured.promotionTier];
-  };
+  // Fly to first property when panel opens
+  useEffect(() => {
+    if (showPanel && currentMapFeatured && !isAnimating) {
+      flyToProperty(currentMapFeatured);
+    }
+  }, [showPanel]);
 
   if (highlightedProperties.length === 0) {
-    return null; // Don't render if no highlighted properties
+    return null;
   }
 
+  const tierConfig = getTierConfig();
+
   return (
-    <div className="absolute top-20 right-4 z-[1000] flex flex-col items-end gap-2">
-      {/* Speech Bubble */}
-      {showSpeechBubble && currentMapFeatured?.agentRecommendation && (
+    <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-3">
+      {/* Recommendation Panel */}
+      {showPanel && currentMapFeatured && (
         <div
-          className="animate-fade-in max-w-[280px] bg-white rounded-2xl shadow-xl p-4 relative"
+          className="animate-fade-in w-[320px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden"
           style={{
-            borderLeft: `4px solid ${getTierColor()}`,
+            border: `2px solid ${tierConfig.color}`,
+            boxShadow: `0 8px 32px ${tierConfig.color}30, 0 4px 16px rgba(0,0,0,0.1)`,
           }}
         >
-          {/* Close button */}
-          <button
-            onClick={() => setShowSpeechBubble(false)}
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Tier badge */}
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">{getTierBadge()}</span>
-            <span
-              className="text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white"
-              style={{ backgroundColor: getTierColor() }}
-            >
-              {currentMapFeatured.promotionTier}
-            </span>
-          </div>
-
-          {/* Recommendation text */}
-          <p className="text-sm text-gray-700 mb-3">
-            {currentMapFeatured.agentRecommendation}
-          </p>
-
-          {/* Property preview */}
-          <div
-            className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-            onClick={handleNavigateToProperty}
-          >
-            <img
-              src={currentMapFeatured.imageUrl}
-              alt={currentMapFeatured.title || currentMapFeatured.address}
-              className="w-12 h-12 rounded-lg object-cover"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">
-                {currentMapFeatured.title || currentMapFeatured.address}
-              </p>
-              <p className="text-xs text-gray-500">{currentMapFeatured.city}</p>
+          {/* Header with gradient */}
+          <div className={`bg-gradient-to-r ${tierConfig.gradient} px-4 py-3 flex items-center justify-between`}>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-lg">{tierConfig.icon}</span>
+              </div>
+              <div>
+                <p className="text-white text-xs font-medium opacity-90">Agent Recommendation</p>
+                <p className="text-white font-bold text-sm">{tierConfig.label} Listing</p>
+              </div>
             </div>
-            <span className="text-primary font-bold">
-              €{(currentMapFeatured.price / 1000).toFixed(0)}K
-            </span>
+            <button
+              onClick={() => setShowPanel(false)}
+              className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+            >
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
-          {/* Navigation arrows */}
-          {highlightedProperties.length > 1 && (
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+          {/* Property Card */}
+          <div className="p-4">
+            {/* Image */}
+            <div className="relative rounded-xl overflow-hidden mb-3 group cursor-pointer" onClick={handleViewProperty}>
+              <img
+                src={currentMapFeatured.imageUrl}
+                alt={currentMapFeatured.title || currentMapFeatured.address}
+                className="w-full h-36 object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+              {/* Price badge */}
+              <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg">
+                <span className="text-lg font-bold text-gray-900">
+                  {formatPrice(currentMapFeatured.price, currentMapFeatured.country)}
+                </span>
+              </div>
+
+              {/* Urgent badge */}
+              {currentMapFeatured.hasUrgentBadge && (
+                <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md animate-pulse flex items-center gap-1">
+                  <span>🔥</span> URGENT
+                </div>
+              )}
+
+              {/* View overlay */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white font-semibold text-sm bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
+                  View Property
+                </span>
+              </div>
+            </div>
+
+            {/* Property Info */}
+            <div className="mb-3">
+              <h3 className="font-bold text-gray-900 text-base mb-1 line-clamp-1">
+                {currentMapFeatured.title || currentMapFeatured.address}
+              </h3>
+              <p className="text-gray-500 text-sm flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {currentMapFeatured.city}, {currentMapFeatured.country}
+              </p>
+            </div>
+
+            {/* Property Stats */}
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              <div className="text-center bg-gray-50 rounded-lg py-2">
+                <div className="font-bold text-gray-900">{currentMapFeatured.beds}</div>
+                <div className="text-[10px] text-gray-500">Beds</div>
+              </div>
+              <div className="text-center bg-gray-50 rounded-lg py-2">
+                <div className="font-bold text-gray-900">{currentMapFeatured.baths}</div>
+                <div className="text-[10px] text-gray-500">Baths</div>
+              </div>
+              <div className="text-center bg-gray-50 rounded-lg py-2">
+                <div className="font-bold text-gray-900">{currentMapFeatured.livingRooms}</div>
+                <div className="text-[10px] text-gray-500">Living</div>
+              </div>
+              <div className="text-center bg-gray-50 rounded-lg py-2 border border-gray-200">
+                <div className="font-bold text-gray-900">{currentMapFeatured.sqft}</div>
+                <div className="text-[10px] text-gray-500">m²</div>
+              </div>
+            </div>
+
+            {/* Recommendation Text */}
+            {currentMapFeatured.agentRecommendation && (
+              <div className="bg-gray-50 rounded-xl p-3 mb-4 border-l-4" style={{ borderColor: tierConfig.color }}>
+                <p className="text-sm text-gray-700 italic">
+                  "{currentMapFeatured.agentRecommendation}"
+                </p>
+              </div>
+            )}
+
+            {/* Navigation Controls */}
+            <div className="flex items-center justify-between">
               <button
-                onClick={navigateToPrevFeatured}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                onClick={handlePrev}
+                disabled={isAnimating}
+                className="flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
+                <span className="text-sm font-medium">Prev</span>
               </button>
-              <span className="text-xs text-gray-400">
-                {currentFeaturedIndex + 1} / {highlightedProperties.length}
-              </span>
+
+              {/* Counter with dots */}
+              <div className="flex items-center gap-1.5">
+                {highlightedProperties.slice(0, 5).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      idx === currentFeaturedIndex % 5
+                        ? 'w-4'
+                        : 'bg-gray-300'
+                    }`}
+                    style={{
+                      backgroundColor: idx === currentFeaturedIndex % 5 ? tierConfig.color : undefined
+                    }}
+                  />
+                ))}
+                {highlightedProperties.length > 5 && (
+                  <span className="text-xs text-gray-400 ml-1">
+                    +{highlightedProperties.length - 5}
+                  </span>
+                )}
+              </div>
+
               <button
-                onClick={navigateToNextFeatured}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                onClick={handleNext}
+                disabled={isAnimating}
+                className="flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span className="text-sm font-medium">Next</span>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
-          )}
+          </div>
 
-          {/* Speech bubble tail */}
+          {/* Footer */}
           <div
-            className="absolute -right-2 bottom-6 w-4 h-4 bg-white transform rotate-45"
-            style={{ boxShadow: '2px 2px 4px rgba(0,0,0,0.1)' }}
-          />
+            className="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between"
+          >
+            <span className="text-xs text-gray-500">
+              {currentFeaturedIndex + 1} of {highlightedProperties.length} promoted listings
+            </span>
+            <button
+              onClick={handleViewProperty}
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg text-white bg-gradient-to-r ${tierConfig.gradient} hover:opacity-90 transition-opacity`}
+            >
+              View Details
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Agent Avatar */}
-      <div
-        className={`relative cursor-pointer transition-all duration-300 ${
-          isExpanded ? 'scale-110' : 'scale-100'
-        }`}
+      {/* Floating Agent Button */}
+      <button
+        onClick={() => setShowPanel(!showPanel)}
         onMouseEnter={() => setIsExpanded(true)}
         onMouseLeave={() => setIsExpanded(false)}
-        onClick={() => setShowSpeechBubble(!showSpeechBubble)}
+        className={`relative transition-all duration-300 ${isExpanded ? 'scale-110' : 'scale-100'}`}
       >
-        {/* Glowing ring animation */}
+        {/* Pulsing ring */}
         <div
           className="absolute inset-0 rounded-full animate-ping opacity-30"
-          style={{
-            backgroundColor: getTierColor(),
-            animationDuration: '2s',
-          }}
+          style={{ backgroundColor: tierConfig.color, animationDuration: '2s' }}
         />
 
-        {/* 3D Agent Avatar Container */}
+        {/* Main button */}
         <div
-          className="relative w-16 h-16 rounded-full bg-gradient-to-br from-white to-gray-100 shadow-xl flex items-center justify-center overflow-hidden"
+          className="relative w-14 h-14 rounded-full bg-white shadow-xl flex items-center justify-center overflow-hidden"
           style={{
-            border: `3px solid ${getTierColor()}`,
-            boxShadow: `0 4px 20px ${getTierColor()}40, 0 0 40px ${getTierColor()}20`,
+            border: `3px solid ${tierConfig.color}`,
+            boxShadow: `0 4px 20px ${tierConfig.color}40`,
           }}
         >
-          {/* 3D Agent SVG */}
-          <svg
-            viewBox="0 0 100 100"
-            className={`w-14 h-14 transition-transform duration-300 ${
-              isWaving ? 'animate-bounce' : ''
-            }`}
-          >
-            {/* Head */}
-            <defs>
-              <linearGradient id="skinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: '#FFE0BD' }} />
-                <stop offset="100%" style={{ stopColor: '#F5C9A8' }} />
-              </linearGradient>
-              <linearGradient id="hairGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: '#4A3C31' }} />
-                <stop offset="100%" style={{ stopColor: '#2C2416' }} />
-              </linearGradient>
-              <linearGradient id="suitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: '#1E3A5F' }} />
-                <stop offset="100%" style={{ stopColor: '#0F2942' }} />
-              </linearGradient>
-            </defs>
+          {/* Agent icon */}
+          <div className="text-3xl">🏠</div>
 
-            {/* Body/Suit */}
-            <ellipse cx="50" cy="95" rx="30" ry="20" fill="url(#suitGradient)" />
-
-            {/* Tie */}
-            <path d="M50 65 L53 75 L50 90 L47 75 Z" fill="#C41E3A" />
-
-            {/* Collar */}
-            <path d="M35 65 L50 60 L65 65 L60 70 L50 65 L40 70 Z" fill="white" />
-
-            {/* Neck */}
-            <rect x="45" y="55" width="10" height="12" fill="url(#skinGradient)" />
-
-            {/* Face */}
-            <ellipse cx="50" cy="40" rx="22" ry="25" fill="url(#skinGradient)" />
-
-            {/* Hair */}
-            <path
-              d="M28 35 Q30 15 50 12 Q70 15 72 35 Q70 25 50 22 Q30 25 28 35"
-              fill="url(#hairGradient)"
-            />
-
-            {/* Eyes */}
-            <ellipse cx="42" cy="38" rx="4" ry="4" fill="white" />
-            <ellipse cx="58" cy="38" rx="4" ry="4" fill="white" />
-            <circle cx="43" cy="38" r="2" fill="#2C3E50" />
-            <circle cx="59" cy="38" r="2" fill="#2C3E50" />
-            <circle cx="43.5" cy="37.5" r="0.8" fill="white" />
-            <circle cx="59.5" cy="37.5" r="0.8" fill="white" />
-
-            {/* Eyebrows */}
-            <path d="M36 32 Q42 30 48 32" stroke="#4A3C31" strokeWidth="1.5" fill="none" />
-            <path d="M52 32 Q58 30 64 32" stroke="#4A3C31" strokeWidth="1.5" fill="none" />
-
-            {/* Nose */}
-            <path d="M50 42 L52 48 L48 48" fill="none" stroke="#D4A574" strokeWidth="1" />
-
-            {/* Smile */}
-            <path
-              d="M42 52 Q50 58 58 52"
-              fill="none"
-              stroke="#C41E3A"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-
-            {/* Waving hand (when waving) */}
-            {isWaving && (
-              <g className="animate-wave">
-                <ellipse cx="78" cy="45" rx="6" ry="8" fill="url(#skinGradient)" />
-                <line x1="65" y1="60" x2="78" y2="45" stroke="url(#skinGradient)" strokeWidth="6" />
-              </g>
-            )}
-
-            {/* Badge on suit */}
-            <circle cx="40" cy="75" r="4" fill="#FFD700" />
-            <text x="40" y="77" fontSize="5" textAnchor="middle" fill="#8B4513">★</text>
-          </svg>
-
-          {/* Tier indicator badge */}
+          {/* Tier badge */}
           <div
-            className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-lg"
-            style={{ backgroundColor: getTierColor() }}
+            className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-md"
+            style={{ backgroundColor: tierConfig.color }}
           >
-            {getTierBadge()}
+            {tierConfig.icon}
           </div>
         </div>
 
-        {/* "Click me" hint on hover */}
-        {isExpanded && !showSpeechBubble && (
-          <div className="absolute -left-24 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap animate-fade-in">
-            {t('property:map.agentHint', 'Click for recommendations!')}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-2 h-2 bg-gray-800 transform rotate-45" />
-          </div>
-        )}
+        {/* Count badge */}
+        <div className="absolute -bottom-1 -left-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
+          {highlightedProperties.length}
+        </div>
 
-        {/* Highlight count badge */}
-        {highlightedProperties.length > 0 && (
-          <div className="absolute -bottom-1 -left-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
-            {highlightedProperties.length}
+        {/* Tooltip */}
+        {isExpanded && !showPanel && (
+          <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap animate-fade-in">
+            {highlightedProperties.length} Premium Listings
+            <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
           </div>
         )}
-      </div>
+      </button>
     </div>
   );
 };
 
-// Export inner version for use inside MapContainer
 export const MapAgentAvatarInner = MapAgentAvatar;
-
 export default MapAgentAvatar;
