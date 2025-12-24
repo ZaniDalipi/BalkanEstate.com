@@ -150,8 +150,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const handleSuggestionClick = (suggestion: NominatimResult) => {
         setSuggestions([]);
 
-        // Clear the search input - we're navigating to the location visually
-        const newFilters = { ...filters, query: '' };
+        // Keep a shortened version of the location in the search bar
+        // Use the first part of the display name (city/area name)
+        const shortName = suggestion.display_name.split(',').slice(0, 2).join(',').trim();
+        const newFilters = { ...filters, query: shortName };
 
         updateSearchPageState({
             filters: newFilters,
