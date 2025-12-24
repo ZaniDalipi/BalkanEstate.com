@@ -587,8 +587,31 @@ export const updateProperty = async (
       console.warn(`⚠️ Blocked attempt to change immutable fields: ${attemptedImmutableChanges.join(', ')}`);
     }
 
-    // Update property with only mutable fields
-    Object.assign(property, updateData);
+    // IMPORTANT: Only update fields that are explicitly provided and not undefined
+    // This preserves existing data when fields are not included in the update
+    const fieldsToUpdate = [
+      'status', 'title', 'price', 'address', 'city', 'country',
+      'beds', 'baths', 'livingRooms', 'sqft', 'yearBuilt', 'parking',
+      'description', 'specialFeatures', 'materials', 'amenities',
+      'tourUrl', 'virtualTour360Url', 'hasVirtualTour360',
+      'imageUrl', 'images', 'lat', 'lng',
+      'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl',
+      'furnishing', 'heatingType', 'condition', 'viewType', 'energyRating',
+      'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
+      'hasAirConditioning', 'hasPool', 'petsAllowed',
+      'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
+    ];
+
+    let updatedFields: string[] = [];
+    fieldsToUpdate.forEach(field => {
+      if (updateData[field] !== undefined) {
+        (property as any)[field] = updateData[field];
+        updatedFields.push(field);
+      }
+    });
+
+    console.log(`📝 Updated property ${property._id} fields: ${updatedFields.join(', ') || 'none'}`);
+
     await property.save();
 
     // Populate seller info

@@ -402,7 +402,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 propertyType: propertyToEdit.propertyType || 'house',
                 floorNumber: propertyToEdit.floorNumber || 0,
                 totalFloors: propertyToEdit.totalFloors || 0,
-                image_tags: (propertyToEdit.images || []).map((img, index) => ({ index, tag: img.tag })),
+                image_tags: (propertyToEdit.images || []).map((img, index) => ({
+                    index,
+                    tag: (typeof img === 'object' && img?.tag) || 'other'
+                })),
                 lat: originalLat,
                 lng: originalLng,
                 hasBalcony: propertyToEdit.hasBalcony,
@@ -430,8 +433,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 setAvailableCities(country.cities);
             }
 
-            const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => ({ file: null, previewUrl: img.url }));
+            // Robustly load existing images - handle both object and string formats
+            const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => {
+                // Handle both {url: string} objects and plain string URLs
+                const imageUrl = typeof img === 'string' ? img : (img?.url || img?.previewUrl || '');
+                return { file: null, previewUrl: imageUrl };
+            }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
+            console.log(`📸 Loaded ${existingImages.length} existing images for editing`);
             if (propertyToEdit.floorplanUrl) {
                 setFloorplanImage({ file: null, previewUrl: propertyToEdit.floorplanUrl });
             }
@@ -907,7 +916,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             const newProperty: Property = {
                 id: propertyToEdit ? propertyToEdit.id : `prop-${Date.now()}`,
                 sellerId: currentUser.id,
-                status: 'active',
+                status: propertyToEdit ? propertyToEdit.status : 'active',
                 title: listingData.title.trim() || undefined,
                 price: Number(listingData.price),
                 address: finalAddress,
