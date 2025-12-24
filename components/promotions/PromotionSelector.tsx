@@ -298,22 +298,110 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
   const priceInfo = calculateFinalPrice();
   const tiers = tiersData.tiers;
 
+  // Tier-specific colors for extension mode
+  const extensionTierStyles = {
+    featured: {
+      headerGradient: 'from-violet-500 to-purple-600',
+      iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500',
+      lightBg: 'from-violet-50 to-purple-50',
+      border: 'border-violet-200',
+      selectedBorder: 'border-violet-500',
+      text: 'text-violet-600',
+      selectedBg: 'from-violet-100 to-purple-100',
+      icon: '⭐',
+      tierName: 'Featured',
+    },
+    highlight: {
+      headerGradient: 'from-sky-500 to-cyan-600',
+      iconBg: 'bg-gradient-to-br from-sky-400 to-cyan-500',
+      lightBg: 'from-sky-50 to-cyan-50',
+      border: 'border-sky-200',
+      selectedBorder: 'border-sky-500',
+      text: 'text-sky-600',
+      selectedBg: 'from-sky-100 to-cyan-100',
+      icon: '💎',
+      tierName: 'Highlight',
+    },
+    premium: {
+      headerGradient: 'from-amber-500 to-yellow-500',
+      iconBg: 'bg-gradient-to-br from-amber-400 to-yellow-500',
+      lightBg: 'from-amber-50 to-yellow-50',
+      border: 'border-amber-200',
+      selectedBorder: 'border-amber-500',
+      text: 'text-amber-600',
+      selectedBg: 'from-amber-100 to-yellow-100',
+      icon: '👑',
+      tierName: 'Premium',
+    },
+  };
+
+  const extStyle = currentTier ? extensionTierStyles[currentTier] : extensionTierStyles.featured;
+
+  // Calculate new end date for extension preview
+  const calculateNewEndDate = (): Date => {
+    const baseDate = currentEndDate ? new Date(currentEndDate) : new Date();
+    return new Date(baseDate.getTime() + selectedDuration * 24 * 60 * 60 * 1000);
+  };
+
   return (
     <div className={inModal ? "w-full" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
-      {/* Header Section */}
-      <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
-        <div className={`inline-block ${inModal ? 'p-2' : 'p-3'} bg-gradient-to-br from-amber-100 to-orange-100 rounded-full mb-3 shadow-lg`}>
-          <span className={inModal ? 'text-2xl' : 'text-4xl'}>{isExtension ? '⏰' : '🚀'}</span>
+      {/* Header Section - Enhanced for Extension Mode */}
+      {isExtension ? (
+        <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
+          {/* Tier Badge */}
+          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${extStyle.headerGradient} text-white text-sm font-semibold mb-4 shadow-lg`}>
+            <span>{extStyle.icon}</span>
+            <span>{extStyle.tierName} Promotion</span>
+          </div>
+
+          <div className={`inline-block p-3 ${extStyle.iconBg} rounded-2xl mb-4 shadow-xl`}>
+            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+
+          <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold text-gray-900 mb-3`}>
+            Extend Your Promotion
+          </h2>
+
+          {/* Current Status Card */}
+          <div className={`inline-flex items-center gap-4 bg-gradient-to-r ${extStyle.lightBg} border ${extStyle.border} rounded-xl px-5 py-3 shadow-sm`}>
+            <div className="text-left">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Current End Date</p>
+              <p className="text-lg font-bold text-gray-900">
+                {currentEndDate ? new Date(currentEndDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                }) : 'N/A'}
+              </p>
+            </div>
+            <div className={`w-px h-10 bg-gradient-to-b ${extStyle.headerGradient}`}></div>
+            <div className="text-left">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">New End Date</p>
+              <p className={`text-lg font-bold ${extStyle.text}`}>
+                {calculateNewEndDate().toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </p>
+            </div>
+          </div>
         </div>
-        <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent mb-2`}>
-          {isExtension ? 'Extend Your Promotion' : 'Promote Your Listing'}
-        </h2>
-        <p className={`text-neutral-600 ${inModal ? 'text-sm' : 'text-base md:text-lg'} max-w-2xl mx-auto`}>
-          {isExtension
-            ? `Add more days to your ${currentTier} promotion. Current end date: ${currentEndDate ? new Date(currentEndDate).toLocaleDateString() : 'N/A'}`
-            : 'Get up to 5x more views and inquiries with promoted placement. Choose the perfect plan for your needs.'}
-        </p>
-      </div>
+      ) : (
+        <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
+          <div className={`inline-block ${inModal ? 'p-2' : 'p-3'} bg-gradient-to-br from-amber-100 to-orange-100 rounded-full mb-3 shadow-lg`}>
+            <span className={inModal ? 'text-2xl' : 'text-4xl'}>🚀</span>
+          </div>
+          <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent mb-2`}>
+            Promote Your Listing
+          </h2>
+          <p className={`text-neutral-600 ${inModal ? 'text-sm' : 'text-base md:text-lg'} max-w-2xl mx-auto`}>
+            Get up to 5x more views and inquiries with promoted placement. Choose the perfect plan for your needs.
+          </p>
+        </div>
+      )}
 
       {successMessage && (
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
@@ -333,12 +421,15 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       )}
 
-      {/* Benefits Banner */}
-      <div className={`bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl ${inModal ? 'p-4 mb-5' : 'p-6 mb-8'}`}>
+      {/* Benefits Banner - Styled based on mode */}
+      <div className={`${isExtension
+        ? `bg-gradient-to-r ${extStyle.lightBg} border ${extStyle.border}`
+        : 'bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20'
+      } rounded-xl ${inModal ? 'p-4 mb-5' : 'p-6 mb-8'}`}>
         <div className={`grid ${inModal ? 'grid-cols-3 gap-3' : 'md:grid-cols-3 gap-6'}`}>
           <div className="flex items-start gap-2">
-            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} bg-primary/20 rounded-lg flex items-center justify-center`}>
-              <span className={inModal ? 'text-sm' : 'text-xl'}>👁️</span>
+            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} ${isExtension ? extStyle.iconBg : 'bg-primary/20'} rounded-lg flex items-center justify-center`}>
+              <span className={`${inModal ? 'text-sm' : 'text-xl'} ${isExtension ? 'filter drop-shadow' : ''}`}>👁️</span>
             </div>
             <div>
               <h3 className={`font-semibold text-neutral-900 ${inModal ? 'text-xs' : 'mb-1'}`}>Higher Visibility</h3>
@@ -346,8 +437,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} bg-primary/20 rounded-lg flex items-center justify-center`}>
-              <span className={inModal ? 'text-sm' : 'text-xl'}>📱</span>
+            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} ${isExtension ? extStyle.iconBg : 'bg-primary/20'} rounded-lg flex items-center justify-center`}>
+              <span className={`${inModal ? 'text-sm' : 'text-xl'} ${isExtension ? 'filter drop-shadow' : ''}`}>📱</span>
             </div>
             <div>
               <h3 className={`font-semibold text-neutral-900 ${inModal ? 'text-xs' : 'mb-1'}`}>More Inquiries</h3>
@@ -355,8 +446,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             </div>
           </div>
           <div className="flex items-start gap-2">
-            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} bg-primary/20 rounded-lg flex items-center justify-center`}>
-              <span className={inModal ? 'text-sm' : 'text-xl'}>⚡</span>
+            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} ${isExtension ? extStyle.iconBg : 'bg-primary/20'} rounded-lg flex items-center justify-center`}>
+              <span className={`${inModal ? 'text-sm' : 'text-xl'} ${isExtension ? 'filter drop-shadow' : ''}`}>⚡</span>
             </div>
             <div>
               <h3 className={`font-semibold text-neutral-900 ${inModal ? 'text-xs' : 'mb-1'}`}>Sell Faster</h3>
@@ -466,11 +557,17 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
 
       {(selectedTier || isExtension) && (
         <>
-          {/* Duration Selection */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm">
+          {/* Duration Selection - Enhanced for Extension */}
+          <div className={`bg-white rounded-xl border ${isExtension ? extStyle.border : 'border-gray-200'} p-5 mb-4 shadow-sm`}>
             <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">⏱️</span>
-              {isExtension ? 'Add Days to Promotion' : 'Select Duration'}
+              <span className={`w-8 h-8 ${isExtension ? extStyle.iconBg : 'bg-primary/10'} rounded-lg flex items-center justify-center`}>
+                {isExtension ? (
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : '⏱️'}
+              </span>
+              {isExtension ? 'Choose Extension Duration' : 'Select Duration'}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {([7, 15, 30, 60, 90] as PromotionDuration[]).map((duration) => {
@@ -480,18 +577,32 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                   (p) => p.tierId === tierToUse && p.duration === duration
                 );
 
+                // Dynamic border and background colors based on tier for extension mode
+                const durationStyle = isExtension && isSelected
+                  ? `${extStyle.selectedBorder} bg-gradient-to-br ${extStyle.selectedBg} shadow-md`
+                  : isSelected
+                    ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50';
+
                 return (
                   <button
                     key={duration}
                     onClick={() => setSelectedDuration(duration)}
-                    className={`p-3 rounded-xl border-2 transition-all text-sm ${
-                      isSelected
-                        ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 text-gray-900 shadow-md'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 text-gray-700'
-                    }`}
+                    className={`p-3 rounded-xl border-2 transition-all text-sm ${durationStyle} text-gray-900`}
                   >
                     <div className="font-bold">{duration} days</div>
-                    <div className={`text-xs font-semibold mt-1 ${isSelected ? 'text-primary' : 'text-gray-500'}`}>€{pricing?.price || 0}</div>
+                    <div className={`text-xs font-semibold mt-1 ${
+                      isSelected
+                        ? isExtension ? extStyle.text : 'text-primary'
+                        : 'text-gray-500'
+                    }`}>
+                      €{pricing?.price || 0}
+                    </div>
+                    {isExtension && isSelected && (
+                      <div className="text-[10px] text-gray-400 mt-1">
+                        +{duration} days
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -604,10 +715,23 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             </div>
           )}
 
-          {/* Price Summary */}
-          <div className="bg-neutral-50 rounded-lg border border-neutral-300 p-5 mb-6">
-            <h3 className="text-sm font-semibold text-neutral-800 mb-3">Summary</h3>
+          {/* Price Summary - Enhanced for Extension */}
+          <div className={`rounded-xl border p-5 mb-6 ${
+            isExtension
+              ? `bg-gradient-to-br ${extStyle.lightBg} ${extStyle.border}`
+              : 'bg-neutral-50 border-neutral-300'
+          }`}>
+            <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
+              {isExtension && <span>{extStyle.icon}</span>}
+              {isExtension ? 'Extension Summary' : 'Summary'}
+            </h3>
             <div className="space-y-2 text-sm">
+              {isExtension && (
+                <div className="flex justify-between text-gray-600">
+                  <span>Duration:</span>
+                  <span className="font-semibold">+{selectedDuration} days</span>
+                </div>
+              )}
               {priceInfo.original !== priceInfo.final && (
                 <div className="flex justify-between text-neutral-600">
                   <span>Original Price:</span>
@@ -620,19 +744,24 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                   <span>-€{priceInfo.savings.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-lg font-bold text-neutral-900 pt-2 border-t border-neutral-300">
+              <div className={`flex justify-between text-lg font-bold text-neutral-900 pt-3 border-t ${
+                isExtension ? extStyle.border : 'border-neutral-300'
+              }`}>
                 <span>Total:</span>
-                <span>
+                <span className={isExtension ? extStyle.text : ''}>
                   €{priceInfo.final.toFixed(2)}
                   {useAgencyAllocation && priceInfo.final === 0 && (
                     <span className="text-sm text-green-600 ml-2 font-normal">(Free)</span>
+                  )}
+                  {isExtension && priceInfo.final === 0 && !useAgencyAllocation && couponValidation?.isValid && (
+                    <span className="text-sm text-green-600 ml-2 font-normal">(Free with coupon)</span>
                   )}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons - Enhanced for Extension */}
           <div className="flex gap-3">
             {onBack && (
               <button
@@ -646,14 +775,22 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             <button
               onClick={onSkip}
               disabled={isProcessing}
-              className="px-6 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-50 shadow-sm"
+              className={`px-6 py-3.5 bg-white border text-gray-700 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-sm ${
+                isExtension
+                  ? `${extStyle.border} hover:bg-gray-50`
+                  : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+              }`}
             >
               {isExtension ? 'Cancel' : pendingPropertyData ? 'Post Without Promotion' : 'Skip for Now'}
             </button>
             <button
               onClick={handlePurchase}
               disabled={isProcessing || successMessage !== null}
-              className="flex-1 px-6 py-3.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl text-sm font-bold hover:shadow-lg hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+              className={`flex-1 px-6 py-3.5 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md ${
+                isExtension
+                  ? `bg-gradient-to-r ${extStyle.headerGradient}`
+                  : 'bg-gradient-to-r from-primary to-primary-dark'
+              }`}
             >
               {isProcessing ? (
                 <span className="flex items-center justify-center gap-2">
@@ -669,7 +806,14 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                 </span>
               ) : (
                 isExtension
-                  ? `Extend +${selectedDuration} days - €${priceInfo.final.toFixed(2)}`
+                  ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
+                      </svg>
+                      Extend +{selectedDuration} days - €{priceInfo.final.toFixed(2)}
+                    </span>
+                  )
                   : `Continue - €${priceInfo.final.toFixed(2)}`
               )}
             </button>
