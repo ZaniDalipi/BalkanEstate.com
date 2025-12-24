@@ -41,6 +41,7 @@ const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingL
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./components/AdminPanel/AdminDashboard'));
 const ResetPasswordPage = lazy(() => import('./components/auth/ResetPasswordPage'));
+const AnalyticsPage = lazy(() => import('./components/AnalyticsPage'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -118,6 +119,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/create-listing': 'create-listing',
         '/admin': 'admin',
         '/reset-password': 'reset-password',
+        '/analytics': 'analytics',
       };
 
       const view = routeMap[path];
@@ -279,6 +281,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <AdminDashboard />;
       case 'reset-password':
         return <ResetPasswordPage />;
+      case 'analytics':
+        return <AnalyticsPage />;
       case 'search':
       default:
         return <SearchPage onToggleSidebar={onToggleSidebar} />;

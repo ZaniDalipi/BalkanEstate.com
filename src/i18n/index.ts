@@ -39,6 +39,7 @@ import enModals from './locales/en/modals.json';
 import enPayment from './locales/en/payment.json';
 import enSaved from './locales/en/saved.json';
 import enExploreCities from './locales/en/exploreCities.json';
+import enAnalytics from './locales/en/analytics.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -267,6 +268,7 @@ const resources = {
     payment: enPayment,
     saved: enSaved,
     exploreCities: enExploreCities,
+    analytics: enAnalytics,
   },
   sq: {
     common: sqCommon,
@@ -468,7 +470,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities', 'analytics'],
 
     interpolation: {
       escapeValue: false, // React already escapes

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   viewStatsApiClient,
   EntityType,
@@ -6,6 +6,8 @@ import {
   EntityStatsResponse,
   MyPropertiesStatsResponse,
   ComparisonStats,
+  DashboardResponse,
+  ReportResponse,
 } from '../../../data/api/ViewStatsApiClient';
 
 // Query keys for React Query cache management
@@ -17,6 +19,8 @@ export const viewStatsKeys = {
   myAgent: (period: Period) => [...viewStatsKeys.all, 'myAgent', period] as const,
   myAgency: (period: Period) => [...viewStatsKeys.all, 'myAgency', period] as const,
   comparison: () => [...viewStatsKeys.all, 'comparison'] as const,
+  dashboard: () => [...viewStatsKeys.all, 'dashboard'] as const,
+  report: (period: Period) => [...viewStatsKeys.all, 'report', period] as const,
 };
 
 /**
@@ -32,8 +36,8 @@ export function useEntityViewStats(
     queryKey: viewStatsKeys.entity(entityType, entityId || '', period),
     queryFn: () => viewStatsApiClient.getEntityStats(entityType, entityId!, period),
     enabled: enabled && !!entityId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
@@ -86,5 +90,43 @@ export function useViewStatsComparison(enabled = true) {
     enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook to get dashboard overview with all stats
+ */
+export function useDashboardOverview(enabled = true) {
+  return useQuery<DashboardResponse>({
+    queryKey: viewStatsKeys.dashboard(),
+    queryFn: () => viewStatsApiClient.getDashboardOverview(),
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook to generate analytics report (Premium only)
+ */
+export function useAnalyticsReport(period: Period = '30d', enabled = true) {
+  return useQuery<ReportResponse>({
+    queryKey: viewStatsKeys.report(period),
+    queryFn: async () => {
+      const result = await viewStatsApiClient.generateReport(period, 'json');
+      return result as ReportResponse;
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook for downloading CSV report
+ */
+export function useDownloadReport() {
+  return useMutation({
+    mutationFn: (period: Period) => viewStatsApiClient.downloadReportCSV(period),
   });
 }

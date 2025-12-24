@@ -7,6 +7,8 @@ import {
   getMyAgentStats,
   getMyAgencyStats,
   getComparisonStats,
+  generateReport,
+  getDashboardOverview,
 } from '../controllers/viewStatsController';
 import { protect, optionalAuth } from '../middleware/auth';
 
@@ -148,6 +150,49 @@ router.get('/my-agency', protect, getMyAgencyStats);
  *         description: Comparison statistics
  */
 router.get('/comparison', protect, getComparisonStats);
+
+/**
+ * @swagger
+ * /api/view-stats/dashboard:
+ *   get:
+ *     summary: Get dashboard overview with all stats
+ *     tags: [View Statistics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard overview
+ */
+router.get('/dashboard', protect, getDashboardOverview);
+
+/**
+ * @swagger
+ * /api/view-stats/report:
+ *   get:
+ *     summary: Generate analytics report (Premium only)
+ *     tags: [View Statistics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [7d, 30d, 90d]
+ *           default: 30d
+ *       - in: query
+ *         name: format
+ *         schema:
+ *           type: string
+ *           enum: [json, csv]
+ *           default: json
+ *     responses:
+ *       200:
+ *         description: Analytics report
+ *       403:
+ *         description: Premium subscription required
+ */
+router.get('/report', protect, generateReport);
 
 /**
  * @swagger

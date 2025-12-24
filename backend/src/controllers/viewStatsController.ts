@@ -36,17 +36,14 @@ const detectReferrerType = (referrer: string): 'direct' | 'search' | 'social' | 
 
   const lowerReferrer = referrer.toLowerCase();
 
-  // Search engines
   if (/google|bing|yahoo|duckduckgo|baidu|yandex/i.test(lowerReferrer)) {
     return 'search';
   }
 
-  // Social media
   if (/facebook|twitter|instagram|linkedin|pinterest|tiktok|reddit/i.test(lowerReferrer)) {
     return 'social';
   }
 
-  // Email providers
   if (/mail|outlook|gmail|yahoo.*mail/i.test(lowerReferrer)) {
     return 'email';
   }
@@ -72,14 +69,12 @@ const isUniqueView = async (
     createdAt: { $gte: twentyFourHoursAgo },
   };
 
-  // Check by viewer ID first (logged in users)
   if (viewerId) {
     query.viewerId = viewerId;
     const existingView = await PageView.findOne(query);
     if (existingView) return false;
   }
 
-  // Check by IP hash
   if (ipHash) {
     delete query.viewerId;
     query.ipHash = ipHash;
@@ -87,7 +82,6 @@ const isUniqueView = async (
     if (existingView) return false;
   }
 
-  // Check by session ID
   if (sessionId) {
     delete query.ipHash;
     query.sessionId = sessionId;
@@ -114,32 +108,45 @@ const getEntityModel = (entityType: EntityType) => {
   }
 };
 
+/**
+ * Check if user has premium analytics access
+ */
+const hasPremiumAnalytics = (user: IUser): boolean => {
+  const tier = user.subscription?.tier || 'free';
+  return ['pro', 'agency_owner', 'agency_agent'].includes(tier);
+};
+
+/**
+ * Get subscription tier display info
+ */
+const getSubscriptionInfo = (user: IUser) => {
+  const tier = user.subscription?.tier || 'free';
+  return {
+    tier,
+    isPremium: hasPremiumAnalytics(user),
+    canAccessDetailedStats: hasPremiumAnalytics(user),
+    canAccessReports: hasPremiumAnalytics(user),
+    canAccessInsights: hasPremiumAnalytics(user),
+  };
+};
+
 // @desc    Record a page view
 // @route   POST /api/view-stats/track
 // @access  Public
 export const trackView = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      entityType,
-      entityId,
-      sessionId,
-      referrer,
-      duration,
-    } = req.body;
+    const { entityType, entityId, sessionId, referrer, duration } = req.body;
 
-    // Validate required fields
     if (!entityType || !entityId) {
       res.status(400).json({ message: 'entityType and entityId are required' });
       return;
     }
 
-    // Validate entity type
     if (!['property', 'agent', 'agency'].includes(entityType)) {
       res.status(400).json({ message: 'Invalid entityType' });
       return;
     }
 
-    // Get viewer info
     const viewerId = req.user ? String((req.user as IUser)._id) : undefined;
     const ip = req.headers['x-forwarded-for']?.toString().split(',')[0] || req.ip || '';
     const ipHash = hashIP(ip);
@@ -147,10 +154,8 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
     const deviceType = detectDeviceType(userAgent);
     const referrerType = detectReferrerType(referrer);
 
-    // Check if this is a unique view
     const isUnique = await isUniqueView(entityType, entityId, viewerId, ipHash, sessionId);
 
-    // Create page view record
     const pageView = await PageView.create({
       entityType,
       entityId,
@@ -165,15 +170,12 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
       isUnique,
     });
 
-    // Update entity view count
     const Model = getEntityModel(entityType);
     if (Model) {
       const entity = await Model.findById(entityId);
       if (entity) {
-        // Increment view count
         entity.views = (entity.views || 0) + 1;
 
-        // Update view stats
         if (!entity.viewStats) {
           entity.viewStats = {
             totalViews: 0,
@@ -194,7 +196,6 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
 
         await entity.save();
 
-        // For properties, also update seller stats
         if (entityType === 'property' && entity.sellerId) {
           await incrementViewCount(String(entity.sellerId));
         }
@@ -226,7 +227,6 @@ export const updateViewDuration = async (req: Request, res: Response): Promise<v
     }
 
     await PageView.findByIdAndUpdate(viewId, { duration });
-
     res.json({ success: true });
   } catch (error: any) {
     console.error('Update view duration error:', error);
@@ -234,7 +234,7 @@ export const updateViewDuration = async (req: Request, res: Response): Promise<v
   }
 };
 
-// @desc    Get view statistics for an entity
+// @desc    Get view statistics for an entity (with subscription gating)
 // @route   GET /api/view-stats/:entityType/:entityId
 // @access  Private (owner only)
 export const getEntityStats = async (req: Request, res: Response): Promise<void> => {
@@ -247,13 +247,14 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Validate entity type
+    const currentUser = req.user as IUser;
+    const subscriptionInfo = getSubscriptionInfo(currentUser);
+
     if (!['property', 'agent', 'agency'].includes(entityType)) {
       res.status(400).json({ message: 'Invalid entityType' });
       return;
     }
 
-    // Get the entity and verify ownership
     const Model = getEntityModel(entityType as EntityType);
     if (!Model) {
       res.status(400).json({ message: 'Invalid entity type' });
@@ -266,8 +267,7 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Check ownership based on entity type
-    const userId = String((req.user as IUser)._id);
+    const userId = String(currentUser._id);
     let isOwner = false;
 
     if (entityType === 'property') {
@@ -284,7 +284,6 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Calculate date range based on period
     let startDate: Date;
     const endDate = new Date();
 
@@ -305,7 +304,41 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
         startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     }
 
-    // Aggregate view statistics
+    const basicStats = await PageView.aggregate([
+      {
+        $match: {
+          entityType,
+          entityId: entity._id,
+          createdAt: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalViews: { $sum: 1 },
+          uniqueViews: { $sum: { $cond: ['$isUnique', 1, 0] } },
+        },
+      },
+    ]);
+
+    // For FREE users, return only basic view count
+    if (!subscriptionInfo.isPremium) {
+      res.json({
+        entityType,
+        entityId,
+        period,
+        subscriptionInfo,
+        stats: {
+          totalViews: basicStats[0]?.totalViews || entity.views || 0,
+          uniqueViews: basicStats[0]?.uniqueViews || 0,
+        },
+        isLimited: true,
+        upgradeMessage: 'Upgrade to Pro to access detailed analytics, traffic sources, device breakdown, and daily trends.',
+      });
+      return;
+    }
+
+    // Full stats for PREMIUM users
     const viewStats = await PageView.aggregate([
       {
         $match: {
@@ -332,7 +365,6 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       },
     ]);
 
-    // Get daily views for chart
     const dailyViews = await PageView.aggregate([
       {
         $match: {
@@ -351,7 +383,23 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       { $sort: { _id: 1 } },
     ]);
 
-    // Get top referrers
+    const hourlyDistribution = await PageView.aggregate([
+      {
+        $match: {
+          entityType,
+          entityId: entity._id,
+          createdAt: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $hour: '$createdAt' },
+          views: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
     const topReferrers = await PageView.aggregate([
       {
         $match: {
@@ -389,6 +437,7 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       entityType,
       entityId,
       period,
+      subscriptionInfo,
       stats: {
         ...stats,
         deviceBreakdown: {
@@ -405,11 +454,13 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
         },
       },
       dailyViews,
+      hourlyDistribution,
       topReferrers,
       entityViewStats: entity.viewStats || {
         totalViews: entity.views || 0,
         uniqueViews: 0,
       },
+      isLimited: false,
     });
   } catch (error: any) {
     console.error('Get entity stats error:', error);
@@ -417,7 +468,111 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// @desc    Get aggregated stats for user's properties
+/**
+ * Generate smart insights for properties
+ */
+function generatePropertyInsights(propertiesStats: any[]): any[] {
+  const insights: any[] = [];
+
+  if (propertiesStats.length === 0) return insights;
+
+  const avgViews = propertiesStats.reduce((sum, p) => sum + p.periodViews, 0) / propertiesStats.length;
+  const promotedProperties = propertiesStats.filter((p) => p.isPromoted);
+  const nonPromotedProperties = propertiesStats.filter((p) => !p.isPromoted);
+
+  // Insight 1: Promotion effectiveness
+  if (promotedProperties.length > 0 && nonPromotedProperties.length > 0) {
+    const promotedAvg = promotedProperties.reduce((sum, p) => sum + p.periodViews, 0) / promotedProperties.length;
+    const nonPromotedAvg = nonPromotedProperties.reduce((sum, p) => sum + p.periodViews, 0) / nonPromotedProperties.length;
+
+    if (promotedAvg > nonPromotedAvg && nonPromotedAvg > 0) {
+      const multiplier = (promotedAvg / nonPromotedAvg).toFixed(1);
+      insights.push({
+        type: 'promotion_success',
+        icon: 'sparkles',
+        title: 'Promotions are working!',
+        message: `Your promoted listings get ${multiplier}x more views than non-promoted ones.`,
+        priority: 'success',
+      });
+    }
+  }
+
+  // Insight 2: Underperforming listings that could benefit from promotion
+  const underperformers = propertiesStats
+    .filter((p) => !p.isPromoted && p.periodViews < avgViews * 0.5 && p.status === 'active')
+    .slice(0, 3);
+
+  if (underperformers.length > 0) {
+    insights.push({
+      type: 'promote_suggestion',
+      icon: 'trending-up',
+      title: 'Boost these listings',
+      message: `${underperformers.length} listing(s) are getting fewer views than average. Consider promoting them to increase visibility.`,
+      priority: 'warning',
+      properties: underperformers.map((p) => ({
+        id: p.propertyId,
+        title: p.title,
+        views: p.periodViews,
+      })),
+    });
+  }
+
+  // Insight 3: Top performer recognition
+  const topPerformer = propertiesStats.reduce((max, p) =>
+    p.periodViews > (max?.periodViews || 0) ? p : max, null);
+
+  if (topPerformer && topPerformer.periodViews > avgViews * 2) {
+    insights.push({
+      type: 'top_performer',
+      icon: 'trophy',
+      title: 'Star listing!',
+      message: `"${topPerformer.title}" is your top performer with ${topPerformer.periodViews} views - ${(topPerformer.periodViews / avgViews).toFixed(1)}x above average!`,
+      priority: 'success',
+      propertyId: topPerformer.propertyId,
+    });
+  }
+
+  // Insight 4: No views warning
+  const noViewsProperties = propertiesStats.filter((p) => p.periodViews === 0 && p.status === 'active');
+  if (noViewsProperties.length > 0) {
+    insights.push({
+      type: 'no_views_warning',
+      icon: 'exclamation',
+      title: 'Listings need attention',
+      message: `${noViewsProperties.length} active listing(s) received no views in this period. Consider updating photos or descriptions.`,
+      priority: 'error',
+      properties: noViewsProperties.slice(0, 5).map((p) => ({
+        id: p.propertyId,
+        title: p.title,
+      })),
+    });
+  }
+
+  // Insight 5: Price vs Views correlation hint
+  const activeProps = propertiesStats.filter((p) => p.status === 'active' && p.price);
+  if (activeProps.length >= 3) {
+    const sortedByPrice = [...activeProps].sort((a, b) => a.price - b.price);
+    const cheapHalf = sortedByPrice.slice(0, Math.floor(sortedByPrice.length / 2));
+    const expensiveHalf = sortedByPrice.slice(Math.floor(sortedByPrice.length / 2));
+
+    const cheapAvgViews = cheapHalf.reduce((sum, p) => sum + p.periodViews, 0) / cheapHalf.length;
+    const expensiveAvgViews = expensiveHalf.reduce((sum, p) => sum + p.periodViews, 0) / expensiveHalf.length;
+
+    if (cheapAvgViews > expensiveAvgViews * 1.5) {
+      insights.push({
+        type: 'price_insight',
+        icon: 'currency',
+        title: 'Price affects visibility',
+        message: 'Lower-priced listings are getting more attention. Consider competitive pricing for better engagement.',
+        priority: 'info',
+      });
+    }
+  }
+
+  return insights;
+}
+
+// @desc    Get aggregated stats for user's properties with insights
 // @route   GET /api/view-stats/my-properties
 // @access  Private
 export const getMyPropertiesStats = async (req: Request, res: Response): Promise<void> => {
@@ -427,11 +582,12 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
       return;
     }
 
-    const userId = String((req.user as IUser)._id);
+    const currentUser = req.user as IUser;
+    const userId = String(currentUser._id);
     const { period = '30d' } = req.query;
+    const subscriptionInfo = getSubscriptionInfo(currentUser);
 
-    // Get user's properties
-    const properties = await Property.find({ sellerId: userId }).select('_id title views viewStats');
+    const properties = await Property.find({ sellerId: userId }).select('_id title views viewStats status isPromoted promotionTier price createdAt');
 
     if (properties.length === 0) {
       res.json({
@@ -439,11 +595,12 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
         totalViews: 0,
         uniqueViews: 0,
         propertiesStats: [],
+        insights: [],
+        subscriptionInfo,
       });
       return;
     }
 
-    // Calculate date range
     let startDate: Date;
     switch (period) {
       case '7d':
@@ -461,7 +618,6 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
 
     const propertyIds = properties.map((p) => p._id);
 
-    // Get aggregated stats for all properties
     const aggregatedStats = await PageView.aggregate([
       {
         $match: {
@@ -475,34 +631,69 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
           _id: '$entityId',
           views: { $sum: 1 },
           uniqueViews: { $sum: { $cond: ['$isUnique', 1, 0] } },
+          avgDuration: { $avg: '$duration' },
         },
       },
     ]);
 
-    // Map stats to properties
     const statsMap = new Map(aggregatedStats.map((s) => [String(s._id), s]));
 
-    const propertiesStats = properties.map((p) => {
-      const stats = statsMap.get(String(p._id)) || { views: 0, uniqueViews: 0 };
+    const propertiesStats = properties.map((p: any) => {
+      const stats = statsMap.get(String(p._id)) || { views: 0, uniqueViews: 0, avgDuration: 0 };
       return {
         propertyId: p._id,
-        title: p.title,
+        title: p.title || 'Untitled Property',
+        status: p.status,
+        isPromoted: p.isPromoted,
+        promotionTier: p.promotionTier,
+        price: p.price,
+        createdAt: p.createdAt,
         totalViews: p.views || 0,
         periodViews: stats.views,
         periodUniqueViews: stats.uniqueViews,
+        avgDuration: Math.round(stats.avgDuration || 0),
       };
     });
 
-    // Calculate totals
     const totalViews = propertiesStats.reduce((sum, p) => sum + p.periodViews, 0);
     const totalUniqueViews = propertiesStats.reduce((sum, p) => sum + p.periodUniqueViews, 0);
+
+    // For FREE users, return basic stats only
+    if (!subscriptionInfo.isPremium) {
+      res.json({
+        period,
+        totalProperties: properties.length,
+        totalViews,
+        uniqueViews: totalUniqueViews,
+        propertiesStats: propertiesStats.map((p) => ({
+          propertyId: p.propertyId,
+          title: p.title,
+          totalViews: p.totalViews,
+          periodViews: p.periodViews,
+        })),
+        subscriptionInfo,
+        isLimited: true,
+        upgradeMessage: 'Upgrade to Pro to access smart insights, property comparisons, and promotion recommendations.',
+      });
+      return;
+    }
+
+    // Generate insights for PREMIUM users
+    const insights = generatePropertyInsights(propertiesStats);
+    const sortedByViews = [...propertiesStats].sort((a, b) => b.periodViews - a.periodViews);
 
     res.json({
       period,
       totalProperties: properties.length,
       totalViews,
       uniqueViews: totalUniqueViews,
-      propertiesStats: propertiesStats.sort((a, b) => b.periodViews - a.periodViews),
+      avgViewsPerProperty: properties.length > 0 ? Math.round(totalViews / properties.length) : 0,
+      propertiesStats: sortedByViews,
+      insights,
+      topPerformers: sortedByViews.slice(0, 3),
+      underperformers: sortedByViews.filter((p) => p.status === 'active').slice(-3).reverse(),
+      subscriptionInfo,
+      isLimited: false,
     });
   } catch (error: any) {
     console.error('Get my properties stats error:', error);
@@ -521,18 +712,14 @@ export const getMyAgentStats = async (req: Request, res: Response): Promise<void
     }
 
     const userId = String((req.user as IUser)._id);
-
-    // Get agent profile
     const agent = await Agent.findOne({ userId });
     if (!agent) {
       res.status(404).json({ message: 'Agent profile not found' });
       return;
     }
 
-    // Forward to getEntityStats
     req.params.entityType = 'agent';
     req.params.entityId = String(agent._id);
-
     return getEntityStats(req, res);
   } catch (error: any) {
     console.error('Get my agent stats error:', error);
@@ -551,8 +738,6 @@ export const getMyAgencyStats = async (req: Request, res: Response): Promise<voi
     }
 
     const userId = String((req.user as IUser)._id);
-
-    // Get agency where user is owner or admin
     const agency = await Agency.findOne({
       $or: [{ ownerId: userId }, { admins: userId }],
     });
@@ -562,10 +747,8 @@ export const getMyAgencyStats = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    // Forward to getEntityStats
     req.params.entityType = 'agency';
     req.params.entityId = String(agency._id);
-
     return getEntityStats(req, res);
   } catch (error: any) {
     console.error('Get my agency stats error:', error);
@@ -583,7 +766,9 @@ export const getComparisonStats = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const userId = String((req.user as IUser)._id);
+    const currentUser = req.user as IUser;
+    const userId = String(currentUser._id);
+    const subscriptionInfo = getSubscriptionInfo(currentUser);
 
     const now = new Date();
     const thisWeekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -591,39 +776,33 @@ export const getComparisonStats = async (req: Request, res: Response): Promise<v
     const thisMonthStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const lastMonthStart = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
-    // Get user's properties
     const properties = await Property.find({ sellerId: userId }).select('_id');
     const propertyIds = properties.map((p) => p._id);
 
-    // Get this week's views
     const thisWeekViews = await PageView.countDocuments({
       entityType: 'property',
       entityId: { $in: propertyIds },
       createdAt: { $gte: thisWeekStart },
     });
 
-    // Get last week's views
     const lastWeekViews = await PageView.countDocuments({
       entityType: 'property',
       entityId: { $in: propertyIds },
       createdAt: { $gte: lastWeekStart, $lt: thisWeekStart },
     });
 
-    // Get this month's views
     const thisMonthViews = await PageView.countDocuments({
       entityType: 'property',
       entityId: { $in: propertyIds },
       createdAt: { $gte: thisMonthStart },
     });
 
-    // Get last month's views
     const lastMonthViews = await PageView.countDocuments({
       entityType: 'property',
       entityId: { $in: propertyIds },
       createdAt: { $gte: lastMonthStart, $lt: thisMonthStart },
     });
 
-    // Calculate percentage changes
     const weeklyChange = lastWeekViews > 0
       ? Math.round(((thisWeekViews - lastWeekViews) / lastWeekViews) * 100)
       : thisWeekViews > 0 ? 100 : 0;
@@ -632,24 +811,316 @@ export const getComparisonStats = async (req: Request, res: Response): Promise<v
       ? Math.round(((thisMonthViews - lastMonthViews) / lastMonthViews) * 100)
       : thisMonthViews > 0 ? 100 : 0;
 
-    res.json({
-      thisWeek: {
-        views: thisWeekViews,
-        change: weeklyChange,
-      },
-      lastWeek: {
-        views: lastWeekViews,
-      },
-      thisMonth: {
-        views: thisMonthViews,
-        change: monthlyChange,
-      },
-      lastMonth: {
-        views: lastMonthViews,
-      },
-    });
+    if (subscriptionInfo.isPremium) {
+      const thisWeekUnique = await PageView.countDocuments({
+        entityType: 'property',
+        entityId: { $in: propertyIds },
+        createdAt: { $gte: thisWeekStart },
+        isUnique: true,
+      });
+
+      const thisMonthUnique = await PageView.countDocuments({
+        entityType: 'property',
+        entityId: { $in: propertyIds },
+        createdAt: { $gte: thisMonthStart },
+        isUnique: true,
+      });
+
+      res.json({
+        thisWeek: { views: thisWeekViews, uniqueViews: thisWeekUnique, change: weeklyChange },
+        lastWeek: { views: lastWeekViews },
+        thisMonth: { views: thisMonthViews, uniqueViews: thisMonthUnique, change: monthlyChange },
+        lastMonth: { views: lastMonthViews },
+        subscriptionInfo,
+        isLimited: false,
+      });
+    } else {
+      res.json({
+        thisWeek: { views: thisWeekViews, change: weeklyChange },
+        lastWeek: { views: lastWeekViews },
+        thisMonth: { views: thisMonthViews, change: monthlyChange },
+        lastMonth: { views: lastMonthViews },
+        subscriptionInfo,
+        isLimited: true,
+      });
+    }
   } catch (error: any) {
     console.error('Get comparison stats error:', error);
     res.status(500).json({ message: 'Error fetching comparison', error: error.message });
+  }
+};
+
+// @desc    Generate analytics report (PDF/CSV)
+// @route   GET /api/view-stats/report
+// @access  Private (Premium only)
+export const generateReport = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const subscriptionInfo = getSubscriptionInfo(currentUser);
+
+    if (!subscriptionInfo.isPremium) {
+      res.status(403).json({
+        message: 'Report generation is a premium feature',
+        upgradeRequired: true,
+        subscriptionInfo,
+      });
+      return;
+    }
+
+    const userId = String(currentUser._id);
+    const { period = '30d', format = 'json' } = req.query;
+
+    let startDate: Date;
+    switch (period) {
+      case '7d':
+        startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '90d':
+        startDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    const properties = await Property.find({ sellerId: userId });
+    const propertyIds = properties.map((p) => p._id);
+
+    const viewStats = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: '$entityId',
+          totalViews: { $sum: 1 },
+          uniqueViews: { $sum: { $cond: ['$isUnique', 1, 0] } },
+          avgDuration: { $avg: '$duration' },
+          desktopViews: { $sum: { $cond: [{ $eq: ['$deviceType', 'desktop'] }, 1, 0] } },
+          mobileViews: { $sum: { $cond: [{ $eq: ['$deviceType', 'mobile'] }, 1, 0] } },
+          tabletViews: { $sum: { $cond: [{ $eq: ['$deviceType', 'tablet'] }, 1, 0] } },
+          directTraffic: { $sum: { $cond: [{ $eq: ['$referrerType', 'direct'] }, 1, 0] } },
+          searchTraffic: { $sum: { $cond: [{ $eq: ['$referrerType', 'search'] }, 1, 0] } },
+          socialTraffic: { $sum: { $cond: [{ $eq: ['$referrerType', 'social'] }, 1, 0] } },
+        },
+      },
+    ]);
+
+    const dailyStats = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          views: { $sum: 1 },
+          uniqueViews: { $sum: { $cond: ['$isUnique', 1, 0] } },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const statsMap = new Map(viewStats.map((s) => [String(s._id), s]));
+    const propertyReports = properties.map((p: any) => {
+      const stats = statsMap.get(String(p._id)) || {};
+      return {
+        id: p._id,
+        title: p.title || 'Untitled',
+        address: p.address,
+        city: p.city,
+        price: p.price,
+        status: p.status,
+        isPromoted: p.isPromoted,
+        promotionTier: p.promotionTier,
+        totalViews: stats.totalViews || 0,
+        uniqueViews: stats.uniqueViews || 0,
+        avgDuration: Math.round(stats.avgDuration || 0),
+        deviceBreakdown: {
+          desktop: stats.desktopViews || 0,
+          mobile: stats.mobileViews || 0,
+          tablet: stats.tabletViews || 0,
+        },
+        trafficSources: {
+          direct: stats.directTraffic || 0,
+          search: stats.searchTraffic || 0,
+          social: stats.socialTraffic || 0,
+        },
+      };
+    });
+
+    const summary = {
+      period: period,
+      generatedAt: new Date().toISOString(),
+      totalProperties: properties.length,
+      activeProperties: properties.filter((p: any) => p.status === 'active').length,
+      promotedProperties: properties.filter((p: any) => p.isPromoted).length,
+      totalViews: propertyReports.reduce((sum, p) => sum + p.totalViews, 0),
+      totalUniqueViews: propertyReports.reduce((sum, p) => sum + p.uniqueViews, 0),
+      avgViewsPerProperty: propertyReports.length > 0
+        ? Math.round(propertyReports.reduce((sum, p) => sum + p.totalViews, 0) / propertyReports.length)
+        : 0,
+    };
+
+    if (format === 'csv') {
+      const csvHeaders = 'Property Title,Address,City,Price,Status,Promoted,Views,Unique Views,Avg Duration (s),Desktop,Mobile,Tablet,Direct,Search,Social\n';
+      const csvRows = propertyReports.map((p) =>
+        `"${p.title}","${p.address}","${p.city}",${p.price},${p.status},${p.isPromoted},${p.totalViews},${p.uniqueViews},${p.avgDuration},${p.deviceBreakdown.desktop},${p.deviceBreakdown.mobile},${p.deviceBreakdown.tablet},${p.trafficSources.direct},${p.trafficSources.search},${p.trafficSources.social}`
+      ).join('\n');
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=analytics-report-${period}.csv`);
+      res.send(csvHeaders + csvRows);
+      return;
+    }
+
+    res.json({
+      report: {
+        summary,
+        properties: propertyReports.sort((a, b) => b.totalViews - a.totalViews),
+        dailyBreakdown: dailyStats,
+      },
+      subscriptionInfo,
+    });
+  } catch (error: any) {
+    console.error('Generate report error:', error);
+    res.status(500).json({ message: 'Error generating report', error: error.message });
+  }
+};
+
+// @desc    Get dashboard overview with all stats
+// @route   GET /api/view-stats/dashboard
+// @access  Private
+export const getDashboardOverview = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const userId = String(currentUser._id);
+    const subscriptionInfo = getSubscriptionInfo(currentUser);
+
+    const properties = await Property.find({ sellerId: userId }).select('_id title views status isPromoted promotionTier price');
+    const propertyIds = properties.map((p) => p._id);
+
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const monthlyViews = await PageView.countDocuments({
+      entityType: 'property',
+      entityId: { $in: propertyIds },
+      createdAt: { $gte: thirtyDaysAgo },
+    });
+
+    const monthlyUniqueViews = await PageView.countDocuments({
+      entityType: 'property',
+      entityId: { $in: propertyIds },
+      createdAt: { $gte: thirtyDaysAgo },
+      isUnique: true,
+    });
+
+    const weeklyViews = await PageView.countDocuments({
+      entityType: 'property',
+      entityId: { $in: propertyIds },
+      createdAt: { $gte: sevenDaysAgo },
+    });
+
+    const totalViews = properties.reduce((sum, p: any) => sum + (p.views || 0), 0);
+
+    const recentActivity = subscriptionInfo.isPremium
+      ? await PageView.find({
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+        })
+          .sort({ createdAt: -1 })
+          .limit(10)
+          .populate('entityId', 'title')
+      : [];
+
+    const propertyStats = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: thirtyDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: '$entityId',
+          views: { $sum: 1 },
+          uniqueViews: { $sum: { $cond: ['$isUnique', 1, 0] } },
+        },
+      },
+      { $sort: { views: -1 } },
+    ]);
+
+    const statsMap = new Map(propertyStats.map((s) => [String(s._id), s]));
+    const propertiesWithStats = properties.map((p: any) => ({
+      id: p._id,
+      title: p.title || 'Untitled',
+      status: p.status,
+      isPromoted: p.isPromoted,
+      promotionTier: p.promotionTier,
+      price: p.price,
+      monthlyViews: statsMap.get(String(p._id))?.views || 0,
+      monthlyUniqueViews: statsMap.get(String(p._id))?.uniqueViews || 0,
+      totalViews: p.views || 0,
+    }));
+
+    const insights = subscriptionInfo.isPremium
+      ? generatePropertyInsights(propertiesWithStats.map((p) => ({
+          ...p,
+          periodViews: p.monthlyViews,
+          periodUniqueViews: p.monthlyUniqueViews,
+          propertyId: p.id,
+        })))
+      : [];
+
+    res.json({
+      overview: {
+        totalProperties: properties.length,
+        activeProperties: properties.filter((p: any) => p.status === 'active').length,
+        promotedProperties: properties.filter((p: any) => p.isPromoted).length,
+        totalAllTimeViews: totalViews,
+        monthlyViews,
+        monthlyUniqueViews,
+        weeklyViews,
+        avgViewsPerProperty: properties.length > 0 ? Math.round(monthlyViews / properties.length) : 0,
+      },
+      properties: propertiesWithStats.sort((a, b) => b.monthlyViews - a.monthlyViews),
+      topPerformers: propertiesWithStats.sort((a, b) => b.monthlyViews - a.monthlyViews).slice(0, 3),
+      needsAttention: propertiesWithStats
+        .filter((p) => p.status === 'active' && p.monthlyViews < 5)
+        .slice(0, 3),
+      insights,
+      recentActivity: recentActivity.map((a: any) => ({
+        propertyTitle: a.entityId?.title || 'Unknown',
+        deviceType: a.deviceType,
+        referrerType: a.referrerType,
+        createdAt: a.createdAt,
+      })),
+      subscriptionInfo,
+      isLimited: !subscriptionInfo.isPremium,
+    });
+  } catch (error: any) {
+    console.error('Get dashboard overview error:', error);
+    res.status(500).json({ message: 'Error fetching dashboard', error: error.message });
   }
 };

@@ -6,12 +6,12 @@ import { httpClient } from './httpClient';
 export type EntityType = 'property' | 'agent' | 'agency';
 export type Period = '7d' | '30d' | '90d' | 'all';
 
-export interface TrackViewRequest {
-  entityType: EntityType;
-  entityId: string;
-  sessionId?: string;
-  referrer?: string;
-  duration?: number;
+export interface SubscriptionInfo {
+  tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer';
+  isPremium: boolean;
+  canAccessDetailedStats: boolean;
+  canAccessReports: boolean;
+  canAccessInsights: boolean;
 }
 
 export interface TrackViewResponse {
@@ -37,41 +37,70 @@ export interface TrafficSources {
 export interface ViewStats {
   totalViews: number;
   uniqueViews: number;
-  avgDuration: number;
-  deviceBreakdown: DeviceBreakdown;
-  trafficSources: TrafficSources;
+  avgDuration?: number;
+  deviceBreakdown?: DeviceBreakdown;
+  trafficSources?: TrafficSources;
 }
 
 export interface DailyView {
-  _id: string; // Date string YYYY-MM-DD
+  _id: string;
   views: number;
   uniqueViews: number;
 }
 
+export interface HourlyView {
+  _id: number;
+  views: number;
+}
+
 export interface TopReferrer {
-  _id: string; // Referrer URL
+  _id: string;
   count: number;
+}
+
+export interface Insight {
+  type: string;
+  icon: string;
+  title: string;
+  message: string;
+  priority: 'success' | 'warning' | 'error' | 'info';
+  propertyId?: string;
+  properties?: Array<{
+    id: string;
+    title: string;
+    views?: number;
+  }>;
 }
 
 export interface EntityStatsResponse {
   entityType: EntityType;
   entityId: string;
   period: Period;
+  subscriptionInfo: SubscriptionInfo;
   stats: ViewStats;
-  dailyViews: DailyView[];
-  topReferrers: TopReferrer[];
+  dailyViews?: DailyView[];
+  hourlyDistribution?: HourlyView[];
+  topReferrers?: TopReferrer[];
   entityViewStats: {
     totalViews: number;
     uniqueViews: number;
   };
+  isLimited: boolean;
+  upgradeMessage?: string;
 }
 
 export interface PropertyStats {
   propertyId: string;
   title: string;
+  status?: string;
+  isPromoted?: boolean;
+  promotionTier?: string;
+  price?: number;
+  createdAt?: string;
   totalViews: number;
   periodViews: number;
-  periodUniqueViews: number;
+  periodUniqueViews?: number;
+  avgDuration?: number;
 }
 
 export interface MyPropertiesStatsResponse {
@@ -79,12 +108,20 @@ export interface MyPropertiesStatsResponse {
   totalProperties: number;
   totalViews: number;
   uniqueViews: number;
+  avgViewsPerProperty?: number;
   propertiesStats: PropertyStats[];
+  insights?: Insight[];
+  topPerformers?: PropertyStats[];
+  underperformers?: PropertyStats[];
+  subscriptionInfo: SubscriptionInfo;
+  isLimited: boolean;
+  upgradeMessage?: string;
 }
 
 export interface ComparisonStats {
   thisWeek: {
     views: number;
+    uniqueViews?: number;
     change: number;
   };
   lastWeek: {
@@ -92,11 +129,95 @@ export interface ComparisonStats {
   };
   thisMonth: {
     views: number;
+    uniqueViews?: number;
     change: number;
   };
   lastMonth: {
     views: number;
   };
+  subscriptionInfo: SubscriptionInfo;
+  isLimited: boolean;
+}
+
+export interface DashboardProperty {
+  id: string;
+  title: string;
+  status: string;
+  isPromoted: boolean;
+  promotionTier?: string;
+  price: number;
+  monthlyViews: number;
+  monthlyUniqueViews: number;
+  totalViews: number;
+}
+
+export interface RecentActivity {
+  propertyTitle: string;
+  deviceType: string;
+  referrerType: string;
+  createdAt: string;
+}
+
+export interface DashboardOverview {
+  totalProperties: number;
+  activeProperties: number;
+  promotedProperties: number;
+  totalAllTimeViews: number;
+  monthlyViews: number;
+  monthlyUniqueViews: number;
+  weeklyViews: number;
+  avgViewsPerProperty: number;
+}
+
+export interface DashboardResponse {
+  overview: DashboardOverview;
+  properties: DashboardProperty[];
+  topPerformers: DashboardProperty[];
+  needsAttention: DashboardProperty[];
+  insights: Insight[];
+  recentActivity: RecentActivity[];
+  subscriptionInfo: SubscriptionInfo;
+  isLimited: boolean;
+}
+
+export interface ReportProperty {
+  id: string;
+  title: string;
+  address: string;
+  city: string;
+  price: number;
+  status: string;
+  isPromoted: boolean;
+  promotionTier?: string;
+  totalViews: number;
+  uniqueViews: number;
+  avgDuration: number;
+  deviceBreakdown: DeviceBreakdown;
+  trafficSources: {
+    direct: number;
+    search: number;
+    social: number;
+  };
+}
+
+export interface ReportSummary {
+  period: string;
+  generatedAt: string;
+  totalProperties: number;
+  activeProperties: number;
+  promotedProperties: number;
+  totalViews: number;
+  totalUniqueViews: number;
+  avgViewsPerProperty: number;
+}
+
+export interface ReportResponse {
+  report: {
+    summary: ReportSummary;
+    properties: ReportProperty[];
+    dailyBreakdown: DailyView[];
+  };
+  subscriptionInfo: SubscriptionInfo;
 }
 
 // Session ID management for anonymous tracking
@@ -130,7 +251,7 @@ export class ViewStatsApiClient {
         sessionId,
         referrer: referrer || document.referrer || '',
       },
-      false // Don't require auth, but will use token if available
+      false
     );
   }
 
@@ -190,6 +311,55 @@ export class ViewStatsApiClient {
    */
   async getComparisonStats(): Promise<ComparisonStats> {
     return await httpClient.get<ComparisonStats>('/view-stats/comparison', true);
+  }
+
+  /**
+   * Get dashboard overview with all stats
+   */
+  async getDashboardOverview(): Promise<DashboardResponse> {
+    return await httpClient.get<DashboardResponse>('/view-stats/dashboard', true);
+  }
+
+  /**
+   * Generate analytics report (Premium only)
+   */
+  async generateReport(period: Period = '30d', format: 'json' | 'csv' = 'json'): Promise<ReportResponse | Blob> {
+    if (format === 'csv') {
+      // For CSV, we need to handle the blob response
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/view-stats/report?period=${period}&format=csv`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate report');
+      }
+      return await response.blob();
+    }
+
+    return await httpClient.get<ReportResponse>(
+      `/view-stats/report?period=${period}&format=${format}`,
+      true
+    );
+  }
+
+  /**
+   * Download report as CSV file
+   */
+  async downloadReportCSV(period: Period = '30d'): Promise<void> {
+    const blob = await this.generateReport(period, 'csv') as Blob;
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics-report-${period}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   }
 }
 

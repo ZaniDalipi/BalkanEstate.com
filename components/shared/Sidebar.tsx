@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 
 const NavItem: React.FC<{
@@ -160,6 +160,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`}><StarIconSolid /></div>
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
                         </button>
+                        {isAuthenticated && (
+                            <button
+                                onClick={() => handleNavClick('analytics')}
+                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
+                                    activeView === 'analytics'
+                                        ? 'bg-primary-light text-primary-dark'
+                                        : 'text-neutral-700 hover:bg-neutral-100'
+                                }`}
+                            >
+                                <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'analytics' ? 'text-primary' : 'text-neutral-700'}`}>
+                                    <ChartBarIcon />
+                                </div>
+                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:analytics')}</span>
+                            </button>
+                        )}
                         <button
                             onClick={() => handleNavClick('inbox')}
                             className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative ${
