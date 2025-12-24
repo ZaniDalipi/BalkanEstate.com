@@ -29,6 +29,9 @@ export interface IPromotion extends Document {
   lastRefreshedAt?: Date;
   nextRefreshAt?: Date;
   refreshCount: number;
+  // Auto-extend feature
+  autoExtend: boolean; // Whether to auto-extend when promotion ends
+  autoExtendDuration?: number; // Duration in days for auto-extend
   // Additional metadata
   purchasedVia: 'web' | 'mobile' | 'api';
   notes?: string;
@@ -139,6 +142,14 @@ const PromotionSchema: Schema = new Schema(
     refreshCount: {
       type: Number,
       default: 0,
+    },
+    autoExtend: {
+      type: Boolean,
+      default: false,
+    },
+    autoExtendDuration: {
+      type: Number,
+      default: 30, // Default to 30 days if auto-extend is enabled
     },
     purchasedVia: {
       type: String,

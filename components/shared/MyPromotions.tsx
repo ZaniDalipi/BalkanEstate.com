@@ -80,11 +80,21 @@ const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
 
 interface PromotedPropertyCardProps {
   property: Property;
+  promotion?: any; // Full promotion data from API
   onViewProperty: (propertyId: string) => void;
   onExtend: (property: Property) => void;
+  onAddUrgent: (promotionId: string) => void;
+  onToggleAutoExtend: (promotionId: string, autoExtend: boolean) => void;
 }
 
-const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, onViewProperty, onExtend }) => {
+const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
+  property,
+  promotion,
+  onViewProperty,
+  onExtend,
+  onAddUrgent,
+  onToggleAutoExtend,
+}) => {
   const tier = property.promotionTier || 'standard';
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.standard;
   const endDate = property.promotionEndDate || 0;
@@ -96,8 +106,31 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
   const elapsed = now - startDate;
   const progressPercent = totalDuration > 0 ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100)) : 0;
 
+  // Calculate days remaining for warning
+  const daysRemaining = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+  const isExpiringSoon = daysRemaining > 0 && daysRemaining <= 3;
+  const isExpired = endDate <= now;
+
   return (
-    <div className={`bg-white rounded-xl border-2 ${tier === 'premium' ? 'border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.25)]' : tier === 'highlight' ? 'border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.25)]' : tier === 'featured' ? 'border-violet-500 shadow-[0_0_12px_rgba(124,58,237,0.2)]' : 'border-gray-200'} hover:shadow-lg transition-all duration-300`}>
+    <div className={`bg-white rounded-xl border-2 ${tier === 'premium' ? 'border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.25)]' : tier === 'highlight' ? 'border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.25)]' : tier === 'featured' ? 'border-violet-500 shadow-[0_0_12px_rgba(124,58,237,0.2)]' : 'border-gray-200'} hover:shadow-lg transition-all duration-300 overflow-hidden`}>
+      {/* Expiring Soon Warning Banner */}
+      {isExpiringSoon && !isExpired && (
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            <span className="text-sm font-semibold">
+              Expiring in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}!
+            </span>
+          </div>
+          <button
+            onClick={() => onExtend(property)}
+            className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1 rounded-full transition-colors"
+          >
+            Extend Now
+          </button>
+        </div>
+      )}
+
       <div className="p-4">
         {/* Header with tier badge */}
         <div className="flex items-start justify-between mb-3">
@@ -105,11 +138,20 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
             <span>{tierConfig.icon}</span>
             <span>{tierConfig.label}</span>
           </div>
-          {property.hasUrgentBadge && (
-            <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
-              🔥 Urgent
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {property.hasUrgentBadge ? (
+              <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
+                🔥 Urgent
+              </span>
+            ) : !isExpired && promotion?._id && (
+              <button
+                onClick={() => onAddUrgent(promotion._id)}
+                className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 text-red-600 text-xs font-semibold px-2.5 py-1 rounded-full hover:from-red-100 hover:to-orange-100 transition-colors flex items-center gap-1"
+              >
+                🔥 +Urgent €0.99
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Property Info */}
@@ -172,6 +214,27 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
           </div>
         </div>
 
+        {/* Auto-Extend Toggle */}
+        {!isExpired && promotion?._id && (
+          <div className="mt-4 pt-4 border-t border-neutral-100">
+            <label className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-neutral-700">Auto-Extend</span>
+                <span className="text-xs text-neutral-400">(renew automatically)</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={promotion?.autoExtend || false}
+                  onChange={(e) => onToggleAutoExtend(promotion._id, e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </div>
+            </label>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="mt-4 flex gap-2">
           <button
@@ -197,27 +260,46 @@ const MyPromotions: React.FC = () => {
   const { t } = useTranslation(['account', 'property']);
   const { dispatch } = useAppContext();
   const [promotedProperties, setPromotedProperties] = useState<Property[]>([]);
+  const [promotions, setPromotions] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'active' | 'expired'>('active');
   const [showExtendModal, setShowExtendModal] = useState(false);
   const [propertyToExtend, setPropertyToExtend] = useState<Property | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch both listings and promotions data
+      const [listings, promotionsData] = await Promise.all([
+        api.getMyListings(),
+        api.getMyPromotions(),
+      ]);
+
+      // Filter only promoted properties
+      const promoted = listings.filter(p => p.isPromoted);
+      setPromotedProperties(promoted);
+
+      // Create a map of propertyId -> promotion for quick lookup
+      const promoMap: Record<string, any> = {};
+      if (promotionsData?.promotions) {
+        promotionsData.promotions.forEach((promo: any) => {
+          const propId = promo.propertyId?._id || promo.propertyId;
+          if (propId) {
+            promoMap[propId] = promo;
+          }
+        });
+      }
+      setPromotions(promoMap);
+    } catch (error) {
+      console.error('Failed to fetch promoted properties:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPromotedProperties = async () => {
-      setIsLoading(true);
-      try {
-        const listings = await api.getMyListings();
-        // Filter only promoted properties
-        const promoted = listings.filter(p => p.isPromoted);
-        setPromotedProperties(promoted);
-      } catch (error) {
-        console.error('Failed to fetch promoted properties:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPromotedProperties();
+    fetchData();
   }, []);
 
   const filteredProperties = useMemo(() => {
@@ -261,14 +343,42 @@ const MyPromotions: React.FC = () => {
   const handleExtensionSuccess = async () => {
     setShowExtendModal(false);
     setPropertyToExtend(null);
+    await fetchData(); // Refresh all data
+  };
 
-    // Refresh promoted properties
+  const handleAddUrgent = async (promotionId: string) => {
+    setActionLoading(promotionId);
     try {
-      const listings = await api.getMyListings();
-      const promoted = listings.filter(p => p.isPromoted);
-      setPromotedProperties(promoted);
-    } catch (error) {
-      console.error('Failed to refresh promoted properties:', error);
+      const result = await api.addUrgentBadge(promotionId);
+      if (result.isFree) {
+        // Badge added directly
+        await fetchData();
+      } else if (result.url) {
+        // Redirect to Stripe checkout
+        window.location.href = result.url;
+      }
+    } catch (error: any) {
+      console.error('Failed to add urgent badge:', error);
+      alert(error.message || 'Failed to add urgent badge');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleAutoExtend = async (promotionId: string, autoExtend: boolean) => {
+    try {
+      await api.updateAutoExtend(promotionId, { autoExtend });
+      // Update local state
+      setPromotions(prev => ({
+        ...prev,
+        [Object.keys(prev).find(k => prev[k]._id === promotionId) || '']: {
+          ...prev[Object.keys(prev).find(k => prev[k]._id === promotionId) || ''],
+          autoExtend,
+        },
+      }));
+    } catch (error: any) {
+      console.error('Failed to update auto-extend:', error);
+      alert(error.message || 'Failed to update auto-extend setting');
     }
   };
 
@@ -380,8 +490,11 @@ const MyPromotions: React.FC = () => {
             <PromotedPropertyCard
               key={property.id}
               property={property}
+              promotion={promotions[property.id]}
               onViewProperty={handleViewProperty}
               onExtend={handleExtend}
+              onAddUrgent={handleAddUrgent}
+              onToggleAutoExtend={handleToggleAutoExtend}
             />
           ))}
         </div>

@@ -1439,6 +1439,107 @@ export const confirmExtensionPayment = async (sessionId: string): Promise<{
 };
 
 /**
+ * Add urgent badge to existing promotion
+ */
+export const addUrgentBadge = async (promotionId: string): Promise<{
+  success: boolean;
+  isFree?: boolean;
+  url?: string;
+  sessionId?: string;
+  price?: number;
+  message?: string;
+  promotion?: any;
+}> => {
+  return await apiRequest(`/promotions/${promotionId}/add-urgent`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Confirm urgent badge payment after Stripe checkout
+ */
+export const confirmUrgentBadgePayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+}> => {
+  return await apiRequest('/promotions/confirm-urgent', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Get promotion history for a property
+ */
+export const getPromotionHistory = async (propertyId: string): Promise<{
+  history: Array<{
+    _id: string;
+    tier: string;
+    tierInfo: any;
+    startDate: string;
+    endDate: string;
+    duration: number;
+    hasUrgentBadge: boolean;
+    price: number;
+    isActive: boolean;
+    isExpired: boolean;
+    daysRemaining: number;
+    paymentStatus: string;
+    isFromAgencyAllocation: boolean;
+    autoExtend: boolean;
+    performance: {
+      views: number;
+      inquiries: number;
+      saves: number;
+    };
+    createdAt: string;
+  }>;
+  totals: {
+    totalPromotions: number;
+    totalSpent: number;
+    totalDaysPromoted: number;
+    totalViews: number;
+    totalInquiries: number;
+  };
+  property: {
+    id: string;
+    title: string;
+  };
+}> => {
+  return await apiRequest(`/promotions/property/${propertyId}/history`, {
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Update auto-extend settings for a promotion
+ */
+export const updateAutoExtend = async (
+  promotionId: string,
+  settings: {
+    autoExtend: boolean;
+    autoExtendDuration?: number;
+  }
+): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: {
+    _id: string;
+    autoExtend: boolean;
+    autoExtendDuration: number;
+  };
+}> => {
+  return await apiRequest(`/promotions/${promotionId}/auto-extend`, {
+    method: 'PUT',
+    body: settings,
+    requiresAuth: true,
+  });
+};
+
+/**
  * Renew a property listing (puts it at top, 24hr cooldown)
  */
 export const renewProperty = async (propertyId: string): Promise<{
