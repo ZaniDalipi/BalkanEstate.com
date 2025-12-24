@@ -1,46 +1,71 @@
+/**
+ * Promotion Routes
+ * All routes for promotion-related operations
+ */
+
 import express from 'express';
 import {
+  // Core
   getPromotionTiers,
   getAgencyPromotionAllocation,
-  purchasePromotion,
   getMyPromotions,
   cancelPromotion,
   getFeaturedProperties,
-  getPromotionStats,
+  // Checkout
+  purchasePromotion,
   createPromotionCheckout,
   confirmPromotionPayment,
+  // Extension
   extendPromotion,
   confirmExtensionPayment,
+  // Urgent
   addUrgentBadge,
   confirmUrgentBadgePayment,
-  getPromotionHistory,
+  // Auto-extend
   updateAutoExtend,
   confirmAutoExtendPayment,
   getAutoExtendCheckout,
-} from '../controllers/promotionController';
+  // Stats
+  getPromotionStats,
+  getPromotionHistory,
+} from '../controllers/promotion';
 import { protect } from '../middleware/auth';
 
 const router = express.Router();
 
-// Public routes
-router.get('/tiers', getPromotionTiers); // Get all promotion tiers and pricing
-router.get('/featured', getFeaturedProperties); // Get all featured properties
+// ============ Public Routes ============
+router.get('/tiers', getPromotionTiers);
+router.get('/featured', getFeaturedProperties);
 
-// Protected routes
-router.post('/', protect, purchasePromotion); // Purchase a promotion (legacy/free allocations)
-router.post('/checkout', protect, createPromotionCheckout); // Create Stripe checkout session
-router.post('/confirm-payment', protect, confirmPromotionPayment); // Confirm payment and activate promotion
-router.post('/confirm-extension', protect, confirmExtensionPayment); // Confirm extension payment
-router.post('/confirm-urgent', protect, confirmUrgentBadgePayment); // Confirm urgent badge payment
-router.post('/confirm-auto-extend', protect, confirmAutoExtendPayment); // Confirm auto-extend payment
-router.get('/', protect, getMyPromotions); // Get user's promotions
-router.delete('/:id', protect, cancelPromotion); // Cancel a promotion
-router.get('/:id/stats', protect, getPromotionStats); // Get promotion statistics
-router.post('/:id/extend', protect, extendPromotion); // Extend an existing promotion
-router.post('/:id/add-urgent', protect, addUrgentBadge); // Add urgent badge to existing promotion
-router.put('/:id/auto-extend', protect, updateAutoExtend); // Update auto-extend settings
-router.get('/:id/auto-extend-checkout', protect, getAutoExtendCheckout); // Get pending auto-extend checkout URL
-router.get('/agency/allocation', protect, getAgencyPromotionAllocation); // Get agency allocation
-router.get('/property/:propertyId/history', protect, getPromotionHistory); // Get promotion history for a property
+// ============ Protected Routes ============
+
+// --- Core Operations ---
+router.get('/', protect, getMyPromotions);
+router.delete('/:id', protect, cancelPromotion);
+
+// --- Checkout & Payment ---
+router.post('/', protect, purchasePromotion);
+router.post('/checkout', protect, createPromotionCheckout);
+router.post('/confirm-payment', protect, confirmPromotionPayment);
+
+// --- Extension ---
+router.post('/:id/extend', protect, extendPromotion);
+router.post('/confirm-extension', protect, confirmExtensionPayment);
+
+// --- Urgent Badge ---
+router.post('/:id/add-urgent', protect, addUrgentBadge);
+router.post('/confirm-urgent', protect, confirmUrgentBadgePayment);
+
+// --- Auto-Extend ---
+router.put('/:id/auto-extend', protect, updateAutoExtend);
+router.post('/confirm-auto-extend', protect, confirmAutoExtendPayment);
+router.get('/:id/auto-extend-checkout', protect, getAutoExtendCheckout);
+
+// --- Stats & History ---
+router.get('/:id/stats', protect, getPromotionStats);
+router.get('/property/:propertyId/history', protect, getPromotionHistory);
+
+// --- Agency ---
+router.get('/agency/allocation', protect, getAgencyPromotionAllocation);
 
 export default router;
