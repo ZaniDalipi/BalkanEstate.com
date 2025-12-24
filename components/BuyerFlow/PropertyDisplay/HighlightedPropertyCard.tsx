@@ -96,32 +96,32 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
-  // Tier-specific styles
-  // Premium = Gold, Highlight = Baby Blue, Featured = Light Blue
+  // Tier-specific styles with glowing borders
+  // Premium = Rich Gold, Highlight = Cyan/Teal, Featured = Soft Purple
   const getTierStyles = () => {
     switch (promotionTier) {
       case 'premium':
         return {
-          border: 'ring-2 ring-yellow-400 border-yellow-300',
-          badge: 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-300',
+          border: 'ring-2 ring-amber-400 border-amber-400',
+          badge: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400',
           icon: '👑',
-          glow: 'shadow-yellow-200/50',
+          glow: 'shadow-[0_0_20px_rgba(255,184,0,0.4)] hover:shadow-[0_0_30px_rgba(255,184,0,0.6)]',
           label: t('property:map.tiers.premium', 'PREMIUM PREMIERE')
         };
       case 'highlight':
         return {
-          border: 'ring-2 ring-sky-400 border-sky-300',
-          badge: 'bg-gradient-to-r from-sky-400 via-sky-300 to-cyan-300',
+          border: 'ring-2 ring-cyan-400 border-cyan-400',
+          badge: 'bg-gradient-to-r from-cyan-500 via-teal-400 to-cyan-400',
           icon: '💎',
-          glow: 'shadow-sky-200/50',
+          glow: 'shadow-[0_0_20px_rgba(0,206,209,0.4)] hover:shadow-[0_0_30px_rgba(0,206,209,0.6)]',
           label: t('property:map.tiers.highlight', 'HIGHLIGHT')
         };
       case 'featured':
         return {
-          border: 'ring-2 ring-blue-300 border-blue-200',
-          badge: 'bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200',
+          border: 'ring-2 ring-purple-400 border-purple-300',
+          badge: 'bg-gradient-to-r from-purple-500 via-violet-400 to-purple-400',
           icon: '⭐',
-          glow: 'shadow-blue-200/50',
+          glow: 'shadow-[0_0_15px_rgba(147,112,219,0.35)] hover:shadow-[0_0_25px_rgba(147,112,219,0.5)]',
           label: t('property:map.tiers.featured', 'FEATURED')
         };
       default:
@@ -129,7 +129,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
           border: 'ring-1 ring-gray-300 border-gray-200',
           badge: 'bg-gradient-to-r from-gray-500 to-gray-600',
           icon: '✨',
-          glow: 'shadow-gray-200/50',
+          glow: 'shadow-md hover:shadow-lg',
           label: 'PROMOTED'
         };
     }

@@ -19,7 +19,7 @@ const injectMapMarkerStyles = () => {
   style.textContent = `
     @keyframes markerBounce {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      50% { transform: translateY(-6px); }
     }
 
     @keyframes markerPulse {
@@ -27,22 +27,58 @@ const injectMapMarkerStyles = () => {
       50% { transform: scale(1.05); }
     }
 
-    /* Premium Premiere - GOLD and glowing, bouncing */
-    @keyframes glowGold {
-      0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 193, 7, 0.6)); }
-      50% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 35px rgba(255, 193, 7, 0.8)); }
+    /* Premium Premiere - Rich Gold with pulsing glow */
+    @keyframes glowPremium {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(255, 180, 0, 0.9)) drop-shadow(0 0 16px rgba(255, 140, 0, 0.6));
+      }
+      50% {
+        filter: drop-shadow(0 0 18px rgba(255, 200, 0, 1)) drop-shadow(0 0 30px rgba(255, 160, 0, 0.8));
+      }
     }
 
-    /* Highlight Listing - Baby blue glow */
-    @keyframes glowBabyBlue {
-      0%, 100% { filter: drop-shadow(0 0 8px rgba(135, 206, 250, 0.7)) drop-shadow(0 0 16px rgba(135, 206, 250, 0.5)); }
-      50% { filter: drop-shadow(0 0 16px rgba(135, 206, 250, 0.9)) drop-shadow(0 0 28px rgba(135, 206, 250, 0.6)); }
+    /* Border pulse animation for Premium */
+    @keyframes borderPulsePremium {
+      0%, 100% {
+        stroke-width: 3;
+        stroke: #FFB800;
+      }
+      50% {
+        stroke-width: 5;
+        stroke: #FFC700;
+      }
     }
 
-    /* Featured - Simple subtle glow only */
-    @keyframes glowSubtle {
-      0%, 100% { filter: drop-shadow(0 0 6px rgba(147, 197, 253, 0.5)) drop-shadow(0 0 10px rgba(147, 197, 253, 0.3)); }
-      50% { filter: drop-shadow(0 0 10px rgba(147, 197, 253, 0.7)) drop-shadow(0 0 16px rgba(147, 197, 253, 0.4)); }
+    /* Highlight Listing - Vibrant Cyan/Teal */
+    @keyframes glowHighlight {
+      0%, 100% {
+        filter: drop-shadow(0 0 6px rgba(0, 200, 220, 0.8)) drop-shadow(0 0 14px rgba(0, 180, 200, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 14px rgba(0, 220, 240, 0.95)) drop-shadow(0 0 24px rgba(0, 200, 220, 0.7));
+      }
+    }
+
+    /* Border pulse animation for Highlight */
+    @keyframes borderPulseHighlight {
+      0%, 100% {
+        stroke-width: 3;
+        stroke: #00CED1;
+      }
+      50% {
+        stroke-width: 5;
+        stroke: #20E8E8;
+      }
+    }
+
+    /* Featured - Soft Purple/Lavender glow */
+    @keyframes glowFeatured {
+      0%, 100% {
+        filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.6)) drop-shadow(0 0 10px rgba(138, 100, 210, 0.4));
+      }
+      50% {
+        filter: drop-shadow(0 0 10px rgba(160, 130, 230, 0.8)) drop-shadow(0 0 18px rgba(147, 112, 219, 0.5));
+      }
     }
 
     /* Marker wrapper - stays in place, provides anchor point */
@@ -50,21 +86,29 @@ const injectMapMarkerStyles = () => {
       position: relative;
     }
 
-    /* Premium Premiere - Gold, glowing, bouncing (TOP tier) */
+    /* Premium Premiere - Gold, glowing, bouncing with border pulse (TOP tier) */
     .promoted-marker-inner-premium {
-      animation: markerBounce 2s ease-in-out infinite, glowGold 1.5s ease-in-out infinite;
+      animation: markerBounce 2s ease-in-out infinite, glowPremium 1.5s ease-in-out infinite;
       transform-origin: center bottom;
     }
+    .promoted-marker-inner-premium svg circle,
+    .promoted-marker-inner-premium svg path:last-of-type {
+      animation: borderPulsePremium 1.5s ease-in-out infinite;
+    }
 
-    /* Highlight Listing - Baby blue, bouncing */
+    /* Highlight Listing - Cyan/Teal, bouncing with border pulse */
     .promoted-marker-inner-highlight {
-      animation: markerBounce 2.5s ease-in-out infinite, glowBabyBlue 2s ease-in-out infinite;
+      animation: markerBounce 2.2s ease-in-out infinite, glowHighlight 1.8s ease-in-out infinite;
       transform-origin: center bottom;
     }
+    .promoted-marker-inner-highlight svg circle,
+    .promoted-marker-inner-highlight svg path:last-of-type {
+      animation: borderPulseHighlight 1.8s ease-in-out infinite;
+    }
 
-    /* Featured - Only subtle glow, no bounce (lower tier) */
+    /* Featured - Subtle purple glow, gentle pulse (lower tier) */
     .promoted-marker-inner-featured {
-      animation: glowSubtle 3s ease-in-out infinite;
+      animation: glowFeatured 2.5s ease-in-out infinite, markerPulse 3s ease-in-out infinite;
       transform-origin: center bottom;
     }
 
@@ -155,16 +199,16 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) 
     property.promotionEndDate > Date.now();
 
   // Get ring color based on promotion tier or property type
-  // Premium = Gold, Highlight = Baby Blue, Featured = Light Blue (lower tier)
+  // Premium = Rich Gold, Highlight = Cyan/Teal, Featured = Soft Purple
   let ringColor = 'none';
   let ringWidth = 2;
   if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
-      ringColor = '#FFD700'; // Gold for Premium Premiere
+      ringColor = '#FFB800'; // Rich Gold for Premium Premiere
     } else if (property.promotionTier === 'highlight') {
-      ringColor = '#87CEEB'; // Baby blue for Highlight
+      ringColor = '#00CED1'; // Cyan/Teal for Highlight
     } else if (property.promotionTier === 'featured') {
-      ringColor = '#93C5FD'; // Light blue for Featured (lower tier)
+      ringColor = '#9370DB'; // Soft Purple for Featured
     } else {
       ringColor = '#9ca3af'; // gray-400 for standard
     }
@@ -213,16 +257,16 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     property.promotionEndDate > Date.now();
 
   // Get stroke color based on promotion tier or property type
-  // Premium = Gold, Highlight = Baby Blue, Featured = Light Blue (lower tier)
+  // Premium = Rich Gold, Highlight = Cyan/Teal, Featured = Soft Purple
   let strokeColor = '#FFFFFF';
   let strokeWidth = 2;
   if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
-      strokeColor = '#FFD700'; // Gold for Premium Premiere
+      strokeColor = '#FFB800'; // Rich Gold for Premium Premiere
     } else if (property.promotionTier === 'highlight') {
-      strokeColor = '#87CEEB'; // Baby blue for Highlight
+      strokeColor = '#00CED1'; // Cyan/Teal for Highlight
     } else if (property.promotionTier === 'featured') {
-      strokeColor = '#93C5FD'; // Light blue for Featured (lower tier)
+      strokeColor = '#9370DB'; // Soft Purple for Featured
     } else {
       strokeColor = '#9ca3af'; // gray-400 for standard
     }
@@ -271,11 +315,11 @@ const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boo
 };
 
 // Tier badge configurations for popup
-// Premium = Gold, Highlight = Baby Blue, Featured = Light Blue (lower tier)
+// Premium = Rich Gold, Highlight = Cyan/Teal, Featured = Soft Purple
 const POPUP_TIER_CONFIG: Record<string, { bg: string; border: string; icon: string; label: string }> = {
-  premium: { bg: 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-300', border: 'border-yellow-400', icon: '👑', label: 'PREMIUM PREMIERE' },
-  highlight: { bg: 'bg-gradient-to-r from-sky-400 via-sky-300 to-cyan-300', border: 'border-sky-300', icon: '💎', label: 'HIGHLIGHT' },
-  featured: { bg: 'bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200', border: 'border-blue-200', icon: '⭐', label: 'FEATURED' },
+  premium: { bg: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400', border: 'border-amber-400', icon: '👑', label: 'PREMIUM PREMIERE' },
+  highlight: { bg: 'bg-gradient-to-r from-cyan-500 via-teal-400 to-cyan-400', border: 'border-cyan-400', icon: '💎', label: 'HIGHLIGHT' },
+  featured: { bg: 'bg-gradient-to-r from-purple-500 via-violet-400 to-purple-400', border: 'border-purple-300', icon: '⭐', label: 'FEATURED' },
   standard: { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', border: 'border-gray-300', icon: '✨', label: 'PROMOTED' },
 };
 
@@ -647,12 +691,12 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
 
 /**
  * Promotion Tier Colors for map markers
- * Premium = Gold, Highlight = Baby Blue, Featured = Light Blue
+ * Premium = Rich Gold, Highlight = Cyan/Teal, Featured = Soft Purple
  */
 const PROMOTION_TIER_COLORS = {
-  premium: '#FFD700',   // Gold for Premium Premiere
-  highlight: '#87CEEB', // Baby blue for Highlight
-  featured: '#93C5FD',  // Light blue for Featured
+  premium: '#FFB800',   // Rich Gold for Premium Premiere
+  highlight: '#00CED1', // Cyan/Teal for Highlight
+  featured: '#9370DB',  // Soft Purple for Featured
 } as const;
 
 /**
