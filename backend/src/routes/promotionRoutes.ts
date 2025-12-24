@@ -9,6 +9,8 @@ import {
   getPromotionStats,
   createPromotionCheckout,
   confirmPromotionPayment,
+  extendPromotion,
+  confirmExtensionPayment,
 } from '../controllers/promotionController';
 import { protect } from '../middleware/auth';
 
@@ -22,9 +24,11 @@ router.get('/featured', getFeaturedProperties); // Get all featured properties
 router.post('/', protect, purchasePromotion); // Purchase a promotion (legacy/free allocations)
 router.post('/checkout', protect, createPromotionCheckout); // Create Stripe checkout session
 router.post('/confirm-payment', protect, confirmPromotionPayment); // Confirm payment and activate promotion
+router.post('/confirm-extension', protect, confirmExtensionPayment); // Confirm extension payment
 router.get('/', protect, getMyPromotions); // Get user's promotions
 router.delete('/:id', protect, cancelPromotion); // Cancel a promotion
 router.get('/:id/stats', protect, getPromotionStats); // Get promotion statistics
+router.post('/:id/extend', protect, extendPromotion); // Extend an existing promotion
 router.get('/agency/allocation', protect, getAgencyPromotionAllocation); // Get agency allocation
 
 export default router;

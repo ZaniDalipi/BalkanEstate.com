@@ -1391,6 +1391,73 @@ export const cancelPromotion = async (promotionId: string): Promise<any> => {
 };
 
 /**
+ * Extend an existing promotion by adding more days
+ * Can pass either promotionId or propertyId
+ */
+export const extendPromotion = async (params: {
+  promotionId?: string;
+  propertyId?: string;
+  duration: number;
+  couponCode?: string;
+}): Promise<{
+  success: boolean;
+  sessionId?: string;
+  url?: string;
+  newEndDate?: string;
+  isFree?: boolean;
+  pricing?: {
+    originalPrice: number;
+    discount: number;
+    finalPrice: number;
+    currency: string;
+  };
+}> => {
+  const id = params.promotionId || params.propertyId;
+  if (!id) throw new Error('Either promotionId or propertyId is required');
+
+  return await apiRequest(`/promotions/${id}/extend`, {
+    method: 'POST',
+    body: { duration: params.duration, couponCode: params.couponCode },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Confirm extension payment after Stripe checkout
+ */
+export const confirmExtensionPayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+  newEndDate?: string;
+}> => {
+  return await apiRequest('/promotions/confirm-extension', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Renew a property listing (puts it at top, 24hr cooldown)
+ */
+export const renewProperty = async (propertyId: string): Promise<{
+  success: boolean;
+  message: string;
+  property?: Property;
+  lastRenewed?: string;
+  canRenewAt?: string;
+  code?: string;
+  hoursRemaining?: number;
+  minutesRemaining?: number;
+}> => {
+  return await apiRequest(`/properties/${propertyId}/renew`, {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+};
+
+/**
  * Get featured/promoted properties (public)
  */
 export const getFeaturedProperties = async (filters?: {

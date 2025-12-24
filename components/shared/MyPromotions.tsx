@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import * as api from '../../services/apiService';
 import { formatPrice } from '../../utils/currency';
 import { SparklesIcon, ClockIcon, BuildingOfficeIcon, MapPinIcon } from '../../constants';
+import PromotionModal from '../promotions/PromotionModal';
 
 // Tier configuration - Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
 const TIER_CONFIG: Record<string, { color: string; bg: string; icon: string; label: string }> = {
@@ -80,9 +81,10 @@ const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
 interface PromotedPropertyCardProps {
   property: Property;
   onViewProperty: (propertyId: string) => void;
+  onExtend: (property: Property) => void;
 }
 
-const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, onViewProperty }) => {
+const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, onViewProperty, onExtend }) => {
   const tier = property.promotionTier || 'standard';
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.standard;
   const endDate = property.promotionEndDate || 0;
@@ -179,8 +181,10 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
             View Listing
           </button>
           <button
-            className="px-4 py-2 border border-neutral-200 rounded-lg text-neutral-600 hover:bg-neutral-50 transition-colors text-sm font-medium"
+            onClick={() => onExtend(property)}
+            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all text-sm font-bold flex items-center gap-1.5"
           >
+            <ClockIcon className="w-4 h-4" />
             Extend
           </button>
         </div>
@@ -195,6 +199,8 @@ const MyPromotions: React.FC = () => {
   const [promotedProperties, setPromotedProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'active' | 'expired'>('active');
+  const [showExtendModal, setShowExtendModal] = useState(false);
+  const [propertyToExtend, setPropertyToExtend] = useState<Property | null>(null);
 
   useEffect(() => {
     const fetchPromotedProperties = async () => {
@@ -245,6 +251,25 @@ const MyPromotions: React.FC = () => {
   const handleViewProperty = (propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+  };
+
+  const handleExtend = (property: Property) => {
+    setPropertyToExtend(property);
+    setShowExtendModal(true);
+  };
+
+  const handleExtensionSuccess = async () => {
+    setShowExtendModal(false);
+    setPropertyToExtend(null);
+
+    // Refresh promoted properties
+    try {
+      const listings = await api.getMyListings();
+      const promoted = listings.filter(p => p.isPromoted);
+      setPromotedProperties(promoted);
+    } catch (error) {
+      console.error('Failed to refresh promoted properties:', error);
+    }
   };
 
   if (isLoading) {
@@ -356,9 +381,27 @@ const MyPromotions: React.FC = () => {
               key={property.id}
               property={property}
               onViewProperty={handleViewProperty}
+              onExtend={handleExtend}
             />
           ))}
         </div>
+      )}
+
+      {/* Extension Modal */}
+      {propertyToExtend && (
+        <PromotionModal
+          isOpen={showExtendModal}
+          onClose={() => {
+            setShowExtendModal(false);
+            setPropertyToExtend(null);
+          }}
+          propertyId={propertyToExtend.id}
+          propertyTitle={propertyToExtend.title || `${propertyToExtend.address}, ${propertyToExtend.city}`}
+          onSuccess={handleExtensionSuccess}
+          isExtension={true}
+          currentTier={propertyToExtend.promotionTier as 'featured' | 'highlight' | 'premium' | undefined}
+          currentEndDate={propertyToExtend.promotionEndDate ? new Date(propertyToExtend.promotionEndDate) : undefined}
+        />
       )}
     </div>
   );

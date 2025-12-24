@@ -976,3 +976,250 @@ export const confirmPromotionPayment = async (
     res.status(500).json({ message: 'Error confirming payment', error: error.message });
   }
 };
+
+/**
+ * @desc    Extend an existing promotion by adding more days
+ * @route   POST /api/promotions/:id/extend (id can be promotionId or propertyId)
+ * @access  Private
+ */
+export const extendPromotion = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const { duration, couponCode } = req.body;
+    const idParam = req.params.id;
+
+    const validDurations: PromotionDuration[] = [7, 15, 30, 60, 90];
+    if (!validDurations.includes(duration)) {
+      res.status(400).json({ message: 'Invalid duration', code: 'INVALID_DURATION' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+
+    // Try to find promotion by ID first, then by propertyId
+    let promotion = await Promotion.findById(idParam);
+    if (!promotion) {
+      // Try finding by propertyId (for active promotions)
+      promotion = await Promotion.findOne({
+        propertyId: idParam,
+        isActive: true,
+        endDate: { $gt: new Date() },
+      });
+    }
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Verify ownership
+    if (promotion.userId.toString() !== String(currentUser._id)) {
+      res.status(403).json({ message: 'Not authorized to extend this promotion' });
+      return;
+    }
+
+    // Get property
+    const property = await Property.findById(promotion.propertyId);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    // Calculate extension price
+    const promotionTier = promotion.promotionTier as PromotionTierType;
+    let extensionPrice = getPromotionPrice(promotionTier, duration, false); // No urgent badge on extension
+    let couponDiscount = 0;
+    let appliedCouponCode: string | undefined;
+
+    // Apply coupon if provided
+    if (couponCode && extensionPrice > 0) {
+      const coupon = await (PromotionCoupon as any).findValidCoupon(couponCode);
+      if (coupon) {
+        const canUse = await coupon.canBeUsedBy(currentUser._id);
+        if (canUse) {
+          if (!coupon.applicableTiers || coupon.applicableTiers.length === 0 || coupon.applicableTiers.includes(promotionTier)) {
+            couponDiscount = coupon.calculateDiscount(extensionPrice);
+            extensionPrice = Math.max(0, extensionPrice - couponDiscount);
+            appliedCouponCode = couponCode;
+          }
+        }
+      }
+    }
+
+    // If free with coupon, extend directly
+    if (extensionPrice === 0) {
+      // Calculate new end date from current end date (or now if expired)
+      const currentEndDate = new Date(promotion.endDate);
+      const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
+      const newEndDate = new Date(baseDate);
+      newEndDate.setDate(newEndDate.getDate() + duration);
+
+      // Update promotion
+      promotion.endDate = newEndDate;
+      promotion.duration = promotion.duration + duration;
+      promotion.isActive = true;
+      if (appliedCouponCode) {
+        promotion.notes = (promotion.notes || '') + ` | Extended with coupon: ${appliedCouponCode}`;
+      }
+      await promotion.save();
+
+      // Update property
+      property.promotionEndDate = newEndDate;
+      property.isPromoted = true;
+      await property.save();
+
+      // Record coupon usage
+      if (appliedCouponCode && couponDiscount > 0) {
+        const coupon = await (PromotionCoupon as any).findValidCoupon(appliedCouponCode);
+        if (coupon) {
+          await coupon.recordUsage(currentUser._id, promotion._id, couponDiscount);
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Promotion extended successfully (free with coupon)',
+        promotion,
+        newEndDate: newEndDate.toISOString(),
+        isFree: true,
+      });
+      return;
+    }
+
+    // Create Stripe checkout for paid extension
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const tierInfo = PROMOTION_TIERS[promotionTier];
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: `Extend ${tierInfo.name} Promotion`,
+              description: `Add ${duration} days to promotion for "${property.title}"`,
+            },
+            unit_amount: Math.round(extensionPrice * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${baseUrl}/promotions/extend-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/promotions/cancel?property_id=${property._id}`,
+      client_reference_id: String(currentUser._id),
+      metadata: {
+        type: 'extension',
+        userId: String(currentUser._id),
+        promotionId: String(promotion._id),
+        propertyId: String(property._id),
+        duration: String(duration),
+        couponCode: appliedCouponCode ?? '',
+        couponDiscount: String(couponDiscount),
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      sessionId: session.id,
+      url: session.url,
+      pricing: {
+        originalPrice: extensionPrice + couponDiscount,
+        discount: couponDiscount,
+        finalPrice: extensionPrice,
+        currency: 'EUR',
+      },
+    });
+  } catch (error: any) {
+    console.error('Extend promotion error:', error);
+    res.status(500).json({ message: 'Error extending promotion', error: error.message });
+  }
+};
+
+/**
+ * @desc    Confirm extension payment (from Stripe redirect)
+ * @route   POST /api/promotions/confirm-extension
+ * @access  Private
+ */
+export const confirmExtensionPayment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ message: 'Session ID is required' });
+      return;
+    }
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      res.status(400).json({ message: 'Payment not completed' });
+      return;
+    }
+
+    const { promotionId, duration } = session.metadata || {};
+
+    if (!promotionId || !duration) {
+      res.status(400).json({ message: 'Invalid session metadata' });
+      return;
+    }
+
+    // Find and update promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check if already processed
+    if (promotion.notes?.includes(sessionId)) {
+      res.status(200).json({
+        success: true,
+        message: 'Extension already processed',
+        promotion,
+      });
+      return;
+    }
+
+    // Calculate new end date
+    const currentEndDate = new Date(promotion.endDate);
+    const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
+    const newEndDate = new Date(baseDate);
+    newEndDate.setDate(newEndDate.getDate() + parseInt(duration));
+
+    // Update promotion
+    promotion.endDate = newEndDate;
+    promotion.duration = promotion.duration + parseInt(duration);
+    promotion.isActive = true;
+    promotion.notes = (promotion.notes || '') + ` | Extended: +${duration} days (${sessionId})`;
+    await promotion.save();
+
+    // Update property
+    const property = await Property.findById(promotion.propertyId);
+    if (property) {
+      property.promotionEndDate = newEndDate;
+      property.isPromoted = true;
+      await property.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Promotion extended successfully',
+      promotion,
+      newEndDate: newEndDate.toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Confirm extension payment error:', error);
+    res.status(500).json({ message: 'Error confirming extension', error: error.message });
+  }
+};

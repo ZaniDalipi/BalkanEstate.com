@@ -985,7 +985,7 @@ export const markAsSold = async (
   }
 };
 
-// @desc    Renew property listing
+// @desc    Renew property listing (puts listing at top, once per 24 hours)
 // @route   PATCH /api/properties/:id/renew
 // @access  Private
 export const renewProperty = async (
@@ -1011,10 +1011,45 @@ export const renewProperty = async (
       return;
     }
 
-    property.lastRenewed = new Date();
+    // Check 24hr cooldown
+    const COOLDOWN_HOURS = 24;
+    const cooldownMs = COOLDOWN_HOURS * 60 * 60 * 1000;
+    const now = new Date();
+
+    if (property.lastRenewed) {
+      const lastRenewedTime = new Date(property.lastRenewed).getTime();
+      const timeSinceRenewal = now.getTime() - lastRenewedTime;
+
+      if (timeSinceRenewal < cooldownMs) {
+        const canRenewAt = new Date(lastRenewedTime + cooldownMs);
+        const hoursRemaining = Math.ceil((cooldownMs - timeSinceRenewal) / (60 * 60 * 1000));
+        const minutesRemaining = Math.ceil((cooldownMs - timeSinceRenewal) / (60 * 1000)) % 60;
+
+        res.status(429).json({
+          message: `You can only renew once every ${COOLDOWN_HOURS} hours`,
+          code: 'RENEWAL_COOLDOWN',
+          canRenewAt: canRenewAt.toISOString(),
+          hoursRemaining,
+          minutesRemaining,
+          lastRenewed: property.lastRenewed,
+        });
+        return;
+      }
+    }
+
+    property.lastRenewed = now;
     await property.save();
 
-    res.json({ property });
+    // Calculate when they can renew next
+    const canRenewAt = new Date(now.getTime() + cooldownMs);
+
+    res.json({
+      success: true,
+      message: 'Property renewed successfully! It will appear at the top of search results.',
+      property,
+      lastRenewed: now.toISOString(),
+      canRenewAt: canRenewAt.toISOString(),
+    });
   } catch (error: any) {
     console.error('Renew property error:', error);
     res.status(500).json({ message: 'Error renewing property', error: error.message });
