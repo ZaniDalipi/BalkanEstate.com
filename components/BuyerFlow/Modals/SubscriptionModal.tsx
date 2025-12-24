@@ -181,12 +181,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
         </div>
 
         {/* Promotion Tiers - Enhanced with tier-specific colors */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid sm:grid-cols-3 gap-5 mb-8 mt-4">
             {/* Featured - Violet theme */}
             <div className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-2xl p-5 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-100 transition-all group">
                 <div className="text-center mb-4">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-violet-400 to-purple-500 rounded-2xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
-                        <span className="text-2xl filter drop-shadow">⭐</span>
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                        <span className="text-xl filter drop-shadow">⭐</span>
                     </div>
                     <h4 className="font-bold text-gray-900 text-lg">Featured</h4>
                     <p className="text-sm text-gray-600 mb-3">Priority in search results</p>
@@ -210,13 +210,13 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
             </div>
 
             {/* Highlight - Sky/Cyan theme */}
-            <div className="bg-gradient-to-br from-sky-50 to-cyan-50 border-2 border-sky-300 rounded-2xl p-5 hover:shadow-xl hover:shadow-sky-100 transition-all relative group scale-[1.02]">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
+            <div className="bg-gradient-to-br from-sky-50 to-cyan-50 border-2 border-sky-300 rounded-2xl p-5 pt-8 hover:shadow-xl hover:shadow-sky-100 transition-all relative group sm:scale-[1.03] sm:-mt-2">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                     ✨ Most Popular
                 </div>
-                <div className="text-center mb-4 pt-2">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-2xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
-                        <span className="text-2xl filter drop-shadow">💎</span>
+                <div className="text-center mb-4">
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                        <span className="text-xl filter drop-shadow">💎</span>
                     </div>
                     <h4 className="font-bold text-gray-900 text-lg">Highlight</h4>
                     <p className="text-sm text-gray-600 mb-3">Stand out with color</p>
@@ -242,8 +242,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
             {/* Premium - Amber/Gold theme */}
             <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-2xl p-5 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-100 transition-all group">
                 <div className="text-center mb-4">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
-                        <span className="text-2xl filter drop-shadow">👑</span>
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                        <span className="text-xl filter drop-shadow">👑</span>
                     </div>
                     <h4 className="font-bold text-gray-900 text-lg">Premium</h4>
                     <p className="text-sm text-gray-600 mb-3">Homepage featuring</p>
