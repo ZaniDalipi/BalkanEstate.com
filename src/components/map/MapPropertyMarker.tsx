@@ -17,11 +17,6 @@ const injectMapMarkerStyles = () => {
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
-    @keyframes markerGlow {
-      0%, 100% { filter: drop-shadow(0 0 8px var(--glow-color)) drop-shadow(0 0 16px var(--glow-color)); }
-      50% { filter: drop-shadow(0 0 16px var(--glow-color)) drop-shadow(0 0 28px var(--glow-color)); }
-    }
-
     @keyframes markerBounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
@@ -29,27 +24,54 @@ const injectMapMarkerStyles = () => {
 
     @keyframes markerPulse {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
+      50% { transform: scale(1.05); }
     }
 
-    .promoted-marker-premium {
-      --glow-color: rgba(192, 132, 252, 0.7);
-      animation: markerGlow 2s ease-in-out infinite, markerBounce 3s ease-in-out infinite;
+    /* Premium Premiere - GOLD and glowing, bouncing */
+    @keyframes glowGold {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 193, 7, 0.6)); }
+      50% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 35px rgba(255, 193, 7, 0.8)); }
     }
 
-    .promoted-marker-highlight {
-      --glow-color: rgba(251, 191, 36, 0.7);
-      animation: markerGlow 2s ease-in-out infinite, markerBounce 3s ease-in-out infinite;
+    /* Highlight Listing - Baby blue glow */
+    @keyframes glowBabyBlue {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(135, 206, 250, 0.7)) drop-shadow(0 0 16px rgba(135, 206, 250, 0.5)); }
+      50% { filter: drop-shadow(0 0 16px rgba(135, 206, 250, 0.9)) drop-shadow(0 0 28px rgba(135, 206, 250, 0.6)); }
     }
 
-    .promoted-marker-featured {
-      --glow-color: rgba(96, 165, 250, 0.7);
-      animation: markerGlow 2.5s ease-in-out infinite, markerPulse 2s ease-in-out infinite;
+    /* Featured - Simple subtle glow only */
+    @keyframes glowSubtle {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(147, 197, 253, 0.5)) drop-shadow(0 0 10px rgba(147, 197, 253, 0.3)); }
+      50% { filter: drop-shadow(0 0 10px rgba(147, 197, 253, 0.7)) drop-shadow(0 0 16px rgba(147, 197, 253, 0.4)); }
     }
 
-    .promoted-marker-standard {
-      --glow-color: rgba(156, 163, 175, 0.5);
+    /* Marker wrapper - stays in place, provides anchor point */
+    .promoted-marker-wrapper {
+      position: relative;
+    }
+
+    /* Premium Premiere - Gold, glowing, bouncing (TOP tier) */
+    .promoted-marker-inner-premium {
+      animation: markerBounce 2s ease-in-out infinite, glowGold 1.5s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    /* Highlight Listing - Baby blue, bouncing */
+    .promoted-marker-inner-highlight {
+      animation: markerBounce 2.5s ease-in-out infinite, glowBabyBlue 2s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    /* Featured - Only subtle glow, no bounce (lower tier) */
+    .promoted-marker-inner-featured {
+      animation: glowSubtle 3s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    /* Standard promotion - just a subtle pulse */
+    .promoted-marker-inner-standard {
       animation: markerPulse 3s ease-in-out infinite;
+      transform-origin: center bottom;
     }
 
     /* Enhanced popup styles for promoted properties */
@@ -103,9 +125,9 @@ const formatMarkerPrice = (price: number): string => {
 };
 
 /**
- * Get animation class for promoted property markers
+ * Get animation class for promoted property markers (inner element)
  */
-const getPromotedMarkerClass = (property: Property): string => {
+const getPromotedMarkerInnerClass = (property: Property): string => {
   const isActivelyPromoted = property.isPromoted &&
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
@@ -113,10 +135,10 @@ const getPromotedMarkerClass = (property: Property): string => {
   if (!isActivelyPromoted) return '';
 
   switch (property.promotionTier) {
-    case 'premium': return 'promoted-marker-premium';
-    case 'highlight': return 'promoted-marker-highlight';
-    case 'featured': return 'promoted-marker-featured';
-    default: return 'promoted-marker-standard';
+    case 'premium': return 'promoted-marker-inner-premium';
+    case 'highlight': return 'promoted-marker-inner-highlight';
+    case 'featured': return 'promoted-marker-inner-featured';
+    default: return 'promoted-marker-inner-standard';
   }
 };
 
@@ -133,22 +155,18 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) 
     property.promotionEndDate > Date.now();
 
   // Get ring color based on promotion tier or property type
+  // Premium = Gold, Highlight = Baby Blue, Featured = Light Blue (lower tier)
   let ringColor = 'none';
   let ringWidth = 2;
-  let glowFilter = '';
   if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
-      ringColor = '#c084fc'; // purple-400
-      glowFilter = 'drop-shadow(0 0 12px rgba(192, 132, 252, 0.8))';
+      ringColor = '#FFD700'; // Gold for Premium Premiere
     } else if (property.promotionTier === 'highlight') {
-      ringColor = '#fbbf24'; // amber-400
-      glowFilter = 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.8))';
+      ringColor = '#87CEEB'; // Baby blue for Highlight
     } else if (property.promotionTier === 'featured') {
-      ringColor = '#60a5fa'; // blue-400
-      glowFilter = 'drop-shadow(0 0 10px rgba(96, 165, 250, 0.7))';
+      ringColor = '#93C5FD'; // Light blue for Featured (lower tier)
     } else {
-      ringColor = '#9ca3af'; // gray-400
-      glowFilter = 'drop-shadow(0 0 8px rgba(156, 163, 175, 0.5))';
+      ringColor = '#9ca3af'; // gray-400 for standard
     }
     ringWidth = isHovered ? 4 : 3;
   } else if (isHovered) {
@@ -157,24 +175,27 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) 
   }
 
   const baseFilter = 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
-  const filterStyle = glowFilter ? `${baseFilter} ${glowFilter}` : baseFilter;
+  const promotedInnerClass = getPromotedMarkerInnerClass(property);
 
+  // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${filterStyle}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div class="promoted-marker-wrapper" style="width: 30px; height: 30px;">
+      <div class="${promotedInnerClass}" style="width: 30px; height: 30px;">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${color}" stroke="${ringColor !== 'none' ? ringColor : '#FFFFFF'}" stroke-width="${ringWidth}"/>
             <text x="15" y="16" font-family="Inter, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
-    `;
+      </div>
+    </div>
+  `;
 
-  const promotedClass = getPromotedMarkerClass(property);
   const hoverClass = isHovered ? 'scale-150 drop-shadow-lg' : '';
-  const className = [promotedClass, hoverClass].filter(Boolean).join(' ');
 
   return L.divIcon({
     html: svgHtml,
-    className: className,
+    className: hoverClass,
     iconSize: [30, 30],
-    iconAnchor: [15, isHovered ? 5 : 15],
+    iconAnchor: [15, 15],
     popupAnchor: [0, -15],
   });
 };
@@ -192,22 +213,18 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     property.promotionEndDate > Date.now();
 
   // Get stroke color based on promotion tier or property type
+  // Premium = Gold, Highlight = Baby Blue, Featured = Light Blue (lower tier)
   let strokeColor = '#FFFFFF';
   let strokeWidth = 2;
-  let glowFilter = '';
   if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
-      strokeColor = '#c084fc'; // purple-400
-      glowFilter = 'drop-shadow(0 0 16px rgba(192, 132, 252, 0.8)) drop-shadow(0 0 24px rgba(192, 132, 252, 0.4))';
+      strokeColor = '#FFD700'; // Gold for Premium Premiere
     } else if (property.promotionTier === 'highlight') {
-      strokeColor = '#fbbf24'; // amber-400
-      glowFilter = 'drop-shadow(0 0 16px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 24px rgba(251, 191, 36, 0.4))';
+      strokeColor = '#87CEEB'; // Baby blue for Highlight
     } else if (property.promotionTier === 'featured') {
-      strokeColor = '#60a5fa'; // blue-400
-      glowFilter = 'drop-shadow(0 0 14px rgba(96, 165, 250, 0.7)) drop-shadow(0 0 20px rgba(96, 165, 250, 0.3))';
+      strokeColor = '#93C5FD'; // Light blue for Featured (lower tier)
     } else {
-      strokeColor = '#9ca3af'; // gray-400
-      glowFilter = 'drop-shadow(0 0 10px rgba(156, 163, 175, 0.5))';
+      strokeColor = '#9ca3af'; // gray-400 for standard
     }
     strokeWidth = isHovered ? 4 : 3;
   } else if (isHovered) {
@@ -217,25 +234,28 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
   const scale = isHovered ? 1.25 : 1;
   const baseFilter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))';
-  const filterStyle = glowFilter ? `${baseFilter} ${glowFilter}` : baseFilter;
+  const promotedInnerClass = getPromotedMarkerInnerClass(property);
 
+  // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-        <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${filterStyle}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div class="promoted-marker-wrapper" style="width: 45px; height: 36px;">
+      <div class="${promotedInnerClass}" style="width: 45px; height: 36px;">
+        <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <path d="M35 56L25 44H45L35 56Z" fill="#003A96" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
             <text x="35" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
-    `;
+      </div>
+    </div>
+  `;
 
-  const promotedClass = getPromotedMarkerClass(property);
   const hoverClass = isHovered ? 'drop-shadow-xl' : '';
-  const className = [promotedClass, hoverClass].filter(Boolean).join(' ');
 
   return L.divIcon({
     html: svgHtml,
-    className: className,
+    className: hoverClass,
     iconSize: [45, 36],
-    iconAnchor: [22.5, isHovered ? 20 : 36],
+    iconAnchor: [22.5, 36],
     popupAnchor: [0, -36],
   });
 };
@@ -251,10 +271,11 @@ const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boo
 };
 
 // Tier badge configurations for popup
+// Premium = Gold, Highlight = Baby Blue, Featured = Light Blue (lower tier)
 const POPUP_TIER_CONFIG: Record<string, { bg: string; border: string; icon: string; label: string }> = {
-  premium: { bg: 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600', border: 'border-purple-300', icon: '👑', label: 'PREMIUM' },
-  highlight: { bg: 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500', border: 'border-amber-300', icon: '💎', label: 'HIGHLIGHT' },
-  featured: { bg: 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500', border: 'border-blue-300', icon: '⭐', label: 'FEATURED' },
+  premium: { bg: 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-300', border: 'border-yellow-400', icon: '👑', label: 'PREMIUM PREMIERE' },
+  highlight: { bg: 'bg-gradient-to-r from-sky-400 via-sky-300 to-cyan-300', border: 'border-sky-300', icon: '💎', label: 'HIGHLIGHT' },
+  featured: { bg: 'bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200', border: 'border-blue-200', icon: '⭐', label: 'FEATURED' },
   standard: { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', border: 'border-gray-300', icon: '✨', label: 'PROMOTED' },
 };
 
@@ -626,11 +647,12 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
 
 /**
  * Promotion Tier Colors for map markers
+ * Premium = Gold, Highlight = Baby Blue, Featured = Light Blue
  */
 const PROMOTION_TIER_COLORS = {
-  premium: '#8B5CF6',   // purple
-  highlight: '#F59E0B', // amber
-  featured: '#3B82F6',  // blue
+  premium: '#FFD700',   // Gold for Premium Premiere
+  highlight: '#87CEEB', // Baby blue for Highlight
+  featured: '#93C5FD',  // Light blue for Featured
 } as const;
 
 /**
@@ -688,21 +710,21 @@ export const Legend: React.FC = () => {
               className="w-3.5 h-3.5 rounded-full border-2 shadow-sm"
               style={{ borderColor: PROMOTION_TIER_COLORS.premium, backgroundColor: 'white' }}
             ></span>
-            <span className="text-xs text-neutral-600">👑 {t('map.tiers.premium', 'Premium')}</span>
+            <span className="text-xs text-neutral-600">👑 {t('map.tiers.premium', 'Premium Premiere')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span
               className="w-3.5 h-3.5 rounded-full border-2 shadow-sm"
               style={{ borderColor: PROMOTION_TIER_COLORS.highlight, backgroundColor: 'white' }}
             ></span>
-            <span className="text-xs text-neutral-600">💎 {t('map.tiers.highlight', 'Highlight')}</span>
+            <span className="text-xs text-neutral-600">💎 {t('map.tiers.highlight', 'Highlight Listing')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span
               className="w-3.5 h-3.5 rounded-full border-2 shadow-sm"
               style={{ borderColor: PROMOTION_TIER_COLORS.featured, backgroundColor: 'white' }}
             ></span>
-            <span className="text-xs text-neutral-600">⭐ {t('map.tiers.featured', 'Featured')}</span>
+            <span className="text-xs text-neutral-600">⭐ {t('map.tiers.featured', 'Featured Listing')}</span>
           </div>
         </div>
       </div>

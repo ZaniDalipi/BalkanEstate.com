@@ -97,28 +97,29 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
   // Tier-specific styles
+  // Premium = Gold, Highlight = Baby Blue, Featured = Light Blue
   const getTierStyles = () => {
     switch (promotionTier) {
       case 'premium':
         return {
-          border: 'ring-2 ring-purple-400 border-purple-300',
-          badge: 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600',
+          border: 'ring-2 ring-yellow-400 border-yellow-300',
+          badge: 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-300',
           icon: '👑',
-          glow: 'shadow-purple-200/50',
-          label: t('property:map.tiers.premium', 'PREMIUM')
+          glow: 'shadow-yellow-200/50',
+          label: t('property:map.tiers.premium', 'PREMIUM PREMIERE')
         };
       case 'highlight':
         return {
-          border: 'ring-2 ring-amber-400 border-amber-300',
-          badge: 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500',
+          border: 'ring-2 ring-sky-400 border-sky-300',
+          badge: 'bg-gradient-to-r from-sky-400 via-sky-300 to-cyan-300',
           icon: '💎',
-          glow: 'shadow-amber-200/50',
+          glow: 'shadow-sky-200/50',
           label: t('property:map.tiers.highlight', 'HIGHLIGHT')
         };
       case 'featured':
         return {
-          border: 'ring-2 ring-blue-400 border-blue-300',
-          badge: 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500',
+          border: 'ring-2 ring-blue-300 border-blue-200',
+          badge: 'bg-gradient-to-r from-blue-400 via-blue-300 to-blue-200',
           icon: '⭐',
           glow: 'shadow-blue-200/50',
           label: t('property:map.tiers.featured', 'FEATURED')

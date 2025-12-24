@@ -863,7 +863,10 @@ function transformToBackendProperty(frontendProp: Property): any {
     imagesCount: frontendProp.images?.length || 0,
     sampleImage: frontendProp.images?.[0]?.url?.substring(0, 50)
   });
-  return {
+
+  // Build the property object, only including fields with meaningful values
+  // This ensures we don't accidentally overwrite existing data with empty/undefined values
+  const result: any = {
     status: frontendProp.status,
     title: frontendProp.title,
     price: frontendProp.price,
@@ -880,37 +883,79 @@ function transformToBackendProperty(frontendProp: Property): any {
     specialFeatures: frontendProp.specialFeatures,
     materials: frontendProp.materials,
     amenities: frontendProp.amenities,
-    tourUrl: frontendProp.tourUrl,
-    virtualTour360Url: frontendProp.virtualTour360Url,
-    hasVirtualTour360: frontendProp.hasVirtualTour360 || false,
     imageUrl: frontendProp.imageUrl,
     images: frontendProp.images,
     lat: frontendProp.lat,
     lng: frontendProp.lng,
     propertyType: frontendProp.propertyType,
-    floorNumber: frontendProp.floorNumber,
-    totalFloors: frontendProp.totalFloors,
-    floorplanUrl: frontendProp.floorplanUrl,
     // Dual-role system
     createdAsRole: frontendProp.createdAsRole,
-    // Advanced property features
-    furnishing: frontendProp.furnishing,
-    heatingType: frontendProp.heatingType,
-    condition: frontendProp.condition,
-    viewType: frontendProp.viewType,
-    energyRating: frontendProp.energyRating,
-    hasBalcony: frontendProp.hasBalcony,
-    hasGarden: frontendProp.hasGarden,
-    hasElevator: frontendProp.hasElevator,
-    hasSecurity: frontendProp.hasSecurity,
-    hasAirConditioning: frontendProp.hasAirConditioning,
-    hasPool: frontendProp.hasPool,
-    petsAllowed: frontendProp.petsAllowed,
-    distanceToCenter: frontendProp.distanceToCenter,
-    distanceToSea: frontendProp.distanceToSea,
-    distanceToSchool: frontendProp.distanceToSchool,
-    distanceToHospital: frontendProp.distanceToHospital,
   };
+
+  // Only include URL fields if they have actual values (preserve existing data)
+  if (frontendProp.tourUrl) {
+    result.tourUrl = frontendProp.tourUrl;
+  }
+  if (frontendProp.virtualTour360Url) {
+    result.virtualTour360Url = frontendProp.virtualTour360Url;
+    result.hasVirtualTour360 = true;
+  } else if (frontendProp.hasVirtualTour360 !== undefined) {
+    // Only explicitly set to false if hasVirtualTour360 was explicitly set
+    result.hasVirtualTour360 = frontendProp.hasVirtualTour360;
+  }
+  if (frontendProp.floorplanUrl) {
+    result.floorplanUrl = frontendProp.floorplanUrl;
+  }
+
+  // Only include floor info if explicitly set
+  if (frontendProp.floorNumber !== undefined && frontendProp.floorNumber > 0) {
+    result.floorNumber = frontendProp.floorNumber;
+  }
+  if (frontendProp.totalFloors !== undefined && frontendProp.totalFloors > 0) {
+    result.totalFloors = frontendProp.totalFloors;
+  }
+
+  // Advanced property features - only include if explicitly set (not 'any' or undefined)
+  if (frontendProp.furnishing && frontendProp.furnishing !== 'any') {
+    result.furnishing = frontendProp.furnishing;
+  }
+  if (frontendProp.heatingType && frontendProp.heatingType !== 'any') {
+    result.heatingType = frontendProp.heatingType;
+  }
+  if (frontendProp.condition && frontendProp.condition !== 'any') {
+    result.condition = frontendProp.condition;
+  }
+  if (frontendProp.viewType && frontendProp.viewType !== 'any') {
+    result.viewType = frontendProp.viewType;
+  }
+  if (frontendProp.energyRating && frontendProp.energyRating !== 'any') {
+    result.energyRating = frontendProp.energyRating;
+  }
+
+  // Boolean amenities - only include if explicitly set (not undefined)
+  if (frontendProp.hasBalcony !== undefined) result.hasBalcony = frontendProp.hasBalcony;
+  if (frontendProp.hasGarden !== undefined) result.hasGarden = frontendProp.hasGarden;
+  if (frontendProp.hasElevator !== undefined) result.hasElevator = frontendProp.hasElevator;
+  if (frontendProp.hasSecurity !== undefined) result.hasSecurity = frontendProp.hasSecurity;
+  if (frontendProp.hasAirConditioning !== undefined) result.hasAirConditioning = frontendProp.hasAirConditioning;
+  if (frontendProp.hasPool !== undefined) result.hasPool = frontendProp.hasPool;
+  if (frontendProp.petsAllowed !== undefined) result.petsAllowed = frontendProp.petsAllowed;
+
+  // Distance fields - only include if explicitly set
+  if (frontendProp.distanceToCenter !== undefined) {
+    result.distanceToCenter = frontendProp.distanceToCenter;
+  }
+  if (frontendProp.distanceToSea !== undefined) {
+    result.distanceToSea = frontendProp.distanceToSea;
+  }
+  if (frontendProp.distanceToSchool !== undefined) {
+    result.distanceToSchool = frontendProp.distanceToSchool;
+  }
+  if (frontendProp.distanceToHospital !== undefined) {
+    result.distanceToHospital = frontendProp.distanceToHospital;
+  }
+
+  return result;
 }
 
 // Transform backend saved search to frontend SavedSearch type

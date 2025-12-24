@@ -6,11 +6,11 @@ import * as api from '../../services/apiService';
 import { formatPrice } from '../../utils/currency';
 import { SparklesIcon, ClockIcon, BuildingOfficeIcon, MapPinIcon } from '../../constants';
 
-// Tier configuration
+// Tier configuration - Premium = Gold, Highlight = Baby Blue, Featured = Light Blue
 const TIER_CONFIG: Record<string, { color: string; bg: string; icon: string; label: string }> = {
-  premium: { color: 'text-purple-700', bg: 'bg-purple-100', icon: '👑', label: 'Premium' },
-  highlight: { color: 'text-amber-700', bg: 'bg-amber-100', icon: '💎', label: 'Highlight' },
-  featured: { color: 'text-blue-700', bg: 'bg-blue-100', icon: '⭐', label: 'Featured' },
+  premium: { color: 'text-yellow-700', bg: 'bg-yellow-100', icon: '👑', label: 'Premium Premiere' },
+  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', icon: '💎', label: 'Highlight' },
+  featured: { color: 'text-blue-600', bg: 'bg-blue-50', icon: '⭐', label: 'Featured' },
   standard: { color: 'text-gray-700', bg: 'bg-gray-100', icon: '✨', label: 'Standard' },
 };
 
@@ -95,7 +95,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
   const progressPercent = totalDuration > 0 ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100)) : 0;
 
   return (
-    <div className={`bg-white rounded-xl border-2 ${tier === 'premium' ? 'border-purple-200' : tier === 'highlight' ? 'border-amber-200' : tier === 'featured' ? 'border-blue-200' : 'border-gray-200'} shadow-sm hover:shadow-md transition-shadow`}>
+    <div className={`bg-white rounded-xl border-2 ${tier === 'premium' ? 'border-yellow-300' : tier === 'highlight' ? 'border-sky-300' : tier === 'featured' ? 'border-blue-200' : 'border-gray-200'} shadow-sm hover:shadow-md transition-shadow`}>
       <div className="p-4">
         {/* Header with tier badge */}
         <div className="flex items-start justify-between mb-3">
@@ -156,9 +156,9 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
           <div className="w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
-                tier === 'premium' ? 'bg-purple-500' :
-                tier === 'highlight' ? 'bg-amber-500' :
-                tier === 'featured' ? 'bg-blue-500' :
+                tier === 'premium' ? 'bg-yellow-500' :
+                tier === 'highlight' ? 'bg-sky-500' :
+                tier === 'featured' ? 'bg-blue-400' :
                 'bg-gray-500'
               }`}
               style={{ width: `${100 - progressPercent}%` }}
@@ -291,17 +291,17 @@ const MyPromotions: React.FC = () => {
           <div className="text-2xl font-bold text-green-700">{stats.active}</div>
           <div className="text-sm text-green-600">Active Promotions</div>
         </div>
-        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
-          <div className="text-2xl font-bold text-purple-700">{stats.tierCounts.premium || 0}</div>
-          <div className="text-sm text-purple-600">👑 Premium</div>
+        <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-200">
+          <div className="text-2xl font-bold text-yellow-700">{stats.tierCounts.premium || 0}</div>
+          <div className="text-sm text-yellow-600">👑 Premium Premiere</div>
         </div>
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-100">
-          <div className="text-2xl font-bold text-amber-700">{stats.tierCounts.highlight || 0}</div>
-          <div className="text-sm text-amber-600">💎 Highlight</div>
+        <div className="bg-gradient-to-br from-sky-50 to-cyan-50 rounded-xl p-4 border border-sky-200">
+          <div className="text-2xl font-bold text-sky-700">{stats.tierCounts.highlight || 0}</div>
+          <div className="text-sm text-sky-600">💎 Highlight</div>
         </div>
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100">
-          <div className="text-2xl font-bold text-blue-700">{stats.tierCounts.featured || 0}</div>
-          <div className="text-sm text-blue-600">⭐ Featured</div>
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-100">
+          <div className="text-2xl font-bold text-blue-600">{stats.tierCounts.featured || 0}</div>
+          <div className="text-sm text-blue-500">⭐ Featured</div>
         </div>
       </div>
 
