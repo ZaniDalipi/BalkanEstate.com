@@ -6,11 +6,11 @@ import * as api from '../../services/apiService';
 import { formatPrice } from '../../utils/currency';
 import { SparklesIcon, ClockIcon, BuildingOfficeIcon, MapPinIcon } from '../../constants';
 
-// Tier configuration - Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Pink (3rd)
+// Tier configuration - Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
 const TIER_CONFIG: Record<string, { color: string; bg: string; icon: string; label: string }> = {
   premium: { color: 'text-amber-700', bg: 'bg-amber-100', icon: '👑', label: 'Premium Premiere' },
   highlight: { color: 'text-sky-700', bg: 'bg-sky-100', icon: '💎', label: 'Highlight' },
-  featured: { color: 'text-pink-600', bg: 'bg-pink-50', icon: '⭐', label: 'Featured' },
+  featured: { color: 'text-violet-600', bg: 'bg-violet-50', icon: '⭐', label: 'Featured' },
   standard: { color: 'text-gray-700', bg: 'bg-gray-100', icon: '✨', label: 'Standard' },
 };
 
@@ -95,7 +95,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
   const progressPercent = totalDuration > 0 ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100)) : 0;
 
   return (
-    <div className={`bg-white rounded-xl border-2 ${tier === 'premium' ? 'border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.25)]' : tier === 'highlight' ? 'border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.25)]' : tier === 'featured' ? 'border-pink-400 shadow-[0_0_12px_rgba(236,72,153,0.2)]' : 'border-gray-200'} hover:shadow-lg transition-all duration-300`}>
+    <div className={`bg-white rounded-xl border-2 ${tier === 'premium' ? 'border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.25)]' : tier === 'highlight' ? 'border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.25)]' : tier === 'featured' ? 'border-violet-500 shadow-[0_0_12px_rgba(124,58,237,0.2)]' : 'border-gray-200'} hover:shadow-lg transition-all duration-300`}>
       <div className="p-4">
         {/* Header with tier badge */}
         <div className="flex items-start justify-between mb-3">
@@ -158,7 +158,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({ property, o
               className={`h-full rounded-full transition-all duration-300 ${
                 tier === 'premium' ? 'bg-gradient-to-r from-amber-500 to-yellow-400' :
                 tier === 'highlight' ? 'bg-gradient-to-r from-sky-500 to-cyan-400' :
-                tier === 'featured' ? 'bg-gradient-to-r from-pink-500 to-rose-400' :
+                tier === 'featured' ? 'bg-gradient-to-r from-violet-600 to-purple-500' :
                 'bg-gray-500'
               }`}
               style={{ width: `${100 - progressPercent}%` }}
@@ -299,9 +299,9 @@ const MyPromotions: React.FC = () => {
           <div className="text-2xl font-bold text-sky-700">{stats.tierCounts.highlight || 0}</div>
           <div className="text-sm text-sky-600">💎 Highlight</div>
         </div>
-        <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 border border-pink-200 shadow-[0_0_10px_rgba(236,72,153,0.15)]">
-          <div className="text-2xl font-bold text-pink-600">{stats.tierCounts.featured || 0}</div>
-          <div className="text-sm text-pink-500">⭐ Featured</div>
+        <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-4 border border-violet-200 shadow-[0_0_10px_rgba(124,58,237,0.15)]">
+          <div className="text-2xl font-bold text-violet-600">{stats.tierCounts.featured || 0}</div>
+          <div className="text-sm text-violet-500">⭐ Featured</div>
         </div>
       </div>
 

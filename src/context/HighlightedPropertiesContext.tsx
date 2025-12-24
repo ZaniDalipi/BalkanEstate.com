@@ -24,11 +24,11 @@ export const PROMOTION_TIER_SCORES = {
 // Urgent badge bonus score
 export const URGENT_BONUS = 5;
 
-// Colors for each tier - Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Pink (3rd)
+// Colors for each tier - Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
 export const PROMOTION_TIER_COLORS = {
   premium: '#FFB800',   // Rich Gold for Premium Premiere (TOP tier)
   highlight: '#0EA5E9', // Light Blue/Sky for Highlight (2nd tier)
-  featured: '#EC4899',  // Vibrant Pink for Featured (3rd tier)
+  featured: '#7C3AED',  // Dark Purple/Violet for Featured (3rd tier)
   standard: '#6B7280',  // Gray for Standard
 } as const;
 

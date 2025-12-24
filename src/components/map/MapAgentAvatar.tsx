@@ -34,8 +34,8 @@ const TIER_CONFIG: Record<string, { color: string; gradient: string; icon: strin
     label: 'Highlight'
   },
   featured: {
-    color: '#EC4899',
-    gradient: 'from-pink-500 via-pink-400 to-rose-400',
+    color: '#7C3AED',
+    gradient: 'from-violet-600 via-purple-500 to-violet-400',
     icon: '⭐',
     label: 'Featured'
   },

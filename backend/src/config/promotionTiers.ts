@@ -117,7 +117,7 @@ export const PROMOTION_TIERS: Record<PromotionTierType, PromotionTier> = {
     ],
     displayMultiplier: 2.0,
     searchPriority: 40,
-    badgeColor: '#EC4899',
+    badgeColor: '#7C3AED',
     badgeIcon: '⭐',
     showImageCarousel: true,
     maxImages: 3,

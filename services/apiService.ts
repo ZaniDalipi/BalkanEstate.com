@@ -1283,6 +1283,50 @@ export const purchasePromotion = async (params: PurchasePromotionParams): Promis
 };
 
 /**
+ * Create Stripe checkout session for promotion purchase
+ */
+export const createPromotionCheckout = async (params: {
+  propertyId: string;
+  promotionTier: string;
+  duration: number;
+  hasUrgentBadge?: boolean;
+  couponCode?: string;
+}): Promise<{
+  success: boolean;
+  sessionId?: string;
+  url?: string;
+  promotion?: any;
+  isFree?: boolean;
+  pricing?: {
+    originalPrice: number;
+    discount: number;
+    finalPrice: number;
+    currency: string;
+  };
+}> => {
+  return await apiRequest('/promotions/checkout', {
+    method: 'POST',
+    body: params,
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Confirm promotion payment after Stripe checkout
+ */
+export const confirmPromotionPayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+}> => {
+  return await apiRequest('/promotions/confirm-payment', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
  * Validate a coupon code and get discount information
  */
 export const validateCoupon = async (

@@ -118,10 +118,10 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         };
       case 'featured':
         return {
-          border: 'ring-2 ring-pink-400 border-pink-400',
-          badge: 'bg-gradient-to-r from-pink-500 via-pink-400 to-rose-400',
+          border: 'ring-2 ring-violet-500 border-violet-500',
+          badge: 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400',
           icon: '⭐',
-          glow: 'shadow-[0_0_15px_rgba(236,72,153,0.35)] hover:shadow-[0_0_25px_rgba(236,72,153,0.5)]',
+          glow: 'shadow-[0_0_15px_rgba(124,58,237,0.35)] hover:shadow-[0_0_25px_rgba(124,58,237,0.5)]',
           label: t('property:map.tiers.featured', 'FEATURED')
         };
       default:

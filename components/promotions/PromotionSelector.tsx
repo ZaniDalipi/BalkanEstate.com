@@ -187,15 +187,41 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
 
       // If we have propertyId, we're promoting an existing listing
       if (propertyId) {
-        await api.purchasePromotion({
+        // If using agency allocation (free), use the direct purchase endpoint
+        if (useAgencyAllocation) {
+          await api.purchasePromotion({
+            propertyId,
+            promotionTier: selectedTier,
+            duration: selectedDuration,
+            hasUrgentBadge,
+            useAgencyAllocation: true,
+            couponCode: couponCode || undefined,
+          });
+          onSuccess?.();
+          return;
+        }
+
+        // For paid promotions, use Stripe checkout
+        const result = await api.createPromotionCheckout({
           propertyId,
           promotionTier: selectedTier,
           duration: selectedDuration,
           hasUrgentBadge,
-          useAgencyAllocation,
           couponCode: couponCode || undefined,
         });
-        onSuccess?.();
+
+        if (result.isFree) {
+          // Promotion was free with coupon, already activated
+          onSuccess?.();
+          return;
+        }
+
+        // Redirect to Stripe checkout
+        if (result.url) {
+          window.location.href = result.url;
+        } else {
+          throw new Error('Failed to create checkout session');
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to purchase promotion');
