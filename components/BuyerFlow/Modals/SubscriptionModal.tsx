@@ -169,119 +169,130 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
 
   const renderSellerPlan = () => (
     <div className="animate-fade-in p-4 sm:p-6">
-        <div className="text-center mb-6">
-            <BuildingOfficeIcon className="w-12 h-12 text-primary mx-auto mb-3" />
-            <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('modals:subscription.sellerPromotion.title')}</h3>
-            <p className="text-neutral-600 mt-2 max-w-md mx-auto text-sm">
+        {/* Header */}
+        <div className="text-center mb-8">
+            <div className="inline-block p-3 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl mb-4 shadow-lg">
+                <span className="text-3xl">🚀</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{t('modals:subscription.sellerPromotion.title')}</h3>
+            <p className="text-gray-600 mt-2 max-w-md mx-auto text-sm">
                 {t('modals:subscription.sellerPromotion.description')}
             </p>
         </div>
 
-        {/* Promotion Tiers */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-6">
-            {/* Featured */}
-            <div className="bg-white border border-gray-300 rounded-lg p-5 hover:border-gray-400 hover:shadow transition-all">
-                <div className="text-center mb-3">
-                    <span className="text-2xl mb-2 block">⭐</span>
-                    <h4 className="font-bold text-gray-900 text-lg mb-1">Featured</h4>
-                    <p className="text-sm text-gray-600 mb-2">Priority in search results</p>
-                    <div className="text-2xl font-bold text-gray-900">€1.99+</div>
-                    <div className="text-xs text-gray-500">7-90 days</div>
+        {/* Promotion Tiers - Enhanced with tier-specific colors */}
+        <div className="grid sm:grid-cols-3 gap-4 mb-8">
+            {/* Featured - Violet theme */}
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-2xl p-5 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-100 transition-all group">
+                <div className="text-center mb-4">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-violet-400 to-purple-500 rounded-2xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                        <span className="text-2xl filter drop-shadow">⭐</span>
+                    </div>
+                    <h4 className="font-bold text-gray-900 text-lg">Featured</h4>
+                    <p className="text-sm text-gray-600 mb-3">Priority in search results</p>
+                    <div className="text-3xl font-bold text-violet-600">€1.99<span className="text-lg text-gray-400">+</span></div>
+                    <div className="text-xs text-gray-500 mt-1">7-90 days</div>
                 </div>
-                <ul className="space-y-1.5 text-left">
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <ul className="space-y-2">
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-violet-500 font-bold mt-0.5">✓</span>
                         <span>Top of search results</span>
                     </li>
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-violet-500 font-bold mt-0.5">✓</span>
                         <span>Featured badge</span>
                     </li>
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-violet-500 font-bold mt-0.5">✓</span>
                         <span>2x visibility boost</span>
                     </li>
                 </ul>
             </div>
 
-            {/* Highlight */}
-            <div className="bg-white border-2 border-primary rounded-lg p-5 hover:shadow-md transition-all relative">
-                <div className="absolute -top-2 right-3 bg-primary text-white text-xs font-medium px-2 py-0.5 rounded">
-                    Popular
+            {/* Highlight - Sky/Cyan theme */}
+            <div className="bg-gradient-to-br from-sky-50 to-cyan-50 border-2 border-sky-300 rounded-2xl p-5 hover:shadow-xl hover:shadow-sky-100 transition-all relative group scale-[1.02]">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
+                    ✨ Most Popular
                 </div>
-                <div className="text-center mb-3">
-                    <span className="text-2xl mb-2 block">💎</span>
-                    <h4 className="font-bold text-gray-900 text-lg mb-1">Highlight</h4>
-                    <p className="text-sm text-gray-600 mb-2">Stand out with color</p>
-                    <div className="text-2xl font-bold text-gray-900">€3.99+</div>
-                    <div className="text-xs text-gray-500">7-90 days</div>
+                <div className="text-center mb-4 pt-2">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-2xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                        <span className="text-2xl filter drop-shadow">💎</span>
+                    </div>
+                    <h4 className="font-bold text-gray-900 text-lg">Highlight</h4>
+                    <p className="text-sm text-gray-600 mb-3">Stand out with color</p>
+                    <div className="text-3xl font-bold text-sky-600">€3.99<span className="text-lg text-gray-400">+</span></div>
+                    <div className="text-xs text-gray-500 mt-1">7-90 days</div>
                 </div>
-                <ul className="space-y-1.5 text-left">
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <ul className="space-y-2">
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-sky-500 font-bold mt-0.5">✓</span>
                         <span>All Featured benefits</span>
                     </li>
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-sky-500 font-bold mt-0.5">✓</span>
                         <span>Colored background</span>
                     </li>
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-sky-500 font-bold mt-0.5">✓</span>
                         <span>3x visibility boost</span>
                     </li>
                 </ul>
             </div>
 
-            {/* Premium */}
-            <div className="bg-white border border-gray-300 rounded-lg p-5 hover:border-gray-400 hover:shadow transition-all">
-                <div className="text-center mb-3">
-                    <span className="text-2xl mb-2 block">👑</span>
-                    <h4 className="font-bold text-gray-900 text-lg mb-1">Premium</h4>
-                    <p className="text-sm text-gray-600 mb-2">Homepage featuring</p>
-                    <div className="text-2xl font-bold text-gray-900">€7.99+</div>
-                    <div className="text-xs text-gray-500">7-90 days</div>
+            {/* Premium - Amber/Gold theme */}
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-2xl p-5 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-100 transition-all group">
+                <div className="text-center mb-4">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl shadow-lg mb-3 group-hover:scale-110 transition-transform">
+                        <span className="text-2xl filter drop-shadow">👑</span>
+                    </div>
+                    <h4 className="font-bold text-gray-900 text-lg">Premium</h4>
+                    <p className="text-sm text-gray-600 mb-3">Homepage featuring</p>
+                    <div className="text-3xl font-bold text-amber-600">€7.99<span className="text-lg text-gray-400">+</span></div>
+                    <div className="text-xs text-gray-500 mt-1">7-90 days</div>
                 </div>
-                <ul className="space-y-1.5 text-left">
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <ul className="space-y-2">
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-amber-500 font-bold mt-0.5">✓</span>
                         <span>All Highlight benefits</span>
                     </li>
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-amber-500 font-bold mt-0.5">✓</span>
                         <span>Homepage carousel</span>
                     </li>
-                    <li className="text-xs text-gray-700 flex items-start gap-2">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li className="text-sm text-gray-700 flex items-start gap-2">
+                        <span className="text-amber-500 font-bold mt-0.5">✓</span>
                         <span>5x visibility boost</span>
                     </li>
                 </ul>
             </div>
         </div>
 
-        {/* Info Box */}
-        <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-6">
-            <div className="flex items-start gap-3">
-                <span className="text-xl">💡</span>
-                <div className="flex-1 text-sm text-gray-700">
-                    <p className="font-medium mb-1">How it works:</p>
-                    <p className="text-xs text-gray-600">
+        {/* Info Box - Enhanced */}
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200 rounded-xl p-5 mb-6">
+            <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                    <span className="text-lg">💡</span>
+                </div>
+                <div className="flex-1">
+                    <p className="font-semibold text-gray-900 mb-1">How it works:</p>
+                    <p className="text-sm text-gray-600">
                         When creating a listing, select your promotion tier and duration. Payment is processed before publishing. Discount coupons are supported!
                     </p>
                 </div>
             </div>
         </div>
 
-        {/* Buttons */}
+        {/* Buttons - Enhanced */}
         <div className="flex flex-col sm:flex-row gap-3">
             <button
                 onClick={handleViewSellerPlans}
-                className="flex-1 px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-gray-400 hover:shadow transition-all"
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm"
             >
                 {t('modals:subscription.sellerPromotion.viewSubscriptionPlans')}
             </button>
             <button
                 onClick={onClose}
-                className="flex-1 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors"
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all shadow-md"
             >
                 {t('modals:subscription.sellerPromotion.startCreatingListing')}
             </button>
