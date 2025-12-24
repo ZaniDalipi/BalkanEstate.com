@@ -93,16 +93,16 @@ const isUniqueView = async (
 };
 
 /**
- * Get the model for an entity type
+ * Find entity by type and ID - avoids TypeScript union type issues with Model.findById
  */
-const getEntityModel = (entityType: EntityType) => {
+const findEntityById = async (entityType: EntityType, entityId: string): Promise<any> => {
   switch (entityType) {
     case 'property':
-      return Property;
+      return Property.findById(entityId);
     case 'agent':
-      return Agent;
+      return Agent.findById(entityId);
     case 'agency':
-      return Agency;
+      return Agency.findById(entityId);
     default:
       return null;
   }
@@ -170,35 +170,32 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
       isUnique,
     });
 
-    const Model = getEntityModel(entityType);
-    if (Model) {
-      const entity = await Model.findById(entityId);
-      if (entity) {
-        entity.views = (entity.views || 0) + 1;
+    const entity = await findEntityById(entityType, entityId);
+    if (entity) {
+      entity.views = (entity.views || 0) + 1;
 
-        if (!entity.viewStats) {
-          entity.viewStats = {
-            totalViews: 0,
-            uniqueViews: 0,
-            viewsThisWeek: 0,
-            viewsThisMonth: 0,
-            viewsLastMonth: 0,
-            inquiriesFromViews: 0,
-            conversionRate: 0,
-          };
-        }
+      if (!entity.viewStats) {
+        entity.viewStats = {
+          totalViews: 0,
+          uniqueViews: 0,
+          viewsThisWeek: 0,
+          viewsThisMonth: 0,
+          viewsLastMonth: 0,
+          inquiriesFromViews: 0,
+          conversionRate: 0,
+        };
+      }
 
-        entity.viewStats.totalViews = (entity.viewStats.totalViews || 0) + 1;
-        if (isUnique) {
-          entity.viewStats.uniqueViews = (entity.viewStats.uniqueViews || 0) + 1;
-        }
-        entity.viewStats.lastViewedAt = new Date();
+      entity.viewStats.totalViews = (entity.viewStats.totalViews || 0) + 1;
+      if (isUnique) {
+        entity.viewStats.uniqueViews = (entity.viewStats.uniqueViews || 0) + 1;
+      }
+      entity.viewStats.lastViewedAt = new Date();
 
-        await entity.save();
+      await entity.save();
 
-        if (entityType === 'property' && entity.sellerId) {
-          await incrementViewCount(String(entity.sellerId));
-        }
+      if (entityType === 'property' && entity.sellerId) {
+        await incrementViewCount(String(entity.sellerId));
       }
     }
 
@@ -255,13 +252,7 @@ export const getEntityStats = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const Model = getEntityModel(entityType as EntityType);
-    if (!Model) {
-      res.status(400).json({ message: 'Invalid entity type' });
-      return;
-    }
-
-    const entity = await Model.findById(entityId);
+    const entity = await findEntityById(entityType as EntityType, entityId);
     if (!entity) {
       res.status(404).json({ message: 'Entity not found' });
       return;
