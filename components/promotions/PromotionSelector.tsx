@@ -344,7 +344,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
   };
 
   return (
-    <div className={inModal ? "w-full" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
+    <div className={inModal ? "w-full px-6 py-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
       {/* Header Section - Enhanced for Extension Mode */}
       {isExtension ? (
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
@@ -421,38 +421,32 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       )}
 
-      {/* Benefits Banner - Styled based on mode */}
+      {/* Benefits Banner - Elegant centered design */}
       <div className={`${isExtension
         ? `bg-gradient-to-r ${extStyle.lightBg} border ${extStyle.border}`
-        : 'bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20'
-      } rounded-xl ${inModal ? 'p-4 mb-5' : 'p-6 mb-8'}`}>
-        <div className={`grid ${inModal ? 'grid-cols-3 gap-3' : 'md:grid-cols-3 gap-6'}`}>
-          <div className="flex items-start gap-2">
-            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} ${isExtension ? extStyle.iconBg : 'bg-primary/20'} rounded-lg flex items-center justify-center`}>
-              <span className={`${inModal ? 'text-sm' : 'text-xl'} ${isExtension ? 'filter drop-shadow' : ''}`}>👁️</span>
+        : 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 border border-slate-200/60'
+      } rounded-2xl ${inModal ? 'px-6 py-5 mb-6' : 'px-8 py-7 mb-10'} shadow-sm`}>
+        <div className={`flex justify-center ${inModal ? 'gap-8' : 'gap-12 md:gap-16'}`}>
+          <div className="flex flex-col items-center text-center">
+            <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-amber-400 to-orange-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
+              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>👁️</span>
             </div>
-            <div>
-              <h3 className={`font-semibold text-neutral-900 ${inModal ? 'text-xs' : 'mb-1'}`}>Higher Visibility</h3>
-              {!inModal && <p className="text-sm text-neutral-600">Appear at the top of search results</p>}
-            </div>
+            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Higher Visibility</h3>
+            {!inModal && <p className="text-xs text-gray-500 mt-0.5">Top of search results</p>}
           </div>
-          <div className="flex items-start gap-2">
-            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} ${isExtension ? extStyle.iconBg : 'bg-primary/20'} rounded-lg flex items-center justify-center`}>
-              <span className={`${inModal ? 'text-sm' : 'text-xl'} ${isExtension ? 'filter drop-shadow' : ''}`}>📱</span>
+          <div className="flex flex-col items-center text-center">
+            <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-blue-400 to-indigo-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
+              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>📱</span>
             </div>
-            <div>
-              <h3 className={`font-semibold text-neutral-900 ${inModal ? 'text-xs' : 'mb-1'}`}>More Inquiries</h3>
-              {!inModal && <p className="text-sm text-neutral-600">Get contacted by serious buyers</p>}
-            </div>
+            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>More Inquiries</h3>
+            {!inModal && <p className="text-xs text-gray-500 mt-0.5">Serious buyer contacts</p>}
           </div>
-          <div className="flex items-start gap-2">
-            <div className={`flex-shrink-0 ${inModal ? 'w-8 h-8' : 'w-10 h-10'} ${isExtension ? extStyle.iconBg : 'bg-primary/20'} rounded-lg flex items-center justify-center`}>
-              <span className={`${inModal ? 'text-sm' : 'text-xl'} ${isExtension ? 'filter drop-shadow' : ''}`}>⚡</span>
+          <div className="flex flex-col items-center text-center">
+            <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-emerald-400 to-teal-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
+              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>⚡</span>
             </div>
-            <div>
-              <h3 className={`font-semibold text-neutral-900 ${inModal ? 'text-xs' : 'mb-1'}`}>Sell Faster</h3>
-              {!inModal && <p className="text-sm text-neutral-600">Reach buyers up to 3x faster</p>}
-            </div>
+            <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Sell Faster</h3>
+            {!inModal && <p className="text-xs text-gray-500 mt-0.5">3x faster results</p>}
           </div>
         </div>
       </div>
