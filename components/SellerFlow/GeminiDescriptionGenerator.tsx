@@ -367,6 +367,12 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     // Populate form if editing
     useEffect(() => {
         if (propertyToEdit) {
+            console.log('📝 [Edit Mode] Loading property for editing:', {
+                id: propertyToEdit.id,
+                hasImages: propertyToEdit.images !== undefined,
+                imagesCount: propertyToEdit.images?.length || 0,
+                sampleImage: propertyToEdit.images?.[0]?.url?.substring(0, 50) || propertyToEdit.images?.[0]
+            });
             setMode('manual');
             setStep('form');
 

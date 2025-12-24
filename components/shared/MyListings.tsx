@@ -199,6 +199,10 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 // Fetch ALL listings without role filter
                 const listings = await api.getMyListings();
                 console.log(`✅ Fetched ${listings.length} total listings`);
+                // Debug: Check if listings have images
+                listings.forEach((p, i) => {
+                    console.log(`📦 Listing ${i}: ${p.id}, images: ${p.images?.length || 0}`);
+                });
 
                 setMyProperties(listings);
             } catch (error) {
