@@ -55,6 +55,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showHint, setShowHint] = useState(true); // Show initial hint message
 
   // Get tier config for current property
   const getTierConfig = useCallback(() => {
@@ -108,12 +109,21 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
   const handleTogglePanel = useCallback(() => {
     const newShowPanel = !showPanel;
     setShowPanel(newShowPanel);
+    setShowHint(false); // Hide hint when panel is interacted with
 
     // Only fly to property when opening the panel (user clicked)
     if (newShowPanel && currentMapFeatured) {
       flyToProperty(currentMapFeatured);
     }
   }, [showPanel, currentMapFeatured, flyToProperty]);
+
+  // Auto-hide hint after 5 seconds
+  useEffect(() => {
+    if (showHint && highlightedProperties.length > 0) {
+      const timer = setTimeout(() => setShowHint(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showHint, highlightedProperties.length]);
 
   if (highlightedProperties.length === 0) {
     return null;
@@ -313,14 +323,37 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
           {highlightedProperties.length}
         </div>
 
-        {/* Tooltip - hidden on mobile */}
-        {isExpanded && !showPanel && (
+        {/* Tooltip on hover - hidden on mobile */}
+        {isExpanded && !showPanel && !showHint && (
           <div className="hidden lg:block absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[9px] px-2 py-1 rounded whitespace-nowrap animate-fade-in">
             {highlightedProperties.length} Promoted
             <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
           </div>
         )}
       </button>
+
+      {/* Initial hint message - shows briefly then fades */}
+      {showHint && !showPanel && (
+        <div
+          className="absolute right-14 md:right-16 top-1/2 -translate-y-1/2 animate-fade-in"
+          style={{ animation: 'fadeIn 0.3s ease-out' }}
+        >
+          <div
+            className="bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border-l-4 whitespace-nowrap"
+            style={{ borderLeftColor: tierConfig.color }}
+          >
+            <p className="text-[11px] font-semibold text-gray-800">
+              {highlightedProperties.length} promoted {highlightedProperties.length === 1 ? 'listing' : 'listings'}
+            </p>
+            <p className="text-[9px] text-gray-500">Tap to explore</p>
+          </div>
+          {/* Arrow pointing to button */}
+          <div
+            className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[6px]"
+            style={{ borderLeftColor: 'white' }}
+          />
+        </div>
+      )}
     </div>
   );
 };
