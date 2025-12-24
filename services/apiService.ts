@@ -858,6 +858,11 @@ function transformBackendProperty(backendProp: any): Property {
 
 // Transform frontend Property to backend format
 function transformToBackendProperty(frontendProp: Property): any {
+  console.log('🔄 [transformToBackendProperty] Input images:', {
+    hasImages: frontendProp.images !== undefined,
+    imagesCount: frontendProp.images?.length || 0,
+    sampleImage: frontendProp.images?.[0]?.url?.substring(0, 50)
+  });
   return {
     status: frontendProp.status,
     title: frontendProp.title,
