@@ -784,7 +784,8 @@ export const createPromotionCheckout = async (
 
       // Update property
       property.isPromoted = true;
-      property.promotionTier = promotionTier;
+      // Cast to property's tier type (excludes 'urgent' which is only a badge modifier)
+      property.promotionTier = promotionTier as 'standard' | 'featured' | 'highlight' | 'premium';
       property.promotionStartDate = startDate;
       property.promotionEndDate = endDate;
       property.hasUrgentBadge = hasUrgentBadge;
@@ -801,10 +802,10 @@ export const createPromotionCheckout = async (
 
     // Create Stripe checkout session
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const tierInfo = PROMOTION_TIERS[promotionTier];
+    const validatedTier = promotionTier as PromotionTierType;
+    const tierInfo = PROMOTION_TIERS[validatedTier];
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
@@ -825,14 +826,14 @@ export const createPromotionCheckout = async (
       metadata: {
         userId: String(user._id),
         propertyId: String(propertyId),
-        promotionTier,
+        promotionTier: String(promotionTier),
         duration: String(duration),
         hasUrgentBadge: String(hasUrgentBadge),
-        couponCode: appliedCouponCode || '',
+        couponCode: appliedCouponCode ?? '',
         couponDiscount: String(couponDiscount),
         originalPrice: String(finalPrice + couponDiscount),
-        userEmail: user.email,
-        propertyTitle: property.title,
+        userEmail: user.email ?? '',
+        propertyTitle: property.title ?? '',
       },
     });
 
@@ -942,7 +943,8 @@ export const confirmPromotionPayment = async (
     const property = await Property.findById(propertyId);
     if (property) {
       property.isPromoted = true;
-      property.promotionTier = promotionTier as PromotionTierType;
+      // Cast to property's tier type (excludes 'urgent' which is only a badge modifier)
+      property.promotionTier = promotionTier as 'standard' | 'featured' | 'highlight' | 'premium';
       property.promotionStartDate = startDate;
       property.promotionEndDate = endDate;
       property.hasUrgentBadge = hasUrgentBadge === 'true';
