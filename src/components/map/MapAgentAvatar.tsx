@@ -104,20 +104,16 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
     }
   }, [currentMapFeatured, flyToProperty, onPropertySelect]);
 
-  // Auto-show panel initially
-  useEffect(() => {
-    if (highlightedProperties.length > 0 && !showPanel) {
-      const timer = setTimeout(() => setShowPanel(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [highlightedProperties.length]);
+  // Toggle panel and fly to property only when user clicks the button
+  const handleTogglePanel = useCallback(() => {
+    const newShowPanel = !showPanel;
+    setShowPanel(newShowPanel);
 
-  // Fly to first property when panel opens
-  useEffect(() => {
-    if (showPanel && currentMapFeatured && !isAnimating) {
+    // Only fly to property when opening the panel (user clicked)
+    if (newShowPanel && currentMapFeatured) {
       flyToProperty(currentMapFeatured);
     }
-  }, [showPanel]);
+  }, [showPanel, currentMapFeatured, flyToProperty]);
 
   if (highlightedProperties.length === 0) {
     return null;
@@ -281,7 +277,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
 
       {/* Floating Agent Button */}
       <button
-        onClick={() => setShowPanel(!showPanel)}
+        onClick={handleTogglePanel}
         onMouseEnter={() => setIsExpanded(true)}
         onMouseLeave={() => setIsExpanded(false)}
         className={`relative transition-all duration-300 ${isExpanded ? 'scale-105' : 'scale-100'}`}
