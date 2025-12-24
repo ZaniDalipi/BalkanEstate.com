@@ -1552,3 +1552,140 @@ export const updateAutoExtend = async (
     res.status(500).json({ message: 'Error updating auto-extend', error: error.message });
   }
 };
+
+/**
+ * @desc    Confirm auto-extend payment
+ * @route   POST /api/promotions/confirm-auto-extend
+ * @access  Private
+ */
+export const confirmAutoExtendPayment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      res.status(400).json({ message: 'Session ID is required' });
+      return;
+    }
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      res.status(400).json({ message: 'Payment not completed' });
+      return;
+    }
+
+    const { type, promotionId, duration } = session.metadata || {};
+
+    if (type !== 'auto-extend' || !promotionId || !duration) {
+      res.status(400).json({ message: 'Invalid session metadata' });
+      return;
+    }
+
+    // Find promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check if already processed
+    if (promotion.autoExtendStatus === 'completed' && promotion.autoExtendSessionId === sessionId) {
+      res.status(200).json({
+        success: true,
+        message: 'Auto-extend already processed',
+        promotion,
+      });
+      return;
+    }
+
+    // Calculate new end date from current end date (or now if expired)
+    const currentEndDate = new Date(promotion.endDate);
+    const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
+    const newEndDate = new Date(baseDate);
+    newEndDate.setDate(newEndDate.getDate() + parseInt(duration));
+
+    // Update promotion
+    promotion.endDate = newEndDate;
+    promotion.duration = promotion.duration + parseInt(duration);
+    promotion.isActive = true;
+    promotion.autoExtendStatus = 'completed';
+    promotion.notes = (promotion.notes || '') + ` | Auto-extended: +${duration} days (${sessionId})`;
+    await promotion.save();
+
+    // Update property
+    const property = await Property.findById(promotion.propertyId);
+    if (property) {
+      property.promotionEndDate = newEndDate;
+      property.isPromoted = true;
+      await property.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Promotion auto-extended successfully',
+      promotion,
+      newEndDate: newEndDate.toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Confirm auto-extend payment error:', error);
+    res.status(500).json({ message: 'Error confirming auto-extend', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get pending auto-extend checkout URL
+ * @route   GET /api/promotions/:id/auto-extend-checkout
+ * @access  Private (Owner only)
+ */
+export const getAutoExtendCheckout = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const promotionId = req.params.id;
+    const userId = String((req.user as IUser)._id);
+
+    // Find promotion
+    const promotion = await Promotion.findById(promotionId);
+    if (!promotion) {
+      res.status(404).json({ message: 'Promotion not found' });
+      return;
+    }
+
+    // Check ownership
+    if (promotion.userId.toString() !== userId) {
+      res.status(403).json({ message: 'Not authorized to view this promotion' });
+      return;
+    }
+
+    // Check if there's a pending auto-extend
+    if (promotion.autoExtendStatus !== 'pending' || !promotion.autoExtendCheckoutUrl) {
+      res.status(404).json({ message: 'No pending auto-extend found' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      url: promotion.autoExtendCheckoutUrl,
+      sessionId: promotion.autoExtendSessionId,
+      promotion: {
+        _id: promotion._id,
+        promotionTier: promotion.promotionTier,
+        autoExtendDuration: promotion.autoExtendDuration,
+        endDate: promotion.endDate,
+      },
+    });
+  } catch (error: any) {
+    console.error('Get auto-extend checkout error:', error);
+    res.status(500).json({ message: 'Error getting auto-extend checkout', error: error.message });
+  }
+};

@@ -1540,6 +1540,41 @@ export const updateAutoExtend = async (
 };
 
 /**
+ * Confirm auto-extend payment
+ */
+export const confirmAutoExtendPayment = async (sessionId: string): Promise<{
+  success: boolean;
+  message: string;
+  promotion?: any;
+  newEndDate?: string;
+}> => {
+  return await apiRequest('/promotions/confirm-auto-extend', {
+    method: 'POST',
+    body: { sessionId },
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Get pending auto-extend checkout URL
+ */
+export const getAutoExtendCheckout = async (promotionId: string): Promise<{
+  success: boolean;
+  url?: string;
+  sessionId?: string;
+  promotion?: {
+    _id: string;
+    promotionTier: string;
+    autoExtendDuration: number;
+    endDate: string;
+  };
+}> => {
+  return await apiRequest(`/promotions/${promotionId}/auto-extend-checkout`, {
+    requiresAuth: true,
+  });
+};
+
+/**
  * Renew a property listing (puts it at top, 24hr cooldown)
  */
 export const renewProperty = async (propertyId: string): Promise<{

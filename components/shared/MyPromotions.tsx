@@ -4,8 +4,9 @@ import { Property } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import * as api from '../../services/apiService';
 import { formatPrice } from '../../utils/currency';
-import { SparklesIcon, ClockIcon, BuildingOfficeIcon, MapPinIcon } from '../../constants';
+import { SparklesIcon, ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon } from '../../constants';
 import PromotionModal from '../promotions/PromotionModal';
+import PromotionHistoryModal from '../promotions/PromotionHistoryModal';
 
 // Tier configuration - Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
 const TIER_CONFIG: Record<string, { color: string; bg: string; icon: string; label: string }> = {
@@ -85,6 +86,8 @@ interface PromotedPropertyCardProps {
   onExtend: (property: Property) => void;
   onAddUrgent: (promotionId: string) => void;
   onToggleAutoExtend: (promotionId: string, autoExtend: boolean) => void;
+  onCompleteAutoExtend: (promotionId: string) => void;
+  onViewHistory: (property: Property) => void;
 }
 
 const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
@@ -94,6 +97,8 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
   onExtend,
   onAddUrgent,
   onToggleAutoExtend,
+  onCompleteAutoExtend,
+  onViewHistory,
 }) => {
   const tier = property.promotionTier || 'standard';
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.standard;
@@ -113,8 +118,26 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
 
   return (
     <div className={`bg-white rounded-xl border-2 ${tier === 'premium' ? 'border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.25)]' : tier === 'highlight' ? 'border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.25)]' : tier === 'featured' ? 'border-violet-500 shadow-[0_0_12px_rgba(124,58,237,0.2)]' : 'border-gray-200'} hover:shadow-lg transition-all duration-300 overflow-hidden`}>
+      {/* Pending Auto-Extend Payment Banner */}
+      {promotion?.autoExtendStatus === 'pending' && promotion?.autoExtendCheckoutUrl && (
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🔄</span>
+            <span className="text-sm font-semibold">
+              Auto-extend ready! Complete payment to extend.
+            </span>
+          </div>
+          <button
+            onClick={() => onCompleteAutoExtend(promotion._id)}
+            className="bg-white text-blue-600 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors shadow-sm"
+          >
+            Complete Payment
+          </button>
+        </div>
+      )}
+
       {/* Expiring Soon Warning Banner */}
-      {isExpiringSoon && !isExpired && (
+      {isExpiringSoon && !isExpired && promotion?.autoExtendStatus !== 'pending' && (
         <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">⚠️</span>
@@ -244,6 +267,13 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             View Listing
           </button>
           <button
+            onClick={() => onViewHistory(property)}
+            className="px-3 py-2 bg-neutral-100 text-neutral-600 hover:bg-neutral-200 rounded-lg transition-colors text-sm font-medium flex items-center gap-1.5"
+            title="View Promotion History"
+          >
+            <ChartBarIcon className="w-4 h-4" />
+          </button>
+          <button
             onClick={() => onExtend(property)}
             className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all text-sm font-bold flex items-center gap-1.5"
           >
@@ -266,6 +296,8 @@ const MyPromotions: React.FC = () => {
   const [showExtendModal, setShowExtendModal] = useState(false);
   const [propertyToExtend, setPropertyToExtend] = useState<Property | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [propertyForHistory, setPropertyForHistory] = useState<Property | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -378,8 +410,30 @@ const MyPromotions: React.FC = () => {
       }));
     } catch (error: any) {
       console.error('Failed to update auto-extend:', error);
-      alert(error.message || 'Failed to update auto-extend setting');
+      alert(error.message || 'Failed to update auto-extend');
     }
+  };
+
+  const handleCompleteAutoExtend = async (promotionId: string) => {
+    try {
+      setActionLoading(promotionId);
+      const result = await api.getAutoExtendCheckout(promotionId);
+      if (result.success && result.url) {
+        window.location.href = result.url;
+      } else {
+        alert('No pending auto-extend checkout found');
+      }
+    } catch (error: any) {
+      console.error('Failed to complete auto-extend:', error);
+      alert(error.message || 'Failed to get auto-extend checkout');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleViewHistory = (property: Property) => {
+    setPropertyForHistory(property);
+    setShowHistoryModal(true);
   };
 
   if (isLoading) {
@@ -495,6 +549,8 @@ const MyPromotions: React.FC = () => {
               onExtend={handleExtend}
               onAddUrgent={handleAddUrgent}
               onToggleAutoExtend={handleToggleAutoExtend}
+              onCompleteAutoExtend={handleCompleteAutoExtend}
+              onViewHistory={handleViewHistory}
             />
           ))}
         </div>
@@ -514,6 +570,19 @@ const MyPromotions: React.FC = () => {
           isExtension={true}
           currentTier={propertyToExtend.promotionTier as 'featured' | 'highlight' | 'premium' | undefined}
           currentEndDate={propertyToExtend.promotionEndDate ? new Date(propertyToExtend.promotionEndDate) : undefined}
+        />
+      )}
+
+      {/* Promotion History Modal */}
+      {propertyForHistory && (
+        <PromotionHistoryModal
+          isOpen={showHistoryModal}
+          onClose={() => {
+            setShowHistoryModal(false);
+            setPropertyForHistory(null);
+          }}
+          propertyId={propertyForHistory.id}
+          propertyTitle={propertyForHistory.title || `${propertyForHistory.address}, ${propertyForHistory.city}`}
         />
       )}
     </div>
