@@ -252,13 +252,9 @@ export const generalRateLimiter = rateLimit({
     // Skip rate limiting for health checks
     return req.path === '/health';
   },
-  keyGenerator: (req: Request) => {
-    // Use X-Forwarded-For header if behind proxy
-    return (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-           req.ip ||
-           req.socket.remoteAddress ||
-           'unknown';
-  },
+  // Use default keyGenerator which handles IPv6 properly
+  // If behind a proxy, ensure 'trust proxy' is set in Express
+  validate: { xForwardedForHeader: false },
 });
 
 /**
