@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Agent } from '../../types';
 import StarRating from '../shared/StarRating';
-import { 
-  UserCircleIcon, 
-  BuildingOfficeIcon, 
-  CheckBadgeIcon, 
-  MapPinIcon, 
-  CurrencyDollarIcon, 
+import {
+  UserCircleIcon,
+  BuildingOfficeIcon,
+  CheckBadgeIcon,
+  MapPinIcon,
+  CurrencyDollarIcon,
   HomeIcon,
   ChevronRightIcon,
   SparklesIcon,
   ChartBarIcon,
   TrophyIcon,
-  ArrowTrendingUpIcon
+  ArrowTrendingUpIcon,
+  BoltIcon
 } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { formatPrice } from '../../utils/currency';
 import { slugify } from '../../utils/slug';
-import './AgentCard.css';
 
 interface AgentCardProps {
   agent: Agent;
@@ -56,10 +57,12 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
 };
 
 const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
+  const { t } = useTranslation(['agents', 'common']);
   const { dispatch } = useAppContext();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [progressAnimated, setProgressAnimated] = useState(false);
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -67,6 +70,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
+          // Delay progress bar animation for smoother effect
+          setTimeout(() => setProgressAnimated(true), 300 + index * 100);
           observer.unobserve(entry.target);
         }
       },
@@ -78,7 +83,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [index]);
 
   // Calculate price range from agent's sold properties
   const getPriceRange = () => {
@@ -88,8 +93,11 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       const maxPrice = avgPrice * 1.8;
       return `${formatPrice(minPrice, '')} - ${formatPrice(maxPrice, '')}`;
     }
-    return 'Contact for pricing';
+    return t('agents:card.contactForPricing');
   };
+
+  // Get first specialization for display
+  const primarySpecialization = agent.specializations?.[0] || null;
 
   // Calculate testimonial count
   const testimonialCount = agent.testimonials?.length || 0;
@@ -190,7 +198,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
               ) : (
                 <>
                   <BuildingOfficeIcon className="w-3.5 h-3.5" />
-                  <span>AGENCY</span>
+                  <span>{t('agents:card.agency')}</span>
                 </>
               )}
               <ChevronRightIcon className="w-3 h-3 ml-1 transform group-hover/agency:translate-x-1 transition-transform" />
@@ -231,11 +239,11 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                       <span className="text-xs text-blue-600 font-semibold ml-1">★</span>
                     </span>
                     <span className="text-xs text-gray-500 mt-0.5">
-                      {testimonialCount} {testimonialCount === 1 ? 'review' : 'reviews'}
+                      {testimonialCount} {testimonialCount === 1 ? t('agents:card.review') : t('agents:card.reviews')}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-sm text-gray-500 italic">No reviews</span>
+                  <span className="text-sm text-gray-500 italic">{t('agents:card.noReviews')}</span>
                 )}
               </div>
             </div>
@@ -258,6 +266,19 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
               )}
             </div>
           )}
+
+          {/* Specialization Badge */}
+          {primarySpecialization && (
+            <div className="flex items-center justify-center gap-2 mt-2 group/spec px-3 py-1.5 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+              <BoltIcon className="w-3.5 h-3.5 text-purple-600" />
+              <p className="text-xs font-semibold text-purple-700">
+                {primarySpecialization}
+              </p>
+              {agent.specializations && agent.specializations.length > 1 && (
+                <span className="text-xs text-purple-500">+{agent.specializations.length - 1}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Animated Divider - Blue */}
@@ -277,7 +298,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                   <CurrencyDollarIcon className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Price Range
+                  {t('agents:card.priceRange')}
                 </span>
               </div>
               <div className="flex items-baseline justify-between">
@@ -286,7 +307,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                 </span>
                 {isTeam && (
                   <span className="text-xs text-blue-600 font-semibold px-2 py-1 bg-blue-100 rounded-full">
-                    Agency rates
+                    {t('agents:card.agencyRates')}
                   </span>
                 )}
               </div>
@@ -304,7 +325,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                     <div className="p-1.5 bg-blue-100 rounded-lg">
                       <HomeIcon className="w-3.5 h-3.5 text-blue-600" />
                     </div>
-                    <span className="text-xs font-semibold text-gray-700">Sales</span>
+                    <span className="text-xs font-semibold text-gray-700">{t('agents:card.sales')}</span>
                   </div>
                   {agent.propertiesSold > 10 && (
                     <TrophyIcon className="w-4 h-4 text-amber-500" />
@@ -318,7 +339,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                     +{Math.floor(agent.propertiesSold * 0.3)}%
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">last 12 months</p>
+                <p className="text-xs text-gray-500 mt-1">{t('agents:card.last12Months')}</p>
               </div>
             </div>
 
@@ -330,17 +351,17 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                   <div className="p-1.5 bg-blue-100 rounded-lg">
                     <HomeIcon className="w-3.5 h-3.5 text-blue-600" />
                   </div>
-                  <span className="text-xs font-semibold text-gray-700">Active</span>
+                  <span className="text-xs font-semibold text-gray-700">{t('agents:card.active')}</span>
                 </div>
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-bold text-gray-900">
                     {agent.activeListings || 0}
                   </span>
                   <span className="text-xs text-blue-600 font-semibold">
-                    {agent.activeListings > 5 ? 'Hot' : 'Available'}
+                    {(agent.activeListings || 0) > 5 ? t('agents:card.hot') : t('agents:card.available')}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">current listings</p>
+                <p className="text-xs text-gray-500 mt-1">{t('agents:card.currentListings')}</p>
               </div>
             </div>
           </div>
@@ -353,16 +374,35 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                 <div className="flex items-center gap-2">
                   <BuildingOfficeIcon className="w-4 h-4 text-blue-600" />
                   <span className="text-sm font-semibold text-blue-900">
-                    Agency Network
+                    {t('agents:card.agencyNetwork')}
                   </span>
                 </div>
                 <p className="text-blue-900 mt-1">
                   <span className="text-xl font-bold">{agent.propertiesSold * 3}</span>
-                  <span className="text-sm font-medium ml-2">combined sales in {agent.city}</span>
+                  <span className="text-sm font-medium ml-2">{t('agents:card.combinedSales', { city: agent.city })}</span>
                 </p>
               </div>
             </div>
           )}
+
+          {/* Performance Progress Bar - Animated */}
+          <div className="relative group/performance mt-2">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {t('agents:card.performanceScore')}
+              </span>
+              <span className="text-sm font-bold text-blue-600">{performanceScore}%</span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 rounded-full transition-all duration-1000 ease-out"
+                style={{
+                  width: progressAnimated ? `${performanceScore}%` : '0%',
+                  boxShadow: isHovered ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none'
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* CTA Button - Professional blue */}
@@ -371,7 +411,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:shadow-blue-300/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 group/button"
             onClick={handleSelectAgent}
           >
-            <span>View Profile</span>
+            <span>{t('agents:card.viewProfile')}</span>
             <ChevronRightIcon className="w-4 h-4 transform group-hover/button:translate-x-1 transition-transform" />
           </button>
         </div>
