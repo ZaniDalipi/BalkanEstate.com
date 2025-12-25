@@ -1,3 +1,18 @@
+/**
+ * @deprecated Import from '@/src/shared/types' instead for better code organization.
+ * This file re-exports all types for backward compatibility.
+ *
+ * New modular types structure:
+ * - User types: @/src/shared/types/user.types
+ * - Property types: @/src/shared/types/property.types
+ * - Agency types: @/src/shared/types/agency.types
+ * - Conversation types: @/src/shared/types/conversation.types
+ * - Saved types: @/src/shared/types/saved.types
+ * - Promotion types: @/src/shared/types/promotion.types
+ * - Location types: @/src/shared/types/location.types
+ * - App types: @/src/shared/types/app.types
+ */
+
 // --- Enums and Simple Types ---
 export enum UserRole {
     BUYER = 'buyer',

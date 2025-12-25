@@ -1,0 +1,133 @@
+// Admin API module
+// Handles all admin-related API calls
+
+import { apiRequest } from '@/src/shared/api';
+
+// --- Admin Featured Subscriptions ---
+
+export const getAllFeaturedSubscriptions = async (params?: {
+  status?: string;
+  page?: number;
+  limit?: number;
+}): Promise<any> => {
+  const queryParams = new URLSearchParams();
+  if (params?.status) queryParams.append('status', params.status);
+  if (params?.page) queryParams.append('page', String(params.page));
+  if (params?.limit) queryParams.append('limit', String(params.limit));
+
+  return apiRequest(`/admin/featured-subscriptions?${queryParams.toString()}`, {
+    requiresAuth: true,
+  });
+};
+
+export const checkExpiredSubscriptions = async (): Promise<any> => {
+  return apiRequest('/admin/featured-subscriptions/check-expired', {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+// --- Admin User Management ---
+
+export const getUsers = async (params?: {
+  page?: number;
+  limit?: number;
+  role?: string;
+  search?: string;
+}): Promise<any> => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append('page', String(params.page));
+  if (params?.limit) queryParams.append('limit', String(params.limit));
+  if (params?.role) queryParams.append('role', params.role);
+  if (params?.search) queryParams.append('search', params.search);
+
+  return apiRequest(`/admin/users?${queryParams.toString()}`, {
+    requiresAuth: true,
+  });
+};
+
+export const updateUserRole = async (
+  userId: string,
+  role: string
+): Promise<any> => {
+  return apiRequest(`/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: { role },
+    requiresAuth: true,
+  });
+};
+
+export const deleteUser = async (userId: string): Promise<any> => {
+  return apiRequest(`/admin/users/${userId}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+};
+
+// --- Admin Property Management ---
+
+export const getAdminProperties = async (params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+}): Promise<any> => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append('page', String(params.page));
+  if (params?.limit) queryParams.append('limit', String(params.limit));
+  if (params?.status) queryParams.append('status', params.status);
+
+  return apiRequest(`/admin/properties?${queryParams.toString()}`, {
+    requiresAuth: true,
+  });
+};
+
+export const approveProperty = async (propertyId: string): Promise<any> => {
+  return apiRequest(`/admin/properties/${propertyId}/approve`, {
+    method: 'PUT',
+    requiresAuth: true,
+  });
+};
+
+export const rejectProperty = async (propertyId: string, reason?: string): Promise<any> => {
+  return apiRequest(`/admin/properties/${propertyId}/reject`, {
+    method: 'PUT',
+    body: { reason },
+    requiresAuth: true,
+  });
+};
+
+// --- Admin Analytics ---
+
+export const getAdminAnalytics = async (): Promise<any> => {
+  return apiRequest('/admin/analytics', {
+    requiresAuth: true,
+  });
+};
+
+// --- Admin Discount Codes ---
+
+export const getDiscountCodes = async (): Promise<any> => {
+  return apiRequest('/admin/discount-codes', {
+    requiresAuth: true,
+  });
+};
+
+export const createDiscountCode = async (data: {
+  code: string;
+  discountPercent: number;
+  maxUses?: number;
+  expiresAt?: string;
+}): Promise<any> => {
+  return apiRequest('/admin/discount-codes', {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+export const deleteDiscountCode = async (codeId: string): Promise<any> => {
+  return apiRequest(`/admin/discount-codes/${codeId}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+};

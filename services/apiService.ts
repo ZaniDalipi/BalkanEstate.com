@@ -1,3 +1,23 @@
+/**
+ * @deprecated This file is deprecated. Import from feature-specific API modules instead:
+ *
+ * - Auth: import { login, signup, logout, ... } from '@/src/features/auth/api'
+ * - Properties: import { getProperties, createProperty, ... } from '@/src/features/properties/api'
+ * - Agencies: import { getAgencies, getAgency, ... } from '@/src/features/agencies/api'
+ * - Agents: import { getAllAgents, getAgent, ... } from '@/src/features/agents/api'
+ * - Conversations: import { getConversations, sendMessage, ... } from '@/src/features/conversations/api'
+ * - Saved: import { getFavorites, getSavedSearches, ... } from '@/src/features/saved/api'
+ * - Promotions: import { getPromotionTiers, purchasePromotion, ... } from '@/src/features/promotions/api'
+ * - Cities: import { getFeaturedCities, getCityMarketData, ... } from '@/src/features/cities/api'
+ * - Admin: import { getAdminAnalytics, ... } from '@/src/features/admin/api'
+ *
+ * Core utilities:
+ * - HTTP Client: import { apiRequest } from '@/src/shared/api'
+ * - Token Service: import { tokenService } from '@/src/shared/api'
+ *
+ * This file is maintained for backward compatibility only.
+ */
+
 import { Property, Seller, User, UserRole, SavedSearch, Message, Conversation, Filters } from '../types';
 
 // Get API URL from environment variables
