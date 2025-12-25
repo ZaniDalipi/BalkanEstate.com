@@ -6,6 +6,7 @@ import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import { IUser } from '../models/User';
 import { incrementViewCount } from '../utils/statsUpdater';
+import { checkViewMilestone } from '../services/engagementService';
 
 /**
  * Helper function to hash IP address for privacy
@@ -196,6 +197,14 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
 
       if (entityType === 'property' && entity.sellerId) {
         await incrementViewCount(String(entity.sellerId));
+
+        // Check for view milestones and send engagement notifications
+        // This runs async in the background to not block the response
+        checkViewMilestone(
+          entityId,
+          entity.views,
+          entity.isPromoted || false
+        ).catch((err) => console.error('Milestone check error:', err));
       }
     }
 
