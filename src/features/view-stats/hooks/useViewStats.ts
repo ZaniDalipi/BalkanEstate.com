@@ -51,6 +51,14 @@ export function useMyPropertiesViewStats(period: Period = '30d', enabled = true)
     enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    retry: (failureCount, error: any) => {
+      // Don't retry on auth errors
+      if (error?.message?.includes('401') || error?.message?.includes('Not authorized')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 
@@ -103,6 +111,15 @@ export function useDashboardOverview(enabled = true) {
     enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    retry: (failureCount, error: any) => {
+      // Don't retry on auth errors (401)
+      if (error?.message?.includes('401') || error?.message?.includes('Not authorized')) {
+        return false;
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 

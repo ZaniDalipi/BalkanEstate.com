@@ -64,10 +64,35 @@ const AnalyticsPage: React.FC = () => {
     data: dashboard,
     isLoading: dashboardLoading,
     error: dashboardError,
+    refetch: refetchDashboard,
   } = useDashboardOverview();
-  const { data: propertiesStats, isLoading: propertiesLoading } =
-    useMyPropertiesViewStats(period);
+  const {
+    data: propertiesStats,
+    isLoading: propertiesLoading,
+    refetch: refetchProperties,
+  } = useMyPropertiesViewStats(period);
   const downloadReport = useDownloadReport();
+
+  // Retry handler
+  const handleRetry = () => {
+    refetchDashboard();
+    refetchProperties();
+  };
+
+  // Get error message
+  const getErrorMessage = (error: any): string => {
+    if (!error) return '';
+    if (error.message?.includes('401') || error.message?.includes('Not authorized')) {
+      return 'Session expired. Please sign in again.';
+    }
+    if (error.message?.includes('Network') || error.message?.includes('fetch')) {
+      return 'Network error. Please check your connection.';
+    }
+    if (error.message?.includes('500')) {
+      return 'Server error. Please try again later.';
+    }
+    return 'Failed to load analytics. Please try again.';
+  };
 
   // Computed values
   const isLoading = dashboardLoading || propertiesLoading;
@@ -123,7 +148,19 @@ const AnalyticsPage: React.FC = () => {
         {/* Error state */}
         {dashboardError && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-            <p className="text-red-600 text-sm">Failed to load analytics. Please try again.</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                <p className="text-red-600 text-sm">{getErrorMessage(dashboardError)}</p>
+              </div>
+              <button
+                onClick={handleRetry}
+                disabled={isLoading}
+                className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
+              >
+                {isLoading ? 'Retrying...' : 'Retry'}
+              </button>
+            </div>
           </div>
         )}
 
