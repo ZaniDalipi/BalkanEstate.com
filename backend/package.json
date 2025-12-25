@@ -25,6 +25,7 @@
     "sync:stats": "ts-node src/scripts/syncAllSellerStats.ts",
     "set-admin": "ts-node src/scripts/setAdminRole.ts",
     "seed:coupons": "ts-node src/scripts/seedPromotionCoupons.ts",
+    "test:engagement": "ts-node src/scripts/testEngagementNotifications.ts",
     "test": "jest --detectOpenHandles --forceExit",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
