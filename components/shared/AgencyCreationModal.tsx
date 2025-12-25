@@ -52,36 +52,75 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     },
   });
 
-  // Auto-populate form with user data when modal opens
+  // Auto-populate form with pending agency data (when editing) or user data (when creating new)
   useEffect(() => {
-    if (isOpen && state.currentUser) {
-      const user = state.currentUser;
-      const userCountry = user.country || '';
+    if (isOpen) {
+      // If there's pending agency data (user came back to edit), use it
+      if (state.pendingAgencyData) {
+        const pendingData = state.pendingAgencyData;
+        setFormData({
+          name: pendingData.name || '',
+          description: pendingData.description || '',
+          address: pendingData.address || '',
+          city: pendingData.city || '',
+          country: pendingData.country || '',
+          phone: pendingData.phone || '',
+          email: pendingData.email || '',
+          website: pendingData.website || '',
+          licenseNumber: pendingData.licenseNumber || '',
+          yearsInBusiness: pendingData.yearsInBusiness?.toString() || '',
+          languages: pendingData.languages || [],
+          facebookUrl: pendingData.facebookUrl || '',
+          instagramUrl: pendingData.instagramUrl || '',
+          linkedinUrl: pendingData.linkedinUrl || '',
+          businessHours: pendingData.businessHours || {
+            monday: '9:00 AM - 6:00 PM',
+            tuesday: '9:00 AM - 6:00 PM',
+            wednesday: '9:00 AM - 6:00 PM',
+            thursday: '9:00 AM - 6:00 PM',
+            friday: '9:00 AM - 6:00 PM',
+            saturday: '10:00 AM - 4:00 PM',
+            sunday: 'Closed',
+          },
+        });
 
-      setFormData(prev => ({
-        ...prev,
-        // Pre-fill with user data, but allow it to be overridden if already set
-        email: prev.email || user.email || '',
-        phone: prev.phone || user.phone || '',
-        city: prev.city || user.city || '',
-        country: prev.country || userCountry,
-        // If user already has an agency name (e.g., they're an agent), use it
-        name: prev.name || user.agencyName || '',
-        // Auto-fill agent-specific fields if user is an agent
-        licenseNumber: prev.licenseNumber || user.licenseNumber || '',
-        // If user has years in business data, use it
-        yearsInBusiness: prev.yearsInBusiness || '',
-      }));
+        // Set available cities for the pending country
+        if (pendingData.country) {
+          const countryData = BALKAN_LOCATIONS.find(c => c.name === pendingData.country);
+          if (countryData) {
+            setAvailableCities(countryData.cities.map(city => city.name));
+          }
+        }
+      } else if (state.currentUser) {
+        // No pending data, pre-fill from user data for new agency creation
+        const user = state.currentUser;
+        const userCountry = user.country || '';
 
-      // Set available cities if user has a country
-      if (userCountry) {
-        const countryData = BALKAN_LOCATIONS.find(c => c.name === userCountry);
-        if (countryData) {
-          setAvailableCities(countryData.cities.map(city => city.name));
+        setFormData(prev => ({
+          ...prev,
+          // Pre-fill with user data, but allow it to be overridden if already set
+          email: prev.email || user.email || '',
+          phone: prev.phone || user.phone || '',
+          city: prev.city || user.city || '',
+          country: prev.country || userCountry,
+          // If user already has an agency name (e.g., they're an agent), use it
+          name: prev.name || user.agencyName || '',
+          // Auto-fill agent-specific fields if user is an agent
+          licenseNumber: prev.licenseNumber || user.licenseNumber || '',
+          // If user has years in business data, use it
+          yearsInBusiness: prev.yearsInBusiness || '',
+        }));
+
+        // Set available cities if user has a country
+        if (userCountry) {
+          const countryData = BALKAN_LOCATIONS.find(c => c.name === userCountry);
+          if (countryData) {
+            setAvailableCities(countryData.cities.map(city => city.name));
+          }
         }
       }
     }
-  }, [isOpen, state.currentUser]);
+  }, [isOpen, state.currentUser, state.pendingAgencyData]);
 
   // Update available cities when country changes
   useEffect(() => {
@@ -169,9 +208,14 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <BuildingOfficeIcon className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-neutral-800 mb-2">Create Your Agency</h2>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-2">
+            {state.pendingAgencyData ? 'Edit Agency Details' : 'Create Your Agency'}
+          </h2>
           <p className="text-sm text-neutral-600">
-            Set up your agency profile to showcase your team and properties
+            {state.pendingAgencyData
+              ? 'Update your agency information before proceeding to payment'
+              : 'Set up your agency profile to showcase your team and properties'
+            }
           </p>
         </div>
 

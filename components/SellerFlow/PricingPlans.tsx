@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '../shared/Modal';
 import PaymentWindow from '../shared/PaymentWindow';
-import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '../../constants';
+import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon, PencilIcon, MapPinIcon, PhoneIcon, EnvelopeIcon, GlobeAltIcon, ClockIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { fetchSellerProducts, Product } from '../../utils/api';
 
@@ -248,6 +248,13 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
     return state.currentUser.role === 'agent' ? 'agent' : 'private_seller';
   };
 
+  // Handle going back to edit agency information
+  const handleEditAgencyInfo = () => {
+    // Close pricing modal and reopen agency creation modal with existing data
+    onClose();
+    dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
+  };
+
 
   return (
     <>
@@ -310,6 +317,133 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                     </>
                 )}
             </div>
+
+            {/* Agency Summary Section - shown when there's pending agency data */}
+            {isAgencyMode && state.pendingAgencyData && (
+              <div className="mb-8 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
+                    <BuildingOfficeIcon className="w-6 h-6 text-amber-600" />
+                    {t('pricing:agencySummary.title', { defaultValue: 'Your Agency Details' })}
+                  </h3>
+                  <button
+                    onClick={handleEditAgencyInfo}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-amber-400 text-amber-700 rounded-lg font-semibold hover:bg-amber-50 hover:border-amber-500 transition-all text-sm"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                    {t('pricing:agencySummary.edit', { defaultValue: 'Edit Info' })}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Agency Name */}
+                  <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">
+                      {t('pricing:agencySummary.agencyName', { defaultValue: 'Agency Name' })}
+                    </p>
+                    <p className="text-neutral-800 font-medium">{state.pendingAgencyData.name || '-'}</p>
+                  </div>
+
+                  {/* Location */}
+                  <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1 flex items-center gap-1">
+                      <MapPinIcon className="w-3 h-3" />
+                      {t('pricing:agencySummary.location', { defaultValue: 'Location' })}
+                    </p>
+                    <p className="text-neutral-800 font-medium">
+                      {state.pendingAgencyData.city && state.pendingAgencyData.country
+                        ? `${state.pendingAgencyData.city}, ${state.pendingAgencyData.country}`
+                        : '-'}
+                    </p>
+                    {state.pendingAgencyData.address && (
+                      <p className="text-neutral-600 text-sm">{state.pendingAgencyData.address}</p>
+                    )}
+                  </div>
+
+                  {/* Contact Email */}
+                  <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1 flex items-center gap-1">
+                      <EnvelopeIcon className="w-3 h-3" />
+                      {t('pricing:agencySummary.email', { defaultValue: 'Email' })}
+                    </p>
+                    <p className="text-neutral-800 font-medium">{state.pendingAgencyData.email || '-'}</p>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1 flex items-center gap-1">
+                      <PhoneIcon className="w-3 h-3" />
+                      {t('pricing:agencySummary.phone', { defaultValue: 'Phone' })}
+                    </p>
+                    <p className="text-neutral-800 font-medium">{state.pendingAgencyData.phone || '-'}</p>
+                  </div>
+
+                  {/* Website */}
+                  {state.pendingAgencyData.website && (
+                    <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1 flex items-center gap-1">
+                        <GlobeAltIcon className="w-3 h-3" />
+                        {t('pricing:agencySummary.website', { defaultValue: 'Website' })}
+                      </p>
+                      <p className="text-neutral-800 font-medium truncate">{state.pendingAgencyData.website}</p>
+                    </div>
+                  )}
+
+                  {/* License Number */}
+                  {state.pendingAgencyData.licenseNumber && (
+                    <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">
+                        {t('pricing:agencySummary.license', { defaultValue: 'License Number' })}
+                      </p>
+                      <p className="text-neutral-800 font-medium">{state.pendingAgencyData.licenseNumber}</p>
+                    </div>
+                  )}
+
+                  {/* Years in Business */}
+                  {state.pendingAgencyData.yearsInBusiness && (
+                    <div className="bg-white/80 rounded-lg p-3 border border-amber-100">
+                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1 flex items-center gap-1">
+                        <ClockIcon className="w-3 h-3" />
+                        {t('pricing:agencySummary.experience', { defaultValue: 'Experience' })}
+                      </p>
+                      <p className="text-neutral-800 font-medium">
+                        {state.pendingAgencyData.yearsInBusiness} {t('pricing:agencySummary.years', { defaultValue: 'years' })}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Languages */}
+                  {state.pendingAgencyData.languages && state.pendingAgencyData.languages.length > 0 && (
+                    <div className="bg-white/80 rounded-lg p-3 border border-amber-100 md:col-span-2">
+                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                        {t('pricing:agencySummary.languages', { defaultValue: 'Languages' })}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {state.pendingAgencyData.languages.map((lang: string) => (
+                          <span key={lang} className="px-2 py-1 bg-amber-100 text-amber-800 text-sm rounded-full font-medium">
+                            {lang}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description if provided */}
+                {state.pendingAgencyData.description && (
+                  <div className="mt-4 bg-white/80 rounded-lg p-3 border border-amber-100">
+                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">
+                      {t('pricing:agencySummary.description', { defaultValue: 'Description' })}
+                    </p>
+                    <p className="text-neutral-700 text-sm line-clamp-3">{state.pendingAgencyData.description}</p>
+                  </div>
+                )}
+
+                <p className="mt-4 text-sm text-amber-700 text-center">
+                  {t('pricing:agencySummary.reviewNote', { defaultValue: 'Please review your agency details before proceeding to payment' })}
+                </p>
+              </div>
+            )}
 
             <div className={`grid grid-cols-1 ${isAgencyMode ? 'lg:grid-cols-1 max-w-xl mx-auto' : 'lg:grid-cols-3'} gap-8 items-start`}>
                 {/* Pro Yearly Plan - Hidden in Agency Mode */}
