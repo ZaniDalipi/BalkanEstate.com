@@ -3,7 +3,7 @@ import {
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
   GlobeAltIcon,
-} from '../../../../constants';
+} from '../../../../../constants';
 
 interface DeviceChartProps {
   desktop: number;
