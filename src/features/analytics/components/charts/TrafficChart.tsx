@@ -4,7 +4,7 @@ import {
   MagnifyingGlassIcon,
   ChatBubbleLeftRightIcon,
   EnvelopeIcon,
-} from '../../../../constants';
+} from '../../../../../constants';
 
 interface TrafficChartProps {
   direct: number;
