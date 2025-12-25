@@ -977,14 +977,103 @@ export const generateReport = async (req: Request, res: Response): Promise<void>
     };
 
     if (format === 'csv') {
-      const csvHeaders = 'Property Title,Address,City,Price,Status,Promoted,Views,Unique Views,Avg Duration (s),Desktop,Mobile,Tablet,Direct,Search,Social\n';
-      const csvRows = propertyReports.map((p) =>
-        `"${p.title}","${p.address}","${p.city}",${p.price},${p.status},${p.isPromoted},${p.totalViews},${p.uniqueViews},${p.avgDuration},${p.deviceBreakdown.desktop},${p.deviceBreakdown.mobile},${p.deviceBreakdown.tablet},${p.trafficSources.direct},${p.trafficSources.search},${p.trafficSources.social}`
-      ).join('\n');
+      // Format price with currency
+      const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'EUR',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(price);
+      };
 
-      res.setHeader('Content-Type', 'text/csv');
+      // Format date
+      const formatDate = (date: string) => {
+        return new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      };
+
+      // Build CSV with summary section
+      const csvLines: string[] = [];
+
+      // Report Header
+      csvLines.push('BALKAN ESTATE - ANALYTICS REPORT');
+      csvLines.push('');
+      csvLines.push(`Report Period,${period === '7d' ? 'Last 7 Days' : period === '30d' ? 'Last 30 Days' : period === '90d' ? 'Last 90 Days' : 'All Time'}`);
+      csvLines.push(`Generated On,${formatDate(summary.generatedAt)}`);
+      csvLines.push('');
+
+      // Summary Section
+      csvLines.push('SUMMARY');
+      csvLines.push(`Total Properties,${summary.totalProperties}`);
+      csvLines.push(`Active Properties,${summary.activeProperties}`);
+      csvLines.push(`Promoted Properties,${summary.promotedProperties}`);
+      csvLines.push(`Total Views,${summary.totalViews.toLocaleString()}`);
+      csvLines.push(`Unique Views,${summary.totalUniqueViews.toLocaleString()}`);
+      csvLines.push(`Average Views per Property,${summary.avgViewsPerProperty}`);
+      csvLines.push('');
+
+      // Properties Table
+      csvLines.push('PROPERTY DETAILS');
+      csvLines.push('Property Title,Address,City,Price,Status,Promoted,Total Views,Unique Views,Avg Duration,Desktop %,Mobile %,Tablet %,Direct %,Search %,Social %');
+
+      // Property rows with formatted data
+      propertyReports.forEach((p) => {
+        const deviceTotal = p.deviceBreakdown.desktop + p.deviceBreakdown.mobile + p.deviceBreakdown.tablet || 1;
+        const trafficTotal = p.trafficSources.direct + p.trafficSources.search + p.trafficSources.social || 1;
+
+        const row = [
+          `"${p.title.replace(/"/g, '""')}"`, // Escape quotes in title
+          `"${(p.address || '').replace(/"/g, '""')}"`,
+          `"${(p.city || '').replace(/"/g, '""')}"`,
+          formatPrice(p.price),
+          p.status === 'active' ? 'Active' : p.status === 'sold' ? 'Sold' : p.status,
+          p.isPromoted ? 'Yes' : 'No',
+          p.totalViews.toLocaleString(),
+          p.uniqueViews.toLocaleString(),
+          `${p.avgDuration}s`,
+          `${Math.round((p.deviceBreakdown.desktop / deviceTotal) * 100)}%`,
+          `${Math.round((p.deviceBreakdown.mobile / deviceTotal) * 100)}%`,
+          `${Math.round((p.deviceBreakdown.tablet / deviceTotal) * 100)}%`,
+          `${Math.round((p.trafficSources.direct / trafficTotal) * 100)}%`,
+          `${Math.round((p.trafficSources.search / trafficTotal) * 100)}%`,
+          `${Math.round((p.trafficSources.social / trafficTotal) * 100)}%`,
+        ];
+        csvLines.push(row.join(','));
+      });
+
+      // Totals row
+      const totalDevice = propertyReports.reduce((sum, p) => sum + p.deviceBreakdown.desktop + p.deviceBreakdown.mobile + p.deviceBreakdown.tablet, 0) || 1;
+      const totalTraffic = propertyReports.reduce((sum, p) => sum + p.trafficSources.direct + p.trafficSources.search + p.trafficSources.social, 0) || 1;
+      const totalDesktop = propertyReports.reduce((sum, p) => sum + p.deviceBreakdown.desktop, 0);
+      const totalMobile = propertyReports.reduce((sum, p) => sum + p.deviceBreakdown.mobile, 0);
+      const totalTablet = propertyReports.reduce((sum, p) => sum + p.deviceBreakdown.tablet, 0);
+      const totalDirect = propertyReports.reduce((sum, p) => sum + p.trafficSources.direct, 0);
+      const totalSearch = propertyReports.reduce((sum, p) => sum + p.trafficSources.search, 0);
+      const totalSocial = propertyReports.reduce((sum, p) => sum + p.trafficSources.social, 0);
+
+      csvLines.push('');
+      csvLines.push(`TOTALS,,,,,,${summary.totalViews.toLocaleString()},${summary.totalUniqueViews.toLocaleString()},,${Math.round((totalDesktop / totalDevice) * 100)}%,${Math.round((totalMobile / totalDevice) * 100)}%,${Math.round((totalTablet / totalDevice) * 100)}%,${Math.round((totalDirect / totalTraffic) * 100)}%,${Math.round((totalSearch / totalTraffic) * 100)}%,${Math.round((totalSocial / totalTraffic) * 100)}%`);
+
+      // Daily breakdown section
+      if (dailyStats.length > 0) {
+        csvLines.push('');
+        csvLines.push('DAILY VIEWS BREAKDOWN');
+        csvLines.push('Date,Total Views,Unique Views');
+        dailyStats.forEach((day) => {
+          csvLines.push(`${day._id},${day.views},${day.uniqueViews}`);
+        });
+      }
+
+      csvLines.push('');
+      csvLines.push('--- End of Report ---');
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename=analytics-report-${period}.csv`);
-      res.send(csvHeaders + csvRows);
+      res.send(csvLines.join('\n'));
       return;
     }
 
