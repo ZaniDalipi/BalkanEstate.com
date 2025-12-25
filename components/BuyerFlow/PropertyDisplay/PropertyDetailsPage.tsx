@@ -299,6 +299,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           onClose={() => setIsPromotionModalOpen(false)}
           propertyId={property.id}
           propertyTitle={property.title || property.address}
+          isExtension={property.isPromoted}
+          currentTier={property.promotionTier as 'featured' | 'highlight' | 'premium' | undefined}
         />
       )}
 
@@ -334,15 +336,23 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           </button>
 
           <div className="flex items-center gap-2">
-            {/* Promote Button - Only visible to property owners */}
+            {/* Promote/Extend Button - Only visible to property owners */}
             {isOwner && property.status !== 'sold' && (
               <button
                 onClick={() => setIsPromotionModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all"
-                aria-label={t('property:actions.promote', 'Promote')}
+                className={`flex items-center gap-1.5 px-3 py-2 text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all ${
+                  property.isPromoted
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
+                    : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+                }`}
+                aria-label={property.isPromoted ? t('property:actions.extendPromotion', 'Extend') : t('property:actions.promote', 'Promote')}
               >
                 <SparklesIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('property:actions.promote', 'Promote')}</span>
+                <span className="hidden sm:inline">
+                  {property.isPromoted
+                    ? t('property:actions.extendPromotion', 'Extend')
+                    : t('property:actions.promote', 'Promote')}
+                </span>
               </button>
             )}
 
