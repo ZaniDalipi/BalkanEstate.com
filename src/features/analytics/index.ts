@@ -4,6 +4,7 @@ export {
   MiniBarChart,
   DeviceChart,
   TrafficChart,
+  HourlyHeatmap,
   StatCard,
   InsightCard,
   PropertyRow,

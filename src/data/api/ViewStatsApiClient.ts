@@ -163,10 +163,13 @@ export interface DashboardOverview {
   activeProperties: number;
   promotedProperties: number;
   totalAllTimeViews: number;
+  todayViews: number;
   monthlyViews: number;
   monthlyUniqueViews: number;
   weeklyViews: number;
   avgViewsPerProperty: number;
+  monthlyChange: number;
+  weeklyChange: number;
 }
 
 export interface DashboardResponse {
@@ -179,6 +182,7 @@ export interface DashboardResponse {
   deviceBreakdown: DeviceBreakdown | null;
   trafficSources: TrafficSources | null;
   weeklyViewsData: number[] | null;
+  hourlyDistribution: number[] | null;
   subscriptionInfo: SubscriptionInfo;
   isLimited: boolean;
 }

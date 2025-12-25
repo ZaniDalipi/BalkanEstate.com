@@ -21,6 +21,7 @@ import {
   GlobeAltIcon,
   TrophyIcon,
   ExclamationTriangleIcon,
+  ClockIcon,
 } from '../constants';
 import {
   StatCard,
@@ -28,6 +29,7 @@ import {
   PropertyRow,
   DeviceChart,
   TrafficChart,
+  HourlyHeatmap,
   PremiumUpgradeBanner,
   PERIOD_OPTIONS,
   truncateText,
@@ -165,33 +167,43 @@ const AnalyticsPage: React.FC = () => {
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+          <StatCard
+            title="Today"
+            value={dashboard?.overview?.todayViews || 0}
+            subtitle="Live views"
+            icon={ClockIcon}
+            loading={isLoading}
+            color="blue"
+            delay={0}
+          />
+          <StatCard
+            title="Weekly"
+            value={dashboard?.overview?.weeklyViews || 0}
+            change={dashboard?.overview?.weeklyChange}
+            icon={ChartBarIcon}
+            loading={isLoading}
+            color="purple"
+            delay={100}
+          />
+          <StatCard
+            title="Monthly"
+            value={dashboard?.overview?.monthlyViews || 0}
+            change={dashboard?.overview?.monthlyChange}
+            icon={EyeIcon}
+            loading={isLoading}
+            color="green"
+            chartData={weeklyData}
+            delay={200}
+          />
           <StatCard
             title="Properties"
             value={dashboard?.overview?.totalProperties || 0}
             subtitle={`${dashboard?.overview?.activeProperties || 0} active`}
             icon={HomeIcon}
             loading={isLoading}
-            color="blue"
-            delay={0}
-          />
-          <StatCard
-            title="Monthly"
-            value={dashboard?.overview?.monthlyViews || 0}
-            icon={EyeIcon}
-            loading={isLoading}
-            color="green"
-            chartData={weeklyData}
-            delay={100}
-          />
-          <StatCard
-            title="Weekly"
-            value={dashboard?.overview?.weeklyViews || 0}
-            subtitle="Last 7 days"
-            icon={ChartBarIcon}
-            loading={isLoading}
-            color="purple"
-            delay={200}
+            color="orange"
+            delay={300}
           />
           <StatCard
             title="Avg/Property"
@@ -199,8 +211,8 @@ const AnalyticsPage: React.FC = () => {
             subtitle={`${dashboard?.overview?.promotedProperties || 0} promoted`}
             icon={StarIcon}
             loading={isLoading}
-            color="orange"
-            delay={300}
+            color="blue"
+            delay={400}
           />
         </div>
 
@@ -236,6 +248,7 @@ const AnalyticsPage: React.FC = () => {
             needsAttention={dashboard?.needsAttention}
             deviceStats={deviceStats}
             trafficStats={trafficStats}
+            hourlyDistribution={dashboard?.hourlyDistribution}
             isPremium={isPremium}
             onPropertyClick={navigateToProperty}
             onUpgradeClick={openPricingModal}
@@ -419,6 +432,7 @@ interface SidebarProps {
   needsAttention?: Array<{ id: string; title: string; monthlyViews: number }>;
   deviceStats: { desktop: number; mobile: number; tablet: number };
   trafficStats: { direct: number; search: number; social: number; email: number; other: number };
+  hourlyDistribution?: number[] | null;
   isPremium: boolean;
   onPropertyClick: (id: string) => void;
   onUpgradeClick: () => void;
@@ -429,6 +443,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   needsAttention,
   deviceStats,
   trafficStats,
+  hourlyDistribution,
   isPremium,
   onPropertyClick,
   onUpgradeClick,
@@ -488,6 +503,17 @@ const Sidebar: React.FC<SidebarProps> = ({
           email={trafficStats.email}
           other={trafficStats.other}
         />
+      </div>
+    )}
+
+    {/* Hourly Activity Heatmap (Premium) */}
+    {isPremium && hourlyDistribution && hourlyDistribution.length === 24 && (
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
+        <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
+          <ClockIcon className="h-4 w-4 text-purple-500" />
+          Peak Hours
+        </h3>
+        <HourlyHeatmap data={hourlyDistribution} />
       </div>
     )}
 

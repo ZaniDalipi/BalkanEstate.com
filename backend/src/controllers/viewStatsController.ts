@@ -1109,12 +1109,37 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
     const propertyIds = properties.map((p) => p._id);
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // Today's views
+    const todayViews = await PageView.countDocuments({
+      entityType: 'property',
+      entityId: { $in: propertyIds },
+      createdAt: { $gte: todayStart },
+    });
 
     const monthlyViews = await PageView.countDocuments({
       entityType: 'property',
       entityId: { $in: propertyIds },
       createdAt: { $gte: thirtyDaysAgo },
+    });
+
+    // Last month views (30-60 days ago) for comparison
+    const lastMonthViews = await PageView.countDocuments({
+      entityType: 'property',
+      entityId: { $in: propertyIds },
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+    });
+
+    // Last week views (7-14 days ago) for comparison
+    const lastWeekViews = await PageView.countDocuments({
+      entityType: 'property',
+      entityId: { $in: propertyIds },
+      createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo },
     });
 
     const monthlyUniqueViews = await PageView.countDocuments({
@@ -1235,6 +1260,39 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
       weeklyViewsData.push(dayData?.count || 0);
     }
 
+    // Get hourly distribution for heatmap (last 7 days)
+    const hourlyStats = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: sevenDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: { $hour: '$createdAt' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Fill in all 24 hours with counts
+    const hourlyDistribution: number[] = Array(24).fill(0);
+    hourlyStats.forEach((h) => {
+      hourlyDistribution[h._id] = h.count;
+    });
+
+    // Calculate change percentages
+    const monthlyChange = lastMonthViews > 0
+      ? Math.round(((monthlyViews - lastMonthViews) / lastMonthViews) * 100)
+      : monthlyViews > 0 ? 100 : 0;
+
+    const weeklyChange = lastWeekViews > 0
+      ? Math.round(((weeklyViews - lastWeekViews) / lastWeekViews) * 100)
+      : weeklyViews > 0 ? 100 : 0;
+
     const statsMap = new Map(propertyStats.map((s) => [String(s._id), s]));
     const propertiesWithStats = properties.map((p: any) => ({
       id: p._id,
@@ -1263,10 +1321,14 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
         activeProperties: properties.filter((p: any) => p.status === 'active').length,
         promotedProperties: properties.filter((p: any) => p.isPromoted).length,
         totalAllTimeViews: totalViews,
+        todayViews,
         monthlyViews,
         monthlyUniqueViews,
         weeklyViews,
         avgViewsPerProperty: properties.length > 0 ? Math.round(monthlyViews / properties.length) : 0,
+        // Change percentages for trend indicators
+        monthlyChange,
+        weeklyChange,
       },
       properties: propertiesWithStats.sort((a, b) => b.monthlyViews - a.monthlyViews),
       topPerformers: propertiesWithStats.sort((a, b) => b.monthlyViews - a.monthlyViews).slice(0, 3),
@@ -1283,6 +1345,7 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
       deviceBreakdown: subscriptionInfo.isPremium ? deviceBreakdown : null,
       trafficSources: subscriptionInfo.isPremium ? trafficSources : null,
       weeklyViewsData: subscriptionInfo.isPremium ? weeklyViewsData : null,
+      hourlyDistribution: subscriptionInfo.isPremium ? hourlyDistribution : null,
       subscriptionInfo,
       isLimited: !subscriptionInfo.isPremium,
     });

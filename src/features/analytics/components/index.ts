@@ -1,5 +1,5 @@
 // Charts
-export { ProgressBar, MiniBarChart, DeviceChart, TrafficChart } from './charts';
+export { ProgressBar, MiniBarChart, DeviceChart, TrafficChart, HourlyHeatmap } from './charts';
 
 // Cards
 export { StatCard, InsightCard, PropertyRow } from './cards';
