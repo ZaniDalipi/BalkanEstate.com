@@ -1062,6 +1062,81 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
       { $sort: { views: -1 } },
     ]);
 
+    // Get device breakdown
+    const deviceStats = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: thirtyDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: '$deviceType',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const deviceBreakdown = {
+      desktop: deviceStats.find((d) => d._id === 'desktop')?.count || 0,
+      mobile: deviceStats.find((d) => d._id === 'mobile')?.count || 0,
+      tablet: deviceStats.find((d) => d._id === 'tablet')?.count || 0,
+    };
+
+    // Get traffic sources
+    const trafficStats = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: thirtyDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: '$referrerType',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const trafficSources = {
+      direct: trafficStats.find((t) => t._id === 'direct')?.count || 0,
+      search: trafficStats.find((t) => t._id === 'search')?.count || 0,
+      social: trafficStats.find((t) => t._id === 'social')?.count || 0,
+      email: trafficStats.find((t) => t._id === 'email')?.count || 0,
+      other: trafficStats.find((t) => t._id === 'other')?.count || 0,
+    };
+
+    // Get daily views for past 7 days
+    const dailyViews = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: sevenDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Fill in missing days with 0
+    const weeklyViewsData: number[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayData = dailyViews.find((d) => d._id === dateStr);
+      weeklyViewsData.push(dayData?.count || 0);
+    }
+
     const statsMap = new Map(propertyStats.map((s) => [String(s._id), s]));
     const propertiesWithStats = properties.map((p: any) => ({
       id: p._id,
@@ -1107,6 +1182,9 @@ export const getDashboardOverview = async (req: Request, res: Response): Promise
         referrerType: a.referrerType,
         createdAt: a.createdAt,
       })),
+      deviceBreakdown: subscriptionInfo.isPremium ? deviceBreakdown : null,
+      trafficSources: subscriptionInfo.isPremium ? trafficSources : null,
+      weeklyViewsData: subscriptionInfo.isPremium ? weeklyViewsData : null,
       subscriptionInfo,
       isLimited: !subscriptionInfo.isPremium,
     });

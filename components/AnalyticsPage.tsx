@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/AppContext';
 import {
@@ -47,35 +47,53 @@ const truncateText = (text: string, maxLength: number = 25) => {
   return text.substring(0, maxLength) + '...';
 };
 
-// Progress Bar Component
-const ProgressBar: React.FC<{ value: number; max: number; color?: string }> = ({
+// Animated Progress Bar Component
+const ProgressBar: React.FC<{ value: number; max: number; color?: string; animate?: boolean }> = ({
   value,
   max,
-  color = 'bg-primary'
+  color = 'bg-primary',
+  animate = true
 }) => {
+  const [width, setWidth] = useState(animate ? 0 : (max > 0 ? Math.min((value / max) * 100, 100) : 0));
   const percentage = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+
+  useEffect(() => {
+    if (animate) {
+      const timer = setTimeout(() => setWidth(percentage), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [percentage, animate]);
+
   return (
     <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
       <div
-        className={`h-full ${color} rounded-full transition-all duration-500`}
-        style={{ width: `${percentage}%` }}
+        className={`h-full ${color} rounded-full transition-all duration-700 ease-out`}
+        style={{ width: `${width}%` }}
       />
     </div>
   );
 };
 
-// Mini Bar Chart Component
+// Animated Mini Bar Chart Component
 const MiniBarChart: React.FC<{ data: number[]; color?: string }> = ({ data, color = 'bg-primary' }) => {
   const max = Math.max(...data, 1);
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex items-end gap-0.5 h-8">
       {data.map((value, i) => (
         <div
           key={i}
-          className={`flex-1 ${color} rounded-t opacity-${60 + Math.floor((i / data.length) * 40)}`}
+          className={`flex-1 ${color} rounded-t transition-all duration-500 ease-out`}
           style={{
-            height: `${Math.max((value / max) * 100, 8)}%`,
-            opacity: 0.4 + (i / data.length) * 0.6
+            height: animated ? `${Math.max((value / max) * 100, 8)}%` : '0%',
+            opacity: 0.4 + (i / data.length) * 0.6,
+            transitionDelay: `${i * 50}ms`
           }}
         />
       ))}
@@ -83,7 +101,7 @@ const MiniBarChart: React.FC<{ data: number[]; color?: string }> = ({ data, colo
   );
 };
 
-// Stat Card with Visual
+// Stat Card with Visual and Animation
 interface StatCardProps {
   title: string;
   value: number | string;
@@ -93,6 +111,7 @@ interface StatCardProps {
   loading?: boolean;
   color?: 'blue' | 'green' | 'purple' | 'orange';
   chartData?: number[];
+  delay?: number;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -104,7 +123,15 @@ const StatCard: React.FC<StatCardProps> = ({
   loading,
   color = 'blue',
   chartData,
+  delay = 0,
 }) => {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 50 + delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
+
   const colorClasses = {
     blue: { bg: 'bg-blue-50', text: 'text-blue-600', bar: 'bg-blue-500' },
     green: { bg: 'bg-green-50', text: 'text-green-600', bar: 'bg-green-500' },
@@ -126,7 +153,7 @@ const StatCard: React.FC<StatCardProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 hover:shadow-md transition-shadow">
+    <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 p-4 hover:shadow-md transition-all duration-500 transform ${animated ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
       <div className="flex items-center justify-between mb-2">
         <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">{title}</p>
         <div className={`p-2 rounded-lg ${colorClasses[color].bg}`}>
@@ -283,23 +310,32 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, onC
   );
 };
 
-// Device Distribution Chart
+// Animated Device Distribution Chart
 const DeviceChart: React.FC<{ desktop: number; mobile: number; tablet: number }> = ({ desktop, mobile, tablet }) => {
   const total = desktop + mobile + tablet || 1;
+  const [animated, setAnimated] = useState(false);
   const segments = [
     { label: 'Desktop', value: desktop, color: 'bg-blue-500', icon: ComputerDesktopIcon },
     { label: 'Mobile', value: mobile, color: 'bg-green-500', icon: DevicePhoneMobileIcon },
     { label: 'Tablet', value: tablet, color: 'bg-purple-500', icon: GlobeAltIcon },
   ];
 
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 transform transition-all duration-500 ${animated ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
       <div className="flex h-2 rounded-full overflow-hidden bg-neutral-100">
         {segments.map((seg, i) => (
           <div
             key={i}
-            className={`${seg.color} transition-all`}
-            style={{ width: `${(seg.value / total) * 100}%` }}
+            className={`${seg.color} transition-all duration-700 ease-out`}
+            style={{
+              width: animated ? `${(seg.value / total) * 100}%` : '0%',
+              transitionDelay: `${i * 100}ms`
+            }}
           />
         ))}
       </div>
@@ -315,9 +351,10 @@ const DeviceChart: React.FC<{ desktop: number; mobile: number; tablet: number }>
   );
 };
 
-// Traffic Sources Chart
-const TrafficChart: React.FC<{ direct: number; search: number; social: number; email: number }> = ({ direct, search, social, email }) => {
-  const total = direct + search + social + email || 1;
+// Animated Traffic Sources Chart
+const TrafficChart: React.FC<{ direct: number; search: number; social: number; email: number; other?: number }> = ({ direct, search, social, email, other = 0 }) => {
+  const total = direct + search + social + email + other || 1;
+  const [animated, setAnimated] = useState(false);
   const sources = [
     { label: 'Direct', value: direct, color: 'bg-blue-500' },
     { label: 'Search', value: search, color: 'bg-green-500' },
@@ -325,13 +362,24 @@ const TrafficChart: React.FC<{ direct: number; search: number; social: number; e
     { label: 'Email', value: email, color: 'bg-amber-500' },
   ];
 
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="space-y-1.5">
+    <div className={`space-y-1.5 transform transition-all duration-500 ${animated ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
       {sources.map((source, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="text-[10px] text-neutral-500 w-12">{source.label}</span>
           <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-            <div className={`h-full ${source.color} rounded-full`} style={{ width: `${(source.value / total) * 100}%` }} />
+            <div
+              className={`h-full ${source.color} rounded-full transition-all duration-700 ease-out`}
+              style={{
+                width: animated ? `${(source.value / total) * 100}%` : '0%',
+                transitionDelay: `${i * 80}ms`
+              }}
+            />
           </div>
           <span className="text-[10px] font-medium text-neutral-600 w-8 text-right">{Math.round((source.value / total) * 100)}%</span>
         </div>
@@ -390,8 +438,14 @@ const AnalyticsPage: React.FC = () => {
   const isPremium = dashboard?.subscriptionInfo?.isPremium ?? false;
   const maxViews = propertiesStats?.propertiesStats?.reduce((max, p) => Math.max(max, p.periodViews), 0) || 1;
 
-  // Mock chart data for demo
-  const weeklyData = [12, 19, 15, 25, 22, 30, 28];
+  // Use real weekly data from API or fallback to calculated values
+  const weeklyData = dashboard?.weeklyViewsData || [0, 0, 0, 0, 0, 0, dashboard?.overview?.weeklyViews || 0];
+
+  // Real device breakdown from API
+  const deviceStats = dashboard?.deviceBreakdown || { desktop: 0, mobile: 0, tablet: 0 };
+
+  // Real traffic sources from API
+  const trafficStats = dashboard?.trafficSources || { direct: 0, search: 0, social: 0, email: 0, other: 0 };
 
   if (!currentUser) {
     return (
@@ -478,6 +532,7 @@ const AnalyticsPage: React.FC = () => {
             icon={HomeIcon}
             loading={isLoading}
             color="blue"
+            delay={0}
           />
           <StatCard
             title="Monthly"
@@ -486,6 +541,7 @@ const AnalyticsPage: React.FC = () => {
             loading={isLoading}
             color="green"
             chartData={weeklyData}
+            delay={100}
           />
           <StatCard
             title="Weekly"
@@ -494,6 +550,7 @@ const AnalyticsPage: React.FC = () => {
             icon={ChartBarIcon}
             loading={isLoading}
             color="purple"
+            delay={200}
           />
           <StatCard
             title="Avg/Property"
@@ -502,6 +559,7 @@ const AnalyticsPage: React.FC = () => {
             icon={StarIcon}
             loading={isLoading}
             color="orange"
+            delay={300}
           />
         </div>
 
@@ -601,24 +659,34 @@ const AnalyticsPage: React.FC = () => {
             )}
 
             {/* Device Stats (Premium) */}
-            {isPremium && (
+            {isPremium && deviceStats && (
               <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
                 <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
                   <ComputerDesktopIcon className="h-4 w-4 text-blue-500" />
                   Devices
                 </h3>
-                <DeviceChart desktop={55} mobile={35} tablet={10} />
+                <DeviceChart
+                  desktop={deviceStats.desktop}
+                  mobile={deviceStats.mobile}
+                  tablet={deviceStats.tablet}
+                />
               </div>
             )}
 
             {/* Traffic Sources (Premium) */}
-            {isPremium && (
+            {isPremium && trafficStats && (
               <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
                 <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
                   <GlobeAltIcon className="h-4 w-4 text-green-500" />
                   Traffic
                 </h3>
-                <TrafficChart direct={40} search={35} social={15} email={10} />
+                <TrafficChart
+                  direct={trafficStats.direct}
+                  search={trafficStats.search}
+                  social={trafficStats.social}
+                  email={trafficStats.email}
+                  other={trafficStats.other}
+                />
               </div>
             )}
 

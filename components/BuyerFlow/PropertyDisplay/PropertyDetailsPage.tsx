@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import { useAppContext } from '../../../context/AppContext';
-import { ArrowLeftIcon } from '../../../constants';
+import { ArrowLeftIcon, SparklesIcon } from '../../../constants';
 import ImageViewerModal from '../Modals/ImageViewerModal';
 import FloorPlanViewerModal from '../Modals/FloorPlanViewerModal';
 import FeaturedAgencies from '../../FeaturedAgencies';
@@ -21,6 +21,7 @@ import {
   NeighborhoodInsights,
 } from '../../../src/components/property';
 import { useTrackView } from '../../../src/features/view-stats/hooks';
+import PromotionModal from '../../promotions/PromotionModal';
 
 /**
  * PropertyDetailsPage Component
@@ -61,6 +62,23 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
   // State for share
   const [showCopiedToast, setShowCopiedToast] = useState(false);
+
+  // State for promotion modal
+  const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+
+  // Get current user
+  const currentUser = state.currentUser || state.user;
+
+  // Check if current user is the owner (private seller or agent)
+  const isOwner = React.useMemo(() => {
+    if (!currentUser) return false;
+    const userId = String(currentUser.id || currentUser._id);
+    // Check if user is the seller (private seller)
+    if (property.sellerId && String(property.sellerId) === userId) return true;
+    // Check if user is the agent for this property
+    if (property.agentId && String(property.agentId) === userId) return true;
+    return false;
+  }, [currentUser, property.sellerId, property.agentId]);
 
   // Computed values
   const isFavorited = state.savedHomes.some((p) => p.id === property.id);
@@ -275,6 +293,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           onClose={() => setIsFloorPlanOpen(false)}
         />
       )}
+      {isPromotionModalOpen && (
+        <PromotionModal
+          isOpen={isPromotionModalOpen}
+          onClose={() => setIsPromotionModalOpen(false)}
+          propertyId={property.id}
+          propertyTitle={property.title || property.address}
+        />
+      )}
 
       {/* Copied Toast */}
       {showCopiedToast && (
@@ -308,6 +334,18 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           </button>
 
           <div className="flex items-center gap-2">
+            {/* Promote Button - Only visible to property owners */}
+            {isOwner && property.status !== 'sold' && (
+              <button
+                onClick={() => setIsPromotionModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all"
+                aria-label={t('property:actions.promote', 'Promote')}
+              >
+                <SparklesIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('property:actions.promote', 'Promote')}</span>
+              </button>
+            )}
+
             {/* Share Button */}
             <button
               onClick={handleShare}

@@ -176,6 +176,9 @@ export interface DashboardResponse {
   needsAttention: DashboardProperty[];
   insights: Insight[];
   recentActivity: RecentActivity[];
+  deviceBreakdown: DeviceBreakdown | null;
+  trafficSources: TrafficSources | null;
+  weeklyViewsData: number[] | null;
   subscriptionInfo: SubscriptionInfo;
   isLimited: boolean;
 }
