@@ -1,117 +1,68 @@
-import React, { useEffect, useCallback } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useCallback, memo } from 'react';
+import { XMarkIcon } from '../../constants';
 
-export interface ModalProps {
+interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  showCloseButton?: boolean;
-  closeOnOverlayClick?: boolean;
-  closeOnEscape?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
+  maxWidth?: string;
 }
 
-const sizeClasses: Record<string, string> = {
-  sm: 'max-w-md',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
-  full: 'max-w-full mx-4',
-};
-
-export const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
-  title,
-  children,
-  size = 'md',
-  showCloseButton = true,
-  closeOnOverlayClick = true,
-  closeOnEscape = true,
-}) => {
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && closeOnEscape) {
-        onClose();
-      }
-    },
-    [onClose, closeOnEscape]
-  );
-
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg', maxWidth }) => {
+  // Lock body scroll when modal is open to prevent map jumping
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
     }
+  }, [isOpen]);
 
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
-    };
-  }, [isOpen, handleEscape]);
+  const handleBackdropClick = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const handleContentClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
 
   if (!isOpen) return null;
 
+  // Use custom maxWidth if provided, otherwise map size to class
+  let sizeClass = maxWidth || 'max-w-lg';
+  if (!maxWidth) {
+    const sizeMap: Record<string, string> = {
+      sm: 'max-w-sm',
+      md: 'max-w-md',
+      lg: 'max-w-lg',
+      xl: 'max-w-xl',
+      '2xl': 'max-w-2xl',
+      '3xl': 'max-w-3xl',
+      '4xl': 'max-w-4xl',
+      '5xl': 'max-w-5xl',
+      '6xl': 'max-w-6xl',
+      '7xl': 'max-w-7xl',
+    };
+    sizeClass = sizeMap[size || 'lg'] || 'max-w-lg';
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Overlay */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto" onClick={handleBackdropClick}>
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-        onClick={closeOnOverlayClick ? onClose : undefined}
-      />
-
-      {/* Modal Content */}
-      <div
-        className={`
-          relative w-full ${sizeClasses[size]} max-h-[90vh]
-          bg-white rounded-2xl shadow-xl overflow-hidden
-          transform transition-all
-        `}
+        className={`bg-white rounded-lg shadow-xl p-3 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto max-h-screen sm:max-h-[95vh] md:max-h-[90vh]`}
+        onClick={handleContentClick}
       >
-        {/* Header */}
-        {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            {title && (
-              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-            )}
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-auto"
-                aria-label="Close modal"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Body */}
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-          {children}
-        </div>
+        <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-1" aria-label="Close modal">
+          <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
+        {title && <h2 className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}
+        <div className="overflow-x-hidden">{children}</div>
       </div>
     </div>
   );
 };
 
-export const ModalBody: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className = '',
-}) => {
-  return <div className={`px-6 py-4 ${className}`}>{children}</div>;
-};
-
-export const ModalFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className = '',
-}) => {
-  return (
-    <div
-      className={`flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
+export default memo(Modal);

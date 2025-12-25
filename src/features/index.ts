@@ -1,35 +1,34 @@
 // Features barrel export
 // Provides a unified import point for all feature modules
 
-// Auth
+// Core Features
 export * from './auth';
-
-// Properties
 export * from './properties';
-
-// Agencies
 export * from './agencies';
-
-// Agents
 export * from './agents';
 
-// Conversations
-export * from './conversations';
-
-// Saved (searches & properties)
+// User Features
 export * from './saved';
+export * from './conversations';
+export * from './messaging';
+export * from './comparison';
 
-// Promotions
+// Search & Display
+export * from './search';
+export * from './property-details';
+export * from './map';
+
+// Seller Features
+export * from './seller';
 export * from './promotions';
+export * from './calculators';
 
-// Cities
+// Discovery
 export * from './cities';
-
-// Admin
-export * from './admin';
-
-// Analytics
 export * from './analytics';
-
-// View Stats
 export * from './view-stats';
+
+// Admin & System
+export * from './admin';
+export * from './onboarding';
+export * from './payments';
