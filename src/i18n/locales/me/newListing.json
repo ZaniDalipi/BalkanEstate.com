@@ -163,8 +163,12 @@
     "priceRequired": "Cijena je obavezna",
     "pricePositive": "Cijena mora biti pozitivan broj",
     "locationRequired": "Lokacija je obavezna",
-    "imagesRequired": "Potrebna je najmanje jedna slika",
-    "propertyTypeRequired": "Vrsta nekretnine je obavezna"
+    "propertyTypeRequired": "Vrsta nekretnine je obavezna",
+    "imagesRequired": "Molimo učitajte bar jednu sliku.",
+    "selectCountryCity": "Molimo odaberite državu i grad.",
+    "selectValidCity": "Molimo odaberite važeći grad.",
+    "apartmentFloorNumber": "Za stanove, molimo unesite važeći broj sprata (1 ili više).",
+    "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj spratova (1 ili više)."
   },
   "success": {
     "title": "Oglas Objavljen!",
@@ -173,8 +177,22 @@
     "createAnother": "Kreiraj Drugi"
   },
   "errors": {
-    "uploadFailed": "Učitavanje neuspješno. Molimo pokušajte ponovo.",
     "saveFailed": "Čuvanje neuspješno. Molimo pokušajte ponovo.",
-    "generic": "Došlo je do greške. Molimo pokušajte ponovo."
+    "generic": "Došlo je do greške. Molimo pokušajte ponovo.",
+    "aiGenerationFailed": "AI Generisanje Nije Uspjelo",
+    "aiTemporarilyUnavailable": "AI Privremeno Nedostupan",
+    "continueManualEntry": "Možete nastaviti sa ručnim unosom.",
+    "uploadFailed": "Učitavanje Nije Uspjelo",
+    "uploadFailedMessage": "Učitavanje slika nije uspjelo: {{error}}. Molimo pokušajte ponovo.",
+    "imageProcessingFailed": "Obrada Slika Nije Uspjela",
+    "failedToProcessImages": "Obrada slika nije uspjela. Molimo pokušajte ponovo.",
+    "noNewImages": "Nema Novih Slika",
+    "noNewImagesMessage": "Nijesu učitane nove slike za analizu. Molimo dodajte nove fajlove slika.",
+    "mustBeLoggedIn": "Morate biti prijavljeni za kreiranje oglasa.",
+    "failedToSubmit": "Slanje Oglasa Nije Uspjelo",
+    "failedToCreate": "Kreiranje Oglasa Nije Uspjelo",
+    "failedToCreateMessage": "Kreiranje oglasa nije uspjelo. Molimo pokušajte ponovo.",
+    "removeImagesFirst": "Molimo uklonite neke slike prije dodavanja novih.",
+    "onlyMoreImages": "Može se dodati samo još {{count}} slika."
   }
 }

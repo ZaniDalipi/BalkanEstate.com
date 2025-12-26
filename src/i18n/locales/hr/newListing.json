@@ -164,7 +164,11 @@
     "pricePositive": "Cijena mora biti pozitivan broj",
     "locationRequired": "Lokacija je obavezna",
     "imagesRequired": "Potrebna je najmanje jedna slika",
-    "propertyTypeRequired": "Vrsta nekretnine je obavezna"
+    "propertyTypeRequired": "Vrsta nekretnine je obavezna",
+    "selectCountryCity": "Molimo odaberite državu i grad.",
+    "selectValidCity": "Molimo odaberite važeći grad.",
+    "apartmentFloorNumber": "Za stanove, molimo unesite važeći broj kata (1 ili više).",
+    "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj katova (1 ili više)."
   },
   "success": {
     "title": "Oglas Objavljen!",
@@ -175,6 +179,20 @@
   "errors": {
     "uploadFailed": "Učitavanje neuspješno. Molimo pokušajte ponovno.",
     "saveFailed": "Spremanje neuspješno. Molimo pokušajte ponovno.",
-    "generic": "Došlo je do greške. Molimo pokušajte ponovno."
+    "generic": "Došlo je do greške. Molimo pokušajte ponovno.",
+    "aiGenerationFailed": "AI Generiranje Nije Uspjelo",
+    "aiTemporarilyUnavailable": "AI Privremeno Nedostupan",
+    "continueManualEntry": "Možete nastaviti s ručnim unosom.",
+    "uploadFailedMessage": "Učitavanje slika nije uspjelo: {{error}}. Molimo pokušajte ponovno.",
+    "imageProcessingFailed": "Obrada Slika Nije Uspjela",
+    "failedToProcessImages": "Obrada slika nije uspjela. Molimo pokušajte ponovno.",
+    "noNewImages": "Nema Novih Slika",
+    "noNewImagesMessage": "Nisu učitane nove slike za analizu. Molimo dodajte nove datoteke slika.",
+    "mustBeLoggedIn": "Morate biti prijavljeni za kreiranje oglasa.",
+    "failedToSubmit": "Slanje Oglasa Nije Uspjelo",
+    "failedToCreate": "Kreiranje Oglasa Nije Uspjelo",
+    "failedToCreateMessage": "Kreiranje oglasa nije uspjelo. Molimo pokušajte ponovno.",
+    "removeImagesFirst": "Molimo uklonite neke slike prije dodavanja novih.",
+    "onlyMoreImages": "Može se dodati samo još {{count}} slika."
   }
 }

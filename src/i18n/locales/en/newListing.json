@@ -222,8 +222,34 @@
     "createAnother": "Create Another Listing"
   },
   "errors": {
-    "aiGenerationFailed": "AI generation failed. Please try again or use manual mode.",
-    "uploadFailed": "Failed to upload images. Please try again.",
-    "publishFailed": "Failed to publish listing. Please try again."
+    "aiGenerationFailed": "AI Generation Failed",
+    "aiTemporarilyUnavailable": "AI Temporarily Unavailable",
+    "continueManualEntry": "You can continue with manual entry instead.",
+    "uploadFailed": "Upload Failed",
+    "uploadFailedMessage": "Failed to upload images: {{error}}. Please try again.",
+    "publishFailed": "Failed to publish listing. Please try again.",
+    "imageProcessingFailed": "Image Processing Failed",
+    "failedToProcessImages": "Failed to process images. Please try again.",
+    "noNewImages": "No New Images",
+    "noNewImagesMessage": "No new images were uploaded to analyze. Please add new image files.",
+    "mustBeLoggedIn": "You must be logged in to create a listing.",
+    "failedToSubmit": "Failed to Submit Listing",
+    "failedToCreate": "Failed to Create Listing",
+    "failedToCreateMessage": "Failed to create listing. Please try again.",
+    "removeImagesFirst": "Please remove some images before adding more.",
+    "onlyMoreImages": "Only {{count}} more image(s) can be added."
+  },
+  "validation": {
+    "required": "This field is required",
+    "minImages": "Please upload at least {{count}} images",
+    "selectCountry": "Please select a country",
+    "selectCity": "Please select a city",
+    "setLocation": "Please set the property location on the map",
+    "invalidPrice": "Please enter a valid price",
+    "imagesRequired": "Please upload at least one image.",
+    "selectCountryCity": "Please select both country and city.",
+    "selectValidCity": "Please select a valid city to set the location.",
+    "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
+    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater)."
   }
 }

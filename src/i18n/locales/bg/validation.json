@@ -1,4 +1,8 @@
 {
+  "imagesRequired": "Изискват се Изображения",
+  "locationRequired": "Изисква се Местоположение",
+  "invalidFloorNumber": "Невалиден Номер на Етаж",
+  "invalidFloorCount": "Невалиден Брой Етажи",
   "password": {
     "minLength": "Поне 8 символа",
     "uppercase": "Една главна буква",

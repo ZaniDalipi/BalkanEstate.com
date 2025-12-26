@@ -525,6 +525,20 @@
     "loadFailed": "Failed to load listing",
     "deleteFailed": "Failed to delete listing",
     "uploadFailed": "Failed to upload photos",
-    "invalidData": "Please check your input"
+    "invalidData": "Please check your input",
+    "listingLimitReached": "Limita de Anunțuri Atinsă",
+    "listingLimitMessage": "Ați atins limita {{tierName}} de {{limit}} anunțuri.",
+    "freeListingLimitReached": "Limita de Anunțuri Gratuite Atinsă",
+    "freeListingLimitMessage": "Ați atins limita gratuită de 3 anunțuri active. Abonați-vă la Pro pentru 25 de anunțuri active!",
+    "proListingLimitReached": "Limita de Anunțuri Pro Atinsă",
+    "proSubscriptionRequired": "Abonament Pro Necesar",
+    "agentProRequiredMessage": "Agenții trebuie să aibă un abonament Pro activ pentru a posta anunțuri. Abonați-vă acum pentru 25 de anunțuri active!",
+    "switchRoleRequired": "Schimbare de Rol Necesară",
+    "buyerCannotCreateListing": "Cumpărătorii nu pot crea anunțuri de proprietăți. Vă rugăm treceți la rolul de Vânzător Privat sau Agent."
+  },
+  "actions": {
+    "subscribeToPro": "Abonează-te la Pro",
+    "viewMyListings": "Vezi Anunțurile Mele",
+    "switchRole": "Schimbă Rolul"
   }
 }

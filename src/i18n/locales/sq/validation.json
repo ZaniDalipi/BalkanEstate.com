@@ -1,4 +1,8 @@
 {
+  "imagesRequired": "Kërkohen Imazhe",
+  "locationRequired": "Kërkohet Vendndodhja",
+  "invalidFloorNumber": "Numër Kati i Pavlefshëm",
+  "invalidFloorCount": "Numri i Kateve i Pavlefshëm",
   "password": {
     "minLength": "Të paktën 8 karaktere",
     "uppercase": "Një shkronjë të madhe",

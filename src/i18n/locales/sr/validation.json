@@ -1,4 +1,8 @@
 {
+  "imagesRequired": "Потребне Слике",
+  "locationRequired": "Потребна Локација",
+  "invalidFloorNumber": "Неважећи Број Спрата",
+  "invalidFloorCount": "Неважећи Број Спратова",
   "password": {
     "minLength": "Najmanje 8 karaktera",
     "uppercase": "Jedno veliko slovo",

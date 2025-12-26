@@ -525,6 +525,20 @@
     "loadFailed": "Failed to load listing",
     "deleteFailed": "Failed to delete listing",
     "uploadFailed": "Failed to upload photos",
-    "invalidData": "Please check your input"
+    "invalidData": "Please check your input",
+    "listingLimitReached": "Достигнут Лимит Огласа",
+    "listingLimitMessage": "Достигли сте ваш {{tierName}} лимит од {{limit}} огласа.",
+    "freeListingLimitReached": "Достигнут Лимит Бесплатних Огласа",
+    "freeListingLimitMessage": "Достигли сте бесплатни лимит од 3 активна огласа. Претплатите се на Pro за 25 активних огласа!",
+    "proListingLimitReached": "Достигнут Pro Лимит Огласа",
+    "proSubscriptionRequired": "Потребна Pro Претплата",
+    "agentProRequiredMessage": "Агенти морају имати активну Pro претплату за постављање огласа. Претплатите се сада за 25 активних огласа!",
+    "switchRoleRequired": "Потребна Промена Улоге",
+    "buyerCannotCreateListing": "Купци не могу креирати огласе за некретнине. Молимо пређите на улогу Приватног Продавца или Агента."
+  },
+  "actions": {
+    "subscribeToPro": "Претплати се на Pro",
+    "viewMyListings": "Погледај Моје Огласе",
+    "switchRole": "Промени Улогу"
   }
 }

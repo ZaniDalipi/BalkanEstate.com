@@ -213,7 +213,12 @@
     "selectCountry": "Ju lutem zgjidhni një vend",
     "selectCity": "Ju lutem zgjidhni një qytet",
     "setLocation": "Ju lutem vendosni vendndodhjen e pronës në hartë",
-    "invalidPrice": "Ju lutem vendosni një çmim të vlefshëm"
+    "invalidPrice": "Ju lutem vendosni një çmim të vlefshëm",
+    "imagesRequired": "Ju lutem ngarkoni të paktën një imazh.",
+    "selectCountryCity": "Ju lutem zgjidhni shtetin dhe qytetin.",
+    "selectValidCity": "Ju lutem zgjidhni një qytet të vlefshëm.",
+    "apartmentFloorNumber": "Për apartamente, ju lutem vendosni një numër kati të vlefshëm (1 ose më shumë).",
+    "houseTotalFloors": "Për shtëpi dhe vila, ju lutem vendosni numrin total të kateve (1 ose më shumë)."
   },
   "success": {
     "title": "Listimi u Publikua!",
@@ -222,8 +227,21 @@
     "createAnother": "Krijo Listim Tjetër"
   },
   "errors": {
-    "aiGenerationFailed": "Gjenerimi me AI dështoi. Ju lutem provoni përsëri ose përdorni modalitetin manual.",
-    "uploadFailed": "Ngarkimi i imazheve dështoi. Ju lutem provoni përsëri.",
+    "aiGenerationFailed": "Gjenerimi i AI Dështoi",
+    "aiTemporarilyUnavailable": "AI Përkohësisht e Padisponueshme",
+    "continueManualEntry": "Mund të vazhdoni me futjen manuale.",
+    "uploadFailed": "Ngarkimi Dështoi",
+    "uploadFailedMessage": "Dështoi ngarkimi i imazheve: {{error}}. Ju lutem provoni përsëri.",
+    "imageProcessingFailed": "Përpunimi i Imazheve Dështoi",
+    "failedToProcessImages": "Dështoi përpunimi i imazheve. Ju lutem provoni përsëri.",
+    "noNewImages": "Nuk Ka Imazhe të Reja",
+    "noNewImagesMessage": "Nuk u ngarkuan imazhe të reja për analizë. Ju lutem shtoni skedarë të rinj imazhesh.",
+    "mustBeLoggedIn": "Duhet të jeni të kyçur për të krijuar një listim.",
+    "failedToSubmit": "Dështoi Dërgimi i Listimit",
+    "failedToCreate": "Dështoi Krijimi i Listimit",
+    "failedToCreateMessage": "Dështoi krijimi i listimit. Ju lutem provoni përsëri.",
+    "removeImagesFirst": "Ju lutem hiqni disa imazhe para se të shtoni më shumë.",
+    "onlyMoreImages": "Mund të shtohen vetëm {{count}} imazhe të tjera.",
     "publishFailed": "Publikimi i listimit dështoi. Ju lutem provoni përsëri."
   }
 }

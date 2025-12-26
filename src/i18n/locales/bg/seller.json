@@ -525,6 +525,20 @@
     "loadFailed": "Failed to load listing",
     "deleteFailed": "Failed to delete listing",
     "uploadFailed": "Failed to upload photos",
-    "invalidData": "Please check your input"
+    "invalidData": "Please check your input",
+    "listingLimitReached": "Достигнат Лимит на Обяви",
+    "listingLimitMessage": "Достигнахте вашия {{tierName}} лимит от {{limit}} обяви.",
+    "freeListingLimitReached": "Достигнат Лимит на Безплатни Обяви",
+    "freeListingLimitMessage": "Достигнахте безплатния лимит от 3 активни обяви. Абонирайте се за Pro за 25 активни обяви!",
+    "proListingLimitReached": "Достигнат Pro Лимит на Обяви",
+    "proSubscriptionRequired": "Изисква се Pro Абонамент",
+    "agentProRequiredMessage": "Агентите трябва да имат активен Pro абонамент, за да публикуват обяви. Абонирайте се сега за 25 активни обяви!",
+    "switchRoleRequired": "Изисква се Смяна на Роля",
+    "buyerCannotCreateListing": "Купувачите не могат да създават обяви за имоти. Моля, преминете към роля Частен Продавач или Агент."
+  },
+  "actions": {
+    "subscribeToPro": "Абонирай се за Pro",
+    "viewMyListings": "Виж Моите Обяви",
+    "switchRole": "Смени Ролята"
   }
 }

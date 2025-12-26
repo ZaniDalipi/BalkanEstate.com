@@ -163,8 +163,12 @@
     "priceRequired": "Prețul este obligatoriu",
     "pricePositive": "Prețul trebuie să fie un număr pozitiv",
     "locationRequired": "Locația este obligatorie",
-    "imagesRequired": "Este necesară cel puțin o imagine",
-    "propertyTypeRequired": "Tipul proprietății este obligatoriu"
+    "propertyTypeRequired": "Tipul proprietății este obligatoriu",
+    "imagesRequired": "Vă rugăm încărcați cel puțin o imagine.",
+    "selectCountryCity": "Vă rugăm selectați țara și orașul.",
+    "selectValidCity": "Vă rugăm selectați un oraș valid.",
+    "apartmentFloorNumber": "Pentru apartamente, vă rugăm introduceți un număr de etaj valid (1 sau mai mare).",
+    "houseTotalFloors": "Pentru case și vile, vă rugăm introduceți numărul total de etaje (1 sau mai mare)."
   },
   "success": {
     "title": "Anunț Publicat!",
@@ -173,8 +177,22 @@
     "createAnother": "Creează Altul"
   },
   "errors": {
-    "uploadFailed": "Încărcare eșuată. Vă rugăm încercați din nou.",
     "saveFailed": "Salvare eșuată. Vă rugăm încercați din nou.",
-    "generic": "A apărut o eroare. Vă rugăm încercați din nou."
+    "generic": "A apărut o eroare. Vă rugăm încercați din nou.",
+    "aiGenerationFailed": "Generarea AI a Eșuat",
+    "aiTemporarilyUnavailable": "AI Temporar Indisponibil",
+    "continueManualEntry": "Puteți continua cu introducerea manuală.",
+    "uploadFailed": "Încărcare Eșuată",
+    "uploadFailedMessage": "Încărcarea imaginilor a eșuat: {{error}}. Vă rugăm încercați din nou.",
+    "imageProcessingFailed": "Procesarea Imaginilor a Eșuat",
+    "failedToProcessImages": "Procesarea imaginilor a eșuat. Vă rugăm încercați din nou.",
+    "noNewImages": "Nu Există Imagini Noi",
+    "noNewImagesMessage": "Nu au fost încărcate imagini noi pentru analiză. Vă rugăm adăugați fișiere imagine noi.",
+    "mustBeLoggedIn": "Trebuie să fiți autentificat pentru a crea un anunț.",
+    "failedToSubmit": "Trimiterea Anunțului a Eșuat",
+    "failedToCreate": "Crearea Anunțului a Eșuat",
+    "failedToCreateMessage": "Crearea anunțului a eșuat. Vă rugăm încercați din nou.",
+    "removeImagesFirst": "Vă rugăm eliminați câteva imagini înainte de a adăuga mai multe.",
+    "onlyMoreImages": "Mai pot fi adăugate doar {{count}} imagini."
   }
 }

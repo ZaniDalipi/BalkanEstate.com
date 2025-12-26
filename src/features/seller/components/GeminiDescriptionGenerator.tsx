@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property, PropertyImage, PropertyImageTag, Seller, UserRole, NominatimResult, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '../../types';
 import { generateDescriptionFromImages, PropertyAnalysisResult, calculatePropertyDistances } from '../../services/geminiService';
 import { searchLocation } from '../../services/osmService';
@@ -304,6 +305,7 @@ const TriStateCheckbox: React.FC<{
 
 // --- Main Component ---
 const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> = ({ propertyToEdit }) => {
+    const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
     const { state, dispatch, updateUser, createListing, updateListing } = useAppContext();
     const { currentUser, properties, isPricingModalOpen, pendingProperty } = state;
     const { showError, showWarning, showSuccess, showInfo } = useAlert();
@@ -358,7 +360,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         if (wasModalOpen.current && !isPricingModalOpen && pendingProperty) {
             const listingsLimit = currentUser?.subscription?.listingsLimit || 3;
             const tierName = currentUser?.subscription?.tier === 'pro' ? 'Pro' : 'Free';
-            showError('Listing Limit Reached', `You've reached your ${tierName} listing limit of ${listingsLimit}. ${tierName === 'Free' ? 'Please subscribe to publish more properties.' : ''}`);
+            showError(t('seller:errors.listingLimitReached'), t('seller:errors.listingLimitMessage', { tierName, limit: listingsLimit }));
             dispatch({ type: 'SET_PENDING_PROPERTY', payload: null });
         }
         wasModalOpen.current = isPricingModalOpen;
@@ -532,11 +534,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         if (totalCount > 30) {
             const availableSlots = 30 - currentImageCount;
             if (availableSlots <= 0) {
-                alert('Maximum 30 images allowed. Please remove some images before adding more.');
+                showWarning(t('newListing:imageUpload.maxImages', { count: 30 }), t('newListing:errors.removeImagesFirst'));
                 e.target.value = '';
                 return;
             }
-            alert(`Maximum 30 images allowed. Only ${availableSlots} more image(s) can be added.`);
+            showWarning(t('newListing:imageUpload.maxImages', { count: 30 }), t('newListing:errors.onlyMoreImages', { count: availableSlots }));
             filesToProcess = files.slice(0, availableSlots);
         }
 
@@ -596,7 +598,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             console.log(`🎉 Successfully processed ${compressedImages.length} images`);
         } catch (error) {
             console.error('Image compression error:', error);
-            showError('Image Processing Failed', 'Failed to process images. Please try again.');
+            showError(t('newListing:errors.imageProcessingFailed'), t('newListing:errors.failedToProcessImages'));
         } finally {
             setIsCompressing(false);
             // Reset input so the same files can be selected again if needed
@@ -693,7 +695,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
     const handleGenerate = async () => {
         if (images.length === 0) {
-            showError('Images Required', 'Please upload at least one image.');
+            showError(t('validation:imagesRequired'), t('newListing:validation.imagesRequired'));
             return;
         }
         setStep('loading');
@@ -704,7 +706,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     setStep('form');
                     return;
                 }
-                showError('No New Images', 'No new images were uploaded to analyze. Please add new image files.');
+                showError(t('newListing:errors.noNewImages'), t('newListing:errors.noNewImagesMessage'));
                 setStep('init');
                 return;
             }
@@ -738,9 +740,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         } catch (e) {
             console.error('⚠️ AI description generation failed:', e);
             if (e instanceof Error) {
-                showWarning('AI Generation Failed', `${e.message}. You can continue with manual entry instead.`);
+                showWarning(t('newListing:errors.aiGenerationFailed'), `${e.message}. ${t('newListing:errors.continueManualEntry')}`);
             } else {
-                showWarning('AI Temporarily Unavailable', 'AI generation is temporarily unavailable. You can continue with manual entry instead.');
+                showWarning(t('newListing:errors.aiTemporarilyUnavailable'), t('newListing:errors.continueManualEntry'));
             }
             // Allow user to continue with manual entry by going back to init
             setStep('init');
@@ -781,7 +783,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentUser) {
-            showError('Authentication Required', "You must be logged in to create a listing.");
+            showError(t('common:errors.authRequired'), t('newListing:errors.mustBeLoggedIn'));
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
             return;
         }
@@ -789,24 +791,24 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
         // Validation
         if (!selectedCountry || !selectedCity) {
-            showError('Location Required', "Please select both country and city.");
+            showError(t('validation:locationRequired'), t('newListing:validation.selectCountryCity'));
             setIsSubmitting(false);
             return;
         }
 
         if (listingData.lat === 0 || listingData.lng === 0) {
-            showError('Location Required', "Please select a valid city to set the location.");
+            showError(t('validation:locationRequired'), t('newListing:validation.selectValidCity'));
             setIsSubmitting(false);
             return;
         }
 
         if (listingData.propertyType === 'apartment' && (!listingData.floorNumber || listingData.floorNumber < 1)) {
-            showError('Invalid Floor Number', "For apartments, please enter a valid floor number (1 or greater).");
+            showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
             setIsSubmitting(false);
             return;
         }
         if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
-            showError('Invalid Floor Count', "For houses and villas, please enter the total number of floors (1 or greater).");
+            showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
             setIsSubmitting(false);
             return;
         }
@@ -877,7 +879,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     });
                 } catch (uploadError: any) {
                     console.error('❌ Failed to upload images to Cloudinary:', uploadError);
-                    showError('Upload Failed', `Failed to upload images: ${uploadError.message || 'Unknown error'}. Please try again.`);
+                    showError(t('newListing:errors.uploadFailed'), t('newListing:errors.uploadFailedMessage', { error: uploadError.message || t('common:errors.unknown') }));
                     setIsSubmitting(false);
                     return;
                 }
@@ -1044,18 +1046,18 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Handle specific backend error codes with professional dialogs
             if (errorCode === 'FREE_LISTING_LIMIT_REACHED') {
                 showWarning(
-                    'Free Listing Limit Reached',
-                    'You have reached your free limit of 3 active listings. Subscribe to Pro for 25 active listings!',
+                    t('seller:errors.freeListingLimitReached'),
+                    t('seller:errors.freeListingLimitMessage'),
                     [
                         {
-                            label: 'Subscribe to Pro',
+                            label: t('seller:actions.subscribeToPro'),
                             onClick: () => {
                                 dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: true });
                             },
                             variant: 'primary',
                         },
                         {
-                            label: 'Cancel',
+                            label: t('common:actions.cancel'),
                             onClick: () => {},
                             variant: 'secondary',
                         },
@@ -1063,18 +1065,18 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 );
             } else if (errorCode === 'PRO_LISTING_LIMIT_REACHED') {
                 showError(
-                    'Pro Listing Limit Reached',
+                    t('seller:errors.proListingLimitReached'),
                     errorMessage,
                     [
                         {
-                            label: 'View My Listings',
+                            label: t('seller:actions.viewMyListings'),
                             onClick: () => {
                                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
                             },
                             variant: 'primary',
                         },
                         {
-                            label: 'Close',
+                            label: t('common:actions.close'),
                             onClick: () => {},
                             variant: 'secondary',
                         },
@@ -1082,18 +1084,18 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 );
             } else if (errorCode === 'AGENT_PRO_REQUIRED') {
                 showWarning(
-                    'Pro Subscription Required',
-                    'Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!',
+                    t('seller:errors.proSubscriptionRequired'),
+                    t('seller:errors.agentProRequiredMessage'),
                     [
                         {
-                            label: 'Subscribe to Pro',
+                            label: t('seller:actions.subscribeToPro'),
                             onClick: () => {
                                 dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: true });
                             },
                             variant: 'primary',
                         },
                         {
-                            label: 'Cancel',
+                            label: t('common:actions.cancel'),
                             onClick: () => {},
                             variant: 'secondary',
                         },
@@ -1101,11 +1103,11 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 );
             } else if (errorCode === 'BUYER_CANNOT_CREATE_LISTING') {
                 showInfo(
-                    'Switch Role Required',
-                    'Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.',
+                    t('seller:errors.switchRoleRequired'),
+                    t('seller:errors.buyerCannotCreateListing'),
                     [
                         {
-                            label: 'Switch Role',
+                            label: t('seller:actions.switchRole'),
                             onClick: () => {
                                 // User can switch roles in their account
                                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
@@ -1113,7 +1115,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             variant: 'primary',
                         },
                         {
-                            label: 'Close',
+                            label: t('common:actions.close'),
                             onClick: () => {},
                             variant: 'secondary',
                         },
@@ -1122,16 +1124,16 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             } else {
                 // Generic error handling
                 showError(
-                    'Failed to Submit Listing',
+                    t('newListing:errors.failedToSubmit'),
                     errorMessage,
                     [
                         {
-                            label: 'Try Again',
+                            label: t('common:actions.tryAgain'),
                             onClick: () => {},
                             variant: 'primary',
                         },
                         {
-                            label: 'Close',
+                            label: t('common:actions.close'),
                             onClick: () => {},
                             variant: 'secondary',
                         },
@@ -1185,7 +1187,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             }, 3000);
         } catch (err) {
             console.error('Error creating listing with promotion:', err);
-            showError('Failed to Create Listing', 'Failed to create listing. Please try again.');
+            showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
             setStep('form');
         } finally {
             setIsSubmitting(false);
@@ -1211,7 +1213,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             }, 3000);
         } catch (err) {
             console.error('Error creating listing:', err);
-            showError('Failed to Create Listing', 'Failed to create listing. Please try again.');
+            showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
             setStep('form');
         } finally {
             setIsSubmitting(false);

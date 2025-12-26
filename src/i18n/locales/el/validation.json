@@ -1,4 +1,8 @@
 {
+  "imagesRequired": "Απαιτούνται Εικόνες",
+  "locationRequired": "Απαιτείται Τοποθεσία",
+  "invalidFloorNumber": "Μη Έγκυρος Αριθμός Ορόφου",
+  "invalidFloorCount": "Μη Έγκυρος Αριθμός Ορόφων",
   "password": {
     "minLength": "At least 8 characters",
     "uppercase": "One uppercase letter",

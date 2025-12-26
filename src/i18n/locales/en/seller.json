@@ -534,6 +534,20 @@
     "loadFailed": "Failed to load listing",
     "deleteFailed": "Failed to delete listing",
     "uploadFailed": "Failed to upload photos",
-    "invalidData": "Please check your input"
+    "invalidData": "Please check your input",
+    "listingLimitReached": "Listing Limit Reached",
+    "listingLimitMessage": "You've reached your {{tierName}} listing limit of {{limit}}.",
+    "freeListingLimitReached": "Free Listing Limit Reached",
+    "freeListingLimitMessage": "You have reached your free limit of 3 active listings. Subscribe to Pro for 25 active listings!",
+    "proListingLimitReached": "Pro Listing Limit Reached",
+    "proSubscriptionRequired": "Pro Subscription Required",
+    "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!",
+    "switchRoleRequired": "Switch Role Required",
+    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
+  },
+  "actions": {
+    "subscribeToPro": "Subscribe to Pro",
+    "viewMyListings": "View My Listings",
+    "switchRole": "Switch Role"
   }
 }

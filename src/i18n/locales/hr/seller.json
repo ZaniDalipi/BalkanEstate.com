@@ -525,6 +525,20 @@
     "loadFailed": "Failed to load listing",
     "deleteFailed": "Failed to delete listing",
     "uploadFailed": "Failed to upload photos",
-    "invalidData": "Please check your input"
+    "invalidData": "Please check your input",
+    "listingLimitReached": "Dosegnut Limit Oglasa",
+    "listingLimitMessage": "Dosegli ste svoj {{tierName}} limit od {{limit}} oglasa.",
+    "freeListingLimitReached": "Dosegnut Limit Besplatnih Oglasa",
+    "freeListingLimitMessage": "Dosegli ste besplatni limit od 3 aktivna oglasa. Pretplatite se na Pro za 25 aktivnih oglasa!",
+    "proListingLimitReached": "Dosegnut Pro Limit Oglasa",
+    "proSubscriptionRequired": "Potrebna Pro Pretplata",
+    "agentProRequiredMessage": "Agenti moraju imati aktivnu Pro pretplatu za objavljivanje oglasa. Pretplatite se sada za 25 aktivnih oglasa!",
+    "switchRoleRequired": "Potrebna Promjena Uloge",
+    "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavača ili Agenta."
+  },
+  "actions": {
+    "subscribeToPro": "Pretplati se na Pro",
+    "viewMyListings": "Pogledaj Moje Oglase",
+    "switchRole": "Promijeni Ulogu"
   }
 }

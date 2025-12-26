@@ -525,6 +525,20 @@
     "loadFailed": "Failed to load listing",
     "deleteFailed": "Failed to delete listing",
     "uploadFailed": "Failed to upload photos",
-    "invalidData": "Please check your input"
+    "invalidData": "Please check your input",
+    "listingLimitReached": "Limiti i Listimeve u Arrit",
+    "listingLimitMessage": "Keni arritur limitin tuaj {{tierName}} prej {{limit}} listimesh.",
+    "freeListingLimitReached": "Limiti i Listimeve Falas u Arrit",
+    "freeListingLimitMessage": "Keni arritur limitin falas prej 3 listimesh aktive. Abonohuni në Pro për 25 listime aktive!",
+    "proListingLimitReached": "Limiti i Listimeve Pro u Arrit",
+    "proSubscriptionRequired": "Kërkohet Abonim Pro",
+    "agentProRequiredMessage": "Agjentët duhet të kenë një abonim aktiv Pro për të postuar listime. Abonohuni tani për 25 listime aktive!",
+    "switchRoleRequired": "Kërkohet Ndërrimi i Rolit",
+    "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent."
+  },
+  "actions": {
+    "subscribeToPro": "Abonohu në Pro",
+    "viewMyListings": "Shiko Listimet e Mia",
+    "switchRole": "Ndërro Rolin"
   }
 }

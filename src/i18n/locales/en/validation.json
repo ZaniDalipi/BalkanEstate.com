@@ -1,4 +1,8 @@
 {
+  "imagesRequired": "Images Required",
+  "locationRequired": "Location Required",
+  "invalidFloorNumber": "Invalid Floor Number",
+  "invalidFloorCount": "Invalid Floor Count",
   "password": {
     "minLength": "At least 8 characters",
     "uppercase": "One uppercase letter",
