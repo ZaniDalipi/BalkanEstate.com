@@ -1,0 +1,180 @@
+{
+  "pageTitle": "Kreiraj Novi Oglas",
+  "steps": {
+    "basicInfo": "Osnovne Informacije",
+    "location": "Lokacija",
+    "details": "Detalji",
+    "media": "Mediji",
+    "pricing": "Cijena",
+    "review": "Pregled"
+  },
+  "modes": {
+    "sale": "Na Prodaju",
+    "rent": "Za Najam",
+    "both": "Prodaja i Najam"
+  },
+  "imageUpload": {
+    "title": "Slike Nekretnine",
+    "dragDrop": "Povucite i ispustite slike ovdje",
+    "or": "ili",
+    "browse": "Pregledaj Fajlove",
+    "maxSize": "Maksimalna veličina: 10MB po slici",
+    "formats": "Podržani formati: JPG, PNG, WebP",
+    "mainImage": "Glavna Slika",
+    "setAsMain": "Postavi kao Glavnu",
+    "remove": "Ukloni",
+    "uploading": "Učitavanje...",
+    "maxImages": "Maksimalno {{count}} slika"
+  },
+  "imageTags": {
+    "title": "Oznaka Slike",
+    "exterior": "Eksterijer",
+    "interior": "Interijer",
+    "kitchen": "Kuhinja",
+    "bedroom": "Spavaća Soba",
+    "bathroom": "Kupatilo",
+    "livingRoom": "Dnevni Boravak",
+    "garden": "Bašta",
+    "pool": "Bazen",
+    "view": "Pogled",
+    "other": "Ostalo"
+  },
+  "propertyDetails": {
+    "title": "Detalji Nekretnine",
+    "propertyType": "Vrsta Nekretnine",
+    "propertyTitle": "Naslov Nekretnine",
+    "titlePlaceholder": "Unesite privlačan naslov",
+    "propertyStatus": "Status Nekretnine",
+    "yearBuilt": "Godina Izgradnje",
+    "condition": "Stanje",
+    "types": {
+      "apartment": "Stan",
+      "house": "Kuća",
+      "villa": "Vila",
+      "land": "Zemljište",
+      "commercial": "Poslovni Prostor",
+      "office": "Kancelarija"
+    }
+  },
+  "location": {
+    "title": "Lokacija",
+    "address": "Adresa",
+    "addressPlaceholder": "Unesite adresu nekretnine",
+    "city": "Grad",
+    "cityPlaceholder": "Odaberite grad",
+    "area": "Područje/Četvrt",
+    "areaPlaceholder": "Unesite područje",
+    "postalCode": "Poštanski Broj",
+    "country": "Država",
+    "mapPin": "Postavite Pin na Mapu",
+    "mapInstructions": "Kliknite na mapu za postavljanje tačne lokacije"
+  },
+  "roomDetails": {
+    "title": "Sobe i Raspored",
+    "bedrooms": "Spavaće Sobe",
+    "bathrooms": "Kupatila",
+    "totalRooms": "Ukupno Soba",
+    "floor": "Sprat",
+    "totalFloors": "Ukupno Spratova",
+    "parkingSpaces": "Parking Mjesta"
+  },
+  "sizeAndAge": {
+    "title": "Veličina i Starost",
+    "totalArea": "Ukupna Površina",
+    "livingArea": "Stambena Površina",
+    "plotSize": "Veličina Parcele",
+    "sqm": "m²",
+    "yearBuilt": "Godina Izgradnje",
+    "renovated": "Renovirano"
+  },
+  "amenities": {
+    "title": "Pogodnosti",
+    "airConditioning": "Klima",
+    "heating": "Grijanje",
+    "parking": "Parking",
+    "garage": "Garaža",
+    "pool": "Bazen",
+    "garden": "Bašta",
+    "balcony": "Balkon",
+    "terrace": "Terasa",
+    "elevator": "Lift",
+    "security": "Sigurnosni Sistem",
+    "storage": "Ostava",
+    "furnished": "Namješteno"
+  },
+  "advancedFeatures": {
+    "title": "Napredne Karakteristike",
+    "energyRating": "Energetski Certifikat",
+    "heatingType": "Vrsta Grijanja",
+    "windowType": "Vrsta Prozora",
+    "flooringType": "Vrsta Poda",
+    "orientation": "Orijentacija",
+    "view": "Pogled"
+  },
+  "description": {
+    "title": "Opis",
+    "placeholder": "Detaljno opišite svoju nekretninu...",
+    "minLength": "Minimalno 100 karaktera",
+    "charCount": "{{count}} karaktera"
+  },
+  "virtualTour": {
+    "title": "Virtualna Tura",
+    "url": "URL Virtualne Ture",
+    "urlPlaceholder": "Unesite link virtualne ture",
+    "preview": "Pregled"
+  },
+  "floorplan": {
+    "title": "Tlocrt",
+    "upload": "Učitaj Tlocrt",
+    "formats": "PDF, JPG, ili PNG"
+  },
+  "language": {
+    "title": "Jezik Oglasa",
+    "primary": "Primarni Jezik",
+    "additional": "Dodatni Jezici"
+  },
+  "role": {
+    "title": "Oglašavate kao",
+    "owner": "Vlasnik Nekretnine",
+    "agent": "Agent za Nekretnine"
+  },
+  "promotion": {
+    "title": "Promocija Oglasa",
+    "featured": "Istaknuti Oglas",
+    "featuredDesc": "Pojavite se na vrhu rezultata pretrage",
+    "highlighted": "Označeni Oglas",
+    "highlightedDesc": "Istaknite se sa naglašenim okvirom",
+    "premium": "Premium Pozicioniranje",
+    "premiumDesc": "Maksimalna vidljivost u svim sekcijama"
+  },
+  "actions": {
+    "saveDraft": "Sačuvaj Nacrt",
+    "preview": "Pregled",
+    "publish": "Objavi Oglas",
+    "next": "Dalje",
+    "previous": "Prethodno",
+    "cancel": "Odustani"
+  },
+  "validation": {
+    "titleRequired": "Naslov je obavezan",
+    "titleMinLength": "Naslov mora imati najmanje 10 karaktera",
+    "descriptionRequired": "Opis je obavezan",
+    "descriptionMinLength": "Opis mora imati najmanje 100 karaktera",
+    "priceRequired": "Cijena je obavezna",
+    "pricePositive": "Cijena mora biti pozitivan broj",
+    "locationRequired": "Lokacija je obavezna",
+    "imagesRequired": "Potrebna je najmanje jedna slika",
+    "propertyTypeRequired": "Vrsta nekretnine je obavezna"
+  },
+  "success": {
+    "title": "Oglas Objavljen!",
+    "message": "Vaša nekretnina je sada aktivna",
+    "viewListing": "Pogledaj Oglas",
+    "createAnother": "Kreiraj Drugi"
+  },
+  "errors": {
+    "uploadFailed": "Učitavanje neuspješno. Molimo pokušajte ponovo.",
+    "saveFailed": "Spašavanje neuspješno. Molimo pokušajte ponovo.",
+    "generic": "Došlo je do greške. Molimo pokušajte ponovo."
+  }
+}

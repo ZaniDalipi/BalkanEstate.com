@@ -165,6 +165,11 @@ import bsModals from './locales/bs/modals.json';
 import bsPayment from './locales/bs/payment.json';
 import bsSaved from './locales/bs/saved.json';
 import bsExploreCities from './locales/bs/exploreCities.json';
+import bsSubscription from './locales/bs/subscription.json';
+import bsAgencies from './locales/bs/agencies.json';
+import bsAgencyDetails from './locales/bs/agencyDetails.json';
+import bsAgentProfile from './locales/bs/agentProfile.json';
+import bsNewListing from './locales/bs/newListing.json';
 
 // Import translations - Montenegrin
 import meCommon from './locales/me/common.json';
@@ -424,6 +429,11 @@ const resources = {
     payment: bsPayment,
     saved: bsSaved,
     exploreCities: bsExploreCities,
+    subscription: bsSubscription,
+    agencies: bsAgencies,
+    agencyDetails: bsAgencyDetails,
+    agentProfile: bsAgentProfile,
+    newListing: bsNewListing,
   },
   me: {
     common: meCommon,
