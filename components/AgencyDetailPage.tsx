@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon } from '../constants';
-import PropertyCard from './BuyerFlow/PropertyDisplay/PropertyCard';
-import PropertyCardSkeleton from './BuyerFlow/PropertyDisplay/PropertyCardSkeleton';
+import PropertyCard from '../src/features/property-details/components/PropertyCard';
+import PropertyCardSkeleton from '../src/features/property-details/components/PropertyCardSkeleton';
 import AgencyJoinRequestsModal from './AgencyJoinRequestsModal';
 import InvitationCodeModal from './InvitationCodeModal';
 import FeaturedSubscriptionCard from './shared/FeaturedSubscriptionCard';
@@ -29,10 +29,21 @@ interface Agent {
   propertiesSold?: number;
   activeListings?: number;
   licenseNumber?: string;
+  stats?: {
+    totalSalesValue?: number;
+    propertiesSold?: number;
+    rating?: number;
+    activeListings?: number;
+  };
+}
+
+// Extended Agency type to include optional id for compatibility
+interface ExtendedAgency extends Agency {
+  id?: string;
 }
 
 interface AgencyDetailPageProps {
-  agency: Agency;
+  agency: ExtendedAgency;
 }
 
 // Gradient presets for agency banners
