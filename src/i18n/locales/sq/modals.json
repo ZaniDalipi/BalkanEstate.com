@@ -114,178 +114,178 @@
     "goToChat": "Shko te Biseda",
     "failedToSend": "Dështoi dërgimi i imazhit të shënuar. Ju lutem provoni përsëri.",
     "tools": {
-      "draw": "Draw",
-      "text": "Add Text",
-      "arrow": "Arrow",
-      "rectangle": "Rectangle",
-      "circle": "Circle",
-      "highlight": "Highlight",
-      "blur": "Blur",
-      "crop": "Crop",
-      "rotate": "Rotate",
-      "undo": "Undo",
-      "redo": "Redo",
-      "clear": "Clear All"
+      "draw": "Vizato",
+      "text": "Shto Tekst",
+      "arrow": "Shigjetë",
+      "rectangle": "Drejtkëndësh",
+      "circle": "Rreth",
+      "highlight": "Thekso",
+      "blur": "Turbullim",
+      "crop": "Prit",
+      "rotate": "Rrotullo",
+      "undo": "Zhbëj",
+      "redo": "Ribëj",
+      "clear": "Pastro Gjithçka"
     },
     "colors": {
-      "red": "Red",
-      "blue": "Blue",
-      "green": "Green",
-      "yellow": "Yellow",
-      "black": "Black",
-      "white": "White"
+      "red": "E Kuqe",
+      "blue": "Blu",
+      "green": "E Gjelbër",
+      "yellow": "E Verdhë",
+      "black": "E Zezë",
+      "white": "E Bardhë"
     }
   },
   "confirmation": {
     "deleteProperty": {
-      "title": "Delete Property",
-      "message": "Are you sure you want to delete this property? This action cannot be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
+      "title": "Fshi Pronën",
+      "message": "Jeni të sigurt që dëshironi ta fshini këtë pronë? Ky veprim nuk mund të zhbëhet.",
+      "confirm": "Fshi",
+      "cancel": "Anulo"
     },
     "deleteAccount": {
-      "title": "Delete Account",
-      "message": "This will permanently delete your account and all associated data. This action cannot be undone.",
-      "confirm": "Delete Account",
-      "cancel": "Cancel"
+      "title": "Fshi Llogarinë",
+      "message": "Kjo do të fshijë përgjithmonë llogarinë tuaj dhe të gjitha të dhënat e lidhura. Ky veprim nuk mund të zhbëhet.",
+      "confirm": "Fshi Llogarinë",
+      "cancel": "Anulo"
     },
     "logout": {
-      "title": "Log Out",
-      "message": "Are you sure you want to log out?",
-      "confirm": "Log Out",
-      "cancel": "Cancel"
+      "title": "Dil",
+      "message": "Jeni të sigurt që dëshironi të dilni?",
+      "confirm": "Dil",
+      "cancel": "Anulo"
     },
     "unsavedChanges": {
-      "title": "Unsaved Changes",
-      "message": "You have unsaved changes. Are you sure you want to leave?",
-      "confirm": "Leave",
-      "cancel": "Stay"
+      "title": "Ndryshime të Paruajtura",
+      "message": "Keni ndryshime të paruajtura. Jeni të sigurt që dëshironi të largoheni?",
+      "confirm": "Largohu",
+      "cancel": "Qëndro"
     },
     "cancelSubscription": {
-      "title": "Cancel Subscription",
-      "message": "Are you sure you want to cancel your subscription? You will lose access to premium features.",
-      "confirm": "Cancel Subscription",
-      "cancel": "Keep Subscription"
+      "title": "Anulo Abonimin",
+      "message": "Jeni të sigurt që dëshironi të anuloni abonimin tuaj? Do të humbni qasjen në veçoritë premium.",
+      "confirm": "Anulo Abonimin",
+      "cancel": "Mbaj Abonimin"
     }
   },
   "share": {
-    "title": "Share Property",
-    "copyLink": "Copy Link",
-    "linkCopied": "Link copied to clipboard!",
-    "shareVia": "Share via",
+    "title": "Shpërndaj Pronën",
+    "copyLink": "Kopjo Linkun",
+    "linkCopied": "Linku u kopjua në clipboard!",
+    "shareVia": "Shpërndaj nëpërmjet",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "linkedin": "LinkedIn",
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "email": "Email",
-    "embedCode": "Embed Code",
-    "copyEmbed": "Copy Embed Code"
+    "embedCode": "Kodi i Ngulitur",
+    "copyEmbed": "Kopjo Kodin e Ngulitur"
   },
   "report": {
-    "title": "Report Listing",
-    "reason": "Reason for reporting",
+    "title": "Raporto Shpalljen",
+    "reason": "Arsyeja e raportimit",
     "reasons": {
-      "spam": "Spam or Misleading",
-      "scam": "Scam or Fraud",
-      "inappropriate": "Inappropriate Content",
-      "duplicate": "Duplicate Listing",
-      "wrongInfo": "Incorrect Information",
-      "soldRented": "Already Sold/Rented",
-      "other": "Other"
+      "spam": "Spam ose Mashtruese",
+      "scam": "Mashtrim ose Frikësim",
+      "inappropriate": "Përmbajtje e Papërshtatshme",
+      "duplicate": "Shpallje e Dublikuar",
+      "wrongInfo": "Informacion i Gabuar",
+      "soldRented": "Tashmë e Shitur/Dhënë me Qira",
+      "other": "Tjetër"
     },
-    "details": "Additional details",
-    "detailsPlaceholder": "Please provide more information...",
-    "submit": "Submit Report",
-    "submitting": "Submitting...",
-    "submitted": "Report submitted successfully",
-    "thankYou": "Thank you for helping keep our platform safe!"
+    "details": "Detaje shtesë",
+    "detailsPlaceholder": "Ju lutemi jepni më shumë informacion...",
+    "submit": "Dërgo Raportin",
+    "submitting": "Duke dërguar...",
+    "submitted": "Raporti u dërgua me sukses",
+    "thankYou": "Faleminderit që na ndihmoni ta mbajmë platformën tonë të sigurt!"
   },
   "contact": {
-    "title": "Contact Seller",
-    "name": "Your Name",
-    "email": "Your Email",
-    "phone": "Your Phone",
-    "message": "Your Message",
-    "messagePlaceholder": "Hi, I'm interested in this property...",
-    "send": "Send Message",
-    "sending": "Sending...",
-    "sent": "Message sent successfully!",
-    "scheduleViewing": "Schedule Viewing",
-    "selectDate": "Select Date",
-    "selectTime": "Select Time",
-    "notes": "Additional Notes"
+    "title": "Kontakto Shitësin",
+    "name": "Emri Juaj",
+    "email": "Email Juaj",
+    "phone": "Telefoni Juaj",
+    "message": "Mesazhi Juaj",
+    "messagePlaceholder": "Përshëndetje, jam i/e interesuar për këtë pronë...",
+    "send": "Dërgo Mesazhin",
+    "sending": "Duke dërguar...",
+    "sent": "Mesazhi u dërgua me sukses!",
+    "scheduleViewing": "Cakto Vizitë",
+    "selectDate": "Zgjidh Datën",
+    "selectTime": "Zgjidh Orën",
+    "notes": "Shënime Shtesë"
   },
   "gallery": {
-    "title": "Photo Gallery",
-    "of": "of",
-    "previous": "Previous",
-    "next": "Next",
-    "close": "Close",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit Fullscreen",
-    "download": "Download",
-    "zoom": "Zoom",
-    "thumbnails": "Show Thumbnails"
+    "title": "Galeria e Fotove",
+    "of": "nga",
+    "previous": "E Mëparshme",
+    "next": "E Ardhshme",
+    "close": "Mbyll",
+    "fullscreen": "Ekran i Plotë",
+    "exitFullscreen": "Dil nga Ekrani i Plotë",
+    "download": "Shkarko",
+    "zoom": "Zmadho",
+    "thumbnails": "Trego Miniaturat"
   },
   "virtualTour": {
-    "title": "Virtual Tour",
-    "loading": "Loading virtual tour...",
+    "title": "Tur Virtual",
+    "loading": "Duke ngarkuar turin virtual...",
     "controls": {
-      "moveForward": "Move Forward",
-      "moveBackward": "Move Backward",
-      "lookAround": "Look Around",
-      "zoomIn": "Zoom In",
-      "zoomOut": "Zoom Out",
-      "fullscreen": "Fullscreen",
-      "exitFullscreen": "Exit Fullscreen"
+      "moveForward": "Lëviz Përpara",
+      "moveBackward": "Lëviz Prapa",
+      "lookAround": "Shiko Rreth e Rrotull",
+      "zoomIn": "Zmadho",
+      "zoomOut": "Zvogëlo",
+      "fullscreen": "Ekran i Plotë",
+      "exitFullscreen": "Dil nga Ekrani i Plotë"
     },
-    "hotspots": "Hotspots",
-    "rooms": "Rooms",
-    "info": "Information"
+    "hotspots": "Pika Interesi",
+    "rooms": "Dhomat",
+    "info": "Informacion"
   },
   "floorPlan": {
-    "title": "Floor Plan",
-    "loading": "Loading floor plan...",
-    "zoomIn": "Zoom In",
-    "zoomOut": "Zoom Out",
-    "reset": "Reset View",
-    "download": "Download Floor Plan",
-    "interactive": "Click on rooms for details"
+    "title": "Planimetria",
+    "loading": "Duke ngarkuar planimetrinë...",
+    "zoomIn": "Zmadho",
+    "zoomOut": "Zvogëlo",
+    "reset": "Rivendos Pamjen",
+    "download": "Shkarko Planimetrinë",
+    "interactive": "Kliko mbi dhomat për detaje"
   },
   "calculator": {
-    "title": "Mortgage Calculator",
-    "calculate": "Calculate",
-    "reset": "Reset",
-    "results": "Results",
-    "monthlyPayment": "Monthly Payment",
-    "totalPayment": "Total Payment",
-    "totalInterest": "Total Interest",
-    "disclaimer": "This is an estimate. Please consult a financial advisor for accurate calculations."
+    "title": "Llogaritës Hipoteke",
+    "calculate": "Llogarit",
+    "reset": "Rivendos",
+    "results": "Rezultatet",
+    "monthlyPayment": "Pagesa Mujore",
+    "totalPayment": "Pagesa Totale",
+    "totalInterest": "Interesi Total",
+    "disclaimer": "Kjo është një vlerësim. Ju lutemi konsultohuni me një këshilltar financiar për llogaritje të sakta."
   },
   "login": {
-    "title": "Log In",
-    "subtitle": "Welcome back!",
-    "noAccount": "Don't have an account?",
-    "signUp": "Sign Up",
-    "forgotPassword": "Forgot Password?"
+    "title": "Hyr",
+    "subtitle": "Mirë se u kthyet!",
+    "noAccount": "Nuk keni llogari?",
+    "signUp": "Regjistrohu",
+    "forgotPassword": "Harruat Fjalëkalimin?"
   },
   "signup": {
-    "title": "Create Account",
-    "subtitle": "Join BalkanEstate today",
-    "haveAccount": "Already have an account?",
-    "logIn": "Log In"
+    "title": "Krijo Llogari",
+    "subtitle": "Bashkohuni me BalkanEstate sot",
+    "haveAccount": "Keni tashmë një llogari?",
+    "logIn": "Hyr"
   },
   "cookie": {
-    "title": "Cookie Consent",
-    "message": "We use cookies to enhance your browsing experience and analyze site traffic. By clicking 'Accept All', you consent to our use of cookies.",
-    "acceptAll": "Accept All",
-    "rejectAll": "Reject All",
-    "customize": "Customize",
-    "necessary": "Necessary (Required)",
-    "analytics": "Analytics",
+    "title": "Pëlqimi për Cookies",
+    "message": "Ne përdorim cookies për të përmirësuar përvojën tuaj të shfletimit dhe për të analizuar trafikun e faqes. Duke klikuar 'Prano të Gjitha', ju pranoni përdorimin tonë të cookies.",
+    "acceptAll": "Prano të Gjitha",
+    "rejectAll": "Refuzo të Gjitha",
+    "customize": "Personalizo",
+    "necessary": "Të Nevojshme (Të Detyrueshme)",
+    "analytics": "Analitika",
     "marketing": "Marketing",
-    "savePreferences": "Save Preferences",
-    "learnMore": "Learn More"
+    "savePreferences": "Ruaj Preferencat",
+    "learnMore": "Mëso Më Shumë"
   }
 }

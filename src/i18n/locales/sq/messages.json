@@ -86,81 +86,81 @@
     "searchesHint": "Ruani kërkimet për t'u njoftuar për prona të reja"
   },
   "compose": {
-    "title": "New Message",
-    "to": "To",
-    "subject": "Subject",
-    "message": "Message",
-    "send": "Send",
-    "sending": "Sending...",
-    "sent": "Message Sent!",
-    "cancel": "Cancel",
-    "attachFile": "Attach File",
-    "attachImage": "Attach Image",
-    "removeAttachment": "Remove Attachment",
-    "maxFileSize": "Max file size: {{size}}MB",
-    "invalidFileType": "Invalid file type",
-    "recipientRequired": "Please select a recipient",
-    "messageRequired": "Please enter a message"
+    "title": "Mesazh i Ri",
+    "to": "Për",
+    "subject": "Subjekti",
+    "message": "Mesazhi",
+    "send": "Dërgo",
+    "sending": "Duke dërguar...",
+    "sent": "Mesazhi u Dërgua!",
+    "cancel": "Anulo",
+    "attachFile": "Bashkangjit Skedar",
+    "attachImage": "Bashkangjit Imazh",
+    "removeAttachment": "Hiq Bashkangjitjen",
+    "maxFileSize": "Madhësia max e skedarit: {{size}}MB",
+    "invalidFileType": "Lloj skedari i pavlefshëm",
+    "recipientRequired": "Ju lutem zgjidhni një marrës",
+    "messageRequired": "Ju lutem shkruani një mesazh"
   },
   "attachment": {
-    "image": "Image",
-    "document": "Document",
-    "downloading": "Downloading...",
-    "download": "Download",
-    "preview": "Preview",
-    "remove": "Remove"
+    "image": "Imazh",
+    "document": "Dokument",
+    "downloading": "Duke shkarkuar...",
+    "download": "Shkarko",
+    "preview": "Parashikim",
+    "remove": "Hiq"
   },
   "status": {
-    "sending": "Sending...",
-    "sent": "Sent",
-    "delivered": "Delivered",
-    "read": "Read",
-    "failed": "Failed to send"
+    "sending": "Duke dërguar...",
+    "sent": "Dërguar",
+    "delivered": "Dorëzuar",
+    "read": "Lexuar",
+    "failed": "Dështoi dërgimi"
   },
   "actions": {
-    "reply": "Reply",
-    "forward": "Forward",
-    "delete": "Delete",
-    "archive": "Archive",
-    "markAsRead": "Mark as Read",
-    "markAsUnread": "Mark as Unread",
-    "block": "Block User",
-    "unblock": "Unblock User",
-    "report": "Report",
-    "mute": "Mute Notifications",
-    "unmute": "Unmute Notifications"
+    "reply": "Përgjigju",
+    "forward": "Përcill",
+    "delete": "Fshi",
+    "archive": "Arkivo",
+    "markAsRead": "Shëno si të Lexuar",
+    "markAsUnread": "Shëno si të Palexuar",
+    "block": "Blloko Përdoruesin",
+    "unblock": "Zhblloko Përdoruesin",
+    "report": "Raporto",
+    "mute": "Hesht Njoftimet",
+    "unmute": "Aktivizo Njoftimet"
   },
   "filter": {
-    "all": "All",
-    "unread": "Unread",
-    "read": "Read",
-    "archived": "Archived",
-    "blocked": "Blocked"
+    "all": "Të Gjitha",
+    "unread": "Të Palexuara",
+    "read": "Të Lexuara",
+    "archived": "Të Arkivuara",
+    "blocked": "Të Bllokuara"
   },
   "search": {
-    "placeholder": "Search messages...",
-    "noResults": "No messages found",
-    "searchIn": "Search in conversations"
+    "placeholder": "Kërko mesazhe...",
+    "noResults": "Nuk u gjetën mesazhe",
+    "searchIn": "Kërko në biseda"
   },
   "report": {
-    "title": "Report Message",
-    "reason": "Reason for reporting",
+    "title": "Raporto Mesazhin",
+    "reason": "Arsyeja e raportimit",
     "spam": "Spam",
-    "harassment": "Harassment",
-    "inappropriate": "Inappropriate Content",
-    "scam": "Scam or Fraud",
-    "other": "Other",
-    "details": "Additional details (optional)",
-    "detailsPlaceholder": "Provide more context...",
-    "submit": "Submit Report",
-    "submitted": "Report submitted. Thank you!",
-    "submitting": "Submitting..."
+    "harassment": "Ngacmim",
+    "inappropriate": "Përmbajtje e Papërshtatshme",
+    "scam": "Mashtrim ose Frikësim",
+    "other": "Tjetër",
+    "details": "Detaje shtesë (opsionale)",
+    "detailsPlaceholder": "Jepni më shumë kontekst...",
+    "submit": "Dërgo Raportin",
+    "submitted": "Raporti u dërgua. Faleminderit!",
+    "submitting": "Duke dërguar..."
   },
   "errors": {
-    "loadFailed": "Failed to load messages",
-    "sendFailed": "Failed to send message",
-    "deleteFailed": "Failed to delete message",
-    "connectionLost": "Connection lost. Reconnecting...",
-    "reconnected": "Connected!"
+    "loadFailed": "Dështoi ngarkimi i mesazheve",
+    "sendFailed": "Dështoi dërgimi i mesazhit",
+    "deleteFailed": "Dështoi fshirja e mesazhit",
+    "connectionLost": "Lidhja u humb. Duke u rilidhur...",
+    "reconnected": "U lidh!"
   }
 }

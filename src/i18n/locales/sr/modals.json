@@ -114,178 +114,178 @@
     "goToChat": "Idi na Poruke",
     "failedToSend": "Slanje označene slike nije uspelo. Pokušajte ponovo.",
     "tools": {
-      "draw": "Draw",
-      "text": "Add Text",
-      "arrow": "Arrow",
-      "rectangle": "Rectangle",
-      "circle": "Circle",
-      "highlight": "Highlight",
-      "blur": "Blur",
-      "crop": "Crop",
-      "rotate": "Rotate",
-      "undo": "Undo",
-      "redo": "Redo",
-      "clear": "Clear All"
+      "draw": "Crtaj",
+      "text": "Dodaj Tekst",
+      "arrow": "Strelica",
+      "rectangle": "Pravougaonik",
+      "circle": "Krug",
+      "highlight": "Istakni",
+      "blur": "Zamuti",
+      "crop": "Iseci",
+      "rotate": "Rotiraj",
+      "undo": "Poništi",
+      "redo": "Ponovi",
+      "clear": "Obriši Sve"
     },
     "colors": {
-      "red": "Red",
-      "blue": "Blue",
-      "green": "Green",
-      "yellow": "Yellow",
-      "black": "Black",
-      "white": "White"
+      "red": "Crvena",
+      "blue": "Plava",
+      "green": "Zelena",
+      "yellow": "Žuta",
+      "black": "Crna",
+      "white": "Bela"
     }
   },
   "confirmation": {
     "deleteProperty": {
-      "title": "Delete Property",
-      "message": "Are you sure you want to delete this property? This action cannot be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
+      "title": "Obriši Nekretninu",
+      "message": "Da li ste sigurni da želite da obrišete ovu nekretninu? Ova radnja se ne može poništiti.",
+      "confirm": "Obriši",
+      "cancel": "Otkaži"
     },
     "deleteAccount": {
-      "title": "Delete Account",
-      "message": "This will permanently delete your account and all associated data. This action cannot be undone.",
-      "confirm": "Delete Account",
-      "cancel": "Cancel"
+      "title": "Obriši Nalog",
+      "message": "Ovo će trajno obrisati vaš nalog i sve povezane podatke. Ova radnja se ne može poništiti.",
+      "confirm": "Obriši Nalog",
+      "cancel": "Otkaži"
     },
     "logout": {
-      "title": "Log Out",
-      "message": "Are you sure you want to log out?",
-      "confirm": "Log Out",
-      "cancel": "Cancel"
+      "title": "Odjavi se",
+      "message": "Da li ste sigurni da želite da se odjavite?",
+      "confirm": "Odjavi se",
+      "cancel": "Otkaži"
     },
     "unsavedChanges": {
-      "title": "Unsaved Changes",
-      "message": "You have unsaved changes. Are you sure you want to leave?",
-      "confirm": "Leave",
-      "cancel": "Stay"
+      "title": "Nesačuvane Promene",
+      "message": "Imate nesačuvane promene. Da li ste sigurni da želite da napustite?",
+      "confirm": "Napusti",
+      "cancel": "Ostani"
     },
     "cancelSubscription": {
-      "title": "Cancel Subscription",
-      "message": "Are you sure you want to cancel your subscription? You will lose access to premium features.",
-      "confirm": "Cancel Subscription",
-      "cancel": "Keep Subscription"
+      "title": "Otkaži Pretplatu",
+      "message": "Da li ste sigurni da želite da otkažete pretplatu? Izgubićete pristup premium funkcijama.",
+      "confirm": "Otkaži Pretplatu",
+      "cancel": "Zadrži Pretplatu"
     }
   },
   "share": {
-    "title": "Share Property",
-    "copyLink": "Copy Link",
-    "linkCopied": "Link copied to clipboard!",
-    "shareVia": "Share via",
+    "title": "Podeli Nekretninu",
+    "copyLink": "Kopiraj Link",
+    "linkCopied": "Link kopiran u međuspremnik!",
+    "shareVia": "Podeli putem",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "linkedin": "LinkedIn",
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "email": "Email",
-    "embedCode": "Embed Code",
-    "copyEmbed": "Copy Embed Code"
+    "embedCode": "Kod za Ugradnju",
+    "copyEmbed": "Kopiraj Kod za Ugradnju"
   },
   "report": {
-    "title": "Report Listing",
-    "reason": "Reason for reporting",
+    "title": "Prijavi Oglas",
+    "reason": "Razlog prijave",
     "reasons": {
-      "spam": "Spam or Misleading",
-      "scam": "Scam or Fraud",
-      "inappropriate": "Inappropriate Content",
-      "duplicate": "Duplicate Listing",
-      "wrongInfo": "Incorrect Information",
-      "soldRented": "Already Sold/Rented",
-      "other": "Other"
+      "spam": "Spam ili Obmanjujuće",
+      "scam": "Prevara",
+      "inappropriate": "Neprikladni Sadržaj",
+      "duplicate": "Duplirani Oglas",
+      "wrongInfo": "Netačne Informacije",
+      "soldRented": "Već Prodato/Iznajmljeno",
+      "other": "Drugo"
     },
-    "details": "Additional details",
-    "detailsPlaceholder": "Please provide more information...",
-    "submit": "Submit Report",
-    "submitting": "Submitting...",
-    "submitted": "Report submitted successfully",
-    "thankYou": "Thank you for helping keep our platform safe!"
+    "details": "Dodatni detalji",
+    "detailsPlaceholder": "Molimo navedite više informacija...",
+    "submit": "Pošalji Prijavu",
+    "submitting": "Slanje...",
+    "submitted": "Prijava uspešno poslata",
+    "thankYou": "Hvala što pomažete da naša platforma bude bezbedna!"
   },
   "contact": {
-    "title": "Contact Seller",
-    "name": "Your Name",
-    "email": "Your Email",
-    "phone": "Your Phone",
-    "message": "Your Message",
-    "messagePlaceholder": "Hi, I'm interested in this property...",
-    "send": "Send Message",
-    "sending": "Sending...",
-    "sent": "Message sent successfully!",
-    "scheduleViewing": "Schedule Viewing",
-    "selectDate": "Select Date",
-    "selectTime": "Select Time",
-    "notes": "Additional Notes"
+    "title": "Kontaktiraj Prodavca",
+    "name": "Vaše Ime",
+    "email": "Vaš Email",
+    "phone": "Vaš Telefon",
+    "message": "Vaša Poruka",
+    "messagePlaceholder": "Zdravo, zainteresovan/a sam za ovu nekretninu...",
+    "send": "Pošalji Poruku",
+    "sending": "Slanje...",
+    "sent": "Poruka uspešno poslata!",
+    "scheduleViewing": "Zakaži Obilazak",
+    "selectDate": "Izaberi Datum",
+    "selectTime": "Izaberi Vreme",
+    "notes": "Dodatne Napomene"
   },
   "gallery": {
-    "title": "Photo Gallery",
-    "of": "of",
-    "previous": "Previous",
-    "next": "Next",
-    "close": "Close",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit Fullscreen",
-    "download": "Download",
-    "zoom": "Zoom",
-    "thumbnails": "Show Thumbnails"
+    "title": "Galerija Fotografija",
+    "of": "od",
+    "previous": "Prethodna",
+    "next": "Sledeća",
+    "close": "Zatvori",
+    "fullscreen": "Ceo Ekran",
+    "exitFullscreen": "Izađi iz Celog Ekrana",
+    "download": "Preuzmi",
+    "zoom": "Zumiraj",
+    "thumbnails": "Prikaži Sličice"
   },
   "virtualTour": {
-    "title": "Virtual Tour",
-    "loading": "Loading virtual tour...",
+    "title": "Virtuelna Tura",
+    "loading": "Učitavanje virtuelne ture...",
     "controls": {
-      "moveForward": "Move Forward",
-      "moveBackward": "Move Backward",
-      "lookAround": "Look Around",
-      "zoomIn": "Zoom In",
-      "zoomOut": "Zoom Out",
-      "fullscreen": "Fullscreen",
-      "exitFullscreen": "Exit Fullscreen"
+      "moveForward": "Pomeri Napred",
+      "moveBackward": "Pomeri Nazad",
+      "lookAround": "Pogledaj Okolo",
+      "zoomIn": "Uvećaj",
+      "zoomOut": "Umanji",
+      "fullscreen": "Ceo Ekran",
+      "exitFullscreen": "Izađi iz Celog Ekrana"
     },
-    "hotspots": "Hotspots",
-    "rooms": "Rooms",
-    "info": "Information"
+    "hotspots": "Tačke Interesovanja",
+    "rooms": "Sobe",
+    "info": "Informacije"
   },
   "floorPlan": {
-    "title": "Floor Plan",
-    "loading": "Loading floor plan...",
-    "zoomIn": "Zoom In",
-    "zoomOut": "Zoom Out",
-    "reset": "Reset View",
-    "download": "Download Floor Plan",
-    "interactive": "Click on rooms for details"
+    "title": "Plan Etaže",
+    "loading": "Učitavanje plana etaže...",
+    "zoomIn": "Uvećaj",
+    "zoomOut": "Umanji",
+    "reset": "Resetuj Prikaz",
+    "download": "Preuzmi Plan Etaže",
+    "interactive": "Kliknite na sobe za detalje"
   },
   "calculator": {
-    "title": "Mortgage Calculator",
-    "calculate": "Calculate",
-    "reset": "Reset",
-    "results": "Results",
-    "monthlyPayment": "Monthly Payment",
-    "totalPayment": "Total Payment",
-    "totalInterest": "Total Interest",
-    "disclaimer": "This is an estimate. Please consult a financial advisor for accurate calculations."
+    "title": "Kalkulator Hipoteke",
+    "calculate": "Izračunaj",
+    "reset": "Resetuj",
+    "results": "Rezultati",
+    "monthlyPayment": "Mesečna Rata",
+    "totalPayment": "Ukupna Isplata",
+    "totalInterest": "Ukupna Kamata",
+    "disclaimer": "Ovo je procena. Molimo konsultujte finansijskog savetnika za tačne proračune."
   },
   "login": {
-    "title": "Log In",
-    "subtitle": "Welcome back!",
-    "noAccount": "Don't have an account?",
-    "signUp": "Sign Up",
-    "forgotPassword": "Forgot Password?"
+    "title": "Prijava",
+    "subtitle": "Dobrodošli nazad!",
+    "noAccount": "Nemate nalog?",
+    "signUp": "Registrujte se",
+    "forgotPassword": "Zaboravili ste Lozinku?"
   },
   "signup": {
-    "title": "Create Account",
-    "subtitle": "Join BalkanEstate today",
-    "haveAccount": "Already have an account?",
-    "logIn": "Log In"
+    "title": "Napravite Nalog",
+    "subtitle": "Pridružite se BalkanEstate danas",
+    "haveAccount": "Već imate nalog?",
+    "logIn": "Prijavite se"
   },
   "cookie": {
-    "title": "Cookie Consent",
-    "message": "We use cookies to enhance your browsing experience and analyze site traffic. By clicking 'Accept All', you consent to our use of cookies.",
-    "acceptAll": "Accept All",
-    "rejectAll": "Reject All",
-    "customize": "Customize",
-    "necessary": "Necessary (Required)",
-    "analytics": "Analytics",
+    "title": "Saglasnost za Kolačiće",
+    "message": "Koristimo kolačiće da poboljšamo vaše iskustvo pregledanja i analiziramo saobraćaj na sajtu. Klikom na 'Prihvati Sve', pristajete na korišćenje kolačića.",
+    "acceptAll": "Prihvati Sve",
+    "rejectAll": "Odbij Sve",
+    "customize": "Prilagodi",
+    "necessary": "Neophodni (Obavezni)",
+    "analytics": "Analitika",
     "marketing": "Marketing",
-    "savePreferences": "Save Preferences",
-    "learnMore": "Learn More"
+    "savePreferences": "Sačuvaj Podešavanja",
+    "learnMore": "Saznaj Više"
   }
 }
