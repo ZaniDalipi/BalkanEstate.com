@@ -1,35 +1,36 @@
 {
-  "roleSelector": {
-    "title": "Post Listing As",
-    "description": "Choose which role to use when creating this listing. Each role has separate listing limits and subscriptions.",
-    "agent": "Agent",
-    "privateSeller": "Private Seller",
-    "sharedLimit": "Shared Limit: {{used}}/{{limit}} total listings",
-    "asRole": "({{count}} as {{role}})",
-    "listings": "Listings",
-    "limitReachedShared": "Shared limit reached across both roles.",
-    "limitReachedUpgrade": "Listing limit reached. Upgrade to Pro for 25 listings!",
-    "remainingListings": "{{count}} listing(s) remaining",
-    "availableListings": "{{count}} listing(s) available",
-    "shared": "(shared)",
-    "highlightCoupons": "🎟️ Highlight Coupons: {{available}}/{{total}}",
-    "couponsDescription": "Use to promote your listings",
-    "noSubscriptionData": "No subscription data",
-    "proRequired": {
-      "title": "Pro Subscription Required",
-      "description": "To post listings as an agent, you need to subscribe to the Pro plan.",
-      "button": "Subscribe to Pro"
-    },
-    "badges": {
-      "trial": "Trial",
-      "pro": "Pro",
-      "agencyOwner": "Agency Owner",
-      "agencyAgent": "Agency Agent",
-      "buyer": "Buyer",
-      "free": "Free",
-      "proRequired": "Pro Required"
-    }
+  
+"roleSelector": {
+  "title": "Публикувай Обява като",
+  "description": "Изберете коя роля да използвате при създаване на тази обява. Всяка роля има отделни лимити за обяви и абонаменти.",
+  "agent": "Агент",
+  "privateSeller": "Частен Продавач",
+  "sharedLimit": "Общ Лимит: {{used}}/{{limit}} обяви общо",
+  "asRole": "({{count}} като {{role}})",
+  "listings": "Обяви",
+  "limitReachedShared": "Общият лимит е достигнат за двете роли.",
+  "limitReachedUpgrade": "Достигнат е лимитът за обяви. Актуализирайте до Pro за 25 обяви!",
+  "remainingListings": "Остават {{count}} обяви",
+  "availableListings": "Налични {{count}} обяви",
+  "shared": "(общо)",
+  "highlightCoupons": "🎟️ Купони за Акцент: {{available}}/{{total}}",
+  "couponsDescription": "Използвайте за промотиране на вашите обяви",
+  "noSubscriptionData": "Няма налични данни за абонамент",
+  "proRequired": {
+    "title": "Изисква се Pro Абонамент",
+    "description": "За да публикувате обяви като агент, трябва да имате Pro абонамент.",
+    "button": "Абонирай се за Pro"
   },
+  "badges": {
+    "trial": "Пробен",
+    "pro": "Pro",
+    "agencyOwner": "Собственик на Агенция",
+    "agencyAgent": "Агент на Агенция",
+    "buyer": "Купувач",
+    "free": "Безплатен",
+    "proRequired": "Изисква се Pro"
+  }
+},
   "createListing": {
     "title": "Създай Нова Обява",
     "editTitle": "Редактирай Обявата",
