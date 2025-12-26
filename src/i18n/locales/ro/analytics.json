@@ -1,0 +1,92 @@
+{
+  "title": "Panou de Analiză",
+  "subtitle": "Urmăriți performanța anunțurilor și obțineți informații",
+  "signInRequired": "Autentificare Necesară",
+  "signInMessage": "Vă rugăm să vă autentificați pentru a vedea analizele.",
+  "signIn": "Autentificare",
+  "periods": {
+    "7d": "Ultimele 7 zile",
+    "30d": "Ultimele 30 de zile",
+    "90d": "Ultimele 90 de zile",
+    "all": "Tot timpul"
+  },
+  "stats": {
+    "totalProperties": "Total Proprietăți",
+    "activeProperties": "{{count}} active",
+    "monthlyViews": "Vizualizări Lunare",
+    "uniqueVisitors": "{{count}} vizitatori unici",
+    "weeklyViews": "Vizualizări Săptămânale",
+    "last7Days": "Ultimele 7 zile",
+    "avgViewsPerProperty": "Media Vizualizări/Proprietate",
+    "promoted": "{{count}} promovate"
+  },
+  "premium": {
+    "unlockTitle": "Deblocați Analizele Premium",
+    "unlockMessage": "Faceți upgrade la Pro pentru acces la analize detaliate, informații inteligente, surse de trafic, distribuție pe dispozitive și rapoarte descărcabile.",
+    "upgradeNow": "Upgrade Acum",
+    "upgradeToPro": "Upgrade la Pro",
+    "premiumAccess": "Aveți acces la toate funcțiile premium de analiză, informații și rapoarte.",
+    "freeAccess": "Faceți upgrade pentru a debloca analize detaliate, informații inteligente și rapoarte descărcabile."
+  },
+  "insights": {
+    "title": "Informații Inteligente",
+    "promotionSuccess": "Succes Promovare",
+    "promotedPerformance": "Anunțurile promovate primesc de {{multiplier}}x mai multe vizualizări decât anunțurile normale!",
+    "topPerformer": "Cel Mai Performant",
+    "topPerformerMessage": "\"{{title}}\" este anunțul cu cea mai bună performanță cu {{views}} vizualizări luna aceasta.",
+    "underperforming": "Anunțuri cu Performanță Slabă",
+    "underperformingMessage": "{{count}} anunțuri au mai puțin de {{threshold}} vizualizări. Luați în considerare actualizarea fotografiilor sau descrierilor.",
+    "noViews": "Avertisment Fără Vizualizări",
+    "noViewsMessage": "{{count}} anunțuri nu au primit nicio vizualizare. Ar putea avea nevoie de atenție.",
+    "priceCorrelation": "Corelația Preț și Vizualizări",
+    "priceCorrelationMessage": "Proprietățile cu prețuri între {{min}} și {{max}} primesc cele mai multe vizualizări în anunțurile dvs."
+  },
+  "properties": {
+    "title": "Performanța Proprietăților",
+    "sortedBy": "Sortate după vizualizări ({{period}})",
+    "noProperties": "Încă nu există proprietăți",
+    "listFirst": "Publicați Prima Proprietate",
+    "active": "Activ",
+    "sold": "Vândut",
+    "pending": "În Așteptare",
+    "promoted": "Promovat",
+    "views": "{{count}} vizualizări",
+    "uniqueViews": "{{count}} unice",
+    "totalViews": "{{count}} total"
+  },
+  "sidebar": {
+    "topPerformers": "Cei Mai Performanți",
+    "needsAttention": "Necesită Atenție",
+    "onlyViews": "Doar {{count}} vizualizări luna aceasta",
+    "promote": "Promovează",
+    "recentActivity": "Activitate Recentă",
+    "subscription": "Abonamentul Dvs.",
+    "tier": {
+      "free": "Gratuit",
+      "pro": "Pro",
+      "agency_owner": "Proprietar Agenție",
+      "agency_agent": "Agent Agenție",
+      "buyer": "Cumpărător"
+    }
+  },
+  "devices": {
+    "desktop": "Desktop",
+    "mobile": "Mobil",
+    "tablet": "Tabletă"
+  },
+  "traffic": {
+    "direct": "Direct",
+    "search": "Căutare",
+    "social": "Rețele Sociale",
+    "email": "Email",
+    "other": "Altele"
+  },
+  "report": {
+    "exportCsv": "Exportă CSV",
+    "downloading": "Se descarcă...",
+    "generateReport": "Generează Raport"
+  },
+  "errors": {
+    "loadFailed": "Încărcarea analizelor a eșuat. Vă rugăm încercați mai târziu."
+  }
+}

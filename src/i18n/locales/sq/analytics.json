@@ -1,0 +1,92 @@
+{
+  "title": "Paneli i Analitikës",
+  "subtitle": "Ndiqni performancën e listimeve tuaja dhe merrni njohuri",
+  "signInRequired": "Kërkohet Kyçja",
+  "signInMessage": "Ju lutem kyçuni për të parë analitikën tuaj.",
+  "signIn": "Kyçu",
+  "periods": {
+    "7d": "7 ditët e fundit",
+    "30d": "30 ditët e fundit",
+    "90d": "90 ditët e fundit",
+    "all": "Të gjitha kohët"
+  },
+  "stats": {
+    "totalProperties": "Prona Totale",
+    "activeProperties": "{{count}} aktive",
+    "monthlyViews": "Shikime Mujore",
+    "uniqueVisitors": "{{count}} vizitorë unikë",
+    "weeklyViews": "Shikime Javore",
+    "last7Days": "7 ditët e fundit",
+    "avgViewsPerProperty": "Mesatarja e Shikimeve/Pronë",
+    "promoted": "{{count}} të promovuara"
+  },
+  "premium": {
+    "unlockTitle": "Zhbllokoni Analitikën Premium",
+    "unlockMessage": "Përmirësohuni në Pro për të aksesuar analitikë të detajuar, njohuri të zgjuara, burimet e trafikut, ndarjen sipas pajisjeve dhe raporte të shkarkueshme.",
+    "upgradeNow": "Përmirësohu Tani",
+    "upgradeToPro": "Përmirësohu në Pro",
+    "premiumAccess": "Keni akses në të gjitha veçoritë premium të analitikës, njohuritë dhe raportet.",
+    "freeAccess": "Përmirësohuni për të zhbllokuar analitikë të detajuar, njohuri të zgjuara dhe raporte të shkarkueshme."
+  },
+  "insights": {
+    "title": "Njohuri të Zgjuara",
+    "promotionSuccess": "Sukses i Promovimit",
+    "promotedPerformance": "Listimet tuaja të promovuara po marrin {{multiplier}}x më shumë shikime se listimet e rregullta!",
+    "topPerformer": "Performuesi Kryesor",
+    "topPerformerMessage": "\"{{title}}\" është listimi juaj me performancën më të mirë me {{views}} shikime këtë muaj.",
+    "underperforming": "Listime me Performancë të Ulët",
+    "underperformingMessage": "{{count}} listime kanë më pak se {{threshold}} shikime. Konsideroni përditësimin e fotove ose përshkrimeve.",
+    "noViews": "Paralajmërim pa Shikime",
+    "noViewsMessage": "{{count}} listime nuk kanë marrë asnjë shikim. Ato mund të kenë nevojë për vëmendje.",
+    "priceCorrelation": "Korrelacioni Çmim & Shikime",
+    "priceCorrelationMessage": "Pronat me çmim midis {{min}} dhe {{max}} po marrin më shumë shikime në listimet tuaja."
+  },
+  "properties": {
+    "title": "Performanca e Pronave",
+    "sortedBy": "Renditur sipas shikimeve ({{period}})",
+    "noProperties": "Asnjë pronë ende",
+    "listFirst": "Listoni Pronën Tuaj të Parë",
+    "active": "Aktive",
+    "sold": "Shitur",
+    "pending": "Në Pritje",
+    "promoted": "E Promovuar",
+    "views": "{{count}} shikime",
+    "uniqueViews": "{{count}} unike",
+    "totalViews": "{{count}} totale"
+  },
+  "sidebar": {
+    "topPerformers": "Performuesit Kryesorë",
+    "needsAttention": "Ka Nevojë për Vëmendje",
+    "onlyViews": "Vetëm {{count}} shikime këtë muaj",
+    "promote": "Promovo",
+    "recentActivity": "Aktiviteti i Fundit",
+    "subscription": "Abonimi Juaj",
+    "tier": {
+      "free": "Falas",
+      "pro": "Pro",
+      "agency_owner": "Pronar Agjencie",
+      "agency_agent": "Agjent Agjencie",
+      "buyer": "Blerës"
+    }
+  },
+  "devices": {
+    "desktop": "Kompjuter",
+    "mobile": "Celular",
+    "tablet": "Tablet"
+  },
+  "traffic": {
+    "direct": "Direkt",
+    "search": "Kërkim",
+    "social": "Social",
+    "email": "Email",
+    "other": "Tjetër"
+  },
+  "report": {
+    "exportCsv": "Eksporto CSV",
+    "downloading": "Duke shkarkuar...",
+    "generateReport": "Gjenero Raport"
+  },
+  "errors": {
+    "loadFailed": "Dështoi ngarkimi i analitikës. Ju lutem provoni përsëri më vonë."
+  }
+}

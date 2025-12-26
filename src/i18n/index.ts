@@ -71,6 +71,7 @@ import sqAgencies from './locales/sq/agencies.json';
 import sqAgencyDetails from './locales/sq/agencyDetails.json';
 import sqAgentProfile from './locales/sq/agentProfile.json';
 import sqNewListing from './locales/sq/newListing.json';
+import sqAnalytics from './locales/sq/analytics.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -97,6 +98,7 @@ import srAgencies from './locales/sr/agencies.json';
 import srAgencyDetails from './locales/sr/agencyDetails.json';
 import srAgentProfile from './locales/sr/agentProfile.json';
 import srNewListing from './locales/sr/newListing.json';
+import srAnalytics from './locales/sr/analytics.json';
 
 // Import translations - Bulgarian
 import bgCommon from './locales/bg/common.json';
@@ -123,6 +125,7 @@ import bgAgencies from './locales/bg/agencies.json';
 import bgAgencyDetails from './locales/bg/agencyDetails.json';
 import bgAgentProfile from './locales/bg/agentProfile.json';
 import bgNewListing from './locales/bg/newListing.json';
+import bgAnalytics from './locales/bg/analytics.json';
 
 // Import translations - Croatian
 import hrCommon from './locales/hr/common.json';
@@ -149,6 +152,7 @@ import hrAgencies from './locales/hr/agencies.json';
 import hrAgencyDetails from './locales/hr/agencyDetails.json';
 import hrAgentProfile from './locales/hr/agentProfile.json';
 import hrNewListing from './locales/hr/newListing.json';
+import hrAnalytics from './locales/hr/analytics.json';
 
 // Import translations - Bosnian
 import bsCommon from './locales/bs/common.json';
@@ -175,6 +179,7 @@ import bsAgencies from './locales/bs/agencies.json';
 import bsAgencyDetails from './locales/bs/agencyDetails.json';
 import bsAgentProfile from './locales/bs/agentProfile.json';
 import bsNewListing from './locales/bs/newListing.json';
+import bsAnalytics from './locales/bs/analytics.json';
 
 // Import translations - Montenegrin
 import meCommon from './locales/me/common.json';
@@ -201,6 +206,7 @@ import meAgencies from './locales/me/agencies.json';
 import meAgencyDetails from './locales/me/agencyDetails.json';
 import meAgentProfile from './locales/me/agentProfile.json';
 import meNewListing from './locales/me/newListing.json';
+import meAnalytics from './locales/me/analytics.json';
 
 // Import translations - Macedonian
 import mkCommon from './locales/mk/common.json';
@@ -227,6 +233,7 @@ import mkAgencies from './locales/mk/agencies.json';
 import mkAgencyDetails from './locales/mk/agencyDetails.json';
 import mkAgentProfile from './locales/mk/agentProfile.json';
 import mkNewListing from './locales/mk/newListing.json';
+import mkAnalytics from './locales/mk/analytics.json';
 
 // Import translations - Romanian
 import roCommon from './locales/ro/common.json';
@@ -253,6 +260,7 @@ import roAgencies from './locales/ro/agencies.json';
 import roAgencyDetails from './locales/ro/agencyDetails.json';
 import roAgentProfile from './locales/ro/agentProfile.json';
 import roNewListing from './locales/ro/newListing.json';
+import roAnalytics from './locales/ro/analytics.json';
 
 // Import translations - Greek
 import elCommon from './locales/el/common.json';
@@ -279,6 +287,7 @@ import elAgencies from './locales/el/agencies.json';
 import elAgencyDetails from './locales/el/agencyDetails.json';
 import elAgentProfile from './locales/el/agentProfile.json';
 import elNewListing from './locales/el/newListing.json';
+import elAnalytics from './locales/el/analytics.json';
 
 // Language configuration
 export const languages = [
@@ -350,6 +359,7 @@ const resources = {
     agencyDetails: sqAgencyDetails,
     agentProfile: sqAgentProfile,
     newListing: sqNewListing,
+    analytics: sqAnalytics,
   },
   sr: {
     common: srCommon,
@@ -376,6 +386,7 @@ const resources = {
     agencyDetails: srAgencyDetails,
     agentProfile: srAgentProfile,
     newListing: srNewListing,
+    analytics: srAnalytics,
   },
   bg: {
     common: bgCommon,
@@ -402,6 +413,7 @@ const resources = {
     agencyDetails: bgAgencyDetails,
     agentProfile: bgAgentProfile,
     newListing: bgNewListing,
+    analytics: bgAnalytics,
   },
   hr: {
     common: hrCommon,
@@ -428,6 +440,7 @@ const resources = {
     agencyDetails: hrAgencyDetails,
     agentProfile: hrAgentProfile,
     newListing: hrNewListing,
+    analytics: hrAnalytics,
   },
   bs: {
     common: bsCommon,
@@ -454,6 +467,7 @@ const resources = {
     agencyDetails: bsAgencyDetails,
     agentProfile: bsAgentProfile,
     newListing: bsNewListing,
+    analytics: bsAnalytics,
   },
   me: {
     common: meCommon,
@@ -480,6 +494,7 @@ const resources = {
     agencyDetails: meAgencyDetails,
     agentProfile: meAgentProfile,
     newListing: meNewListing,
+    analytics: meAnalytics,
   },
   mk: {
     common: mkCommon,
@@ -506,6 +521,7 @@ const resources = {
     agencyDetails: mkAgencyDetails,
     agentProfile: mkAgentProfile,
     newListing: mkNewListing,
+    analytics: mkAnalytics,
   },
   ro: {
     common: roCommon,
@@ -532,6 +548,7 @@ const resources = {
     agencyDetails: roAgencyDetails,
     agentProfile: roAgentProfile,
     newListing: roNewListing,
+    analytics: roAnalytics,
   },
   el: {
     common: elCommon,
@@ -558,6 +575,7 @@ const resources = {
     agencyDetails: elAgencyDetails,
     agentProfile: elAgentProfile,
     newListing: elNewListing,
+    analytics: elAnalytics,
   }
 
 };

@@ -1,0 +1,92 @@
+{
+  "title": "Analitička Ploča",
+  "subtitle": "Pratite performanse vaših oglasa i dobijte uvide",
+  "signInRequired": "Potrebna Prijava",
+  "signInMessage": "Molimo prijavite se da biste vidjeli vašu analitiku.",
+  "signIn": "Prijavi se",
+  "periods": {
+    "7d": "Posljednjih 7 dana",
+    "30d": "Posljednjih 30 dana",
+    "90d": "Posljednjih 90 dana",
+    "all": "Sve vrijeme"
+  },
+  "stats": {
+    "totalProperties": "Ukupno Nekretnina",
+    "activeProperties": "{{count}} aktivnih",
+    "monthlyViews": "Mjesečni Pregledi",
+    "uniqueVisitors": "{{count}} jedinstvenih posjetilaca",
+    "weeklyViews": "Sedmični Pregledi",
+    "last7Days": "Posljednjih 7 dana",
+    "avgViewsPerProperty": "Prosjek Pregleda/Nekretnina",
+    "promoted": "{{count}} promovisanih"
+  },
+  "premium": {
+    "unlockTitle": "Otključajte Premium Analitiku",
+    "unlockMessage": "Nadogradite na Pro za pristup detaljnoj analitici, pametnim uvidima, izvorima saobraćaja, podjeli po uređajima i izvještajima za preuzimanje.",
+    "upgradeNow": "Nadogradi Sada",
+    "upgradeToPro": "Nadogradi na Pro",
+    "premiumAccess": "Imate pristup svim premium funkcijama analitike, uvidima i izvještajima.",
+    "freeAccess": "Nadogradite za otključavanje detaljne analitike, pametnih uvida i izvještaja za preuzimanje."
+  },
+  "insights": {
+    "title": "Pametni Uvidi",
+    "promotionSuccess": "Uspjeh Promocije",
+    "promotedPerformance": "Vaši promovisani oglasi dobijaju {{multiplier}}x više pregleda od običnih oglasa!",
+    "topPerformer": "Najbolji Izvođač",
+    "topPerformerMessage": "\"{{title}}\" je vaš najbolji oglas sa {{views}} pregleda ovog mjeseca.",
+    "underperforming": "Oglasi sa Slabim Performansama",
+    "underperformingMessage": "{{count}} oglasa ima manje od {{threshold}} pregleda. Razmislite o ažuriranju fotografija ili opisa.",
+    "noViews": "Upozorenje o Nedostatku Pregleda",
+    "noViewsMessage": "{{count}} oglasa nije dobilo nijedan pregled. Možda im je potrebna pažnja.",
+    "priceCorrelation": "Korelacija Cijene i Pregleda",
+    "priceCorrelationMessage": "Nekretnine sa cijenom između {{min}} i {{max}} dobijaju najviše pregleda u vašim oglasima."
+  },
+  "properties": {
+    "title": "Performanse Nekretnina",
+    "sortedBy": "Sortirano po pregledima ({{period}})",
+    "noProperties": "Još nema nekretnina",
+    "listFirst": "Oglašite Vašu Prvu Nekretninu",
+    "active": "Aktivno",
+    "sold": "Prodato",
+    "pending": "Na Čekanju",
+    "promoted": "Promovisano",
+    "views": "{{count}} pregleda",
+    "uniqueViews": "{{count}} jedinstvenih",
+    "totalViews": "{{count}} ukupno"
+  },
+  "sidebar": {
+    "topPerformers": "Najbolji Izvođači",
+    "needsAttention": "Potrebna Pažnja",
+    "onlyViews": "Samo {{count}} pregleda ovog mjeseca",
+    "promote": "Promoviši",
+    "recentActivity": "Nedavna Aktivnost",
+    "subscription": "Vaša Pretplata",
+    "tier": {
+      "free": "Besplatno",
+      "pro": "Pro",
+      "agency_owner": "Vlasnik Agencije",
+      "agency_agent": "Agent Agencije",
+      "buyer": "Kupac"
+    }
+  },
+  "devices": {
+    "desktop": "Računar",
+    "mobile": "Mobilni",
+    "tablet": "Tablet"
+  },
+  "traffic": {
+    "direct": "Direktan",
+    "search": "Pretraga",
+    "social": "Društvene Mreže",
+    "email": "Email",
+    "other": "Ostalo"
+  },
+  "report": {
+    "exportCsv": "Izvezi CSV",
+    "downloading": "Preuzimanje...",
+    "generateReport": "Generiši Izvještaj"
+  },
+  "errors": {
+    "loadFailed": "Učitavanje analitike nije uspjelo. Molimo pokušajte kasnije."
+  }
+}
