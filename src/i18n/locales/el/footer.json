@@ -1,34 +1,34 @@
 {
-  "tagline": "Finding perfect properties across the Balkans with premium service and modern technology.",
+  "tagline": "Βρίσκουμε τέλεια ακίνητα σε όλα τα Βαλκάνια με premium υπηρεσίες και σύγχρονη τεχνολογία.",
   "sections": {
-    "forBuyers": "For Buyers",
-    "forSellers": "For Sellers",
-    "contact": "Contact"
+    "forBuyers": "Για Αγοραστές",
+    "forSellers": "Για Πωλητές",
+    "contact": "Επικοινωνία"
   },
   "links": {
-    "searchProperties": "Search Properties",
-    "savedProperties": "Saved Properties",
-    "savedSearches": "Saved Searches",
-    "findAgents": "Find Agents",
-    "browseAgencies": "Browse Agencies",
-    "listProperty": "List Property",
-    "messages": "Messages",
-    "myAccount": "My Account"
+    "searchProperties": "Αναζήτηση Ακινήτων",
+    "savedProperties": "Αποθηκευμένα Ακίνητα",
+    "savedSearches": "Αποθηκευμένες Αναζητήσεις",
+    "findAgents": "Εύρεση Μεσιτών",
+    "browseAgencies": "Περιήγηση Γραφείων",
+    "listProperty": "Καταχώρηση Ακινήτου",
+    "messages": "Μηνύματα",
+    "myAccount": "Ο Λογαριασμός μου"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",
     "email": "info@balkanestate.com"
   },
   "legal": {
-    "allRightsReserved": "All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "allRightsReserved": "Με επιφύλαξη παντός δικαιώματος.",
+    "privacyPolicy": "Πολιτική Απορρήτου",
+    "termsOfService": "Όροι Χρήσης",
+    "cookiePolicy": "Πολιτική Cookies",
+    "disclaimer": "Αποποίηση Ευθύνης",
+    "accessibility": "Προσβασιμότητα"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Ακολουθήστε μας",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -36,35 +36,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Κατεβάστε την Εφαρμογή μας",
+    "availableOn": "Διαθέσιμο στο",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Εγγραφή στο Newsletter",
+    "placeholder": "Εισάγετε το email σας",
+    "subscribe": "Εγγραφή",
+    "subscribed": "Ευχαριστούμε για την εγγραφή!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Υποστήριξη",
+    "helpCenter": "Κέντρο Βοήθειας",
+    "contactUs": "Επικοινωνήστε μαζί μας",
+    "faq": "Συχνές Ερωτήσεις",
+    "feedback": "Αφήστε Σχόλια"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
+    "title": "Εταιρεία",
+    "aboutUs": "Σχετικά με Εμάς",
+    "careers": "Καριέρα",
+    "press": "Τύπος",
     "blog": "Blog"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Συνεργάτες",
+    "becomePartner": "Γίνετε Συνεργάτης",
+    "affiliates": "Συνεργάτες",
+    "developers": "Για Προγραμματιστές"
   }
 }

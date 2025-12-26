@@ -1,34 +1,34 @@
 {
-  "tagline": "Finding perfect properties across the Balkans with premium service and modern technology.",
+  "tagline": "Găsim proprietăți perfecte în întreaga regiune a Balcanilor cu servicii premium și tehnologie modernă.",
   "sections": {
-    "forBuyers": "For Buyers",
-    "forSellers": "For Sellers",
+    "forBuyers": "Pentru Cumpărători",
+    "forSellers": "Pentru Vânzători",
     "contact": "Contact"
   },
   "links": {
-    "searchProperties": "Search Properties",
-    "savedProperties": "Saved Properties",
-    "savedSearches": "Saved Searches",
-    "findAgents": "Find Agents",
-    "browseAgencies": "Browse Agencies",
-    "listProperty": "List Property",
-    "messages": "Messages",
-    "myAccount": "My Account"
+    "searchProperties": "Caută Proprietăți",
+    "savedProperties": "Proprietăți Salvate",
+    "savedSearches": "Căutări Salvate",
+    "findAgents": "Găsește Agenți",
+    "browseAgencies": "Explorează Agenții",
+    "listProperty": "Listează Proprietate",
+    "messages": "Mesaje",
+    "myAccount": "Contul Meu"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",
     "email": "info@balkanestate.com"
   },
   "legal": {
-    "allRightsReserved": "All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "allRightsReserved": "Toate drepturile rezervate.",
+    "privacyPolicy": "Politica de Confidențialitate",
+    "termsOfService": "Termeni și Condiții",
+    "cookiePolicy": "Politica Cookies",
+    "disclaimer": "Declinarea Responsabilității",
+    "accessibility": "Accesibilitate"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Urmărește-ne",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -36,35 +36,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Descarcă Aplicația Noastră",
+    "availableOn": "Disponibilă pe",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Abonează-te la Newsletter",
+    "placeholder": "Introdu emailul tău",
+    "subscribe": "Abonează-te",
+    "subscribed": "Mulțumim pentru abonare!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Suport",
+    "helpCenter": "Centru de Ajutor",
+    "contactUs": "Contactează-ne",
+    "faq": "Întrebări Frecvente",
+    "feedback": "Oferă Feedback"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
+    "title": "Companie",
+    "aboutUs": "Despre Noi",
+    "careers": "Cariere",
+    "press": "Presă",
     "blog": "Blog"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Parteneri",
+    "becomePartner": "Devino Partener",
+    "affiliates": "Afiliați",
+    "developers": "Pentru Dezvoltatori"
   }
 }
