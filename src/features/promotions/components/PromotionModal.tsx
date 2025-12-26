@@ -1,5 +1,5 @@
 import React from 'react';
-import Modal from '../shared/Modal';
+import Modal from '@/src/shared/components/ui/Modal';
 import PromotionSelector from './PromotionSelector';
 
 interface PromotionModalProps {
