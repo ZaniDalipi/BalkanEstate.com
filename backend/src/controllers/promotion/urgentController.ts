@@ -98,6 +98,15 @@ export const addUrgentBadge = async (
       cancel_url: `${baseUrl}/settings?tab=promotions&urgent_cancelled=true`,
     });
 
+    if (!session.url) {
+      console.error('Stripe session created but URL is null:', session);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create payment session. Please try again.'
+      });
+      return;
+    }
+
     res.status(200).json({
       success: true,
       isFree: false,
@@ -107,7 +116,10 @@ export const addUrgentBadge = async (
     });
   } catch (error: any) {
     console.error('Add urgent badge error:', error);
-    res.status(500).json({ message: 'Error adding urgent badge', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error adding urgent badge'
+    });
   }
 };
 
