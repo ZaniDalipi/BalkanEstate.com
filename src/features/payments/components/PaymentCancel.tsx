@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
-import { XCircleIcon, ArrowLeftIcon } from '../constants';
+import { useAppContext } from '@/context/AppContext';
+import { XCircleIcon, ArrowLeftIcon } from '@/constants';
 
 const PaymentCancel: React.FC = () => {
   const { t } = useTranslation(['payment']);

@@ -1,6 +1,6 @@
 import React from 'react';
-import AgencyCreationModal from './shared/AgencyCreationModal';
-import { useAppContext } from '../context/AppContext';
+import AgencyCreationModal from '@/components/shared/AgencyCreationModal';
+import { useAppContext } from '@/context/AppContext';
 
 interface EnterpriseCreationFormProps {
   isOpen: boolean;

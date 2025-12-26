@@ -20,8 +20,8 @@ import {
   PropertyMapLink,
   NeighborhoodInsights,
 } from '@/src/features/components/property';
-import { useTrackView } from '../../view-stats/hooks';
-import PromotionModal from '../../promotions/components/PromotionModal';
+import { useTrackView } from '@/src/features/view-stats/hooks';
+import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 
 /**
  * PropertyDetailsPage Component

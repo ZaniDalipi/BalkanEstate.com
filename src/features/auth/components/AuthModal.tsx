@@ -188,7 +188,7 @@ const AuthPage: React.FC = () => {
         // Fetch available OAuth providers
         const fetchProviders = async () => {
             try {
-                const { getAvailableOAuthProviders } = await import('../../services/apiService');
+                const { getAvailableOAuthProviders } = await import('@/services/apiService');
                 const providers = await getAvailableOAuthProviders();
                 setAvailableProviders(providers);
             } catch (error) {
@@ -203,7 +203,7 @@ const AuthPage: React.FC = () => {
         const fetchAgencies = async () => {
             if (isAgent && state.authModalView === 'signup') {
                 try {
-                    const { getAgencies } = await import('../../services/apiService');
+                    const { getAgencies } = await import('@/services/apiService');
                     const response = await getAgencies({});
                     setAgencies(response.agencies || []);
                 } catch (error) {

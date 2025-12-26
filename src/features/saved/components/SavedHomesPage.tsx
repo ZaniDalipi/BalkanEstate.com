@@ -6,11 +6,11 @@ import PropertyCard from '../PropertyDisplay/PropertyCard';
 import { HeartIcon } from '@/constants';
 import ComparisonBar from '../Comparison/ComparisonBar';
 import ComparisonModal from '../Comparison/ComparisonModal';
-import Toast from '../../shared/Toast';
+import Toast from '@/components/shared/Toast';
 import PropertyCardSkeleton from '../PropertyDisplay/PropertyCardSkeleton';
-import AdvertisementBanner from '../../AdvertisementBanner';
-import FeaturedAgencies from '../../FeaturedAgencies';
-import Footer from '../../shared/Footer';
+import AdvertisementBanner from '@/components/AdvertisementBanner';
+import FeaturedAgencies from '@/components/FeaturedAgencies';
+import Footer from '@/components/shared/Footer';
 
 const SavedPropertiesPage: React.FC = () => {
   const { t } = useTranslation(['property', 'nav']);

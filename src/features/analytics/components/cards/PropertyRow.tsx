@@ -2,7 +2,7 @@ import React from 'react';
 import { SparklesIcon } from '@/constants';
 import { formatPrice } from '@/utils/currency';
 import { ProgressBar } from '../charts';
-import { truncateText, getPerformanceColor } from '../../utils/helpers';
+import { truncateText, getPerformanceColor } from '@/src/features/analytics/utils/helpers';
 
 export interface PropertyRowData {
   propertyId: string;

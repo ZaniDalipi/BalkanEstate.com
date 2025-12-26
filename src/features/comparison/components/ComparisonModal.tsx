@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import Modal from '../../shared/Modal';
+import Modal from '@/components/shared/Modal';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon } from '@/constants';

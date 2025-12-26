@@ -3,7 +3,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertyKeys } from '../api/propertyKeys';
-import { authKeys } from '../../auth/api/authKeys';
+import { authKeys } from '@/src/features/auth/api/authKeys';
 import * as api from '@/services/apiService';
 import { Property } from '@/types';
 

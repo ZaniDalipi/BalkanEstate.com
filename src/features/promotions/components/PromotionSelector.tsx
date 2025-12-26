@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import * as api from '../../services/apiService';
-import { Property } from '../../types';
+import * as api from '@/services/apiService';
+import { Property } from '@/types';
 
 interface PromotionSelectorProps {
   // Either propertyId (for existing listings) or pendingPropertyData (for new listings)

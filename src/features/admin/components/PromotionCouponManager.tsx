@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlusIcon, XMarkIcon } from '../../constants';
+import { PlusIcon, XMarkIcon } from '@/constants';
 
 interface PromotionCoupon {
   _id: string;

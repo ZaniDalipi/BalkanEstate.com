@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getFeaturedCities, CityMarketData } from '../../services/apiService';
-import { formatPrice } from '../../utils/currency';
-import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, SparklesIcon, FireIcon, TrendingUpIcon, StarIcon, BuildingOfficeIcon } from '../../constants';
-import { useAppContext } from '../../context/AppContext';
-import Footer from '../shared/Footer';
-import { SEO } from '../../src/components/seo';
+import { getFeaturedCities, CityMarketData } from '@/services/apiService';
+import { formatPrice } from '@/utils/currency';
+import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, SparklesIcon, FireIcon, TrendingUpIcon, StarIcon, BuildingOfficeIcon } from '@/constants';
+import { useAppContext } from '@/context/AppContext';
+import Footer from '@/components/shared/Footer';
+import { SEO } from '@/src/components/seo';
 
 const CityRecommendations: React.FC = () => {
   const [cities, setCities] = useState<CityMarketData[]>([]);

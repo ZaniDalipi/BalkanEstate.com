@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, TrashIcon, XMarkIcon, EyeIcon, BuildingOfficeIcon } from '../../constants';
-import { Agency } from '../../types';
+import { PencilIcon, TrashIcon, XMarkIcon, EyeIcon, BuildingOfficeIcon } from '@/constants';
+import { Agency } from '@/types';
 
 interface User {
   _id: string;

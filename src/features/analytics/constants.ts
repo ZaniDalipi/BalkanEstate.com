@@ -1,4 +1,4 @@
-import { Period } from '../../data/api/ViewStatsApiClient';
+import { Period } from '@/data/api/ViewStatsApiClient';
 
 /**
  * Period options for analytics time range selector

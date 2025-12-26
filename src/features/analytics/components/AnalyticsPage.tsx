@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import {
   useDashboardOverview,
   useMyPropertiesViewStats,
   useDownloadReport,
-} from '../src/features/view-stats/hooks';
-import { Period } from '../src/data/api/ViewStatsApiClient';
-import { AppView } from '../types';
+} from '@/src/features/view-stats/hooks';
+import { Period } from '@/src/data/api/ViewStatsApiClient';
+import { AppView } from '@/types';
 import {
   ChartBarIcon,
   EyeIcon,
@@ -22,7 +22,7 @@ import {
   TrophyIcon,
   ExclamationTriangleIcon,
   ClockIcon,
-} from '../constants';
+} from '@/constants';
 import {
   StatCard,
   InsightCard,
@@ -33,7 +33,7 @@ import {
   PremiumUpgradeBanner,
   PERIOD_OPTIONS,
   truncateText,
-} from '../src/features/analytics';
+} from '@/src/features/analytics';
 
 /**
  * Analytics Dashboard Page

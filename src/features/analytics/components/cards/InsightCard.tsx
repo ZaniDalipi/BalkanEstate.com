@@ -10,8 +10,8 @@ import {
   LightBulbIcon,
 } from '@/constants';
 import { Insight } from '@/src/data/api/ViewStatsApiClient';
-import { INSIGHT_PRIORITY_CONFIG } from '../../constants';
-import { truncateText } from '../../utils/helpers';
+import { INSIGHT_PRIORITY_CONFIG } from '@/src/features/analytics/constants';
+import { truncateText } from '@/src/features/analytics/utils/helpers';
 
 export interface InsightCardProps {
   insight: Insight;

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getFeaturedAgencies } from '../services/apiService';
-import { XMarkIcon, BuildingOfficeIcon } from '../constants';
-import { useAppContext } from '../context/AppContext';
+import { getFeaturedAgencies } from '@/services/apiService';
+import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
+import { useAppContext } from '@/context/AppContext';
 
 const AD_VIEW_THRESHOLD = 3; // Trigger gamification after 3 ad views
 const AD_VIEW_STORAGE_KEY = 'balkan_estate_ad_views';

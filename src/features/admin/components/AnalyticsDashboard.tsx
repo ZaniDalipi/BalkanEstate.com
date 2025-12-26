@@ -6,7 +6,7 @@ import {
   UserGroupIcon,
   TicketIcon,
   ChartBarIcon
-} from '../../constants';
+} from '@/constants';
 
 interface AdminStats {
   overview: {

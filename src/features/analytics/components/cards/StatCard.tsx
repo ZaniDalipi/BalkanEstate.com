@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@/constants';
-import { STAT_CARD_COLORS, StatCardColor } from '../../constants';
+import { STAT_CARD_COLORS, StatCardColor } from '@/src/features/analytics/constants';
 import { MiniBarChart } from '../charts';
 
 export interface StatCardProps {

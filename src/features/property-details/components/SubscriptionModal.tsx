@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import Modal from '../../shared/Modal';
-import PaymentWindow from '../../shared/PaymentWindow';
+import Modal from '@/components/shared/Modal';
+import PaymentWindow from '@/components/shared/PaymentWindow';
 import { AtSymbolIcon, UserIcon, BuildingOfficeIcon, CheckCircleIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { fetchBuyerProducts, Product } from '@/utils/api';

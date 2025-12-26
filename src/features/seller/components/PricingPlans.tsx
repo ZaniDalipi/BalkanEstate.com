@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import Modal from '../shared/Modal';
-import PaymentWindow from '../shared/PaymentWindow';
-import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '../../constants';
-import { useAppContext } from '../../context/AppContext';
-import { fetchSellerProducts, Product } from '../../utils/api';
+import Modal from '@/components/shared/Modal';
+import PaymentWindow from '@/components/shared/PaymentWindow';
+import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '@/constants';
+import { useAppContext } from '@/context/AppContext';
+import { fetchSellerProducts, Product } from '@/utils/api';
 
 interface PricingPlansProps {
   isOpen: boolean;

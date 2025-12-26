@@ -4,9 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Property } from '../../types';
-import { formatPrice } from '../../utils/currency';
-import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon } from '../../constants';
+import { Property } from '@/types';
+import { formatPrice } from '@/utils/currency';
+import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon } from '@/constants';
 
 // Tier configuration
 export const TIER_CONFIG: Record<string, { color: string; bg: string; icon: string; label: string }> = {

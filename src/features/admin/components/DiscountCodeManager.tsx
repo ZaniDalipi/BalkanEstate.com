@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlusIcon, TrashIcon, XMarkIcon } from '../../constants';
+import { PlusIcon, TrashIcon, XMarkIcon } from '@/constants';
 
 interface DiscountCode {
   _id: string;

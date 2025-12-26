@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
-import { resetPassword as resetPasswordApi } from '../../services/apiService';
-import { LogoIcon, EyeIcon } from '../../constants';
+import { useAppContext } from '@/context/AppContext';
+import { resetPassword as resetPasswordApi } from '@/services/apiService';
+import { LogoIcon, EyeIcon } from '@/constants';
 
 const EyeSlashIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

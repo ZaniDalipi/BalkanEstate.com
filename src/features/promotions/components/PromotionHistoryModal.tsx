@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon, ChartBarIcon, ClockIcon, EyeIcon, ChatBubbleLeftRightIcon, HeartIcon } from '../../constants';
-import * as api from '../../services/apiService';
-import { formatPrice } from '../../utils/currency';
+import { XMarkIcon, ChartBarIcon, ClockIcon, EyeIcon, ChatBubbleLeftRightIcon, HeartIcon } from '@/constants';
+import * as api from '@/services/apiService';
+import { formatPrice } from '@/utils/currency';
 
 interface PromotionHistoryItem {
   _id: string;

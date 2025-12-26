@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
-import { CheckCircleIcon, ArrowLeftIcon } from '../constants';
+import { useAppContext } from '@/context/AppContext';
+import { CheckCircleIcon, ArrowLeftIcon } from '@/constants';
 
 interface PaymentDetails {
   paymentStatus?: string;
