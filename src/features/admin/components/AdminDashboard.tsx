@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import AdminNav from './AdminNav';
 import DiscountCodeManager from './DiscountCodeManager';
 import PromotionCouponManager from './PromotionCouponManager';

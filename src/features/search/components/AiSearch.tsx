@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChatMessage, AiSearchQuery, Property } from '../../../types';
-import { getAiChatResponse } from '../../../services/geminiService';
-import { PaperAirplaneIcon, SparklesIcon } from '../../../constants';
+import { ChatMessage, AiSearchQuery, Property } from '@/types';
+import { getAiChatResponse } from '@/services/geminiService';
+import { PaperAirplaneIcon, SparklesIcon } from '@/constants';
 
 interface AiSearchProps {
     properties: Property[];

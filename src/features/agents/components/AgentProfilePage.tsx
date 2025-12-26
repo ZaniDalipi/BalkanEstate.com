@@ -1,9 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Agent } from '../../types';
-import { Agency } from '../../types';
-import AgencyBadge from '../shared/AgencyBadge';
-import { useAppContext } from '../../context/AppContext';
+import { Agent, Agency } from '@/types';
+import AgencyBadge from '@/components/shared/AgencyBadge';
+import { useAppContext } from '@/context/AppContext';
 import {
   ArrowLeftIcon,
   BuildingOfficeIcon,
@@ -45,18 +44,18 @@ import {
   ArrowRightIcon,
   MagnifyingGlassIcon,
   XMarkIcon
-} from '../../constants';
-import StarRating from '../shared/StarRating';
-import { formatPrice } from '../../utils/currency';
-import PropertyCard from '../BuyerFlow/PropertyDisplay/PropertyCard';
+} from '@/constants';
+import StarRating from '@/components/shared/StarRating';
+import { formatPrice } from '@/utils/currency';
+import PropertyCard from '@/components/BuyerFlow/PropertyDisplay/PropertyCard';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import PropertyCardSkeleton from '../BuyerFlow/PropertyDisplay/PropertyCardSkeleton';
-import AgentReviewForm from '../shared/AgentReviewForm';
-import FeaturedAgencies from '../FeaturedAgencies';
-import { slugify } from '../../utils/slug';
-import { getAgencyAgents, getAllAgents } from '../../services/apiService';
-import { useTrackView } from '../../src/features/view-stats/hooks';
+import PropertyCardSkeleton from '@/components/BuyerFlow/PropertyDisplay/PropertyCardSkeleton';
+import AgentReviewForm from '@/components/shared/AgentReviewForm';
+import FeaturedAgencies from '@/components/FeaturedAgencies';
+import { slugify } from '@/utils/slug';
+import { getAgencyAgents, getAllAgents } from '@/services/apiService';
+import { useTrackView } from '@/src/features/view-stats/hooks';
 
 
 interface AgentProfilePageProps {

@@ -7,7 +7,7 @@ import {
   HomeIcon,
   BuildingOfficeIcon,
   SparklesIcon
-} from '../../constants';
+} from '@/constants';
 
 type AdminView = 'dashboard' | 'discounts' | 'promotionCoupons' | 'users' | 'properties' | 'agencies';
 

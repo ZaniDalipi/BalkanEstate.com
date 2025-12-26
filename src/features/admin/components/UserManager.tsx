@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon } from '../../constants';
+import { MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon } from '@/constants';
 
 interface User {
   _id: string;

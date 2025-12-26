@@ -1,14 +1,14 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
-import { Agent, Agency } from '../../types';
-import { getAllAgents, getAgencies } from '../../services/apiService';
+import { useAppContext } from '@/context/AppContext';
+import { Agent, Agency } from '@/types';
+import { getAllAgents, getAgencies } from '@/services/apiService';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
-import AgencyBadge from '../shared/AgencyBadge';
-import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon } from '../../constants';
-import Footer from '../shared/Footer';
-import { SEO } from '../../src/components/seo';
+import AgencyBadge from '@/components/shared/AgencyBadge';
+import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon } from '@/constants';
+import Footer from '@/components/shared/Footer';
+import { SEO } from '@/src/components/seo';
 type SearchTab = 'location' | 'name' | 'specialization';
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 

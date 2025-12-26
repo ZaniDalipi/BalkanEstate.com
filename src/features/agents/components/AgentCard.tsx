@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Agent } from '../../types';
-import StarRating from '../shared/StarRating';
+import { Agent } from '@/types';
+import StarRating from '@/components/shared/StarRating';
 import {
   UserCircleIcon,
   BuildingOfficeIcon,
@@ -15,10 +15,10 @@ import {
   TrophyIcon,
   ArrowTrendingUpIcon,
   BoltIcon
-} from '../../constants';
-import { useAppContext } from '../../context/AppContext';
-import { formatPrice } from '../../utils/currency';
-import { slugify } from '../../utils/slug';
+} from '@/constants';
+import { useAppContext } from '@/context/AppContext';
+import { formatPrice } from '@/utils/currency';
+import { slugify } from '@/utils/slug';
 
 interface AgentCardProps {
   agent: Agent;
