@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
-import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, SparklesIcon, FireIcon, TrendingUpIcon, StarIcon, BuildingOfficeIcon } from '@/constants';
+import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, SparklesIcon, FireIcon, StarIcon, BuildingOfficeIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 
 const CityRecommendations: React.FC = () => {
+  const { t } = useTranslation(['exploreCities']);
   const [cities, setCities] = useState<CityMarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState<string>('all');
@@ -128,15 +130,21 @@ const CityRecommendations: React.FC = () => {
     return 'text-neutral-600 bg-neutral-50';
   };
 
+  const getTrendLabel = (trend: string) => {
+    if (trend === 'rising') return t('trends.rising');
+    if (trend === 'declining') return t('trends.declining');
+    return t('trends.stable');
+  };
+
   if (loading) {
     return (
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 flex items-center gap-3">
             <SparklesIcon className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl font-bold text-neutral-900">Explore Cities</h2>
+            <h2 className="text-3xl font-bold text-neutral-900">{t('hero.title')}</h2>
           </div>
-          <p className="text-neutral-600 mb-8">Discover the best real estate markets across the Balkans</p>
+          <p className="text-neutral-600 mb-8">{t('hero.discoverSubtitle')}</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -161,8 +169,8 @@ const CityRecommendations: React.FC = () => {
       <div className="p-8">
         <div className="max-w-7xl mx-auto text-center">
           <HomeIcon className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-neutral-700 mb-2">No City Data Available</h3>
-          <p className="text-neutral-500">Market data will be updated soon. Check back later!</p>
+          <h3 className="text-xl font-semibold text-neutral-700 mb-2">{t('empty.title')}</h3>
+          <p className="text-neutral-500">{t('empty.message')}</p>
         </div>
       </div>
     );
@@ -172,8 +180,8 @@ const CityRecommendations: React.FC = () => {
     <div className="min-h-screen bg-neutral-50">
       {/* SEO Meta Tags */}
       <SEO
-        title="Explore Balkan Cities - Real Estate Market Insights"
-        description={`Discover real estate opportunities in ${cities.length}+ major cities across Serbia, Montenegro, Croatia, Bosnia, and the Balkans. AI-powered market insights, trends, and property recommendations.`}
+        title={t('page.title')}
+        description={t('hero.subtitle', { count: cities.length })}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/explore-cities`}
         type="website"
       />
@@ -186,10 +194,10 @@ const CityRecommendations: React.FC = () => {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <SparklesIcon className="w-8 h-8 text-primary" />
-                  <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900">Explore Balkan Cities</h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900">{t('hero.title')}</h2>
                 </div>
                 <p className="text-neutral-600 text-sm sm:text-base">
-                  AI-powered market insights for {cities.length} major cities across 10 countries
+                  {t('hero.subtitle', { count: cities.length })}
                 </p>
               </div>
             </div>
@@ -199,21 +207,21 @@ const CityRecommendations: React.FC = () => {
               <div className="bg-white rounded-lg p-4 border border-neutral-200">
                 <div className="flex items-center gap-2 mb-1">
                   <MapPinIcon className="w-4 h-4 text-primary" />
-                  <span className="text-xs text-neutral-500 font-medium">Total Cities</span>
+                  <span className="text-xs text-neutral-500 font-medium">{t('stats.totalCities')}</span>
                 </div>
                 <p className="text-2xl font-bold text-neutral-900">{cities.length}</p>
               </div>
               <div className="bg-white rounded-lg p-4 border border-neutral-200">
                 <div className="flex items-center gap-2 mb-1">
                   <BuildingOfficeIcon className="w-4 h-4 text-green-600" />
-                  <span className="text-xs text-neutral-500 font-medium">Countries</span>
+                  <span className="text-xs text-neutral-500 font-medium">{t('stats.countries')}</span>
                 </div>
                 <p className="text-2xl font-bold text-neutral-900">{countries.length}</p>
               </div>
               <div className="bg-white rounded-lg p-4 border border-neutral-200">
                 <div className="flex items-center gap-2 mb-1">
                   <ArrowTrendingUpIcon className="w-4 h-4 text-green-600" />
-                  <span className="text-xs text-neutral-500 font-medium">Avg. Growth</span>
+                  <span className="text-xs text-neutral-500 font-medium">{t('stats.avgGrowth')}</span>
                 </div>
                 <p className="text-2xl font-bold text-green-600">
                   +{(cities.reduce((sum, c) => sum + c.priceGrowthYoY, 0) / cities.length).toFixed(1)}%
@@ -222,7 +230,7 @@ const CityRecommendations: React.FC = () => {
               <div className="bg-white rounded-lg p-4 border border-neutral-200">
                 <div className="flex items-center gap-2 mb-1">
                   <HomeIcon className="w-4 h-4 text-primary" />
-                  <span className="text-xs text-neutral-500 font-medium">Total Listings</span>
+                  <span className="text-xs text-neutral-500 font-medium">{t('stats.totalListings')}</span>
                 </div>
                 <p className="text-2xl font-bold text-neutral-900">
                   {cities.reduce((sum, c) => sum + c.listingsCount, 0).toLocaleString()}
@@ -241,7 +249,7 @@ const CityRecommendations: React.FC = () => {
                 : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
             }`}
           >
-            All Countries ({cities.length})
+            {t('filters.allCountries')} ({cities.length})
           </button>
           {countries.map(country => {
             const count = cities.filter(c => c.country === country).length;
@@ -282,7 +290,7 @@ const CityRecommendations: React.FC = () => {
                 </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${getTrendColor(city.marketTrend)}`}>
                   {getTrendIcon(city.marketTrend)}
-                  {city.marketTrend}
+                  {getTrendLabel(city.marketTrend)}
                 </div>
               </div>
 
@@ -290,30 +298,30 @@ const CityRecommendations: React.FC = () => {
               <div className="flex gap-2 mb-4">
                 <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
                   <FireIcon className="w-4 h-4" />
-                  Demand: {city.demandScore}/100
+                  {t('cityCard.demand')}: {city.demandScore}/100
                 </div>
                 <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
                   <StarIcon className="w-4 h-4" />
-                  Investment: {city.investmentScore}/100
+                  {t('cityCard.investment')}: {city.investmentScore}/100
                 </div>
               </div>
 
               {/* Key Metrics */}
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Avg. Price/m²</span>
+                  <span className="text-sm text-neutral-600">{t('cityCard.avgPricePerSqm')}</span>
                   <span className="text-base font-bold text-neutral-900">
                     €{city.avgPricePerSqm.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Median Price</span>
+                  <span className="text-sm text-neutral-600">{t('cityCard.medianPrice')}</span>
                   <span className="text-base font-semibold text-neutral-900">
                     {formatPrice(city.medianPrice, city.countryCode)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">YoY Growth</span>
+                  <span className="text-sm text-neutral-600">{t('cityCard.yoyGrowth')}</span>
                   <span className={`text-base font-semibold ${
                     city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
                   }`}>
@@ -321,15 +329,15 @@ const CityRecommendations: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Rental Yield</span>
+                  <span className="text-sm text-neutral-600">{t('cityCard.rentalYield')}</span>
                   <span className="text-base font-semibold text-primary">
                     {city.rentalYield}%
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">Days on Market</span>
+                  <span className="text-sm text-neutral-600">{t('cityCard.daysOnMarket')}</span>
                   <span className="text-base font-semibold text-neutral-700">
-                    {city.averageDaysOnMarket} days
+                    {city.averageDaysOnMarket} {t('cityCard.days')}
                   </span>
                 </div>
               </div>
@@ -339,7 +347,7 @@ const CityRecommendations: React.FC = () => {
                 <div className="border-t border-neutral-100 pt-3 mb-3">
                   <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
                     <BuildingOfficeIcon className="w-3.5 h-3.5" />
-                    Top Neighborhoods
+                    {t('sections.topNeighborhoods')}
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {city.topNeighborhoods.slice(0, 3).map((neighborhood, idx) => (
@@ -356,7 +364,7 @@ const CityRecommendations: React.FC = () => {
                 <div className="border-t border-neutral-100 pt-3">
                   <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
                     <SparklesIcon className="w-3.5 h-3.5" />
-                    Market Insights
+                    {t('sections.marketInsights')}
                   </h4>
                   <ul className="space-y-1.5">
                     {city.highlights.slice(0, 3).map((highlight, idx) => (
@@ -373,11 +381,11 @@ const CityRecommendations: React.FC = () => {
               <div className="border-t border-neutral-100 pt-3 mt-3 flex items-center justify-between text-xs text-neutral-500">
                 <div className="flex items-center gap-1">
                   <HomeIcon className="w-4 h-4" />
-                  <span>{city.listingsCount} listings</span>
+                  <span>{city.listingsCount} {t('footer.listings')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <CalendarIcon className="w-4 h-4" />
-                  <span>{city.soldLastMonth} sold/mo</span>
+                  <span>{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
                 </div>
               </div>
             </button>
@@ -390,18 +398,18 @@ const CityRecommendations: React.FC = () => {
             <div className="flex items-start gap-3">
               <SparklesIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-neutral-900 mb-1">AI-Powered Market Intelligence</h4>
+                <h4 className="font-semibold text-neutral-900 mb-1">{t('aiInsights.title')}</h4>
                 <p className="text-sm text-neutral-600 mb-2">
-                  Our market data is powered by Gemini AI and updated twice monthly (1st and 15th).
-                  We analyze real-time market trends, property prices, demand indicators, and local insights
-                  across {cities.length} major cities in the Balkans.
+                  {t('aiInsights.description', { count: cities.length })}
                 </p>
                 <p className="text-xs text-neutral-500">
-                  Last updated: {new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })} • Data source: Gemini AI + Local Property Databases
+                  {t('aiInsights.lastUpdated', {
+                    date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })
+                  })} • {t('aiInsights.dataSource')}
                 </p>
               </div>
             </div>
