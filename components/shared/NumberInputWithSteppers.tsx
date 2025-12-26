@@ -27,7 +27,13 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
     };
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const numValue = e.target.value === '' ? min : parseInt(e.target.value, 10);
+        const inputValue = e.target.value;
+        // Allow empty input to be treated as min value (usually 0)
+        if (inputValue === '') {
+            onChange(min ?? 0);
+            return;
+        }
+        const numValue = parseInt(inputValue, 10);
         if (!isNaN(numValue)) {
             let clampedValue = numValue;
             if (min !== undefined && clampedValue < min) clampedValue = min;
@@ -40,19 +46,19 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
         <div className="relative">
             <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
             <div className="flex items-center justify-between w-full h-[58px] bg-white rounded-lg border border-neutral-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
-                <button 
-                    type="button" 
-                    onClick={handleDecrement} 
+                <button
+                    type="button"
+                    onClick={handleDecrement}
                     disabled={value <= min}
                     className="px-4 sm:px-6 py-2 text-2xl sm:text-3xl font-light text-neutral-600 hover:bg-neutral-100 disabled:text-neutral-300 disabled:cursor-not-allowed h-full rounded-l-lg focus:outline-none transition-colors"
                     aria-label={`Decrease ${label}`}
                 >
                     -
                 </button>
-                <input 
-                    type="number" 
+                <input
+                    type="number"
                     id={id}
-                    value={value || ''} 
+                    value={value === undefined || value === null ? '' : value}
                     onChange={handleChange}
                     className="w-full text-center text-lg font-semibold text-neutral-900 border-none focus:ring-0 bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min={min}

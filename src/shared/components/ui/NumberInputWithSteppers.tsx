@@ -27,7 +27,13 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
     };
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const numValue = e.target.value === '' ? min : parseInt(e.target.value, 10);
+        const inputValue = e.target.value;
+        // Allow empty input to be treated as min value (usually 0)
+        if (inputValue === '') {
+            onChange(min ?? 0);
+            return;
+        }
+        const numValue = parseInt(inputValue, 10);
         if (!isNaN(numValue)) {
             let clampedValue = numValue;
             if (min !== undefined && clampedValue < min) clampedValue = min;
@@ -49,10 +55,10 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
                 >
                     -
                 </button>
-                <input 
-                    type="number" 
+                <input
+                    type="number"
                     id={id}
-                    value={value || ''} 
+                    value={value === undefined || value === null ? '' : value}
                     onChange={handleChange}
                     className="w-full text-center text-lg font-semibold text-neutral-900 border-none focus:ring-0 bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min={min}
