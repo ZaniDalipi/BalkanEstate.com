@@ -149,13 +149,15 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const firstName = agent.name?.split(' ')[0] || 'Agent';
     const canWriteReview = currentUser && currentUser.id !== agentUserId;
 
-    // Scroll to top on mount - use immediate scroll for page load
+    // Scroll to top on mount - scroll the main content container
     useEffect(() => {
-        // Scroll immediately
+        // The main scroll container has id="main-content"
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.scrollTop = 0;
+        }
+        // Also try window scroll as fallback
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        // Also scroll the document element in case of different scroll containers
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
     }, [agent.id]);
 
     // Fetch similar agents from same agency or city and fetch agency gradient
