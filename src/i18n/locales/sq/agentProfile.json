@@ -1,0 +1,103 @@
+{
+  "navigation": {
+    "back": "Kthehu te Agjentët"
+  },
+  "tabs": {
+    "overview": "Përmbledhje",
+    "listings": "Listime",
+    "reviews": "Vlerësime",
+    "about": "Rreth"
+  },
+  "badges": {
+    "premierAgent": "Agjent Kryesor",
+    "topRated": "Me Vlerësim të Lartë",
+    "verified": "I Verifikuar",
+    "superhost": "Superhost"
+  },
+  "contact": {
+    "title": "Kontakto Agjentin",
+    "phone": "Telefon",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "callNow": "Thirr Tani",
+    "sendEmail": "Dërgo Email",
+    "sendMessage": "Dërgo Mesazh",
+    "scheduleCall": "Planifiko një Telefonatë"
+  },
+  "stats": {
+    "totalSales": "Totali i Shitjeve",
+    "propertiesSold": "Prona të Shitura",
+    "activeListings": "Listime Aktive",
+    "yearsExperience": "Vite Eksperiencë",
+    "avgResponseTime": "Koha Mesatare e Përgjigjes",
+    "satisfactionRate": "Shkalla e Kënaqësisë",
+    "languages": "Gjuhët e Folura"
+  },
+  "overview": {
+    "aboutMe": "Rreth Meje",
+    "specializations": "Specializimet",
+    "serviceAreas": "Zonat e Shërbimit",
+    "certifications": "Çertifikimet",
+    "languages": "Gjuhët"
+  },
+  "listings": {
+    "title": "Listimet e Agjentit",
+    "activeListings": "Listime Aktive",
+    "soldListings": "Listime të Shitura",
+    "noListings": "Nuk ka listime të disponueshme",
+    "viewAll": "Shiko Të Gjitha Listimet"
+  },
+  "reviews": {
+    "title": "Vlerësimet e Klientëve",
+    "writeReview": "Shkruaj Vlerësim",
+    "averageRating": "Vlerësimi Mesatar",
+    "totalReviews": "Totali i Vlerësimeve",
+    "noReviews": "Ende pa vlerësime",
+    "beFirst": "Bëhuni i pari që lë një vlerësim për këtë agjent",
+    "verifiedPurchase": "Blerje e Verifikuar",
+    "helpful": "E Dobishme",
+    "reportReview": "Raporto Vlerësimin"
+  },
+  "consultation": {
+    "title": "Rezervo një Konsultim",
+    "description": "Planifikoni një konsultim falas me këtë agjent për të diskutuar nevojat tuaja të pasurive të paluajtshme",
+    "selectDate": "Zgjidhni Datën",
+    "selectTime": "Zgjidhni Orën",
+    "yourName": "Emri Juaj",
+    "yourEmail": "Email-i Juaj",
+    "yourPhone": "Telefoni Juaj",
+    "message": "Mesazhi (opsional)",
+    "messagePlaceholder": "Na tregoni për kërkesat tuaja të pronës...",
+    "bookNow": "Rezervo Konsultimin",
+    "confirmBooking": "Konfirmo Rezervimin"
+  },
+  "appraisal": {
+    "title": "Kërko Vlerësim Prone",
+    "description": "Merrni një vlerësim falas të pronës nga ky agjent ekspert",
+    "propertyAddress": "Adresa e Pronës",
+    "propertyType": "Lloji i Pronës",
+    "requestAppraisal": "Kërko Vlerësim"
+  },
+  "agency": {
+    "partOf": "Pjesë e",
+    "viewAgency": "Shiko Agjencin",
+    "independentAgent": "Agjent i Pavarur"
+  },
+  "similarAgents": {
+    "title": "Agjentë të Ngjashëm",
+    "inArea": "në {area}",
+    "viewAll": "Shiko Të Gjithë Agjentët"
+  },
+  "actions": {
+    "shareProfile": "Ndaj Profilin",
+    "saveAgent": "Ruaj Agjentin",
+    "reportAgent": "Raporto Agjentin"
+  },
+  "messages": {
+    "consultationBooked": "Konsultimi u rezervua me sukses!",
+    "appraisalRequested": "Kërkesa për vlerësim u dërgua me sukses!",
+    "profileShared": "Linku i profilit u kopjua në clipboard!",
+    "agentSaved": "Agjenti u ruajt te të preferuarat tuaja!",
+    "reviewSubmitted": "Vlerësimi u dërgua me sukses!"
+  }
+}

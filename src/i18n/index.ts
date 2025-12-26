@@ -66,6 +66,11 @@ import sqModals from './locales/sq/modals.json';
 import sqPayment from './locales/sq/payment.json';
 import sqSaved from './locales/sq/saved.json';
 import sqExploreCities from './locales/sq/exploreCities.json';
+import sqSubscription from './locales/sq/subscription.json';
+import sqAgencies from './locales/sq/agencies.json';
+import sqAgencyDetails from './locales/sq/agencyDetails.json';
+import sqAgentProfile from './locales/sq/agentProfile.json';
+import sqNewListing from './locales/sq/newListing.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -300,6 +305,11 @@ const resources = {
     payment: sqPayment,
     saved: sqSaved,
     exploreCities: sqExploreCities,
+    subscription: sqSubscription,
+    agencies: sqAgencies,
+    agencyDetails: sqAgencyDetails,
+    agentProfile: sqAgentProfile,
+    newListing: sqNewListing,
   },
   sr: {
     common: srCommon,

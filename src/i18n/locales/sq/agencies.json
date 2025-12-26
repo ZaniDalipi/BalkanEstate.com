@@ -1,0 +1,84 @@
+{
+  "hero": {
+    "badge": "Rrjetet Kryesore të Pasurive të Paluajtshme",
+    "title": "Agjencitë Kryesore të",
+    "titleHighlight": "Pasurive në Ballkan",
+    "subtitle": "Lidhuni me agjenci profesionale që sjellin ekspertizë, besim dhe rezultate në udhëtimin tuaj të pronave."
+  },
+  "search": {
+    "title": "Gjeni Agjencin Tuaj Ideal",
+    "subtitle": "Kërkoni {count}+ agjenci profesionale në të gjithë Ballkanin",
+    "tabs": {
+      "city": "Qyteti",
+      "agencyName": "Emri i Agjencisë"
+    },
+    "placeholder": {
+      "city": "Kërkoni sipas qytetit ose vendndodhjes...",
+      "name": "Kërkoni sipas emrit të agjencisë..."
+    },
+    "clearSearch": "Pastro kërkimin",
+    "popularSearches": "Kërkime të njohura:"
+  },
+  "stats": {
+    "professionalAgencies": "Agjenci Profesionale",
+    "expertAgents": "Agjentë Ekspertë",
+    "listedProperties": "Prona të Listuara"
+  },
+  "filters": {
+    "allAgencies": "Të Gjitha Agjencitë",
+    "featured": "Të Veçanta",
+    "myAgency": "Agjencia Ime"
+  },
+  "sort": {
+    "mostProperties": "Më Shumë Prona",
+    "mostAgents": "Më Shumë Agjentë",
+    "mostExperienced": "Më me Eksperiencë",
+    "alphabetical": "Alfabetike"
+  },
+  "results": {
+    "title": "Agjencitë Kryesore të Pasurive të Paluajtshme",
+    "featuredTitle": "Agjenci të Veçanta",
+    "yourAgencyTitle": "Agjencia Juaj",
+    "showingMatching": "Duke shfaqur {count} agjenci që përputhen me \"{query}\"",
+    "browseAgencies": "Shfletoni agjenci profesionale me ekipe me eksperiencë",
+    "agenciesFound": "agjenci u gjetën",
+    "moreAgencies": "Më Shumë Agjenci"
+  },
+  "card": {
+    "featured": "E Veçantë",
+    "certified": "E Çertifikuar",
+    "properties": "Prona",
+    "agents": "Agjentë",
+    "years": "Vite",
+    "certs": "Çert.",
+    "viewProfile": "Shiko Profilin",
+    "view": "Shiko",
+    "more": "+{count} më shumë"
+  },
+  "statsCards": {
+    "mostProperties": "Më Shumë Prona",
+    "mostAgents": "Më Shumë Agjentë",
+    "mostExperience": "Më Shumë Eksperiencë"
+  },
+  "empty": {
+    "noAgenciesTitle": "Nuk u Gjetën Agjenci",
+    "noAgenciesYet": "Ende pa Agjenci",
+    "noMyAgency": "Nuk u Gjet Agjenci",
+    "adjustSearch": "Provoni të rregulloni kriteret e kërkimit ose shfletoni të gjitha agjencitë.",
+    "noMyAgencyMessage": "Nuk keni krijuar ende një agjenci. Filloni udhëtimin tuaj sot!",
+    "beFirst": "Bëhuni i pari që krijon një agjenci dhe shfaqni pronat tuaja!"
+  },
+  "cta": {
+    "createAgency": "Krijo Agjenci",
+    "readyToGrow": "Gati të Rritni Agjencin Tuaj?",
+    "ctaDescription": "Bashkohuni me rrjetin tonë të agjencive kryesore të pasurive të paluajtshme dhe shfaquni te mijëra klientë potencialë. Shfaqni pronat tuaja, lidhuni me blerësit dhe zgjeroni mbulimin tuaj.",
+    "createToday": "Krijoni Agjencin Tuaj Sot"
+  },
+  "loading": {
+    "title": "Duke Gjetur Agjenci...",
+    "message": "Duke kërkuar nëpër rrjetin tonë të agjencive profesionale të pasurive të paluajtshme"
+  },
+  "error": {
+    "unableToLoad": "Nuk Mund të Ngarkohen Agjencitë"
+  }
+}

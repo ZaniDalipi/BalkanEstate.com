@@ -1,0 +1,229 @@
+{
+  "pageTitle": "Krijo Listim të Ri",
+  "editTitle": "Redakto Listimin",
+  "steps": {
+    "init": "Fillo",
+    "loading": "Duke Analizuar...",
+    "form": "Detajet e Pronës",
+    "floorplan": "Planimetria",
+    "payment": "Pagesa",
+    "success": "U Publikua!"
+  },
+  "modes": {
+    "ai": "Me AI",
+    "aiDescription": "Ngarkoni foto dhe lëreni AI të gjenerojë listimin tuaj",
+    "manual": "Hyrje Manuale",
+    "manualDescription": "Plotësoni vetë të gjitha detajet e pronës"
+  },
+  "imageUpload": {
+    "title": "Ngarko Fotot e Pronës",
+    "subtitle": "Tërhiqni dhe lëshoni imazhet ose klikoni për të shfletuar",
+    "hint": "Ngarkoni të paktën 3 foto për rezultate më të mira",
+    "maxImages": "Maksimumi {count} imazhe",
+    "dragDrop": "Tërhiqni dhe lëshoni imazhet këtu",
+    "orClick": "ose klikoni për të shfletuar",
+    "supportedFormats": "Formatet e mbështetura: JPG, PNG, WebP",
+    "compressing": "Duke kompresuar imazhet...",
+    "uploading": "Duke ngarkuar imazhet...",
+    "uploadProgress": "Progresi i Ngarkimit"
+  },
+  "imageTags": {
+    "title": "Etiketat e Imazheve",
+    "selectTag": "Zgjidhni Etiketë",
+    "exterior": "Pamje e Jashtme",
+    "livingRoom": "Dhoma e Ndenjës",
+    "kitchen": "Kuzhina",
+    "bedroom": "Dhoma e Gjumit",
+    "bathroom": "Banjo",
+    "other": "Tjetër"
+  },
+  "propertyDetails": {
+    "title": "Detajet e Pronës",
+    "basicInfo": "Informacioni Bazë",
+    "propertyTitle": "Titulli",
+    "propertyTitlePlaceholder": "Vendosni një titull përshkrues për pronën tuaj",
+    "streetAddress": "Adresa e Rrugës",
+    "streetAddressPlaceholder": "Vendosni adresën e rrugës",
+    "price": "Çmimi",
+    "pricePlaceholder": "Vendosni çmimin e kërkuar",
+    "propertyType": "Lloji i Pronës",
+    "propertyTypes": {
+      "house": "Shtëpi",
+      "apartment": "Apartament",
+      "villa": "Vilë",
+      "other": "Tjetër"
+    }
+  },
+  "location": {
+    "title": "Vendndodhja",
+    "selectCountry": "Zgjidhni Vendin",
+    "selectCity": "Zgjidhni Qytetin",
+    "searchAddress": "Kërkoni për adresë",
+    "dragPin": "Tërhiqni shënuesin për të vendosur vendndodhjen e saktë",
+    "coordinates": "Koordinatat"
+  },
+  "roomDetails": {
+    "title": "Detajet e Dhomave",
+    "bedrooms": "Dhoma Gjumi",
+    "bathrooms": "Banjo",
+    "livingRooms": "Dhoma Ndenjeje",
+    "floorNumber": "Numri i Katit",
+    "totalFloors": "Totali i Kateve"
+  },
+  "sizeAndAge": {
+    "title": "Madhësia dhe Mosha",
+    "sqMeters": "Metra Katrorë",
+    "yearBuilt": "Viti i Ndërtimit",
+    "parkingSpots": "Vende Parkimi"
+  },
+  "amenities": {
+    "title": "Komoditetet",
+    "hasBalcony": "Ballkon",
+    "hasGarden": "Kopsht",
+    "hasElevator": "Ashensor",
+    "hasSecurity": "Siguri",
+    "hasAirConditioning": "Kondicionim Ajri",
+    "hasPool": "Pishinë",
+    "petsAllowed": "Kafshë të Lejuara",
+    "states": {
+      "no": "Jo",
+      "any": "Çfarëdo",
+      "yes": "Po"
+    }
+  },
+  "advancedFeatures": {
+    "title": "Veçori të Avancuara",
+    "furnishing": "Statusi i Mobilimit",
+    "furnishingOptions": {
+      "any": "Çfarëdo",
+      "unfurnished": "Pa Mobilim",
+      "partlyFurnished": "Pjesërisht i Mobiluar",
+      "fullyFurnished": "Plotësisht i Mobiluar"
+    },
+    "heatingType": "Lloji i Ngrohjes",
+    "heatingOptions": {
+      "any": "Çfarëdo",
+      "central": "Ngrohje Qendrore",
+      "electric": "Elektrike",
+      "gas": "Gaz",
+      "wood": "Dru",
+      "solar": "Diellore",
+      "geothermal": "Gjeotermale",
+      "none": "Asnjë"
+    },
+    "condition": "Gjendja e Pronës",
+    "conditionOptions": {
+      "any": "Çfarëdo",
+      "new": "E Re",
+      "excellent": "Shkëlqyeshme",
+      "good": "Mirë",
+      "fair": "Mesatare",
+      "needsRenovation": "Ka Nevojë për Rinovim"
+    },
+    "viewType": "Lloji i Pamjes",
+    "viewOptions": {
+      "any": "Çfarëdo",
+      "sea": "Pamje Deti",
+      "mountain": "Pamje Mali",
+      "city": "Pamje Qyteti",
+      "garden": "Pamje Kopshti",
+      "park": "Pamje Parku",
+      "lake": "Pamje Liqeni",
+      "river": "Pamje Lumi",
+      "none": "Pa Pamje të Veçantë"
+    },
+    "energyRating": "Klasifikimi Energjetik",
+    "energyOptions": {
+      "any": "Çfarëdo",
+      "aPlus": "A+",
+      "a": "A",
+      "b": "B",
+      "c": "C",
+      "d": "D",
+      "e": "E",
+      "f": "F",
+      "g": "G"
+    }
+  },
+  "description": {
+    "title": "Përshkrimi",
+    "descriptionLabel": "Përshkrimi i Pronës",
+    "descriptionPlaceholder": "Përshkruani pronën tuaj në detaje...",
+    "specialFeatures": "Veçori të Veçanta",
+    "specialFeaturesPlaceholder": "Shtoni veçori të veçanta...",
+    "materials": "Materialet e Ndërtimit",
+    "materialsPlaceholder": "Shtoni materialet...",
+    "additionalAmenities": "Komodite Shtesë",
+    "additionalAmenitiesPlaceholder": "Shtoni komoditete...",
+    "addTagHint": "Shtypni Enter ose presje për të shtuar"
+  },
+  "virtualTour": {
+    "title": "Tur Virtual",
+    "tourUrl": "URL e Turit Video",
+    "tourUrlPlaceholder": "Vendosni URL të YouTube ose Vimeo",
+    "virtualTour360": "URL e Turit Virtual 360°",
+    "virtualTour360Placeholder": "Vendosni URL të Matterport, Kuula ose tureve të tjera 360"
+  },
+  "floorplan": {
+    "title": "Planimetria",
+    "uploadFloorplan": "Ngarko Planimetri",
+    "optional": "Opsionale - Shtoni një imazh të planimetrisë",
+    "skip": "Kalo Planimetrin"
+  },
+  "language": {
+    "title": "Gjuha e Listimit",
+    "selectLanguage": "Zgjidhni Gjuhën",
+    "languages": {
+      "english": "Anglisht",
+      "albanian": "Shqip",
+      "macedonian": "Maqedonisht",
+      "serbian": "Serbisht",
+      "bosnian": "Boshnjakisht",
+      "croatian": "Kroatisht",
+      "montenegrin": "Malazeze",
+      "greek": "Greqisht",
+      "bulgarian": "Bullgarisht",
+      "romanian": "Rumanisht"
+    }
+  },
+  "role": {
+    "title": "Listimi Si",
+    "selectRole": "Zgjidhni rolin tuaj për këtë listim",
+    "privateSeller": "Shitës Privat",
+    "agent": "Agjent i Pasurive të Paluajtshme"
+  },
+  "promotion": {
+    "title": "Promovo Listimin Tuaj",
+    "wantToPromote": "Dua të promovoj listimin tim",
+    "selectPromotion": "Zgjidhni Llojin e Promovimit"
+  },
+  "actions": {
+    "generateWithAi": "Gjenero me AI",
+    "analyzing": "Duke analizuar imazhet...",
+    "saveDraft": "Ruaj Draft",
+    "preview": "Paraparje",
+    "publish": "Publiko Listimin",
+    "update": "Përditëso Listimin",
+    "publishing": "Duke publikuar...",
+    "goBack": "Kthehu Mbrapa"
+  },
+  "validation": {
+    "required": "Kjo fushë është e detyrueshme",
+    "minImages": "Ju lutem ngarkoni të paktën {count} imazhe",
+    "selectCountry": "Ju lutem zgjidhni një vend",
+    "selectCity": "Ju lutem zgjidhni një qytet",
+    "setLocation": "Ju lutem vendosni vendndodhjen e pronës në hartë",
+    "invalidPrice": "Ju lutem vendosni një çmim të vlefshëm"
+  },
+  "success": {
+    "title": "Listimi u Publikua!",
+    "message": "Listimi juaj i pronës u publikua me sukses.",
+    "viewListing": "Shiko Listimin",
+    "createAnother": "Krijo Listim Tjetër"
+  },
+  "errors": {
+    "aiGenerationFailed": "Gjenerimi me AI dështoi. Ju lutem provoni përsëri ose përdorni modalitetin manual.",
+    "uploadFailed": "Ngarkimi i imazheve dështoi. Ju lutem provoni përsëri.",
+    "publishFailed": "Publikimi i listimit dështoi. Ju lutem provoni përsëri."
+  }
+}

@@ -1,0 +1,245 @@
+{
+  "modal": {
+    "title": "Zgjidhni Planin Tuaj",
+    "tabs": {
+      "forBuyers": "Për Blerësit",
+      "forSellers": "Për Shitësit"
+    }
+  },
+  "buyerPlan": {
+    "title": "Blerës Pro",
+    "price": "€{price}",
+    "perMonth": "/muaj",
+    "description": "Mos humbisni asnjë listim të ri! Merrni njoftim sapo një pronë që përputhet me kriteret tuaja të dalë në treg.",
+    "features": {
+      "notifications": "Njoftime të menjëhershme me email dhe SMS",
+      "savedSearches": "Ruani kërkime të pakufizuara",
+      "earlyAccess": "Akses i hershëm në listime të reja",
+      "marketInsights": "Njohuri të avancuara të tregut"
+    },
+    "form": {
+      "emailLabel": "Adresa Email",
+      "emailPlaceholder": "ju@shembull.com",
+      "continueToPayment": "Vazhdo te Pagesa",
+      "securePayment": "Pagesë e sigurt e mundësuar nga Stripe"
+    }
+  },
+  "sellerPlan": {
+    "title": "Planet e Promovimit të Listimeve",
+    "description": "Rritni dukshmërinë e listimeve tuaja të pronave dhe merrni më shumë pyetje",
+    "tiers": {
+      "featured": {
+        "title": "I Veçantë",
+        "emoji": "⭐",
+        "description": "Prioritet në rezultatet e kërkimit",
+        "price": "€1.99+",
+        "duration": "7-90 ditë",
+        "benefits": {
+          "topResults": "Në krye të rezultateve të kërkimit",
+          "badge": "Distinktiv i veçantë",
+          "visibility": "2x rritje e dukshmërisë"
+        }
+      },
+      "highlight": {
+        "title": "I Theksuar",
+        "emoji": "💎",
+        "description": "Dallohuni me ngjyrë",
+        "price": "€3.99+",
+        "duration": "7-90 ditë",
+        "popular": "Popullor",
+        "benefits": {
+          "allFeatured": "Të gjitha përfitimet e Veçantë",
+          "coloredBg": "Sfond me ngjyrë",
+          "visibility": "3x rritje e dukshmërisë"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "emoji": "👑",
+        "description": "Paraqitje në faqen kryesore",
+        "price": "€7.99+",
+        "duration": "7-90 ditë",
+        "benefits": {
+          "allHighlight": "Të gjitha përfitimet e Theksuar",
+          "carousel": "Karusel në faqen kryesore",
+          "visibility": "5x rritje e dukshmërisë"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Si funksionon:",
+      "description": "Kur krijoni një listim, zgjidhni nivelin dhe kohëzgjatjen e promovimit. Pagesa përpunohet para publikimit. Kuponët e zbritjes mbështeten!"
+    },
+    "actions": {
+      "viewSubscriptionPlans": "Shiko Planet e Abonimit",
+      "startCreatingListing": "Fillo Krijimin e Listimit"
+    }
+  },
+  "management": {
+    "title": "Menaxhimi i Abonimit",
+    "noActiveSubscription": "Asnjë Abonim Aktiv",
+    "unlockFeatures": "Zhbllokoni veçoritë premium dhe çoni përvojën tuaj në nivelin tjetër",
+    "viewPlans": "Shiko Planet dhe Çmimet",
+    "refresh": "Rifresko",
+    "timeRemaining": "Koha e Mbetur",
+    "dayLeft": "ditë e mbetur",
+    "daysLeft": "ditë të mbetura",
+    "listingLimit": "Limiti i Listimeve",
+    "remaining": "të mbetura",
+    "couponSubscription": "Abonim me Kupon",
+    "cancellationPending": "Anulimi i Abonimit në Pritje",
+    "autoRenewal": "Rinovim Automatik",
+    "on": "Aktiv",
+    "off": "Joaktiv",
+    "paymentSource": "Burimi i Pagesës",
+    "web": "Web",
+    "cancelSubscription": "Anulo Abonimin",
+    "cancelPlan": "Anulo Planin",
+    "upgradePlan": "Përmirëso Planin Tuaj",
+    "upgradeNow": "Përmirëso Tani",
+    "proRatedPricing": "Çmimi i Përshtatur Proporcionalisht",
+    "confirmUpgrade": "Konfirmo Përmirësimin",
+    "upgradingTo": "Përmirësim në:",
+    "originalPrice": "Çmimi Origjinal",
+    "proRatedCredit": "Kredia Proporcionale",
+    "totalDue": "Totali për Pagesë",
+    "cancelling": "DUKE ANULUAR",
+    "features": {
+      "prioritySupport": "Mbështetje Prioritare",
+      "advancedAnalytics": "Analitika të Avancuara",
+      "listings25": "25 Listime",
+      "premiumPlacement": "Vendosje Premium"
+    },
+    "cancelModal": {
+      "cancellingTrial": "Duke anuluar provën tuaj falas:",
+      "whatHappens": "Çfarë ndodh kur anuloni:",
+      "loseAccess": "Do të humbisni aksesin në veçoritë premium",
+      "listingsDeactivated": "Listimet tuaja mund të çaktivizohen",
+      "canResubscribe": "Mund të riabonohen në çdo kohë",
+      "cancelAtEnd": "Anulo në fund të periudhës së faturimit",
+      "cancelNowRefund": "Anulo tani dhe merr €{{amount}} rimbursim",
+      "keepSubscription": "Mbaj {{subscription}}"
+    }
+  },
+  "featuredAgency": {
+    "title": "Agjenci e Veçantë",
+    "featureYourAgency": "Bëni Agjencin Tuaj të Veçantë",
+    "description": "Merrni më shumë dukshmëri me një listim të veçantë. Agjencia juaj do të shfaqet në krye të rezultateve të kërkimit dhe në karuselin e agjencive të veçanta.",
+    "startPlan": "Fillo Planin €10/javë",
+    "currentlyFeatured": "Agjencia Aktualisht e Veçantë ✨",
+    "featuredDescription": "Agjencia juaj aktualisht është e veçantë dhe po merr dukshmëri të shtuar.",
+    "timeRemaining": "Koha e Mbetur",
+    "expires": "Skadon:",
+    "boostVisibility": "Rrit Dukshmërinë Tuaj",
+    "status": {
+      "active": "Aktive",
+      "trial": "Provë",
+      "expired": "Skaduar",
+      "canceled": "Anuluar"
+    },
+    "progress": {
+      "freeTrialProgress": "Progresi i Provës Falas",
+      "subscriptionPeriod": "Periudha e Abonimit",
+      "daysLeft": "të mbetura"
+    },
+    "details": {
+      "interval": "Intervali",
+      "price": "Çmimi",
+      "startDate": "Data e Fillimit",
+      "renewsOn": "Rinovohet më",
+      "endedOn": "Përfundoi më"
+    },
+    "trial": {
+      "title": "Prova Falas Aktive",
+      "description": "Prova juaj falas përfundon më {date}"
+    },
+    "coupon": {
+      "applied": "Kuponi {code} u aplikua"
+    },
+    "cancelNotice": "Abonimi do të anulohet në fund të periudhës aktuale",
+    "renewStatus": {
+      "title": "Rinovoni Statusin Tuaj të Veçantë",
+      "description": "Vazhdoni të gëzoni dukshmëri të shtuar dhe vendosje në krye të rezultateve të kërkimit.",
+      "renewNow": "Rinovoni Tani"
+    },
+    "visibilityTip": "Agjencitë e veçanta marrin deri në 5x më shumë dukshmëri dhe shfaqen në krye të rezultateve të kërkimit!"
+  },
+  "featuredDialog": {
+    "title": "Abonimi i Agjencisë së Veçantë",
+    "subscriptionCreated": "Abonimi u Krijua!",
+    "agencyFeatured": "Agjencia juaj tani është e veçantë. Duke ridrejtuar...",
+    "getFeatured": "Bëhu i Veçantë!",
+    "boostAgency": "Rritni dukshmërinë e agjencisë suaj dhe merrni më shumë kontakte me një listim të veçantë",
+    "choosePlan": "Zgjidhni Planin Tuaj",
+    "perPeriod": "për {{period}}",
+    "savingsPercent": "Kurse {{savings}}%",
+    "whatsIncluded": "Çfarë Përfshihet:",
+    "benefits": {
+      "topPlacement": "Vendosje në krye të rezultateve të kërkimit",
+      "featuredCarousel": "I veçantë në karuselin e agjencive",
+      "premiumBadge": "Distinktiv premium në profilin tuaj",
+      "monthlyRotation": "Rotacion mujor për freski",
+      "cancelAnytime": "Anuloni në çdo kohë"
+    },
+    "coupon": {
+      "haveCoupon": "Keni kod kuponi?",
+      "enterCode": "Vendosni kodin e kuponit",
+      "validating": "Duke validuar...",
+      "apply": "Apliko",
+      "appliedSuccess": "Kuponi u Aplikua me Sukses!",
+      "originalPrice": "Çmimi Origjinal:",
+      "discount": "Zbritja:",
+      "freeWithCoupon": "FALAS!",
+      "finalPrice": "Çmimi Përfundimtar:"
+    },
+    "buttons": {
+      "cancel": "Anulo",
+      "processing": "Duke përpunuar...",
+      "activateFree": "Aktivizo FALAS",
+      "subscribe": "Abonohu - €{{price}}"
+    },
+    "terms": "Duke u abonuar, pranoni kushtet tona.",
+    "noPaymentRequired": "Nuk kërkohet pagesë - 100% zbritje e aplikuar!",
+    "chargeNotice": "Do të tarifoheni €{{price}} për {{period}}.",
+    "errors": {
+      "enterCoupon": "Ju lutem vendosni një kod kuponi",
+      "invalidCoupon": "Kupon i pavlefshëm",
+      "createFailed": "Dështoi krijimi i abonimit"
+    }
+  },
+  "payment": {
+    "title": "Përfundo Pagesën",
+    "processing": "Duke përpunuar pagesën...",
+    "success": "Pagesa u krye me sukses!",
+    "error": "Pagesa dështoi",
+    "securePayment": "Pagesë e sigurt e mundësuar nga Stripe",
+    "cardDetails": "Detajet e Kartës",
+    "payNow": "Paguaj Tani",
+    "cancel": "Anulo"
+  },
+  "validation": {
+    "invalidEmail": "Ju lutem vendosni një adresë email të vlefshme",
+    "emailRequired": "Email-i është i detyrueshëm"
+  },
+  "messages": {
+    "subscriptionActivated": "Abonimi u aktivizua me sukses!",
+    "subscriptionCanceled": "Abonimi u anulua me sukses",
+    "paymentFailed": "Pagesa dështoi. Ju lutem provoni përsëri."
+  },
+  "coupons": {
+    "haveCoupon": "Keni kupon?",
+    "enterCode": "Vendosni kodin e kuponit",
+    "apply": "Apliko",
+    "applied": "Kuponi u aplikua!",
+    "invalid": "Kod kuponi i pavlefshëm",
+    "expired": "Ky kupon ka skaduar"
+  },
+  "intervals": {
+    "weekly": "Javore",
+    "monthly": "Mujore",
+    "yearly": "Vjetore",
+    "perWeek": "në javë",
+    "perMonth": "në muaj",
+    "perYear": "në vit"
+  }
+}

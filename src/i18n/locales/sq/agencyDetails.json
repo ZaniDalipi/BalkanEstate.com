@@ -1,0 +1,161 @@
+{
+  "navigation": {
+    "back": "Kthehu"
+  },
+  "banner": {
+    "gradients": "Gradientë",
+    "uploadImage": "Ngarko Imazh",
+    "uploading": "Duke ngarkuar...",
+    "chooseGradient": "Zgjidhni Gradientin",
+    "customImageHint": "Ose ngarkoni një imazh të personalizuar duke përdorur butonin më sipër",
+    "changeLogo": "Ndrysho Logon"
+  },
+  "gradientPresets": {
+    "oceanBlue": "Blu Oqeani",
+    "sunset": "Perëndimi",
+    "forest": "Pylli",
+    "royalPurple": "Vjollcë Mbretërore",
+    "fire": "Zjarr",
+    "nightSky": "Qielli i Natës",
+    "mintFresh": "Mentë e Freskët",
+    "roseGold": "Ar Trëndafili"
+  },
+  "stats": {
+    "totalListings": "Totali i Listimeve",
+    "totalAgents": "Totali i Agjentëve",
+    "yearsInBusiness": "Vite në Biznes",
+    "rating": "Vlerësimi",
+    "notAvailable": "N/A"
+  },
+  "salesPerformance": {
+    "title": "Performanca e Shitjeve",
+    "salesLast12Months": "Shitjet në 12 muajt e fundit",
+    "totalSales": "Totali i shitjeve",
+    "priceRange": "Gama e çmimeve",
+    "averagePrice": "Çmimi mesatar"
+  },
+  "about": {
+    "title": "Rreth {agencyName}",
+    "contactInfo": "Informacioni i Kontaktit",
+    "specialties": "Specialitetet",
+    "specializations": "Specializimet",
+    "serviceAreas": "Zonat e Shërbimit",
+    "languagesSpoken": "Gjuhët e Folura"
+  },
+  "invitationCode": {
+    "title": "Kodi i Ftesës së Agjencisë",
+    "description": "Ndani këtë kod me agjentët që dëshironi të bashkohen me agjencin tuaj",
+    "copy": "Kopjo"
+  },
+  "actions": {
+    "editAgency": "Redakto Agjencin",
+    "manageJoinRequests": "Menaxho Kërkesat për Bashkim",
+    "requestToJoin": "Kërko të Bashkohesh me Agjencin"
+  },
+  "featuredSubscription": {
+    "title": "Abonimi i Veçantë",
+    "subtitle": "Rritni Dukshmërin Tuaj",
+    "proTip": "Këshillë Pro:",
+    "proTipMessage": "Agjencitë e veçanta marrin deri në 5x më shumë dukshmëri dhe shfaqen në krye të rezultateve të kërkimit!"
+  },
+  "teamMembers": {
+    "title": "Anëtarët e Ekipit",
+    "showTopPerformers": "Shfaq Performuesit Kryesorë",
+    "showAllMembers": "Shfaq Të Gjithë Anëtarët",
+    "rankedByPerformance": "Renditur sipas Performancës",
+    "topAgent": "Agjenti Kryesor",
+    "secondPlace": "Vendi i 2-të",
+    "thirdPlace": "Vendi i 3-të",
+    "owner": "Pronari",
+    "admin": "Administrator",
+    "license": "Liçensa",
+    "totalSales": "Totali i Shitjeve",
+    "propertiesSold": "Prona të Shitura",
+    "activeListings": "Listime Aktive",
+    "removeAdmin": "Hiq Administratorin",
+    "makeAdmin": "Bëj Administrator",
+    "remove": "Hiq",
+    "removing": "Duke hequr...",
+    "leaveAgency": "Largohu nga Agjencia",
+    "leaving": "Duke u larguar...",
+    "noAgentsFound": "Nuk u gjetën agjentë për këtë agjenci"
+  },
+  "properties": {
+    "activeListings": "LISTIME AKTIVE",
+    "soldProperties": "PRONA TË SHITURA",
+    "activeListingsTitle": "Listime Aktive",
+    "soldPropertiesTitle": "Prona të Shitura",
+    "propertiesCount": "{count} prona",
+    "noActiveListings": "Nuk ka listime aktive për momentin",
+    "noSoldProperties": "Ende pa prona të shitura",
+    "checkBackSoon": "Kontrolloni së shpejti për prona të reja",
+    "soldWillAppear": "Pronat e shitura do të shfaqen këtu"
+  },
+  "editModal": {
+    "title": "Redakto Agjencin",
+    "basicInfo": "Informacioni Bazë",
+    "agencyName": "Emri i Agjencisë",
+    "description": "Përshkrimi",
+    "email": "Email",
+    "phone": "Telefon",
+    "website": "Faqja e Internetit",
+    "yearsInBusiness": "Vite në Biznes",
+    "location": "Vendndodhja",
+    "address": "Adresa",
+    "city": "Qyteti",
+    "country": "Vendi",
+    "zipCode": "Kodi Postar",
+    "latitude": "Gjerësia Gjeografike",
+    "longitude": "Gjatësia Gjeografike",
+    "socialMedia": "Media Sociale",
+    "facebookUrl": "URL e Facebook",
+    "instagramUrl": "URL e Instagram",
+    "linkedinUrl": "URL e LinkedIn",
+    "twitterUrl": "URL e Twitter",
+    "specialtiesCerts": "Specialitetet dhe Çertifikimet",
+    "specialtiesLabel": "Specialitetet (të ndara me presje)",
+    "specialtiesPlaceholder": "Rezidenciale, Komerciale, Prona Luksoze",
+    "certificationsLabel": "Çertifikimet (të ndara me presje)",
+    "certificationsPlaceholder": "Agjenci e Liçensuar, ISO e Çertifikuar",
+    "languagesLabel": "Gjuhët e Folura (të ndara me presje)",
+    "languagesPlaceholder": "Shqip, Serbisht, Kroatisht, Anglisht",
+    "languagesHint": "Gjuhët sinkronizohen automatikisht kur agjentët bashkohen/largohen",
+    "businessHours": "Orari i Punës",
+    "businessHoursPlaceholder": "9:00 - 18:00",
+    "saveChanges": "Ruaj Ndryshimet"
+  },
+  "confirmations": {
+    "removeAgent": "Jeni i sigurt që dëshironi të hiqni {name} nga {agency}?",
+    "removeAgentDetails": "Kjo do të:\n- I heq ata nga agjencia juaj\n- Pastron përkatësin e tyre të agjencisë\n- Mban pronat dhe vlerësimet e tyre të paprekura",
+    "leaveAgency": "Jeni i sigurt që dëshironi të largoheni nga {agency}?",
+    "leaveAgencyDetails": "Kjo do të:\n- Ju heq nga kjo agjenci\n- Pastron përkatësin tuaj të agjencisë\n- Mban pronat dhe vlerësimet tuaja të paprekura\n- Ndryshon statusin tuaj në Agjent i Pavarur",
+    "toggleAdmin": "Jeni i sigurt që dëshironi të {action} {name}?",
+    "removeAdminRights": "hiqni të drejtat e administratorit nga",
+    "makeAdminRights": "bëni administrator"
+  },
+  "messages": {
+    "logoUpdated": "Logo u përditësua me sukses!",
+    "coverUpdated": "Imazhi i kopertinës u përditësua me sukses!",
+    "gradientUpdated": "Gradienti i banerit u përditësua me sukses!",
+    "agencyUpdated": "Agjencia u përditësua me sukses!",
+    "agentRemoved": "{name} u hoq me sukses nga agjencia.",
+    "leftAgency": "Jeni larguar me sukses nga {agency}",
+    "invitationCopied": "Kodi i ftesës u kopjua në clipboard!",
+    "joinRequestSent": "Kërkesa për bashkim u dërgua me sukses! Administratori i agjencisë do ta shqyrtojë kërkesën tuaj.",
+    "adminAdded": "{name} tani është administrator!",
+    "adminRemoved": "{name} nuk është më administrator.",
+    "onlyOwnerCanManage": "Vetëm pronari i agjencisë mund të menaxhojë administratorët",
+    "onlyAdminCanRemove": "Vetëm administratorët e agjencisë mund të heqin agjentët",
+    "selectImageFile": "Ju lutem zgjidhni një skedar imazhi",
+    "imageSizeLimit": "Madhësia e imazhit duhet të jetë më pak se 5MB"
+  },
+  "weekdays": {
+    "monday": "E Hënë",
+    "tuesday": "E Martë",
+    "wednesday": "E Mërkurë",
+    "thursday": "E Enjte",
+    "friday": "E Premte",
+    "saturday": "E Shtunë",
+    "sunday": "E Diel"
+  }
+}
