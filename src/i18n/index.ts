@@ -40,6 +40,11 @@ import enPayment from './locales/en/payment.json';
 import enSaved from './locales/en/saved.json';
 import enExploreCities from './locales/en/exploreCities.json';
 import enAnalytics from './locales/en/analytics.json';
+import enSubscription from './locales/en/subscription.json';
+import enAgencies from './locales/en/agencies.json';
+import enAgencyDetails from './locales/en/agencyDetails.json';
+import enAgentProfile from './locales/en/agentProfile.json';
+import enNewListing from './locales/en/newListing.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -269,6 +274,11 @@ const resources = {
     saved: enSaved,
     exploreCities: enExploreCities,
     analytics: enAnalytics,
+    subscription: enSubscription,
+    agencies: enAgencies,
+    agencyDetails: enAgencyDetails,
+    agentProfile: enAgentProfile,
+    newListing: enNewListing,
   },
   sq: {
     common: sqCommon,
@@ -470,7 +480,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities', 'analytics'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities', 'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile', 'newListing'],
 
     interpolation: {
       escapeValue: false, // React already escapes

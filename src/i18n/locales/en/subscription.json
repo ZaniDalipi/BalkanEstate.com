@@ -1,0 +1,245 @@
+{
+  "modal": {
+    "title": "Choose Your Plan",
+    "tabs": {
+      "forBuyers": "For Buyers",
+      "forSellers": "For Sellers"
+    }
+  },
+  "buyerPlan": {
+    "title": "Buyer Pro",
+    "price": "€{price}",
+    "perMonth": "/month",
+    "description": "Never miss a new listing! Get notified the moment a property matching your criteria hits the market.",
+    "features": {
+      "notifications": "Instant email & SMS notifications",
+      "savedSearches": "Save unlimited searches",
+      "earlyAccess": "Early access to new listings",
+      "marketInsights": "Advanced market insights"
+    },
+    "form": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "continueToPayment": "Continue to Payment",
+      "securePayment": "Secure payment powered by Stripe"
+    }
+  },
+  "sellerPlan": {
+    "title": "Listing Promotion Plans",
+    "description": "Boost your property listings to get more visibility and inquiries",
+    "tiers": {
+      "featured": {
+        "title": "Featured",
+        "emoji": "⭐",
+        "description": "Priority in search results",
+        "price": "€1.99+",
+        "duration": "7-90 days",
+        "benefits": {
+          "topResults": "Top of search results",
+          "badge": "Featured badge",
+          "visibility": "2x visibility boost"
+        }
+      },
+      "highlight": {
+        "title": "Highlight",
+        "emoji": "💎",
+        "description": "Stand out with color",
+        "price": "€3.99+",
+        "duration": "7-90 days",
+        "popular": "Popular",
+        "benefits": {
+          "allFeatured": "All Featured benefits",
+          "coloredBg": "Colored background",
+          "visibility": "3x visibility boost"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "emoji": "👑",
+        "description": "Homepage featuring",
+        "price": "€7.99+",
+        "duration": "7-90 days",
+        "benefits": {
+          "allHighlight": "All Highlight benefits",
+          "carousel": "Homepage carousel",
+          "visibility": "5x visibility boost"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "How it works:",
+      "description": "When creating a listing, select your promotion tier and duration. Payment is processed before publishing. Discount coupons are supported!"
+    },
+    "actions": {
+      "viewSubscriptionPlans": "View Subscription Plans",
+      "startCreatingListing": "Start Creating Listing"
+    }
+  },
+  "management": {
+    "title": "Subscription Management",
+    "noActiveSubscription": "No Active Subscription",
+    "unlockFeatures": "Unlock premium features and take your experience to the next level",
+    "viewPlans": "View Plans & Pricing",
+    "refresh": "Refresh",
+    "timeRemaining": "Time Remaining",
+    "dayLeft": "day left",
+    "daysLeft": "days left",
+    "listingLimit": "Listing Limit",
+    "remaining": "remaining",
+    "couponSubscription": "Coupon Subscription",
+    "cancellationPending": "Subscription Cancellation Pending",
+    "autoRenewal": "Auto-Renewal",
+    "on": "On",
+    "off": "Off",
+    "paymentSource": "Payment Source",
+    "web": "Web",
+    "cancelSubscription": "Cancel Subscription",
+    "cancelPlan": "Cancel Plan",
+    "upgradePlan": "Upgrade Your Plan",
+    "upgradeNow": "Upgrade Now",
+    "proRatedPricing": "Pro-rated Upgrade Pricing",
+    "confirmUpgrade": "Confirm Upgrade",
+    "upgradingTo": "Upgrading to:",
+    "originalPrice": "Original Price",
+    "proRatedCredit": "Pro-rated Credit",
+    "totalDue": "Total Due",
+    "cancelling": "CANCELLING",
+    "features": {
+      "prioritySupport": "Priority Support",
+      "advancedAnalytics": "Advanced Analytics",
+      "listings25": "25 Listings",
+      "premiumPlacement": "Premium Placement"
+    },
+    "cancelModal": {
+      "cancellingTrial": "Cancelling your free trial:",
+      "whatHappens": "What happens when you cancel:",
+      "loseAccess": "You will lose access to premium features",
+      "listingsDeactivated": "Your listings may be deactivated",
+      "canResubscribe": "You can resubscribe anytime",
+      "cancelAtEnd": "Cancel at end of billing period",
+      "cancelNowRefund": "Cancel now & get €{{amount}} refund",
+      "keepSubscription": "Keep {{subscription}}"
+    }
+  },
+  "featuredAgency": {
+    "title": "Featured Agency",
+    "featureYourAgency": "Feature Your Agency",
+    "description": "Get more visibility with a featured listing. Your agency will appear at the top of search results and in the featured agencies carousel.",
+    "startPlan": "Start €10/week Plan",
+    "currentlyFeatured": "Agency Currently Featured ✨",
+    "featuredDescription": "Your agency is currently featured and receiving enhanced visibility.",
+    "timeRemaining": "Time Remaining",
+    "expires": "Expires:",
+    "boostVisibility": "Boost Your Visibility",
+    "status": {
+      "active": "Active",
+      "trial": "Trial",
+      "expired": "Expired",
+      "canceled": "Canceled"
+    },
+    "progress": {
+      "freeTrialProgress": "Free Trial Progress",
+      "subscriptionPeriod": "Subscription Period",
+      "daysLeft": "left"
+    },
+    "details": {
+      "interval": "Interval",
+      "price": "Price",
+      "startDate": "Start Date",
+      "renewsOn": "Renews On",
+      "endedOn": "Ended On"
+    },
+    "trial": {
+      "title": "Free Trial Active",
+      "description": "Your free trial ends on {date}"
+    },
+    "coupon": {
+      "applied": "Coupon {code} applied"
+    },
+    "cancelNotice": "Subscription will be canceled at the end of the current period",
+    "renewStatus": {
+      "title": "Renew Your Featured Status",
+      "description": "Continue enjoying enhanced visibility and top placement in search results.",
+      "renewNow": "Renew Now"
+    },
+    "visibilityTip": "Featured agencies get up to 5x more visibility and appear at the top of search results!"
+  },
+  "featuredDialog": {
+    "title": "Featured Agency Subscription",
+    "subscriptionCreated": "Subscription Created!",
+    "agencyFeatured": "Your agency is now featured. Redirecting...",
+    "getFeatured": "Get Featured!",
+    "boostAgency": "Boost your agency's visibility and get more leads with a featured listing",
+    "choosePlan": "Choose Your Plan",
+    "perPeriod": "per {{period}}",
+    "savingsPercent": "Save {{savings}}%",
+    "whatsIncluded": "What's Included:",
+    "benefits": {
+      "topPlacement": "Top placement in search results",
+      "featuredCarousel": "Featured in agency carousel",
+      "premiumBadge": "Premium badge on your profile",
+      "monthlyRotation": "Monthly rotation to maintain freshness",
+      "cancelAnytime": "Cancel anytime"
+    },
+    "coupon": {
+      "haveCoupon": "Have a coupon code?",
+      "enterCode": "Enter coupon code",
+      "validating": "Validating...",
+      "apply": "Apply",
+      "appliedSuccess": "Coupon Applied Successfully!",
+      "originalPrice": "Original Price:",
+      "discount": "Discount:",
+      "freeWithCoupon": "FREE!",
+      "finalPrice": "Final Price:"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "processing": "Processing...",
+      "activateFree": "Activate for FREE",
+      "subscribe": "Subscribe - €{{price}}"
+    },
+    "terms": "By subscribing, you agree to our terms and conditions.",
+    "noPaymentRequired": "No payment required - 100% discount applied!",
+    "chargeNotice": "You will be charged €{{price}} per {{period}}.",
+    "errors": {
+      "enterCoupon": "Please enter a coupon code",
+      "invalidCoupon": "Invalid coupon",
+      "createFailed": "Failed to create subscription"
+    }
+  },
+  "payment": {
+    "title": "Complete Payment",
+    "processing": "Processing payment...",
+    "success": "Payment successful!",
+    "error": "Payment failed",
+    "securePayment": "Secure payment powered by Stripe",
+    "cardDetails": "Card Details",
+    "payNow": "Pay Now",
+    "cancel": "Cancel"
+  },
+  "validation": {
+    "invalidEmail": "Please enter a valid email address",
+    "emailRequired": "Email is required"
+  },
+  "messages": {
+    "subscriptionActivated": "Subscription activated successfully!",
+    "subscriptionCanceled": "Subscription canceled successfully",
+    "paymentFailed": "Payment failed. Please try again."
+  },
+  "coupons": {
+    "haveCoupon": "Have a coupon?",
+    "enterCode": "Enter coupon code",
+    "apply": "Apply",
+    "applied": "Coupon applied!",
+    "invalid": "Invalid coupon code",
+    "expired": "This coupon has expired"
+  },
+  "intervals": {
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perWeek": "per week",
+    "perMonth": "per month",
+    "perYear": "per year"
+  }
+}

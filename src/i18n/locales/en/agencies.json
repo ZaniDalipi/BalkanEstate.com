@@ -1,0 +1,84 @@
+{
+  "hero": {
+    "badge": "Premier Real Estate Networks",
+    "title": "Top Real Estate",
+    "titleHighlight": "Agencies in Balkans",
+    "subtitle": "Connect with professional agencies that bring expertise, trust, and results to your property journey."
+  },
+  "search": {
+    "title": "Find Your Ideal Agency",
+    "subtitle": "Search {count}+ professional agencies across the Balkans",
+    "tabs": {
+      "city": "City",
+      "agencyName": "Agency Name"
+    },
+    "placeholder": {
+      "city": "Search by city or location...",
+      "name": "Search by agency name..."
+    },
+    "clearSearch": "Clear search",
+    "popularSearches": "Popular searches:"
+  },
+  "stats": {
+    "professionalAgencies": "Professional Agencies",
+    "expertAgents": "Expert Agents",
+    "listedProperties": "Listed Properties"
+  },
+  "filters": {
+    "allAgencies": "All Agencies",
+    "featured": "Featured",
+    "myAgency": "My Agency"
+  },
+  "sort": {
+    "mostProperties": "Most Properties",
+    "mostAgents": "Most Agents",
+    "mostExperienced": "Most Experienced",
+    "alphabetical": "Alphabetical"
+  },
+  "results": {
+    "title": "Top Real Estate Agencies",
+    "featuredTitle": "Featured Agencies",
+    "yourAgencyTitle": "Your Agency",
+    "showingMatching": "Showing {count} agencies matching \"{query}\"",
+    "browseAgencies": "Browse professional agencies with experienced teams",
+    "agenciesFound": "agencies found",
+    "moreAgencies": "More Agencies"
+  },
+  "card": {
+    "featured": "Featured",
+    "certified": "Certified",
+    "properties": "Properties",
+    "agents": "Agents",
+    "years": "Years",
+    "certs": "Certs",
+    "viewProfile": "View Profile",
+    "view": "View",
+    "more": "+{count} more"
+  },
+  "statsCards": {
+    "mostProperties": "Most Properties",
+    "mostAgents": "Most Agents",
+    "mostExperience": "Most Experience"
+  },
+  "empty": {
+    "noAgenciesTitle": "No Agencies Found",
+    "noAgenciesYet": "No Agencies Yet",
+    "noMyAgency": "No Agency Found",
+    "adjustSearch": "Try adjusting your search criteria or browse all agencies.",
+    "noMyAgencyMessage": "You haven't created an agency yet. Start your journey today!",
+    "beFirst": "Be the first to create an agency and showcase your properties!"
+  },
+  "cta": {
+    "createAgency": "Create Agency",
+    "readyToGrow": "Ready to Grow Your Agency?",
+    "ctaDescription": "Join our network of premier real estate agencies and get featured to thousands of potential clients. Showcase your properties, connect with buyers, and expand your reach.",
+    "createToday": "Create Your Agency Today"
+  },
+  "loading": {
+    "title": "Finding Agencies...",
+    "message": "Searching through our network of professional real estate agencies"
+  },
+  "error": {
+    "unableToLoad": "Unable to Load Agencies"
+  }
+}

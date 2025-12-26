@@ -1,0 +1,103 @@
+{
+  "navigation": {
+    "back": "Back to Agents"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "listings": "Listings",
+    "reviews": "Reviews",
+    "about": "About"
+  },
+  "badges": {
+    "premierAgent": "Premier Agent",
+    "topRated": "Top Rated",
+    "verified": "Verified",
+    "superhost": "Superhost"
+  },
+  "contact": {
+    "title": "Contact Agent",
+    "phone": "Phone",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "callNow": "Call Now",
+    "sendEmail": "Send Email",
+    "sendMessage": "Send Message",
+    "scheduleCall": "Schedule a Call"
+  },
+  "stats": {
+    "totalSales": "Total Sales",
+    "propertiesSold": "Properties Sold",
+    "activeListings": "Active Listings",
+    "yearsExperience": "Years Experience",
+    "avgResponseTime": "Avg. Response Time",
+    "satisfactionRate": "Satisfaction Rate",
+    "languages": "Languages Spoken"
+  },
+  "overview": {
+    "aboutMe": "About Me",
+    "specializations": "Specializations",
+    "serviceAreas": "Service Areas",
+    "certifications": "Certifications",
+    "languages": "Languages"
+  },
+  "listings": {
+    "title": "Agent Listings",
+    "activeListings": "Active Listings",
+    "soldListings": "Sold Listings",
+    "noListings": "No listings available",
+    "viewAll": "View All Listings"
+  },
+  "reviews": {
+    "title": "Client Reviews",
+    "writeReview": "Write a Review",
+    "averageRating": "Average Rating",
+    "totalReviews": "Total Reviews",
+    "noReviews": "No reviews yet",
+    "beFirst": "Be the first to leave a review for this agent",
+    "verifiedPurchase": "Verified Purchase",
+    "helpful": "Helpful",
+    "reportReview": "Report Review"
+  },
+  "consultation": {
+    "title": "Book a Consultation",
+    "description": "Schedule a free consultation with this agent to discuss your real estate needs",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
+    "yourName": "Your Name",
+    "yourEmail": "Your Email",
+    "yourPhone": "Your Phone",
+    "message": "Message (optional)",
+    "messagePlaceholder": "Tell us about your property requirements...",
+    "bookNow": "Book Consultation",
+    "confirmBooking": "Confirm Booking"
+  },
+  "appraisal": {
+    "title": "Request Property Appraisal",
+    "description": "Get a free property valuation from this expert agent",
+    "propertyAddress": "Property Address",
+    "propertyType": "Property Type",
+    "requestAppraisal": "Request Appraisal"
+  },
+  "agency": {
+    "partOf": "Part of",
+    "viewAgency": "View Agency",
+    "independentAgent": "Independent Agent"
+  },
+  "similarAgents": {
+    "title": "Similar Agents",
+    "inArea": "in {area}",
+    "viewAll": "View All Agents"
+  },
+  "actions": {
+    "shareProfile": "Share Profile",
+    "saveAgent": "Save Agent",
+    "reportAgent": "Report Agent"
+  },
+  "messages": {
+    "consultationBooked": "Consultation booked successfully!",
+    "appraisalRequested": "Appraisal request sent successfully!",
+    "profileShared": "Profile link copied to clipboard!",
+    "agentSaved": "Agent saved to your favorites!",
+    "reviewSubmitted": "Review submitted successfully!"
+  }
+}
