@@ -1,6 +1,11 @@
 {
   "navigation": {
-    "back": "Back"
+    "back": "Back",
+    "backToAgencies": "Back to Agencies"
+  },
+  "seo": {
+    "title": "{{name}} - Real Estate Agency",
+    "description": "{{name}} is a trusted real estate agency in {{city}}. Browse {{properties}} listings and connect with {{agents}} professional agents."
   },
   "banner": {
     "gradients": "Gradients",
@@ -157,5 +162,15 @@
     "friday": "Friday",
     "saturday": "Saturday",
     "sunday": "Sunday"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "featured": "Featured",
+    "required": "*"
+  },
+  "labels": {
+    "call": "Call",
+    "email": "Email",
+    "website": "Website"
   }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/AppContext';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon } from '../constants';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
@@ -59,6 +60,7 @@ const GRADIENT_PRESETS = [
 ];
 
 const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
+  const { t } = useTranslation('agencyDetails');
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
 
@@ -270,13 +272,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleToggleAdmin = async (agentId: string, agentName: string, isCurrentlyAdmin: boolean) => {
     if (!isOwner) {
-      alert('Only the agency owner can manage admins');
+      alert(t('messages.onlyOwnerCanManage'));
       return;
     }
 
-    const action = isCurrentlyAdmin ? 'remove admin rights from' : 'make admin';
+    const action = isCurrentlyAdmin ? t('confirmations.removeAdminRights') : t('confirmations.makeAdminRights');
     const confirmed = window.confirm(
-      `Are you sure you want to ${action} ${agentName}?`
+      t('confirmations.toggleAdmin', { action, name: agentName })
     );
 
     if (!confirmed) return;
@@ -288,32 +290,29 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           ...prev,
           admins: prev.admins?.filter(id => id !== agentId) || []
         }));
-        alert(`${agentName} is no longer an admin.`);
+        alert(t('messages.adminRemoved', { name: agentName }));
       } else {
         await addAgencyAdmin(agencyData._id, agentId);
         setAgencyData(prev => ({
           ...prev,
           admins: [...(prev.admins || []), agentId]
         }));
-        alert(`${agentName} is now an admin!`);
+        alert(t('messages.adminAdded', { name: agentName }));
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to update admin status');
+      alert(error instanceof Error ? error.message : t('messages.onlyOwnerCanManage'));
     }
   };
 
   const handleRemoveAgent = async (agentId: string, agentName: string) => {
     if (!isAdmin) {
-      alert('Only agency admins can remove agents');
+      alert(t('messages.onlyAdminCanRemove'));
       return;
     }
 
     const confirmed = window.confirm(
-      `Are you sure you want to remove ${agentName} from ${agencyData.name}?\n\n` +
-      `This will:\n` +
-      `- Remove them from your agency\n` +
-      `- Clear their agency affiliation\n` +
-      `- Keep their properties and reviews intact`
+      t('confirmations.removeAgent', { name: agentName, agency: agencyData.name }) + '\n\n' +
+      t('confirmations.removeAgentDetails')
     );
 
     if (!confirmed) return;
@@ -333,10 +332,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         totalAgents: prev.totalAgents - 1
       }));
 
-      alert(`${agentName} has been removed from the agency successfully.`);
+      alert(t('messages.agentRemoved', { name: agentName }));
     } catch (error: any) {
       console.error('Error removing agent:', error);
-      alert(error.message || 'Failed to remove agent from agency');
+      alert(error.message || t('messages.onlyAdminCanRemove'));
     } finally {
       setRemovingAgentId(null);
     }
@@ -344,12 +343,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleLeaveAgency = async () => {
     const confirmed = window.confirm(
-      `Are you sure you want to leave ${agencyData.name}?\n\n` +
-      `This will:\n` +
-      `- Remove you from this agency\n` +
-      `- Clear your agency affiliation\n` +
-      `- Keep your properties and reviews intact\n` +
-      `- Change your status to Independent Agent`
+      t('confirmations.leaveAgency', { agency: agencyData.name }) + '\n\n' +
+      t('confirmations.leaveAgencyDetails')
     );
 
     if (!confirmed) return;
@@ -372,13 +367,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         } as any);
       }
 
-      alert(response.message || `You have successfully left ${agencyData.name}`);
+      alert(response.message || t('messages.leftAgency', { agency: agencyData.name }));
 
       // Redirect to home or agencies page
       window.location.href = '/';
     } catch (error: any) {
       console.error('Error leaving agency:', error);
-      alert(error.message || 'Failed to leave agency');
+      alert(error.message || t('messages.leftAgency', { agency: agencyData.name }));
     } finally {
       setIsLeavingAgency(false);
     }
@@ -452,10 +447,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
       setAgencyData(data.agency);
       setIsEditModalOpen(false);
-      alert('Agency updated successfully!');
+      alert(t('messages.agencyUpdated'));
     } catch (error) {
       console.error('Error updating agency:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update agency');
+      alert(error instanceof Error ? error.message : t('messages.agencyUpdated'));
     }
   };
 
@@ -464,12 +459,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     if (!file || !isOwner) return;
 
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file');
+      setUploadError(t('messages.selectImageFile'));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image size must be less than 5MB');
+      setUploadError(t('messages.imageSizeLimit'));
       return;
     }
 
@@ -491,13 +486,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to upload logo');
+        throw new Error(data.message || t('messages.logoUpdated'));
       }
 
       setAgencyData(data.agency);
-      alert('Logo updated successfully!');
+      alert(t('messages.logoUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Failed to upload logo');
+      setUploadError(err instanceof Error ? err.message : t('messages.logoUpdated'));
     } finally {
       setIsUploadingLogo(false);
     }
@@ -508,12 +503,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     if (!file || !isOwner) return;
 
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file');
+      setUploadError(t('messages.selectImageFile'));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image size must be less than 5MB');
+      setUploadError(t('messages.imageSizeLimit'));
       return;
     }
 
@@ -535,13 +530,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to upload cover image');
+        throw new Error(data.message || t('messages.coverUpdated'));
       }
 
       setAgencyData(data.agency);
-      alert('Cover image updated successfully!');
+      alert(t('messages.coverUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Failed to upload cover image');
+      setUploadError(err instanceof Error ? err.message : t('messages.coverUpdated'));
     } finally {
       setIsUploadingCover(false);
     }
@@ -569,21 +564,21 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update gradient');
+        throw new Error(data.message || t('messages.gradientUpdated'));
       }
 
       setAgencyData(data.agency);
       setShowGradientPicker(false);
-      alert('Banner gradient updated successfully!');
+      alert(t('messages.gradientUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Failed to update gradient');
+      setUploadError(err instanceof Error ? err.message : t('messages.gradientUpdated'));
     }
   };
 
   const getRankBadge = (index: number) => {
-    if (index === 0) return { emoji: '🥇', color: 'from-yellow-400 to-yellow-600', text: 'Top Agent' };
-    if (index === 1) return { emoji: '🥈', color: 'from-gray-300 to-gray-500', text: '2nd Place' };
-    if (index === 2) return { emoji: '🥉', color: 'from-orange-400 to-orange-600', text: '3rd Place' };
+    if (index === 0) return { emoji: '🥇', color: 'from-yellow-400 to-yellow-600', text: t('teamMembers.topAgent') };
+    if (index === 1) return { emoji: '🥈', color: 'from-gray-300 to-gray-500', text: t('teamMembers.secondPlace') };
+    if (index === 2) return { emoji: '🥉', color: 'from-orange-400 to-orange-600', text: t('teamMembers.thirdPlace') };
     return null;
   };
 
@@ -656,7 +651,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
               </svg>
-              Gradients
+              {t('banner.gradients')}
             </button>
 
             {/* Upload Image Button */}
@@ -677,14 +672,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {isUploadingCover ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Uploading...
+                  {t('banner.uploading')}
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  Upload Image
+                  {t('banner.uploadImage')}
                 </>
               )}
             </label>
@@ -693,7 +688,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {showGradientPicker && (
               <div className="absolute top-full right-0 mt-2 bg-white rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Choose Gradient</h3>
+                  <h3 className="text-lg font-bold text-gray-900">{t('banner.chooseGradient')}</h3>
                   <button
                     onClick={() => setShowGradientPicker(false)}
                     className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -726,7 +721,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   ))}
                 </div>
                 <p className="text-xs text-gray-500 mt-3 text-center">
-                  Or upload a custom image using the button above
+                  {t('banner.customImageHint')}
                 </p>
               </div>
             )}
@@ -737,10 +732,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         <button
           onClick={handleBack}
           className="absolute top-6 left-6 md:left-24 flex items-center gap-2 text-white font-semibold px-4 py-2 rounded-lg bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors z-10"
-          aria-label="Go back to agencies list"
+          aria-label={t('navigation.backToAgencies')}
         >
           <ArrowLeftIcon className="w-5 h-5" />
-          Back
+          {t('navigation.back')}
         </button>
 
         {/* Agency Logo and Name */}
@@ -760,7 +755,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {agencyData.isFeatured && (
               <div className="absolute -top-2 -right-2 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
                 <StarIcon className="w-4 h-4" />
-                Featured
+                {t('common.featured')}
               </div>
             )}
 
@@ -784,10 +779,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   {isUploadingLogo ? (
                     <>
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
-                      Uploading...
+                      {t('banner.uploading')}
                     </>
                   ) : (
-                    'Change Logo'
+                    t('banner.changeLogo')
                   )}
                 </label>
               </div>
@@ -819,7 +814,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 font-medium">Total Listings</p>
+                <p className="text-sm text-gray-500 font-medium">{t('stats.totalListings')}</p>
                 <p className="text-3xl font-bold text-primary mt-1">{agencyProperties.length}</p>
               </div>
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -831,7 +826,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 font-medium">Total Agents</p>
+                <p className="text-sm text-gray-500 font-medium">{t('stats.totalAgents')}</p>
                 <p className="text-3xl font-bold text-green-600 mt-1">{agencyData.totalAgents}</p>
               </div>
               <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
@@ -843,8 +838,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 font-medium">Years in Business</p>
-                <p className="text-3xl font-bold text-blue-600 mt-1">{agencyData.yearsInBusiness || 'N/A'}</p>
+                <p className="text-sm text-gray-500 font-medium">{t('stats.yearsInBusiness')}</p>
+                <p className="text-3xl font-bold text-blue-600 mt-1">{agencyData.yearsInBusiness || t('stats.notAvailable')}</p>
               </div>
               <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
                 <ChartBarIcon className="w-7 h-7 text-blue-600" />
@@ -855,7 +850,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 font-medium">Rating</p>
+                <p className="text-sm text-gray-500 font-medium">{t('stats.rating')}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <StarIcon className="w-6 h-6 text-amber-500 fill-current" />
                   <p className="text-3xl font-bold text-gray-900">4.8</p>
@@ -871,32 +866,32 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {/* Sales Statistics */}
         {soldProperties.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Sales Performance</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('salesPerformance.title')}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">Sales last 12 months</p>
+                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.salesLast12Months')}</p>
                 <p className="text-3xl font-bold text-primary">{salesLast12Months}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">Total sales</p>
+                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.totalSales')}</p>
                 <p className="text-3xl font-bold text-green-600">{totalSales}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">Price range</p>
+                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.priceRange')}</p>
                 <p className="text-lg font-bold text-blue-600">
                   {minPrice > 0 && maxPrice > 0 ? (
                     <>
                       {formatPrice(minPrice, agencyData.country || 'Serbia')} - {formatPrice(maxPrice, agencyData.country || 'Serbia')}
                     </>
                   ) : (
-                    'N/A'
+                    t('stats.notAvailable')
                   )}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">Average price</p>
+                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.averagePrice')}</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {averagePrice > 0 ? formatPrice(averagePrice, agencyData.country || 'Serbia') : 'N/A'}
+                  {averagePrice > 0 ? formatPrice(averagePrice, agencyData.country || 'Serbia') : t('stats.notAvailable')}
                 </p>
               </div>
             </div>
