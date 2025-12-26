@@ -75,6 +75,52 @@
       "startCreatingListing": "Start Creating Listing"
     }
   },
+  "management": {
+    "title": "Subscription Management",
+    "noActiveSubscription": "No Active Subscription",
+    "unlockFeatures": "Unlock premium features and take your experience to the next level",
+    "viewPlans": "View Plans & Pricing",
+    "refresh": "Refresh",
+    "timeRemaining": "Time Remaining",
+    "dayLeft": "day left",
+    "daysLeft": "days left",
+    "listingLimit": "Listing Limit",
+    "remaining": "remaining",
+    "couponSubscription": "Coupon Subscription",
+    "cancellationPending": "Subscription Cancellation Pending",
+    "autoRenewal": "Auto-Renewal",
+    "on": "On",
+    "off": "Off",
+    "paymentSource": "Payment Source",
+    "web": "Web",
+    "cancelSubscription": "Cancel Subscription",
+    "cancelPlan": "Cancel Plan",
+    "upgradePlan": "Upgrade Your Plan",
+    "upgradeNow": "Upgrade Now",
+    "proRatedPricing": "Pro-rated Upgrade Pricing",
+    "confirmUpgrade": "Confirm Upgrade",
+    "upgradingTo": "Upgrading to:",
+    "originalPrice": "Original Price",
+    "proRatedCredit": "Pro-rated Credit",
+    "totalDue": "Total Due",
+    "cancelling": "CANCELLING",
+    "features": {
+      "prioritySupport": "Priority Support",
+      "advancedAnalytics": "Advanced Analytics",
+      "listings25": "25 Listings",
+      "premiumPlacement": "Premium Placement"
+    },
+    "cancelModal": {
+      "cancellingTrial": "Cancelling your free trial:",
+      "whatHappens": "What happens when you cancel:",
+      "loseAccess": "You will lose access to premium features",
+      "listingsDeactivated": "Your listings may be deactivated",
+      "canResubscribe": "You can resubscribe anytime",
+      "cancelAtEnd": "Cancel at end of billing period",
+      "cancelNowRefund": "Cancel now & get €{{amount}} refund",
+      "keepSubscription": "Keep {{subscription}}"
+    }
+  },
   "featuredAgency": {
     "title": "Featured Agency",
     "featureYourAgency": "Feature Your Agency",
@@ -84,6 +130,7 @@
     "featuredDescription": "Your agency is currently featured and receiving enhanced visibility.",
     "timeRemaining": "Time Remaining",
     "expires": "Expires:",
+    "boostVisibility": "Boost Your Visibility",
     "status": {
       "active": "Active",
       "trial": "Trial",
@@ -91,9 +138,9 @@
       "canceled": "Canceled"
     },
     "progress": {
-      "freeTrialProgress": "🎉 Free Trial Progress",
-      "subscriptionPeriod": "📅 Subscription Period",
-      "daysLeft": "{count} {count, plural, one {day} other {days}} left"
+      "freeTrialProgress": "Free Trial Progress",
+      "subscriptionPeriod": "Subscription Period",
+      "daysLeft": "left"
     },
     "details": {
       "interval": "Interval",
@@ -103,13 +150,62 @@
       "endedOn": "Ended On"
     },
     "trial": {
-      "title": "🎉 Free Trial Active",
+      "title": "Free Trial Active",
       "description": "Your free trial ends on {date}"
     },
     "coupon": {
-      "applied": "✓ Coupon {code} applied"
+      "applied": "Coupon {code} applied"
     },
-    "cancelNotice": "⚠️ Subscription will be canceled at the end of the current period"
+    "cancelNotice": "Subscription will be canceled at the end of the current period",
+    "renewStatus": {
+      "title": "Renew Your Featured Status",
+      "description": "Continue enjoying enhanced visibility and top placement in search results.",
+      "renewNow": "Renew Now"
+    },
+    "visibilityTip": "Featured agencies get up to 5x more visibility and appear at the top of search results!"
+  },
+  "featuredDialog": {
+    "title": "Featured Agency Subscription",
+    "subscriptionCreated": "Subscription Created!",
+    "agencyFeatured": "Your agency is now featured. Redirecting...",
+    "getFeatured": "Get Featured!",
+    "boostAgency": "Boost your agency's visibility and get more leads with a featured listing",
+    "choosePlan": "Choose Your Plan",
+    "perPeriod": "per {{period}}",
+    "savingsPercent": "Save {{savings}}%",
+    "whatsIncluded": "What's Included:",
+    "benefits": {
+      "topPlacement": "Top placement in search results",
+      "featuredCarousel": "Featured in agency carousel",
+      "premiumBadge": "Premium badge on your profile",
+      "monthlyRotation": "Monthly rotation to maintain freshness",
+      "cancelAnytime": "Cancel anytime"
+    },
+    "coupon": {
+      "haveCoupon": "Have a coupon code?",
+      "enterCode": "Enter coupon code",
+      "validating": "Validating...",
+      "apply": "Apply",
+      "appliedSuccess": "Coupon Applied Successfully!",
+      "originalPrice": "Original Price:",
+      "discount": "Discount:",
+      "freeWithCoupon": "FREE!",
+      "finalPrice": "Final Price:"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "processing": "Processing...",
+      "activateFree": "Activate for FREE",
+      "subscribe": "Subscribe - €{{price}}"
+    },
+    "terms": "By subscribing, you agree to our terms and conditions.",
+    "noPaymentRequired": "No payment required - 100% discount applied!",
+    "chargeNotice": "You will be charged €{{price}} per {{period}}.",
+    "errors": {
+      "enterCoupon": "Please enter a coupon code",
+      "invalidCoupon": "Invalid coupon",
+      "createFailed": "Failed to create subscription"
+    }
   },
   "payment": {
     "title": "Complete Payment",
