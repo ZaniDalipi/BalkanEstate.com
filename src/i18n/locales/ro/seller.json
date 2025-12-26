@@ -187,11 +187,33 @@
         "g": "G (Least Efficient)"
       }
     },
+    "landDetails": {
+      "title": "Detalii Teren",
+      "hint": "Furnizați detalii despre teren pentru a ajuta cumpărătorii să înțeleagă ce cumpără",
+      "condition": {
+        "label": "Stare Teren",
+        "notSpecified": "Nespecificat",
+        "readyToBuild": "Pregătit pentru Construcție",
+        "cleared": "Curățat",
+        "partiallyCleared": "Parțial Curățat",
+        "needsClearing": "Necesită Curățare"
+      },
+      "viewAccess": {
+        "label": "Vedere/Acces",
+        "notSpecified": "Nespecificat",
+        "seaView": "Vedere la Mare",
+        "mountainView": "Vedere la Munte",
+        "cityView": "Vedere la Oraș",
+        "parkView": "Vedere la Parc",
+        "natureView": "Vedere la Natură",
+        "roadAccess": "Acces la Drum"
+      }
+    },
     "floorPlan": {
-      "title": "Floor Plan (Optional)"
+      "title": "Plan Etaj (Opțional)"
     },
     "virtualTour": {
-      "title": "360° Virtual Tour (Optional)",
+      "title": "Tur Virtual 360° (Opțional)",
       "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
       "label": "360° Tour URL",
       "placeholder": "https://my.matterport.com/show/?m=... or https://kuula.co/share/...",

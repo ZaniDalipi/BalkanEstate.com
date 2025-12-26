@@ -187,6 +187,28 @@
         "g": "G (Më Pak Efikase)"
       }
     },
+    "landDetails": {
+      "title": "Detajet e Tokës",
+      "hint": "Jepni detaje të tokës për t'i ndihmuar blerësit të kuptojnë çfarë po blejnë",
+      "condition": {
+        "label": "Gjendja e Tokës",
+        "notSpecified": "Nuk është Specifikuar",
+        "readyToBuild": "Gati për Ndërtim",
+        "cleared": "E Pastruar",
+        "partiallyCleared": "Pjesërisht e Pastruar",
+        "needsClearing": "Ka Nevojë për Pastrim"
+      },
+      "viewAccess": {
+        "label": "Pamje/Aksesi",
+        "notSpecified": "Nuk është Specifikuar",
+        "seaView": "Pamje Deti",
+        "mountainView": "Pamje Mali",
+        "cityView": "Pamje Qyteti",
+        "parkView": "Pamje Parku",
+        "natureView": "Pamje Natyre",
+        "roadAccess": "Akses Rruge"
+      }
+    },
     "floorPlan": {
       "title": "Planimetri (Opsionale)"
     },

@@ -187,11 +187,33 @@
         "g": "G (Least Efficient)"
       }
     },
+    "landDetails": {
+      "title": "Λεπτομέρειες Οικοπέδου",
+      "hint": "Παρέχετε λεπτομέρειες οικοπέδου για να βοηθήσετε τους αγοραστές να κατανοήσουν τι αγοράζουν",
+      "condition": {
+        "label": "Κατάσταση Οικοπέδου",
+        "notSpecified": "Δεν Καθορίζεται",
+        "readyToBuild": "Έτοιμο για Κατασκευή",
+        "cleared": "Καθαρισμένο",
+        "partiallyCleared": "Μερικώς Καθαρισμένο",
+        "needsClearing": "Χρειάζεται Καθαρισμό"
+      },
+      "viewAccess": {
+        "label": "Θέα/Πρόσβαση",
+        "notSpecified": "Δεν Καθορίζεται",
+        "seaView": "Θέα Θάλασσα",
+        "mountainView": "Θέα Βουνό",
+        "cityView": "Θέα Πόλη",
+        "parkView": "Θέα Πάρκο",
+        "natureView": "Θέα Φύση",
+        "roadAccess": "Πρόσβαση Δρόμου"
+      }
+    },
     "floorPlan": {
-      "title": "Floor Plan (Optional)"
+      "title": "Κάτοψη (Προαιρετικό)"
     },
     "virtualTour": {
-      "title": "360° Virtual Tour (Optional)",
+      "title": "360° Εικονική Περιήγηση (Προαιρετικό)",
       "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
       "label": "360° Tour URL",
       "placeholder": "https://my.matterport.com/show/?m=... or https://kuula.co/share/...",

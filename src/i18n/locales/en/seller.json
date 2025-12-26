@@ -187,6 +187,28 @@
         "g": "G (Least Efficient)"
       }
     },
+    "landDetails": {
+      "title": "Land Details",
+      "hint": "Provide land details to help buyers understand what they're purchasing",
+      "condition": {
+        "label": "Land Condition",
+        "notSpecified": "Not Specified",
+        "readyToBuild": "Ready to Build",
+        "cleared": "Cleared",
+        "partiallyCleared": "Partially Cleared",
+        "needsClearing": "Needs Clearing"
+      },
+      "viewAccess": {
+        "label": "View/Access",
+        "notSpecified": "Not Specified",
+        "seaView": "Sea View",
+        "mountainView": "Mountain View",
+        "cityView": "City View",
+        "parkView": "Park View",
+        "natureView": "Nature View",
+        "roadAccess": "Road Access"
+      }
+    },
     "floorPlan": {
       "title": "Floor Plan (Optional)"
     },

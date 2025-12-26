@@ -187,11 +187,33 @@
         "g": "G (Least Efficient)"
       }
     },
+    "landDetails": {
+      "title": "Detalji Zemljišta",
+      "hint": "Navedite detalje zemljišta kako biste pomogli kupcima da razumiju šta kupuju",
+      "condition": {
+        "label": "Stanje Zemljišta",
+        "notSpecified": "Nije Navedeno",
+        "readyToBuild": "Spremno za Gradnju",
+        "cleared": "Očišćeno",
+        "partiallyCleared": "Djelimično Očišćeno",
+        "needsClearing": "Potrebno Čišćenje"
+      },
+      "viewAccess": {
+        "label": "Pogled/Pristup",
+        "notSpecified": "Nije Navedeno",
+        "seaView": "Pogled na More",
+        "mountainView": "Pogled na Planinu",
+        "cityView": "Pogled na Grad",
+        "parkView": "Pogled na Park",
+        "natureView": "Pogled na Prirodu",
+        "roadAccess": "Pristup Putu"
+      }
+    },
     "floorPlan": {
-      "title": "Floor Plan (Optional)"
+      "title": "Tlocrt (Opcionalno)"
     },
     "virtualTour": {
-      "title": "360° Virtual Tour (Optional)",
+      "title": "360° Virtualna Tura (Opcionalno)",
       "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
       "label": "360° Tour URL",
       "placeholder": "https://my.matterport.com/show/?m=... or https://kuula.co/share/...",

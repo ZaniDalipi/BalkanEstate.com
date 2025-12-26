@@ -1287,29 +1287,29 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 <select id="language" value={language} onChange={(e) => setLanguage(e.target.value)} className={`${floatingInputClasses} border-neutral-300`}>
                                     {LANGUAGES.map(lang => <option key={lang} value={lang}>{lang}</option>)}
                                 </select>
-                                <label htmlFor="language" className={floatingSelectLabelClasses}>Description Language</label>
+                                <label htmlFor="language" className={floatingSelectLabelClasses}>{t('seller:createListing.language.label')}</label>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div>
                             </div>
                             <div className="relative">
                                 <select id="aiPropertyType" value={aiPropertyType} onChange={(e) => setAiPropertyType(e.target.value as any)} className={`${floatingInputClasses} border-neutral-300`}>
-                                    <option value="house">House</option>
-                                    <option value="apartment">Apartment</option>
-                                    <option value="villa">Villa</option>
-                                    <option value="land">Land</option>
-                                    <option value="other">Other</option>
+                                    <option value="house">{t('seller:propertyTypes.house')}</option>
+                                    <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                                    <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                                    <option value="land">{t('seller:propertyTypes.land')}</option>
+                                    <option value="other">{t('seller:propertyTypes.other')}</option>
                                 </select>
-                                <label htmlFor="aiPropertyType" className={floatingSelectLabelClasses}>Property Type</label>
+                                <label htmlFor="aiPropertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div>
                             </div>
                         </div>
                         <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-neutral-300 border-dashed rounded-lg cursor-pointer bg-neutral-50 hover:bg-neutral-100">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className="w-10 h-10 mb-3 text-neutral-400" /><p className="mb-2 text-sm text-neutral-500"><span className="font-semibold">Click to upload photos</span></p><p className="text-xs text-neutral-500">PNG, JPG or WEBP</p></div>
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className="w-10 h-10 mb-3 text-neutral-400" /><p className="mb-2 text-sm text-neutral-500"><span className="font-semibold">{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-neutral-500">{t('seller:createListing.upload.fileTypes')}</p></div>
                             <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
                         </label>
                         {images.length > 0 && (
-                            <div className="mt-4"><p className="font-semibold text-sm mb-2">{images.length} image(s) selected:</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-md" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">&times;</button></div>))}</div></div>
+                            <div className="mt-4"><p className="font-semibold text-sm mb-2">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-md" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">&times;</button></div>))}</div></div>
                         )}
-                         <button type="button" onClick={handleGenerate} className="w-full mt-6 py-3 text-lg font-bold text-white bg-primary rounded-lg shadow-md hover:bg-primary-dark transition-colors flex items-center justify-center gap-2" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>Generate Listing</button>
+                         <button type="button" onClick={handleGenerate} className="w-full mt-6 py-3 text-lg font-bold text-white bg-primary rounded-lg shadow-md hover:bg-primary-dark transition-colors flex items-center justify-center gap-2" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>{t('seller:createListing.generate')}</button>
                     </div>
                 </div>
             )}
@@ -1326,14 +1326,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 className={`${floatingInputClasses} border-neutral-300`}
                                 required
                             >
-                                <option value="">Select Country</option>
+                                <option value="">{t('seller:createListing.location.selectCountry')}</option>
                                 {BALKAN_LOCATIONS.map(country => (
                                     <option key={country.code} value={country.name}>
                                         {country.name}
                                     </option>
                                 ))}
                             </select>
-                            <label htmlFor="country" className={floatingSelectLabelClasses}>Country</label>
+                            <label htmlFor="country" className={floatingSelectLabelClasses}>{t('seller:createListing.location.country')}</label>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
@@ -1351,14 +1351,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 required
                                 disabled={!selectedCountry}
                             >
-                                <option value="">Select City</option>
+                                <option value="">{t('seller:createListing.location.selectCity')}</option>
                                 {availableCities.map(city => (
                                     <option key={city.name} value={city.name}>
                                         {city.name}
                                     </option>
                                 ))}
                             </select>
-                            <label htmlFor="city" className={floatingSelectLabelClasses}>City</label>
+                            <label htmlFor="city" className={floatingSelectLabelClasses}>{t('seller:createListing.location.city')}</label>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
@@ -1386,10 +1386,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                         <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('title')?.focus()}>
                             <input type="text" id="title" name="title" value={listingData.title} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`} placeholder=" " required maxLength={50} />
-                            <label htmlFor="title" className={floatingLabelClasses}>Listing Title</label>
+                            <label htmlFor="title" className={floatingLabelClasses}>{t('seller:createListing.fields.listingTitle')}</label>
                             <div className="flex justify-between items-center mt-1">
                                 <p className="text-xs text-neutral-500">
-                                    Short, catchy title (e.g., "Luxury Sea View Villa", "Cozy Studio Downtown")
+                                    {t('seller:createListing.fields.titleHint')}
                                 </p>
                                 <span className={`text-xs ${listingData.title.length > 40 ? 'text-amber-600' : 'text-neutral-400'}`}>
                                     {listingData.title.length}/50
@@ -1399,17 +1399,17 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
                         <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('streetAddress')?.focus()}>
                             <input type="text" id="streetAddress" name="streetAddress" value={listingData.streetAddress} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`} placeholder=" " />
-                            <label htmlFor="streetAddress" className={floatingLabelClasses}>Address</label>
+                            <label htmlFor="streetAddress" className={floatingLabelClasses}>{t('seller:createListing.location.address')}</label>
                             <p className="mt-1 text-xs text-neutral-500">
-                                This will be auto-filled from the Property Location you select on the map
+                                {t('seller:createListing.location.addressHint')}
                                 <br />
-                                <span className="text-neutral-400">Examples: Rr. Muharrem Fejza 23 • Bulevar Kralja Aleksandra 45 • Ul. Makedonija 12 • Trg Krešimira Ćosića 7</span>
+                                <span className="text-neutral-400">{t('seller:createListing.location.addressExamples')}</span>
                             </p>
                         </div>
 
                         <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('price')?.focus()}>
                             <input type="text" id="price" inputMode="numeric" name="price" value={listingData.price > 0 ? new Intl.NumberFormat('de-DE').format(listingData.price) : ''} onChange={handlePriceChange} className={`${floatingInputClasses} border-neutral-300 pl-8`} placeholder=" " required />
-                            <label htmlFor="price" className={floatingLabelClasses}>Price</label>
+                            <label htmlFor="price" className={floatingLabelClasses}>{t('seller:createListing.fields.price')}</label>
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">{getCurrencySymbol(selectedCountry)}</span>
                         </div>
                     </fieldset>
@@ -1418,19 +1418,19 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                         <div className="relative">
                             <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
-                                <option value="house">House</option>
-                                <option value="apartment">Apartment</option>
-                                <option value="villa">Villa</option>
-                                <option value="land">Land</option>
-                                <option value="other">Other</option>
+                                <option value="house">{t('seller:propertyTypes.house')}</option>
+                                <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
+                                <option value="villa">{t('seller:propertyTypes.villa')}</option>
+                                <option value="land">{t('seller:propertyTypes.land')}</option>
+                                <option value="other">{t('seller:propertyTypes.other')}</option>
                             </select>
-                            <label htmlFor="propertyType" className={floatingSelectLabelClasses}>Property Type</label>
+                            <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                         </div>
                         {listingData.propertyType === 'apartment' && (
-                            <NumberInputWithSteppers label="Floor Number" value={listingData.floorNumber} onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))} min={1} />
+                            <NumberInputWithSteppers label={t('seller:createListing.fields.floorNumber')} value={listingData.floorNumber} onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))} min={1} />
                         )}
                         {(listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (
-                            <NumberInputWithSteppers label="Total Floors" value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} />
+                            <NumberInputWithSteppers label={t('seller:createListing.fields.totalFloors')} value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} />
                         )}
                     </fieldset>
 
@@ -1438,85 +1438,85 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {listingData.propertyType !== 'land' && (
                             <>
-                                <NumberInputWithSteppers label="Bedrooms" value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
-                                <NumberInputWithSteppers label="Bathrooms" value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
-                                <NumberInputWithSteppers label="Living Rooms" value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
+                                <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
+                                <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
+                                <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
                             </>
                         )}
-                        <NumberInputWithSteppers label="Area (m²)" value={listingData.sq_meters} step={5} onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
+                        <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
                         {listingData.propertyType !== 'land' && (
-                            <NumberInputWithSteppers label="Year Built" value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} />
+                            <NumberInputWithSteppers label={t('seller:createListing.fields.yearBuilt')} value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} />
                         )}
-                        <NumberInputWithSteppers label="Parking Spots" value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} />
+                        <NumberInputWithSteppers label={t('seller:createListing.fields.parkingSpots')} value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} />
                     </fieldset>
-                    <fieldset><TagListInput label="Special Features" tags={listingData.specialFeatures} setTags={(tags) => setListingData(p => ({ ...p, specialFeatures: tags }))} /></fieldset>
-                    <fieldset><TagListInput label="Materials" tags={listingData.materials} setTags={(tags) => setListingData(p => ({ ...p, materials: tags }))} /></fieldset>
+                    <fieldset><TagListInput label={t('seller:createListing.fields.specialFeatures')} tags={listingData.specialFeatures} setTags={(tags) => setListingData(p => ({ ...p, specialFeatures: tags }))} /></fieldset>
+                    <fieldset><TagListInput label={t('seller:createListing.fields.materials')} tags={listingData.materials} setTags={(tags) => setListingData(p => ({ ...p, materials: tags }))} /></fieldset>
                     <fieldset>
                         <TagListInput
-                            label="Amenities (e.g., #gym, #pool, #parking, #wifi)"
+                            label={t('seller:createListing.fields.amenities')}
                             tags={listingData.amenities}
                             setTags={(tags) => setListingData(p => ({ ...p, amenities: tags }))}
                         />
-                        <p className="text-xs text-neutral-500 mt-1">Add hashtag-style amenities that buyers can search for</p>
+                        <p className="text-xs text-neutral-500 mt-1">{t('seller:createListing.fields.amenitiesHint')}</p>
                     </fieldset>
 
                     {/* Mandatory Amenities Section - show different options for land */}
                     <fieldset className="space-y-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                         <h3 className="text-base font-semibold text-neutral-800 mb-3">
-                            {listingData.propertyType === 'land' ? 'Land Features' : 'Property Features'}
+                            {listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.landFeatures', 'Land Features') : t('seller:createListing.propertyFeatures.title')}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {listingData.propertyType !== 'land' && (
                                 <TriStateCheckbox
-                                    label="Balcony/Terrace"
+                                    label={t('seller:createListing.propertyFeatures.balconyTerrace')}
                                     value={listingData.hasBalcony}
                                     onChange={(val) => setListingData(p => ({ ...p, hasBalcony: val }))}
                                 />
                             )}
                             <TriStateCheckbox
-                                label={listingData.propertyType === 'land' ? 'Has Vegetation/Trees' : 'Garden/Yard'}
+                                label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.hasVegetation', 'Has Vegetation/Trees') : t('seller:createListing.propertyFeatures.gardenYard')}
                                 value={listingData.hasGarden}
                                 onChange={(val) => setListingData(p => ({ ...p, hasGarden: val }))}
                             />
                             {listingData.propertyType !== 'land' && (
                                 <TriStateCheckbox
-                                    label="Elevator"
+                                    label={t('seller:createListing.propertyFeatures.elevator')}
                                     value={listingData.hasElevator}
                                     onChange={(val) => setListingData(p => ({ ...p, hasElevator: val }))}
                                 />
                             )}
                             <TriStateCheckbox
-                                label={listingData.propertyType === 'land' ? 'Fenced/Secured' : 'Security System'}
+                                label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.fencedSecured', 'Fenced/Secured') : t('seller:createListing.propertyFeatures.securitySystem')}
                                 value={listingData.hasSecurity}
                                 onChange={(val) => setListingData(p => ({ ...p, hasSecurity: val }))}
                             />
                             {listingData.propertyType !== 'land' && (
                                 <TriStateCheckbox
-                                    label="Air Conditioning"
+                                    label={t('seller:createListing.propertyFeatures.airConditioning')}
                                     value={listingData.hasAirConditioning}
                                     onChange={(val) => setListingData(p => ({ ...p, hasAirConditioning: val }))}
                                 />
                             )}
                             <TriStateCheckbox
-                                label={listingData.propertyType === 'land' ? 'Has Water Source' : 'Swimming Pool'}
+                                label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.hasWaterSource', 'Has Water Source') : t('seller:createListing.propertyFeatures.swimmingPool')}
                                 value={listingData.hasPool}
                                 onChange={(val) => setListingData(p => ({ ...p, hasPool: val }))}
                             />
                             {listingData.propertyType !== 'land' && (
                                 <TriStateCheckbox
-                                    label="Pets Allowed"
+                                    label={t('seller:createListing.propertyFeatures.petsAllowed')}
                                     value={listingData.petsAllowed}
                                     onChange={(val) => setListingData(p => ({ ...p, petsAllowed: val }))}
                                 />
                             )}
                         </div>
-                        <p className="text-xs text-neutral-500 mt-2">Select "Yes" if available, "No" if not available, or leave as "Any" to skip</p>
+                        <p className="text-xs text-neutral-500 mt-2">{t('seller:createListing.propertyFeatures.hint')}</p>
                     </fieldset>
 
                     {/* Advanced Property Details Section - hide for land */}
                     {listingData.propertyType !== 'land' ? (
                         <fieldset className="space-y-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-                            <h3 className="text-base font-semibold text-neutral-800 mb-3">Advanced Property Details</h3>
+                            <h3 className="text-base font-semibold text-neutral-800 mb-3">{t('seller:createListing.advancedDetails.title')}</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {/* Furnishing Status */}
                                 <div className="relative">
@@ -1527,12 +1527,12 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         onChange={handleInputChange}
                                         className={`${floatingInputClasses} border-neutral-300`}
                                     >
-                                        <option value="any">Not Specified</option>
-                                        <option value="furnished">Fully Furnished</option>
-                                        <option value="semi-furnished">Semi-Furnished</option>
-                                        <option value="unfurnished">Unfurnished</option>
+                                        <option value="any">{t('seller:createListing.advancedDetails.furnishing.notSpecified')}</option>
+                                        <option value="furnished">{t('seller:createListing.advancedDetails.furnishing.furnished')}</option>
+                                        <option value="semi-furnished">{t('seller:createListing.advancedDetails.furnishing.semiFurnished')}</option>
+                                        <option value="unfurnished">{t('seller:createListing.advancedDetails.furnishing.unfurnished')}</option>
                                     </select>
-                                    <label htmlFor="furnishing" className={floatingSelectLabelClasses}>Furnishing</label>
+                                    <label htmlFor="furnishing" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.furnishing.label')}</label>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
@@ -1547,17 +1547,17 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         onChange={handleInputChange}
                                         className={`${floatingInputClasses} border-neutral-300`}
                                     >
-                                        <option value="any">Not Specified</option>
-                                        <option value="central">Central Heating</option>
-                                        <option value="electric">Electric</option>
-                                        <option value="gas">Gas</option>
-                                        <option value="oil">Oil</option>
-                                        <option value="heat-pump">Heat Pump</option>
-                                        <option value="solar">Solar</option>
-                                        <option value="wood">Wood/Fireplace</option>
-                                        <option value="none">No Heating</option>
+                                        <option value="any">{t('seller:createListing.advancedDetails.heatingType.notSpecified')}</option>
+                                        <option value="central">{t('seller:createListing.advancedDetails.heatingType.central')}</option>
+                                        <option value="electric">{t('seller:createListing.advancedDetails.heatingType.electric')}</option>
+                                        <option value="gas">{t('seller:createListing.advancedDetails.heatingType.gas')}</option>
+                                        <option value="oil">{t('seller:createListing.advancedDetails.heatingType.oil')}</option>
+                                        <option value="heat-pump">{t('seller:createListing.advancedDetails.heatingType.heatPump')}</option>
+                                        <option value="solar">{t('seller:createListing.advancedDetails.heatingType.solar')}</option>
+                                        <option value="wood">{t('seller:createListing.advancedDetails.heatingType.wood')}</option>
+                                        <option value="none">{t('seller:createListing.advancedDetails.heatingType.none')}</option>
                                     </select>
-                                    <label htmlFor="heatingType" className={floatingSelectLabelClasses}>Heating Type</label>
+                                    <label htmlFor="heatingType" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.heatingType.label')}</label>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
@@ -1572,14 +1572,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         onChange={handleInputChange}
                                         className={`${floatingInputClasses} border-neutral-300`}
                                     >
-                                        <option value="any">Not Specified</option>
-                                        <option value="new">New Construction</option>
-                                        <option value="excellent">Excellent</option>
-                                        <option value="good">Good</option>
-                                        <option value="fair">Fair</option>
-                                        <option value="needs-renovation">Needs Renovation</option>
+                                        <option value="any">{t('seller:createListing.advancedDetails.condition.notSpecified')}</option>
+                                        <option value="new">{t('seller:createListing.advancedDetails.condition.new')}</option>
+                                        <option value="excellent">{t('seller:createListing.advancedDetails.condition.excellent')}</option>
+                                        <option value="good">{t('seller:createListing.advancedDetails.condition.good')}</option>
+                                        <option value="fair">{t('seller:createListing.advancedDetails.condition.fair')}</option>
+                                        <option value="needs-renovation">{t('seller:createListing.advancedDetails.condition.needsRenovation')}</option>
                                     </select>
-                                    <label htmlFor="condition" className={floatingSelectLabelClasses}>Condition</label>
+                                    <label htmlFor="condition" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.condition.label')}</label>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
@@ -1594,15 +1594,15 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         onChange={handleInputChange}
                                         className={`${floatingInputClasses} border-neutral-300`}
                                     >
-                                        <option value="any">Not Specified</option>
-                                        <option value="sea">Sea View</option>
-                                        <option value="mountain">Mountain View</option>
-                                        <option value="city">City View</option>
-                                        <option value="park">Park View</option>
-                                        <option value="garden">Garden View</option>
-                                        <option value="street">Street View</option>
+                                        <option value="any">{t('seller:createListing.advancedDetails.viewType.notSpecified')}</option>
+                                        <option value="sea">{t('seller:createListing.advancedDetails.viewType.sea')}</option>
+                                        <option value="mountain">{t('seller:createListing.advancedDetails.viewType.mountain')}</option>
+                                        <option value="city">{t('seller:createListing.advancedDetails.viewType.city')}</option>
+                                        <option value="park">{t('seller:createListing.advancedDetails.viewType.park')}</option>
+                                        <option value="garden">{t('seller:createListing.advancedDetails.viewType.garden')}</option>
+                                        <option value="street">{t('seller:createListing.advancedDetails.viewType.street')}</option>
                                     </select>
-                                    <label htmlFor="viewType" className={floatingSelectLabelClasses}>View Type</label>
+                                    <label htmlFor="viewType" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.viewType.label')}</label>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
@@ -1617,27 +1617,27 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         onChange={handleInputChange}
                                         className={`${floatingInputClasses} border-neutral-300`}
                                     >
-                                        <option value="any">Not Specified</option>
-                                        <option value="A+">A+ (Most Efficient)</option>
-                                        <option value="A">A</option>
-                                        <option value="B">B</option>
-                                        <option value="C">C</option>
-                                        <option value="D">D</option>
-                                        <option value="E">E</option>
-                                        <option value="F">F</option>
-                                        <option value="G">G (Least Efficient)</option>
+                                        <option value="any">{t('seller:createListing.advancedDetails.energyRating.notSpecified')}</option>
+                                        <option value="A+">{t('seller:createListing.advancedDetails.energyRating.aPlus')}</option>
+                                        <option value="A">{t('seller:createListing.advancedDetails.energyRating.a')}</option>
+                                        <option value="B">{t('seller:createListing.advancedDetails.energyRating.b')}</option>
+                                        <option value="C">{t('seller:createListing.advancedDetails.energyRating.c')}</option>
+                                        <option value="D">{t('seller:createListing.advancedDetails.energyRating.d')}</option>
+                                        <option value="E">{t('seller:createListing.advancedDetails.energyRating.e')}</option>
+                                        <option value="F">{t('seller:createListing.advancedDetails.energyRating.f')}</option>
+                                        <option value="G">{t('seller:createListing.advancedDetails.energyRating.g')}</option>
                                     </select>
-                                    <label htmlFor="energyRating" className={floatingSelectLabelClasses}>Energy Rating</label>
+                                    <label htmlFor="energyRating" className={floatingSelectLabelClasses}>{t('seller:createListing.advancedDetails.energyRating.label')}</label>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
                                 </div>
                             </div>
-                            <p className="text-xs text-neutral-500 mt-2">Provide detailed property information to help buyers find your listing through advanced filters</p>
+                            <p className="text-xs text-neutral-500 mt-2">{t('seller:createListing.advancedDetails.hint')}</p>
                         </fieldset>
                     ) : (
                         <fieldset className="space-y-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-                            <h3 className="text-base font-semibold text-neutral-800 mb-3">Land Details</h3>
+                            <h3 className="text-base font-semibold text-neutral-800 mb-3">{t('seller:createListing.landDetails.title')}</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {/* Land Condition */}
                                 <div className="relative">
@@ -1648,13 +1648,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         onChange={handleInputChange}
                                         className={`${floatingInputClasses} border-neutral-300`}
                                     >
-                                        <option value="any">Not Specified</option>
-                                        <option value="excellent">Ready to Build</option>
-                                        <option value="good">Cleared</option>
-                                        <option value="fair">Partially Cleared</option>
-                                        <option value="needs-renovation">Needs Clearing</option>
+                                        <option value="any">{t('seller:createListing.landDetails.condition.notSpecified')}</option>
+                                        <option value="excellent">{t('seller:createListing.landDetails.condition.readyToBuild')}</option>
+                                        <option value="good">{t('seller:createListing.landDetails.condition.cleared')}</option>
+                                        <option value="fair">{t('seller:createListing.landDetails.condition.partiallyCleared')}</option>
+                                        <option value="needs-renovation">{t('seller:createListing.landDetails.condition.needsClearing')}</option>
                                     </select>
-                                    <label htmlFor="condition" className={floatingSelectLabelClasses}>Land Condition</label>
+                                    <label htmlFor="condition" className={floatingSelectLabelClasses}>{t('seller:createListing.landDetails.condition.label')}</label>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
@@ -1669,33 +1669,33 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         onChange={handleInputChange}
                                         className={`${floatingInputClasses} border-neutral-300`}
                                     >
-                                        <option value="any">Not Specified</option>
-                                        <option value="sea">Sea View</option>
-                                        <option value="mountain">Mountain View</option>
-                                        <option value="city">City View</option>
-                                        <option value="park">Park View</option>
-                                        <option value="garden">Nature View</option>
-                                        <option value="street">Road Access</option>
+                                        <option value="any">{t('seller:createListing.landDetails.viewAccess.notSpecified')}</option>
+                                        <option value="sea">{t('seller:createListing.landDetails.viewAccess.seaView')}</option>
+                                        <option value="mountain">{t('seller:createListing.landDetails.viewAccess.mountainView')}</option>
+                                        <option value="city">{t('seller:createListing.landDetails.viewAccess.cityView')}</option>
+                                        <option value="park">{t('seller:createListing.landDetails.viewAccess.parkView')}</option>
+                                        <option value="garden">{t('seller:createListing.landDetails.viewAccess.natureView')}</option>
+                                        <option value="street">{t('seller:createListing.landDetails.viewAccess.roadAccess')}</option>
                                     </select>
-                                    <label htmlFor="viewType" className={floatingSelectLabelClasses}>View/Access</label>
+                                    <label htmlFor="viewType" className={floatingSelectLabelClasses}>{t('seller:createListing.landDetails.viewAccess.label')}</label>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
                                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
                                 </div>
                             </div>
-                            <p className="text-xs text-neutral-500 mt-2">Provide land details to help buyers understand what they're purchasing</p>
+                            <p className="text-xs text-neutral-500 mt-2">{t('seller:createListing.landDetails.hint')}</p>
                         </fieldset>
                     )}
 
-                    <fieldset><label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">Description</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
-                    
+                    <fieldset><label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">{t('seller:createListing.fields.description')}</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
+
                     <fieldset>
-                        <label className="block text-sm font-medium text-neutral-700 mb-1">Image Management</label>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">{t('seller:createListing.imageManagement.title')}</label>
                         <div className="p-4 border rounded-lg bg-neutral-50/70">
                              <label htmlFor="image-upload-manual" className="flex flex-col items-center justify-center w-full h-32 border-2 border-neutral-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-neutral-50 mb-4">
                                 <div className="flex flex-col items-center justify-center">
                                     <UploadIcon className="w-8 h-8 mb-2 text-neutral-400" />
-                                    <p className="text-sm text-neutral-500">{images.length > 0 ? 'Upload more or replace images' : 'Upload property images'}</p>
+                                    <p className="text-sm text-neutral-500">{images.length > 0 ? t('seller:createListing.upload.uploadMore') : t('seller:createListing.upload.uploadProperty')}</p>
                                 </div>
                                 <input id="image-upload-manual" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
                             </label>
@@ -1704,7 +1704,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 <div>
                                     <div className="flex items-center gap-2 bg-blue-100 text-blue-800 text-sm p-3 rounded-lg mb-4">
                                         <InfoIcon className="w-8 h-8 flex-shrink-0"/>
-                                        <p>Drag and drop images to reorder them. The first image will be the main cover photo for your listing.</p>
+                                        <p>{t('seller:createListing.imageManagement.dragToReorder')}</p>
                                     </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
                                         {images.map((img, index) => (
@@ -1734,9 +1734,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     </fieldset>
                     
                     <div>
-                        <h4 className="font-semibold text-neutral-800 mb-2 mt-4">Floor Plan (Optional)</h4>
+                        <h4 className="font-semibold text-neutral-800 mb-2 mt-4">{t('seller:createListing.floorPlan.title')}</h4>
                         <label htmlFor="floorplan-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-neutral-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-neutral-50">
-                            <div className="flex flex-col items-center justify-center"><UploadIcon className="w-8 h-8 mb-2 text-neutral-400" /><p className="text-sm text-neutral-500">Upload floor plan image</p></div>
+                            <div className="flex flex-col items-center justify-center"><UploadIcon className="w-8 h-8 mb-2 text-neutral-400" /><p className="text-sm text-neutral-500">{t('seller:createListing.upload.uploadFloorplan')}</p></div>
                             <input id="floorplan-upload" type="file" accept="image/*" className="hidden" onChange={handleFloorplanImageChange} />
                         </label>
                         {floorplanImage.previewUrl && (
@@ -1752,11 +1752,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                                 <path d="M2 12h20" />
                             </svg>
-                            <h3 className="text-base font-semibold text-purple-900">360° Virtual Tour (Optional)</h3>
+                            <h3 className="text-base font-semibold text-purple-900">{t('seller:createListing.virtualTour.title')}</h3>
                         </div>
                         <p className="text-sm text-purple-700 mb-3">
-                            Add an immersive 360° virtual tour to help buyers explore your property remotely.
-                            Supports Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.
+                            {t('seller:createListing.virtualTour.description')}
                         </p>
                         <div className="relative">
                             <input
@@ -1765,15 +1764,15 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 name="virtualTour360Url"
                                 value={listingData.virtualTour360Url}
                                 onChange={handleInputChange}
-                                placeholder="https://my.matterport.com/show/?m=... or https://kuula.co/share/..."
+                                placeholder={t('seller:createListing.virtualTour.placeholder')}
                                 className={`${floatingInputClasses} border-purple-300 focus:border-purple-500 focus:ring-purple-500`}
                             />
                             <label htmlFor="virtualTour360Url" className={`${floatingLabelClasses} text-purple-700 peer-focus:text-purple-600`}>
-                                360° Tour URL
+                                {t('seller:createListing.virtualTour.label')}
                             </label>
                         </div>
                         <p className="text-xs text-purple-600">
-                            Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing.
+                            {t('seller:createListing.virtualTour.hint')}
                         </p>
                     </fieldset>
 
@@ -1783,9 +1782,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             <div className="flex items-center gap-3 mb-2">
                                 <SpinnerIcon className="w-5 h-5 text-blue-600 animate-spin" />
                                 <span className="text-sm font-semibold text-blue-800">
-                                    {isCompressing && 'Compressing images...'}
-                                    {isUploading && 'Uploading to cloud...'}
-                                    {isSubmitting && !isUploading && 'Creating listing...'}
+                                    {isCompressing && t('seller:createListing.progress.compressing')}
+                                    {isUploading && t('seller:createListing.progress.uploading')}
+                                    {isSubmitting && !isUploading && t('seller:createListing.progress.creating')}
                                 </span>
                             </div>
                             {isUploading && (
@@ -1807,10 +1806,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 </div>
                                 <div className="flex-1">
                                     <h3 className="text-base font-bold text-gray-900 mb-1">
-                                        Promote Your Listing
+                                        {t('seller:createListing.promotion.title')}
                                     </h3>
                                     <p className="text-sm text-gray-600">
-                                        Get more visibility and inquiries with promoted placement
+                                        {t('seller:createListing.promotion.description')}
                                     </p>
                                 </div>
                             </div>
@@ -1825,10 +1824,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 />
                                 <div className="flex-1">
                                     <span className="text-sm font-semibold text-gray-900">
-                                        I want to promote this listing
+                                        {t('seller:createListing.promotion.checkbox')}
                                     </span>
                                     <p className="text-xs text-gray-600 mt-1">
-                                        You'll choose your promotion plan and complete payment on the next page before publishing.
+                                        {t('seller:createListing.promotion.hint')}
                                     </p>
                                 </div>
                             </label>
@@ -1839,10 +1838,10 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                         <span className="text-lg">✓</span>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium text-green-900 mb-1">
-                                                Promotion selected
+                                                {t('seller:createListing.promotion.selected')}
                                             </p>
                                             <p className="text-xs text-green-700">
-                                                On the next page, you'll select your promotion tier (from €1.99), duration, and apply any discount coupons before publishing.
+                                                {t('seller:createListing.promotion.selectedHint')}
                                             </p>
                                         </div>
                                     </div>
@@ -1857,9 +1856,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             disabled={isSubmitting || isCompressing || isUploading}
                             className="px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isSubmitting ? 'Saving...' : (
-                                propertyToEdit ? 'Update Listing' : (
-                                    wantToPromote ? 'Continue to Payment' : 'Publish Listing'
+                            {isSubmitting ? t('seller:createListing.buttons.saving') : (
+                                propertyToEdit ? t('seller:createListing.buttons.updateListing') : (
+                                    wantToPromote ? t('seller:createListing.buttons.continueToPayment') : t('seller:createListing.buttons.publishListing')
                                 )
                             )}
                         </button>
