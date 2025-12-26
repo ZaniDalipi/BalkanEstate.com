@@ -202,6 +202,11 @@ import mkModals from './locales/mk/modals.json';
 import mkPayment from './locales/mk/payment.json';
 import mkSaved from './locales/mk/saved.json';
 import mkExploreCities from './locales/mk/exploreCities.json';
+import mkSubscription from './locales/mk/subscription.json';
+import mkAgencies from './locales/mk/agencies.json';
+import mkAgencyDetails from './locales/mk/agencyDetails.json';
+import mkAgentProfile from './locales/mk/agentProfile.json';
+import mkNewListing from './locales/mk/newListing.json';
 
 // Import translations - Romanian
 import roCommon from './locales/ro/common.json';
@@ -446,6 +451,11 @@ const resources = {
     payment: mkPayment,
     saved: mkSaved,
     exploreCities: mkExploreCities,
+    subscription: mkSubscription,
+    agencies: mkAgencies,
+    agencyDetails: mkAgencyDetails,
+    agentProfile: mkAgentProfile,
+    newListing: mkNewListing,
   },
   ro: {
     common: roCommon,

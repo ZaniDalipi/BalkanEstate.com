@@ -1,0 +1,103 @@
+{
+  "navigation": {
+    "back": "Назад кон Агенти"
+  },
+  "tabs": {
+    "overview": "Преглед",
+    "listings": "Огласи",
+    "reviews": "Рецензии",
+    "about": "За Агентот"
+  },
+  "badges": {
+    "premierAgent": "Премиер Агент",
+    "topRated": "Најдобро Оценет",
+    "verified": "Верифициран",
+    "superhost": "Суперхост"
+  },
+  "contact": {
+    "title": "Контактирајте го Агентот",
+    "phone": "Телефон",
+    "email": "Е-пошта",
+    "whatsapp": "WhatsApp",
+    "callNow": "Јавете се Сега",
+    "sendEmail": "Испратете Е-пошта",
+    "sendMessage": "Испратете Порака",
+    "scheduleCall": "Закажете Повик"
+  },
+  "stats": {
+    "totalSales": "Вкупна Продажба",
+    "propertiesSold": "Продадени Недвижности",
+    "activeListings": "Активни Огласи",
+    "yearsExperience": "Години Искуство",
+    "avgResponseTime": "Просечно Време на Одговор",
+    "satisfactionRate": "Стапка на Задоволство",
+    "languages": "Јазици што ги Зборува"
+  },
+  "overview": {
+    "aboutMe": "За Мене",
+    "specializations": "Специјализации",
+    "serviceAreas": "Сервисни Области",
+    "certifications": "Сертификати",
+    "languages": "Јазици"
+  },
+  "listings": {
+    "title": "Огласи на Агентот",
+    "activeListings": "Активни Огласи",
+    "soldListings": "Продадени Огласи",
+    "noListings": "Нема достапни огласи",
+    "viewAll": "Погледни Сите Огласи"
+  },
+  "reviews": {
+    "title": "Рецензии од Клиенти",
+    "writeReview": "Напишете Рецензија",
+    "averageRating": "Просечна Оценка",
+    "totalReviews": "Вкупно Рецензии",
+    "noReviews": "Сè уште нема рецензии",
+    "beFirst": "Бидете први што ќе оставите рецензија за овој агент",
+    "verifiedPurchase": "Верифицирано Купување",
+    "helpful": "Корисно",
+    "reportReview": "Пријави Рецензија"
+  },
+  "consultation": {
+    "title": "Закажете Консултација",
+    "description": "Закажете бесплатна консултација со овој агент за да разговарате за вашите потреби за недвижности",
+    "selectDate": "Изберете Датум",
+    "selectTime": "Изберете Време",
+    "yourName": "Вашето Име",
+    "yourEmail": "Вашата Е-пошта",
+    "yourPhone": "Вашиот Телефон",
+    "message": "Порака (опционално)",
+    "messagePlaceholder": "Кажете ни за вашите барања за недвижност...",
+    "bookNow": "Закажи Консултација",
+    "confirmBooking": "Потврди Резервација"
+  },
+  "appraisal": {
+    "title": "Побарајте Проценка на Недвижност",
+    "description": "Добијте бесплатна проценка на недвижност од овој стручен агент",
+    "propertyAddress": "Адреса на Недвижност",
+    "propertyType": "Тип на Недвижност",
+    "requestAppraisal": "Побарај Проценка"
+  },
+  "agency": {
+    "partOf": "Дел од",
+    "viewAgency": "Погледни Агенција",
+    "independentAgent": "Независен Агент"
+  },
+  "similarAgents": {
+    "title": "Слични Агенти",
+    "inArea": "во {area}",
+    "viewAll": "Погледни Сите Агенти"
+  },
+  "actions": {
+    "shareProfile": "Сподели Профил",
+    "saveAgent": "Зачувај Агент",
+    "reportAgent": "Пријави Агент"
+  },
+  "messages": {
+    "consultationBooked": "Консултацијата успешно закажана!",
+    "appraisalRequested": "Барањето за проценка успешно испратено!",
+    "profileShared": "Линкот на профилот е копиран во клипборд!",
+    "agentSaved": "Агентот е зачуван во вашите омилени!",
+    "reviewSubmitted": "Рецензијата успешно испратена!"
+  }
+}

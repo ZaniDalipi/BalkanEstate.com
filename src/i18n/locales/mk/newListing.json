@@ -1,0 +1,229 @@
+{
+  "pageTitle": "Креирај Нов Оглас",
+  "editTitle": "Уреди Оглас",
+  "steps": {
+    "init": "Почеток",
+    "loading": "Анализирање...",
+    "form": "Детали за Недвижност",
+    "floorplan": "План на Кат",
+    "payment": "Плаќање",
+    "success": "Објавено!"
+  },
+  "modes": {
+    "ai": "AI Поддржано",
+    "aiDescription": "Прикачете фотографии и оставете AI да го генерира вашиот оглас",
+    "manual": "Рачен Внес",
+    "manualDescription": "Сами пополнете ги сите детали за недвижноста"
+  },
+  "imageUpload": {
+    "title": "Прикачете Фотографии од Недвижност",
+    "subtitle": "Повлечете и пуштете слики или кликнете за прегледување",
+    "hint": "Прикачете најмалку 3 фотографии за најдобри резултати",
+    "maxImages": "Максимум {count} слики",
+    "dragDrop": "Повлечете и пуштете слики тука",
+    "orClick": "или кликнете за прегледување",
+    "supportedFormats": "Поддржани формати: JPG, PNG, WebP",
+    "compressing": "Компресирање на слики...",
+    "uploading": "Прикачување на слики...",
+    "uploadProgress": "Напредок на Прикачување"
+  },
+  "imageTags": {
+    "title": "Ознаки за Слики",
+    "selectTag": "Изберете Ознака",
+    "exterior": "Екстериер",
+    "livingRoom": "Дневна Соба",
+    "kitchen": "Кујна",
+    "bedroom": "Спална Соба",
+    "bathroom": "Бања",
+    "other": "Друго"
+  },
+  "propertyDetails": {
+    "title": "Детали за Недвижност",
+    "basicInfo": "Основни Информации",
+    "propertyTitle": "Наслов",
+    "propertyTitlePlaceholder": "Внесете описен наслов за вашата недвижност",
+    "streetAddress": "Улица и Број",
+    "streetAddressPlaceholder": "Внесете адреса на улица",
+    "price": "Цена",
+    "pricePlaceholder": "Внесете побарувана цена",
+    "propertyType": "Тип на Недвижност",
+    "propertyTypes": {
+      "house": "Куќа",
+      "apartment": "Стан",
+      "villa": "Вила",
+      "other": "Друго"
+    }
+  },
+  "location": {
+    "title": "Локација",
+    "selectCountry": "Изберете Држава",
+    "selectCity": "Изберете Град",
+    "searchAddress": "Пребарај адреса",
+    "dragPin": "Повлечете го маркерот за да поставите точна локација",
+    "coordinates": "Координати"
+  },
+  "roomDetails": {
+    "title": "Детали за Соби",
+    "bedrooms": "Спални Соби",
+    "bathrooms": "Бањи",
+    "livingRooms": "Дневни Соби",
+    "floorNumber": "Број на Кат",
+    "totalFloors": "Вкупно Катови"
+  },
+  "sizeAndAge": {
+    "title": "Големина и Возраст",
+    "sqMeters": "Квадратни Метри",
+    "yearBuilt": "Година на Градба",
+    "parkingSpots": "Паркинг Места"
+  },
+  "amenities": {
+    "title": "Погодности",
+    "hasBalcony": "Балкон",
+    "hasGarden": "Градина",
+    "hasElevator": "Лифт",
+    "hasSecurity": "Обезбедување",
+    "hasAirConditioning": "Клима Уред",
+    "hasPool": "Базен",
+    "petsAllowed": "Домашни Миленици Дозволени",
+    "states": {
+      "no": "Не",
+      "any": "Било кој",
+      "yes": "Да"
+    }
+  },
+  "advancedFeatures": {
+    "title": "Напредни Карактеристики",
+    "furnishing": "Статус на Мебел",
+    "furnishingOptions": {
+      "any": "Било кој",
+      "unfurnished": "Немеблирано",
+      "partlyFurnished": "Делумно Меблирано",
+      "fullyFurnished": "Целосно Меблирано"
+    },
+    "heatingType": "Тип на Греење",
+    "heatingOptions": {
+      "any": "Било кој",
+      "central": "Централно Греење",
+      "electric": "Електрично",
+      "gas": "Гас",
+      "wood": "Дрва",
+      "solar": "Соларно",
+      "geothermal": "Геотермално",
+      "none": "Без Греење"
+    },
+    "condition": "Состојба на Недвижност",
+    "conditionOptions": {
+      "any": "Било која",
+      "new": "Нова",
+      "excellent": "Одлична",
+      "good": "Добра",
+      "fair": "Задоволителна",
+      "needsRenovation": "Потребна Реновација"
+    },
+    "viewType": "Тип на Поглед",
+    "viewOptions": {
+      "any": "Било кој",
+      "sea": "Поглед на Море",
+      "mountain": "Поглед на Планина",
+      "city": "Поглед на Град",
+      "garden": "Поглед на Градина",
+      "park": "Поглед на Парк",
+      "lake": "Поглед на Езеро",
+      "river": "Поглед на Река",
+      "none": "Без Посебен Поглед"
+    },
+    "energyRating": "Енергетски Разред",
+    "energyOptions": {
+      "any": "Било кој",
+      "aPlus": "A+",
+      "a": "A",
+      "b": "B",
+      "c": "C",
+      "d": "D",
+      "e": "E",
+      "f": "F",
+      "g": "G"
+    }
+  },
+  "description": {
+    "title": "Опис",
+    "descriptionLabel": "Опис на Недвижност",
+    "descriptionPlaceholder": "Опишете ја вашата недвижност детално...",
+    "specialFeatures": "Посебни Карактеристики",
+    "specialFeaturesPlaceholder": "Додадете посебни карактеристики...",
+    "materials": "Градежни Материјали",
+    "materialsPlaceholder": "Додадете материјали...",
+    "additionalAmenities": "Дополнителни Погодности",
+    "additionalAmenitiesPlaceholder": "Додадете погодности...",
+    "addTagHint": "Притиснете Enter или запирка за да додадете"
+  },
+  "virtualTour": {
+    "title": "Виртуелна Тура",
+    "tourUrl": "URL на Видео Тура",
+    "tourUrlPlaceholder": "Внесете YouTube или Vimeo URL",
+    "virtualTour360": "URL на 360° Виртуелна Тура",
+    "virtualTour360Placeholder": "Внесете Matterport, Kuula или друг 360 URL на тура"
+  },
+  "floorplan": {
+    "title": "План на Кат",
+    "uploadFloorplan": "Прикачи План на Кат",
+    "optional": "Опционално - Додадете слика на план на кат",
+    "skip": "Прескокни План на Кат"
+  },
+  "language": {
+    "title": "Јазик на Оглас",
+    "selectLanguage": "Изберете Јазик",
+    "languages": {
+      "english": "Англиски",
+      "albanian": "Албански",
+      "macedonian": "Македонски",
+      "serbian": "Српски",
+      "bosnian": "Босански",
+      "croatian": "Хрватски",
+      "montenegrin": "Црногорски",
+      "greek": "Грчки",
+      "bulgarian": "Бугарски",
+      "romanian": "Романски"
+    }
+  },
+  "role": {
+    "title": "Огласувате Како",
+    "selectRole": "Изберете ја вашата улога за овој оглас",
+    "privateSeller": "Приватен Продавач",
+    "agent": "Агент за Недвижности"
+  },
+  "promotion": {
+    "title": "Промовирајте го Вашиот Оглас",
+    "wantToPromote": "Сакам да го промовирам мојот оглас",
+    "selectPromotion": "Изберете Тип на Промоција"
+  },
+  "actions": {
+    "generateWithAi": "Генерирај со AI",
+    "analyzing": "Анализирање на слики...",
+    "saveDraft": "Зачувај Нацрт",
+    "preview": "Преглед",
+    "publish": "Објави Оглас",
+    "update": "Ажурирај Оглас",
+    "publishing": "Објавување...",
+    "goBack": "Врати се Назад"
+  },
+  "validation": {
+    "required": "Ова поле е задолжително",
+    "minImages": "Ве молиме прикачете најмалку {count} слики",
+    "selectCountry": "Ве молиме изберете држава",
+    "selectCity": "Ве молиме изберете град",
+    "setLocation": "Ве молиме поставете ја локацијата на недвижноста на мапата",
+    "invalidPrice": "Ве молиме внесете валидна цена"
+  },
+  "success": {
+    "title": "Огласот Објавен!",
+    "message": "Вашиот оглас за недвижност е успешно објавен.",
+    "viewListing": "Погледни Оглас",
+    "createAnother": "Креирај Уште Еден Оглас"
+  },
+  "errors": {
+    "aiGenerationFailed": "AI генерирањето не успеа. Ве молиме обидете се повторно или користете рачен режим.",
+    "uploadFailed": "Прикачувањето на слики не успеа. Ве молиме обидете се повторно.",
+    "publishFailed": "Објавувањето на оглас не успеа. Ве молиме обидете се повторно."
+  }
+}
