@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '../../types';
 
 interface RoleSelectorProps {
@@ -8,6 +9,7 @@ interface RoleSelectorProps {
 }
 
 const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, onRoleSelect }) => {
+    const { t } = useTranslation(['seller']);
     const availableRoles = currentUser.availableRoles || [currentUser.role];
 
     // Debug logging to diagnose subscription display issues
@@ -46,9 +48,9 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     const getRoleLabel = (role: UserRole) => {
         switch (role) {
             case UserRole.AGENT:
-                return 'Agent';
+                return t('seller:roleSelector.agent');
             case UserRole.PRIVATE_SELLER:
-                return 'Private Seller';
+                return t('seller:roleSelector.privateSeller');
             default:
                 return role;
         }
@@ -106,21 +108,21 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     const getPlanBadge = (plan: string) => {
         switch (plan) {
             case 'trial':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Trial</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-700 rounded">{t('seller:roleSelector.badges.trial')}</span>;
             case 'pro':
             case 'pro_monthly':
             case 'pro_yearly':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded">Pro</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded">{t('seller:roleSelector.badges.pro')}</span>;
             case 'agency_owner':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded">Agency Owner</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded">{t('seller:roleSelector.badges.agencyOwner')}</span>;
             case 'agency_agent':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded">Agency Agent</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded">{t('seller:roleSelector.badges.agencyAgent')}</span>;
             case 'buyer':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded">Buyer</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded">{t('seller:roleSelector.badges.buyer')}</span>;
             case 'free':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-neutral-200 text-neutral-700 rounded">Free</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-neutral-200 text-neutral-700 rounded">{t('seller:roleSelector.badges.free')}</span>;
             case 'none':
-                return <span className="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-700 rounded">Pro Required</span>;
+                return <span className="text-xs font-semibold px-2 py-0.5 bg-red-100 text-red-700 rounded">{t('seller:roleSelector.badges.proRequired')}</span>;
             default:
                 return null;
         }
@@ -129,12 +131,12 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     return (
         <div className="bg-white border-2 border-primary/20 rounded-lg p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-lg font-bold text-neutral-800">Post Listing As</h3>
+                <h3 className="text-lg font-bold text-neutral-800">{t('seller:roleSelector.title')}</h3>
                 <div className="flex-1 h-px bg-neutral-200"></div>
             </div>
 
             <p className="text-sm text-neutral-600 mb-4">
-                Choose which role to use when creating this listing. Each role has separate listing limits and subscriptions.
+                {t('seller:roleSelector.description')}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -177,6 +179,10 @@ interface RoleCardProps {
         used: number;
         isActive: boolean;
         isTrial?: boolean;
+        isPro?: boolean;
+        roleCount?: number;
+        highlightCoupons?: number;
+        usedCoupons?: number;
     } | null;
     isSelected: boolean;
     onSelect: () => void;
@@ -194,6 +200,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
     getPlanBadge,
     agencyName
 }) => {
+    const { t } = useTranslation(['seller']);
     const remaining = subscription ? subscription.limit - subscription.used : 0;
     const isLimitReached = subscription ? (subscription.plan === 'none' || subscription.used >= subscription.limit) : false;
 
@@ -236,10 +243,10 @@ const RoleCard: React.FC<RoleCardProps> = ({
                             <div className="space-y-2">
                                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                                     <p className="text-xs text-red-700 font-medium mb-1">
-                                        Pro Subscription Required
+                                        {t('seller:roleSelector.proRequired.title')}
                                     </p>
                                     <p className="text-xs text-red-600">
-                                        To post listings as an agent, you need to subscribe to the Pro plan.
+                                        {t('seller:roleSelector.proRequired.description')}
                                     </p>
                                 </div>
                                 <button
@@ -251,7 +258,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                         alert('Subscription modal will open here');
                                     }}
                                 >
-                                    Subscribe to Pro
+                                    {t('seller:roleSelector.proRequired.button')}
                                 </button>
                             </div>
                         ) : (
@@ -260,15 +267,15 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                 {subscription.isPro ? (
                                     <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded">
                                         <p className="text-xs text-amber-800 font-medium">
-                                            Shared Limit: {subscription.used}/{subscription.limit} total listings
+                                            {t('seller:roleSelector.sharedLimit', { used: subscription.used, limit: subscription.limit })}
                                         </p>
                                         <p className="text-xs text-amber-700 mt-0.5">
-                                            ({subscription.roleCount || 0} as {role === UserRole.AGENT ? 'agent' : 'private seller'})
+                                            {t('seller:roleSelector.asRole', { count: subscription.roleCount || 0, role: role === UserRole.AGENT ? t('seller:roleSelector.agent').toLowerCase() : t('seller:roleSelector.privateSeller').toLowerCase() })}
                                         </p>
                                     </div>
                                 ) : (
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-neutral-600">Listings</span>
+                                        <span className="text-neutral-600">{t('seller:roleSelector.listings')}</span>
                                         <span className={`font-semibold ${isLimitReached ? 'text-red-600' : 'text-neutral-800'}`}>
                                             {subscription.used} / {subscription.limit}
                                         </span>
@@ -291,15 +298,15 @@ const RoleCard: React.FC<RoleCardProps> = ({
 
                                 {isLimitReached ? (
                                     <p className="text-xs text-red-600 font-medium mt-1">
-                                        {subscription.isPro ? 'Shared limit reached across both roles.' : 'Listing limit reached. Upgrade to Pro for 25 listings!'}
+                                        {subscription.isPro ? t('seller:roleSelector.limitReachedShared') : t('seller:roleSelector.limitReachedUpgrade')}
                                     </p>
                                 ) : remaining <= 2 ? (
                                     <p className="text-xs text-amber-600 font-medium mt-1">
-                                        {remaining} listing{remaining !== 1 ? 's' : ''} remaining {subscription.isPro ? '(shared)' : ''}
+                                        {t('seller:roleSelector.remainingListings', { count: remaining })} {subscription.isPro ? t('seller:roleSelector.shared') : ''}
                                     </p>
                                 ) : (
                                     <p className="text-xs text-green-600 font-medium mt-1">
-                                        {remaining} listing{remaining !== 1 ? 's' : ''} available {subscription.isPro ? '(shared)' : ''}
+                                        {t('seller:roleSelector.availableListings', { count: remaining })} {subscription.isPro ? t('seller:roleSelector.shared') : ''}
                                     </p>
                                 )}
 
@@ -307,17 +314,17 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                 {role === UserRole.AGENT && subscription.isPro && subscription.highlightCoupons !== undefined && (
                                     <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded text-xs">
                                         <p className="text-purple-800 font-medium">
-                                            🎟️ Highlight Coupons: {subscription.highlightCoupons - (subscription.usedCoupons || 0)}/{subscription.highlightCoupons}
+                                            {t('seller:roleSelector.highlightCoupons', { available: subscription.highlightCoupons - (subscription.usedCoupons || 0), total: subscription.highlightCoupons })}
                                         </p>
                                         <p className="text-purple-600 text-xs mt-0.5">
-                                            Use to promote your listings
+                                            {t('seller:roleSelector.couponsDescription')}
                                         </p>
                                     </div>
                                 )}
                             </div>
                         )
                     ) : (
-                        <p className="text-xs text-neutral-500">No subscription data</p>
+                        <p className="text-xs text-neutral-500">{t('seller:roleSelector.noSubscriptionData')}</p>
                     )}
                 </div>
             </div>

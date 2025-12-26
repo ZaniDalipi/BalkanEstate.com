@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { searchLocation, reverseGeocode } from '../../services/osmService';
@@ -26,6 +27,7 @@ interface MapLocationPickerProps {
 }
 
 const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange }) => {
+  const { t } = useTranslation(['search']);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -99,7 +101,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       autoPan: true,
     }).addTo(map);
 
-    marker.bindPopup(`<b>Drag me to adjust location</b><br>${address}`).openPopup();
+    marker.bindPopup(`<b>${t('search:map.dragToAdjust')}</b><br>${address}`).openPopup();
 
     // Handle marker drag
     marker.on('dragstart', () => {
@@ -110,7 +112,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       const position = e.target.getLatLng();
       onLocationChange(position.lat, position.lng);
       setIsDragging(false);
-      marker.setPopupContent(`<b>Location set</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
+      marker.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
       marker.openPopup();
 
       // Reverse geocode to get address for the new pin location
@@ -130,7 +132,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
 
     marker.on('drag', (e) => {
       const position = e.target.getLatLng();
-      marker.setPopupContent(`<b>Dragging...</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
+      marker.setPopupContent(`<b>${t('search:map.dragging')}</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
     });
 
     mapRef.current = map;
@@ -210,7 +212,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         mapRef.current.setView(newLatLng, mapRef.current.getZoom(), { animate: false });
       }
 
-      markerRef.current.setPopupContent(`<b>Drag me to adjust location</b><br>${address}`);
+      markerRef.current.setPopupContent(`<b>${t('search:map.dragToAdjust')}</b><br>${address}`);
 
       // Open popup after animation (no resize needed)
       const popupDelay = distance > 500 ? 900 : (distance > 100 ? 550 : 0);
@@ -288,7 +290,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     if (city && cityLat && cityLng) {
       const distance = calculateDistance(cityLat, cityLng, newLat, newLng);
       if (distance > 30) {
-        alert(`This location is ${distance.toFixed(1)}km away from ${city}. Please select a location within ${city} or nearby areas.`);
+        alert(t('search:map.locationTooFar', { distance: distance.toFixed(1), city }));
         return;
       }
     }
@@ -340,8 +342,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-neutral-700">Property Location</p>
-        <p className="text-xs text-neutral-500">Search, navigate, and pin your location</p>
+        <p className="text-sm font-medium text-neutral-700">{t('search:map.propertyLocation')}</p>
+        <p className="text-xs text-neutral-500">{t('search:map.searchNavigatePin')}</p>
       </div>
 
       {/* Search box */}
@@ -351,7 +353,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
           value={searchQuery}
           onChange={handleSearchChange}
           onFocus={() => searchResults.length > 0 && setShowResults(true)}
-          placeholder="Search for your village, town, or street..."
+          placeholder={t('search:map.searchPlaceholder')}
           className="w-full px-4 py-2.5 pr-10 text-sm border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           autoComplete="off"
         />
@@ -404,7 +406,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
                 : 'text-neutral-600 hover:bg-neutral-100'
             }`}
           >
-            Street
+            {t('search:map.street')}
           </button>
           <button
             onClick={() => handleMapTypeToggle('satellite')}
@@ -414,7 +416,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
                 : 'text-neutral-600 hover:bg-neutral-100'
             }`}
           >
-            Satellite
+            {t('search:map.satellite')}
           </button>
         </div>
       </div>
@@ -422,17 +424,17 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
         <p className="text-xs text-blue-800">
-          <span className="font-semibold">💡 Tips:</span> Use the search box to find your village/town, zoom with +/- buttons or scroll wheel, pan by dragging the map, and drag the red marker to your exact property location.
+          {t('search:map.tips')}
         </p>
       </div>
 
       {/* Coordinates */}
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div className="bg-neutral-50 p-2 rounded border border-neutral-200">
-          <span className="text-neutral-500">Latitude:</span> <span className="font-mono font-semibold text-neutral-800">{lat.toFixed(6)}</span>
+          <span className="text-neutral-500">{t('search:map.latitude')}</span> <span className="font-mono font-semibold text-neutral-800">{lat.toFixed(6)}</span>
         </div>
         <div className="bg-neutral-50 p-2 rounded border border-neutral-200">
-          <span className="text-neutral-500">Longitude:</span> <span className="font-mono font-semibold text-neutral-800">{lng.toFixed(6)}</span>
+          <span className="text-neutral-500">{t('search:map.longitude')}</span> <span className="font-mono font-semibold text-neutral-800">{lng.toFixed(6)}</span>
         </div>
       </div>
     </div>

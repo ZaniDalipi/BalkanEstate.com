@@ -1,4 +1,35 @@
 {
+  "roleSelector": {
+    "title": "Post Listing As",
+    "description": "Choose which role to use when creating this listing. Each role has separate listing limits and subscriptions.",
+    "agent": "Agent",
+    "privateSeller": "Private Seller",
+    "sharedLimit": "Shared Limit: {{used}}/{{limit}} total listings",
+    "asRole": "({{count}} as {{role}})",
+    "listings": "Listings",
+    "limitReachedShared": "Shared limit reached across both roles.",
+    "limitReachedUpgrade": "Listing limit reached. Upgrade to Pro for 25 listings!",
+    "remainingListings": "{{count}} listing(s) remaining",
+    "availableListings": "{{count}} listing(s) available",
+    "shared": "(shared)",
+    "highlightCoupons": "🎟️ Highlight Coupons: {{available}}/{{total}}",
+    "couponsDescription": "Use to promote your listings",
+    "noSubscriptionData": "No subscription data",
+    "proRequired": {
+      "title": "Pro Subscription Required",
+      "description": "To post listings as an agent, you need to subscribe to the Pro plan.",
+      "button": "Subscribe to Pro"
+    },
+    "badges": {
+      "trial": "Trial",
+      "pro": "Pro",
+      "agencyOwner": "Agency Owner",
+      "agencyAgent": "Agency Agent",
+      "buyer": "Buyer",
+      "free": "Free",
+      "proRequired": "Pro Required"
+    }
+  },
   "createListing": {
     "title": "Създай Нова Обява",
     "editTitle": "Редактирай Обявата",

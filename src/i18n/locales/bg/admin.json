@@ -24,6 +24,7 @@
     "users": "Потребители",
     "agencies": "Агенции",
     "discountCodes": "Кодове за Отстъпка",
+    "promotionCoupons": "Promotion Coupons",
     "promotions": "Промоции",
     "analytics": "Анализи",
     "settings": "Настройки",
@@ -31,7 +32,8 @@
     "support": "Поддръжка",
     "logs": "Дневници на Дейността",
     "notifications": "Известия",
-    "backToSite": "Обратно към Сайта"
+    "backToSite": "Обратно към Сайта",
+    "usersAndAgents": "Users & Agents"
   },
   "properties": {
     "title": "Управление на Имоти",

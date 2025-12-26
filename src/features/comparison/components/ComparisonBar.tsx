@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { BuildingOfficeIcon } from '../../../constants';
 
@@ -38,6 +39,7 @@ const CompareImage: React.FC<{ prop: Property; onRemove: (id: string) => void; }
 };
 
 const ComparisonBar: React.FC<ComparisonBarProps> = ({ properties, onCompareNow, onRemove, onClear }) => {
+    const { t } = useTranslation(['search']);
     const propertyCount = properties.length;
     const canCompare = propertyCount >= 2;
 
@@ -51,20 +53,20 @@ const ComparisonBar: React.FC<ComparisonBarProps> = ({ properties, onCompareNow,
                         ))}
                     </div>
                     <div>
-                        <h3 className="font-semibold text-sm text-neutral-800">Compare Properties</h3>
-                        <p className="text-xs text-neutral-600">{propertyCount} of 5 selected</p>
+                        <h3 className="font-semibold text-sm text-neutral-800">{t('search:compare.title')}</h3>
+                        <p className="text-xs text-neutral-600">{t('search:compare.selectedOfMax', { count: propertyCount, max: 5 })}</p>
                     </div>
                 </div>
                 <div className="w-full sm:w-auto flex items-center justify-end gap-3 flex-shrink-0">
                     <button onClick={onClear} className="text-sm font-semibold text-neutral-600 hover:text-primary">
-                        Clear
+                        {t('search:compare.clear')}
                     </button>
                     <button
                         onClick={onCompareNow}
                         disabled={!canCompare}
                         className="flex-grow sm:flex-grow-0 px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed"
                     >
-                        Compare Now ({propertyCount})
+                        {t('search:compare.compareNow', { count: propertyCount })}
                     </button>
                 </div>
             </div>

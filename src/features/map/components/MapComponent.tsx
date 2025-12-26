@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
 import { Property } from '../../../types';
 import L from 'leaflet';
@@ -109,6 +110,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   searchMode,
   hoveredPropertyId,
 }) => {
+  const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const [mapType, setMapType] = useState<TileLayerType>('street');
   const [isLegendOpen, setIsLegendOpen] = useState(false);
@@ -185,7 +187,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               <button
                 onClick={onRecenter}
                 className="p-2 rounded-full hover:bg-black/10 transition-colors"
-                title="Center on my location"
+                title={t('search:map.centerOnLocation')}
               >
                 <CrosshairsIcon className="w-6 h-6 text-neutral-700" />
               </button>
@@ -198,7 +200,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
                 >
-                  Street
+                  {t('search:map.street')}
                 </button>
                 <button
                   onClick={() => setMapType('satellite')}
@@ -208,7 +210,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
                 >
-                  Satellite
+                  {t('search:map.satellite')}
                 </button>
               </div>
               <button
@@ -220,7 +222,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 }`}
               >
                 {isDrawing ? <XCircleIcon className="w-5 h-5" /> : <PencilIcon className="w-5 h-5" />}
-                <span>{isDrawing ? 'Cancel' : 'Draw Area'}</span>
+                <span>{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
               </button>
             </div>
 
@@ -232,9 +234,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     ? 'bg-primary text-white hover:bg-primary-dark'
                     : 'bg-white/90 text-neutral-800 hover:bg-white'
                 }`}
-                title="Show cadastral parcels (zoom in to see)"
+                title={t('search:map.cadastralParcels')}
               >
-                {showCadastre ? '✓ ' : ''} Cadastral Parcels
+                {showCadastre ? '✓ ' : ''} {t('search:map.cadastralParcels')}
               </button>
             )}
 
@@ -247,7 +249,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
                   >
                     <SearchPlusIcon className="w-5 h-5" />
-                    <span>{isSaving ? 'Saving...' : 'Save Area'}</span>
+                    <span>{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
                   </button>
                 )}
                 <button
@@ -255,7 +257,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   className="flex items-center gap-2 px-4 py-2 bg-neutral-800 text-white font-bold rounded-full shadow-lg hover:bg-neutral-900"
                 >
                   <XCircleIcon className="w-5 h-5" />
-                  <span>Clear Area</span>
+                  <span>{t('search:map.clearArea')}</span>
                 </button>
               </div>
             )}
@@ -281,15 +283,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   ? 'bg-primary text-white hover:bg-primary-dark'
                   : 'bg-white/90 text-neutral-800 hover:bg-white'
               }`}
-              title="Show cadastral parcels (zoom in to see)"
+              title={t('search:map.cadastralParcels')}
             >
-              {showCadastre ? '✓ ' : ''}Parcels
+              {showCadastre ? '✓ ' : ''}{t('search:map.parcels')}
             </button>
           )}
           <button
             onClick={() => setIsLegendOpen((p) => !p)}
             className="bg-white/80 backdrop-blur-sm p-2.5 rounded-full shadow-lg pointer-events-auto"
-            title="Map Legend"
+            title={t('search:map.mapLegend')}
           >
             <MapLegendIcon className="w-6 h-6 text-neutral-800" />
           </button>
