@@ -92,6 +92,11 @@ import srModals from './locales/sr/modals.json';
 import srPayment from './locales/sr/payment.json';
 import srSaved from './locales/sr/saved.json';
 import srExploreCities from './locales/sr/exploreCities.json';
+import srSubscription from './locales/sr/subscription.json';
+import srAgencies from './locales/sr/agencies.json';
+import srAgencyDetails from './locales/sr/agencyDetails.json';
+import srAgentProfile from './locales/sr/agentProfile.json';
+import srNewListing from './locales/sr/newListing.json';
 
 // Import translations - Bulgarian
 import bgCommon from './locales/bg/common.json';
@@ -331,6 +336,11 @@ const resources = {
     payment: srPayment,
     saved: srSaved,
     exploreCities: srExploreCities,
+    subscription: srSubscription,
+    agencies: srAgencies,
+    agencyDetails: srAgencyDetails,
+    agentProfile: srAgentProfile,
+    newListing: srNewListing,
   },
   bg: {
     common: bgCommon,
