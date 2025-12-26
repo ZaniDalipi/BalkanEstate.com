@@ -136,17 +136,27 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
     try {
       setActionLoading(promotionId);
       const result = await api.addUrgentBadge(promotionId);
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to add urgent badge');
+      }
+
       if (result.isFree) {
+        // Free urgent badge - reload to show the change
         window.location.reload();
       } else if (result.url) {
+        // Redirect to Stripe checkout
         window.location.href = result.url;
+      } else {
+        // Fallback: should not happen, but handle gracefully
+        throw new Error('No payment URL returned. Please try again.');
       }
     } catch (error: any) {
       console.error('Failed to add urgent badge:', error);
-      alert(error.message || 'Failed to add urgent badge');
-    } finally {
+      alert(error.message || 'Failed to add urgent badge. Please try again.');
       setActionLoading(null);
     }
+    // Note: Don't set actionLoading to null on success since we're redirecting
   }, []);
 
   const handleToggleAutoExtend = useCallback(async (

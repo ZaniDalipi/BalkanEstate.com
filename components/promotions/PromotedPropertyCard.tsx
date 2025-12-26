@@ -88,6 +88,7 @@ export interface PromotedPropertyCardProps {
   onToggleAutoExtend: (promotionId: string, autoExtend: boolean) => void;
   onCompleteAutoExtend: (promotionId: string) => void;
   onViewHistory: (property: Property) => void;
+  isAddingUrgent?: boolean;
 }
 
 const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
@@ -99,6 +100,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
   onToggleAutoExtend,
   onCompleteAutoExtend,
   onViewHistory,
+  isAddingUrgent = false,
 }) => {
   const tier = property.promotionTier || 'standard';
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.standard;
@@ -179,9 +181,16 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             ) : !isExpired && promotion?._id && (
               <button
                 onClick={() => onAddUrgent(promotion._id)}
-                className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 text-red-600 text-xs font-semibold px-2.5 py-1 rounded-full hover:from-red-100 hover:to-orange-100 transition-colors flex items-center gap-1"
+                disabled={isAddingUrgent}
+                className={`bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 text-red-600 text-xs font-semibold px-2.5 py-1 rounded-full hover:from-red-100 hover:to-orange-100 transition-colors flex items-center gap-1 ${isAddingUrgent ? 'opacity-50 cursor-wait' : ''}`}
               >
-                🔥 +Urgent €0.99
+                {isAddingUrgent ? (
+                  <>
+                    <span className="animate-spin">⏳</span> Processing...
+                  </>
+                ) : (
+                  <>🔥 +Urgent €0.99</>
+                )}
               </button>
             )}
           </div>

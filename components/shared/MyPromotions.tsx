@@ -31,6 +31,7 @@ const MyPromotions: React.FC = () => {
   } = usePromotions();
 
   const {
+    actionLoading,
     handleAddUrgent,
     handleToggleAutoExtend,
     handleCompleteAutoExtend,
@@ -190,6 +191,7 @@ const MyPromotions: React.FC = () => {
               onToggleAutoExtend={onToggleAutoExtend}
               onCompleteAutoExtend={handleCompleteAutoExtend}
               onViewHistory={handleViewHistory}
+              isAddingUrgent={actionLoading === promotions[property.id]?._id}
             />
           ))}
         </div>
