@@ -23,7 +23,20 @@
     "extend": "Extend",
     "timeRemaining": "Time Remaining",
     "expired": "Expired",
-    "activePromotions": "Active Promotions"
+    "activePromotions": "Active Promotions",
+    "premiumPremiere": "Premium Premiere",
+    "highlight": "Highlight",
+    "featured": "Featured",
+    "days": "days",
+    "hrs": "hrs",
+    "min": "min",
+    "sec": "sec",
+    "started": "Started",
+    "ends": "Ends",
+    "autoExtend": "Auto-Extend",
+    "renewAutomatically": "renew automatically",
+    "active": "Active",
+    "all": "All"
   },
   "roles": {
     "buyer": "Buyer",

@@ -118,19 +118,19 @@ const MyPromotions: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
           <div className="text-2xl font-bold text-green-700">{stats.active}</div>
-          <div className="text-sm text-green-600">Active Promotions</div>
+          <div className="text-sm text-green-600">{t('account:promotions.activePromotions')}</div>
         </div>
         <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4 border border-amber-200 shadow-[0_0_10px_rgba(255,184,0,0.15)]">
           <div className="text-2xl font-bold text-amber-700">{stats.tierCounts.premium || 0}</div>
-          <div className="text-sm text-amber-600">{TIER_CONFIG.premium.icon} Premium Premiere</div>
+          <div className="text-sm text-amber-600">{TIER_CONFIG.premium.icon} {t('account:promotions.premiumPremiere')}</div>
         </div>
         <div className="bg-gradient-to-br from-sky-50 to-cyan-50 rounded-xl p-4 border border-sky-200 shadow-[0_0_10px_rgba(14,165,233,0.15)]">
           <div className="text-2xl font-bold text-sky-700">{stats.tierCounts.highlight || 0}</div>
-          <div className="text-sm text-sky-600">{TIER_CONFIG.highlight.icon} Highlight</div>
+          <div className="text-sm text-sky-600">{TIER_CONFIG.highlight.icon} {t('account:promotions.highlight')}</div>
         </div>
         <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-4 border border-violet-200 shadow-[0_0_10px_rgba(124,58,237,0.15)]">
           <div className="text-2xl font-bold text-violet-600">{stats.tierCounts.featured || 0}</div>
-          <div className="text-sm text-violet-500">{TIER_CONFIG.featured.icon} Featured</div>
+          <div className="text-sm text-violet-500">{TIER_CONFIG.featured.icon} {t('account:promotions.featured')}</div>
         </div>
       </div>
 
@@ -146,9 +146,9 @@ const MyPromotions: React.FC = () => {
                 : 'text-neutral-600 hover:text-neutral-800'
             }`}
           >
-            {f === 'active' ? `Active (${stats.active})` :
-             f === 'expired' ? `Expired (${stats.expired})` :
-             `All (${stats.total})`}
+            {f === 'active' ? `${t('account:promotions.active')} (${stats.active})` :
+             f === 'expired' ? `${t('account:promotions.expired')} (${stats.expired})` :
+             `${t('account:promotions.all')} (${stats.total})`}
           </button>
         ))}
       </div>
@@ -158,14 +158,14 @@ const MyPromotions: React.FC = () => {
         <div className="text-center py-12 bg-neutral-50 rounded-xl border border-neutral-200">
           <SparklesIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-neutral-600 mb-2">
-            {filter === 'active' ? 'No Active Promotions' :
-             filter === 'expired' ? 'No Expired Promotions' :
-             'No Promotions Yet'}
+            {filter === 'active' ? t('account:promotions.noActive') :
+             filter === 'expired' ? t('account:promotions.noExpired') :
+             t('account:promotions.noPromotions')}
           </h3>
           <p className="text-neutral-500 mb-4">
             {filter === 'active'
-              ? 'Promote your listings to get more visibility!'
-              : 'Your promotion history will appear here.'}
+              ? t('account:promotions.promoteHint')
+              : t('account:promotions.historyHint')}
           </p>
           {filter === 'active' && (
             <button
@@ -174,7 +174,7 @@ const MyPromotions: React.FC = () => {
               }}
               className="bg-primary text-white font-semibold px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
             >
-              Promote a Listing
+              {t('account:promotions.promoteButton')}
             </button>
           )}
         </div>
