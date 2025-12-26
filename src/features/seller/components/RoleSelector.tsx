@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, UserRole } from '../../types';
+import { User, UserRole } from '@/types';
 
 interface RoleSelectorProps {
     currentUser: User;

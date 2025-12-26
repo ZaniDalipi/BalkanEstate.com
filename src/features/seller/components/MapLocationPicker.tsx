@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { searchLocation, reverseGeocode } from '../../services/osmService';
-import { NominatimResult } from '../../types';
+import { searchLocation, reverseGeocode } from '@/services/osmService';
+import { NominatimResult } from '@/types';
 
 // Fix for default markers in Leaflet with webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CurrencyDollarIcon, SparklesIcon } from '../../constants';
+import { CurrencyDollarIcon, SparklesIcon } from '@/constants';
 import PropertyCalculator from './PropertyCalculator';
 import GeminiDescriptionGenerator from './GeminiDescriptionGenerator';
-import { useAppContext } from '../../context/AppContext';
-import Footer from '../shared/Footer';
+import { useAppContext } from '@/context/AppContext';
+import Footer from '@/components/shared/Footer';
 
 const CreateListingPage: React.FC = () => {
   const { t } = useTranslation(['seller']);

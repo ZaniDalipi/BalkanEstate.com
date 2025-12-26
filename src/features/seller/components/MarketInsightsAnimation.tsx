@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getFeaturedCities, CityMarketData as ApiCityMarketData } from '../../services/apiService';
+import { getFeaturedCities, CityMarketData as ApiCityMarketData } from '@/services/apiService';
 
 interface MarketInsightsAnimationProps {
     city?: string;

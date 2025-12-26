@@ -14,7 +14,7 @@ import './src/i18n';
 
 // Core components (loaded immediately)
 import Onboarding from './components/Onboarding';
-import { SearchPage } from './components/BuyerFlow/Search';
+import { SearchPage } from './src/features/search/components';
 import AuthPage from './components/auth/AuthModal';
 import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
@@ -23,14 +23,14 @@ import Footer from './components/shared/Footer';
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
 const CityRecommendations = lazy(() => import('./components/BuyerFlow/CityRecommendations'));
-const CreateListingPage = lazy(() => import('./components/SellerFlow/SellerDashboard'));
+const CreateListingPage = lazy(() => import('./src/features/seller/components/SellerDashboard'));
 const PricingPlans = lazy(() => import('./components/SellerFlow/PricingPlans'));
 const SavedSearchesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedSearchesPage'));
 const SavedPropertiesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedHomesPage'));
 const InboxPage = lazy(() => import('./components/BuyerFlow/Messaging/InboxPage'));
 const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
 const SubscriptionModal = lazy(() => import('./components/BuyerFlow/Modals/SubscriptionModal'));
-const AgentsPage = lazy(() => import('./components/AgentsPage/AgentsPage'));
+const AgentsPage = lazy(() => import('./src/features/agents/components/AgentsPage'));
 const AgenciesListPage = lazy(() => import('./components/AgenciesListPage'));
 const AgencyDetailPage = lazy(() => import('./components/AgencyDetailPage'));
 const EnterpriseCreationForm = lazy(() => import('./components/EnterpriseCreationForm'));
@@ -39,7 +39,7 @@ const PaymentSuccess = lazy(() => import('./components/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('./components/PaymentCancel'));
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
-const AdminDashboard = lazy(() => import('./components/AdminPanel/AdminDashboard'));
+const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
 const ResetPasswordPage = lazy(() => import('./components/auth/ResetPasswordPage'));
 const AnalyticsPage = lazy(() => import('./components/AnalyticsPage'));
 

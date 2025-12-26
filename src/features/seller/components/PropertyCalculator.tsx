@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatPrice } from '../../utils/currency';
-import { allProperties as dummyProperties } from '../../services/apiService';
-import { NominatimResult } from '../../types';
-import { searchLocation } from '../../services/osmService';
-import { MapPinIcon, SpinnerIcon } from '../../constants';
+import { formatPrice } from '@/utils/currency';
+import { allProperties as dummyProperties } from '@/services/apiService';
+import { NominatimResult } from '@/types';
+import { searchLocation } from '@/services/osmService';
+import { MapPinIcon, SpinnerIcon } from '@/constants';
 
 const PropertyCalculator: React.FC = () => {
   const { t } = useTranslation(['calculators']);
