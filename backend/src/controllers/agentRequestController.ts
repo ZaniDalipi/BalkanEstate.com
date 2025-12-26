@@ -88,9 +88,9 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
       });
 
       // Merge and deduplicate
-      const existingIds = new Set(matchedAgents.map(a => a._id.toString()));
+      const existingIds = new Set(matchedAgents.map(a => (a._id as mongoose.Types.ObjectId).toString()));
       for (const agent of additionalAgents) {
-        if (!existingIds.has(agent._id.toString())) {
+        if (!existingIds.has((agent._id as mongoose.Types.ObjectId).toString())) {
           matchedAgents.push(agent);
           if (matchedAgents.length >= 5) break;
         }
