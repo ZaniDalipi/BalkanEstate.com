@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent, Agency } from '@/types';
 import AgencyBadge from '@/components/shared/AgencyBadge';
@@ -48,8 +48,31 @@ import {
 import StarRating from '@/components/shared/StarRating';
 import { formatPrice } from '@/utils/currency';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+
+// Component to fix map rendering issues in dynamic containers
+const MapInvalidator: React.FC = () => {
+    const map = useMap();
+
+    useEffect(() => {
+        // Invalidate size after mount and when container might have changed
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        // Also invalidate on window resize
+        const handleResize = () => map.invalidateSize();
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [map]);
+
+    return null;
+};
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import AgentReviewForm from '@/components/shared/AgentReviewForm';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
@@ -924,6 +947,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                                         />
+                                                        <MapInvalidator />
                                                         {agentProperties.filter(p => p.lat && p.lng).map((property) => (
                                                             <Marker
                                                                 key={property.id}
@@ -1002,6 +1026,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                                         />
+                                                        <MapInvalidator />
                                                         <Marker position={[agent.lat, agent.lng]} icon={L.icon({
                                                             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
                                                             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
