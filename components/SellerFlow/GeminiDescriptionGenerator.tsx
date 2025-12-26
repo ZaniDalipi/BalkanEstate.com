@@ -324,9 +324,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         const currentRole = currentUser?.activeRole || currentUser?.role;
 
         // If current role is buyer, choose a valid seller role
-        if (currentRole === 'buyer' || currentRole === UserRole.BUYER) {
+        if (currentRole === UserRole.BUYER) {
             // Prefer agent if available, otherwise private_seller
-            if (currentUser?.availableRoles?.includes('agent')) {
+            if (currentUser?.availableRoles?.includes(UserRole.AGENT)) {
                 return UserRole.AGENT;
             }
             return UserRole.PRIVATE_SELLER;
@@ -442,7 +442,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Robustly load existing images - handle both object and string formats
             const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => {
                 // Handle both {url: string} objects and plain string URLs
-                const imageUrl = typeof img === 'string' ? img : (img?.url || img?.previewUrl || '');
+                const imageUrl = typeof img === 'string' ? img : (img?.url || '');
                 return { file: null, previewUrl: imageUrl };
             }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
@@ -1244,7 +1244,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         return (
              <div className="text-center py-12 flex flex-col items-center">
                 <MarketInsightsAnimation
-                    city={selectedCity?.name}
+                    city={selectedCity}
                     country={selectedCountry || 'Serbia'}
                     propertyType={listingData.propertyType}
                 />

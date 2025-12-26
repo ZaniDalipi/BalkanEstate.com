@@ -3,14 +3,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, PropertyImageTag } from '../../../types';
-import { useAppContext } from '../../../context/AppContext';
-import { ArrowLeftIcon, SparklesIcon } from '../../../constants';
-import ImageViewerModal from '../Modals/ImageViewerModal';
-import FloorPlanViewerModal from '../Modals/FloorPlanViewerModal';
-import FeaturedAgencies from '../../FeaturedAgencies';
-import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '../../../src/components/seo';
-import { SocialShare } from '../../../src/components/marketing/SocialShare';
+import { Property, PropertyImageTag } from '../../../../types';
+import { useAppContext } from '../../../../context/AppContext';
+import { ArrowLeftIcon, SparklesIcon } from '../../../../constants';
+import ImageViewerModal from './ImageViewerModal';
+import FloorPlanViewerModal from './FloorPlanViewerModal';
+import FeaturedAgencies from '../../../../components/FeaturedAgencies';
+import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '../../../components/seo';
+import { SocialShare } from '../../../components/marketing/SocialShare';
 import {
   ImageEditorModal,
   PropertyGallery,
@@ -19,9 +19,9 @@ import {
   PropertyPhotos,
   PropertyMapLink,
   NeighborhoodInsights,
-} from '../../../src/components/property';
-import { useTrackView } from '../../../src/features/view-stats/hooks';
-import PromotionModal from '../../promotions/PromotionModal';
+} from '../../../components/property';
+import { useTrackView } from '../../view-stats/hooks';
+import PromotionModal from '../../promotions/components/PromotionModal';
 
 /**
  * PropertyDetailsPage Component
@@ -73,12 +73,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   const isOwner = React.useMemo(() => {
     if (!currentUser) return false;
     const userId = String(currentUser.id || currentUser._id);
-    // Check if user is the seller (private seller)
+    // Check if user is the seller (covers both private sellers and agents)
     if (property.sellerId && String(property.sellerId) === userId) return true;
-    // Check if user is the agent for this property
-    if (property.agentId && String(property.agentId) === userId) return true;
     return false;
-  }, [currentUser, property.sellerId, property.agentId]);
+  }, [currentUser, property.sellerId]);
 
   // Computed values
   const isFavorited = state.savedHomes.some((p) => p.id === property.id);

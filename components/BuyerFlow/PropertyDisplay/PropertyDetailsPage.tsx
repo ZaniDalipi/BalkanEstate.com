@@ -73,12 +73,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   const isOwner = React.useMemo(() => {
     if (!currentUser) return false;
     const userId = String(currentUser.id || currentUser._id);
-    // Check if user is the seller (private seller)
+    // Check if user is the seller (covers both private sellers and agents)
     if (property.sellerId && String(property.sellerId) === userId) return true;
-    // Check if user is the agent for this property
-    if (property.agentId && String(property.agentId) === userId) return true;
     return false;
-  }, [currentUser, property.sellerId, property.agentId]);
+  }, [currentUser, property.sellerId]);
 
   // Computed values
   const isFavorited = state.savedHomes.some((p) => p.id === property.id);
@@ -233,7 +231,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   }, [dispatch]);
 
   // Generate SEO description
-  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.type || 'property'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 100) || ''}`;
+  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 100) || ''}`;
 
   // Get all images for SEO
   const seoImages = allImages.map(img => img.url).filter(Boolean);
@@ -256,7 +254,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           address: property.address,
           city: property.city,
           country: property.country,
-          propertyType: property.type,
+          propertyType: property.propertyType,
           images: seoImages,
           latitude: property.lat,
           longitude: property.lng,
