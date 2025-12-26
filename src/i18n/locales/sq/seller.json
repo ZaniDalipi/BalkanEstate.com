@@ -117,7 +117,8 @@
       "amenities": "Komoditete",
       "amenitiesHint": "Shtoni komoditete në stilin e hashtageve që blerësit mund t'i kërkojnë",
       "amenitiesPlaceholder": "p.sh., #palestër, #pishinë, #parkim, #wifi",
-      "description": "Përshkrimi"
+      "description": "Përshkrimi",
+      "addTags": "Shto etiketa..."
     },
     "propertyFeatures": {
       "title": "Veçoritë e Pronës",

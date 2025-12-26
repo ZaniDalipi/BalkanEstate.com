@@ -117,7 +117,8 @@
       "amenities": "Amenities",
       "amenitiesHint": "Add hashtag-style amenities that buyers can search for",
       "amenitiesPlaceholder": "e.g., #gym, #pool, #parking, #wifi",
-      "description": "Description"
+      "description": "Description",
+      "addTags": "Add tags..."
     },
     "propertyFeatures": {
       "title": "Property Features",

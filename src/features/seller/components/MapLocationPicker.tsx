@@ -379,7 +379,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
                   </svg>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-neutral-900 truncate">{result.display_name}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{result.type || 'Location'}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">{result.type || t('search:map.location')}</p>
                   </div>
                 </div>
               </button>

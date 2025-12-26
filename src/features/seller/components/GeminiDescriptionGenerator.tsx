@@ -199,6 +199,7 @@ const TagListInput: React.FC<{
     setTags: (tags: string[]) => void;
     label: string;
 }> = ({ tags, setTags, label }) => {
+    const { t } = useTranslation(['seller']);
     const [inputValue, setInputValue] = useState('');
     const inputId = `tag-input-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
@@ -236,7 +237,7 @@ const TagListInput: React.FC<{
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={tags.length === 0 ? "Add tags..." : ""}
+                    placeholder={tags.length === 0 ? t('seller:createListing.fields.addTags') : ""}
                     className="flex-grow bg-transparent outline-none text-base h-8 placeholder:text-neutral-700"
                 />
             </div>
