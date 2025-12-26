@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Property } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon } from '../../constants';
@@ -39,6 +40,7 @@ const calculateTimeRemaining = (endDate: number): TimeRemaining => {
 };
 
 const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
+  const { t } = useTranslation(['account']);
   const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(calculateTimeRemaining(endDate));
 
   useEffect(() => {
@@ -50,7 +52,7 @@ const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
   }, [endDate]);
 
   if (timeRemaining.total <= 0) {
-    return <span className="text-red-600 font-semibold">Expired</span>;
+    return <span className="text-red-600 font-semibold">{t('account:promotions.expired')}</span>;
   }
 
   return (
@@ -58,22 +60,22 @@ const CountdownTimer: React.FC<{ endDate: number }> = ({ endDate }) => {
       {timeRemaining.days > 0 && (
         <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
           <span className="text-lg font-bold text-neutral-800">{timeRemaining.days}</span>
-          <span className="text-[10px] text-neutral-500">days</span>
+          <span className="text-[10px] text-neutral-500">{t('account:promotions.days')}</span>
         </div>
       )}
       <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
         <span className="text-lg font-bold text-neutral-800">{String(timeRemaining.hours).padStart(2, '0')}</span>
-        <span className="text-[10px] text-neutral-500">hrs</span>
+        <span className="text-[10px] text-neutral-500">{t('account:promotions.hrs')}</span>
       </div>
       <span className="text-neutral-400 font-bold">:</span>
       <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
         <span className="text-lg font-bold text-neutral-800">{String(timeRemaining.minutes).padStart(2, '0')}</span>
-        <span className="text-[10px] text-neutral-500">min</span>
+        <span className="text-[10px] text-neutral-500">{t('account:promotions.min')}</span>
       </div>
       <span className="text-neutral-400 font-bold">:</span>
       <div className="flex flex-col items-center bg-neutral-100 px-2 py-1 rounded">
         <span className="text-lg font-bold text-neutral-800">{String(timeRemaining.seconds).padStart(2, '0')}</span>
-        <span className="text-[10px] text-neutral-500">sec</span>
+        <span className="text-[10px] text-neutral-500">{t('account:promotions.sec')}</span>
       </div>
     </div>
   );
@@ -102,6 +104,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
   onViewHistory,
   isAddingUrgent = false,
 }) => {
+  const { t } = useTranslation(['account']);
   const tier = property.promotionTier || 'standard';
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.standard;
   const endDate = property.promotionEndDate || 0;
@@ -222,7 +225,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-sm text-neutral-600">
               <ClockIcon className="w-4 h-4" />
-              <span>Time Remaining</span>
+              <span>{t('account:promotions.timeRemaining')}</span>
             </div>
             <CountdownTimer endDate={endDate} />
           </div>
@@ -230,8 +233,8 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             <div className={`h-full rounded-full transition-all duration-300 ${progressBarClass}`} style={{ width: `${100 - progressPercent}%` }} />
           </div>
           <div className="flex justify-between text-xs text-neutral-400 mt-1">
-            <span>Started: {new Date(startDate).toLocaleDateString()}</span>
-            <span>Ends: {new Date(endDate).toLocaleDateString()}</span>
+            <span>{t('account:promotions.started')}: {new Date(startDate).toLocaleDateString()}</span>
+            <span>{t('account:promotions.ends')}: {new Date(endDate).toLocaleDateString()}</span>
           </div>
         </div>
 
@@ -240,8 +243,8 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <label className="flex items-center justify-between cursor-pointer">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-neutral-700">Auto-Extend</span>
-                <span className="text-xs text-neutral-400">(renew automatically)</span>
+                <span className="text-sm font-medium text-neutral-700">{t('account:promotions.autoExtend')}</span>
+                <span className="text-xs text-neutral-400">({t('account:promotions.renewAutomatically')})</span>
               </div>
               <div className="relative">
                 <input
@@ -262,7 +265,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             onClick={() => onViewProperty(property.id)}
             className="flex-1 bg-primary/10 text-primary hover:bg-primary hover:text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
           >
-            View Listing
+            {t('account:promotions.viewListing')}
           </button>
           <button
             onClick={() => onViewHistory(property)}
@@ -276,7 +279,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all text-sm font-bold flex items-center gap-1.5"
           >
             <ClockIcon className="w-4 h-4" />
-            Extend
+            {t('account:promotions.extend')}
           </button>
         </div>
       </div>
