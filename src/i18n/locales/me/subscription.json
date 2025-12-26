@@ -1,105 +1,245 @@
 {
   "modal": {
     "title": "Odaberite Svoj Plan",
-    "subtitle": "Otključajte premium funkcije za bolje iskustvo s nekretninama",
-    "close": "Zatvori"
+    "tabs": {
+      "forBuyers": "Za Kupce",
+      "forSellers": "Za Prodavače"
+    }
   },
   "buyerPlan": {
-    "title": "Plan za Kupce",
-    "description": "Idealno za pretraživanje nekretnina",
+    "title": "Kupac Pro",
+    "price": "€{price}",
+    "perMonth": "/mjesec",
+    "description": "Nikada ne propustite novi oglas! Primite obavještenje čim nekretnina koja odgovara vašim kriterijumima izađe na tržište.",
     "features": {
-      "savedSearches": "Neograničene sačuvane pretrage",
-      "alerts": "Obavještenja o nekretninama u realnom vremenu",
-      "analytics": "Analitika tržišta",
-      "support": "Prioritetna podrška"
+      "notifications": "Trenutna obavještenja putem e-pošte i SMS-a",
+      "savedSearches": "Sačuvajte neograničene pretrage",
+      "earlyAccess": "Rani pristup novim oglasima",
+      "marketInsights": "Napredni uvidi u tržište"
+    },
+    "form": {
+      "emailLabel": "E-mail Adresa",
+      "emailPlaceholder": "vi@primjer.com",
+      "continueToPayment": "Nastavi na Plaćanje",
+      "securePayment": "Bezbijedno plaćanje putem Stripea"
     }
   },
   "sellerPlan": {
-    "title": "Plan za Prodavce",
-    "description": "Savršeno za oglašavanje i prodaju nekretnina",
-    "features": {
-      "listings": "Neograničeni oglasi nekretnina",
-      "featured": "Opcije istaknutih nekretnina",
-      "analytics": "Analitika oglasa",
-      "support": "Posvećena podrška prodavcima"
+    "title": "Planovi Promocije Oglasa",
+    "description": "Povećajte vidljivost svojih oglasa nekretnina i dobijte više upita",
+    "tiers": {
+      "featured": {
+        "title": "Izdvojeno",
+        "emoji": "⭐",
+        "description": "Prioritet u rezultatima pretraživanja",
+        "price": "€1.99+",
+        "duration": "7-90 dana",
+        "benefits": {
+          "topResults": "Na vrhu rezultata pretraživanja",
+          "badge": "Značka izdvojenog",
+          "visibility": "2x povećanje vidljivosti"
+        }
+      },
+      "highlight": {
+        "title": "Istaknuto",
+        "emoji": "💎",
+        "description": "Istaknite se bojom",
+        "price": "€3.99+",
+        "duration": "7-90 dana",
+        "popular": "Popularno",
+        "benefits": {
+          "allFeatured": "Sve pogodnosti Izdvojenog",
+          "coloredBg": "Obojena pozadina",
+          "visibility": "3x povećanje vidljivosti"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "emoji": "👑",
+        "description": "Prikazivanje na početnoj stranici",
+        "price": "€7.99+",
+        "duration": "7-90 dana",
+        "benefits": {
+          "allHighlight": "Sve pogodnosti Istaknutog",
+          "carousel": "Karusel na početnoj stranici",
+          "visibility": "5x povećanje vidljivosti"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Kako funkcioniše:",
+      "description": "Prilikom kreiranja oglasa odaberite nivo i trajanje promocije. Plaćanje se obrađuje prije objavljivanja. Podržani su kuponi za popust!"
+    },
+    "actions": {
+      "viewSubscriptionPlans": "Pogledaj Planove Pretplate",
+      "startCreatingListing": "Počni Kreirati Oglas"
     }
   },
   "management": {
     "title": "Upravljanje Pretplatom",
-    "currentPlan": "Trenutni Plan",
-    "status": "Status",
-    "nextBilling": "Sljedeća Naplata",
+    "noActiveSubscription": "Nema Aktivne Pretplate",
+    "unlockFeatures": "Otključajte premium funkcije i podignite svoje iskustvo na viši nivo",
+    "viewPlans": "Pogledaj Planove i Cijene",
+    "refresh": "Osvježi",
+    "timeRemaining": "Preostalo Vrijeme",
+    "dayLeft": "dan preostalo",
+    "daysLeft": "dana preostalo",
+    "listingLimit": "Limit Oglasa",
+    "remaining": "preostalo",
+    "couponSubscription": "Pretplata Kuponom",
+    "cancellationPending": "Otkazivanje Pretplate na Čekanju",
+    "autoRenewal": "Automatsko Obnavljanje",
+    "on": "Uključeno",
+    "off": "Isključeno",
+    "paymentSource": "Izvor Plaćanja",
+    "web": "Web",
     "cancelSubscription": "Otkaži Pretplatu",
-    "changePlan": "Promijeni Plan",
-    "reactivate": "Ponovo Aktiviraj Pretplatu",
-    "active": "Aktivna",
-    "cancelled": "Otkazana",
-    "expired": "Istekla",
-    "freeTier": "Besplatni Nivo"
+    "cancelPlan": "Otkaži Plan",
+    "upgradePlan": "Nadogradi Svoj Plan",
+    "upgradeNow": "Nadogradi Sada",
+    "proRatedPricing": "Proporcionalna Cijena Nadogradnje",
+    "confirmUpgrade": "Potvrdi Nadogradnju",
+    "upgradingTo": "Nadogradnja na:",
+    "originalPrice": "Originalna Cijena",
+    "proRatedCredit": "Proporcionalni Kredit",
+    "totalDue": "Ukupno za Plaćanje",
+    "cancelling": "OTKAZUJE SE",
+    "features": {
+      "prioritySupport": "Prioritetna Podrška",
+      "advancedAnalytics": "Napredna Analitika",
+      "listings25": "25 Oglasa",
+      "premiumPlacement": "Premium Pozicija"
+    },
+    "cancelModal": {
+      "cancellingTrial": "Otkazivanje vašeg besplatnog probnog perioda:",
+      "whatHappens": "Šta se dešava kada otkažete:",
+      "loseAccess": "Izgubićete pristup premium funkcijama",
+      "listingsDeactivated": "Vaši oglasi mogu biti deaktivirani",
+      "canResubscribe": "Možete se ponovo pretplatiti u bilo kojem trenutku",
+      "cancelAtEnd": "Otkaži na kraju obračunskog perioda",
+      "cancelNowRefund": "Otkaži sada i dobij €{{amount}} povraćaj",
+      "keepSubscription": "Zadrži {{subscription}}"
+    }
   },
   "featuredAgency": {
-    "title": "Istaknuta Agencija",
-    "description": "Povećajte vidljivost svoje agencije uz premium pozicioniranje",
-    "benefits": {
-      "visibility": "Vrhunsko pozicioniranje u rezultatima pretrage",
-      "badge": "Značka istaknute agencije",
-      "analytics": "Poboljšana analitika",
-      "priority": "Prioritetna podrška"
+    "title": "Izdvojena Agencija",
+    "featureYourAgency": "Izdvojite Svoju Agenciju",
+    "description": "Dobijte veću vidljivost s izdvojenim oglasom. Vaša agencija će se pojavljivati na vrhu rezultata pretraživanja i u karuselu izdvojenih agencija.",
+    "startPlan": "Započni Plan od €10/nedjeljno",
+    "currentlyFeatured": "Agencija Trenutno Izdvojena ✨",
+    "featuredDescription": "Vaša agencija je trenutno izdvojena i prima poboljšanu vidljivost.",
+    "timeRemaining": "Preostalo Vrijeme",
+    "expires": "Ističe:",
+    "boostVisibility": "Povećajte Svoju Vidljivost",
+    "status": {
+      "active": "Aktivna",
+      "trial": "Probni period",
+      "expired": "Istekla",
+      "canceled": "Otkazana"
     },
-    "cta": "Istaknite Se"
+    "progress": {
+      "freeTrialProgress": "Napredak Besplatnog Probnog Perioda",
+      "subscriptionPeriod": "Period Pretplate",
+      "daysLeft": "preostalo"
+    },
+    "details": {
+      "interval": "Interval",
+      "price": "Cijena",
+      "startDate": "Datum Početka",
+      "renewsOn": "Obnavlja se",
+      "endedOn": "Završeno"
+    },
+    "trial": {
+      "title": "Besplatni Probni Period Aktivan",
+      "description": "Vaš besplatni probni period završava {date}"
+    },
+    "coupon": {
+      "applied": "Kupon {code} primijenjen"
+    },
+    "cancelNotice": "Pretplata će biti otkazana na kraju trenutnog perioda",
+    "renewStatus": {
+      "title": "Obnovite Svoj Izdvojeni Status",
+      "description": "Nastavite uživati u poboljšanoj vidljivosti i vrhu rezultata pretraživanja.",
+      "renewNow": "Obnovi Sada"
+    },
+    "visibilityTip": "Izdvojene agencije dobijaju do 5x veću vidljivost i pojavljuju se na vrhu rezultata pretraživanja!"
   },
   "featuredDialog": {
-    "title": "Istaknite Svoju Agenciju",
-    "selectDuration": "Odaberite trajanje",
-    "week": "1 Nedjelja",
-    "month": "1 Mjesec",
-    "quarter": "3 Mjeseca",
-    "year": "1 Godina",
-    "totalPrice": "Ukupna Cijena",
-    "confirm": "Potvrdi Plaćanje",
-    "cancel": "Odustani"
+    "title": "Pretplata Izdvojene Agencije",
+    "subscriptionCreated": "Pretplata Kreirana!",
+    "agencyFeatured": "Vaša agencija je sada izdvojena. Preusmjeravanje...",
+    "getFeatured": "Postanite Izdvojeni!",
+    "boostAgency": "Povećajte vidljivost svoje agencije i dobijte više kontakata s izdvojenim oglasom",
+    "choosePlan": "Odaberite Svoj Plan",
+    "perPeriod": "po {{period}}",
+    "savingsPercent": "Uštedite {{savings}}%",
+    "whatsIncluded": "Šta je Uključeno:",
+    "benefits": {
+      "topPlacement": "Vrhunska pozicija u rezultatima pretraživanja",
+      "featuredCarousel": "Izdvojeno u karuselu agencija",
+      "premiumBadge": "Premium značka na vašem profilu",
+      "monthlyRotation": "Mjesečna rotacija za svježinu",
+      "cancelAnytime": "Otkažite u bilo kojem trenutku"
+    },
+    "coupon": {
+      "haveCoupon": "Imate kupon kod?",
+      "enterCode": "Unesite kupon kod",
+      "validating": "Provjera...",
+      "apply": "Primijeni",
+      "appliedSuccess": "Kupon Uspješno Primijenjen!",
+      "originalPrice": "Originalna Cijena:",
+      "discount": "Popust:",
+      "freeWithCoupon": "BESPLATNO!",
+      "finalPrice": "Konačna Cijena:"
+    },
+    "buttons": {
+      "cancel": "Odustani",
+      "processing": "Obrada...",
+      "activateFree": "Aktiviraj BESPLATNO",
+      "subscribe": "Pretplati se - €{{price}}"
+    },
+    "terms": "Pretplatom prihvatate naše uslove korišćenja.",
+    "noPaymentRequired": "Nije potrebno plaćanje - 100% popust primijenjen!",
+    "chargeNotice": "Biće vam naplaćeno €{{price}} po {{period}}.",
+    "errors": {
+      "enterCoupon": "Molimo unesite kupon kod",
+      "invalidCoupon": "Nevažeći kupon",
+      "createFailed": "Kreiranje pretplate nije uspjelo"
+    }
   },
   "payment": {
-    "title": "Plaćanje",
+    "title": "Dovršite Plaćanje",
     "processing": "Obrada plaćanja...",
     "success": "Plaćanje uspješno!",
-    "failed": "Plaćanje neuspješno",
-    "retry": "Pokušaj Ponovo",
-    "securePayment": "Sigurno Plaćanje",
-    "cardNumber": "Broj Kartice",
-    "expiry": "Datum Isteka",
-    "cvv": "CVV",
-    "nameOnCard": "Ime na Kartici"
+    "error": "Plaćanje neuspješno",
+    "securePayment": "Bezbijedno plaćanje putem Stripea",
+    "cardDetails": "Podaci o Kartici",
+    "payNow": "Plati Sada",
+    "cancel": "Odustani"
   },
   "validation": {
-    "cardRequired": "Broj kartice je obavezan",
-    "cardInvalid": "Neispravan broj kartice",
-    "expiryRequired": "Datum isteka je obavezan",
-    "expiryInvalid": "Neispravan datum isteka",
-    "cvvRequired": "CVV je obavezan",
-    "cvvInvalid": "Neispravan CVV",
-    "nameRequired": "Ime na kartici je obavezno"
+    "invalidEmail": "Molimo unesite validnu e-mail adresu",
+    "emailRequired": "E-mail je obavezan"
   },
   "messages": {
-    "subscriptionUpdated": "Pretplata uspješno ažurirana",
-    "subscriptionCancelled": "Pretplata otkazana",
-    "subscriptionReactivated": "Pretplata ponovo aktivirana",
-    "paymentSuccessful": "Plaćanje uspješno",
-    "paymentFailed": "Plaćanje neuspješno. Molimo pokušajte ponovo.",
-    "error": "Došlo je do greške. Molimo pokušajte ponovo."
+    "subscriptionActivated": "Pretplata uspješno aktivirana!",
+    "subscriptionCanceled": "Pretplata uspješno otkazana",
+    "paymentFailed": "Plaćanje neuspješno. Molimo pokušajte ponovo."
   },
   "coupons": {
-    "title": "Imate kupon kod?",
-    "placeholder": "Unesite kupon kod",
+    "haveCoupon": "Imate kupon?",
+    "enterCode": "Unesite kupon kod",
     "apply": "Primijeni",
     "applied": "Kupon primijenjen!",
-    "invalid": "Neispravan kupon kod",
-    "expired": "Ovaj kupon je istekao",
-    "discount": "Popust"
+    "invalid": "Nevažeći kupon kod",
+    "expired": "Ovaj kupon je istekao"
   },
   "intervals": {
+    "weekly": "Nedjeljno",
     "monthly": "Mjesečno",
     "yearly": "Godišnje",
-    "saveWithYearly": "Uštedite 20% sa godišnjom naplatom"
+    "perWeek": "nedjeljno",
+    "perMonth": "mjesečno",
+    "perYear": "godišnje"
   }
 }

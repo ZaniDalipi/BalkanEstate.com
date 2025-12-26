@@ -1,105 +1,245 @@
 {
   "modal": {
     "title": "Alegeți Planul Dumneavoastră",
-    "subtitle": "Deblocați funcții premium pentru o experiență imobiliară mai bună",
-    "close": "Închide"
+    "tabs": {
+      "forBuyers": "Pentru Cumpărători",
+      "forSellers": "Pentru Vânzători"
+    }
   },
   "buyerPlan": {
-    "title": "Plan pentru Cumpărători",
-    "description": "Ideal pentru căutarea proprietăților",
+    "title": "Cumpărător Pro",
+    "price": "€{price}",
+    "perMonth": "/lună",
+    "description": "Nu ratați niciodată un anunț nou! Primiți notificare imediat ce o proprietate care corespunde criteriilor dumneavoastră apare pe piață.",
     "features": {
-      "savedSearches": "Căutări salvate nelimitate",
-      "alerts": "Alerte în timp real pentru proprietăți",
-      "analytics": "Analiză de piață",
-      "support": "Suport prioritar"
+      "notifications": "Notificări instantanee prin email și SMS",
+      "savedSearches": "Salvați căutări nelimitate",
+      "earlyAccess": "Acces timpuriu la anunțuri noi",
+      "marketInsights": "Informații avansate despre piață"
+    },
+    "form": {
+      "emailLabel": "Adresa de Email",
+      "emailPlaceholder": "dvs@exemplu.com",
+      "continueToPayment": "Continuați către Plată",
+      "securePayment": "Plată securizată prin Stripe"
     }
   },
   "sellerPlan": {
-    "title": "Plan pentru Vânzători",
-    "description": "Perfect pentru listarea și vânzarea proprietăților",
-    "features": {
-      "listings": "Anunțuri nelimitate de proprietăți",
-      "featured": "Opțiuni pentru proprietăți promovate",
-      "analytics": "Analiză anunțuri",
-      "support": "Suport dedicat pentru vânzători"
+    "title": "Planuri de Promovare a Anunțurilor",
+    "description": "Creșteți vizibilitatea anunțurilor de proprietăți și obțineți mai multe întrebări",
+    "tiers": {
+      "featured": {
+        "title": "Promovat",
+        "emoji": "⭐",
+        "description": "Prioritate în rezultatele căutării",
+        "price": "€1.99+",
+        "duration": "7-90 zile",
+        "benefits": {
+          "topResults": "În topul rezultatelor căutării",
+          "badge": "Insignă de promovat",
+          "visibility": "2x creștere a vizibilității"
+        }
+      },
+      "highlight": {
+        "title": "Evidențiat",
+        "emoji": "💎",
+        "description": "Ieșiți în evidență cu culoare",
+        "price": "€3.99+",
+        "duration": "7-90 zile",
+        "popular": "Popular",
+        "benefits": {
+          "allFeatured": "Toate beneficiile Promovat",
+          "coloredBg": "Fundal colorat",
+          "visibility": "3x creștere a vizibilității"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "emoji": "👑",
+        "description": "Afișare pe pagina principală",
+        "price": "€7.99+",
+        "duration": "7-90 zile",
+        "benefits": {
+          "allHighlight": "Toate beneficiile Evidențiat",
+          "carousel": "Carusel pe pagina principală",
+          "visibility": "5x creștere a vizibilității"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Cum funcționează:",
+      "description": "La crearea unui anunț, alegeți nivelul și durata promoției. Plata se procesează înainte de publicare. Cupoanele de reducere sunt acceptate!"
+    },
+    "actions": {
+      "viewSubscriptionPlans": "Vedeți Planurile de Abonament",
+      "startCreatingListing": "Începeți Crearea Anunțului"
     }
   },
   "management": {
     "title": "Gestionare Abonament",
-    "currentPlan": "Plan Curent",
-    "status": "Status",
-    "nextBilling": "Următoarea Facturare",
+    "noActiveSubscription": "Niciun Abonament Activ",
+    "unlockFeatures": "Deblocați funcții premium și duceți experiența la următorul nivel",
+    "viewPlans": "Vedeți Planuri și Prețuri",
+    "refresh": "Reîmprospătare",
+    "timeRemaining": "Timp Rămas",
+    "dayLeft": "zi rămasă",
+    "daysLeft": "zile rămase",
+    "listingLimit": "Limită de Anunțuri",
+    "remaining": "rămase",
+    "couponSubscription": "Abonament cu Cupon",
+    "cancellationPending": "Anulare Abonament în Așteptare",
+    "autoRenewal": "Reînnoire Automată",
+    "on": "Activată",
+    "off": "Dezactivată",
+    "paymentSource": "Sursa Plății",
+    "web": "Web",
     "cancelSubscription": "Anulează Abonamentul",
-    "changePlan": "Schimbă Planul",
-    "reactivate": "Reactivează Abonamentul",
-    "active": "Activ",
-    "cancelled": "Anulat",
-    "expired": "Expirat",
-    "freeTier": "Nivel Gratuit"
+    "cancelPlan": "Anulează Planul",
+    "upgradePlan": "Actualizați Planul",
+    "upgradeNow": "Actualizați Acum",
+    "proRatedPricing": "Preț Proporțional de Actualizare",
+    "confirmUpgrade": "Confirmați Actualizarea",
+    "upgradingTo": "Actualizare la:",
+    "originalPrice": "Preț Original",
+    "proRatedCredit": "Credit Proporțional",
+    "totalDue": "Total de Plată",
+    "cancelling": "SE ANULEAZĂ",
+    "features": {
+      "prioritySupport": "Suport Prioritar",
+      "advancedAnalytics": "Analize Avansate",
+      "listings25": "25 Anunțuri",
+      "premiumPlacement": "Poziționare Premium"
+    },
+    "cancelModal": {
+      "cancellingTrial": "Anularea perioadei de probă gratuite:",
+      "whatHappens": "Ce se întâmplă când anulați:",
+      "loseAccess": "Veți pierde accesul la funcțiile premium",
+      "listingsDeactivated": "Anunțurile dvs. pot fi dezactivate",
+      "canResubscribe": "Vă puteți reabona oricând",
+      "cancelAtEnd": "Anulează la sfârșitul perioadei de facturare",
+      "cancelNowRefund": "Anulează acum și primește €{{amount}} rambursare",
+      "keepSubscription": "Păstrează {{subscription}}"
+    }
   },
   "featuredAgency": {
     "title": "Agenție Promovată",
-    "description": "Creșteți vizibilitatea agenției cu poziționare premium",
-    "benefits": {
-      "visibility": "Poziționare de top în rezultatele căutării",
-      "badge": "Insignă de agenție promovată",
-      "analytics": "Analiză îmbunătățită",
-      "priority": "Suport prioritar"
+    "featureYourAgency": "Promovați-vă Agenția",
+    "description": "Obțineți mai multă vizibilitate cu un anunț promovat. Agenția dvs. va apărea în topul rezultatelor căutării și în caruselul agențiilor promovate.",
+    "startPlan": "Începeți Planul €10/săptămână",
+    "currentlyFeatured": "Agenția Este Promovată ✨",
+    "featuredDescription": "Agenția dvs. este promovată și primește vizibilitate îmbunătățită.",
+    "timeRemaining": "Timp Rămas",
+    "expires": "Expiră:",
+    "boostVisibility": "Creșteți Vizibilitatea",
+    "status": {
+      "active": "Activ",
+      "trial": "Probă",
+      "expired": "Expirat",
+      "canceled": "Anulat"
     },
-    "cta": "Deveniți Promovat"
+    "progress": {
+      "freeTrialProgress": "Progres Probă Gratuită",
+      "subscriptionPeriod": "Perioada Abonamentului",
+      "daysLeft": "rămase"
+    },
+    "details": {
+      "interval": "Interval",
+      "price": "Preț",
+      "startDate": "Data Începerii",
+      "renewsOn": "Se Reînnoiește",
+      "endedOn": "S-a Încheiat"
+    },
+    "trial": {
+      "title": "Probă Gratuită Activă",
+      "description": "Proba dvs. gratuită se termină pe {date}"
+    },
+    "coupon": {
+      "applied": "Cuponul {code} a fost aplicat"
+    },
+    "cancelNotice": "Abonamentul va fi anulat la sfârșitul perioadei curente",
+    "renewStatus": {
+      "title": "Reînnoiți Statutul Promovat",
+      "description": "Continuați să vă bucurați de vizibilitate îmbunătățită și poziție de top în rezultatele căutării.",
+      "renewNow": "Reînnoiți Acum"
+    },
+    "visibilityTip": "Agențiile promovate primesc până la 5x mai multă vizibilitate și apar în topul rezultatelor căutării!"
   },
   "featuredDialog": {
-    "title": "Promovați-vă Agenția",
-    "selectDuration": "Selectați durata",
-    "week": "1 Săptămână",
-    "month": "1 Lună",
-    "quarter": "3 Luni",
-    "year": "1 An",
-    "totalPrice": "Preț Total",
-    "confirm": "Confirmă Plata",
-    "cancel": "Anulează"
+    "title": "Abonament Agenție Promovată",
+    "subscriptionCreated": "Abonament Creat!",
+    "agencyFeatured": "Agenția dvs. este acum promovată. Redirecționare...",
+    "getFeatured": "Deveniți Promovat!",
+    "boostAgency": "Creșteți vizibilitatea agenției și obțineți mai multe contacte cu un anunț promovat",
+    "choosePlan": "Alegeți Planul",
+    "perPeriod": "pe {{period}}",
+    "savingsPercent": "Economisiți {{savings}}%",
+    "whatsIncluded": "Ce Este Inclus:",
+    "benefits": {
+      "topPlacement": "Poziție de top în rezultatele căutării",
+      "featuredCarousel": "Promovat în caruselul agențiilor",
+      "premiumBadge": "Insignă premium pe profilul dvs.",
+      "monthlyRotation": "Rotație lunară pentru prospețime",
+      "cancelAnytime": "Anulați oricând"
+    },
+    "coupon": {
+      "haveCoupon": "Aveți un cod de cupon?",
+      "enterCode": "Introduceți codul cuponului",
+      "validating": "Validare...",
+      "apply": "Aplică",
+      "appliedSuccess": "Cupon Aplicat cu Succes!",
+      "originalPrice": "Preț Original:",
+      "discount": "Reducere:",
+      "freeWithCoupon": "GRATUIT!",
+      "finalPrice": "Preț Final:"
+    },
+    "buttons": {
+      "cancel": "Anulează",
+      "processing": "Procesare...",
+      "activateFree": "Activați GRATUIT",
+      "subscribe": "Abonați-vă - €{{price}}"
+    },
+    "terms": "Prin abonare, acceptați termenii și condițiile noastre.",
+    "noPaymentRequired": "Nu este necesară plata - 100% reducere aplicată!",
+    "chargeNotice": "Vi se va factura €{{price}} pe {{period}}.",
+    "errors": {
+      "enterCoupon": "Vă rugăm introduceți un cod de cupon",
+      "invalidCoupon": "Cupon invalid",
+      "createFailed": "Crearea abonamentului a eșuat"
+    }
   },
   "payment": {
-    "title": "Plată",
-    "processing": "Se procesează plata...",
+    "title": "Finalizați Plata",
+    "processing": "Procesare plată...",
     "success": "Plată reușită!",
-    "failed": "Plată eșuată",
-    "retry": "Încearcă Din Nou",
-    "securePayment": "Plată Securizată",
-    "cardNumber": "Număr Card",
-    "expiry": "Data Expirării",
-    "cvv": "CVV",
-    "nameOnCard": "Nume pe Card"
+    "error": "Plată eșuată",
+    "securePayment": "Plată securizată prin Stripe",
+    "cardDetails": "Detalii Card",
+    "payNow": "Plătiți Acum",
+    "cancel": "Anulează"
   },
   "validation": {
-    "cardRequired": "Numărul cardului este obligatoriu",
-    "cardInvalid": "Număr de card invalid",
-    "expiryRequired": "Data expirării este obligatorie",
-    "expiryInvalid": "Dată de expirare invalidă",
-    "cvvRequired": "CVV-ul este obligatoriu",
-    "cvvInvalid": "CVV invalid",
-    "nameRequired": "Numele pe card este obligatoriu"
+    "invalidEmail": "Vă rugăm introduceți o adresă de email validă",
+    "emailRequired": "Email-ul este obligatoriu"
   },
   "messages": {
-    "subscriptionUpdated": "Abonament actualizat cu succes",
-    "subscriptionCancelled": "Abonament anulat",
-    "subscriptionReactivated": "Abonament reactivat",
-    "paymentSuccessful": "Plată reușită",
-    "paymentFailed": "Plată eșuată. Vă rugăm încercați din nou.",
-    "error": "A apărut o eroare. Vă rugăm încercați din nou."
+    "subscriptionActivated": "Abonament activat cu succes!",
+    "subscriptionCanceled": "Abonament anulat cu succes",
+    "paymentFailed": "Plată eșuată. Vă rugăm încercați din nou."
   },
   "coupons": {
-    "title": "Aveți un cod de cupon?",
-    "placeholder": "Introduceți codul cuponului",
+    "haveCoupon": "Aveți un cupon?",
+    "enterCode": "Introduceți codul cuponului",
     "apply": "Aplică",
     "applied": "Cupon aplicat!",
     "invalid": "Cod de cupon invalid",
-    "expired": "Acest cupon a expirat",
-    "discount": "Reducere"
+    "expired": "Acest cupon a expirat"
   },
   "intervals": {
+    "weekly": "Săptămânal",
     "monthly": "Lunar",
     "yearly": "Anual",
-    "saveWithYearly": "Economisiți 20% cu facturare anuală"
+    "perWeek": "pe săptămână",
+    "perMonth": "pe lună",
+    "perYear": "pe an"
   }
 }
