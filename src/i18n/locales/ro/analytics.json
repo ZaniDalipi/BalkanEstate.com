@@ -49,7 +49,8 @@
     "noViews": "Avertisment Fără Vizualizări",
     "noViewsMessage": "{{count}} anunțuri nu au primit nicio vizualizare. Ar putea avea nevoie de atenție.",
     "priceCorrelation": "Corelația Preț și Vizualizări",
-    "priceCorrelationMessage": "Proprietățile cu prețuri între {{min}} și {{max}} primesc cele mai multe vizualizări în anunțurile dvs."
+    "priceCorrelationMessage": "Proprietățile cu prețuri între {{min}} și {{max}} primesc cele mai multe vizualizări în anunțurile dvs.",
+    "moreProperties": "+{{count}} mai mult"
   },
   "properties": {
     "title": "Performanța Proprietăților",

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   SparklesIcon,
   TrophyIcon,
@@ -36,6 +37,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
  * Displays a smart insight with icon, message and action buttons
  */
 const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
+  const { t } = useTranslation(['analytics']);
   const config = INSIGHT_PRIORITY_CONFIG[insight.priority];
   const Icon = ICON_MAP[insight.icon] || LightBulbIcon;
 
@@ -73,7 +75,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
               ))}
               {insight.properties.length > 2 && (
                 <span className="text-xs px-2 py-1 text-neutral-500">
-                  +{insight.properties.length - 2} more
+                  {t('analytics:insights.moreProperties', { count: insight.properties.length - 2 })}
                 </span>
               )}
             </div>

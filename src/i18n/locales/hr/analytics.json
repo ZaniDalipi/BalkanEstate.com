@@ -49,7 +49,8 @@
     "noViews": "Upozorenje o Nedostatku Pregleda",
     "noViewsMessage": "{{count}} oglasa nije dobilo nijedan pregled. Možda im je potrebna pažnja.",
     "priceCorrelation": "Korelacija Cijene i Pregleda",
-    "priceCorrelationMessage": "Nekretnine s cijenom između {{min}} i {{max}} dobivaju najviše pregleda u vašim oglasima."
+    "priceCorrelationMessage": "Nekretnine s cijenom između {{min}} i {{max}} dobivaju najviše pregleda u vašim oglasima.",
+    "moreProperties": "+{{count}} više"
   },
   "properties": {
     "title": "Performanse Nekretnina",

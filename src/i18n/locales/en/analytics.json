@@ -49,7 +49,8 @@
     "noViews": "No Views Warning",
     "noViewsMessage": "{{count}} listings have received no views. They might need attention.",
     "priceCorrelation": "Price & Views Correlation",
-    "priceCorrelationMessage": "Properties priced between {{min}} and {{max}} are getting the most views in your listings."
+    "priceCorrelationMessage": "Properties priced between {{min}} and {{max}} are getting the most views in your listings.",
+    "moreProperties": "+{{count}} more"
   },
   "properties": {
     "title": "Properties",
