@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
-import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, FacebookIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '../../constants';
-import { User, UserRole, AuthModalView, Agency } from '../../types';
+import { useAppContext } from '@/context/AppContext';
+import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, FacebookIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
+import { User, UserRole, AuthModalView, Agency } from '@/types';
 import SocialLoginPopup from './SocialLoginPopup';
 
 type Method = 'email' | 'phone';

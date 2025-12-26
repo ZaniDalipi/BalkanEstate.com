@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { GoogleIcon, FacebookIcon, AppleIcon, SpinnerIcon, XMarkIcon } from '../../constants';
+import { GoogleIcon, FacebookIcon, AppleIcon, SpinnerIcon, XMarkIcon } from '@/constants';
 
 type Provider = 'google' | 'facebook' | 'apple';
 

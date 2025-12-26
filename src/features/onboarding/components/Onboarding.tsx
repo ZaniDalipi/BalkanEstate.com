@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
-import { UserRole } from '../types';
-import { LogoIcon, BuildingOfficeIcon, MapPinIcon, BedIcon, HeartIcon, SparklesIcon, KeyIcon } from '../constants';
+import { useAppContext } from '@/context/AppContext';
+import { UserRole } from '@/types';
+import { LogoIcon, BuildingOfficeIcon, MapPinIcon, BedIcon, HeartIcon, SparklesIcon, KeyIcon } from '@/constants';
 
 const baseIcons = [
     { id: 1, icon: BuildingOfficeIcon },
