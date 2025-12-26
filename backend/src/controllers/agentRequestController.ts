@@ -26,24 +26,83 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
     await agentRequest.save();
 
     // Find nearby agents based on location
-    // Parse location to extract city/country
+    // Parse location to extract city/country/address
     const locationLower = location.toLowerCase();
 
     // Try to find agents in the same area
+    // Search serviceAreas (on Agent model) and officeAddress
     const nearbyAgents = await Agent.find({
       $or: [
-        { city: { $regex: locationLower, $options: 'i' } },
-        { country: { $regex: locationLower, $options: 'i' } },
+        { serviceAreas: { $elemMatch: { $regex: locationLower, $options: 'i' } } },
+        { officeAddress: { $regex: locationLower, $options: 'i' } },
       ],
       licenseVerified: true, // Only verified agents
     })
-      .sort({ propertiesSold: -1 }) // Prioritize agents with more sales
-      .limit(5)
-      .select('_id agentId userId');
+      .populate({
+        path: 'userId',
+        match: {
+          $or: [
+            { city: { $regex: locationLower, $options: 'i' } },
+            { country: { $regex: locationLower, $options: 'i' } },
+            { address: { $regex: locationLower, $options: 'i' } },
+          ],
+        },
+        select: 'city country address',
+      })
+      .sort({ totalSales: -1 }) // Prioritize agents with more sales (correct field name)
+      .limit(10) // Get more initially, filter later
+      .select('_id agentId userId serviceAreas officeAddress');
 
-    // Assign nearby agents to the request
-    if (nearbyAgents.length > 0) {
-      agentRequest.assignedAgents = nearbyAgents.map(agent => agent._id as mongoose.Types.ObjectId);
+    // Filter to include agents who either:
+    // 1. Matched on serviceAreas/officeAddress (always have userId populated)
+    // 2. Matched on populated user fields (userId not null from match)
+    // Also re-query agents whose serviceAreas/officeAddress didn't match but user fields might
+    let matchedAgents = nearbyAgents.filter(agent => agent.userId !== null);
+
+    // If we didn't find enough from the first query, try a second query with User model search
+    if (matchedAgents.length < 5) {
+      const allAgents = await Agent.find({ licenseVerified: true })
+        .populate({
+          path: 'userId',
+          select: 'city country address',
+        })
+        .sort({ totalSales: -1 })
+        .limit(50)
+        .select('_id agentId userId serviceAreas officeAddress');
+
+      // Filter by location match on any field
+      const additionalAgents = allAgents.filter(agent => {
+        if (!agent.userId) return false;
+        const user = agent.userId as any;
+        const city = (user.city || '').toLowerCase();
+        const country = (user.country || '').toLowerCase();
+        const address = (user.address || '').toLowerCase();
+        const serviceAreas = (agent.serviceAreas || []).map((s: string) => s.toLowerCase());
+        const officeAddress = (agent.officeAddress || '').toLowerCase();
+
+        return city.includes(locationLower) ||
+               country.includes(locationLower) ||
+               address.includes(locationLower) ||
+               serviceAreas.some((area: string) => area.includes(locationLower)) ||
+               officeAddress.includes(locationLower);
+      });
+
+      // Merge and deduplicate
+      const existingIds = new Set(matchedAgents.map(a => a._id.toString()));
+      for (const agent of additionalAgents) {
+        if (!existingIds.has(agent._id.toString())) {
+          matchedAgents.push(agent);
+          if (matchedAgents.length >= 5) break;
+        }
+      }
+    }
+
+    // Limit to 5 agents
+    matchedAgents = matchedAgents.slice(0, 5);
+
+    // Assign matched agents to the request
+    if (matchedAgents.length > 0) {
+      agentRequest.assignedAgents = matchedAgents.map(agent => agent._id as mongoose.Types.ObjectId);
       agentRequest.status = 'assigned';
       await agentRequest.save();
     }
@@ -55,7 +114,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
         email: agentRequest.email,
         location: agentRequest.location,
         status: agentRequest.status,
-        assignedAgents: nearbyAgents.map(agent => ({
+        assignedAgents: matchedAgents.map(agent => ({
           agentId: agent.agentId,
           userId: agent.userId,
         })),
