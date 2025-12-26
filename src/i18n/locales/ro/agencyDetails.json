@@ -6,6 +6,10 @@
     "agents": "Agenți",
     "reviews": "Recenzii"
   },
+  "seo": {
+    "title": "{{name}} - Agenție Imobiliară",
+    "description": "{{name}} este o agenție imobiliară de încredere din {{city}}. Răsfoiți {{properties}} anunțuri și conectați-vă cu {{agents}} agenți profesioniști."
+  },
   "banner": {
     "featured": "Agenție Promovată",
     "verified": "Verificat",
@@ -132,5 +136,15 @@
     "friday": "Vineri",
     "saturday": "Sâmbătă",
     "sunday": "Duminică"
+  },
+  "common": {
+    "cancel": "Anulează",
+    "featured": "Recomandat",
+    "required": "*"
+  },
+  "labels": {
+    "call": "Sună",
+    "email": "Email",
+    "website": "Site web"
   }
 }

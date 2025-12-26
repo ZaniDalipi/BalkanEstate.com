@@ -1,6 +1,11 @@
 {
   "navigation": {
-    "back": "Kthehu"
+    "back": "Kthehu",
+    "backToAgencies": "Kthehu tek Agjencitë"
+  },
+  "seo": {
+    "title": "{{name}} - Agjenci Imobiliare",
+    "description": "{{name}} është një agjenci e besueshme imobiliare në {{city}}. Shfletoni {{properties}} litime dhe lidhuni me {{agents}} agjentë profesionistë."
   },
   "banner": {
     "gradients": "Gradientë",
@@ -157,5 +162,15 @@
     "friday": "E Premte",
     "saturday": "E Shtunë",
     "sunday": "E Diel"
+  },
+  "common": {
+    "cancel": "Anulo",
+    "featured": "E Veçantë",
+    "required": "*"
+  },
+  "labels": {
+    "call": "Telefono",
+    "email": "Email",
+    "website": "Faqja e Internetit"
   }
 }

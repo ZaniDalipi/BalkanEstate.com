@@ -6,6 +6,10 @@
     "agents": "Agenti",
     "reviews": "Recenzije"
   },
+  "seo": {
+    "title": "{{name}} - Agencija za Nekretnine",
+    "description": "{{name}} je pouzdana agencija za nekretnine u {{city}}. Pregledajte {{properties}} oglasa i povežite se sa {{agents}} profesionalnih agenata."
+  },
   "banner": {
     "featured": "Istaknuta Agencija",
     "verified": "Verificirano",
@@ -132,5 +136,15 @@
     "friday": "Petak",
     "saturday": "Subota",
     "sunday": "Nedjelja"
+  },
+  "common": {
+    "cancel": "Otkaži",
+    "featured": "Istaknuto",
+    "required": "*"
+  },
+  "labels": {
+    "call": "Pozovi",
+    "email": "Email",
+    "website": "Web stranica"
   }
 }

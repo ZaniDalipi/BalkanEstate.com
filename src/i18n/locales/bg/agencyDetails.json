@@ -1,10 +1,14 @@
 {
   "navigation": {
-    "backToAgencies": "Обратно към Агенциите",
+    "backToAgencies": "Назад към Агенции",
     "overview": "Преглед",
     "properties": "Имоти",
     "agents": "Агенти",
     "reviews": "Отзиви"
+  },
+  "seo": {
+    "title": "{{name}} - Агенция за Недвижими Имоти",
+    "description": "{{name}} е надеждна агенция за недвижими имоти в {{city}}. Разгледайте {{properties}} обяви и се свържете с {{agents}} професионални агенти."
   },
   "banner": {
     "featured": "Представена Агенция",
@@ -132,5 +136,15 @@
     "friday": "Петък",
     "saturday": "Събота",
     "sunday": "Неделя"
+  },
+  "common": {
+    "cancel": "Отказ",
+    "featured": "Препоръчано",
+    "required": "*"
+  },
+  "labels": {
+    "call": "Обади се",
+    "email": "Имейл",
+    "website": "Уебсайт"
   }
 }

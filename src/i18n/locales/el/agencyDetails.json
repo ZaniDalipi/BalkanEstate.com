@@ -1,10 +1,14 @@
 {
   "navigation": {
-    "backToAgencies": "Πίσω στα Γραφεία",
+    "backToAgencies": "Πίσω στις Πρακτορεία",
     "overview": "Επισκόπηση",
     "properties": "Ακίνητα",
     "agents": "Πράκτορες",
     "reviews": "Κριτικές"
+  },
+  "seo": {
+    "title": "{{name}} - Μεσιτικό Γραφείο",
+    "description": "{{name}} είναι ένα αξιόπιστο μεσιτικό γραφείο στην {{city}}. Περιηγηθείτε σε {{properties}} αγγελίες και συνδεθείτε με {{agents}} επαγγελματίες μεσίτες."
   },
   "banner": {
     "featured": "Προβεβλημένο Γραφείο",
@@ -132,5 +136,15 @@
     "friday": "Παρασκευή",
     "saturday": "Σάββατο",
     "sunday": "Κυριακή"
+  },
+  "common": {
+    "cancel": "Ακύρωση",
+    "featured": "Προτεινόμενο",
+    "required": "*"
+  },
+  "labels": {
+    "call": "Κλήση",
+    "email": "Email",
+    "website": "Ιστοσελίδα"
   }
 }

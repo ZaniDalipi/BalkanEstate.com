@@ -1,6 +1,11 @@
 {
   "navigation": {
-    "back": "Назад"
+    "back": "Назад",
+    "backToAgencies": "Назад на Агенције"
+  },
+  "seo": {
+    "title": "{{name}} - Некретнинска Агенција",
+    "description": "{{name}} је поуздана некретнинска агенција у {{city}}. Прегледајте {{properties}} огласа и повежите се са {{agents}} професионалних агената."
   },
   "banner": {
     "gradients": "Градијенти",
@@ -157,5 +162,15 @@
     "friday": "Петак",
     "saturday": "Субота",
     "sunday": "Недеља"
+  },
+  "common": {
+    "cancel": "Откажи",
+    "featured": "Истакнуто",
+    "required": "*"
+  },
+  "labels": {
+    "call": "Позови",
+    "email": "Email",
+    "website": "Веб сајт"
   }
 }
