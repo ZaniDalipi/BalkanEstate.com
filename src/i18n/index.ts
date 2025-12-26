@@ -118,6 +118,11 @@ import bgModals from './locales/bg/modals.json';
 import bgPayment from './locales/bg/payment.json';
 import bgSaved from './locales/bg/saved.json';
 import bgExploreCities from './locales/bg/exploreCities.json';
+import bgSubscription from './locales/bg/subscription.json';
+import bgAgencies from './locales/bg/agencies.json';
+import bgAgencyDetails from './locales/bg/agencyDetails.json';
+import bgAgentProfile from './locales/bg/agentProfile.json';
+import bgNewListing from './locales/bg/newListing.json';
 
 // Import translations - Croatian
 import hrCommon from './locales/hr/common.json';
@@ -382,6 +387,11 @@ const resources = {
     payment: bgPayment,
     saved: bgSaved,
     exploreCities: bgExploreCities,
+    subscription: bgSubscription,
+    agencies: bgAgencies,
+    agencyDetails: bgAgencyDetails,
+    agentProfile: bgAgentProfile,
+    newListing: bgNewListing,
   },
   hr: {
     common: hrCommon,

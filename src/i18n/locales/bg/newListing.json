@@ -1,0 +1,180 @@
+{
+  "pageTitle": "Създай Нова Обява",
+  "steps": {
+    "basicInfo": "Основна Информация",
+    "location": "Локация",
+    "details": "Детайли",
+    "media": "Медия",
+    "pricing": "Цена",
+    "review": "Преглед"
+  },
+  "modes": {
+    "sale": "За Продажба",
+    "rent": "Под Наем",
+    "both": "Продажба и Наем"
+  },
+  "imageUpload": {
+    "title": "Снимки на Имота",
+    "dragDrop": "Плъзнете и пуснете снимки тук",
+    "or": "или",
+    "browse": "Разгледай Файлове",
+    "maxSize": "Максимален размер: 10MB на снимка",
+    "formats": "Поддържани формати: JPG, PNG, WebP",
+    "mainImage": "Главна Снимка",
+    "setAsMain": "Задай като Главна",
+    "remove": "Премахни",
+    "uploading": "Качване...",
+    "maxImages": "Максимум {{count}} снимки"
+  },
+  "imageTags": {
+    "title": "Етикет на Снимката",
+    "exterior": "Екстериор",
+    "interior": "Интериор",
+    "kitchen": "Кухня",
+    "bedroom": "Спалня",
+    "bathroom": "Баня",
+    "livingRoom": "Хол",
+    "garden": "Градина",
+    "pool": "Басейн",
+    "view": "Гледка",
+    "other": "Друго"
+  },
+  "propertyDetails": {
+    "title": "Детайли на Имота",
+    "propertyType": "Тип Имот",
+    "propertyTitle": "Заглавие на Имота",
+    "titlePlaceholder": "Въведете привлекателно заглавие",
+    "propertyStatus": "Статус на Имота",
+    "yearBuilt": "Година на Строеж",
+    "condition": "Състояние",
+    "types": {
+      "apartment": "Апартамент",
+      "house": "Къща",
+      "villa": "Вила",
+      "land": "Парцел",
+      "commercial": "Търговски Обект",
+      "office": "Офис"
+    }
+  },
+  "location": {
+    "title": "Локация",
+    "address": "Адрес",
+    "addressPlaceholder": "Въведете адреса на имота",
+    "city": "Град",
+    "cityPlaceholder": "Изберете град",
+    "area": "Район/Квартал",
+    "areaPlaceholder": "Въведете район",
+    "postalCode": "Пощенски Код",
+    "country": "Държава",
+    "mapPin": "Поставете Пин на Картата",
+    "mapInstructions": "Кликнете върху картата, за да зададете точната локация"
+  },
+  "roomDetails": {
+    "title": "Стаи и Разпределение",
+    "bedrooms": "Спални",
+    "bathrooms": "Бани",
+    "totalRooms": "Общо Стаи",
+    "floor": "Етаж",
+    "totalFloors": "Общо Етажи",
+    "parkingSpaces": "Паркоместа"
+  },
+  "sizeAndAge": {
+    "title": "Размер и Възраст",
+    "totalArea": "Обща Площ",
+    "livingArea": "Жилищна Площ",
+    "plotSize": "Размер на Парцела",
+    "sqm": "кв.м.",
+    "yearBuilt": "Година на Строеж",
+    "renovated": "Ремонтиран"
+  },
+  "amenities": {
+    "title": "Удобства",
+    "airConditioning": "Климатик",
+    "heating": "Отопление",
+    "parking": "Паркинг",
+    "garage": "Гараж",
+    "pool": "Басейн",
+    "garden": "Градина",
+    "balcony": "Балкон",
+    "terrace": "Тераса",
+    "elevator": "Асансьор",
+    "security": "Охранителна Система",
+    "storage": "Мазе",
+    "furnished": "Обзаведен"
+  },
+  "advancedFeatures": {
+    "title": "Разширени Характеристики",
+    "energyRating": "Енергиен Клас",
+    "heatingType": "Тип Отопление",
+    "windowType": "Тип Прозорци",
+    "flooringType": "Тип Подова Настилка",
+    "orientation": "Изложение",
+    "view": "Гледка"
+  },
+  "description": {
+    "title": "Описание",
+    "placeholder": "Опишете подробно вашия имот...",
+    "minLength": "Минимум 100 символа",
+    "charCount": "{{count}} символа"
+  },
+  "virtualTour": {
+    "title": "Виртуална Обиколка",
+    "url": "URL на Виртуалната Обиколка",
+    "urlPlaceholder": "Въведете линк към виртуалната обиколка",
+    "preview": "Преглед"
+  },
+  "floorplan": {
+    "title": "Етажен План",
+    "upload": "Качи Етажен План",
+    "formats": "PDF, JPG, или PNG"
+  },
+  "language": {
+    "title": "Език на Обявата",
+    "primary": "Основен Език",
+    "additional": "Допълнителни Езици"
+  },
+  "role": {
+    "title": "Публикувате като",
+    "owner": "Собственик на Имота",
+    "agent": "Агент по Недвижими Имоти"
+  },
+  "promotion": {
+    "title": "Промоция на Обявата",
+    "featured": "Представена Обява",
+    "featuredDesc": "Появете се в началото на резултатите от търсенето",
+    "highlighted": "Подчертана Обява",
+    "highlightedDesc": "Отличете се с подчертана рамка",
+    "premium": "Премиум Позициониране",
+    "premiumDesc": "Максимална видимост във всички секции"
+  },
+  "actions": {
+    "saveDraft": "Запази Чернова",
+    "preview": "Преглед",
+    "publish": "Публикувай Обявата",
+    "next": "Напред",
+    "previous": "Назад",
+    "cancel": "Отказ"
+  },
+  "validation": {
+    "titleRequired": "Заглавието е задължително",
+    "titleMinLength": "Заглавието трябва да е поне 10 символа",
+    "descriptionRequired": "Описанието е задължително",
+    "descriptionMinLength": "Описанието трябва да е поне 100 символа",
+    "priceRequired": "Цената е задължителна",
+    "pricePositive": "Цената трябва да е положително число",
+    "locationRequired": "Локацията е задължителна",
+    "imagesRequired": "Необходима е поне една снимка",
+    "propertyTypeRequired": "Типът имот е задължителен"
+  },
+  "success": {
+    "title": "Обявата е Публикувана!",
+    "message": "Вашият имот вече е активен",
+    "viewListing": "Виж Обявата",
+    "createAnother": "Създай Друга"
+  },
+  "errors": {
+    "uploadFailed": "Качването е неуспешно. Моля, опитайте отново.",
+    "saveFailed": "Запазването е неуспешно. Моля, опитайте отново.",
+    "generic": "Възникна грешка. Моля, опитайте отново."
+  }
+}

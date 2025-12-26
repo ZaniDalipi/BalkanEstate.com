@@ -1,0 +1,95 @@
+{
+  "navigation": {
+    "backToAgents": "Обратно към Агентите",
+    "overview": "Преглед",
+    "listings": "Обяви",
+    "reviews": "Отзиви"
+  },
+  "tabs": {
+    "about": "За Мен",
+    "listings": "Обяви",
+    "reviews": "Отзиви",
+    "contact": "Контакт"
+  },
+  "badges": {
+    "verified": "Верифициран Агент",
+    "featured": "Представен",
+    "topRated": "Топ Рейтинг",
+    "superAgent": "Супер Агент",
+    "newAgent": "Нов Агент"
+  },
+  "contact": {
+    "title": "Информация за Контакт",
+    "phone": "Телефон",
+    "email": "Имейл",
+    "whatsapp": "WhatsApp",
+    "schedule": "Насрочи Обаждане",
+    "message": "Изпрати Съобщение",
+    "responseTime": "Обикновено отговаря в рамките на"
+  },
+  "stats": {
+    "propertiesSold": "Продадени Имоти",
+    "activeListings": "Активни Обяви",
+    "totalReviews": "Общо Отзиви",
+    "avgRating": "Среден Рейтинг",
+    "responseRate": "Процент на Отговор",
+    "yearsExperience": "Години Опит"
+  },
+  "overview": {
+    "about": "За Мен",
+    "specializations": "Специализации",
+    "areasServed": "Обслужвани Райони",
+    "languages": "Езици, които Говоря",
+    "certifications": "Сертификати",
+    "education": "Образование"
+  },
+  "listings": {
+    "title": "Моите Обяви",
+    "active": "Активни",
+    "sold": "Продадени",
+    "pending": "Изчакващи",
+    "viewAll": "Виж Всички",
+    "noListings": "Все още няма обяви"
+  },
+  "reviews": {
+    "title": "Отзиви от Клиенти",
+    "writeReview": "Напишете Отзив",
+    "noReviews": "Все още няма отзиви",
+    "verifiedPurchase": "Верифициран Клиент",
+    "helpful": "Полезно",
+    "report": "Докладвай"
+  },
+  "consultation": {
+    "title": "Резервирайте Безплатна Консултация",
+    "description": "Получете персонализирани съвети за вашите нужди от недвижими имоти",
+    "button": "Резервирай Сега",
+    "duration": "30 минути",
+    "free": "Безплатно"
+  },
+  "appraisal": {
+    "title": "Оценка на Имота",
+    "description": "Разберете стойността на вашия имот днес",
+    "button": "Заявка за Оценка"
+  },
+  "agency": {
+    "title": "Агенция",
+    "worksWith": "Работи с",
+    "viewAgency": "Виж Агенцията",
+    "independent": "Независим Агент"
+  },
+  "similarAgents": {
+    "title": "Подобни Агенти",
+    "viewAll": "Виж Всички"
+  },
+  "actions": {
+    "share": "Сподели Профила",
+    "save": "Запази Агента",
+    "report": "Докладвай Агента"
+  },
+  "messages": {
+    "saved": "Агентът е запазен в любими",
+    "removed": "Агентът е премахнат от любими",
+    "messageSent": "Съобщението е изпратено успешно",
+    "error": "Възникна грешка. Моля, опитайте отново."
+  }
+}
