@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SavedSearch } from '@/types';
-import PropertyCard from '../PropertyDisplay/PropertyCard';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { ChevronUpIcon, ChevronDownIcon, TrashIcon, PencilIcon, CheckCircleIcon, XMarkIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { filterProperties } from '@/utils/propertyUtils';
-import PropertyCardSkeleton from '../PropertyDisplay/PropertyCardSkeleton';
+import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import L from 'leaflet';
 import * as api from '@/services/apiService';
-import MapComponent from '../Maps/MapComponent';
+import MapComponent from '@/src/features/map/components/MapComponent';
 
 interface SavedSearchAccordionProps {
   search: SavedSearch;
