@@ -9,8 +9,8 @@ import { ArrowLeftIcon, SparklesIcon } from '@/constants';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
-import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/features/components/seo';
-import { SocialShare } from '@/src/features/components/marketing/SocialShare';
+import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
+import { SocialShare } from '@/src/components/marketing/SocialShare';
 import {
   ImageEditorModal,
   PropertyGallery,
@@ -19,7 +19,7 @@ import {
   PropertyPhotos,
   PropertyMapLink,
   NeighborhoodInsights,
-} from '@/src/features/components/property';
+} from '@/src/components/property';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 
@@ -231,7 +231,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   }, [dispatch]);
 
   // Generate SEO description
-  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.type || 'property'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 100) || ''}`;
+  const seoDescription = `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} in ${property.city}, ${property.country}. ${property.sqft}m² for €${property.price?.toLocaleString()}. ${property.description?.slice(0, 100) || ''}`;
 
   // Get all images for SEO
   const seoImages = allImages.map(img => img.url).filter(Boolean);
@@ -254,7 +254,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           address: property.address,
           city: property.city,
           country: property.country,
-          propertyType: property.type,
+          propertyType: property.propertyType,
           images: seoImages,
           latitude: property.lat,
           longitude: property.lng,
