@@ -48,6 +48,22 @@ export const MapEvents: React.FC<{
   searchMode: 'manual' | 'ai';
 }> = ({ onMove, mapBounds, searchMode }) => {
   const map = useMap();
+  const hasInitialized = useRef(false);
+
+  // Ensure bounds are set on initial mount - don't rely solely on 'load' event
+  useEffect(() => {
+    if (!hasInitialized.current && map) {
+      // Set initial bounds immediately
+      const timer = setTimeout(() => {
+        if (map.getContainer()) {
+          map.invalidateSize();
+          onMove(map.getBounds(), map.getCenter());
+          hasInitialized.current = true;
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [map, onMove]);
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {

@@ -459,9 +459,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // Filter to show only properties visible in the current map view
         if (mapBounds) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
+            // If no properties in view but we have properties, show all (better UX than empty list)
+            if (withinView.length === 0 && baseFilteredProperties.length > 0) {
+                return baseFilteredProperties;
+            }
             return withinView;
         }
-        // Fallback to all filtered properties if no bounds set
+        // Fallback to all filtered properties if no bounds set (initial load)
         return baseFilteredProperties;
     }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
 
