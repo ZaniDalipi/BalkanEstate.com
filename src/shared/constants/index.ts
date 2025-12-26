@@ -1,4 +1,3 @@
 // Shared Constants
-// Export all constants from this file
-
-export * from './icons';
+// Re-export icons from root constants file
+export * from '@/constants';
