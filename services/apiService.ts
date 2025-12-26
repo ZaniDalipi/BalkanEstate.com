@@ -1656,6 +1656,7 @@ function transformBackendAgent(backendAgent: any): any {
     avatarUrl: user.avatarUrl,
     city: user.city,
     country: user.country,
+    address: user.address,
     role: 'agent',
     agencyName: backendAgent.agencyName,
     agencyId: agencyId ? String(agencyId) : undefined,

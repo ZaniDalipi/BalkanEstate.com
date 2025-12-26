@@ -484,7 +484,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         yearsOfExperience: user.yearsOfExperience || 0,
         city: user.city || '',
         country: user.country || '',
-        streetAddress: '',
+        streetAddress: user.address || '',
         lat: user.lat || 0,
         lng: user.lng || 0,
     });
@@ -513,7 +513,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             yearsOfExperience: user.yearsOfExperience || 0,
             city: user.city || '',
             country: user.country || '',
-            streetAddress: '',
+            streetAddress: user.address || '',
             lat: user.lat || 0,
             lng: user.lng || 0,
         });
@@ -704,6 +704,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 phone: formData.phone,
                 city: agentData.city,
                 country: agentData.country,
+                address: agentData.streetAddress || '',
                 avatarUrl: formData.avatarUrl,
             };
 

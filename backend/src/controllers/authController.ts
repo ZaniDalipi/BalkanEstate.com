@@ -533,7 +533,7 @@ export const updateProfile = async (
       return;
     }
 
-    const { name, phone, city, country, avatarUrl } = req.body;
+    const { name, phone, city, country, address, avatarUrl } = req.body;
 
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
@@ -552,12 +552,13 @@ export const updateProfile = async (
     if (phone) user.phone = phone;
     if (city) user.city = city;
     if (country) user.country = country;
+    if (address !== undefined) user.address = address;
     if (avatarUrl) user.avatarUrl = avatarUrl;
 
     await user.save();
 
     console.log('Profile updated for user:', user._id);
-    console.log('Updated fields:', { name, phone, city, country });
+    console.log('Updated fields:', { name, phone, city, country, address });
 
     res.json({
       user: {
@@ -569,6 +570,7 @@ export const updateProfile = async (
         avatarUrl: user.avatarUrl,
         city: user.city,
         country: user.country,
+        address: user.address,
         agencyName: user.agencyName,
         agencyId: user.agencyId,
         agentId: user.agentId,

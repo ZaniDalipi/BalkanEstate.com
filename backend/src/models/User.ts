@@ -18,6 +18,7 @@ export interface IUser extends Document {
   isEmailVerified: boolean;
   city?: string;
   country?: string;
+  address?: string;
   agencyName?: string;
   agentId?: string;
   licenseNumber?: string;
@@ -285,6 +286,9 @@ const UserSchema: Schema = new Schema(
       type: String,
     },
     country: {
+      type: String,
+    },
+    address: {
       type: String,
     },
     agencyName: {

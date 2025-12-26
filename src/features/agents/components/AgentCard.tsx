@@ -255,11 +255,11 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
           </h3>
 
           {/* Location with blue animation - Prominent Badge */}
-          {(agent.serviceAreas?.[0] || agent.city || agent.country || agent.officeAddress) && (
+          {(agent.address || agent.city || agent.country || agent.serviceAreas?.[0] || agent.officeAddress) && (
             <div className="flex items-center justify-center gap-2 mt-2 group/location px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
               <MapPinIcon className="w-4 h-4 text-blue-600 transform group-hover/location:scale-110 transition-transform duration-300" />
-              <p className="text-sm font-semibold text-blue-700 group-hover/location:text-blue-800 transition-colors">
-                {agent.serviceAreas?.[0] || [agent.city, agent.country].filter(Boolean).join(', ') || agent.officeAddress}
+              <p className="text-sm font-semibold text-blue-700 group-hover/location:text-blue-800 transition-colors text-center">
+                {agent.address || [agent.city, agent.country].filter(Boolean).join(', ') || agent.serviceAreas?.[0] || agent.officeAddress}
               </p>
               {isHovered && (
                 <SparklesIcon className="w-3.5 h-3.5 text-blue-500 animate-bounce" />

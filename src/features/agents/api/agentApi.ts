@@ -21,6 +21,7 @@ export function transformBackendAgent(backendAgent: any): Agent {
     avatarUrl: user.avatarUrl,
     city: user.city,
     country: user.country,
+    address: user.address,
     role: 'agent' as any,
     agencyName: backendAgent.agencyName,
     agencyId: agencyId ? String(agencyId) : undefined,
