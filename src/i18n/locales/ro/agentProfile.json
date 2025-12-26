@@ -1,0 +1,95 @@
+{
+  "navigation": {
+    "backToAgents": "Înapoi la Agenți",
+    "overview": "Prezentare",
+    "listings": "Anunțuri",
+    "reviews": "Recenzii"
+  },
+  "tabs": {
+    "about": "Despre Mine",
+    "listings": "Anunțuri",
+    "reviews": "Recenzii",
+    "contact": "Contact"
+  },
+  "badges": {
+    "verified": "Agent Verificat",
+    "featured": "Promovat",
+    "topRated": "Top Rating",
+    "superAgent": "Super Agent",
+    "newAgent": "Agent Nou"
+  },
+  "contact": {
+    "title": "Informații de Contact",
+    "phone": "Telefon",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "schedule": "Programează un Apel",
+    "message": "Trimite Mesaj",
+    "responseTime": "Răspunde de obicei în"
+  },
+  "stats": {
+    "propertiesSold": "Proprietăți Vândute",
+    "activeListings": "Anunțuri Active",
+    "totalReviews": "Total Recenzii",
+    "avgRating": "Rating Mediu",
+    "responseRate": "Rata de Răspuns",
+    "yearsExperience": "Ani de Experiență"
+  },
+  "overview": {
+    "about": "Despre Mine",
+    "specializations": "Specializări",
+    "areasServed": "Zone Deservite",
+    "languages": "Limbi Vorbite",
+    "certifications": "Certificări",
+    "education": "Educație"
+  },
+  "listings": {
+    "title": "Anunțurile Mele",
+    "active": "Active",
+    "sold": "Vândute",
+    "pending": "În Așteptare",
+    "viewAll": "Vezi Toate",
+    "noListings": "Încă nu există anunțuri"
+  },
+  "reviews": {
+    "title": "Recenzii Clienți",
+    "writeReview": "Scrieți o Recenzie",
+    "noReviews": "Încă nu există recenzii",
+    "verifiedPurchase": "Client Verificat",
+    "helpful": "Util",
+    "report": "Raportează"
+  },
+  "consultation": {
+    "title": "Programați o Consultație Gratuită",
+    "description": "Primiți sfaturi personalizate pentru nevoile dumneavoastră imobiliare",
+    "button": "Programează Acum",
+    "duration": "30 minute",
+    "free": "Gratuit"
+  },
+  "appraisal": {
+    "title": "Evaluare Proprietate",
+    "description": "Aflați valoarea proprietății dumneavoastră astăzi",
+    "button": "Solicită Evaluare"
+  },
+  "agency": {
+    "title": "Agenție",
+    "worksWith": "Lucrează cu",
+    "viewAgency": "Vezi Agenția",
+    "independent": "Agent Independent"
+  },
+  "similarAgents": {
+    "title": "Agenți Similari",
+    "viewAll": "Vezi Toți"
+  },
+  "actions": {
+    "share": "Distribuie Profilul",
+    "save": "Salvează Agentul",
+    "report": "Raportează Agentul"
+  },
+  "messages": {
+    "saved": "Agent salvat în favorite",
+    "removed": "Agent eliminat din favorite",
+    "messageSent": "Mesaj trimis cu succes",
+    "error": "A apărut o eroare. Vă rugăm încercați din nou."
+  }
+}

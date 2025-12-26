@@ -1,0 +1,180 @@
+{
+  "pageTitle": "Creează Anunț Nou",
+  "steps": {
+    "basicInfo": "Informații de Bază",
+    "location": "Locație",
+    "details": "Detalii",
+    "media": "Media",
+    "pricing": "Preț",
+    "review": "Verificare"
+  },
+  "modes": {
+    "sale": "De Vânzare",
+    "rent": "De Închiriat",
+    "both": "Vânzare și Închiriere"
+  },
+  "imageUpload": {
+    "title": "Imagini Proprietate",
+    "dragDrop": "Trageți și plasați imagini aici",
+    "or": "sau",
+    "browse": "Răsfoiți Fișiere",
+    "maxSize": "Dimensiune maximă: 10MB per imagine",
+    "formats": "Formate acceptate: JPG, PNG, WebP",
+    "mainImage": "Imagine Principală",
+    "setAsMain": "Setează ca Principală",
+    "remove": "Elimină",
+    "uploading": "Se încarcă...",
+    "maxImages": "Maximum {{count}} imagini"
+  },
+  "imageTags": {
+    "title": "Etichetă Imagine",
+    "exterior": "Exterior",
+    "interior": "Interior",
+    "kitchen": "Bucătărie",
+    "bedroom": "Dormitor",
+    "bathroom": "Baie",
+    "livingRoom": "Living",
+    "garden": "Grădină",
+    "pool": "Piscină",
+    "view": "Vedere",
+    "other": "Altele"
+  },
+  "propertyDetails": {
+    "title": "Detalii Proprietate",
+    "propertyType": "Tip Proprietate",
+    "propertyTitle": "Titlu Proprietate",
+    "titlePlaceholder": "Introduceți un titlu atractiv",
+    "propertyStatus": "Status Proprietate",
+    "yearBuilt": "Anul Construcției",
+    "condition": "Stare",
+    "types": {
+      "apartment": "Apartament",
+      "house": "Casă",
+      "villa": "Vilă",
+      "land": "Teren",
+      "commercial": "Spațiu Comercial",
+      "office": "Birou"
+    }
+  },
+  "location": {
+    "title": "Locație",
+    "address": "Adresă",
+    "addressPlaceholder": "Introduceți adresa proprietății",
+    "city": "Oraș",
+    "cityPlaceholder": "Selectați orașul",
+    "area": "Zonă/Cartier",
+    "areaPlaceholder": "Introduceți zona",
+    "postalCode": "Cod Poștal",
+    "country": "Țară",
+    "mapPin": "Plasați Pin pe Hartă",
+    "mapInstructions": "Faceți clic pe hartă pentru a seta locația exactă"
+  },
+  "roomDetails": {
+    "title": "Camere și Configurație",
+    "bedrooms": "Dormitoare",
+    "bathrooms": "Băi",
+    "totalRooms": "Total Camere",
+    "floor": "Etaj",
+    "totalFloors": "Total Etaje",
+    "parkingSpaces": "Locuri de Parcare"
+  },
+  "sizeAndAge": {
+    "title": "Dimensiune și Vechime",
+    "totalArea": "Suprafață Totală",
+    "livingArea": "Suprafață Locuibilă",
+    "plotSize": "Suprafață Teren",
+    "sqm": "mp",
+    "yearBuilt": "Anul Construcției",
+    "renovated": "Renovat"
+  },
+  "amenities": {
+    "title": "Facilități",
+    "airConditioning": "Aer Condiționat",
+    "heating": "Încălzire",
+    "parking": "Parcare",
+    "garage": "Garaj",
+    "pool": "Piscină",
+    "garden": "Grădină",
+    "balcony": "Balcon",
+    "terrace": "Terasă",
+    "elevator": "Lift",
+    "security": "Sistem de Securitate",
+    "storage": "Debara",
+    "furnished": "Mobilat"
+  },
+  "advancedFeatures": {
+    "title": "Caracteristici Avansate",
+    "energyRating": "Clasă Energetică",
+    "heatingType": "Tip Încălzire",
+    "windowType": "Tip Ferestre",
+    "flooringType": "Tip Pardoseală",
+    "orientation": "Orientare",
+    "view": "Vedere"
+  },
+  "description": {
+    "title": "Descriere",
+    "placeholder": "Descrieți detaliat proprietatea dumneavoastră...",
+    "minLength": "Minimum 100 caractere",
+    "charCount": "{{count}} caractere"
+  },
+  "virtualTour": {
+    "title": "Tur Virtual",
+    "url": "URL Tur Virtual",
+    "urlPlaceholder": "Introduceți linkul turului virtual",
+    "preview": "Previzualizare"
+  },
+  "floorplan": {
+    "title": "Plan Etaj",
+    "upload": "Încărcați Plan Etaj",
+    "formats": "PDF, JPG, sau PNG"
+  },
+  "language": {
+    "title": "Limba Anunțului",
+    "primary": "Limba Principală",
+    "additional": "Limbi Adiționale"
+  },
+  "role": {
+    "title": "Publicați ca",
+    "owner": "Proprietar",
+    "agent": "Agent Imobiliar"
+  },
+  "promotion": {
+    "title": "Promovare Anunț",
+    "featured": "Anunț Promovat",
+    "featuredDesc": "Apăreți în topul rezultatelor căutării",
+    "highlighted": "Anunț Evidențiat",
+    "highlightedDesc": "Ieșiți în evidență cu chenar accentuat",
+    "premium": "Poziționare Premium",
+    "premiumDesc": "Vizibilitate maximă în toate secțiunile"
+  },
+  "actions": {
+    "saveDraft": "Salvează Ciornă",
+    "preview": "Previzualizare",
+    "publish": "Publică Anunțul",
+    "next": "Următorul",
+    "previous": "Anterior",
+    "cancel": "Anulează"
+  },
+  "validation": {
+    "titleRequired": "Titlul este obligatoriu",
+    "titleMinLength": "Titlul trebuie să aibă cel puțin 10 caractere",
+    "descriptionRequired": "Descrierea este obligatorie",
+    "descriptionMinLength": "Descrierea trebuie să aibă cel puțin 100 caractere",
+    "priceRequired": "Prețul este obligatoriu",
+    "pricePositive": "Prețul trebuie să fie un număr pozitiv",
+    "locationRequired": "Locația este obligatorie",
+    "imagesRequired": "Este necesară cel puțin o imagine",
+    "propertyTypeRequired": "Tipul proprietății este obligatoriu"
+  },
+  "success": {
+    "title": "Anunț Publicat!",
+    "message": "Proprietatea dumneavoastră este acum activă",
+    "viewListing": "Vezi Anunțul",
+    "createAnother": "Creează Altul"
+  },
+  "errors": {
+    "uploadFailed": "Încărcare eșuată. Vă rugăm încercați din nou.",
+    "saveFailed": "Salvare eșuată. Vă rugăm încercați din nou.",
+    "generic": "A apărut o eroare. Vă rugăm încercați din nou."
+  }
+}

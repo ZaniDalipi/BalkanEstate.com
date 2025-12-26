@@ -1,0 +1,67 @@
+{
+  "hero": {
+    "title": "Pronađite Vrhunske Agencije za Nekretnine",
+    "subtitle": "Povežite se s pouzdanim stručnjacima za nekretnine u vašem području",
+    "searchPlaceholder": "Pretraži agencije po imenu ili lokaciji..."
+  },
+  "search": {
+    "placeholder": "Pretraži agencije...",
+    "button": "Pretraži",
+    "clear": "Očisti"
+  },
+  "stats": {
+    "totalAgencies": "Ukupno Agencija",
+    "totalAgents": "Profesionalnih Agenata",
+    "propertiesListed": "Oglašenih Nekretnina",
+    "citiesCovered": "Pokrivenih Gradova"
+  },
+  "filters": {
+    "title": "Filteri",
+    "location": "Lokacija",
+    "allLocations": "Sve Lokacije",
+    "specialization": "Specijalizacija",
+    "allSpecializations": "Sve Specijalizacije",
+    "rating": "Ocjena",
+    "anyRating": "Bilo koja Ocjena",
+    "reset": "Poništi Filtere"
+  },
+  "sort": {
+    "label": "Sortiraj po",
+    "nameAsc": "Naziv (A-Ž)",
+    "nameDesc": "Naziv (Ž-A)",
+    "ratingDesc": "Najviša Ocjena",
+    "propertiesDesc": "Najviše Nekretnina",
+    "newest": "Najnovije Prvo"
+  },
+  "results": {
+    "showing": "Prikazuje se {{count}} agencija",
+    "of": "od",
+    "noResults": "Nijedna agencija nije pronađena",
+    "tryAdjusting": "Pokušajte prilagoditi filtere"
+  },
+  "card": {
+    "properties": "nekretnina",
+    "agents": "agenata",
+    "viewProfile": "Pogledaj Profil",
+    "contact": "Kontakt",
+    "featured": "Istaknuto",
+    "verified": "Verifikovano"
+  },
+  "empty": {
+    "title": "Nijedna Agencija Nije Pronađena",
+    "description": "Nijedna agencija ne odgovara vašim kriterijumima",
+    "resetFilters": "Poništi Filtere"
+  },
+  "cta": {
+    "title": "Jeste li Stručnjak za Nekretnine?",
+    "description": "Pridružite se našoj mreži pouzdanih agencija i proširite svoje poslovanje",
+    "button": "Registrujte Svoju Agenciju"
+  },
+  "loading": {
+    "text": "Učitavanje agencija..."
+  },
+  "error": {
+    "title": "Greška pri Učitavanju Agencija",
+    "retry": "Pokušaj Ponovo"
+  }
+}

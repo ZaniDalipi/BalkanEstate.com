@@ -1,0 +1,136 @@
+{
+  "navigation": {
+    "backToAgencies": "Nazad na Agencije",
+    "overview": "Pregled",
+    "properties": "Nekretnine",
+    "agents": "Agenti",
+    "reviews": "Recenzije"
+  },
+  "banner": {
+    "featured": "Istaknuta Agencija",
+    "verified": "Verifikovano",
+    "memberSince": "Član od",
+    "contact": "Kontakt",
+    "website": "Posjetite Web Stranicu",
+    "share": "Podijeli"
+  },
+  "stats": {
+    "totalProperties": "Ukupno Nekretnina",
+    "activeListings": "Aktivnih Oglasa",
+    "totalAgents": "Članova Tima",
+    "avgRating": "Prosječna Ocjena",
+    "propertiesSold": "Prodatih Nekretnina",
+    "yearsExperience": "Godina Iskustva"
+  },
+  "salesPerformance": {
+    "title": "Rezultati Prodaje",
+    "totalSales": "Ukupna Prodaja",
+    "thisMonth": "Ovaj Mjesec",
+    "thisYear": "Ova Godina",
+    "allTime": "Ukupno",
+    "chart": {
+      "sales": "Prodaja",
+      "listings": "Oglasi",
+      "views": "Pregledi"
+    }
+  },
+  "about": {
+    "title": "O Nama",
+    "description": "Opis",
+    "specializations": "Specijalizacije",
+    "areasServed": "Područja Djelovanja",
+    "languages": "Jezici",
+    "established": "Osnovano"
+  },
+  "invitationCode": {
+    "title": "Pozivni Kod Tima",
+    "description": "Podijelite ovaj kod sa agentima kako bi se pridružili vašoj agenciji",
+    "code": "Pozivni Kod",
+    "copy": "Kopiraj Kod",
+    "copied": "Kopirano!",
+    "generate": "Generiši Novi Kod",
+    "expires": "Ističe",
+    "never": "Nikad",
+    "uses": "Korišćenja",
+    "unlimited": "Neograničeno"
+  },
+  "actions": {
+    "edit": "Uredi Agenciju",
+    "delete": "Obriši Agenciju",
+    "feature": "Istaknite Se",
+    "verify": "Zatraži Verifikaciju",
+    "message": "Pošalji Poruku",
+    "call": "Pozovi",
+    "email": "Pošalji Email"
+  },
+  "teamMembers": {
+    "title": "Članovi Tima",
+    "viewAll": "Pogledaj Sve",
+    "role": "Uloga",
+    "joined": "Pridružio se",
+    "properties": "Nekretnine",
+    "sales": "Prodaje",
+    "contact": "Kontakt",
+    "owner": "Vlasnik",
+    "admin": "Administrator",
+    "agent": "Agent"
+  },
+  "properties": {
+    "title": "Oglasi Nekretnina",
+    "viewAll": "Pogledaj Sve Nekretnine",
+    "active": "Aktivno",
+    "pending": "Na Čekanju",
+    "sold": "Prodato",
+    "noProperties": "Još nema oglasa nekretnina",
+    "filters": {
+      "all": "Sve",
+      "forSale": "Na Prodaju",
+      "forRent": "Za Najam"
+    }
+  },
+  "editModal": {
+    "title": "Uredi Agenciju",
+    "name": "Naziv Agencije",
+    "description": "Opis",
+    "phone": "Telefon",
+    "email": "Email",
+    "website": "Web Stranica",
+    "address": "Adresa",
+    "city": "Grad",
+    "country": "Država",
+    "logo": "Logo",
+    "cover": "Naslovna Slika",
+    "save": "Sačuvaj Promjene",
+    "cancel": "Odustani"
+  },
+  "confirmations": {
+    "delete": {
+      "title": "Obriši Agenciju",
+      "message": "Jeste li sigurni da želite obrisati ovu agenciju? Ova radnja se ne može poništiti.",
+      "confirm": "Da, Obriši",
+      "cancel": "Odustani"
+    },
+    "leave": {
+      "title": "Napusti Agenciju",
+      "message": "Jeste li sigurni da želite napustiti ovu agenciju?",
+      "confirm": "Da, Napusti",
+      "cancel": "Odustani"
+    }
+  },
+  "messages": {
+    "updated": "Agencija uspješno ažurirana",
+    "deleted": "Agencija uspješno obrisana",
+    "codeCopied": "Pozivni kod kopiran",
+    "codeGenerated": "Novi pozivni kod generisan",
+    "error": "Došlo je do greške. Molimo pokušajte ponovo."
+  },
+  "weekdays": {
+    "monday": "Ponedeljak",
+    "tuesday": "Utorak",
+    "wednesday": "Srijeda",
+    "thursday": "Četvrtak",
+    "friday": "Petak",
+    "saturday": "Subota",
+    "sunday": "Nedjelja"
+  }
+}

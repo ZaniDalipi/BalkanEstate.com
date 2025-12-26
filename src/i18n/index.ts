@@ -196,6 +196,11 @@ import meModals from './locales/me/modals.json';
 import mePayment from './locales/me/payment.json';
 import meSaved from './locales/me/saved.json';
 import meExploreCities from './locales/me/exploreCities.json';
+import meSubscription from './locales/me/subscription.json';
+import meAgencies from './locales/me/agencies.json';
+import meAgencyDetails from './locales/me/agencyDetails.json';
+import meAgentProfile from './locales/me/agentProfile.json';
+import meNewListing from './locales/me/newListing.json';
 
 // Import translations - Macedonian
 import mkCommon from './locales/mk/common.json';
@@ -243,6 +248,11 @@ import roModals from './locales/ro/modals.json';
 import roPayment from './locales/ro/payment.json';
 import roSaved from './locales/ro/saved.json';
 import roExploreCities from './locales/ro/exploreCities.json';
+import roSubscription from './locales/ro/subscription.json';
+import roAgencies from './locales/ro/agencies.json';
+import roAgencyDetails from './locales/ro/agencyDetails.json';
+import roAgentProfile from './locales/ro/agentProfile.json';
+import roNewListing from './locales/ro/newListing.json';
 
 // Import translations - Greek
 import elCommon from './locales/el/common.json';
@@ -465,6 +475,11 @@ const resources = {
     payment: mePayment,
     saved: meSaved,
     exploreCities: meExploreCities,
+    subscription: meSubscription,
+    agencies: meAgencies,
+    agencyDetails: meAgencyDetails,
+    agentProfile: meAgentProfile,
+    newListing: meNewListing,
   },
   mk: {
     common: mkCommon,
@@ -512,6 +527,11 @@ const resources = {
     payment: roPayment,
     saved: roSaved,
     exploreCities: roExploreCities,
+    subscription: roSubscription,
+    agencies: roAgencies,
+    agencyDetails: roAgencyDetails,
+    agentProfile: roAgentProfile,
+    newListing: roNewListing,
   },
   el: {
     common: elCommon,

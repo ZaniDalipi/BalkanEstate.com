@@ -1,0 +1,105 @@
+{
+  "modal": {
+    "title": "Odaberite Svoj Plan",
+    "subtitle": "Otključajte premium funkcije za bolje iskustvo s nekretninama",
+    "close": "Zatvori"
+  },
+  "buyerPlan": {
+    "title": "Plan za Kupce",
+    "description": "Idealno za pretraživanje nekretnina",
+    "features": {
+      "savedSearches": "Neograničene sačuvane pretrage",
+      "alerts": "Obavještenja o nekretninama u realnom vremenu",
+      "analytics": "Analitika tržišta",
+      "support": "Prioritetna podrška"
+    }
+  },
+  "sellerPlan": {
+    "title": "Plan za Prodavce",
+    "description": "Savršeno za oglašavanje i prodaju nekretnina",
+    "features": {
+      "listings": "Neograničeni oglasi nekretnina",
+      "featured": "Opcije istaknutih nekretnina",
+      "analytics": "Analitika oglasa",
+      "support": "Posvećena podrška prodavcima"
+    }
+  },
+  "management": {
+    "title": "Upravljanje Pretplatom",
+    "currentPlan": "Trenutni Plan",
+    "status": "Status",
+    "nextBilling": "Sljedeća Naplata",
+    "cancelSubscription": "Otkaži Pretplatu",
+    "changePlan": "Promijeni Plan",
+    "reactivate": "Ponovo Aktiviraj Pretplatu",
+    "active": "Aktivna",
+    "cancelled": "Otkazana",
+    "expired": "Istekla",
+    "freeTier": "Besplatni Nivo"
+  },
+  "featuredAgency": {
+    "title": "Istaknuta Agencija",
+    "description": "Povećajte vidljivost svoje agencije uz premium pozicioniranje",
+    "benefits": {
+      "visibility": "Vrhunsko pozicioniranje u rezultatima pretrage",
+      "badge": "Značka istaknute agencije",
+      "analytics": "Poboljšana analitika",
+      "priority": "Prioritetna podrška"
+    },
+    "cta": "Istaknite Se"
+  },
+  "featuredDialog": {
+    "title": "Istaknite Svoju Agenciju",
+    "selectDuration": "Odaberite trajanje",
+    "week": "1 Nedjelja",
+    "month": "1 Mjesec",
+    "quarter": "3 Mjeseca",
+    "year": "1 Godina",
+    "totalPrice": "Ukupna Cijena",
+    "confirm": "Potvrdi Plaćanje",
+    "cancel": "Odustani"
+  },
+  "payment": {
+    "title": "Plaćanje",
+    "processing": "Obrada plaćanja...",
+    "success": "Plaćanje uspješno!",
+    "failed": "Plaćanje neuspješno",
+    "retry": "Pokušaj Ponovo",
+    "securePayment": "Sigurno Plaćanje",
+    "cardNumber": "Broj Kartice",
+    "expiry": "Datum Isteka",
+    "cvv": "CVV",
+    "nameOnCard": "Ime na Kartici"
+  },
+  "validation": {
+    "cardRequired": "Broj kartice je obavezan",
+    "cardInvalid": "Neispravan broj kartice",
+    "expiryRequired": "Datum isteka je obavezan",
+    "expiryInvalid": "Neispravan datum isteka",
+    "cvvRequired": "CVV je obavezan",
+    "cvvInvalid": "Neispravan CVV",
+    "nameRequired": "Ime na kartici je obavezno"
+  },
+  "messages": {
+    "subscriptionUpdated": "Pretplata uspješno ažurirana",
+    "subscriptionCancelled": "Pretplata otkazana",
+    "subscriptionReactivated": "Pretplata ponovo aktivirana",
+    "paymentSuccessful": "Plaćanje uspješno",
+    "paymentFailed": "Plaćanje neuspješno. Molimo pokušajte ponovo.",
+    "error": "Došlo je do greške. Molimo pokušajte ponovo."
+  },
+  "coupons": {
+    "title": "Imate kupon kod?",
+    "placeholder": "Unesite kupon kod",
+    "apply": "Primijeni",
+    "applied": "Kupon primijenjen!",
+    "invalid": "Neispravan kupon kod",
+    "expired": "Ovaj kupon je istekao",
+    "discount": "Popust"
+  },
+  "intervals": {
+    "monthly": "Mjesečno",
+    "yearly": "Godišnje",
+    "saveWithYearly": "Uštedite 20% sa godišnjom naplatom"
+  }
+}

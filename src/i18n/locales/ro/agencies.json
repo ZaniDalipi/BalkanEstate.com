@@ -1,0 +1,67 @@
+{
+  "hero": {
+    "title": "Găsiți Agenții Imobiliare de Top",
+    "subtitle": "Conectați-vă cu profesioniști imobiliari de încredere din zona dumneavoastră",
+    "searchPlaceholder": "Căutați agenții după nume sau locație..."
+  },
+  "search": {
+    "placeholder": "Căutați agenții...",
+    "button": "Caută",
+    "clear": "Șterge"
+  },
+  "stats": {
+    "totalAgencies": "Total Agenții",
+    "totalAgents": "Agenți Profesioniști",
+    "propertiesListed": "Proprietăți Listate",
+    "citiesCovered": "Orașe Acoperite"
+  },
+  "filters": {
+    "title": "Filtre",
+    "location": "Locație",
+    "allLocations": "Toate Locațiile",
+    "specialization": "Specializare",
+    "allSpecializations": "Toate Specializările",
+    "rating": "Rating",
+    "anyRating": "Orice Rating",
+    "reset": "Resetează Filtrele"
+  },
+  "sort": {
+    "label": "Sortează după",
+    "nameAsc": "Nume (A-Z)",
+    "nameDesc": "Nume (Z-A)",
+    "ratingDesc": "Cel Mai Mare Rating",
+    "propertiesDesc": "Cele Mai Multe Proprietăți",
+    "newest": "Cele Mai Noi Întâi"
+  },
+  "results": {
+    "showing": "Se afișează {{count}} agenții",
+    "of": "din",
+    "noResults": "Nu s-au găsit agenții",
+    "tryAdjusting": "Încercați să ajustați filtrele"
+  },
+  "card": {
+    "properties": "proprietăți",
+    "agents": "agenți",
+    "viewProfile": "Vezi Profilul",
+    "contact": "Contact",
+    "featured": "Promovat",
+    "verified": "Verificat"
+  },
+  "empty": {
+    "title": "Nu S-au Găsit Agenții",
+    "description": "Nu s-au găsit agenții care să corespundă criteriilor dumneavoastră",
+    "resetFilters": "Resetează Filtrele"
+  },
+  "cta": {
+    "title": "Sunteți Profesionist Imobiliar?",
+    "description": "Alăturați-vă rețelei noastre de agenții de încredere și extindeți-vă afacerea",
+    "button": "Înregistrați-vă Agenția"
+  },
+  "loading": {
+    "text": "Se încarcă agențiile..."
+  },
+  "error": {
+    "title": "Eroare la Încărcarea Agențiilor",
+    "retry": "Încearcă Din Nou"
+  }
+}

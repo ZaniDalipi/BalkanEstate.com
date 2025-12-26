@@ -1,0 +1,136 @@
+{
+  "navigation": {
+    "backToAgencies": "Înapoi la Agenții",
+    "overview": "Prezentare",
+    "properties": "Proprietăți",
+    "agents": "Agenți",
+    "reviews": "Recenzii"
+  },
+  "banner": {
+    "featured": "Agenție Promovată",
+    "verified": "Verificat",
+    "memberSince": "Membru din",
+    "contact": "Contact",
+    "website": "Vizitați Website-ul",
+    "share": "Distribuie"
+  },
+  "stats": {
+    "totalProperties": "Total Proprietăți",
+    "activeListings": "Anunțuri Active",
+    "totalAgents": "Membri Echipă",
+    "avgRating": "Rating Mediu",
+    "propertiesSold": "Proprietăți Vândute",
+    "yearsExperience": "Ani de Experiență"
+  },
+  "salesPerformance": {
+    "title": "Performanță Vânzări",
+    "totalSales": "Vânzări Totale",
+    "thisMonth": "Luna Aceasta",
+    "thisYear": "Anul Acesta",
+    "allTime": "Total",
+    "chart": {
+      "sales": "Vânzări",
+      "listings": "Anunțuri",
+      "views": "Vizualizări"
+    }
+  },
+  "about": {
+    "title": "Despre Noi",
+    "description": "Descriere",
+    "specializations": "Specializări",
+    "areasServed": "Zone Deservite",
+    "languages": "Limbi",
+    "established": "Înființată"
+  },
+  "invitationCode": {
+    "title": "Cod de Invitație Echipă",
+    "description": "Distribuiți acest cod agenților pentru a se alătura agenției dumneavoastră",
+    "code": "Cod de Invitație",
+    "copy": "Copiază Codul",
+    "copied": "Copiat!",
+    "generate": "Generează Cod Nou",
+    "expires": "Expiră",
+    "never": "Niciodată",
+    "uses": "Utilizări",
+    "unlimited": "Nelimitat"
+  },
+  "actions": {
+    "edit": "Editează Agenția",
+    "delete": "Șterge Agenția",
+    "feature": "Deveniți Promovat",
+    "verify": "Solicită Verificare",
+    "message": "Trimite Mesaj",
+    "call": "Sună",
+    "email": "Trimite Email"
+  },
+  "teamMembers": {
+    "title": "Membri Echipă",
+    "viewAll": "Vezi Toți",
+    "role": "Rol",
+    "joined": "S-a Alăturat",
+    "properties": "Proprietăți",
+    "sales": "Vânzări",
+    "contact": "Contact",
+    "owner": "Proprietar",
+    "admin": "Administrator",
+    "agent": "Agent"
+  },
+  "properties": {
+    "title": "Anunțuri Proprietăți",
+    "viewAll": "Vezi Toate Proprietățile",
+    "active": "Active",
+    "pending": "În Așteptare",
+    "sold": "Vândute",
+    "noProperties": "Încă nu există anunțuri de proprietăți",
+    "filters": {
+      "all": "Toate",
+      "forSale": "De Vânzare",
+      "forRent": "De Închiriat"
+    }
+  },
+  "editModal": {
+    "title": "Editează Agenția",
+    "name": "Nume Agenție",
+    "description": "Descriere",
+    "phone": "Telefon",
+    "email": "Email",
+    "website": "Website",
+    "address": "Adresă",
+    "city": "Oraș",
+    "country": "Țară",
+    "logo": "Logo",
+    "cover": "Copertă",
+    "save": "Salvează Modificările",
+    "cancel": "Anulează"
+  },
+  "confirmations": {
+    "delete": {
+      "title": "Șterge Agenția",
+      "message": "Sunteți sigur că doriți să ștergeți această agenție? Această acțiune nu poate fi anulată.",
+      "confirm": "Da, Șterge",
+      "cancel": "Anulează"
+    },
+    "leave": {
+      "title": "Părăsește Agenția",
+      "message": "Sunteți sigur că doriți să părăsiți această agenție?",
+      "confirm": "Da, Părăsește",
+      "cancel": "Anulează"
+    }
+  },
+  "messages": {
+    "updated": "Agenție actualizată cu succes",
+    "deleted": "Agenție ștearsă cu succes",
+    "codeCopied": "Cod de invitație copiat",
+    "codeGenerated": "Cod de invitație nou generat",
+    "error": "A apărut o eroare. Vă rugăm încercați din nou."
+  },
+  "weekdays": {
+    "monday": "Luni",
+    "tuesday": "Marți",
+    "wednesday": "Miercuri",
+    "thursday": "Joi",
+    "friday": "Vineri",
+    "saturday": "Sâmbătă",
+    "sunday": "Duminică"
+  }
+}
