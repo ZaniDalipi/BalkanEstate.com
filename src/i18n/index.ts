@@ -249,6 +249,11 @@ import elModals from './locales/el/modals.json';
 import elPayment from './locales/el/payment.json';
 import elSaved from './locales/el/saved.json';
 import elExploreCities from './locales/el/exploreCities.json';
+import elSubscription from './locales/el/subscription.json';
+import elAgencies from './locales/el/agencies.json';
+import elAgencyDetails from './locales/el/agencyDetails.json';
+import elAgentProfile from './locales/el/agentProfile.json';
+import elNewListing from './locales/el/newListing.json';
 
 // Language configuration
 export const languages = [
@@ -498,6 +503,11 @@ const resources = {
     payment: elPayment,
     saved: elSaved,
     exploreCities: elExploreCities,
+    subscription: elSubscription,
+    agencies: elAgencies,
+    agencyDetails: elAgencyDetails,
+    agentProfile: elAgentProfile,
+    newListing: elNewListing,
   }
 
 };
