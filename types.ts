@@ -96,6 +96,11 @@ export interface User {
         priceGrowthYoY?: number;
         activityLevel?: string;
     };
+    // Agent-related fields (populated when user is an agent)
+    languages?: string[];
+    specializations?: string[];
+    serviceAreas?: string[];
+    yearsOfExperience?: number;
     // Dual-Role System fields
     availableRoles?: UserRole[];
     activeRole?: UserRole;

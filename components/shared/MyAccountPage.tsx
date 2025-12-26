@@ -12,7 +12,7 @@ import AgencyManagementSection from './AgencyManagementSection';
 import { switchRole, joinAgencyByInvitationCode, getAgencies, updateAgentProfile } from '../../services/apiService';
 import Footer from './Footer';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
-import MapLocationPicker from '../SellerFlow/MapLocationPicker';
+import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { SEO } from '../../src/components/seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
@@ -1171,11 +1171,11 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             <option value="">{t('agent.addServiceArea')}</option>
                             {BALKAN_LOCATIONS.map((location) => (
                                 <option
-                                    key={`${location.name}-${location.country}`}
+                                    key={location.code}
                                     value={location.name}
                                     disabled={agentData.serviceAreas.includes(location.name)}
                                 >
-                                    {location.name} {location.country}
+                                    {location.name}
                                 </option>
                             ))}
                         </select>
