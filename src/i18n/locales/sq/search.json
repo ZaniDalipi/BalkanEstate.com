@@ -171,7 +171,18 @@
     "myLocation": "Vendndodhja Ime",
     "satellite": "Satelitor",
     "street": "Pamje Rruge",
-    "legend": "Legjenda"
+    "legend": "Legjenda",
+    "propertyLocation": "Vendndodhja e Pronës",
+    "searchNavigatePin": "Kërko, navigo dhe vendos vendndodhjen",
+    "searchPlaceholder": "Kërko fshatin, qytetin ose rrugën tuaj...",
+    "dragToAdjust": "Më tërhiq për të rregulluar vendndodhjen",
+    "locationSet": "Vendndodhja u vendos",
+    "dragging": "Duke tërhequr...",
+    "locationTooFar": "Kjo vendndodhje është {{distance}}km larg nga {{city}}. Ju lutem zgjidhni një vendndodhje brenda {{city}} ose zonave përreth.",
+    "tips": "💡 Këshilla: Përdorni kutinë e kërkimit për të gjetur fshatin/qytetin tuaj, zmadho me butonat +/- ose rrotën e miut, lëviz hartën duke e tërhequr dhe tërhiq shënuesin e kuq në vendndodhjen e saktë të pronës.",
+    "latitude": "Gjerësia:",
+    "longitude": "Gjatësia:",
+    "location": "Vendndodhja"
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

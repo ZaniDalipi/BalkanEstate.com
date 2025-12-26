@@ -171,7 +171,18 @@
     "myLocation": "Moja Lokacija",
     "satellite": "Satelit",
     "street": "Ulični Prikaz",
-    "legend": "Legenda"
+    "legend": "Legenda",
+    "propertyLocation": "Lokacija Nekretnine",
+    "searchNavigatePin": "Pretražite, navigirajte i označite vašu lokaciju",
+    "searchPlaceholder": "Pretražite vaše selo, grad ili ulicu...",
+    "dragToAdjust": "Prevucite me da podesite lokaciju",
+    "locationSet": "Lokacija postavljena",
+    "dragging": "Prevlačenje...",
+    "locationTooFar": "Ova lokacija je {{distance}}km daleko od {{city}}. Molimo odaberite lokaciju u {{city}} ili obližnjim oblastima.",
+    "tips": "💡 Saveti: Koristite polje za pretragu da pronađete vaše selo/grad, zumirajte sa +/- dugmadima ili točkićem miša, pomerajte mapu prevlačenjem i prevucite crveni marker na tačnu lokaciju vaše nekretnine.",
+    "latitude": "Geografska širina:",
+    "longitude": "Geografska dužina:",
+    "location": "Lokacija"
   },
   "newsletter": {
     "title": "Budite u Toku sa Novim Nekretninama",
