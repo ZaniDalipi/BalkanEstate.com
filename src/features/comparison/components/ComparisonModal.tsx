@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '../../shared/Modal';
-import { Property } from '../../../types';
-import { formatPrice } from '../../../utils/currency';
-import { BuildingOfficeIcon } from '../../../constants';
+import { Property } from '@/types';
+import { formatPrice } from '@/utils/currency';
+import { BuildingOfficeIcon } from '@/constants';
 
 interface ComparisonModalProps {
     isOpen: boolean;

@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { PhoneIcon, UserCircleIcon, HeartIcon, ShareIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
-import MortgageCalculator from '../../../components/BuyerFlow/Calculators/MortgageCalculator';
-import RentVsBuyCalculator from '../../../components/BuyerFlow/Calculators/RentVsBuyCalculator';
+import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
+import RentVsBuyCalculator from '@/src/features/calculators/components/RentVsBuyCalculator';
 
 interface PropertyContactProps {
   property: Property;

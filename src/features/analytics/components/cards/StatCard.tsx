@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '../../../../../constants';
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@/constants';
 import { STAT_CARD_COLORS, StatCardColor } from '../../constants';
 import { MiniBarChart } from '../charts';
 

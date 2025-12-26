@@ -3,8 +3,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertyKeys } from '../api/propertyKeys';
-import * as api from '../../../services/apiService';
-import { Property } from '../../../types';
+import * as api from '@/services/apiService';
+import { Property } from '@/types';
 
 /**
  * Hook to get user's favorite properties

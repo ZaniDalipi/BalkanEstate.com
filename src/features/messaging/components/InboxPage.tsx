@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../../context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import ConversationList from './ConversationList';
 import ConversationView from './ConversationView';
-import { EnvelopeIcon } from '../../../constants';
-import PropertyCard from '../PropertyDisplay/PropertyCard';
-import Footer from '../../shared/Footer';
-import { SEO } from '../../../src/components/seo';
+import { EnvelopeIcon } from '@/constants';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
+import { SEO } from '@/src/components/seo';
 
 const InboxPage: React.FC = () => {
     const { t } = useTranslation(['messages', 'nav']);

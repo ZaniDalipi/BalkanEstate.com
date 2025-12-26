@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Conversation } from '../../../types';
-import { useAppContext } from '../../../context/AppContext';
-import { BuildingOfficeIcon } from '../../../constants';
+import { Conversation } from '@/types';
+import { useAppContext } from '@/context/AppContext';
+import { BuildingOfficeIcon } from '@/constants';
 
 interface ConversationListItemProps {
     conversation: Conversation;

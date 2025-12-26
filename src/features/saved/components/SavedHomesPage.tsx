@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../../context/AppContext';
-import { Property } from '../../../types';
+import { useAppContext } from '@/context/AppContext';
+import { Property } from '@/types';
 import PropertyCard from '../PropertyDisplay/PropertyCard';
-import { HeartIcon } from '../../../constants';
+import { HeartIcon } from '@/constants';
 import ComparisonBar from '../Comparison/ComparisonBar';
 import ComparisonModal from '../Comparison/ComparisonModal';
 import Toast from '../../shared/Toast';

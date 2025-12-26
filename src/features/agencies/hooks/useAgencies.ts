@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { agencyKeys } from '../api/agencyKeys';
-import * as api from '../../../../services/apiService';
+import * as api from '@/services/apiService';
 
 export function useAgencies(filters?: { city?: string; featured?: boolean; page?: number; limit?: number }) {
   const {

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property } from '../../../types';
+import { Property } from '@/types';
 import HighlightedPropertyCard from './HighlightedPropertyCard';
 
 interface HighlightedPropertiesSectionProps {

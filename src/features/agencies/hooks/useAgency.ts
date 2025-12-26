@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { agencyKeys } from '../api/agencyKeys';
-import * as api from '../../../services/apiService';
+import * as api from '@/services/apiService';
 
 export function useAgency(agencyId: string | null | undefined) {
   const {

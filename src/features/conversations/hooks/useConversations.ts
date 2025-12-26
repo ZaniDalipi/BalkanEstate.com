@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { conversationKeys } from '../api/conversationKeys';
-import * as api from '../../../services/apiService';
-import { Conversation } from '../../../types';
+import * as api from '@/services/apiService';
+import { Conversation } from '@/types';
 
 /**
  * Hook to get all conversations for current user

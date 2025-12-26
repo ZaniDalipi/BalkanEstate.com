@@ -1,5 +1,5 @@
 import React from 'react';
-import { LockClosedIcon } from '../../../../constants';
+import { LockClosedIcon } from '@/constants';
 
 interface PremiumUpgradeBannerProps {
   onUpgradeClick: () => void;

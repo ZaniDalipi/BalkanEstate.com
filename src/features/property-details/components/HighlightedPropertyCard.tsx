@@ -1,9 +1,9 @@
 import React, { useState, useCallback, memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property } from '../../../types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon } from '../../../constants';
-import { useAppContext } from '../../../context/AppContext';
-import { formatPrice } from '../../../utils/currency';
+import { Property } from '@/types';
+import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon } from '@/constants';
+import { useAppContext } from '@/context/AppContext';
+import { formatPrice } from '@/utils/currency';
 
 // Chevron Icons
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
-import { Property } from '../../../types';
+import { Property } from '@/types';
 import L from 'leaflet';
-import { useAppContext } from '../../../context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import {
   BellIcon,
   PencilIcon,
@@ -11,17 +11,17 @@ import {
   SearchPlusIcon,
   MapLegendIcon,
   CrosshairsIcon,
-} from '../../../constants';
-import { CadastreLayer } from '../../Map/CadastreLayer';
+} from '@/constants';
+import { CadastreLayer } from './CadastreLayer';
 import {
   FlyToController,
   MapEvents,
   ZoomBasedTileSwitch,
   MapDrawEvents,
-} from '../../../src/components/map/MapHelpers';
-import { Markers, Legend, HighlightedPropertyMarkers } from '../../../src/components/map/MapPropertyMarker';
-import MapAgentAvatar, { MapAgentAvatarInner } from '../../../src/components/map/MapAgentAvatar';
-import { HighlightedPropertiesProvider } from '../../../src/context/HighlightedPropertiesContext';
+} from '@/src/components/map/MapHelpers';
+import { Markers, Legend, HighlightedPropertyMarkers } from '@/src/components/map/MapPropertyMarker';
+import MapAgentAvatar, { MapAgentAvatarInner } from '@/src/components/map/MapAgentAvatar';
+import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 
 // Fix for default icon issue with bundlers
 let DefaultIcon = L.icon({

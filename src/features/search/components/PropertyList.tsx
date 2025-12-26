@@ -1,10 +1,10 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
-import PropertyCard from '@/components/BuyerFlow/PropertyDisplay/PropertyCard';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { SearchIcon, SparklesIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import AiSearch from './AiSearch';
-import PropertyCardSkeleton from '@/components/BuyerFlow/PropertyDisplay/PropertyCardSkeleton';
+import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 

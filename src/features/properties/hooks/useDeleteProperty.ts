@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertyKeys } from '../api/propertyKeys';
 import { authKeys } from '../../auth/api/authKeys';
-import * as api from '../../../services/apiService';
+import * as api from '@/services/apiService';
 
 /**
  * Hook to delete a property listing

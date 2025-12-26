@@ -3,14 +3,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, PropertyImageTag } from '../../../../types';
-import { useAppContext } from '../../../../context/AppContext';
-import { ArrowLeftIcon, SparklesIcon } from '../../../../constants';
+import { Property, PropertyImageTag } from '@/types';
+import { useAppContext } from '@/context/AppContext';
+import { ArrowLeftIcon, SparklesIcon } from '@/constants';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
-import FeaturedAgencies from '../../../../components/FeaturedAgencies';
-import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '../../../components/seo';
-import { SocialShare } from '../../../components/marketing/SocialShare';
+import FeaturedAgencies from '@/components/FeaturedAgencies';
+import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/features/components/seo';
+import { SocialShare } from '@/src/features/components/marketing/SocialShare';
 import {
   ImageEditorModal,
   PropertyGallery,
@@ -19,7 +19,7 @@ import {
   PropertyPhotos,
   PropertyMapLink,
   NeighborhoodInsights,
-} from '../../../components/property';
+} from '@/src/features/components/property';
 import { useTrackView } from '../../view-stats/hooks';
 import PromotionModal from '../../promotions/components/PromotionModal';
 

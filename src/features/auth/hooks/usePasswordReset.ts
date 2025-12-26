@@ -2,7 +2,7 @@
 // Uses TanStack Query mutation for password reset operations
 
 import { useMutation } from '@tanstack/react-query';
-import * as api from '../../../services/apiService';
+import * as api from '@/services/apiService';
 
 interface PasswordResetParams {
   email: string;

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { conversationKeys } from '../api/conversationKeys';
-import * as api from '../../../services/apiService';
-import { Conversation, Message } from '../../../types';
+import * as api from '@/services/apiService';
+import { Conversation, Message } from '@/types';
 
 /**
  * Hook to create new conversation

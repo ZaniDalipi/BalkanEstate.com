@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { SearchIcon, XMarkIcon, MapPinIcon, SpinnerIcon } from '../../../../../constants';
-import { NominatimResult } from '../../../../../types';
+import { SearchIcon, XMarkIcon, MapPinIcon, SpinnerIcon } from '@/constants';
+import { NominatimResult } from '@/types';
 
 interface SearchInputProps {
     value: string;

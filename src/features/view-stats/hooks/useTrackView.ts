@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { viewStatsApiClient, EntityType } from '../../../data/api/ViewStatsApiClient';
+import { viewStatsApiClient, EntityType } from '@/src/data/api/ViewStatsApiClient';
 
 interface UseTrackViewOptions {
   entityType: EntityType;

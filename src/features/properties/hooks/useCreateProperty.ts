@@ -4,8 +4,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertyKeys } from '../api/propertyKeys';
 import { authKeys } from '../../auth/api/authKeys';
-import * as api from '../../../services/apiService';
-import { Property } from '../../../types';
+import * as api from '@/services/apiService';
+import { Property } from '@/types';
 
 /**
  * Hook to create a new property listing

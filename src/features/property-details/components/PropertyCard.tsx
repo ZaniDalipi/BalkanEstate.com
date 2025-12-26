@@ -1,10 +1,10 @@
 import React, { useState, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property } from '../../../types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '../../../constants';
-import { useAppContext } from '../../../context/AppContext';
-import { formatPrice } from '../../../utils/currency';
-import { BALKAN_COUNTRIES } from '../../../constants/countries';
+import { Property } from '@/types';
+import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '@/constants';
+import { useAppContext } from '@/context/AppContext';
+import { formatPrice } from '@/utils/currency';
+import { BALKAN_COUNTRIES } from '@/constants/countries';
 
 interface PropertyCardProps {
   property: Property;

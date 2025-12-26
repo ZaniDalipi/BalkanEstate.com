@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import MapComponent from '@/components/BuyerFlow/Maps/MapComponent';
+import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyList from './PropertyList';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
 import { getAiChatResponse, generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';

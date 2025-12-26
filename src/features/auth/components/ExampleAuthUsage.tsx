@@ -10,7 +10,7 @@ import {
   usePasswordReset,
   usePhoneAuth,
 } from '../hooks';
-import { useAuthModal } from '../../../app/store/uiStore';
+import { useAuthModal } from '@/app/store/uiStore';
 
 /**
  * Example: Simple Login Form

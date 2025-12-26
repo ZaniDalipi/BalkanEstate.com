@@ -8,8 +8,8 @@ import {
   CurrencyEuroIcon,
   FireIcon,
   LightBulbIcon,
-} from '../../../../../constants';
-import { Insight } from '../../../../data/api/ViewStatsApiClient';
+} from '@/constants';
+import { Insight } from '@/src/data/api/ViewStatsApiClient';
 import { INSIGHT_PRIORITY_CONFIG } from '../../constants';
 import { truncateText } from '../../utils/helpers';
 

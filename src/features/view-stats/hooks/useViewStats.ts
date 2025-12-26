@@ -8,7 +8,7 @@ import {
   ComparisonStats,
   DashboardResponse,
   ReportResponse,
-} from '../../../data/api/ViewStatsApiClient';
+} from '@/src/data/api/ViewStatsApiClient';
 
 // Query keys for React Query cache management
 export const viewStatsKeys = {

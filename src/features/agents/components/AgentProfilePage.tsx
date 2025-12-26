@@ -47,10 +47,10 @@ import {
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
 import { formatPrice } from '@/utils/currency';
-import PropertyCard from '@/components/BuyerFlow/PropertyDisplay/PropertyCard';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import PropertyCardSkeleton from '@/components/BuyerFlow/PropertyDisplay/PropertyCardSkeleton';
+import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import AgentReviewForm from '@/components/shared/AgentReviewForm';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { slugify } from '@/utils/slug';

@@ -3,8 +3,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { authKeys } from '../api/authKeys';
-import * as api from '../../../services/apiService';
-import { User } from '../../../types';
+import * as api from '@/services/apiService';
+import { User } from '@/types';
 
 /**
  * Hook to get the current authenticated user

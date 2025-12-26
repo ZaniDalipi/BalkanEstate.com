@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../../context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import SavedSearchAccordion from './SavedSearchAccordion';
-import { MagnifyingGlassPlusIcon } from '../../../constants';
-import { SavedSearch, Filters, SellerType } from '../../../types';
-import AdvertisementBanner from '../../AdvertisementBanner';
-import Footer from '../../shared/Footer';
-import FeaturedAgencies from '../../FeaturedAgencies';
-import { SEO } from '../../../src/components/seo';
+import { MagnifyingGlassPlusIcon } from '@/constants';
+import { SavedSearch, Filters, SellerType } from '@/types';
+import AdvertisementBanner from '@/src/features/seller/components/AdvertisementBanner';
+import Footer from '@/components/shared/Footer';
+import FeaturedAgencies from '@/components/FeaturedAgencies';
+import { SEO } from '@/src/components/seo';
 
 const initialFilters: Filters = {
     query: '',

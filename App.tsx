@@ -13,35 +13,35 @@ import { LogoIcon } from './constants';
 import './src/i18n';
 
 // Core components (loaded immediately)
-import Onboarding from './components/Onboarding';
+import Onboarding from './src/features/onboarding/components/Onboarding';
 import { SearchPage } from './src/features/search/components';
-import AuthPage from './components/auth/AuthModal';
+import AuthPage from './src/features/auth/components/AuthModal';
 import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
-const CityRecommendations = lazy(() => import('./components/BuyerFlow/CityRecommendations'));
+const CityRecommendations = lazy(() => import('./src/features/cities/components/CityRecommendations'));
 const CreateListingPage = lazy(() => import('./src/features/seller/components/SellerDashboard'));
-const PricingPlans = lazy(() => import('./components/SellerFlow/PricingPlans'));
-const SavedSearchesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedSearchesPage'));
-const SavedPropertiesPage = lazy(() => import('./components/BuyerFlow/Saved/SavedHomesPage'));
-const InboxPage = lazy(() => import('./components/BuyerFlow/Messaging/InboxPage'));
+const PricingPlans = lazy(() => import('./src/features/seller/components/PricingPlans'));
+const SavedSearchesPage = lazy(() => import('./src/features/saved/components/SavedSearchesPage'));
+const SavedPropertiesPage = lazy(() => import('./src/features/saved/components/SavedHomesPage'));
+const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPage'));
 const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
-const SubscriptionModal = lazy(() => import('./components/BuyerFlow/Modals/SubscriptionModal'));
+const SubscriptionModal = lazy(() => import('./src/features/property-details/components/SubscriptionModal'));
 const AgentsPage = lazy(() => import('./src/features/agents/components/AgentsPage'));
 const AgenciesListPage = lazy(() => import('./components/AgenciesListPage'));
 const AgencyDetailPage = lazy(() => import('./components/AgencyDetailPage'));
-const EnterpriseCreationForm = lazy(() => import('./components/EnterpriseCreationForm'));
-const PropertyDetailsPage = lazy(() => import('./components/BuyerFlow/PropertyDisplay/PropertyDetailsPage'));
-const PaymentSuccess = lazy(() => import('./components/PaymentSuccess'));
-const PaymentCancel = lazy(() => import('./components/PaymentCancel'));
+const EnterpriseCreationForm = lazy(() => import('./src/features/seller/components/EnterpriseCreationForm'));
+const PropertyDetailsPage = lazy(() => import('./src/features/property-details/components/PropertyDetailsPage'));
+const PaymentSuccess = lazy(() => import('./src/features/payments/components/PaymentSuccess'));
+const PaymentCancel = lazy(() => import('./src/features/payments/components/PaymentCancel'));
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
-const ResetPasswordPage = lazy(() => import('./components/auth/ResetPasswordPage'));
-const AnalyticsPage = lazy(() => import('./components/AnalyticsPage'));
+const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
+const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { XMarkIcon } from '../../../../../constants';
-import { Filters } from '../../../../../types';
+import { XMarkIcon } from '@/constants';
+import { Filters } from '@/types';
 
 interface MobileFiltersModalProps {
     isOpen: boolean;

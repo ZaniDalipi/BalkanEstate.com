@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatPrice, getCurrencySymbol } from '../../../utils/currency';
-import { CurrencyDollarIcon } from '../../../constants';
+import { formatPrice, getCurrencySymbol } from '@/utils/currency';
+import { CurrencyDollarIcon } from '@/constants';
 
 interface MortgageCalculatorProps {
   propertyPrice: number;
