@@ -1,0 +1,95 @@
+{
+  "navigation": {
+    "backToAgents": "Natrag na Agente",
+    "overview": "Pregled",
+    "listings": "Oglasi",
+    "reviews": "Recenzije"
+  },
+  "tabs": {
+    "about": "O Meni",
+    "listings": "Oglasi",
+    "reviews": "Recenzije",
+    "contact": "Kontakt"
+  },
+  "badges": {
+    "verified": "Verificirani Agent",
+    "featured": "Istaknuto",
+    "topRated": "Najbolje Ocijenjeno",
+    "superAgent": "Super Agent",
+    "newAgent": "Novi Agent"
+  },
+  "contact": {
+    "title": "Kontakt Informacije",
+    "phone": "Telefon",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "schedule": "Zakaži Poziv",
+    "message": "Pošalji Poruku",
+    "responseTime": "Obično odgovara unutar"
+  },
+  "stats": {
+    "propertiesSold": "Prodanih Nekretnina",
+    "activeListings": "Aktivnih Oglasa",
+    "totalReviews": "Ukupno Recenzija",
+    "avgRating": "Prosječna Ocjena",
+    "responseRate": "Stopa Odgovora",
+    "yearsExperience": "Godina Iskustva"
+  },
+  "overview": {
+    "about": "O Meni",
+    "specializations": "Specijalizacije",
+    "areasServed": "Područja Djelovanja",
+    "languages": "Jezici koje Govorim",
+    "certifications": "Certifikati",
+    "education": "Obrazovanje"
+  },
+  "listings": {
+    "title": "Moji Oglasi",
+    "active": "Aktivno",
+    "sold": "Prodano",
+    "pending": "Na Čekanju",
+    "viewAll": "Pogledaj Sve",
+    "noListings": "Još nema oglasa"
+  },
+  "reviews": {
+    "title": "Recenzije Klijenata",
+    "writeReview": "Napišite Recenziju",
+    "noReviews": "Još nema recenzija",
+    "verifiedPurchase": "Verificirani Klijent",
+    "helpful": "Korisno",
+    "report": "Prijavi"
+  },
+  "consultation": {
+    "title": "Zakažite Besplatnu Konzultaciju",
+    "description": "Dobijte personalizirane savjete za vaše potrebe za nekretninama",
+    "button": "Zakaži Sada",
+    "duration": "30 minuta",
+    "free": "Besplatno"
+  },
+  "appraisal": {
+    "title": "Procjena Nekretnine",
+    "description": "Saznajte vrijednost vaše nekretnine danas",
+    "button": "Zatraži Procjenu"
+  },
+  "agency": {
+    "title": "Agencija",
+    "worksWith": "Radi s",
+    "viewAgency": "Pogledaj Agenciju",
+    "independent": "Neovisni Agent"
+  },
+  "similarAgents": {
+    "title": "Slični Agenti",
+    "viewAll": "Pogledaj Sve"
+  },
+  "actions": {
+    "share": "Podijeli Profil",
+    "save": "Spremi Agenta",
+    "report": "Prijavi Agenta"
+  },
+  "messages": {
+    "saved": "Agent spremljen u favorite",
+    "removed": "Agent uklonjen iz favorita",
+    "messageSent": "Poruka uspješno poslana",
+    "error": "Došlo je do greške. Molimo pokušajte ponovno."
+  }
+}

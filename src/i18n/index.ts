@@ -139,6 +139,11 @@ import hrModals from './locales/hr/modals.json';
 import hrPayment from './locales/hr/payment.json';
 import hrSaved from './locales/hr/saved.json';
 import hrExploreCities from './locales/hr/exploreCities.json';
+import hrSubscription from './locales/hr/subscription.json';
+import hrAgencies from './locales/hr/agencies.json';
+import hrAgencyDetails from './locales/hr/agencyDetails.json';
+import hrAgentProfile from './locales/hr/agentProfile.json';
+import hrNewListing from './locales/hr/newListing.json';
 
 // Import translations - Bosnian
 import bsCommon from './locales/bs/common.json';
@@ -393,6 +398,11 @@ const resources = {
     payment: hrPayment,
     saved: hrSaved,
     exploreCities: hrExploreCities,
+    subscription: hrSubscription,
+    agencies: hrAgencies,
+    agencyDetails: hrAgencyDetails,
+    agentProfile: hrAgentProfile,
+    newListing: hrNewListing,
   },
   bs: {
     common: bsCommon,
