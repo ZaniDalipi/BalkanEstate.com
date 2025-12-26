@@ -65,21 +65,32 @@ const AnalyticsPage: React.FC = () => {
   const {
     data: dashboard,
     isLoading: dashboardLoading,
+    isFetching: dashboardFetching,
     error: dashboardError,
     refetch: refetchDashboard,
   } = useDashboardOverview();
   const {
     data: propertiesStats,
     isLoading: propertiesLoading,
+    isFetching: propertiesFetching,
     refetch: refetchProperties,
   } = useMyPropertiesViewStats(period);
   const downloadReport = useDownloadReport();
 
-  // Retry handler
-  const handleRetry = () => {
-    refetchDashboard();
-    refetchProperties();
+  // Retry handler - refetch both dashboard and properties data
+  const handleRetry = async () => {
+    try {
+      await Promise.all([
+        refetchDashboard(),
+        refetchProperties(),
+      ]);
+    } catch (error) {
+      console.error('Failed to refetch analytics data:', error);
+    }
   };
+
+  // Track if any data is being fetched (initial or refetch)
+  const isFetching = dashboardFetching || propertiesFetching;
 
   // Get error message
   const getErrorMessage = (error: any): string => {
@@ -157,10 +168,10 @@ const AnalyticsPage: React.FC = () => {
               </div>
               <button
                 onClick={handleRetry}
-                disabled={isLoading}
+                disabled={isFetching}
                 className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
               >
-                {isLoading ? t('analytics:errors.retrying') : t('analytics:errors.retry')}
+                {isFetching ? t('analytics:errors.retrying') : t('analytics:errors.retry')}
               </button>
             </div>
           </div>
