@@ -1,4 +1,35 @@
 {
+  "roleSelector": {
+    "title": "Posto Shpalljen Si",
+    "description": "Zgjidhni cilin rol të përdorni kur krijoni këtë shpallje. Çdo rol ka limite dhe abonime të veçanta listimesh.",
+    "agent": "Agjent",
+    "privateSeller": "Shitës Privat",
+    "sharedLimit": "Limit i Përbashkët: {{used}}/{{limit}} listime gjithsej",
+    "asRole": "({{count}} si {{role}})",
+    "listings": "Listime",
+    "limitReachedShared": "Limiti i përbashkët u arrit mes të dy roleve.",
+    "limitReachedUpgrade": "Limiti i listimeve u arrit. Përmirëso në Pro për 25 listime!",
+    "remainingListings": "{{count}} listime të mbetura",
+    "availableListings": "{{count}} listime të disponueshme",
+    "shared": "(të përbashkëta)",
+    "highlightCoupons": "🎟️ Kuponë Theksimi: {{available}}/{{total}}",
+    "couponsDescription": "Përdori për të promovuar listimet tuaja",
+    "noSubscriptionData": "Nuk ka të dhëna abonimi",
+    "proRequired": {
+      "title": "Kërkohet Abonim Pro",
+      "description": "Për të postuar listime si agjent, duhet të abonoheni në planin Pro.",
+      "button": "Abonohu në Pro"
+    },
+    "badges": {
+      "trial": "Provë",
+      "pro": "Pro",
+      "agencyOwner": "Pronari i Agjencisë",
+      "agencyAgent": "Agjent Agjence",
+      "buyer": "Blerës",
+      "free": "Falas",
+      "proRequired": "Kërkohet Pro"
+    }
+  },
   "createListing": {
     "title": "Krijo Shpallje të Re",
     "editTitle": "Redakto Shpalljen Tuaj",

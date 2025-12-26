@@ -1,4 +1,35 @@
 {
+  "roleSelector": {
+    "title": "Δημοσίευση αγγελίας ως",
+    "description": "Επιλέξτε ποιον ρόλο θέλετε να χρησιμοποιήσετε κατά τη δημιουργία αυτής της αγγελίας. Κάθε ρόλος έχει ξεχωριστά όρια αγγελιών και συνδρομές.",
+    "agent": "Πράκτορας",
+    "privateSeller": "Ιδιώτης πωλητής",
+    "sharedLimit": "Κοινό όριο: {{used}}/{{limit}} συνολικές αγγελίες",
+    "asRole": "({{count}} ως {{role}})",
+    "listings": "Αγγελίες",
+    "limitReachedShared": "Το κοινό όριο επιτεύχθηκε και για τους δύο ρόλους.",
+    "limitReachedUpgrade": "Το όριο αγγελιών επιτεύχθηκε. Αναβαθμίστε σε Pro για 25 αγγελίες!",
+    "remainingListings": "{{count}} εναπομένουσες αγγελίες",
+    "availableListings": "{{count}} διαθέσιμες αγγελίες",
+    "shared": "(κοινόχρηστο)",
+    "highlightCoupons": "🎟️ Κουπόνια επισήμανσης: {{available}}/{{total}}",
+    "couponsDescription": "Χρησιμοποιήστε τα για προώθηση των αγγελιών σας",
+    "noSubscriptionData": "Δεν υπάρχουν δεδομένα συνδρομής",
+    "proRequired": {
+      "title": "Απαιτείται συνδρομή Pro",
+      "description": "Για να δημοσιεύσετε αγγελίες ως πράκτορας, πρέπει να εγγραφείτε στο πρόγραμμα Pro.",
+      "button": "Εγγραφή στο Pro"
+    },
+    "badges": {
+      "trial": "Δοκιμαστικό",
+      "pro": "Pro",
+      "agencyOwner": "Ιδιοκτήτης πρακτορείου",
+      "agencyAgent": "Πράκτορας πρακτορείου",
+      "buyer": "Αγοραστής",
+      "free": "Δωρεάν",
+      "proRequired": "Απαιτείται Pro"
+    }
+  },
   "createListing": {
     "title": "Create a New Listing",
     "editTitle": "Edit Your Listing",

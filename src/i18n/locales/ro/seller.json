@@ -1,4 +1,35 @@
 {
+  "roleSelector": {
+    "title": "Publică anunțul ca",
+    "description": "Alege ce rol dorești să folosești la crearea acestui anunț. Fiecare rol are limite de anunțuri și abonamente separate.",
+    "agent": "Agent",
+    "privateSeller": "Vânzător privat",
+    "sharedLimit": "Limită partajată: {{used}}/{{limit}} anunțuri în total",
+    "asRole": "({{count}} ca {{role}})",
+    "listings": "Anunțuri",
+    "limitReachedShared": "Limita partajată atinsă pentru ambele roluri.",
+    "limitReachedUpgrade": "Limita anunțurilor atinsă. Fă upgrade la Pro pentru 25 anunțuri!",
+    "remainingListings": "{{count}} anunțuri rămase",
+    "availableListings": "{{count}} anunțuri disponibile",
+    "shared": "(partajat)",
+    "highlightCoupons": "🎟️ Cupoane de evidențiere: {{available}}/{{total}}",
+    "couponsDescription": "Folosește-le pentru a-ți promova anunțurile",
+    "noSubscriptionData": "Niciun dat despre abonament",
+    "proRequired": {
+      "title": "Abonament Pro necesar",
+      "description": "Pentru a publica anunțuri ca agent, trebuie să te abonezi la planul Pro.",
+      "button": "Abonează-te la Pro"
+    },
+    "badges": {
+      "trial": "Perioadă de probă",
+      "pro": "Pro",
+      "agencyOwner": "Proprietar agenție",
+      "agencyAgent": "Agent agenție",
+      "buyer": "Cumpărător",
+      "free": "Gratuit",
+      "proRequired": "Pro necesar"
+    }
+  },
   "createListing": {
     "title": "Create a New Listing",
     "editTitle": "Edit Your Listing",

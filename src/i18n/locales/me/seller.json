@@ -1,4 +1,35 @@
 {
+  "roleSelector": {
+    "title": "Objavi oglas kao",
+    "description": "Odaberite koju ulogu želite koristiti pri kreiranju ovog oglasa. Svaka uloga ima zasebne limite oglasa i pretplate.",
+    "agent": "Agent",
+    "privateSeller": "Privatni prodavac",
+    "sharedLimit": "Dijeljeni limit: {{used}}/{{limit}} ukupno oglasa",
+    "asRole": "({{count}} kao {{role}})",
+    "listings": "Oglasi",
+    "limitReachedShared": "Dijeljeni limit dostignut za obje uloge.",
+    "limitReachedUpgrade": "Limit oglasa dostignut. Nadogradite na Pro za 25 oglasa!",
+    "remainingListings": "{{count}} preostalih oglasa",
+    "availableListings": "{{count}} dostupnih oglasa",
+    "shared": "(dijeljeno)",
+    "highlightCoupons": "🎟️ Kuponi za isticanje: {{available}}/{{total}}",
+    "couponsDescription": "Koristite za promociju vaših oglasa",
+    "noSubscriptionData": "Nema podataka o pretplati",
+    "proRequired": {
+      "title": "Potrebna Pro pretplata",
+      "description": "Za objavu oglasa kao agent, morate se pretplatiti na Pro plan.",
+      "button": "Pretplatite se na Pro"
+    },
+    "badges": {
+      "trial": "Probni",
+      "pro": "Pro",
+      "agencyOwner": "Vlasnik agencije",
+      "agencyAgent": "Agent agencije",
+      "buyer": "Kupac",
+      "free": "Besplatno",
+      "proRequired": "Potreban Pro"
+    }
+  },
   "createListing": {
     "title": "Create a New Listing",
     "editTitle": "Edit Your Listing",

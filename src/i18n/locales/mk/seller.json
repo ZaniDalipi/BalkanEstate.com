@@ -1,4 +1,35 @@
 {
+  "roleSelector": {
+    "title": "Објави оглас како",
+    "description": "Изберете која улога да ја користите при креирање на овој оглас. Секоја улога има посебни лимити за огласи и претплати.",
+    "agent": "Агент",
+    "privateSeller": "Приватен продавач",
+    "sharedLimit": "Споделен лимит: {{used}}/{{limit}} вкупно огласи",
+    "asRole": "({{count}} како {{role}})",
+    "listings": "Огласи",
+    "limitReachedShared": "Споделениот лимит е достигнат за двете улоги.",
+    "limitReachedUpgrade": "Лимитот за огласи е достигнат. Надградете на Pro за 25 огласи!",
+    "remainingListings": "{{count}} преостанати огласи",
+    "availableListings": "{{count}} достапни огласи",
+    "shared": "(споделено)",
+    "highlightCoupons": "🎟️ Купони за истакнување: {{available}}/{{total}}",
+    "couponsDescription": "Користете ги за промоција на вашите огласи",
+    "noSubscriptionData": "Нема податоци за претплата",
+    "proRequired": {
+      "title": "Потребна е Pro претплата",
+      "description": "За да објавувате огласи како агент, мора да се претплатите на Pro планот.",
+      "button": "Претплатете се на Pro"
+    },
+    "badges": {
+      "trial": "Проба",
+      "pro": "Pro",
+      "agencyOwner": "Сопственик на агенција",
+      "agencyAgent": "Агент на агенција",
+      "buyer": "Купувач",
+      "free": "Бесплатно",
+      "proRequired": "Потребен Pro"
+    }
+  },
   "createListing": {
     "title": "Create a New Listing",
     "editTitle": "Edit Your Listing",
