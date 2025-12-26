@@ -24,7 +24,7 @@
         "description": "Приоритет в резултатите от търсенето",
         "features": [
           "Горе в резултатите от търсенето",
-          "Значка 'Препоръчан'",
+          "Значка \"Препоръчан\"",
           "2x увеличение на видимостта"
         ]
       },
@@ -33,7 +33,7 @@
         "description": "Изпъкнете с цвят",
         "popular": "Популярен",
         "features": [
-          "Всички ползи от 'Препоръчан'",
+          "Всички ползи от \"Препоръчан\"",
           "Цветен фон",
           "3x увеличение на видимостта"
         ]
@@ -42,7 +42,7 @@
         "title": "Премиум",
         "description": "Представяне на начална страница",
         "features": [
-          "Всички ползи от 'Подчертан'",
+          "Всички ползи от \"Подчертан\"",
           "Карусел на началната страница",
           "5x увеличение на видимостта"
         ]
@@ -110,182 +110,167 @@
     "sending": "Изпращане...",
     "sendToAgent": "Изпрати на Агент",
     "sentSuccessTitle": "Изпратено Успешно!",
-    "sentSuccessMessage": "Вашето анотирано изображение беше изпратено на агента. Те ще отговорят скоро.",
+    "sentSuccessMessage": "Вашето анотирано изображение беше изпратено на агента. Той ще отговори скоро.",
     "goToChat": "Отиди в Чата",
     "failedToSend": "Неуспешно изпращане на анотираното изображение. Моля, опитайте отново.",
     "tools": {
-      "draw": "Draw",
-      "text": "Add Text",
-      "arrow": "Arrow",
-      "rectangle": "Rectangle",
-      "circle": "Circle",
-      "highlight": "Highlight",
-      "blur": "Blur",
-      "crop": "Crop",
-      "rotate": "Rotate",
-      "undo": "Undo",
-      "redo": "Redo",
-      "clear": "Clear All"
+      "draw": "Рисуване",
+      "text": "Добавяне на текст",
+      "arrow": "Стрелка",
+      "rectangle": "Правоъгълник",
+      "circle": "Кръг",
+      "highlight": "Подчертаване",
+      "blur": "Замъгляване",
+      "crop": "Изрязване",
+      "rotate": "Завъртане",
+      "undo": "Отмяна",
+      "redo": "Повторение",
+      "clear": "Изчистване"
     },
     "colors": {
-      "red": "Red",
-      "blue": "Blue",
-      "green": "Green",
-      "yellow": "Yellow",
-      "black": "Black",
-      "white": "White"
+      "red": "Червен",
+      "blue": "Син",
+      "green": "Зелен",
+      "yellow": "Жълт",
+      "black": "Черен",
+      "white": "Бял"
     }
   },
   "confirmation": {
     "deleteProperty": {
-      "title": "Delete Property",
-      "message": "Are you sure you want to delete this property? This action cannot be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
+      "title": "Изтриване на Имот",
+      "message": "Сигурни ли сте, че искате да изтриете този имот? Това действие не може да бъде отменено.",
+      "confirm": "Изтриване",
+      "cancel": "Отказ"
     },
     "deleteAccount": {
-      "title": "Delete Account",
-      "message": "This will permanently delete your account and all associated data. This action cannot be undone.",
-      "confirm": "Delete Account",
-      "cancel": "Cancel"
+      "title": "Изтриване на Профил",
+      "message": "Това ще изтрие завинаги вашия профил и всички свързани данни. Това действие не може да бъде отменено.",
+      "confirm": "Изтрий Профила",
+      "cancel": "Отказ"
     },
     "logout": {
-      "title": "Log Out",
-      "message": "Are you sure you want to log out?",
-      "confirm": "Log Out",
-      "cancel": "Cancel"
+      "title": "Изход",
+      "message": "Сигурни ли сте, че искате да излезете?",
+      "confirm": "Изход",
+      "cancel": "Отказ"
     },
     "unsavedChanges": {
-      "title": "Unsaved Changes",
-      "message": "You have unsaved changes. Are you sure you want to leave?",
-      "confirm": "Leave",
-      "cancel": "Stay"
+      "title": "Незаписани Промени",
+      "message": "Имате незаписани промени. Сигурни ли сте, че искате да напуснете?",
+      "confirm": "Напусни",
+      "cancel": "Остани"
     },
     "cancelSubscription": {
-      "title": "Cancel Subscription",
-      "message": "Are you sure you want to cancel your subscription? You will lose access to premium features.",
-      "confirm": "Cancel Subscription",
-      "cancel": "Keep Subscription"
+      "title": "Отказ от Абонамент",
+      "message": "Сигурни ли сте, че искате да отмените абонамента си? Ще загубите достъп до премиум функции.",
+      "confirm": "Отмени Абонамента",
+      "cancel": "Запази Абонамента"
     }
   },
   "share": {
-    "title": "Share Property",
-    "copyLink": "Copy Link",
-    "linkCopied": "Link copied to clipboard!",
-    "shareVia": "Share via",
-    "facebook": "Facebook",
-    "twitter": "Twitter",
-    "linkedin": "LinkedIn",
-    "whatsapp": "WhatsApp",
-    "telegram": "Telegram",
-    "email": "Email",
-    "embedCode": "Embed Code",
-    "copyEmbed": "Copy Embed Code"
+    "title": "Споделяне на Имот",
+    "copyLink": "Копирай Връзката",
+    "linkCopied": "Връзката е копирана!",
+    "shareVia": "Сподели чрез",
+    "email": "Имейл",
+    "embedCode": "Код за Вграждане",
+    "copyEmbed": "Копирай Кода за Вграждане"
   },
   "report": {
-    "title": "Report Listing",
-    "reason": "Reason for reporting",
-    "reasons": {
-      "spam": "Spam or Misleading",
-      "scam": "Scam or Fraud",
-      "inappropriate": "Inappropriate Content",
-      "duplicate": "Duplicate Listing",
-      "wrongInfo": "Incorrect Information",
-      "soldRented": "Already Sold/Rented",
-      "other": "Other"
-    },
-    "details": "Additional details",
-    "detailsPlaceholder": "Please provide more information...",
-    "submit": "Submit Report",
-    "submitting": "Submitting...",
-    "submitted": "Report submitted successfully",
-    "thankYou": "Thank you for helping keep our platform safe!"
+    "title": "Докладване на Обява",
+    "reason": "Причина за докладване",
+    "details": "Допълнителни детайли",
+    "detailsPlaceholder": "Моля, предоставете повече информация...",
+    "submit": "Изпрати Доклад",
+    "submitting": "Изпращане...",
+    "submitted": "Докладът е изпратен успешно",
+    "thankYou": "Благодарим ви, че помагате платформата да бъде безопасна!"
   },
   "contact": {
-    "title": "Contact Seller",
-    "name": "Your Name",
-    "email": "Your Email",
-    "phone": "Your Phone",
-    "message": "Your Message",
-    "messagePlaceholder": "Hi, I'm interested in this property...",
-    "send": "Send Message",
-    "sending": "Sending...",
-    "sent": "Message sent successfully!",
-    "scheduleViewing": "Schedule Viewing",
-    "selectDate": "Select Date",
-    "selectTime": "Select Time",
-    "notes": "Additional Notes"
+    "title": "Свържете се с Продавача",
+    "name": "Вашето Име",
+    "email": "Вашият Имейл",
+    "phone": "Вашият Телефон",
+    "message": "Вашето Съобщение",
+    "messagePlaceholder": "Здравейте, интересувам се от този имот...",
+    "send": "Изпрати Съобщение",
+    "sending": "Изпращане...",
+    "sent": "Съобщението е изпратено успешно!",
+    "scheduleViewing": "Насрочване на Оглед",
+    "selectDate": "Изберете Дата",
+    "selectTime": "Изберете Час",
+    "notes": "Допълнителни Бележки"
   },
   "gallery": {
-    "title": "Photo Gallery",
-    "of": "of",
-    "previous": "Previous",
-    "next": "Next",
-    "close": "Close",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit Fullscreen",
-    "download": "Download",
-    "zoom": "Zoom",
-    "thumbnails": "Show Thumbnails"
+    "title": "Фото Галерия",
+    "previous": "Предишна",
+    "next": "Следваща",
+    "close": "Затвори",
+    "fullscreen": "Цял Екран",
+    "exitFullscreen": "Изход от Цял Екран",
+    "download": "Изтегляне",
+    "zoom": "Мащабиране",
+    "thumbnails": "Покажи Миниатюри"
   },
   "virtualTour": {
-    "title": "Virtual Tour",
-    "loading": "Loading virtual tour...",
+    "title": "Виртуална Разходка",
+    "loading": "Зареждане на виртуална разходка...",
     "controls": {
-      "moveForward": "Move Forward",
-      "moveBackward": "Move Backward",
-      "lookAround": "Look Around",
-      "zoomIn": "Zoom In",
-      "zoomOut": "Zoom Out",
-      "fullscreen": "Fullscreen",
-      "exitFullscreen": "Exit Fullscreen"
+      "moveForward": "Напред",
+      "moveBackward": "Назад",
+      "lookAround": "Оглед",
+      "zoomIn": "Увеличаване",
+      "zoomOut": "Намаляване",
+      "fullscreen": "Цял Екран",
+      "exitFullscreen": "Изход от Цял Екран"
     },
-    "hotspots": "Hotspots",
-    "rooms": "Rooms",
-    "info": "Information"
+    "hotspots": "Горещи Точки",
+    "rooms": "Стаи",
+    "info": "Информация"
   },
   "floorPlan": {
-    "title": "Floor Plan",
-    "loading": "Loading floor plan...",
-    "zoomIn": "Zoom In",
-    "zoomOut": "Zoom Out",
-    "reset": "Reset View",
-    "download": "Download Floor Plan",
-    "interactive": "Click on rooms for details"
+    "title": "Разпределение",
+    "loading": "Зареждане на разпределение...",
+    "zoomIn": "Увеличаване",
+    "zoomOut": "Намаляване",
+    "reset": "Нулиране на Изгледа",
+    "download": "Изтегляне на Разпределение",
+    "interactive": "Кликнете върху стаите за детайли"
   },
   "calculator": {
-    "title": "Mortgage Calculator",
-    "calculate": "Calculate",
-    "reset": "Reset",
-    "results": "Results",
-    "monthlyPayment": "Monthly Payment",
-    "totalPayment": "Total Payment",
-    "totalInterest": "Total Interest",
-    "disclaimer": "This is an estimate. Please consult a financial advisor for accurate calculations."
+    "title": "Ипотечен Калкулатор",
+    "calculate": "Изчисли",
+    "reset": "Нулиране",
+    "results": "Резултати",
+    "monthlyPayment": "Месечна Вноска",
+    "totalPayment": "Обща Сума",
+    "totalInterest": "Обща Лихва",
+    "disclaimer": "Това е приблизителна оценка. Моля, консултирайте се с финансов съветник за точни изчисления."
   },
   "login": {
-    "title": "Log In",
-    "subtitle": "Welcome back!",
-    "noAccount": "Don't have an account?",
-    "signUp": "Sign Up",
-    "forgotPassword": "Forgot Password?"
+    "title": "Вход",
+    "subtitle": "Добре дошли отново!",
+    "noAccount": "Нямате профил?",
+    "signUp": "Регистрация",
+    "forgotPassword": "Забравена парола?"
   },
   "signup": {
-    "title": "Create Account",
-    "subtitle": "Join BalkanEstate today",
-    "haveAccount": "Already have an account?",
-    "logIn": "Log In"
+    "title": "Създаване на Профил",
+    "subtitle": "Присъединете се към BalkanEstate днес",
+    "haveAccount": "Вече имате профил?",
+    "logIn": "Вход"
   },
   "cookie": {
-    "title": "Cookie Consent",
-    "message": "We use cookies to enhance your browsing experience and analyze site traffic. By clicking 'Accept All', you consent to our use of cookies.",
-    "acceptAll": "Accept All",
-    "rejectAll": "Reject All",
-    "customize": "Customize",
-    "necessary": "Necessary (Required)",
-    "analytics": "Analytics",
-    "marketing": "Marketing",
-    "savePreferences": "Save Preferences",
-    "learnMore": "Learn More"
+    "title": "Съгласие за Бисквитки",
+    "message": "Използваме бисквитки, за да подобрим вашето преживяване и да анализираме трафика на сайта. С натискане на \"Приемам всички\" вие се съгласявате с използването на бисквитки.",
+    "acceptAll": "Приемам Всички",
+    "rejectAll": "Отхвърлям Всички",
+    "customize": "Персонализиране",
+    "necessary": "Необходими (Задължителни)",
+    "analytics": "Анализ",
+    "marketing": "Маркетинг",
+    "savePreferences": "Запази Предпочитанията",
+    "learnMore": "Научи Повече"
   }
 }

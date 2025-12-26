@@ -184,7 +184,7 @@
     "save": "Запази това търсене",
     "saveSearch": "Запази търсенето",
     "name": "Име на търсенето",
-    "namePlaceholder": "напр. 2-стайни апартаменти в Прищина",
+    "namePlaceholder": "напр. 2-стайни апартаменти в София",
     "notifications": "Получавай известия за нови обяви",
     "saved": "Търсенето е запазено успешно",
     "delete": "Изтрий търсенето",
@@ -202,14 +202,14 @@
     "beds": "спални",
     "baths": "бани",
     "living": "всекидневни",
-    "noResults": "No properties match your description",
-    "tryDifferent": "Try describing what you're looking for differently",
-    "suggestions": "Suggestions",
-    "recentSearches": "Recent Searches",
-    "clearHistory": "Clear History"
+    "noResults": "Няма имоти, отговарящи на описанието ви",
+    "tryDifferent": "Опитайте да опишете търсенето си по друг начин",
+    "suggestions": "Предложения",
+    "recentSearches": "Последни търсения",
+    "clearHistory": "Изчисти историята"
   },
   "energyRatings": {
-    "any": "Any",
+    "any": "Всички",
     "aPlus": "A+",
     "a": "A",
     "b": "B",
@@ -220,102 +220,102 @@
     "g": "G"
   },
   "sellerTypes": {
-    "any": "Any",
-    "agent": "Agent",
-    "private": "Private Seller",
-    "agency": "Agency",
-    "developer": "Developer"
+    "any": "Всички",
+    "agent": "Агент",
+    "private": "Частен продавач",
+    "agency": "Агенция",
+    "developer": "Разработчик"
   },
   "parkingOptions": {
-    "any": "Any",
-    "none": "None",
-    "one": "1 Space",
-    "two": "2 Spaces",
-    "threePlus": "3+ Spaces",
-    "garage": "Garage",
-    "street": "Street Parking"
+    "any": "Всички",
+    "none": "Няма",
+    "one": "1 паркомясто",
+    "two": "2 паркоместа",
+    "threePlus": "3+ паркоместа",
+    "garage": "Гараж",
+    "street": "Паркинг на улицата"
   },
   "floorOptions": {
-    "any": "Any",
-    "ground": "Ground Floor",
-    "first": "1st Floor",
-    "second": "2nd Floor",
-    "third": "3rd Floor",
-    "fourthPlus": "4th Floor+",
-    "top": "Top Floor",
-    "penthouse": "Penthouse"
+    "any": "Всички",
+    "ground": "Партер",
+    "first": "1-ви етаж",
+    "second": "2-ри етаж",
+    "third": "3-ти етаж",
+    "fourthPlus": "4-ти етаж+",
+    "top": "Горен етаж",
+    "penthouse": "Пентхаус"
   },
   "view": {
-    "title": "View Options",
-    "list": "List View",
-    "grid": "Grid View",
-    "compact": "Compact View",
-    "detailed": "Detailed View"
+    "title": "Начин на показване",
+    "list": "Списък",
+    "grid": "Мрежа",
+    "compact": "Компактен",
+    "detailed": "Подробен"
   },
   "pagination": {
-    "first": "First",
-    "previous": "Previous",
-    "next": "Next",
-    "last": "Last",
-    "page": "Page",
-    "of": "of",
-    "showing": "Showing",
-    "to": "to",
-    "results": "results",
-    "perPage": "Per page",
-    "goToPage": "Go to page"
+    "first": "Първа",
+    "previous": "Предишна",
+    "next": "Следваща",
+    "last": "Последна",
+    "page": "Страница",
+    "of": "от",
+    "showing": "Показване",
+    "to": "до",
+    "results": "резултата",
+    "perPage": "на страница",
+    "goToPage": "Отиди на страница"
   },
   "quickFilters": {
-    "newListings": "New Listings",
-    "priceReduced": "Price Reduced",
-    "openHouse": "Open House",
-    "virtualTour": "Virtual Tour Available",
-    "petFriendly": "Pet Friendly",
-    "furnished": "Furnished",
-    "withPool": "With Pool",
-    "seaView": "Sea View",
-    "newConstruction": "New Construction"
+    "newListings": "Нови обяви",
+    "priceReduced": "Намалена цена",
+    "openHouse": "Дни на отворени врати",
+    "virtualTour": "Виртуална обиколка",
+    "petFriendly": "Позволени домашни любимци",
+    "furnished": "Обзаведен",
+    "withPool": "С басейн",
+    "seaView": "Морска гледка",
+    "newConstruction": "Ново строителство"
   },
   "compare": {
-    "title": "Compare Properties",
-    "add": "Add to Compare",
-    "remove": "Remove from Compare",
-    "clear": "Clear All",
-    "viewComparison": "View Comparison",
-    "maxProperties": "You can compare up to {{max}} properties",
-    "noProperties": "Add properties to compare",
-    "selected": "{{count}} selected"
+    "title": "Сравни имоти",
+    "add": "Добави за сравнение",
+    "remove": "Премахни от сравнението",
+    "clear": "Изчисти всички",
+    "viewComparison": "Виж сравнението",
+    "maxProperties": "Можете да сравнявате до {{max}} имота",
+    "noProperties": "Добавете имоти за сравнение",
+    "selected": "{{count}} избрани"
   },
   "alerts": {
-    "title": "Property Alerts",
-    "create": "Create Alert",
-    "manage": "Manage Alerts",
+    "title": "Известия за имоти",
+    "create": "Създай известие",
+    "manage": "Управление на известията",
     "frequency": {
-      "instant": "Instant",
-      "daily": "Daily",
-      "weekly": "Weekly"
+      "instant": "Мигновено",
+      "daily": "Ежедневно",
+      "weekly": "Седмично"
     },
-    "created": "Alert created successfully",
-    "deleted": "Alert deleted",
-    "updated": "Alert updated"
+    "created": "Известието е създадено успешно",
+    "deleted": "Известието е изтрито",
+    "updated": "Известието е актуализирано"
   },
   "empty": {
-    "title": "No Properties Found",
-    "description": "We couldn't find any properties matching your criteria.",
+    "title": "Няма намерени имоти",
+    "description": "Не успяхме да намерим имоти, отговарящи на вашите критерии.",
     "suggestions": {
-      "title": "Suggestions",
-      "expandArea": "Try expanding your search area",
-      "adjustPrice": "Adjust your price range",
-      "fewerFilters": "Use fewer filters",
-      "differentLocation": "Try a different location"
+      "title": "Предложения",
+      "expandArea": "Опитайте да разширите зоната на търсене",
+      "adjustPrice": "Коригирайте ценовия диапазон",
+      "fewerFilters": "Използвайте по-малко филтри",
+      "differentLocation": "Опитайте друга локация"
     },
-    "browseAll": "Browse All Properties",
-    "modifySearch": "Modify Search"
+    "browseAll": "Разгледайте всички имоти",
+    "modifySearch": "Променете търсенето"
   },
   "loading": {
-    "searching": "Searching properties...",
-    "loadingMore": "Loading more properties...",
-    "updating": "Updating results...",
-    "applyingFilters": "Applying filters..."
+    "searching": "Търсене на имоти...",
+    "loadingMore": "Зареждане на още имоти...",
+    "updating": "Обновяване на резултатите...",
+    "applyingFilters": "Приложение на филтрите..."
   }
 }

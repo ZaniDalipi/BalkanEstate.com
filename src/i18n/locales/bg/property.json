@@ -33,7 +33,7 @@
     "house": "Къща",
     "villa": "Вила",
     "land": "Земя",
-    "commercial": "Търговски",
+    "commercial": "Търговски обект",
     "office": "Офис",
     "garage": "Гараж",
     "other": "Друго"
@@ -42,7 +42,7 @@
     "bedrooms": "Спални",
     "beds": "Легла",
     "bathrooms": "Бани",
-    "baths": "Болни",
+    "baths": "Бани",
     "livingRooms": "Хол",
     "area": "Площ",
     "sqft": "Квадратни метри",
@@ -89,26 +89,26 @@
     "view": "Гледка",
     "orientation": "Ориентация",
     "materials": "Строителни материали",
-    "viewType": "{{type}} View",
-    "furnishing": "Furnishing",
-    "specialFeatures": "Special Features",
-    "notListed": "Not listed",
-    "viewFloorPlan": "View Interactive Floor Plan",
-    "soldMessage": "This property has been sold and is no longer available.",
-    "amenitiesFeatures": "Amenities & Features",
-    "propertyAmenities": "Property Amenities",
-    "propertyFeatures": "Property Features",
-    "distanceInfo": "Distance Information",
-    "balconyTerrace": "Balcony/Terrace",
-    "gardenYard": "Garden/Yard",
-    "yes": "Yes",
-    "no": "No",
-    "none": "None",
-    "spot": "spot",
-    "spots": "spots",
-    "livingRoom": "living room",
-    "livingRoomPlural": "living rooms",
-    "petsAllowed": "Pets Allowed"
+    "viewType": "Гледка: {{type}}",
+    "furnishing": "Обзавеждане",
+    "specialFeatures": "Специални характеристики",
+    "notListed": "Не е посочено",
+    "viewFloorPlan": "Виж интерактивен план на етажа",
+    "soldMessage": "Този имот е продаден и вече не е наличен.",
+    "amenitiesFeatures": "Удобства и характеристики",
+    "propertyAmenities": "Удобства на имота",
+    "propertyFeatures": "Характеристики на имота",
+    "distanceInfo": "Информация за разстояния",
+    "balconyTerrace": "Балкон/Тераса",
+    "gardenYard": "Градина/Двор",
+    "yes": "Да",
+    "no": "Не",
+    "none": "Няма",
+    "spot": "место",
+    "spots": "места",
+    "livingRoom": "хол",
+    "livingRoomPlural": "холове",
+    "petsAllowed": "Позволени домашни любимци"
   },
   "distances": {
     "title": "Разстояния",
@@ -140,7 +140,7 @@
     "addToCompare": "Добави за сравнение",
     "removeFromCompare": "Премахни от сравнението",
     "compareLimit": "Можете да сравнявате до 4 имота едновременно.",
-    "virtualTour": "Виртуален обиколка",
+    "virtualTour": "Виртуална обиколка",
     "view360": "360° изглед",
     "floorPlan": "План на етажа",
     "viewOnMap": "Виж на карта",
@@ -148,14 +148,14 @@
     "messageSeller": "Изпрати съобщение на продавача",
     "startingChat": "Стартиране на чата...",
     "propertySold": "Имотът е продаден",
-    "shareThisProperty": "Share this Property",
-    "linkCopied": "Link Copied!",
-    "annotate": "Annotate",
-    "tour3d": "3D Tour",
-    "tour360": "360° Tour",
-    "photos": "Photos",
-    "streetView": "Street View",
-    "all": "All"
+    "shareThisProperty": "Сподели този имот",
+    "linkCopied": "Връзката е копирана!",
+    "annotate": "Анотиране",
+    "tour3d": "3D обиколка",
+    "tour360": "360° обиколка",
+    "photos": "Снимки",
+    "streetView": "Уличен изглед",
+    "all": "Всички"
   },
   "seller": {
     "seller": "Продавач",
@@ -231,11 +231,11 @@
     }
   },
   "neighborhood": {
-    "title": "Информация за Района",
+    "title": "Информация за района",
     "description": "Открийте какво има наоколо на този имот. Нашият AI може да предостави подробности за училища, паркове и транспорт.",
     "loginRequired": "Изисква се вход - Безплатни потребители получават 3 анализа/месец, premium получават 20/месец",
-    "generateInsights": "Генерирай Анализи",
-    "loginAndGenerate": "Влезте и Генерирайте Анализи",
+    "generateInsights": "Генерирай анализи",
+    "loginAndGenerate": "Влезте и генерирайте анализи",
     "usageInfo": "Използване: {{used}}/{{limit}} анализа използвани този месец",
     "remainingInfo": "{{remaining}} от {{limit}} анализа оставащи този месец",
     "upgradePrompt": "Преминете към premium за повече анализи!",
@@ -258,9 +258,9 @@
     }
   },
   "mapLink": {
-    "title": "Виж на Карта",
+    "title": "Виж на карта",
     "description": "Искате да разгледате района около този имот?",
-    "button": "Виж на Картата за Търсене"
+    "button": "Виж на картата за търсене"
   },
   "guide": {
     "messages": {
@@ -277,7 +277,7 @@
     },
     "actions": {
       "calculate": "Изчисли",
-      "takeTour": "Направи Обиколка"
+      "takeTour": "Направи обиколка"
     },
     "quickActions": {
       "save": "Запази",

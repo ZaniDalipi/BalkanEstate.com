@@ -21,14 +21,14 @@
   },
   "legal": {
     "allRightsReserved": "Всички права запазени.",
-    "privacyPolicy": "Политика за Поверителност",
-    "termsOfService": "Общи Условия",
-    "cookiePolicy": "Политика за Бисквитки",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "privacyPolicy": "Политика за поверителност",
+    "termsOfService": "Общи условия",
+    "cookiePolicy": "Политика за бисквитки",
+    "disclaimer": "Отказ от отговорност",
+    "accessibility": "Достъпност"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Последвайте ни",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -36,35 +36,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Изтеглете нашето приложение",
+    "availableOn": "Налично в",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Абонирайте се за бюлетина",
+    "placeholder": "Въведете своя имейл",
+    "subscribe": "Абониране",
+    "subscribed": "Благодарим ви за абонамента!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Поддръжка",
+    "helpCenter": "Център за помощ",
+    "contactUs": "Свържете се с нас",
+    "faq": "Често задавани въпроси",
+    "feedback": "Дайте обратна връзка"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
-    "blog": "Blog"
+    "title": "Компания",
+    "aboutUs": "За нас",
+    "careers": "Кариери",
+    "press": "Преса",
+    "blog": "Блог"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Партньори",
+    "becomePartner": "Станете партньор",
+    "affiliates": "Партньорска програма",
+    "developers": "За разработчици"
   }
 }

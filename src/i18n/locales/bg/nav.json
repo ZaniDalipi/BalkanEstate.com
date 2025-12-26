@@ -11,7 +11,7 @@
   "savedSearches": "Запазени търсения",
   "savedProperties": "Запазени имоти",
   "favorites": "Любими",
-  "inbox": "Входяща поща",
+  "inbox": "Входяща кутия",
   "messages": "Съобщения",
   "account": "Моят акаунт",
   "myAccount": "Моят акаунт",
@@ -43,37 +43,37 @@
     "listProperty": "Публикувай имот"
   },
   "mobile": {
-    "menu": "Menu",
-    "close": "Close Menu",
-    "back": "Back"
+    "menu": "Меню",
+    "close": "Затвори менюто",
+    "back": "Назад"
   },
   "user": {
-    "greeting": "Hello, {{name}}",
-    "viewProfile": "View Profile",
-    "accountSettings": "Account Settings",
-    "myProperties": "My Properties",
-    "myFavorites": "My Favorites",
-    "myMessages": "My Messages",
-    "notifications": "Notifications",
-    "helpCenter": "Help Center",
-    "logout": "Log Out"
+    "greeting": "Здравейте, {{name}}",
+    "viewProfile": "Виж профила",
+    "accountSettings": "Настройки на акаунта",
+    "myProperties": "Моите имоти",
+    "myFavorites": "Моите любими",
+    "myMessages": "Моите съобщения",
+    "notifications": "Известия",
+    "helpCenter": "Център за помощ",
+    "logout": "Изход"
   },
   "breadcrumbs": {
-    "home": "Home",
-    "search": "Search",
-    "property": "Property",
-    "agents": "Agents",
-    "agencies": "Agencies",
-    "account": "My Account",
-    "messages": "Messages",
-    "savedSearches": "Saved Searches",
-    "savedProperties": "Saved Properties",
-    "createListing": "Create Listing",
-    "editListing": "Edit Listing"
+    "home": "Начало",
+    "search": "Търсене",
+    "property": "Имот",
+    "agents": "Агенти",
+    "agencies": "Агенции",
+    "account": "Моят акаунт",
+    "messages": "Съобщения",
+    "savedSearches": "Запазени търсения",
+    "savedProperties": "Запазени имоти",
+    "createListing": "Създай обява",
+    "editListing": "Редактирай обява"
   },
   "skipLinks": {
-    "mainContent": "Skip to main content",
-    "navigation": "Skip to navigation",
-    "footer": "Skip to footer"
+    "mainContent": "Прескочи към основното съдържание",
+    "navigation": "Прескочи към навигацията",
+    "footer": "Прескочи към долния колонтитул"
   }
 }
