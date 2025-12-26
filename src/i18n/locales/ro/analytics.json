@@ -5,12 +5,18 @@
   "signInMessage": "Vă rugăm să vă autentificați pentru a vedea analizele.",
   "signIn": "Autentificare",
   "periods": {
-    "7d": "Ultimele 7 zile",
-    "30d": "Ultimele 30 de zile",
-    "90d": "Ultimele 90 de zile",
-    "all": "Tot timpul"
+    "7d": "7z",
+    "30d": "30z",
+    "90d": "90z",
+    "all": "Toate"
   },
   "stats": {
+    "today": "Astăzi",
+    "liveViews": "Vizualizări live",
+    "weekly": "Săptămânal",
+    "monthly": "Lunar",
+    "properties": "Proprietăți",
+    "avgPerProperty": "Medie/Proprietate",
     "totalProperties": "Total Proprietăți",
     "activeProperties": "{{count}} active",
     "monthlyViews": "Vizualizări Lunare",
@@ -18,15 +24,19 @@
     "weeklyViews": "Vizualizări Săptămânale",
     "last7Days": "Ultimele 7 zile",
     "avgViewsPerProperty": "Media Vizualizări/Proprietate",
-    "promoted": "{{count}} promovate"
+    "promoted": "{{count}} promovate",
+    "listings": "{{count}} anunțuri"
   },
   "premium": {
     "unlockTitle": "Deblocați Analizele Premium",
     "unlockMessage": "Faceți upgrade la Pro pentru acces la analize detaliate, informații inteligente, surse de trafic, distribuție pe dispozitive și rapoarte descărcabile.",
     "upgradeNow": "Upgrade Acum",
     "upgradeToPro": "Upgrade la Pro",
-    "premiumAccess": "Aveți acces la toate funcțiile premium de analiză, informații și rapoarte.",
-    "freeAccess": "Faceți upgrade pentru a debloca analize detaliate, informații inteligente și rapoarte descărcabile."
+    "upgrade": "Upgrade",
+    "premiumAccess": "Acces complet la toate funcțiile",
+    "freeAccess": "Upgrade pentru analize avansate",
+    "proActive": "Pro Activ",
+    "freePlan": "Plan Gratuit"
   },
   "insights": {
     "title": "Informații Inteligente",
@@ -46,6 +56,7 @@
     "sortedBy": "Sortate după vizualizări ({{period}})",
     "noProperties": "Încă nu există proprietăți",
     "listFirst": "Publicați Prima Proprietate",
+    "addProperty": "Adaugă Proprietate",
     "active": "Activ",
     "sold": "Vândut",
     "pending": "În Așteptare",
@@ -55,12 +66,15 @@
     "totalViews": "{{count}} total"
   },
   "sidebar": {
-    "topPerformers": "Cei Mai Performanți",
-    "needsAttention": "Necesită Atenție",
+    "topPerformers": "Top 3",
+    "needsAttention": "Puține Vizualizări",
     "onlyViews": "Doar {{count}} vizualizări luna aceasta",
     "promote": "Promovează",
     "recentActivity": "Activitate Recentă",
     "subscription": "Abonamentul Dvs.",
+    "devices": "Dispozitive",
+    "traffic": "Trafic",
+    "peakHours": "Ore de Vârf",
     "tier": {
       "free": "Gratuit",
       "pro": "Pro",
@@ -70,11 +84,13 @@
     }
   },
   "devices": {
+    "title": "Dispozitive",
     "desktop": "Desktop",
     "mobile": "Mobil",
     "tablet": "Tabletă"
   },
   "traffic": {
+    "title": "Trafic",
     "direct": "Direct",
     "search": "Căutare",
     "social": "Rețele Sociale",
@@ -87,6 +103,11 @@
     "generateReport": "Generează Raport"
   },
   "errors": {
-    "loadFailed": "Încărcarea analizelor a eșuat. Vă rugăm încercați mai târziu."
+    "loadFailed": "Încărcarea analizelor a eșuat. Vă rugăm încercați mai târziu.",
+    "sessionExpired": "Sesiunea a expirat. Vă rugăm să vă autentificați din nou.",
+    "networkError": "Eroare de rețea. Vă rugăm verificați conexiunea.",
+    "serverError": "Eroare de server. Vă rugăm încercați mai târziu.",
+    "retry": "Reîncercați",
+    "retrying": "Se reîncearcă..."
   }
 }

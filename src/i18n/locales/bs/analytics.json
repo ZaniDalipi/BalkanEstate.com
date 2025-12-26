@@ -5,12 +5,18 @@
   "signInMessage": "Molimo prijavite se da biste vidjeli vašu analitiku.",
   "signIn": "Prijavi se",
   "periods": {
-    "7d": "Posljednjih 7 dana",
-    "30d": "Posljednjih 30 dana",
-    "90d": "Posljednjih 90 dana",
-    "all": "Sve vrijeme"
+    "7d": "7d",
+    "30d": "30d",
+    "90d": "90d",
+    "all": "Sve"
   },
   "stats": {
+    "today": "Danas",
+    "liveViews": "Uživo pregledi",
+    "weekly": "Sedmično",
+    "monthly": "Mjesečno",
+    "properties": "Nekretnine",
+    "avgPerProperty": "Prosjek/Nekretnina",
     "totalProperties": "Ukupno Nekretnina",
     "activeProperties": "{{count}} aktivnih",
     "monthlyViews": "Mjesečni Pregledi",
@@ -18,15 +24,19 @@
     "weeklyViews": "Sedmični Pregledi",
     "last7Days": "Posljednjih 7 dana",
     "avgViewsPerProperty": "Prosjek Pregleda/Nekretnina",
-    "promoted": "{{count}} promoviranih"
+    "promoted": "{{count}} promoviranih",
+    "listings": "{{count}} oglasa"
   },
   "premium": {
     "unlockTitle": "Otključajte Premium Analitiku",
     "unlockMessage": "Nadogradite na Pro za pristup detaljnoj analitici, pametnim uvidima, izvorima saobraćaja, podjeli po uređajima i izvještajima za preuzimanje.",
     "upgradeNow": "Nadogradi Sada",
     "upgradeToPro": "Nadogradi na Pro",
-    "premiumAccess": "Imate pristup svim premium funkcijama analitike, uvidima i izvještajima.",
-    "freeAccess": "Nadogradite za otključavanje detaljne analitike, pametnih uvida i izvještaja za preuzimanje."
+    "upgrade": "Nadogradi",
+    "premiumAccess": "Pun pristup svim funkcijama",
+    "freeAccess": "Nadogradite za naprednu analitiku",
+    "proActive": "Pro Aktivan",
+    "freePlan": "Besplatan Plan"
   },
   "insights": {
     "title": "Pametni Uvidi",
@@ -46,6 +56,7 @@
     "sortedBy": "Sortirano po pregledima ({{period}})",
     "noProperties": "Još nema nekretnina",
     "listFirst": "Oglašite Vašu Prvu Nekretninu",
+    "addProperty": "Dodaj Nekretninu",
     "active": "Aktivno",
     "sold": "Prodato",
     "pending": "Na Čekanju",
@@ -55,12 +66,15 @@
     "totalViews": "{{count}} ukupno"
   },
   "sidebar": {
-    "topPerformers": "Najbolji Izvođači",
-    "needsAttention": "Potrebna Pažnja",
+    "topPerformers": "Top 3",
+    "needsAttention": "Malo Pregleda",
     "onlyViews": "Samo {{count}} pregleda ovog mjeseca",
     "promote": "Promoviraj",
     "recentActivity": "Nedavna Aktivnost",
     "subscription": "Vaša Pretplata",
+    "devices": "Uređaji",
+    "traffic": "Saobraćaj",
+    "peakHours": "Vršni Sati",
     "tier": {
       "free": "Besplatno",
       "pro": "Pro",
@@ -70,11 +84,13 @@
     }
   },
   "devices": {
+    "title": "Uređaji",
     "desktop": "Računar",
     "mobile": "Mobilni",
     "tablet": "Tablet"
   },
   "traffic": {
+    "title": "Saobraćaj",
     "direct": "Direktan",
     "search": "Pretraga",
     "social": "Društvene Mreže",
@@ -87,6 +103,11 @@
     "generateReport": "Generiši Izvještaj"
   },
   "errors": {
-    "loadFailed": "Učitavanje analitike nije uspjelo. Molimo pokušajte kasnije."
+    "loadFailed": "Učitavanje analitike nije uspjelo. Molimo pokušajte kasnije.",
+    "sessionExpired": "Sesija je istekla. Molimo prijavite se ponovo.",
+    "networkError": "Greška na mreži. Molimo provjerite vašu vezu.",
+    "serverError": "Greška na serveru. Molimo pokušajte kasnije.",
+    "retry": "Pokušaj ponovo",
+    "retrying": "Pokušavanje ponovo..."
   }
 }

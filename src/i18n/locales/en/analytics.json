@@ -1,16 +1,22 @@
 {
-  "title": "Analytics Dashboard",
-  "subtitle": "Track your listings performance and get insights",
+  "title": "Analytics",
+  "subtitle": "Track performance & insights",
   "signInRequired": "Sign in Required",
-  "signInMessage": "Please sign in to view your analytics.",
+  "signInMessage": "Please sign in to view your analytics dashboard.",
   "signIn": "Sign In",
   "periods": {
-    "7d": "Last 7 days",
-    "30d": "Last 30 days",
-    "90d": "Last 90 days",
-    "all": "All time"
+    "7d": "7d",
+    "30d": "30d",
+    "90d": "90d",
+    "all": "All"
   },
   "stats": {
+    "today": "Today",
+    "liveViews": "Live views",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "properties": "Properties",
+    "avgPerProperty": "Avg/Property",
     "totalProperties": "Total Properties",
     "activeProperties": "{{count}} active",
     "monthlyViews": "Monthly Views",
@@ -18,18 +24,22 @@
     "weeklyViews": "Weekly Views",
     "last7Days": "Last 7 days",
     "avgViewsPerProperty": "Avg. Views/Property",
-    "promoted": "{{count}} promoted"
+    "promoted": "{{count}} promoted",
+    "listings": "{{count}} listings"
   },
   "premium": {
     "unlockTitle": "Unlock Premium Analytics",
     "unlockMessage": "Upgrade to Pro to access detailed analytics, smart insights, traffic sources, device breakdown, and downloadable reports.",
     "upgradeNow": "Upgrade Now",
     "upgradeToPro": "Upgrade to Pro",
-    "premiumAccess": "You have access to all premium analytics features, insights, and reports.",
-    "freeAccess": "Upgrade to unlock detailed analytics, smart insights, and downloadable reports."
+    "upgrade": "Upgrade",
+    "premiumAccess": "Full access to all features",
+    "freeAccess": "Upgrade for advanced analytics",
+    "proActive": "Pro Active",
+    "freePlan": "Free Plan"
   },
   "insights": {
-    "title": "Smart Insights",
+    "title": "Insights",
     "promotionSuccess": "Promotion Success",
     "promotedPerformance": "Your promoted listings are getting {{multiplier}}x more views than regular listings!",
     "topPerformer": "Top Performer",
@@ -42,10 +52,11 @@
     "priceCorrelationMessage": "Properties priced between {{min}} and {{max}} are getting the most views in your listings."
   },
   "properties": {
-    "title": "Property Performance",
+    "title": "Properties",
     "sortedBy": "Sorted by views ({{period}})",
     "noProperties": "No properties yet",
     "listFirst": "List Your First Property",
+    "addProperty": "Add Property",
     "active": "Active",
     "sold": "Sold",
     "pending": "Pending",
@@ -55,12 +66,15 @@
     "totalViews": "{{count}} total"
   },
   "sidebar": {
-    "topPerformers": "Top Performers",
-    "needsAttention": "Needs Attention",
+    "topPerformers": "Top 3",
+    "needsAttention": "Low Views",
     "onlyViews": "Only {{count}} views this month",
     "promote": "Promote",
     "recentActivity": "Recent Activity",
     "subscription": "Your Subscription",
+    "devices": "Devices",
+    "traffic": "Traffic",
+    "peakHours": "Peak Hours",
     "tier": {
       "free": "Free",
       "pro": "Pro",
@@ -70,11 +84,13 @@
     }
   },
   "devices": {
+    "title": "Devices",
     "desktop": "Desktop",
     "mobile": "Mobile",
     "tablet": "Tablet"
   },
   "traffic": {
+    "title": "Traffic",
     "direct": "Direct",
     "search": "Search",
     "social": "Social",
@@ -87,6 +103,11 @@
     "generateReport": "Generate Report"
   },
   "errors": {
-    "loadFailed": "Failed to load analytics. Please try again later."
+    "loadFailed": "Failed to load analytics. Please try again later.",
+    "sessionExpired": "Session expired. Please sign in again.",
+    "networkError": "Network error. Please check your connection.",
+    "serverError": "Server error. Please try again later.",
+    "retry": "Retry",
+    "retrying": "Retrying..."
   }
 }

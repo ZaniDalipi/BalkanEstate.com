@@ -5,12 +5,18 @@
   "signInMessage": "Ju lutem kyçuni për të parë analitikën tuaj.",
   "signIn": "Kyçu",
   "periods": {
-    "7d": "7 ditët e fundit",
-    "30d": "30 ditët e fundit",
-    "90d": "90 ditët e fundit",
-    "all": "Të gjitha kohët"
+    "7d": "7d",
+    "30d": "30d",
+    "90d": "90d",
+    "all": "Të gjitha"
   },
   "stats": {
+    "today": "Sot",
+    "liveViews": "Shikime live",
+    "weekly": "Javore",
+    "monthly": "Mujore",
+    "properties": "Prona",
+    "avgPerProperty": "Mesatare/Pronë",
     "totalProperties": "Prona Totale",
     "activeProperties": "{{count}} aktive",
     "monthlyViews": "Shikime Mujore",
@@ -18,15 +24,19 @@
     "weeklyViews": "Shikime Javore",
     "last7Days": "7 ditët e fundit",
     "avgViewsPerProperty": "Mesatarja e Shikimeve/Pronë",
-    "promoted": "{{count}} të promovuara"
+    "promoted": "{{count}} të promovuara",
+    "listings": "{{count}} listime"
   },
   "premium": {
     "unlockTitle": "Zhbllokoni Analitikën Premium",
     "unlockMessage": "Përmirësohuni në Pro për të aksesuar analitikë të detajuar, njohuri të zgjuara, burimet e trafikut, ndarjen sipas pajisjeve dhe raporte të shkarkueshme.",
     "upgradeNow": "Përmirësohu Tani",
     "upgradeToPro": "Përmirësohu në Pro",
-    "premiumAccess": "Keni akses në të gjitha veçoritë premium të analitikës, njohuritë dhe raportet.",
-    "freeAccess": "Përmirësohuni për të zhbllokuar analitikë të detajuar, njohuri të zgjuara dhe raporte të shkarkueshme."
+    "upgrade": "Përmirëso",
+    "premiumAccess": "Akses i plotë në të gjitha veçoritë",
+    "freeAccess": "Përmirësohuni për analitikë të avancuar",
+    "proActive": "Pro Aktiv",
+    "freePlan": "Plan Falas"
   },
   "insights": {
     "title": "Njohuri të Zgjuara",
@@ -46,6 +56,7 @@
     "sortedBy": "Renditur sipas shikimeve ({{period}})",
     "noProperties": "Asnjë pronë ende",
     "listFirst": "Listoni Pronën Tuaj të Parë",
+    "addProperty": "Shto Pronë",
     "active": "Aktive",
     "sold": "Shitur",
     "pending": "Në Pritje",
@@ -55,12 +66,15 @@
     "totalViews": "{{count}} totale"
   },
   "sidebar": {
-    "topPerformers": "Performuesit Kryesorë",
-    "needsAttention": "Ka Nevojë për Vëmendje",
+    "topPerformers": "Top 3",
+    "needsAttention": "Shikime të Ulëta",
     "onlyViews": "Vetëm {{count}} shikime këtë muaj",
     "promote": "Promovo",
     "recentActivity": "Aktiviteti i Fundit",
     "subscription": "Abonimi Juaj",
+    "devices": "Pajisjet",
+    "traffic": "Trafiku",
+    "peakHours": "Orët Pik",
     "tier": {
       "free": "Falas",
       "pro": "Pro",
@@ -70,11 +84,13 @@
     }
   },
   "devices": {
+    "title": "Pajisjet",
     "desktop": "Kompjuter",
     "mobile": "Celular",
     "tablet": "Tablet"
   },
   "traffic": {
+    "title": "Trafiku",
     "direct": "Direkt",
     "search": "Kërkim",
     "social": "Social",
@@ -87,6 +103,11 @@
     "generateReport": "Gjenero Raport"
   },
   "errors": {
-    "loadFailed": "Dështoi ngarkimi i analitikës. Ju lutem provoni përsëri më vonë."
+    "loadFailed": "Dështoi ngarkimi i analitikës. Ju lutem provoni përsëri më vonë.",
+    "sessionExpired": "Sesioni ka skaduar. Ju lutem kyçuni përsëri.",
+    "networkError": "Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj.",
+    "serverError": "Gabim në server. Ju lutem provoni përsëri më vonë.",
+    "retry": "Riprovo",
+    "retrying": "Duke riprovuar..."
   }
 }
