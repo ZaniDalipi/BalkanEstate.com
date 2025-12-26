@@ -279,7 +279,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.propertyType')}
-                                options={[ { value: 'any', label: t('search:propertyTypes.any') }, { value: 'house', label: t('search:propertyTypes.house') }, { value: 'apartment', label: t('search:propertyTypes.apartment') }, { value: 'villa', label: t('search:propertyTypes.villa') }, ]}
+                                options={[ { value: 'any', label: t('search:propertyTypes.any') }, { value: 'house', label: t('search:propertyTypes.house') }, { value: 'apartment', label: t('search:propertyTypes.apartment') }, { value: 'villa', label: t('search:propertyTypes.villa') }, { value: 'land', label: t('search:propertyTypes.land') }, ]}
                                 selectedValue={filters.propertyType}
                                 onChange={(value) => onFilterChange('propertyType', (value as Filters['propertyType']) || 'any')}
                             />

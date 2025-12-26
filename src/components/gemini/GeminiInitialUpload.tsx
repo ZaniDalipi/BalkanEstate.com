@@ -88,6 +88,7 @@ export const GeminiInitialUpload: React.FC<GeminiInitialUploadProps> = ({
               <option value="house">House</option>
               <option value="apartment">Apartment</option>
               <option value="villa">Villa</option>
+              <option value="land">Land</option>
               <option value="other">Other</option>
             </select>
             <label htmlFor="aiPropertyType" className={floatingSelectLabelClasses}>

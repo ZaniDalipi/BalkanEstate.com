@@ -280,7 +280,7 @@ export interface Property {
     lat: number;
     lng: number;
     seller: Seller;
-    propertyType: 'house' | 'apartment' | 'villa' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
@@ -368,7 +368,7 @@ export interface Filters {
     maxSqft: number | null;
     sortBy: string;
     sellerType: SellerType;
-    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'other';
+    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'land' | 'other';
     // Advanced filters
     minYearBuilt: number | null;
     maxYearBuilt: number | null;

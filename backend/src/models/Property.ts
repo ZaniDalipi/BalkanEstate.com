@@ -37,7 +37,7 @@ export interface IProperty extends Document {
   images: IPropertyImage[];
   lat: number;
   lng: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'other';
+  propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
@@ -228,7 +228,7 @@ const PropertySchema: Schema = new Schema(
     },
     propertyType: {
       type: String,
-      enum: ['house', 'apartment', 'villa', 'other'],
+      enum: ['house', 'apartment', 'villa', 'land', 'other'],
       required: true,
       index: true,
     },

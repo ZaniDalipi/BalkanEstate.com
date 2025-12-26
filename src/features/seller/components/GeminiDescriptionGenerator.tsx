@@ -36,7 +36,7 @@ interface ListingData {
     image_tags: { index: number; tag: string; }[];
     tourUrl: string;
     virtualTour360Url: string; // URL for 360 virtual tour (Matterport, Kuula, etc.)
-    propertyType: 'house' | 'apartment' | 'villa' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
     floorNumber: number;
     totalFloors: number;
     lat: number;
@@ -315,7 +315,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     const [floorplanImage, setFloorplanImage] = useState<ImageData>({ file: null, previewUrl: '' });
     const [listingData, setListingData] = useState<ListingData>(initialListingData);
     const [language, setLanguage] = useState('English');
-    const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'other'>('house');
+    const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'land' | 'other'>('house');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [wantToPromote, setWantToPromote] = useState(false);
     const [pendingPropertyData, setPendingPropertyData] = useState<Property | null>(null);
@@ -802,15 +802,18 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             return;
         }
 
-        if (listingData.propertyType === 'apartment' && (!listingData.floorNumber || listingData.floorNumber < 1)) {
-            showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
-            setIsSubmitting(false);
-            return;
-        }
-        if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
-            showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
-            setIsSubmitting(false);
-            return;
+        // Floor validation - skip for land
+        if (listingData.propertyType !== 'land') {
+            if (listingData.propertyType === 'apartment' && (!listingData.floorNumber || listingData.floorNumber < 1)) {
+                showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
+                setIsSubmitting(false);
+                return;
+            }
+            if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
+                showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
+                setIsSubmitting(false);
+                return;
+            }
         }
 
         try {
@@ -1292,6 +1295,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                     <option value="house">House</option>
                                     <option value="apartment">Apartment</option>
                                     <option value="villa">Villa</option>
+                                    <option value="land">Land</option>
                                     <option value="other">Other</option>
                                 </select>
                                 <label htmlFor="aiPropertyType" className={floatingSelectLabelClasses}>Property Type</label>
@@ -1410,8 +1414,41 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         </div>
                     </fieldset>
 
-                    <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"><NumberInputWithSteppers label="Bedrooms" value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} /><NumberInputWithSteppers label="Bathrooms" value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} /><NumberInputWithSteppers label="Living Rooms" value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} /><NumberInputWithSteppers label="Area (m²)" value={listingData.sq_meters} step={5} onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} /><NumberInputWithSteppers label="Year Built" value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} /><NumberInputWithSteppers label="Parking Spots" value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} /></fieldset>
-                    <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end"><div className="relative"><select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}><option value="house">House</option><option value="apartment">Apartment</option><option value="villa">Villa</option><option value="other">Other</option></select><label htmlFor="propertyType" className={floatingSelectLabelClasses}>Property Type</label></div>{listingData.propertyType === 'apartment' && (<NumberInputWithSteppers label="Floor Number" value={listingData.floorNumber} onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))} min={1} />)}{(listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (<NumberInputWithSteppers label="Total Floors" value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} />)}</fieldset>
+                    {/* Property Type Selection */}
+                    <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                        <div className="relative">
+                            <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
+                                <option value="house">House</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="villa">Villa</option>
+                                <option value="land">Land</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <label htmlFor="propertyType" className={floatingSelectLabelClasses}>Property Type</label>
+                        </div>
+                        {listingData.propertyType === 'apartment' && (
+                            <NumberInputWithSteppers label="Floor Number" value={listingData.floorNumber} onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))} min={1} />
+                        )}
+                        {(listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (
+                            <NumberInputWithSteppers label="Total Floors" value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} />
+                        )}
+                    </fieldset>
+
+                    {/* Property Details - hide some fields for land */}
+                    <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {listingData.propertyType !== 'land' && (
+                            <>
+                                <NumberInputWithSteppers label="Bedrooms" value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
+                                <NumberInputWithSteppers label="Bathrooms" value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
+                                <NumberInputWithSteppers label="Living Rooms" value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
+                            </>
+                        )}
+                        <NumberInputWithSteppers label="Area (m²)" value={listingData.sq_meters} step={5} onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
+                        {listingData.propertyType !== 'land' && (
+                            <NumberInputWithSteppers label="Year Built" value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} />
+                        )}
+                        <NumberInputWithSteppers label="Parking Spots" value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} />
+                    </fieldset>
                     <fieldset><TagListInput label="Special Features" tags={listingData.specialFeatures} setTags={(tags) => setListingData(p => ({ ...p, specialFeatures: tags }))} /></fieldset>
                     <fieldset><TagListInput label="Materials" tags={listingData.materials} setTags={(tags) => setListingData(p => ({ ...p, materials: tags }))} /></fieldset>
                     <fieldset>
@@ -1423,170 +1460,232 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         <p className="text-xs text-neutral-500 mt-1">Add hashtag-style amenities that buyers can search for</p>
                     </fieldset>
 
-                    {/* Mandatory Amenities Section */}
+                    {/* Mandatory Amenities Section - show different options for land */}
                     <fieldset className="space-y-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-                        <h3 className="text-base font-semibold text-neutral-800 mb-3">Property Features</h3>
+                        <h3 className="text-base font-semibold text-neutral-800 mb-3">
+                            {listingData.propertyType === 'land' ? 'Land Features' : 'Property Features'}
+                        </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {listingData.propertyType !== 'land' && (
+                                <TriStateCheckbox
+                                    label="Balcony/Terrace"
+                                    value={listingData.hasBalcony}
+                                    onChange={(val) => setListingData(p => ({ ...p, hasBalcony: val }))}
+                                />
+                            )}
                             <TriStateCheckbox
-                                label="Balcony/Terrace"
-                                value={listingData.hasBalcony}
-                                onChange={(val) => setListingData(p => ({ ...p, hasBalcony: val }))}
-                            />
-                            <TriStateCheckbox
-                                label="Garden/Yard"
+                                label={listingData.propertyType === 'land' ? 'Has Vegetation/Trees' : 'Garden/Yard'}
                                 value={listingData.hasGarden}
                                 onChange={(val) => setListingData(p => ({ ...p, hasGarden: val }))}
                             />
+                            {listingData.propertyType !== 'land' && (
+                                <TriStateCheckbox
+                                    label="Elevator"
+                                    value={listingData.hasElevator}
+                                    onChange={(val) => setListingData(p => ({ ...p, hasElevator: val }))}
+                                />
+                            )}
                             <TriStateCheckbox
-                                label="Elevator"
-                                value={listingData.hasElevator}
-                                onChange={(val) => setListingData(p => ({ ...p, hasElevator: val }))}
-                            />
-                            <TriStateCheckbox
-                                label="Security System"
+                                label={listingData.propertyType === 'land' ? 'Fenced/Secured' : 'Security System'}
                                 value={listingData.hasSecurity}
                                 onChange={(val) => setListingData(p => ({ ...p, hasSecurity: val }))}
                             />
+                            {listingData.propertyType !== 'land' && (
+                                <TriStateCheckbox
+                                    label="Air Conditioning"
+                                    value={listingData.hasAirConditioning}
+                                    onChange={(val) => setListingData(p => ({ ...p, hasAirConditioning: val }))}
+                                />
+                            )}
                             <TriStateCheckbox
-                                label="Air Conditioning"
-                                value={listingData.hasAirConditioning}
-                                onChange={(val) => setListingData(p => ({ ...p, hasAirConditioning: val }))}
-                            />
-                            <TriStateCheckbox
-                                label="Swimming Pool"
+                                label={listingData.propertyType === 'land' ? 'Has Water Source' : 'Swimming Pool'}
                                 value={listingData.hasPool}
                                 onChange={(val) => setListingData(p => ({ ...p, hasPool: val }))}
                             />
-                            <TriStateCheckbox
-                                label="Pets Allowed"
-                                value={listingData.petsAllowed}
-                                onChange={(val) => setListingData(p => ({ ...p, petsAllowed: val }))}
-                            />
+                            {listingData.propertyType !== 'land' && (
+                                <TriStateCheckbox
+                                    label="Pets Allowed"
+                                    value={listingData.petsAllowed}
+                                    onChange={(val) => setListingData(p => ({ ...p, petsAllowed: val }))}
+                                />
+                            )}
                         </div>
                         <p className="text-xs text-neutral-500 mt-2">Select "Yes" if available, "No" if not available, or leave as "Any" to skip</p>
                     </fieldset>
 
-                    {/* Advanced Property Details Section */}
-                    <fieldset className="space-y-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-                        <h3 className="text-base font-semibold text-neutral-800 mb-3">Advanced Property Details</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {/* Furnishing Status */}
-                            <div className="relative">
-                                <select
-                                    id="furnishing"
-                                    name="furnishing"
-                                    value={listingData.furnishing}
-                                    onChange={handleInputChange}
-                                    className={`${floatingInputClasses} border-neutral-300`}
-                                >
-                                    <option value="any">Not Specified</option>
-                                    <option value="furnished">Fully Furnished</option>
-                                    <option value="semi-furnished">Semi-Furnished</option>
-                                    <option value="unfurnished">Unfurnished</option>
-                                </select>
-                                <label htmlFor="furnishing" className={floatingSelectLabelClasses}>Furnishing</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    {/* Advanced Property Details Section - hide for land */}
+                    {listingData.propertyType !== 'land' ? (
+                        <fieldset className="space-y-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+                            <h3 className="text-base font-semibold text-neutral-800 mb-3">Advanced Property Details</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {/* Furnishing Status */}
+                                <div className="relative">
+                                    <select
+                                        id="furnishing"
+                                        name="furnishing"
+                                        value={listingData.furnishing}
+                                        onChange={handleInputChange}
+                                        className={`${floatingInputClasses} border-neutral-300`}
+                                    >
+                                        <option value="any">Not Specified</option>
+                                        <option value="furnished">Fully Furnished</option>
+                                        <option value="semi-furnished">Semi-Furnished</option>
+                                        <option value="unfurnished">Unfurnished</option>
+                                    </select>
+                                    <label htmlFor="furnishing" className={floatingSelectLabelClasses}>Furnishing</label>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Heating Type */}
-                            <div className="relative">
-                                <select
-                                    id="heatingType"
-                                    name="heatingType"
-                                    value={listingData.heatingType}
-                                    onChange={handleInputChange}
-                                    className={`${floatingInputClasses} border-neutral-300`}
-                                >
-                                    <option value="any">Not Specified</option>
-                                    <option value="central">Central Heating</option>
-                                    <option value="electric">Electric</option>
-                                    <option value="gas">Gas</option>
-                                    <option value="oil">Oil</option>
-                                    <option value="heat-pump">Heat Pump</option>
-                                    <option value="solar">Solar</option>
-                                    <option value="wood">Wood/Fireplace</option>
-                                    <option value="none">No Heating</option>
-                                </select>
-                                <label htmlFor="heatingType" className={floatingSelectLabelClasses}>Heating Type</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                {/* Heating Type */}
+                                <div className="relative">
+                                    <select
+                                        id="heatingType"
+                                        name="heatingType"
+                                        value={listingData.heatingType}
+                                        onChange={handleInputChange}
+                                        className={`${floatingInputClasses} border-neutral-300`}
+                                    >
+                                        <option value="any">Not Specified</option>
+                                        <option value="central">Central Heating</option>
+                                        <option value="electric">Electric</option>
+                                        <option value="gas">Gas</option>
+                                        <option value="oil">Oil</option>
+                                        <option value="heat-pump">Heat Pump</option>
+                                        <option value="solar">Solar</option>
+                                        <option value="wood">Wood/Fireplace</option>
+                                        <option value="none">No Heating</option>
+                                    </select>
+                                    <label htmlFor="heatingType" className={floatingSelectLabelClasses}>Heating Type</label>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Property Condition */}
-                            <div className="relative">
-                                <select
-                                    id="condition"
-                                    name="condition"
-                                    value={listingData.condition}
-                                    onChange={handleInputChange}
-                                    className={`${floatingInputClasses} border-neutral-300`}
-                                >
-                                    <option value="any">Not Specified</option>
-                                    <option value="new">New Construction</option>
-                                    <option value="excellent">Excellent</option>
-                                    <option value="good">Good</option>
-                                    <option value="fair">Fair</option>
-                                    <option value="needs-renovation">Needs Renovation</option>
-                                </select>
-                                <label htmlFor="condition" className={floatingSelectLabelClasses}>Condition</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                {/* Property Condition */}
+                                <div className="relative">
+                                    <select
+                                        id="condition"
+                                        name="condition"
+                                        value={listingData.condition}
+                                        onChange={handleInputChange}
+                                        className={`${floatingInputClasses} border-neutral-300`}
+                                    >
+                                        <option value="any">Not Specified</option>
+                                        <option value="new">New Construction</option>
+                                        <option value="excellent">Excellent</option>
+                                        <option value="good">Good</option>
+                                        <option value="fair">Fair</option>
+                                        <option value="needs-renovation">Needs Renovation</option>
+                                    </select>
+                                    <label htmlFor="condition" className={floatingSelectLabelClasses}>Condition</label>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* View Type */}
-                            <div className="relative">
-                                <select
-                                    id="viewType"
-                                    name="viewType"
-                                    value={listingData.viewType}
-                                    onChange={handleInputChange}
-                                    className={`${floatingInputClasses} border-neutral-300`}
-                                >
-                                    <option value="any">Not Specified</option>
-                                    <option value="sea">Sea View</option>
-                                    <option value="mountain">Mountain View</option>
-                                    <option value="city">City View</option>
-                                    <option value="park">Park View</option>
-                                    <option value="garden">Garden View</option>
-                                    <option value="street">Street View</option>
-                                </select>
-                                <label htmlFor="viewType" className={floatingSelectLabelClasses}>View Type</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                {/* View Type */}
+                                <div className="relative">
+                                    <select
+                                        id="viewType"
+                                        name="viewType"
+                                        value={listingData.viewType}
+                                        onChange={handleInputChange}
+                                        className={`${floatingInputClasses} border-neutral-300`}
+                                    >
+                                        <option value="any">Not Specified</option>
+                                        <option value="sea">Sea View</option>
+                                        <option value="mountain">Mountain View</option>
+                                        <option value="city">City View</option>
+                                        <option value="park">Park View</option>
+                                        <option value="garden">Garden View</option>
+                                        <option value="street">Street View</option>
+                                    </select>
+                                    <label htmlFor="viewType" className={floatingSelectLabelClasses}>View Type</label>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Energy Rating */}
-                            <div className="relative">
-                                <select
-                                    id="energyRating"
-                                    name="energyRating"
-                                    value={listingData.energyRating}
-                                    onChange={handleInputChange}
-                                    className={`${floatingInputClasses} border-neutral-300`}
-                                >
-                                    <option value="any">Not Specified</option>
-                                    <option value="A+">A+ (Most Efficient)</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
-                                    <option value="G">G (Least Efficient)</option>
-                                </select>
-                                <label htmlFor="energyRating" className={floatingSelectLabelClasses}>Energy Rating</label>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                {/* Energy Rating */}
+                                <div className="relative">
+                                    <select
+                                        id="energyRating"
+                                        name="energyRating"
+                                        value={listingData.energyRating}
+                                        onChange={handleInputChange}
+                                        className={`${floatingInputClasses} border-neutral-300`}
+                                    >
+                                        <option value="any">Not Specified</option>
+                                        <option value="A+">A+ (Most Efficient)</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option>
+                                        <option value="F">F</option>
+                                        <option value="G">G (Least Efficient)</option>
+                                    </select>
+                                    <label htmlFor="energyRating" className={floatingSelectLabelClasses}>Energy Rating</label>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <p className="text-xs text-neutral-500 mt-2">Provide detailed property information to help buyers find your listing through advanced filters</p>
-                    </fieldset>
+                            <p className="text-xs text-neutral-500 mt-2">Provide detailed property information to help buyers find your listing through advanced filters</p>
+                        </fieldset>
+                    ) : (
+                        <fieldset className="space-y-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+                            <h3 className="text-base font-semibold text-neutral-800 mb-3">Land Details</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {/* Land Condition */}
+                                <div className="relative">
+                                    <select
+                                        id="condition"
+                                        name="condition"
+                                        value={listingData.condition}
+                                        onChange={handleInputChange}
+                                        className={`${floatingInputClasses} border-neutral-300`}
+                                    >
+                                        <option value="any">Not Specified</option>
+                                        <option value="excellent">Ready to Build</option>
+                                        <option value="good">Cleared</option>
+                                        <option value="fair">Partially Cleared</option>
+                                        <option value="needs-renovation">Needs Clearing</option>
+                                    </select>
+                                    <label htmlFor="condition" className={floatingSelectLabelClasses}>Land Condition</label>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
+                                </div>
+
+                                {/* View Type */}
+                                <div className="relative">
+                                    <select
+                                        id="viewType"
+                                        name="viewType"
+                                        value={listingData.viewType}
+                                        onChange={handleInputChange}
+                                        className={`${floatingInputClasses} border-neutral-300`}
+                                    >
+                                        <option value="any">Not Specified</option>
+                                        <option value="sea">Sea View</option>
+                                        <option value="mountain">Mountain View</option>
+                                        <option value="city">City View</option>
+                                        <option value="park">Park View</option>
+                                        <option value="garden">Nature View</option>
+                                        <option value="street">Road Access</option>
+                                    </select>
+                                    <label htmlFor="viewType" className={floatingSelectLabelClasses}>View/Access</label>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="text-xs text-neutral-500 mt-2">Provide land details to help buyers understand what they're purchasing</p>
+                        </fieldset>
+                    )}
 
                     <fieldset><label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">Description</label><textarea id="description" name="description" value={listingData.description} onChange={handleInputChange} className={`${inputBaseClasses} h-48`} required /></fieldset>
                     
