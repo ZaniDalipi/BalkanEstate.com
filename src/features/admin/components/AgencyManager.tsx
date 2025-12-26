@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PencilIcon, TrashIcon, XMarkIcon, EyeIcon, BuildingOfficeIcon } from '../../constants';
 import { Agency } from '../../types';
 
@@ -10,6 +11,7 @@ interface User {
 }
 
 const AgencyManager: React.FC = () => {
+  const { t } = useTranslation(['admin']);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -213,7 +215,7 @@ const AgencyManager: React.FC = () => {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading agencies...</p>
+        <p className="mt-4 text-gray-600">{t('admin:agencies.loading')}</p>
       </div>
     );
   }
@@ -224,8 +226,8 @@ const AgencyManager: React.FC = () => {
       <div className="border-b border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Agency Management</h2>
-            <p className="text-sm text-gray-600 mt-1">Total: {totalAgencies} agencies</p>
+            <h2 className="text-2xl font-bold text-gray-900">{t('admin:agencies.title')}</h2>
+            <p className="text-sm text-gray-600 mt-1">{t('admin:dashboard.totalAgencies')}: {totalAgencies}</p>
           </div>
         </div>
       </div>

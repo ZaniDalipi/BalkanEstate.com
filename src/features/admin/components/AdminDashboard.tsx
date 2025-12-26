@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import AdminNav from './AdminNav';
 import DiscountCodeManager from './DiscountCodeManager';
@@ -11,6 +12,7 @@ import AgencyManager from './AgencyManager';
 type AdminView = 'dashboard' | 'discounts' | 'promotionCoupons' | 'users' | 'properties' | 'agencies';
 
 const AdminDashboard: React.FC = () => {
+  const { t } = useTranslation(['admin']);
   const { state, dispatch } = useAppContext();
   const [activeSection, setActiveSection] = useState<AdminView>('dashboard');
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -66,13 +68,13 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-          <p className="text-gray-600">Please log in to access the admin panel.</p>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">{t('admin:errors.accessDenied')}</h2>
+          <p className="text-gray-600">{t('admin:errors.pleaseLogin')}</p>
           <button
             onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
             className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Go to Home
+            {t('admin:errors.goHome')}
           </button>
         </div>
       </div>
@@ -84,12 +86,12 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">{t('admin:errors.accessDenied')}</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           {error.includes('VPN') && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
               <p className="text-sm text-yellow-800">
-                The admin panel requires VPN connection for security. Please connect to the authorized VPN and refresh.
+                {t('admin:errors.vpnRequired', { defaultValue: 'The admin panel requires VPN connection for security. Please connect to the authorized VPN and refresh.' })}
               </p>
             </div>
           )}
@@ -97,7 +99,7 @@ const AdminDashboard: React.FC = () => {
             onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Go to Home
+            {t('admin:errors.goHome')}
           </button>
         </div>
       </div>
@@ -110,7 +112,7 @@ const AdminDashboard: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verifying admin access...</p>
+          <p className="mt-4 text-gray-600">{t('admin:table.loading')}</p>
         </div>
       </div>
     );
@@ -146,13 +148,13 @@ const AdminDashboard: React.FC = () => {
                 onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
-                ← Back to Site
+                ← {t('admin:sidebar.backToSite')}
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t('admin:dashboard.title')}</h1>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>Admin Access</span>
+              <span>{t('admin:errors.adminRequired', { defaultValue: 'Admin Access' })}</span>
             </div>
           </div>
         </div>

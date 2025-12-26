@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon } from '../../constants';
 
 interface User {
@@ -24,6 +25,7 @@ interface User {
 }
 
 const UserManager: React.FC = () => {
+  const { t } = useTranslation(['admin']);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -203,7 +205,7 @@ const UserManager: React.FC = () => {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading users...</p>
+        <p className="mt-4 text-gray-600">{t('admin:users.loading')}</p>
       </div>
     );
   }
@@ -214,8 +216,8 @@ const UserManager: React.FC = () => {
       <div className="border-b border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">User & Agent Management</h2>
-            <p className="text-sm text-gray-600 mt-1">Total: {totalUsers} users</p>
+            <h2 className="text-2xl font-bold text-gray-900">{t('admin:users.title')}</h2>
+            <p className="text-sm text-gray-600 mt-1">{t('admin:dashboard.totalUsers')}: {totalUsers}</p>
           </div>
         </div>
 
@@ -227,7 +229,7 @@ const UserManager: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name or email..."
+              placeholder={t('admin:filters.search')}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
             />
           </div>
@@ -237,11 +239,11 @@ const UserManager: React.FC = () => {
             onChange={(e) => setFilterRole(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Roles</option>
-            <option value="buyer">Buyers</option>
-            <option value="private_seller">Private Sellers</option>
-            <option value="agent">Agents</option>
-            <option value="admin">Admins</option>
+            <option value="all">{t('admin:filters.all')}</option>
+            <option value="buyer">{t('admin:users.roles.buyer')}</option>
+            <option value="private_seller">{t('admin:users.roles.seller')}</option>
+            <option value="agent">{t('admin:users.roles.agent')}</option>
+            <option value="admin">{t('admin:users.roles.admin')}</option>
           </select>
 
           <select
@@ -249,9 +251,9 @@ const UserManager: React.FC = () => {
             onChange={(e) => setFilterSubscription(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Subscriptions</option>
-            <option value="subscribed">Subscribed</option>
-            <option value="free">Free</option>
+            <option value="all">{t('admin:filters.all')}</option>
+            <option value="subscribed">{t('admin:filters.active')}</option>
+            <option value="free">{t('admin:filters.inactive')}</option>
           </select>
         </div>
       </div>

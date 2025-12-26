@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon, EyeIcon } from '../../constants';
 
 interface Property {
@@ -34,6 +35,7 @@ interface Property {
 }
 
 const PropertyManager: React.FC = () => {
+  const { t } = useTranslation(['admin']);
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -225,7 +227,7 @@ const PropertyManager: React.FC = () => {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading properties...</p>
+        <p className="mt-4 text-gray-600">{t('admin:properties.loading')}</p>
       </div>
     );
   }
@@ -236,8 +238,8 @@ const PropertyManager: React.FC = () => {
       <div className="border-b border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Property Management</h2>
-            <p className="text-sm text-gray-600 mt-1">Total: {totalProperties} properties</p>
+            <h2 className="text-2xl font-bold text-gray-900">{t('admin:properties.title')}</h2>
+            <p className="text-sm text-gray-600 mt-1">{t('admin:dashboard.totalProperties')}: {totalProperties}</p>
           </div>
         </div>
 
@@ -249,7 +251,7 @@ const PropertyManager: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by title, address, or city..."
+              placeholder={t('admin:filters.search')}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
             />
           </div>
@@ -259,10 +261,10 @@ const PropertyManager: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="sold">Sold</option>
+            <option value="all">{t('admin:filters.all')}</option>
+            <option value="active">{t('admin:properties.status.active')}</option>
+            <option value="pending">{t('admin:properties.status.pending')}</option>
+            <option value="sold">{t('admin:properties.status.sold')}</option>
           </select>
         </div>
       </div>
@@ -284,13 +286,13 @@ const PropertyManager: React.FC = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seller</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:table.title')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:table.location')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:table.price')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:table.owner')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:table.status')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:table.createdAt')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:table.actions')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -374,7 +376,7 @@ const PropertyManager: React.FC = () => {
 
         {properties.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            No properties found matching your filters.
+            {t('admin:properties.noProperties')}
           </div>
         )}
       </div>
@@ -383,7 +385,7 @@ const PropertyManager: React.FC = () => {
       {totalPages > 1 && (
         <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
+            {t('admin:table.page')} {currentPage} {t('admin:table.of')} {totalPages}
           </div>
           <div className="flex gap-2">
             <button
@@ -391,14 +393,14 @@ const PropertyManager: React.FC = () => {
               disabled={currentPage === 1}
               className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Previous
+              {t('admin:table.previous')}
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
               className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Next
+              {t('admin:table.next')}
             </button>
           </div>
         </div>

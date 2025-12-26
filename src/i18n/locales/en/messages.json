@@ -2,6 +2,7 @@
   "inbox": {
     "title": "Messages",
     "inboxTitle": "Inbox - Messages",
+    "allConversations": "All Conversations",
     "loginToView": "Log in to view your messages",
     "communicateWithSellers": "Communicate with sellers and agents about your favorite properties.",
     "emptyInbox": "Your Inbox is Empty",
