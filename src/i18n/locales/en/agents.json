@@ -598,6 +598,28 @@
       "cancel": "Cancel",
       "scheduling": "Scheduling...",
       "scheduleConsultation": "Schedule Consultation"
-    }
+    },
+    "editModal": {
+      "title": "Edit Profile",
+      "bio": "About Me",
+      "bioPlaceholder": "Tell clients about yourself, your experience, and what makes you unique...",
+      "yearsOfExperience": "Years of Experience",
+      "specializations": "Specializations",
+      "addSpecialization": "Add specialization...",
+      "languages": "Languages Spoken",
+      "addLanguage": "Add language...",
+      "serviceAreas": "Service Areas",
+      "addServiceArea": "Add service area...",
+      "contactInfo": "Contact Information",
+      "officePhone": "Office Phone",
+      "officeAddress": "Office Address",
+      "officeAddressPlaceholder": "Enter your office address...",
+      "socialLinks": "Social Links",
+      "website": "Website",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes"
+    },
+    "editButton": "Edit Profile"
   }
 }

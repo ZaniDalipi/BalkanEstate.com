@@ -597,7 +597,29 @@
       "whatToDiscuss": "What would you like to discuss?",
       "cancel": "Cancel",
       "scheduling": "Scheduling...",
-      "scheduleConsultation": "Schedule Consultation"
-    }
+      "scheduleConsultation": "Programează Consultație"
+    },
+    "editModal": {
+      "title": "Editează Profil",
+      "bio": "Despre Mine",
+      "bioPlaceholder": "Spuneți clienților despre dvs., experiența dvs. și ce vă face unic...",
+      "yearsOfExperience": "Ani de Experiență",
+      "specializations": "Specializări",
+      "addSpecialization": "Adaugă specializare...",
+      "languages": "Limbi Vorbite",
+      "addLanguage": "Adaugă limbă...",
+      "serviceAreas": "Zone de Servicii",
+      "addServiceArea": "Adaugă zonă de servicii...",
+      "contactInfo": "Informații de Contact",
+      "officePhone": "Telefon Birou",
+      "officeAddress": "Adresa Biroului",
+      "officeAddressPlaceholder": "Introduceți adresa biroului dvs...",
+      "socialLinks": "Rețele Sociale",
+      "website": "Site Web",
+      "cancel": "Anulează",
+      "saving": "Se salvează...",
+      "saveChanges": "Salvează Modificările"
+    },
+    "editButton": "Editează Profil"
   }
 }

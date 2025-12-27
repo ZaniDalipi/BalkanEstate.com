@@ -597,7 +597,29 @@
       "whatToDiscuss": "What would you like to discuss?",
       "cancel": "Cancel",
       "scheduling": "Scheduling...",
-      "scheduleConsultation": "Schedule Consultation"
-    }
+      "scheduleConsultation": "Προγραμματισμός Συνάντησης"
+    },
+    "editModal": {
+      "title": "Επεξεργασία Προφίλ",
+      "bio": "Σχετικά με Εμένα",
+      "bioPlaceholder": "Πείτε στους πελάτες για τον εαυτό σας, την εμπειρία σας και τι σας κάνει μοναδικό...",
+      "yearsOfExperience": "Χρόνια Εμπειρίας",
+      "specializations": "Εξειδικεύσεις",
+      "addSpecialization": "Προσθήκη εξειδίκευσης...",
+      "languages": "Γλώσσες που Μιλώ",
+      "addLanguage": "Προσθήκη γλώσσας...",
+      "serviceAreas": "Περιοχές Εξυπηρέτησης",
+      "addServiceArea": "Προσθήκη περιοχής εξυπηρέτησης...",
+      "contactInfo": "Στοιχεία Επικοινωνίας",
+      "officePhone": "Τηλέφωνο Γραφείου",
+      "officeAddress": "Διεύθυνση Γραφείου",
+      "officeAddressPlaceholder": "Εισάγετε τη διεύθυνση του γραφείου σας...",
+      "socialLinks": "Κοινωνικά Δίκτυα",
+      "website": "Ιστοσελίδα",
+      "cancel": "Ακύρωση",
+      "saving": "Αποθήκευση...",
+      "saveChanges": "Αποθήκευση Αλλαγών"
+    },
+    "editButton": "Επεξεργασία Προφίλ"
   }
 }

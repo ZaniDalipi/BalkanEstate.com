@@ -385,6 +385,28 @@
         "description": "Analizat e tregut për këtë zonë nuk janë ende të disponueshme."
       },
       "lastUpdated": "Përditësuar së fundmi: {{date}}"
-    }
+    },
+    "editModal": {
+      "title": "Ndrysho Profilin",
+      "bio": "Rreth Meje",
+      "bioPlaceholder": "Tregoni klientëve për veten tuaj, përvojën tuaj dhe çfarë ju bën unik...",
+      "yearsOfExperience": "Vitet e Përvojës",
+      "specializations": "Specializimet",
+      "addSpecialization": "Shto specializim...",
+      "languages": "Gjuhët e Folura",
+      "addLanguage": "Shto gjuhë...",
+      "serviceAreas": "Zonat e Shërbimit",
+      "addServiceArea": "Shto zonë shërbimi...",
+      "contactInfo": "Informacioni i Kontaktit",
+      "officePhone": "Telefoni i Zyrës",
+      "officeAddress": "Adresa e Zyrës",
+      "officeAddressPlaceholder": "Shkruani adresën e zyrës tuaj...",
+      "socialLinks": "Lidhjet Sociale",
+      "website": "Faqja e Internetit",
+      "cancel": "Anulo",
+      "saving": "Duke ruajtur...",
+      "saveChanges": "Ruaj Ndryshimet"
+    },
+    "editButton": "Ndrysho Profilin"
   }
 }

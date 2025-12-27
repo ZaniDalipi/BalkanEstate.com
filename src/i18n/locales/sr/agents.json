@@ -597,7 +597,29 @@
       "whatToDiscuss": "What would you like to discuss?",
       "cancel": "Cancel",
       "scheduling": "Scheduling...",
-      "scheduleConsultation": "Schedule Consultation"
-    }
+      "scheduleConsultation": "Закажи консултацију"
+    },
+    "editModal": {
+      "title": "Уреди профил",
+      "bio": "О мени",
+      "bioPlaceholder": "Реците клијентима о себи, свом искуству и шта вас чини јединственим...",
+      "yearsOfExperience": "Године искуства",
+      "specializations": "Специјализације",
+      "addSpecialization": "Додај специјализацију...",
+      "languages": "Језици које говорим",
+      "addLanguage": "Додај језик...",
+      "serviceAreas": "Подручја услуга",
+      "addServiceArea": "Додај подручје услуге...",
+      "contactInfo": "Контакт информације",
+      "officePhone": "Телефон канцеларије",
+      "officeAddress": "Адреса канцеларије",
+      "officeAddressPlaceholder": "Унесите адресу канцеларије...",
+      "socialLinks": "Друштвене мреже",
+      "website": "Веб сајт",
+      "cancel": "Откажи",
+      "saving": "Чување...",
+      "saveChanges": "Сачувај измене"
+    },
+    "editButton": "Уреди профил"
   }
 }

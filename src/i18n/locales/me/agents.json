@@ -597,7 +597,29 @@
       "whatToDiscuss": "What would you like to discuss?",
       "cancel": "Cancel",
       "scheduling": "Scheduling...",
-      "scheduleConsultation": "Schedule Consultation"
-    }
+      "scheduleConsultation": "Zakaži konsultaciju"
+    },
+    "editModal": {
+      "title": "Uredi profil",
+      "bio": "O meni",
+      "bioPlaceholder": "Recite klijentima o sebi, svom iskustvu i šta vas čini jedinstvenim...",
+      "yearsOfExperience": "Godine iskustva",
+      "specializations": "Specijalizacije",
+      "addSpecialization": "Dodaj specijalizaciju...",
+      "languages": "Jezici koje govorim",
+      "addLanguage": "Dodaj jezik...",
+      "serviceAreas": "Područja usluga",
+      "addServiceArea": "Dodaj područje usluge...",
+      "contactInfo": "Kontakt informacije",
+      "officePhone": "Telefon kancelarije",
+      "officeAddress": "Adresa kancelarije",
+      "officeAddressPlaceholder": "Unesite adresu kancelarije...",
+      "socialLinks": "Društvene mreže",
+      "website": "Web stranica",
+      "cancel": "Odustani",
+      "saving": "Spremanje...",
+      "saveChanges": "Spremi promjene"
+    },
+    "editButton": "Uredi profil"
   }
 }
