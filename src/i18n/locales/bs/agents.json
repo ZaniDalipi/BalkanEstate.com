@@ -396,25 +396,101 @@
       "team": "Team"
     },
     "credentials": {
-      "title": "Credentials & Certifications",
-      "licensedAgent": "Licensed Real Estate Agent",
-      "authorizedToPractice": "Authorized to practice in {{city}}, {{country}}",
-      "professionalCertifications": "Professional Certifications",
-      "memberOfAssociation": "Member of National Association",
-      "awardsRecognition": "Awards & Recognition",
-      "noAwards": "No awards listed"
+      "title": "Kvalifikacije i Certifikati",
+      "licensedAgent": "Licencirani Agent za Nekretnine",
+      "authorizedToPractice": "Ovlašten za rad u {{city}}, {{country}}",
+      "professionalCertifications": "Profesionalni Certifikati",
+      "memberOfAssociation": "Član Nacionalnog Udruženja",
+      "awardsRecognition": "Nagrade i Priznanja",
+      "noAwards": "Nema navedenih nagrada",
+      "addCredential": "Dodaj Kvalifikaciju",
+      "editCredential": "Uredi Kvalifikaciju",
+      "deleteCredential": "Obriši Kvalifikaciju",
+      "uploadDocument": "Prenesi Dokument",
+      "viewDocument": "Pogledaj Dokument",
+      "types": {
+        "license": "Licenca",
+        "certification": "Certifikat",
+        "award": "Nagrada",
+        "membership": "Članstvo"
+      },
+      "status": {
+        "pending": "Na Čekanju Verifikacije",
+        "verified": "Verificirano",
+        "rejected": "Odbijeno",
+        "expired": "Isteklo"
+      },
+      "form": {
+        "type": "Tip Kvalifikacije",
+        "title": "Naziv",
+        "titlePlaceholder": "npr., Licencirani Agent za Nekretnine",
+        "issuer": "Organizacija Izdavač",
+        "issuerPlaceholder": "npr., Nacionalno Udruženje za Nekretnine",
+        "issueNumber": "Broj Licence/Certifikata",
+        "issueNumberPlaceholder": "npr., RE-12345",
+        "issueDate": "Datum Izdavanja",
+        "expiryDate": "Datum Isteka",
+        "isPublic": "Prikaži na javnom profilu",
+        "document": "Prateći Dokument",
+        "documentHint": "Prenesite PDF ili sliku kvalifikacije (max 10MB)",
+        "save": "Spremi Kvalifikaciju",
+        "saving": "Spremanje...",
+        "cancel": "Odustani"
+      },
+      "messages": {
+        "added": "Kvalifikacija uspješno dodana",
+        "updated": "Kvalifikacija uspješno ažurirana",
+        "deleted": "Kvalifikacija uspješno obrisana",
+        "deleteConfirm": "Jeste li sigurni da želite obrisati ovu kvalifikaciju?"
+      },
+      "empty": {
+        "title": "Nema dodanih kvalifikacija",
+        "description": "Dodajte svoje profesionalne licence, certifikate i nagrade kako biste izgradili povjerenje kod potencijalnih klijenata."
+      }
     },
     "marketInsights": {
-      "title": "Local Market Insights",
-      "avgDaysOnMarket": "Avg. Days on Market",
-      "days": "days",
-      "fasterThanAverage": "Faster than average",
-      "priceGrowthYoY": "Price Growth (YoY)",
-      "healthyAppreciation": "Healthy appreciation",
-      "marketActivity": "Market Activity",
-      "strongDemand": "Strong demand",
-      "requestFullReport": "Request Full Market Report",
-      "getDetailedInsights": "Get detailed insights about the {{city}} real estate market"
+      "title": "Lokalni Uvidi u Tržište",
+      "subtitle": "Tržišni podaci u stvarnom vremenu za {{city}}",
+      "avgDaysOnMarket": "Prosječno Dana na Tržištu",
+      "days": "dana",
+      "fasterThanAverage": "Brže od prosjeka",
+      "slowerThanAverage": "Sporije od prosjeka",
+      "priceGrowthYoY": "Rast Cijena (Godišnji)",
+      "healthyAppreciation": "Zdrava aprecijacija",
+      "stableMarket": "Stabilno tržište",
+      "decliningMarket": "Tržište u padu",
+      "marketActivity": "Aktivnost Tržišta",
+      "high": "Visoka",
+      "medium": "Srednja",
+      "low": "Niska",
+      "strongDemand": "Jaka potražnja",
+      "moderateDemand": "Umjerena potražnja",
+      "lowDemand": "Slaba potražnja",
+      "requestFullReport": "Zatraži Potpuni Izvještaj o Tržištu",
+      "getDetailedInsights": "Dobijte detaljne uvide o tržištu nekretnina u {{city}}",
+      "avgPricePerSqm": "Prosječna Cijena po m²",
+      "demandScore": "Ocjena Potražnje",
+      "investmentScore": "Ocjena Investicije",
+      "rentalYield": "Prinos od Najma",
+      "topNeighborhoods": "Najbolje Lokacije",
+      "marketTrend": "Trend Tržišta",
+      "trends": {
+        "rising": "U Porastu",
+        "stable": "Stabilan",
+        "declining": "U Padu"
+      },
+      "agentMetrics": {
+        "title": "Performanse Agenta u Području",
+        "avgDaysOnMarket": "Prosječno Dana Agenta na Tržištu",
+        "activeListings": "Aktivni Oglasi",
+        "totalSold": "Prodane Nekretnine",
+        "marketShare": "Udio na Tržištu"
+      },
+      "noData": {
+        "title": "Tržišni podaci nisu dostupni",
+        "description": "Uvidi u tržište za ovo područje još nisu dostupni."
+      },
+      "lastUpdated": "Posljednje ažuriranje: {{date}}"
     },
     "propertiesMap": {
       "title": "Properties Map",

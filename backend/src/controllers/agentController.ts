@@ -3,6 +3,8 @@ import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import Agency from '../models/Agency';
 import Conversation from '../models/Conversation';
+import Property from '../models/Property';
+import CityMarketData from '../models/CityMarketData';
 import { getSocketInstance } from '../utils/socketInstance';
 
 
@@ -420,5 +422,124 @@ export const leaveAgency = async (req: Request, res: Response): Promise<void> =>
   } catch (error: any) {
     console.error('Leave agency error:', error);
     res.status(500).json({ message: 'Error leaving agency', error: error.message });
+  }
+};
+
+// @desc    Get market insights for agent's service area
+// @route   GET /api/agents/:id/market-insights
+// @access  Public
+export const getAgentMarketInsights = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const agent = await Agent.findById(req.params.id)
+      .populate('userId', 'city country');
+
+    if (!agent) {
+      res.status(404).json({ message: 'Agent not found' });
+      return;
+    }
+
+    // Get the agent's primary service area (first in the list) or user's city
+    const userInfo = agent.userId as any;
+    let primaryCity = agent.serviceAreas?.[0] || userInfo?.city;
+    let primaryCountry = userInfo?.country;
+
+    // If no service area, try to get from the user's location
+    if (!primaryCity && userInfo) {
+      primaryCity = userInfo.city;
+      primaryCountry = userInfo.country;
+    }
+
+    if (!primaryCity) {
+      res.json({
+        success: true,
+        hasData: false,
+        message: 'No service area defined for this agent',
+        insights: null,
+      });
+      return;
+    }
+
+    // Get market data for the service area
+    const marketData = await CityMarketData.findOne({
+      city: { $regex: new RegExp(`^${primaryCity}$`, 'i') },
+    }).lean();
+
+    // Calculate agent-specific metrics from their properties
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Get agent's properties in this area
+    const agentProperties = await Property.find({
+      userId: agent.userId,
+      status: { $in: ['active', 'sold'] },
+    });
+
+    // Calculate agent's average days on market for sold properties
+    const soldProperties = agentProperties.filter(p => p.status === 'sold' && p.createdAt && p.updatedAt);
+    const agentAvgDaysOnMarket = soldProperties.length > 0
+      ? Math.round(
+          soldProperties.reduce((sum, p) => {
+            const daysOnMarket = Math.floor((p.updatedAt.getTime() - p.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+            return sum + daysOnMarket;
+          }, 0) / soldProperties.length
+        )
+      : null;
+
+    // Get total listings in the area for comparison
+    const areaListingsCount = await Property.countDocuments({
+      city: { $regex: new RegExp(`^${primaryCity}$`, 'i') },
+      status: 'active',
+    });
+
+    // Calculate agent's market share in this area
+    const agentActiveListings = agentProperties.filter(p => p.status === 'active').length;
+    const marketShare = areaListingsCount > 0
+      ? Math.round((agentActiveListings / areaListingsCount) * 100 * 10) / 10
+      : 0;
+
+    // Determine market activity level
+    let marketActivity: 'High' | 'Medium' | 'Low' = 'Medium';
+    if (marketData) {
+      if (marketData.demandScore >= 80 || marketData.marketTrend === 'rising') {
+        marketActivity = 'High';
+      } else if (marketData.demandScore <= 50 || marketData.marketTrend === 'declining') {
+        marketActivity = 'Low';
+      }
+    }
+
+    const insights = {
+      serviceArea: {
+        city: primaryCity,
+        country: primaryCountry || marketData?.country,
+      },
+      marketData: marketData ? {
+        avgDaysOnMarket: marketData.averageDaysOnMarket,
+        priceGrowthYoY: marketData.priceGrowthYoY,
+        marketActivity,
+        demandScore: marketData.demandScore,
+        avgPricePerSqm: marketData.avgPricePerSqm,
+        marketTrend: marketData.marketTrend,
+        topNeighborhoods: marketData.topNeighborhoods,
+        investmentScore: marketData.investmentScore,
+        rentalYield: marketData.rentalYield,
+        lastUpdated: marketData.lastUpdated,
+      } : null,
+      agentMetrics: {
+        avgDaysOnMarket: agentAvgDaysOnMarket,
+        activeListings: agentActiveListings,
+        totalSold: soldProperties.length,
+        marketShare,
+        areaListingsCount,
+      },
+    };
+
+    res.json({
+      success: true,
+      hasData: !!marketData,
+      insights,
+    });
+  } catch (error: any) {
+    console.error('Get agent market insights error:', error);
+    res.status(500).json({ message: 'Error fetching market insights', error: error.message });
   }
 };

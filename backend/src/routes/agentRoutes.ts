@@ -7,6 +7,7 @@ import {
   addTestimonial,
   addReview,
   leaveAgency,
+  getAgentMarketInsights,
 } from '../controllers/agentController';
 import { protect } from '../middleware/auth';
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get('/', getAgents);
 router.get('/user/:userId', getAgentByUserId);
 router.get('/:id', getAgent);
+router.get('/:id/market-insights', getAgentMarketInsights);
 
 // Protected routes
 router.put('/profile', protect, updateAgentProfile);

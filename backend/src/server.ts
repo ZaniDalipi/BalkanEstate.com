@@ -62,6 +62,7 @@ import agencyFeaturedSubscriptionRoutes from './routes/agencyFeaturedSubscriptio
 import adminRoutes from './routes/adminRoutes';
 import cityMarketDataRoutes from './routes/cityMarketDataRoutes';
 import licenseRoutes from './routes/licenseRoutes';
+import credentialRoutes from './routes/credentialRoutes';
 import sitemapRoutes from './routes/sitemapRoutes';
 import viewStatsRoutes from './routes/viewStatsRoutes';
 import notificationRoutes from './routes/notificationRoutes';
@@ -227,6 +228,7 @@ app.use('/api/discount-codes', discountCodeRoutes);
 app.use('/api/cities', cityMarketDataRoutes); // City market data and recommendations
 app.use('/api/admin', sensitiveRateLimiter, adminRoutes); // Admin panel routes (VPN + admin role required)
 app.use('/api/license', licenseRoutes); // Agent license verification
+app.use('/api/credentials', credentialRoutes); // Agent credentials management
 app.use('/api/view-stats', viewStatsRoutes); // View statistics tracking
 app.use('/api/notifications', notificationRoutes); // User notifications
 

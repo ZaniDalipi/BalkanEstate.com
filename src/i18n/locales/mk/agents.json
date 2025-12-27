@@ -396,25 +396,101 @@
       "team": "Team"
     },
     "credentials": {
-      "title": "Credentials & Certifications",
-      "licensedAgent": "Licensed Real Estate Agent",
-      "authorizedToPractice": "Authorized to practice in {{city}}, {{country}}",
-      "professionalCertifications": "Professional Certifications",
-      "memberOfAssociation": "Member of National Association",
-      "awardsRecognition": "Awards & Recognition",
-      "noAwards": "No awards listed"
+      "title": "Квалификации и Сертификати",
+      "licensedAgent": "Лиценциран Агент за Недвижности",
+      "authorizedToPractice": "Овластен да работи во {{city}}, {{country}}",
+      "professionalCertifications": "Професионални Сертификати",
+      "memberOfAssociation": "Член на Националната Асоцијација",
+      "awardsRecognition": "Награди и Признанија",
+      "noAwards": "Нема наведени награди",
+      "addCredential": "Додај Квалификација",
+      "editCredential": "Измени Квалификација",
+      "deleteCredential": "Избриши Квалификација",
+      "uploadDocument": "Прикачи Документ",
+      "viewDocument": "Погледни Документ",
+      "types": {
+        "license": "Лиценца",
+        "certification": "Сертификат",
+        "award": "Награда",
+        "membership": "Членство"
+      },
+      "status": {
+        "pending": "На Чекање Верификација",
+        "verified": "Верификувано",
+        "rejected": "Одбиено",
+        "expired": "Истечено"
+      },
+      "form": {
+        "type": "Тип на Квалификација",
+        "title": "Наслов",
+        "titlePlaceholder": "пр., Лиценциран Агент за Недвижности",
+        "issuer": "Организација Издавач",
+        "issuerPlaceholder": "пр., Националната Асоцијација за Недвижности",
+        "issueNumber": "Број на Лиценца/Сертификат",
+        "issueNumberPlaceholder": "пр., RE-12345",
+        "issueDate": "Датум на Издавање",
+        "expiryDate": "Датум на Истекување",
+        "isPublic": "Прикажи на јавен профил",
+        "document": "Придружен Документ",
+        "documentHint": "Прикачете PDF или слика на квалификацијата (max 10MB)",
+        "save": "Зачувај Квалификација",
+        "saving": "Зачувување...",
+        "cancel": "Откажи"
+      },
+      "messages": {
+        "added": "Квалификацијата е успешно додадена",
+        "updated": "Квалификацијата е успешно ажурирана",
+        "deleted": "Квалификацијата е успешно избришана",
+        "deleteConfirm": "Дали сте сигурни дека сакате да ја избришете оваа квалификација?"
+      },
+      "empty": {
+        "title": "Нема додадени квалификации",
+        "description": "Додадете ги вашите професионални лиценци, сертификати и награди за да изградите доверба кај потенцијалните клиенти."
+      }
     },
     "marketInsights": {
-      "title": "Local Market Insights",
-      "avgDaysOnMarket": "Avg. Days on Market",
-      "days": "days",
-      "fasterThanAverage": "Faster than average",
-      "priceGrowthYoY": "Price Growth (YoY)",
-      "healthyAppreciation": "Healthy appreciation",
-      "marketActivity": "Market Activity",
-      "strongDemand": "Strong demand",
-      "requestFullReport": "Request Full Market Report",
-      "getDetailedInsights": "Get detailed insights about the {{city}} real estate market"
+      "title": "Локални Увиди во Пазарот",
+      "subtitle": "Пазарни податоци во реално време за {{city}}",
+      "avgDaysOnMarket": "Просечно Денови на Пазарот",
+      "days": "денови",
+      "fasterThanAverage": "Побрзо од просекот",
+      "slowerThanAverage": "Побавно од просекот",
+      "priceGrowthYoY": "Раст на Цени (Годишен)",
+      "healthyAppreciation": "Здрава апрецијација",
+      "stableMarket": "Стабилен пазар",
+      "decliningMarket": "Пазар во пад",
+      "marketActivity": "Активност на Пазарот",
+      "high": "Висока",
+      "medium": "Средна",
+      "low": "Ниска",
+      "strongDemand": "Силна побарувачка",
+      "moderateDemand": "Умерена побарувачка",
+      "lowDemand": "Ниска побарувачка",
+      "requestFullReport": "Побарај Целосен Извештај за Пазарот",
+      "getDetailedInsights": "Добијте детални увиди за пазарот на недвижности во {{city}}",
+      "avgPricePerSqm": "Просечна Цена по m²",
+      "demandScore": "Оцена на Побарувачка",
+      "investmentScore": "Оцена на Инвестиција",
+      "rentalYield": "Принос од Изнајмување",
+      "topNeighborhoods": "Најдобри Населби",
+      "marketTrend": "Тренд на Пазарот",
+      "trends": {
+        "rising": "Во Пораст",
+        "stable": "Стабилен",
+        "declining": "Во Пад"
+      },
+      "agentMetrics": {
+        "title": "Перформанси на Агентот во Областа",
+        "avgDaysOnMarket": "Просечно Денови на Агентот на Пазарот",
+        "activeListings": "Активни Огласи",
+        "totalSold": "Продадени Недвижности",
+        "marketShare": "Удел на Пазарот"
+      },
+      "noData": {
+        "title": "Пазарните податоци не се достапни",
+        "description": "Увидите во пазарот за оваа област сè уште не се достапни."
+      },
+      "lastUpdated": "Последно ажурирање: {{date}}"
     },
     "propertiesMap": {
       "title": "Properties Map",

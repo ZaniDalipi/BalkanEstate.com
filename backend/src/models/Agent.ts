@@ -1,5 +1,22 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface ICredential {
+  type: 'license' | 'certification' | 'award' | 'membership';
+  title: string;
+  issuer: string;
+  issueNumber?: string;
+  issueDate?: Date;
+  expiryDate?: Date;
+  documentUrl?: string;
+  documentPublicId?: string;
+  status: 'pending' | 'verified' | 'rejected' | 'expired';
+  verifiedAt?: Date;
+  verifiedBy?: mongoose.Types.ObjectId;
+  isPublic: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ITestimonial {
   clientName: string;
   userId?: mongoose.Types.ObjectId; // User who wrote the review
@@ -33,6 +50,7 @@ export interface IAgent extends Document {
   yearsOfExperience?: number;
   languages: string[]; // e.g., ['English', 'Serbian', 'Croatian']
   serviceAreas: string[]; // e.g., ['Belgrade', 'Novi Sad']
+  credentials: ICredential[]; // Professional credentials, certifications, awards
   lat?: number;
   lng?: number;
   websiteUrl?: string;
@@ -55,6 +73,61 @@ export interface IAgent extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+const CredentialSchema: Schema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ['license', 'certification', 'award', 'membership'],
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      maxlength: 200,
+    },
+    issuer: {
+      type: String,
+      required: true,
+      maxlength: 200,
+    },
+    issueNumber: {
+      type: String,
+      maxlength: 100,
+    },
+    issueDate: {
+      type: Date,
+    },
+    expiryDate: {
+      type: Date,
+    },
+    documentUrl: {
+      type: String,
+    },
+    documentPublicId: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'verified', 'rejected', 'expired'],
+      default: 'pending',
+    },
+    verifiedAt: {
+      type: Date,
+    },
+    verifiedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    isPublic: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const TestimonialSchema: Schema = new Schema(
   {
@@ -171,6 +244,10 @@ const AgentSchema: Schema = new Schema(
     },
     testimonials: {
       type: [TestimonialSchema],
+      default: [],
+    },
+    credentials: {
+      type: [CredentialSchema],
       default: [],
     },
     rating: {

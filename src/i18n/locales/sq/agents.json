@@ -288,6 +288,103 @@
       "title": "Rreth Agjentit",
       "defaultBio": "Ky agjent është një profesionist i përkushtuar në pasuri të paluajtshme me {{years}} vite përvojë në industri{{agency}}. Specializohet në ndihmën e klientëve për të arritur objektivat e tyre përmes njohurive të tregut dhe shërbimit të personalizuar.",
       "asPartOf": " si pjesë e ekipit {{agencyName}}"
+    },
+    "credentials": {
+      "title": "Kualifikimet & Certifikimet",
+      "licensedAgent": "Agjent i Licencuar i Pasurive të Paluajtshme",
+      "authorizedToPractice": "I autorizuar për të praktikuar në {{city}}, {{country}}",
+      "professionalCertifications": "Certifikime Profesionale",
+      "memberOfAssociation": "Anëtar i Shoqatës Kombëtare",
+      "awardsRecognition": "Çmime & Njohje",
+      "noAwards": "Nuk ka çmime të listuara",
+      "addCredential": "Shto Kualifikim",
+      "editCredential": "Ndrysho Kualifikimin",
+      "deleteCredential": "Fshi Kualifikimin",
+      "uploadDocument": "Ngarko Dokumentin",
+      "viewDocument": "Shiko Dokumentin",
+      "types": {
+        "license": "Licencë",
+        "certification": "Certifikim",
+        "award": "Çmim",
+        "membership": "Anëtarësim"
+      },
+      "status": {
+        "pending": "Në Pritje të Verifikimit",
+        "verified": "I Verifikuar",
+        "rejected": "I Refuzuar",
+        "expired": "I Skaduar"
+      },
+      "form": {
+        "type": "Lloji i Kualifikimit",
+        "title": "Titulli",
+        "titlePlaceholder": "p.sh., Agjent i Licencuar i Pasurive të Paluajtshme",
+        "issuer": "Organizata Lëshuese",
+        "issuerPlaceholder": "p.sh., Shoqata Kombëtare e Pasurive të Paluajtshme",
+        "issueNumber": "Numri i Licencës/Certifikatës",
+        "issueNumberPlaceholder": "p.sh., RE-12345",
+        "issueDate": "Data e Lëshimit",
+        "expiryDate": "Data e Skadimit",
+        "isPublic": "Shfaq në profilin publik",
+        "document": "Dokumenti Mbështetës",
+        "documentHint": "Ngarko një PDF ose imazh të kualifikimit (max 10MB)",
+        "save": "Ruaj Kualifikimin",
+        "saving": "Duke ruajtur...",
+        "cancel": "Anulo"
+      },
+      "messages": {
+        "added": "Kualifikimi u shtua me sukses",
+        "updated": "Kualifikimi u përditësua me sukses",
+        "deleted": "Kualifikimi u fshi me sukses",
+        "deleteConfirm": "A jeni të sigurt që doni të fshini këtë kualifikim?"
+      },
+      "empty": {
+        "title": "Nuk ka kualifikime të shtuara ende",
+        "description": "Shtoni licencat, certifikimet dhe çmimet tuaja profesionale për të ndërtuar besim me klientët potencial."
+      }
+    },
+    "marketInsights": {
+      "title": "Analiza e Tregut Lokal",
+      "subtitle": "Të dhëna tregu në kohë reale për {{city}}",
+      "avgDaysOnMarket": "Mesatarja e Ditëve në Treg",
+      "days": "ditë",
+      "fasterThanAverage": "Më shpejt se mesatarja",
+      "slowerThanAverage": "Më ngadalë se mesatarja",
+      "priceGrowthYoY": "Rritja e Çmimit (Vjetor)",
+      "healthyAppreciation": "Vlerësim i shëndetshëm",
+      "stableMarket": "Treg i qëndrueshëm",
+      "decliningMarket": "Treg në rënie",
+      "marketActivity": "Aktiviteti i Tregut",
+      "high": "I Lartë",
+      "medium": "Mesatar",
+      "low": "I Ulët",
+      "strongDemand": "Kërkesë e fortë",
+      "moderateDemand": "Kërkesë mesatare",
+      "lowDemand": "Kërkesë e ulët",
+      "requestFullReport": "Kërko Raportin e Plotë të Tregut",
+      "getDetailedInsights": "Merrni analiza të detajuara për tregun e pasurive të paluajtshme në {{city}}",
+      "avgPricePerSqm": "Çmimi Mesatar për m²",
+      "demandScore": "Rezultati i Kërkesës",
+      "investmentScore": "Rezultati i Investimit",
+      "rentalYield": "Rendimenti i Qirasë",
+      "topNeighborhoods": "Lagjet Kryesore",
+      "marketTrend": "Trendi i Tregut",
+      "trends": {
+        "rising": "Në Rritje",
+        "stable": "I Qëndrueshëm",
+        "declining": "Në Rënie"
+      },
+      "agentMetrics": {
+        "title": "Performanca e Agjentit në Zonë",
+        "avgDaysOnMarket": "Mesatarja e Ditëve të Agjentit në Treg",
+        "activeListings": "Listime Aktive",
+        "totalSold": "Prona të Shitura",
+        "marketShare": "Pjesa e Tregut"
+      },
+      "noData": {
+        "title": "Të dhënat e tregut nuk janë të disponueshme",
+        "description": "Analizat e tregut për këtë zonë nuk janë ende të disponueshme."
+      },
+      "lastUpdated": "Përditësuar së fundmi: {{date}}"
     }
   }
 }
