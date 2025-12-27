@@ -80,5 +80,27 @@
   },
   "error": {
     "unableToLoad": "Unable to Load Agencies"
+  },
+  "featured": {
+    "title": "Featured Agencies",
+    "subtitle": "Discover properties through our trusted network of professional real estate partners",
+    "badge": "Featured",
+    "viewAgency": "View Agency",
+    "exploreAll": "Explore All Agencies",
+    "selectedByAlgorithm": "Each agency is carefully selected for quality and trust",
+    "selectedByAlgorithmMobile": "Carefully selected agencies",
+    "properties": "Properties",
+    "agents": "Agents",
+    "agencyTypes": {
+      "luxury": "Luxury Properties",
+      "commercial": "Commercial Properties",
+      "boutique": "Boutique Agency",
+      "team": "Team Agency",
+      "default": "Real Estate"
+    },
+    "empty": {
+      "title": "No featured agencies available at the moment",
+      "message": "Check back soon for our featured partners!"
+    }
   }
 }

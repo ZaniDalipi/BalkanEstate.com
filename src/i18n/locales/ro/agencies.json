@@ -63,5 +63,27 @@
   "error": {
     "title": "Eroare la Încărcarea Agențiilor",
     "retry": "Încearcă Din Nou"
+  },
+  "featured": {
+    "title": "Agenții Promovate",
+    "subtitle": "Descoperiți proprietăți prin rețeaua noastră de încredere de parteneri imobiliari profesioniști",
+    "badge": "Promovat",
+    "viewAgency": "Vezi Agenția",
+    "exploreAll": "Explorați Toate Agențiile",
+    "selectedByAlgorithm": "Fiecare agenție este selectată cu grijă pentru calitate și încredere",
+    "selectedByAlgorithmMobile": "Agenții selectate cu grijă",
+    "properties": "Proprietăți",
+    "agents": "Agenți",
+    "agencyTypes": {
+      "luxury": "Proprietăți de Lux",
+      "commercial": "Proprietăți Comerciale",
+      "boutique": "Agenție Boutique",
+      "team": "Agenție de Echipă",
+      "default": "Imobiliare"
+    },
+    "empty": {
+      "title": "Nu există agenții promovate disponibile momentan",
+      "message": "Reveniți în curând pentru partenerii noștri promovați!"
+    }
   }
 }

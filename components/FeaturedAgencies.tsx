@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/AppContext';
 import { BuildingStorefrontIcon ,SparklesIcon, ArrowRightIcon } from '../constants';
 import { useFeaturedAgencies } from '../src/features/agencies/hooks/useAgencies';
 import { Agency } from '../types';
 
 const FeaturedAgencies: React.FC = () => {
+  const { t } = useTranslation('agencies');
   const { state, dispatch } = useAppContext();
   const { agencies, isLoading } = useFeaturedAgencies(4);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,15 +94,15 @@ const FeaturedAgencies: React.FC = () => {
   const getAgencyTypeInfo = (type?: string) => {
     switch (type) {
       case 'luxury':
-        return { emoji: '👑', label: 'Luxury Properties' };
+        return { emoji: '👑', label: t('featured.agencyTypes.luxury') };
       case 'commercial':
-        return { emoji: '🏢', label: 'Commercial Properties' };
+        return { emoji: '🏢', label: t('featured.agencyTypes.commercial') };
       case 'boutique':
-        return { emoji: '🗝️', label: 'Boutique Agency' };
+        return { emoji: '🗝️', label: t('featured.agencyTypes.boutique') };
       case 'team':
-        return { emoji: '👥', label: 'Team Agency' };
+        return { emoji: '👥', label: t('featured.agencyTypes.team') };
       default:
-        return { emoji: '🏠', label: 'Real Estate' };
+        return { emoji: '🏠', label: t('featured.agencyTypes.default') };
     }
   };
 
@@ -186,13 +188,13 @@ const FeaturedAgencies: React.FC = () => {
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 via-primary to-blue-600 bg-clip-text text-transparent transition-all duration-700 leading-tight ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`} style={{ transitionDelay: '0.7s' }}>
-            Magically Featured Agencies
+            {t('featured.title')}
           </h2>
 
           <p className={`text-base sm:text-lg text-neutral-600 max-w-2xl mx-auto transition-all duration-700 px-4 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`} style={{ transitionDelay: '0.8s' }}>
-            Discover properties through our enchanted network of trusted real estate partners
+            {t('featured.subtitle')}
           </p>
         </div>
 
@@ -291,7 +293,7 @@ const FeaturedAgencies: React.FC = () => {
                   <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 flex gap-2">
                     <div className="flex items-center gap-1.5 sm:gap-2 bg-white/25 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg">
                       <SparklesIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-300" />
-                      <span className="text-white font-semibold text-xs sm:text-sm">Featured</span>
+                      <span className="text-white font-semibold text-xs sm:text-sm">{t('featured.badge')}</span>
                     </div>
                   </div>
                 </div>
@@ -311,18 +313,18 @@ const FeaturedAgencies: React.FC = () => {
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5 flex-1">
                     <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 sm:p-4 text-center border border-primary/10">
                       <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">{agency.totalProperties || 0}</div>
-                      <div className="text-xs sm:text-sm text-neutral-600 font-medium">Properties</div>
+                      <div className="text-xs sm:text-sm text-neutral-600 font-medium">{t('featured.properties')}</div>
                     </div>
 
                     <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 sm:p-4 text-center border border-purple-200">
                       <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">{agency.totalAgents || 0}</div>
-                      <div className="text-xs sm:text-sm text-neutral-600 font-medium">Agents</div>
+                      <div className="text-xs sm:text-sm text-neutral-600 font-medium">{t('featured.agents')}</div>
                     </div>
                   </div>
 
                   {/* View Button */}
                   <button className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 sm:py-3.5 px-4 rounded-xl font-semibold text-sm sm:text-base hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn">
-                    <span>View Agency</span>
+                    <span>{t('featured.viewAgency')}</span>
                     <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1 transition-transform duration-300" />
                   </button>
                 </div>
@@ -343,8 +345,8 @@ const FeaturedAgencies: React.FC = () => {
                 <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
                   <BuildingStorefrontIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
                 </div>
-                <p className="text-neutral-600 text-base sm:text-lg font-medium mb-2">No featured agencies available at the moment</p>
-                <p className="text-neutral-500 text-sm">Check back soon for our featured partners!</p>
+                <p className="text-neutral-600 text-base sm:text-lg font-medium mb-2">{t('featured.empty.title')}</p>
+                <p className="text-neutral-500 text-sm">{t('featured.empty.message')}</p>
               </div>
             </div>
           )}
@@ -360,7 +362,7 @@ const FeaturedAgencies: React.FC = () => {
               className="group relative px-6 sm:px-8 lg:px-10 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-primary text-white font-bold text-sm sm:text-base rounded-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98]">
               <span className="relative z-10 flex items-center gap-2 sm:gap-3">
                 <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                Explore All Magical Agencies
+                {t('featured.exploreAll')}
                 <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               </span>
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-primary rounded-xl blur opacity-0 group-hover:opacity-70 transition-opacity duration-500" />
@@ -368,8 +370,8 @@ const FeaturedAgencies: React.FC = () => {
 
             <p className="text-neutral-500 text-xs sm:text-sm mt-4 sm:mt-6 flex items-center justify-center gap-2 px-4">
               <span className="animate-pulse">✨</span>
-              <span className="hidden sm:inline">Each agency is carefully selected by our magical algorithms</span>
-              <span className="sm:hidden">Carefully selected agencies</span>
+              <span className="hidden sm:inline">{t('featured.selectedByAlgorithm')}</span>
+              <span className="sm:hidden">{t('featured.selectedByAlgorithmMobile')}</span>
               <span className="animate-pulse">✨</span>
             </p>
           </div>

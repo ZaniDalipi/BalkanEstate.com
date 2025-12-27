@@ -80,5 +80,27 @@
   },
   "error": {
     "unableToLoad": "Nuk Mund të Ngarkohen Agjencitë"
+  },
+  "featured": {
+    "title": "Agjenci të Veçanta",
+    "subtitle": "Zbuloni prona përmes rrjetit tonë të besueshëm të partnerëve profesionalë të pasurive të paluajtshme",
+    "badge": "E Veçantë",
+    "viewAgency": "Shiko Agjencin",
+    "exploreAll": "Eksploro të Gjitha Agjencitë",
+    "selectedByAlgorithm": "Çdo agjenci është zgjedhur me kujdes për cilësi dhe besueshmëri",
+    "selectedByAlgorithmMobile": "Agjenci të zgjedhura me kujdes",
+    "properties": "Prona",
+    "agents": "Agjentë",
+    "agencyTypes": {
+      "luxury": "Prona Luksoze",
+      "commercial": "Prona Komerciale",
+      "boutique": "Agjenci Boutique",
+      "team": "Agjenci Ekipore",
+      "default": "Pasuri të Paluajtshme"
+    },
+    "empty": {
+      "title": "Asnjë agjenci e veçantë nuk është e disponueshme për momentin",
+      "message": "Kontrolloni sërish së shpejti për partnerët tanë të veçantë!"
+    }
   }
 }

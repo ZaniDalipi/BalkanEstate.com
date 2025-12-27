@@ -63,5 +63,27 @@
   "error": {
     "title": "Greška pri Učitavanju Agencija",
     "retry": "Pokušaj Ponovo"
+  },
+  "featured": {
+    "title": "Izdvojene Agencije",
+    "subtitle": "Otkrijte nekretnine putem naše pouzdane mreže profesionalnih partnera za nekretnine",
+    "badge": "Izdvojeno",
+    "viewAgency": "Pogledaj Agenciju",
+    "exploreAll": "Istraži Sve Agencije",
+    "selectedByAlgorithm": "Svaka agencija je pažljivo odabrana za kvalitet i povjerenje",
+    "selectedByAlgorithmMobile": "Pažljivo odabrane agencije",
+    "properties": "Nekretnine",
+    "agents": "Agenti",
+    "agencyTypes": {
+      "luxury": "Luksuzne Nekretnine",
+      "commercial": "Komercijalne Nekretnine",
+      "boutique": "Butik Agencija",
+      "team": "Timska Agencija",
+      "default": "Nekretnine"
+    },
+    "empty": {
+      "title": "Trenutno nema dostupnih izdvojenih agencija",
+      "message": "Provjerite uskoro za naše izdvojene partnere!"
+    }
   }
 }
