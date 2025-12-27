@@ -396,25 +396,101 @@
       "team": "Team"
     },
     "credentials": {
-      "title": "Credentials & Certifications",
-      "licensedAgent": "Licensed Real Estate Agent",
-      "authorizedToPractice": "Authorized to practice in {{city}}, {{country}}",
-      "professionalCertifications": "Professional Certifications",
-      "memberOfAssociation": "Member of National Association",
-      "awardsRecognition": "Awards & Recognition",
-      "noAwards": "No awards listed"
+      "title": "Διαπιστευτήρια & Πιστοποιήσεις",
+      "licensedAgent": "Αδειοδοτημένος Κτηματομεσίτης",
+      "authorizedToPractice": "Εξουσιοδοτημένος να εργάζεται στην {{city}}, {{country}}",
+      "professionalCertifications": "Επαγγελματικές Πιστοποιήσεις",
+      "memberOfAssociation": "Μέλος Εθνικού Συλλόγου",
+      "awardsRecognition": "Βραβεία & Αναγνώριση",
+      "noAwards": "Δεν υπάρχουν βραβεία",
+      "addCredential": "Προσθήκη Διαπιστευτηρίου",
+      "editCredential": "Επεξεργασία Διαπιστευτηρίου",
+      "deleteCredential": "Διαγραφή Διαπιστευτηρίου",
+      "uploadDocument": "Μεταφόρτωση Εγγράφου",
+      "viewDocument": "Προβολή Εγγράφου",
+      "types": {
+        "license": "Άδεια",
+        "certification": "Πιστοποίηση",
+        "award": "Βραβείο",
+        "membership": "Συνδρομή"
+      },
+      "status": {
+        "pending": "Σε Αναμονή Επαλήθευσης",
+        "verified": "Επαληθευμένο",
+        "rejected": "Απορρίφθηκε",
+        "expired": "Έληξε"
+      },
+      "form": {
+        "type": "Τύπος Διαπιστευτηρίου",
+        "title": "Τίτλος",
+        "titlePlaceholder": "π.χ., Αδειοδοτημένος Κτηματομεσίτης",
+        "issuer": "Οργανισμός Έκδοσης",
+        "issuerPlaceholder": "π.χ., Εθνικός Σύλλογος Κτηματομεσιτών",
+        "issueNumber": "Αριθμός Άδειας/Πιστοποιητικού",
+        "issueNumberPlaceholder": "π.χ., RE-12345",
+        "issueDate": "Ημερομηνία Έκδοσης",
+        "expiryDate": "Ημερομηνία Λήξης",
+        "isPublic": "Εμφάνιση στο δημόσιο προφίλ",
+        "document": "Υποστηρικτικό Έγγραφο",
+        "documentHint": "Ανεβάστε PDF ή εικόνα του διαπιστευτηρίου (μέγ. 10MB)",
+        "save": "Αποθήκευση Διαπιστευτηρίου",
+        "saving": "Αποθήκευση...",
+        "cancel": "Ακύρωση"
+      },
+      "messages": {
+        "added": "Το διαπιστευτήριο προστέθηκε επιτυχώς",
+        "updated": "Το διαπιστευτήριο ενημερώθηκε επιτυχώς",
+        "deleted": "Το διαπιστευτήριο διαγράφηκε επιτυχώς",
+        "deleteConfirm": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το διαπιστευτήριο;"
+      },
+      "empty": {
+        "title": "Δεν έχουν προστεθεί διαπιστευτήρια",
+        "description": "Προσθέστε τις επαγγελματικές σας άδειες, πιστοποιήσεις και βραβεία για να χτίσετε εμπιστοσύνη με τους πιθανούς πελάτες."
+      }
     },
     "marketInsights": {
-      "title": "Local Market Insights",
-      "avgDaysOnMarket": "Avg. Days on Market",
-      "days": "days",
-      "fasterThanAverage": "Faster than average",
-      "priceGrowthYoY": "Price Growth (YoY)",
-      "healthyAppreciation": "Healthy appreciation",
-      "marketActivity": "Market Activity",
-      "strongDemand": "Strong demand",
-      "requestFullReport": "Request Full Market Report",
-      "getDetailedInsights": "Get detailed insights about the {{city}} real estate market"
+      "title": "Τοπικές Πληροφορίες Αγοράς",
+      "subtitle": "Δεδομένα αγοράς σε πραγματικό χρόνο για {{city}}",
+      "avgDaysOnMarket": "Μέσος Όρος Ημερών στην Αγορά",
+      "days": "ημέρες",
+      "fasterThanAverage": "Ταχύτερα από τον μέσο όρο",
+      "slowerThanAverage": "Αργότερα από τον μέσο όρο",
+      "priceGrowthYoY": "Αύξηση Τιμής (Ετήσια)",
+      "healthyAppreciation": "Υγιής ανατίμηση",
+      "stableMarket": "Σταθερή αγορά",
+      "decliningMarket": "Πτωτική αγορά",
+      "marketActivity": "Δραστηριότητα Αγοράς",
+      "high": "Υψηλή",
+      "medium": "Μέτρια",
+      "low": "Χαμηλή",
+      "strongDemand": "Ισχυρή ζήτηση",
+      "moderateDemand": "Μέτρια ζήτηση",
+      "lowDemand": "Χαμηλή ζήτηση",
+      "requestFullReport": "Αίτηση Πλήρους Αναφοράς Αγοράς",
+      "getDetailedInsights": "Λάβετε λεπτομερείς πληροφορίες για την αγορά ακινήτων στην {{city}}",
+      "avgPricePerSqm": "Μέση Τιμή ανά m²",
+      "demandScore": "Βαθμολογία Ζήτησης",
+      "investmentScore": "Βαθμολογία Επένδυσης",
+      "rentalYield": "Απόδοση Ενοικίασης",
+      "topNeighborhoods": "Κορυφαίες Γειτονιές",
+      "marketTrend": "Τάση Αγοράς",
+      "trends": {
+        "rising": "Ανοδική",
+        "stable": "Σταθερή",
+        "declining": "Πτωτική"
+      },
+      "agentMetrics": {
+        "title": "Απόδοση Μεσίτη στην Περιοχή",
+        "avgDaysOnMarket": "Μέσος Όρος Ημερών Μεσίτη στην Αγορά",
+        "activeListings": "Ενεργές Καταχωρήσεις",
+        "totalSold": "Πωληθέντα Ακίνητα",
+        "marketShare": "Μερίδιο Αγοράς"
+      },
+      "noData": {
+        "title": "Τα δεδομένα αγοράς δεν είναι διαθέσιμα",
+        "description": "Οι πληροφορίες αγοράς για αυτήν την περιοχή δεν είναι ακόμη διαθέσιμες."
+      },
+      "lastUpdated": "Τελευταία ενημέρωση: {{date}}"
     },
     "propertiesMap": {
       "title": "Properties Map",

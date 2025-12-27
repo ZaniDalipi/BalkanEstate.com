@@ -396,25 +396,101 @@
       "team": "Team"
     },
     "credentials": {
-      "title": "Credentials & Certifications",
-      "licensedAgent": "Licensed Real Estate Agent",
-      "authorizedToPractice": "Authorized to practice in {{city}}, {{country}}",
-      "professionalCertifications": "Professional Certifications",
-      "memberOfAssociation": "Member of National Association",
-      "awardsRecognition": "Awards & Recognition",
-      "noAwards": "No awards listed"
+      "title": "Calificări & Certificări",
+      "licensedAgent": "Agent Imobiliar Licențiat",
+      "authorizedToPractice": "Autorizat să practice în {{city}}, {{country}}",
+      "professionalCertifications": "Certificări Profesionale",
+      "memberOfAssociation": "Membru al Asociației Naționale",
+      "awardsRecognition": "Premii & Recunoașteri",
+      "noAwards": "Nu sunt premii listate",
+      "addCredential": "Adaugă Calificare",
+      "editCredential": "Editează Calificarea",
+      "deleteCredential": "Șterge Calificarea",
+      "uploadDocument": "Încarcă Document",
+      "viewDocument": "Vezi Document",
+      "types": {
+        "license": "Licență",
+        "certification": "Certificat",
+        "award": "Premiu",
+        "membership": "Membri"
+      },
+      "status": {
+        "pending": "În Așteptarea Verificării",
+        "verified": "Verificat",
+        "rejected": "Respins",
+        "expired": "Expirat"
+      },
+      "form": {
+        "type": "Tip Calificare",
+        "title": "Titlu",
+        "titlePlaceholder": "ex., Agent Imobiliar Licențiat",
+        "issuer": "Organizația Emitentă",
+        "issuerPlaceholder": "ex., Asociația Națională Imobiliară",
+        "issueNumber": "Număr Licență/Certificat",
+        "issueNumberPlaceholder": "ex., RE-12345",
+        "issueDate": "Data Emiterii",
+        "expiryDate": "Data Expirării",
+        "isPublic": "Afișează pe profilul public",
+        "document": "Document Suport",
+        "documentHint": "Încărcați un PDF sau imagine a calificării (max 10MB)",
+        "save": "Salvează Calificarea",
+        "saving": "Se salvează...",
+        "cancel": "Anulează"
+      },
+      "messages": {
+        "added": "Calificarea a fost adăugată cu succes",
+        "updated": "Calificarea a fost actualizată cu succes",
+        "deleted": "Calificarea a fost ștearsă cu succes",
+        "deleteConfirm": "Sunteți sigur că doriți să ștergeți această calificare?"
+      },
+      "empty": {
+        "title": "Nu sunt calificări adăugate",
+        "description": "Adăugați licențele, certificările și premiile dvs. profesionale pentru a construi încredere cu potențialii clienți."
+      }
     },
     "marketInsights": {
-      "title": "Local Market Insights",
-      "avgDaysOnMarket": "Avg. Days on Market",
-      "days": "days",
-      "fasterThanAverage": "Faster than average",
-      "priceGrowthYoY": "Price Growth (YoY)",
-      "healthyAppreciation": "Healthy appreciation",
-      "marketActivity": "Market Activity",
-      "strongDemand": "Strong demand",
-      "requestFullReport": "Request Full Market Report",
-      "getDetailedInsights": "Get detailed insights about the {{city}} real estate market"
+      "title": "Informații despre Piața Locală",
+      "subtitle": "Date de piață în timp real pentru {{city}}",
+      "avgDaysOnMarket": "Media Zilelor pe Piață",
+      "days": "zile",
+      "fasterThanAverage": "Mai rapid decât media",
+      "slowerThanAverage": "Mai lent decât media",
+      "priceGrowthYoY": "Creșterea Prețului (Anual)",
+      "healthyAppreciation": "Apreciere sănătoasă",
+      "stableMarket": "Piață stabilă",
+      "decliningMarket": "Piață în declin",
+      "marketActivity": "Activitatea Pieței",
+      "high": "Ridicată",
+      "medium": "Medie",
+      "low": "Scăzută",
+      "strongDemand": "Cerere puternică",
+      "moderateDemand": "Cerere moderată",
+      "lowDemand": "Cerere scăzută",
+      "requestFullReport": "Solicită Raport Complet de Piață",
+      "getDetailedInsights": "Obțineți informații detaliate despre piața imobiliară din {{city}}",
+      "avgPricePerSqm": "Preț Mediu pe m²",
+      "demandScore": "Scor Cerere",
+      "investmentScore": "Scor Investiție",
+      "rentalYield": "Randament Închiriere",
+      "topNeighborhoods": "Cele Mai Bune Cartiere",
+      "marketTrend": "Tendința Pieței",
+      "trends": {
+        "rising": "În Creștere",
+        "stable": "Stabilă",
+        "declining": "În Scădere"
+      },
+      "agentMetrics": {
+        "title": "Performanța Agentului în Zonă",
+        "avgDaysOnMarket": "Media Zilelor Agentului pe Piață",
+        "activeListings": "Anunțuri Active",
+        "totalSold": "Proprietăți Vândute",
+        "marketShare": "Cotă de Piață"
+      },
+      "noData": {
+        "title": "Datele de piață nu sunt disponibile",
+        "description": "Informațiile despre piață pentru această zonă nu sunt încă disponibile."
+      },
+      "lastUpdated": "Ultima actualizare: {{date}}"
     },
     "propertiesMap": {
       "title": "Properties Map",
