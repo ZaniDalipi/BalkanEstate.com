@@ -1,27 +1,48 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { Property } from '@/types';
+import { Property, Agent } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
-import { HeartIcon } from '@/constants';
+import { HeartIcon, UserCircleIcon, HomeIcon, UsersIcon } from '@/constants';
 import ComparisonBar from '@/src/features/comparison/components/ComparisonBar';
 import ComparisonModal from '@/src/features/comparison/components/ComparisonModal';
 import Toast from '@/components/shared/Toast';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
-import AdvertisementBanner from '@/src/features/seller/components/AdvertisementBanner';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import Footer from '@/components/shared/Footer';
+import { getSavedAgents } from '@/src/features/agents/api/agentApi';
+import StarRating from '@/components/shared/StarRating';
 
 const SavedPropertiesPage: React.FC = () => {
-  const { t } = useTranslation(['property', 'nav']);
+  const { t } = useTranslation(['property', 'nav', 'agents']);
   const { state, dispatch } = useAppContext();
   const { savedHomes, comparisonList, properties, isAuthenticated, isLoadingUserData } = state;
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
   const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
+  const [activeTab, setActiveTab] = useState<'properties' | 'agents'>('properties');
+  const [savedAgentsList, setSavedAgentsList] = useState<Agent[]>([]);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
 
   const showToast = (message: string, type: 'success' | 'error') => {
       setToast({ show: true, message, type });
   };
+
+  // Fetch saved agents when tab changes to agents
+  useEffect(() => {
+    const fetchSavedAgents = async () => {
+      if (!isAuthenticated || activeTab !== 'agents') return;
+      setIsLoadingAgents(true);
+      try {
+        const agents = await getSavedAgents();
+        setSavedAgentsList(agents);
+      } catch (error) {
+        console.error('Error fetching saved agents:', error);
+      } finally {
+        setIsLoadingAgents(false);
+      }
+    };
+    fetchSavedAgents();
+  }, [isAuthenticated, activeTab]);
 
   // New nested grouping type for Country -> City -> Properties
   type GroupedHomes = Record<string, Record<string, Property[]>>;
@@ -41,88 +62,251 @@ const SavedPropertiesPage: React.FC = () => {
   const selectedForComparison = useMemo(() => {
     return comparisonList.map(id => properties.find(p => p.id === id)).filter((p): p is Property => p !== undefined);
   }, [comparisonList, properties]);
-  
+
   const exampleProperties = useMemo(() => properties.slice(0, 4), [properties]);
+
+  const handleAgentClick = (agent: Agent) => {
+    const agentIdentifier = agent.agentId || agent.id;
+    dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agentProfile' });
+    window.history.pushState({}, '', `/agents/${agentIdentifier}`);
+  };
+
+  const handleBrowseAgents = () => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
+    window.history.pushState({}, '', '/agents');
+  };
+
+  const renderAgentCard = (agent: Agent) => (
+    <div
+      key={agent.id}
+      onClick={() => handleAgentClick(agent)}
+      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 group"
+    >
+      <div className="p-6">
+        <div className="flex items-start gap-4">
+          {agent.avatarUrl ? (
+            <img
+              src={agent.avatarUrl}
+              alt={agent.name}
+              className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
+            />
+          ) : (
+            <UserCircleIcon className="w-16 h-16 text-gray-300" />
+          )}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 text-lg truncate group-hover:text-blue-600 transition-colors">
+              {agent.name}
+            </h3>
+            {agent.agencyName && agent.agencyName !== 'Independent Agent' && (
+              <p className="text-sm text-gray-500 truncate">{agent.agencyName}</p>
+            )}
+            <div className="flex items-center gap-2 mt-1">
+              <StarRating rating={agent.rating || 0} size="sm" />
+              <span className="text-sm text-gray-500">
+                ({agent.totalReviews || 0} {t('agents:card.reviews')})
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
+          {agent.yearsOfExperience && (
+            <span>{agent.yearsOfExperience} {t('agents:card.years')}</span>
+          )}
+          {agent.propertiesSold > 0 && (
+            <span>{agent.propertiesSold} {t('agents:card.sales')}</span>
+          )}
+          {agent.city && (
+            <span className="truncate">{agent.city}</span>
+          )}
+        </div>
+
+        {agent.specializations && agent.specializations.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {agent.specializations.slice(0, 3).map((spec, i) => (
+              <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full">
+                {spec}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderPropertiesContent = () => {
+    if (isLoadingUserData) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <PropertyCardSkeleton key={index} />
+          ))}
+        </div>
+      );
+    }
+
+    if (Object.keys(groupedHomes).length > 0) {
+      return (
+        <div className="space-y-8">
+          {Object.entries(groupedHomes).map(([country, cities]) => (
+            <div key={country}>
+              <h2 className="text-2xl font-bold text-neutral-800 mb-4 pb-2 border-b-2 border-primary">{country}</h2>
+              <div className="space-y-6">
+                {Object.entries(cities).map(([city, cityProperties]) => (
+                  <div key={city}>
+                    <h3 className="text-lg font-semibold text-neutral-700 mb-3">{city}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {cityProperties.map((property) => (
+                        <PropertyCard
+                          key={property.id}
+                          property={property}
+                          showCompareButton={true}
+                          showToast={showToast}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <>
+          <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
+            <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.noSaved')}</h3>
+            <p className="text-neutral-500 mt-2">{t('property:saved.clickHeart')}</p>
+          </div>
+          <div className="mt-8">
+            <h2 className="text-xl font-bold text-neutral-800 mb-4 text-center">{t('property:saved.popularProperties')}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {exampleProperties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  showCompareButton={true}
+                  showToast={showToast}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      );
+    }
+  };
+
+  const renderAgentsContent = () => {
+    if (isLoadingAgents) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-md p-6 animate-pulse">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-full" />
+                <div className="flex-1">
+                  <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (savedAgentsList.length > 0) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {savedAgentsList.map(renderAgentCard)}
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
+          <UsersIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.agents.noSaved')}</h3>
+          <p className="text-neutral-500 mt-2">{t('property:saved.agents.clickHeart')}</p>
+          <button
+            onClick={handleBrowseAgents}
+            className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+          >
+            {t('property:saved.agents.browseAgents')}
+          </button>
+        </div>
+      );
+    }
+  };
 
   const renderContent = () => {
     if (!isAuthenticated) {
-        return (
-            <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
-                <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.loginToView')}</h3>
-                <p className="text-neutral-500 mt-2">{t('property:saved.saveDescription')}</p>
-                <button
-                    onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
-                    className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
-                >
-                    {t('nav:loginRegister')}
-                </button>
-            </div>
-        );
+      return (
+        <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
+          <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.loginToView')}</h3>
+          <p className="text-neutral-500 mt-2">{t('property:saved.saveDescription')}</p>
+          <button
+            onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
+            className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+          >
+            {t('nav:loginRegister')}
+          </button>
+        </div>
+      );
     }
 
-    if (isLoadingUserData) {
-        return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 3 }).map((_, index) => (
-                    <PropertyCardSkeleton key={index} />
-                ))}
-            </div>
-        );
-    }
-    
-    if (Object.keys(groupedHomes).length > 0) {
-        return (
-            <div className="space-y-8">
-              {Object.entries(groupedHomes).map(([country, cities]) => (
-                <div key={country}>
-                  <h2 className="text-2xl font-bold text-neutral-800 mb-4 pb-2 border-b-2 border-primary">{country}</h2>
-                  <div className="space-y-6">
-                    {Object.entries(cities).map(([city, properties]) => (
-                      <div key={city}>
-                        <h3 className="text-lg font-semibold text-neutral-700 mb-3">{city}</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {properties.map((property) => (
-                            <PropertyCard
-                                key={property.id}
-                                property={property}
-                                showCompareButton={true}
-                                showToast={showToast}
-                             />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-        );
-    } else {
-        return (
-            <>
-                <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
-                    <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.noSaved')}</h3>
-                  <p className="text-neutral-500 mt-2">{t('property:saved.clickHeart')}</p>
-                </div>
-                <div className="mt-8">
-                    <h2 className="text-xl font-bold text-neutral-800 mb-4 text-center">{t('property:saved.popularProperties')}</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {exampleProperties.map((property) => (
-                            <PropertyCard
-                                key={property.id}
-                                property={property}
-                                showCompareButton={true}
-                                showToast={showToast}
-                             />
-                        ))}
-                    </div>
-                </div>
-            </>
-        );
-    }
+    return (
+      <>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('properties')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'properties'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+            }`}
+          >
+            <HomeIcon className="w-5 h-5" />
+            {t('property:saved.tabs.properties')}
+            {savedHomes.length > 0 && (
+              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'properties' ? 'bg-white/20' : 'bg-gray-100'
+              }`}>
+                {savedHomes.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('agents')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'agents'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+            }`}
+          >
+            <UsersIcon className="w-5 h-5" />
+            {t('property:saved.tabs.agents')}
+            {savedAgentsList.length > 0 && (
+              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'agents' ? 'bg-white/20' : 'bg-gray-100'
+              }`}>
+                {savedAgentsList.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Content based on active tab */}
+        {activeTab === 'properties' ? renderPropertiesContent() : renderAgentsContent()}
+      </>
+    );
   };
+
+  const totalSaved = savedHomes.length + savedAgentsList.length;
 
   return (
     <div className="bg-neutral-50 min-h-screen flex flex-col">
@@ -149,13 +333,19 @@ const SavedPropertiesPage: React.FC = () => {
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
             {t('property:saved.subtitle')}
           </p>
-          {savedHomes.length > 0 && (
-            <div className="mt-6 inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
-              <span className="text-2xl font-bold text-white">{savedHomes.length}</span>
+          {totalSaved > 0 && (
+            <div className="mt-6 inline-flex items-center gap-4 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
+              <div className="flex items-center gap-2">
+                <HomeIcon className="w-5 h-5" />
+                <span className="text-lg font-bold text-white">{savedHomes.length}</span>
+                <span className="text-sm text-white/80">{savedHomes.length === 1 ? t('property:saved.propertySaved') : t('property:saved.propertiesSaved')}</span>
+              </div>
               <div className="h-6 w-px bg-white/30"></div>
-              <span className="text-sm font-semibold text-white/90">
-                {savedHomes.length === 1 ? t('property:saved.propertySaved') : t('property:saved.propertiesSaved')}
-              </span>
+              <div className="flex items-center gap-2">
+                <UsersIcon className="w-5 h-5" />
+                <span className="text-lg font-bold text-white">{savedAgentsList.length}</span>
+                <span className="text-sm text-white/80">{savedAgentsList.length === 1 ? t('property:saved.agents.agentSaved') : t('property:saved.agents.agentsSaved')}</span>
+              </div>
             </div>
           )}
         </div>

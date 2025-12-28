@@ -192,16 +192,28 @@
   "noResults": "No properties found",
   "tryDifferentFilters": "Try adjusting your filters or search criteria",
   "saved": {
-    "title": "Saved Properties",
-    "subtitle": "Your favorite properties, all in one place",
-    "propertySaved": "Property Saved",
-    "propertiesSaved": "Properties Saved",
-    "loginToView": "Log in to view your saved homes",
-    "saveDescription": "Save your favorite properties and access them anytime, anywhere.",
-    "noSaved": "You haven't saved any homes yet.",
-    "clickHeart": "Click the heart icon on any property to save it here.",
-    "popularProperties": "Here are some popular properties",
-    "featuredAgencies": "Featured Agencies"
+    "title": "Sačuvane Stavke",
+    "subtitle": "Vaše omiljene nekretnine i agenti, sve na jednom mjestu",
+    "propertySaved": "Nekretnina Sačuvana",
+    "propertiesSaved": "Nekretnine Sačuvane",
+    "loginToView": "Prijavite se da vidite sačuvane stavke",
+    "saveDescription": "Sačuvajte omiljene nekretnine i agente i pristupite im bilo đe, bilo kad.",
+    "noSaved": "Još nijeste sačuvali nijednu nekretninu.",
+    "clickHeart": "Kliknite na ikonu srca na bilo kojoj nekretnini da je sačuvate ovdje.",
+    "popularProperties": "Evo nekih popularnih nekretnina",
+    "featuredAgencies": "Istaknute Agencije",
+    "tabs": {
+      "properties": "Nekretnine",
+      "agents": "Agenti"
+    },
+    "agents": {
+      "title": "Sačuvani Agenti",
+      "noSaved": "Još nijeste sačuvali nijednog agenta.",
+      "clickHeart": "Kliknite na ikonu srca na bilo kojem profilu agenta da ga sačuvate ovdje.",
+      "browseAgents": "Pretraži Agente",
+      "agentSaved": "Agent Sačuvan",
+      "agentsSaved": "Agenti Sačuvani"
+    }
   },
   "comparison": {
     "title": "Compare Properties",

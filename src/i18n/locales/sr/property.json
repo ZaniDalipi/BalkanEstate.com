@@ -191,16 +191,28 @@
   "noResults": "Nisu pronađene nekretnine",
   "tryDifferentFilters": "Pokušajte promeniti filtere ili kriterijume pretrage",
   "saved": {
-    "title": "Sačuvane Nekretnine",
-    "subtitle": "Vaše omiljene nekretnine, sve na jednom mestu",
-    "propertySaved": "Nekretnina Sačuvana",
-    "propertiesSaved": "Nekretnine Sačuvane",
-    "loginToView": "Prijavite se da vidite sačuvane nekretnine",
-    "saveDescription": "Sačuvajte omiljene nekretnine i pristupite im bilo gde, bilo kad.",
-    "noSaved": "Još niste sačuvali nijednu nekretninu.",
-    "clickHeart": "Kliknite na ikonu srca na bilo kojoj nekretnini da je sačuvate ovde.",
-    "popularProperties": "Evo nekih popularnih nekretnina",
-    "featuredAgencies": "Istaknute Agencije"
+    "title": "Сачувани Артикли",
+    "subtitle": "Ваше омиљене некретнине и агенти, све на једном месту",
+    "propertySaved": "Некретнина Сачувана",
+    "propertiesSaved": "Некретнине Сачуване",
+    "loginToView": "Пријавите се да видите сачуване артикле",
+    "saveDescription": "Сачувајте омиљене некретнине и агенте и приступите им било где, било кад.",
+    "noSaved": "Још нисте сачували ниједну некретнину.",
+    "clickHeart": "Кликните на икону срца на било којој некретнини да је сачувате овде.",
+    "popularProperties": "Ево неких популарних некретнина",
+    "featuredAgencies": "Истакнуте Агенције",
+    "tabs": {
+      "properties": "Некретнине",
+      "agents": "Агенти"
+    },
+    "agents": {
+      "title": "Сачувани Агенти",
+      "noSaved": "Још нисте сачували ниједног агента.",
+      "clickHeart": "Кликните на икону срца на било ком профилу агента да га сачувате овде.",
+      "browseAgents": "Претражи Агенте",
+      "agentSaved": "Агент Сачуван",
+      "agentsSaved": "Агенти Сачувани"
+    }
   },
   "comparison": {
     "title": "Uporedi Nekretnine",

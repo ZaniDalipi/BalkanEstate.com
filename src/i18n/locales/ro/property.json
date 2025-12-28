@@ -192,16 +192,28 @@
   "noResults": "Nu s-au găsit proprietăți",
   "tryDifferentFilters": "Încercați să ajustați filtrele sau criteriile de căutare",
   "saved": {
-    "title": "Proprietăți Salvate",
-    "subtitle": "Proprietățile tale preferate, toate într-un singur loc",
+    "title": "Elemente Salvate",
+    "subtitle": "Proprietățile și agenții tăi preferați, toate într-un singur loc",
     "propertySaved": "Proprietate Salvată",
     "propertiesSaved": "Proprietăți Salvate",
-    "loginToView": "Conectează-te pentru a vedea locuințele salvate",
-    "saveDescription": "Salvează proprietățile preferate și accesează-le oricând, de oriunde.",
+    "loginToView": "Conectează-te pentru a vedea elementele salvate",
+    "saveDescription": "Salvează proprietățile și agenții preferați și accesează-i oricând, de oriunde.",
     "noSaved": "Nu ai salvat încă nicio locuință.",
     "clickHeart": "Apasă pe iconița inimă de pe orice proprietate pentru a o salva aici.",
     "popularProperties": "Iată câteva proprietăți populare",
-    "featuredAgencies": "Agenții Recomandate"
+    "featuredAgencies": "Agenții Recomandate",
+    "tabs": {
+      "properties": "Proprietăți",
+      "agents": "Agenți"
+    },
+    "agents": {
+      "title": "Agenți Salvați",
+      "noSaved": "Nu ai salvat încă niciun agent.",
+      "clickHeart": "Apasă pe iconița inimă de pe orice profil de agent pentru a-l salva aici.",
+      "browseAgents": "Caută Agenți",
+      "agentSaved": "Agent Salvat",
+      "agentsSaved": "Agenți Salvați"
+    }
   },
   "comparison": {
     "title": "Compară Proprietăți",

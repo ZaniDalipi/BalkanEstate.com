@@ -192,16 +192,28 @@
   "noResults": "No properties found",
   "tryDifferentFilters": "Try adjusting your filters or search criteria",
   "saved": {
-    "title": "Saved Properties",
-    "subtitle": "Your favorite properties, all in one place",
-    "propertySaved": "Property Saved",
-    "propertiesSaved": "Properties Saved",
-    "loginToView": "Log in to view your saved homes",
-    "saveDescription": "Save your favorite properties and access them anytime, anywhere.",
-    "noSaved": "You haven't saved any homes yet.",
-    "clickHeart": "Click the heart icon on any property to save it here.",
-    "popularProperties": "Here are some popular properties",
-    "featuredAgencies": "Featured Agencies"
+    "title": "Зачувани Артикли",
+    "subtitle": "Вашите омилени имоти и агенти, сите на едно место",
+    "propertySaved": "Имот Зачуван",
+    "propertiesSaved": "Имоти Зачувани",
+    "loginToView": "Најавете се за да ги видите зачуваните артикли",
+    "saveDescription": "Зачувајте ги омилените имоти и агенти и пристапете до нив било каде, било кога.",
+    "noSaved": "Сè уште немате зачувано ниеден имот.",
+    "clickHeart": "Кликнете на иконата со срце на било кој имот за да го зачувате овде.",
+    "popularProperties": "Еве неколку популарни имоти",
+    "featuredAgencies": "Истакнати Агенции",
+    "tabs": {
+      "properties": "Имоти",
+      "agents": "Агенти"
+    },
+    "agents": {
+      "title": "Зачувани Агенти",
+      "noSaved": "Сè уште немате зачувано ниеден агент.",
+      "clickHeart": "Кликнете на иконата со срце на било кој профил на агент за да го зачувате овде.",
+      "browseAgents": "Пребарај Агенти",
+      "agentSaved": "Агент Зачуван",
+      "agentsSaved": "Агенти Зачувани"
+    }
   },
   "comparison": {
     "title": "Compare Properties",

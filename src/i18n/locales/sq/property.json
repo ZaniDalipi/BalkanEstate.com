@@ -191,16 +191,28 @@
   "noResults": "Nuk u gjetën prona",
   "tryDifferentFilters": "Provoni të ndryshoni filtrat ose kriteret e kërkimit",
   "saved": {
-    "title": "Prona të Ruajtura",
-    "subtitle": "Pronat tuaja të preferuara, të gjitha në një vend",
+    "title": "Artikuj të Ruajtur",
+    "subtitle": "Pronat dhe agjentët tuaj të preferuar, të gjitha në një vend",
     "propertySaved": "Pronë e Ruajtur",
     "propertiesSaved": "Prona të Ruajtura",
-    "loginToView": "Hyni për të parë pronat e ruajtura",
-    "saveDescription": "Ruani pronat tuaja të preferuara dhe qasuni kudo, kurdo.",
+    "loginToView": "Hyni për të parë artikujt e ruajtur",
+    "saveDescription": "Ruani pronat dhe agjentët tuaj të preferuar dhe qasuni kudo, kurdo.",
     "noSaved": "Nuk keni ruajtur asnjë pronë ende.",
     "clickHeart": "Klikoni ikonën e zemrës në çdo pronë për ta ruajtur këtu.",
     "popularProperties": "Ja disa prona të njohura",
-    "featuredAgencies": "Agjenci të Zgjedhura"
+    "featuredAgencies": "Agjenci të Zgjedhura",
+    "tabs": {
+      "properties": "Pronat",
+      "agents": "Agjentët"
+    },
+    "agents": {
+      "title": "Agjentë të Ruajtur",
+      "noSaved": "Nuk keni ruajtur asnjë agjent ende.",
+      "clickHeart": "Klikoni ikonën e zemrës në çdo profil agjenti për ta ruajtur këtu.",
+      "browseAgents": "Shfletoni Agjentët",
+      "agentSaved": "Agjent i Ruajtur",
+      "agentsSaved": "Agjentë të Ruajtur"
+    }
   },
   "comparison": {
     "title": "Krahaso Pronat",

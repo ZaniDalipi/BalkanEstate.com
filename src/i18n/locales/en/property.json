@@ -192,16 +192,28 @@
   "noResults": "No properties found",
   "tryDifferentFilters": "Try adjusting your filters or search criteria",
   "saved": {
-    "title": "Saved Properties",
-    "subtitle": "Your favorite properties, all in one place",
+    "title": "Saved Items",
+    "subtitle": "Your favorite properties and agents, all in one place",
     "propertySaved": "Property Saved",
     "propertiesSaved": "Properties Saved",
-    "loginToView": "Log in to view your saved homes",
-    "saveDescription": "Save your favorite properties and access them anytime, anywhere.",
+    "loginToView": "Log in to view your saved items",
+    "saveDescription": "Save your favorite properties and agents and access them anytime, anywhere.",
     "noSaved": "You haven't saved any homes yet.",
     "clickHeart": "Click the heart icon on any property to save it here.",
     "popularProperties": "Here are some popular properties",
-    "featuredAgencies": "Featured Agencies"
+    "featuredAgencies": "Featured Agencies",
+    "tabs": {
+      "properties": "Properties",
+      "agents": "Agents"
+    },
+    "agents": {
+      "title": "Saved Agents",
+      "noSaved": "You haven't saved any agents yet.",
+      "clickHeart": "Click the heart icon on any agent profile to save them here.",
+      "browseAgents": "Browse Agents",
+      "agentSaved": "Agent Saved",
+      "agentsSaved": "Agents Saved"
+    }
   },
   "comparison": {
     "title": "Compare Properties",
