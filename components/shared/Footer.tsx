@@ -20,6 +20,7 @@ import {
     UserCircleIcon
 } from '../../constants';
 import FooterCityscape from './FooterCityscape';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface FooterProps {
     className?: string;
@@ -29,10 +30,12 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
     const { t } = useTranslation(['footer', 'common']);
     const currentYear = new Date().getFullYear();
     const { dispatch, state } = useAppContext();
+    const { getLocalizedPath } = useLocalizedNavigation();
 
     const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works') => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
-        window.history.pushState({}, '', `/${view === 'search' ? '' : view}`);
+        const route = view === 'search' ? '/' : `/${view}`;
+        window.history.pushState({}, '', getLocalizedPath(route));
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 

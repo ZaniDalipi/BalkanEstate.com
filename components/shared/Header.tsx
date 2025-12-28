@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface HeaderProps {
     onToggleSidebar: () => void;
@@ -13,6 +14,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const { t } = useTranslation(['nav']);
   const { state, dispatch } = useAppContext();
   const { isAuthenticated, currentUser } = state;
+  const { getLocalizedPath } = useLocalizedNavigation();
 
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
@@ -20,12 +22,12 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        // Update URL
-        window.history.pushState({}, '', '/account');
+        // Update URL with language prefix
+        window.history.pushState({}, '', getLocalizedPath('/account'));
     } else {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, getLocalizedPath]);
 
   const handleNewListingClick = useCallback(() => {
     if (isAuthenticated) {
@@ -33,12 +35,12 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-        // Update URL
-        window.history.pushState({}, '', '/create-listing');
+        // Update URL with language prefix
+        window.history.pushState({}, '', getLocalizedPath('/create-listing'));
     } else {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, getLocalizedPath]);
 
   const handleSubscribeClick = useCallback(() => {
     dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });

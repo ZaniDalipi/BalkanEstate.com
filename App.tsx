@@ -12,6 +12,9 @@ import { LogoIcon } from './constants';
 // Initialize i18n
 import './src/i18n';
 
+// Language routing utilities
+import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
+
 // Core components (loaded immediately)
 import Onboarding from './src/features/onboarding/components/Onboarding';
 import { SearchPage } from './src/features/search/components';
@@ -62,13 +65,16 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // Check URL for routing on mount and when URL changes (handles browser/mobile back button)
   useEffect(() => {
     const checkUrlForRouting = () => {
+      // Initialize language from URL (handles redirect if no language prefix)
+      const { lang, path: cleanPath } = initializeLanguageFromUrl();
+
       // Normalize path: remove trailing slashes (except for root '/')
-      let path = window.location.pathname;
+      let path = cleanPath;
       if (path.length > 1 && path.endsWith('/')) {
         path = path.slice(0, -1);
       }
 
-      console.log('🔙 Navigation detected:', path);
+      console.log('🔙 Navigation detected:', path, 'lang:', lang);
 
       // Payment callback routes (highest priority)
       if (path === '/payment/success' || path === '/payment/cancel') {
@@ -136,7 +142,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', buildLocalizedPath('/'));
       }
     };
 

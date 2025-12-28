@@ -5,7 +5,8 @@
 
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { languages, changeLanguage, getCurrentLanguage, type LanguageCode } from '../i18n';
+import { languages, getCurrentLanguage, type LanguageCode } from '../i18n';
+import { changeLanguageWithUrl } from '../utils/languageRouting';
 
 interface LanguageSwitcherProps {
   variant?: 'dropdown' | 'compact' | 'full' | 'sidebar';
@@ -46,8 +47,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
-  const handleLanguageChange = useCallback(async (code: LanguageCode) => {
-    await changeLanguage(code);
+  const handleLanguageChange = useCallback((code: LanguageCode) => {
+    changeLanguageWithUrl(code);
     setIsOpen(false);
   }, []);
 
