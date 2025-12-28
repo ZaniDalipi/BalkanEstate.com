@@ -31,20 +31,15 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       if (search.drawnBoundsJSON) {
           try {
               // Handle case where drawnBoundsJSON might already be an object (from MongoDB)
-              let parsed = search.drawnBoundsJSON;
+              let parsed: any = search.drawnBoundsJSON;
               if (typeof parsed === 'string') {
-                  // Validate it looks like JSON before parsing
-                  if (!parsed.startsWith('{') && !parsed.startsWith('[')) {
-                      console.warn("Invalid drawnBoundsJSON format, falling back to filters:", parsed.substring(0, 50));
-                      return filterProperties(properties, search.filters);
-                  }
                   parsed = JSON.parse(parsed);
               }
 
               // Validate parsed object has required properties
               if (!parsed._southWest || !parsed._northEast) {
                   console.warn("drawnBoundsJSON missing required bounds properties");
-                  return filterProperties(properties, search.filters);
+                  return [];
               }
 
               const drawnBounds = L.latLngBounds(parsed._southWest, parsed._northEast);
@@ -52,9 +47,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
               return properties.filter(p => p.lat && p.lng && drawnBounds.contains([p.lat, p.lng]));
           } catch (e) {
               console.error("Failed to parse drawnBoundsJSON in SavedSearchAccordion:", e);
-              console.error("drawnBoundsJSON value:", typeof search.drawnBoundsJSON, search.drawnBoundsJSON);
-              // Fall back to filter-based search instead of returning empty
-              return filterProperties(properties, search.filters);
+              return [];
           }
       }
 
