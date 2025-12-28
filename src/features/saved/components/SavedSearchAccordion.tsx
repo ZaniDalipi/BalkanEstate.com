@@ -78,7 +78,10 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       // Set fly target for map when opening - calculate appropriate zoom to fit bounds
       if (search.drawnBoundsJSON) {
         try {
-          const parsed = JSON.parse(search.drawnBoundsJSON);
+          let parsed: any = search.drawnBoundsJSON;
+          if (typeof parsed === 'string') {
+            parsed = JSON.parse(parsed);
+          }
           const bounds = L.latLngBounds(parsed._southWest, parsed._northEast);
           const center = bounds.getCenter();
 
@@ -243,7 +246,10 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
           {/* Map display for saved search area */}
           {search.drawnBoundsJSON && (() => {
             try {
-              const parsed = JSON.parse(search.drawnBoundsJSON);
+              let parsed: any = search.drawnBoundsJSON;
+              if (typeof parsed === 'string') {
+                parsed = JSON.parse(parsed);
+              }
               const bounds = L.latLngBounds(parsed._southWest, parsed._northEast);
 
               return (
