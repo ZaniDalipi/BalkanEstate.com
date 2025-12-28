@@ -23,6 +23,7 @@
     "badges": {
       "trial": "Trial",
       "pro": "Pro",
+      "enterprise": "Enterprise",
       "agencyOwner": "Agency Owner",
       "agencyAgent": "Agency Agent",
       "buyer": "Buyer",

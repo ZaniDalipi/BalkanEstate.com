@@ -23,6 +23,7 @@
     "badges": {
       "trial": "Δοκιμαστικό",
       "pro": "Pro",
+      "enterprise": "Enterprise",
       "agencyOwner": "Ιδιοκτήτης πρακτορείου",
       "agencyAgent": "Πράκτορας πρακτορείου",
       "buyer": "Αγοραστής",

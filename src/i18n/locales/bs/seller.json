@@ -23,6 +23,7 @@
     "badges": {
       "trial": "Probni",
       "pro": "Pro",
+      "enterprise": "Enterprise",
       "agencyOwner": "Vlasnik agencije",
       "agencyAgent": "Agent agencije",
       "buyer": "Kupac",

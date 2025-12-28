@@ -23,6 +23,7 @@
     "badges": {
       "trial": "Проба",
       "pro": "Pro",
+      "enterprise": "Enterprise",
       "agencyOwner": "Сопственик на агенција",
       "agencyAgent": "Агент на агенција",
       "buyer": "Купувач",
