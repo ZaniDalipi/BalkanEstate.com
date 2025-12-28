@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import SavedSearchAccordion from './SavedSearchAccordion';
@@ -66,12 +66,19 @@ const SortButton: React.FC<{
 
 const SavedSearchesPage: React.FC = () => {
   const { t } = useTranslation(['saved']);
-  const { state, dispatch } = useAppContext();
-  const { savedSearches, isAuthenticated } = state;
+  const { state, dispatch, fetchProperties } = useAppContext();
+  const { savedSearches, isAuthenticated, properties } = state;
   const [sortBy, setSortBy] = useState<'createdAt' | 'name' | 'lastAccessed'>('createdAt');
 
+  // Fetch properties if not already loaded
+  useEffect(() => {
+    if (properties.length === 0) {
+      fetchProperties();
+    }
+  }, [properties.length, fetchProperties]);
+
   // Scroll to top on mount and when sort changes
-  React.useEffect(() => {
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [sortBy]);
 
