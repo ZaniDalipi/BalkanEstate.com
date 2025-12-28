@@ -47,34 +47,10 @@ const initialFilters: Filters = {
     amenities: []
 };
 
-// Helper to validate a saved search is not corrupted
+// Helper to validate a saved search has basic required fields
+// Note: drawnBoundsJSON validation happens in SavedSearchAccordion - corrupted bounds just won't show map area
 const isValidSavedSearch = (search: SavedSearch): boolean => {
-    try {
-        // Must have id and name
-        if (!search || !search.id || !search.name) return false;
-
-        // If drawnBoundsJSON exists, validate it's parseable
-        if (search.drawnBoundsJSON) {
-            let bounds = search.drawnBoundsJSON;
-            if (typeof bounds === 'string') {
-                const trimmed = bounds.trim();
-                // Quick sanity checks before any parsing
-                if (trimmed.length < 20 || !trimmed.startsWith('{') || !trimmed.endsWith('}')) {
-                    return false;
-                }
-                if (!trimmed.includes('_southWest') || !trimmed.includes('_northEast')) {
-                    return false;
-                }
-                // Try parsing to verify it's valid JSON
-                const parsed = JSON.parse(trimmed);
-                if (!parsed || typeof parsed !== 'object') return false;
-            }
-        }
-
-        return true;
-    } catch {
-        return false;
-    }
+    return !!(search && search.id && search.name);
 };
 
 const SortButton: React.FC<{
