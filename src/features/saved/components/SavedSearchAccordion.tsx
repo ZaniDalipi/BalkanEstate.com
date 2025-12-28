@@ -175,8 +175,8 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
               </div>
             )}
             <div className="flex items-center bg-indigo-600 text-white rounded-full transition-colors hover:bg-indigo-700">
-              <span className="text-sm font-bold px-3 py-1.5 text-center">
-                {propertyCount}
+              <span className="text-sm font-bold px-3 py-1.5 text-center min-w-[2rem]">
+                {isLoadingProperties || properties.length === 0 ? '...' : propertyCount}
               </span>
               <div className="border-l border-indigo-400 p-1.5">
                 {isOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
