@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IFilters {
   query: string;
+  country: string;
   minPrice: number | null;
   maxPrice: number | null;
   beds: number | null;
@@ -11,7 +12,30 @@ export interface IFilters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: 'any' | 'agent' | 'private';
-  propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'other';
+  propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  // Advanced filters
+  minYearBuilt: number | null;
+  maxYearBuilt: number | null;
+  minParking: number | null;
+  furnishing: string;
+  heatingType: string;
+  condition: string;
+  viewType: string;
+  energyRating: string;
+  hasBalcony: boolean | null;
+  hasGarden: boolean | null;
+  hasElevator: boolean | null;
+  hasSecurity: boolean | null;
+  hasAirConditioning: boolean | null;
+  hasPool: boolean | null;
+  petsAllowed: boolean | null;
+  minFloorNumber: number | null;
+  maxFloorNumber: number | null;
+  maxDistanceToCenter: number | null;
+  maxDistanceToSea: number | null;
+  maxDistanceToSchool: number | null;
+  maxDistanceToHospital: number | null;
+  amenities: string[];
 }
 
 export interface ISavedSearch extends Document {
@@ -38,25 +62,8 @@ const SavedSearchSchema: Schema = new Schema(
       required: true,
     },
     filters: {
-      query: { type: String, default: '' },
-      minPrice: { type: Number, default: null },
-      maxPrice: { type: Number, default: null },
-      beds: { type: Number, default: null },
-      baths: { type: Number, default: null },
-      livingRooms: { type: Number, default: null },
-      minSqft: { type: Number, default: null },
-      maxSqft: { type: Number, default: null },
-      sortBy: { type: String, default: 'newest' },
-      sellerType: {
-        type: String,
-        enum: ['any', 'agent', 'private'],
-        default: 'any',
-      },
-      propertyType: {
-        type: String,
-        enum: ['any', 'house', 'apartment', 'villa', 'other'],
-        default: 'any',
-      },
+      type: Schema.Types.Mixed,
+      default: {},
     },
     drawnBoundsJSON: {
       type: String,
