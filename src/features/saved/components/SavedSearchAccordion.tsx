@@ -26,32 +26,60 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const { state, dispatch, updateSavedSearchAccessTime } = useAppContext();
   const { isLoadingProperties, allMunicipalities, properties } = state;
 
-  // Helper function to safely parse drawnBoundsJSON
+  // Helper function to safely parse drawnBoundsJSON - ultra-robust validation
   const parsedBounds = useMemo(() => {
-    if (!search.drawnBoundsJSON) return null;
-
     try {
+      // Bail early if no data
+      if (!search.drawnBoundsJSON) return null;
+
       let parsed: any = search.drawnBoundsJSON;
 
       // If it's a string, try to parse it
       if (typeof parsed === 'string') {
         // Skip empty strings or invalid values
         const trimmed = parsed.trim();
-        if (!trimmed || trimmed === 'null' || trimmed === 'undefined' || !trimmed.startsWith('{')) {
+        if (!trimmed || trimmed.length < 20 || trimmed === 'null' || trimmed === 'undefined') {
+          return null;
+        }
+        // Must be valid JSON object format with required keys
+        if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
+          return null;
+        }
+        // Must contain required nested structure
+        if (!trimmed.includes('_southWest') || !trimmed.includes('_northEast') || !trimmed.includes('lat') || !trimmed.includes('lng')) {
           return null;
         }
         parsed = JSON.parse(trimmed);
       }
 
-      // Validate parsed object has required properties
-      if (!parsed || !parsed._southWest || !parsed._northEast) {
-        console.warn("drawnBoundsJSON missing required bounds properties");
+      // Validate parsed is a proper object
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return null;
+      }
+
+      // Validate has required properties with proper nesting
+      if (!parsed._southWest || typeof parsed._southWest !== 'object' ||
+          !parsed._northEast || typeof parsed._northEast !== 'object') {
+        return null;
+      }
+
+      // Validate lat/lng are numbers
+      const sw = parsed._southWest;
+      const ne = parsed._northEast;
+      if (typeof sw.lat !== 'number' || typeof sw.lng !== 'number' ||
+          typeof ne.lat !== 'number' || typeof ne.lng !== 'number') {
+        return null;
+      }
+
+      // Validate lat/lng are in valid range
+      if (sw.lat < -90 || sw.lat > 90 || ne.lat < -90 || ne.lat > 90 ||
+          sw.lng < -180 || sw.lng > 180 || ne.lng < -180 || ne.lng > 180) {
         return null;
       }
 
       return parsed;
-    } catch (e) {
-      console.error("Failed to parse drawnBoundsJSON:", e);
+    } catch {
+      // Silently fail for any error - corrupted saved search data
       return null;
     }
   }, [search.drawnBoundsJSON]);

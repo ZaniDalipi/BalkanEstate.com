@@ -47,6 +47,36 @@ const initialFilters: Filters = {
     amenities: []
 };
 
+// Helper to validate a saved search is not corrupted
+const isValidSavedSearch = (search: SavedSearch): boolean => {
+    try {
+        // Must have id and name
+        if (!search || !search.id || !search.name) return false;
+
+        // If drawnBoundsJSON exists, validate it's parseable
+        if (search.drawnBoundsJSON) {
+            let bounds = search.drawnBoundsJSON;
+            if (typeof bounds === 'string') {
+                const trimmed = bounds.trim();
+                // Quick sanity checks before any parsing
+                if (trimmed.length < 20 || !trimmed.startsWith('{') || !trimmed.endsWith('}')) {
+                    return false;
+                }
+                if (!trimmed.includes('_southWest') || !trimmed.includes('_northEast')) {
+                    return false;
+                }
+                // Try parsing to verify it's valid JSON
+                const parsed = JSON.parse(trimmed);
+                if (!parsed || typeof parsed !== 'object') return false;
+            }
+        }
+
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 const SortButton: React.FC<{
     label: string;
     isActive: boolean;
@@ -101,8 +131,9 @@ const SavedSearchesPage: React.FC = () => {
   };
 
   const sortedSearches = useMemo(() => {
-    const sorted = [...savedSearches].filter(s => s && s.id); // Filter out invalid entries
-    sorted.sort((a, b) => {
+    // Filter out invalid/corrupted entries before sorting
+    const valid = savedSearches.filter(isValidSavedSearch);
+    valid.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return (a.name || '').localeCompare(b.name || '');
@@ -113,7 +144,7 @@ const SavedSearchesPage: React.FC = () => {
           return (b.createdAt || 0) - (a.createdAt || 0);
       }
     });
-    return sorted;
+    return valid;
   }, [savedSearches, sortBy]);
 
 
@@ -134,7 +165,7 @@ const SavedSearchesPage: React.FC = () => {
         );
     }
     
-    if (savedSearches.length === 0) {
+    if (sortedSearches.length === 0) {
         const handleSaveExample = () => {
             const now = Date.now();
             const exampleSearch: SavedSearch = {
@@ -224,12 +255,12 @@ const SavedSearchesPage: React.FC = () => {
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
             {t('hero.subtitle')}
           </p>
-          {savedSearches.length > 0 && (
+          {sortedSearches.length > 0 && (
             <div className="mt-6 inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
-              <span className="text-2xl font-bold text-white">{savedSearches.length}</span>
+              <span className="text-2xl font-bold text-white">{sortedSearches.length}</span>
               <div className="h-6 w-px bg-white/30"></div>
               <span className="text-sm font-semibold text-white/90">
-                {savedSearches.length === 1 ? t('hero.searchCount.singular') : t('hero.searchCount.plural')}
+                {sortedSearches.length === 1 ? t('hero.searchCount.singular') : t('hero.searchCount.plural')}
               </span>
             </div>
           )}
