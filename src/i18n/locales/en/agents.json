@@ -359,7 +359,8 @@
       "save": "Save",
       "saved": "Saved",
       "share": "Share",
-      "independentAgent": "Independent Agent"
+      "independentAgent": "Independent Agent",
+      "editProfile": "Edit Profile"
     },
     "stats": {
       "propertiesSold": "Properties Sold",

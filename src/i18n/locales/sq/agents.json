@@ -284,6 +284,16 @@
     "careerOpportunities": "Mundësi Karriere"
   },
   "profilePage": {
+    "header": {
+      "back": "Kthehu",
+      "backToAgents": "Kthehu te Agjentët",
+      "viewAgencyProfile": "Shiko Profilin e Agjencisë →",
+      "save": "Ruaj",
+      "saved": "Ruajtur",
+      "share": "Ndaj",
+      "independentAgent": "Agjent i Pavarur",
+      "editProfile": "Ndrysho Profilin"
+    },
     "about": {
       "title": "Rreth Agjentit",
       "defaultBio": "Ky agjent është një profesionist i përkushtuar në pasuri të paluajtshme me {{years}} vite përvojë në industri{{agency}}. Specializohet në ndihmën e klientëve për të arritur objektivat e tyre përmes njohurive të tregut dhe shërbimit të personalizuar.",
