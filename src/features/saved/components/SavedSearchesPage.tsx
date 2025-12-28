@@ -101,16 +101,16 @@ const SavedSearchesPage: React.FC = () => {
   };
 
   const sortedSearches = useMemo(() => {
-    const sorted = [...savedSearches];
+    const sorted = [...savedSearches].filter(s => s && s.id); // Filter out invalid entries
     sorted.sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
         case 'lastAccessed':
-          return b.lastAccessed - a.lastAccessed;
+          return (b.lastAccessed || 0) - (a.lastAccessed || 0);
         case 'createdAt':
         default:
-          return b.createdAt - a.createdAt;
+          return (b.createdAt || 0) - (a.createdAt || 0);
       }
     });
     return sorted;

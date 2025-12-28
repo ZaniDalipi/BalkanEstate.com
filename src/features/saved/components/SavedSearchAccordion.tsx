@@ -26,34 +26,52 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const { state, dispatch, updateSavedSearchAccessTime } = useAppContext();
   const { isLoadingProperties, allMunicipalities, properties } = state;
 
+  // Helper function to safely parse drawnBoundsJSON
+  const parsedBounds = useMemo(() => {
+    if (!search.drawnBoundsJSON) return null;
+
+    try {
+      let parsed: any = search.drawnBoundsJSON;
+
+      // If it's a string, try to parse it
+      if (typeof parsed === 'string') {
+        // Skip empty strings or invalid values
+        const trimmed = parsed.trim();
+        if (!trimmed || trimmed === 'null' || trimmed === 'undefined' || !trimmed.startsWith('{')) {
+          return null;
+        }
+        parsed = JSON.parse(trimmed);
+      }
+
+      // Validate parsed object has required properties
+      if (!parsed || !parsed._southWest || !parsed._northEast) {
+        console.warn("drawnBoundsJSON missing required bounds properties");
+        return null;
+      }
+
+      return parsed;
+    } catch (e) {
+      console.error("Failed to parse drawnBoundsJSON:", e);
+      return null;
+    }
+  }, [search.drawnBoundsJSON]);
+
   const matchingProperties = useMemo(() => {
-      // If there's a drawn area, prioritize geographic filtering
-      if (search.drawnBoundsJSON) {
+      // If there's a valid drawn area, prioritize geographic filtering
+      if (parsedBounds) {
           try {
-              // Handle case where drawnBoundsJSON might already be an object (from MongoDB)
-              let parsed: any = search.drawnBoundsJSON;
-              if (typeof parsed === 'string') {
-                  parsed = JSON.parse(parsed);
-              }
-
-              // Validate parsed object has required properties
-              if (!parsed._southWest || !parsed._northEast) {
-                  console.warn("drawnBoundsJSON missing required bounds properties");
-                  return [];
-              }
-
-              const drawnBounds = L.latLngBounds(parsed._southWest, parsed._northEast);
+              const drawnBounds = L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
               // Only filter by bounds for drawn area searches
               return properties.filter(p => p.lat && p.lng && drawnBounds.contains([p.lat, p.lng]));
           } catch (e) {
-              console.error("Failed to parse drawnBoundsJSON in SavedSearchAccordion:", e);
+              console.error("Failed to create bounds from parsed data:", e);
               return [];
           }
       }
 
       // Otherwise use filter-based search
       return filterProperties(properties, search.filters);
-  }, [properties, search.filters, search.drawnBoundsJSON]);
+  }, [properties, search.filters, parsedBounds]);
 
   // Calculate new properties (properties not in seenPropertyIds)
   const newProperties = useMemo(() => {
@@ -76,13 +94,9 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       onOpen(); // Call onOpen after updating (in case parent needs to do something)
 
       // Set fly target for map when opening - calculate appropriate zoom to fit bounds
-      if (search.drawnBoundsJSON) {
+      if (parsedBounds) {
         try {
-          let parsed: any = search.drawnBoundsJSON;
-          if (typeof parsed === 'string') {
-            parsed = JSON.parse(parsed);
-          }
-          const bounds = L.latLngBounds(parsed._southWest, parsed._northEast);
+          const bounds = L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
           const center = bounds.getCenter();
 
           // Calculate zoom level to fit the bounds
@@ -103,7 +117,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
           setMapFlyTarget({ center: [center.lat, center.lng], zoom });
         } catch (e) {
-          console.error("Failed to parse bounds for fly target", e);
+          console.error("Failed to create bounds for fly target", e);
         }
       }
     }
@@ -244,41 +258,28 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       {isOpen && (
         <div className="p-4 bg-neutral-50/70 border-t border-neutral-200 animate-fade-in">
           {/* Map display for saved search area */}
-          {search.drawnBoundsJSON && (() => {
-            try {
-              let parsed: any = search.drawnBoundsJSON;
-              if (typeof parsed === 'string') {
-                parsed = JSON.parse(parsed);
-              }
-              const bounds = L.latLngBounds(parsed._southWest, parsed._northEast);
-
-              return (
-                <div className="mb-4 rounded-lg overflow-hidden border border-neutral-300 shadow-sm" style={{ height: '400px' }}>
-                  <MapComponent
-                    properties={matchingProperties}
-                    onMapMove={() => {}}
-                    userLocation={null}
-                    onSaveSearch={() => {}}
-                    isSaving={false}
-                    isAuthenticated={false}
-                    mapBounds={null}
-                    drawnBounds={bounds}
-                    onDrawComplete={() => {}}
-                    isDrawing={false}
-                    onDrawStart={() => {}}
-                    flyToTarget={mapFlyTarget}
-                    onFlyComplete={() => setMapFlyTarget(null)}
-                    onRecenter={() => {}}
-                    isMobile={false}
-                    searchMode="manual"
-                  />
-                </div>
-              );
-            } catch (e) {
-              console.error("Failed to render map for saved search", e);
-              return null;
-            }
-          })()}
+          {parsedBounds && (
+            <div className="mb-4 rounded-lg overflow-hidden border border-neutral-300 shadow-sm" style={{ height: '400px' }}>
+              <MapComponent
+                properties={matchingProperties}
+                onMapMove={() => {}}
+                userLocation={null}
+                onSaveSearch={() => {}}
+                isSaving={false}
+                isAuthenticated={false}
+                mapBounds={null}
+                drawnBounds={L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast)}
+                onDrawComplete={() => {}}
+                isDrawing={false}
+                onDrawStart={() => {}}
+                flyToTarget={mapFlyTarget}
+                onFlyComplete={() => setMapFlyTarget(null)}
+                onRecenter={() => {}}
+                isMobile={false}
+                searchMode="manual"
+              />
+            </div>
+          )}
 
           {/* Property List */}
           {isLoadingProperties ? (
