@@ -29,12 +29,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   // Helper function to safely parse drawnBoundsJSON
   const parsedBounds = useMemo(() => {
     try {
-      console.log('[SavedSearch] drawnBoundsJSON:', search.drawnBoundsJSON, 'type:', typeof search.drawnBoundsJSON);
-
-      if (!search.drawnBoundsJSON) {
-        console.log('[SavedSearch] No drawnBoundsJSON');
-        return null;
-      }
+      if (!search.drawnBoundsJSON) return null;
 
       let parsed: any = search.drawnBoundsJSON;
 
@@ -42,22 +37,14 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       if (typeof parsed === 'string') {
         const trimmed = parsed.trim();
         if (!trimmed || trimmed === 'null' || trimmed === 'undefined') {
-          console.log('[SavedSearch] Empty or invalid string');
           return null;
         }
         parsed = JSON.parse(trimmed);
-        console.log('[SavedSearch] Parsed from string:', parsed);
       }
 
       // Validate structure
-      if (!parsed || typeof parsed !== 'object') {
-        console.log('[SavedSearch] Not an object');
-        return null;
-      }
-      if (!parsed._southWest || !parsed._northEast) {
-        console.log('[SavedSearch] Missing _southWest or _northEast');
-        return null;
-      }
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (!parsed._southWest || !parsed._northEast) return null;
 
       const sw = parsed._southWest;
       const ne = parsed._northEast;
@@ -65,14 +52,11 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       // Check lat/lng exist and are numbers
       if (typeof sw.lat !== 'number' || typeof sw.lng !== 'number' ||
           typeof ne.lat !== 'number' || typeof ne.lng !== 'number') {
-        console.log('[SavedSearch] lat/lng not numbers:', sw, ne);
         return null;
       }
 
-      console.log('[SavedSearch] Valid bounds:', parsed);
       return parsed;
-    } catch (e) {
-      console.error('[SavedSearch] Parse error:', e);
+    } catch {
       return null;
     }
   }, [search.drawnBoundsJSON]);
