@@ -129,6 +129,43 @@ const GiftIconComponent: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// Team Icon component
+const TeamIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+  </svg>
+);
+
+// Copy icon component
+const CopyIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  </svg>
+);
+
+// Agent coupon data interface
+interface AgentCouponData {
+  code: string;
+  status: 'available' | 'used' | 'expired';
+  generatedAt: string;
+  expiresAt: string;
+  usedBy?: string;
+  usedAt?: string;
+}
+
+interface AgencyTeamData {
+  agencyId: string;
+  invitationCode: string;
+  totalAgents: number;
+  maxAgents: number;
+  agentCoupons: {
+    coupons: AgentCouponData[];
+    available: number;
+    used: number;
+    canGenerateMore: boolean;
+  } | null;
+}
+
 const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId }) => {
   const { state, dispatch } = useAppContext();
   const [loading, setLoading] = useState(true);
@@ -141,6 +178,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const [restoring, setRestoring] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Agency team tracking state
+  const [agencyTeamData, setAgencyTeamData] = useState<AgencyTeamData | null>(null);
+  const [loadingAgencyData, setLoadingAgencyData] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [generatingCoupons, setGeneratingCoupons] = useState(false);
 
   const user = state.currentUser as User;
 
@@ -241,6 +284,99 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       window.removeEventListener('subscriptionUpdated', handlePaymentSuccess);
     };
   }, [fetchSubscription]);
+
+  // Fetch agency team data if user is an agency owner
+  useEffect(() => {
+    const fetchAgencyTeamData = async () => {
+      // Check if user has an agency (is agency owner)
+      if (!user?.agencyId) return;
+
+      setLoadingAgencyData(true);
+      try {
+        const token = localStorage.getItem('balkan_estate_token');
+        if (!token) return;
+
+        // Fetch agency details first to get invitation code
+        const agencyResponse = await fetch(`${API_URL}/agencies/${user.agencyId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!agencyResponse.ok) return;
+        const agencyData = await agencyResponse.json();
+        const agency = agencyData.agency;
+
+        // Fetch agency coupons
+        const couponsResponse = await fetch(`${API_URL}/agencies/${user.agencyId}/coupons`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        let agentCoupons = null;
+        if (couponsResponse.ok) {
+          const couponsData = await couponsResponse.json();
+          agentCoupons = couponsData.agentCoupons;
+        }
+
+        setAgencyTeamData({
+          agencyId: String(agency._id),
+          invitationCode: agency.invitationCode || '',
+          totalAgents: agency.totalAgents || agency.agents?.length || 0,
+          maxAgents: 5, // Agency plan includes 5 agent slots
+          agentCoupons,
+        });
+      } catch (error) {
+        console.error('Error fetching agency team data:', error);
+      } finally {
+        setLoadingAgencyData(false);
+      }
+    };
+
+    fetchAgencyTeamData();
+  }, [user?.agencyId, refreshKey]);
+
+  // Handle copying code to clipboard
+  const handleCopyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  };
+
+  // Handle generating new agent coupons
+  const handleGenerateCoupons = async () => {
+    if (!agencyTeamData?.agencyId) return;
+
+    setGeneratingCoupons(true);
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      const response = await fetch(`${API_URL}/agencies/${agencyTeamData.agencyId}/coupons/generate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Refresh the data
+        setRefreshKey(prev => prev + 1);
+      } else {
+        const data = await response.json();
+        setActionError(data.message || 'Failed to generate coupons');
+      }
+    } catch (error) {
+      console.error('Error generating coupons:', error);
+      setActionError('Failed to generate coupons');
+    } finally {
+      setGeneratingCoupons(false);
+    }
+  };
 
   // Calculate actual days in the subscription period based on calendar
   const calculateActualDays = (startDate: Date, endDate: Date): number => {
@@ -706,6 +842,148 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           />
         </div>
       </div>
+
+      {/* Team Members Section - Only show for agency owners */}
+      {agencyTeamData && (
+        <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
+          {/* Header with count */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <TeamIcon className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-neutral-800">Team Members</p>
+                <p className="text-sm text-neutral-500">
+                  {agencyTeamData.totalAgents} of {agencyTeamData.maxAgents} agents registered
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-neutral-800">
+                {agencyTeamData.maxAgents - agencyTeamData.totalAgents}
+              </p>
+              <p className="text-xs text-neutral-500">slots remaining</p>
+            </div>
+          </div>
+          <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-purple-500 h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(100, (agencyTeamData.totalAgents / agencyTeamData.maxAgents) * 100)}%` }}
+            />
+          </div>
+
+          {/* Invitation Code */}
+          {agencyTeamData.invitationCode && (
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <p className="text-sm font-medium text-neutral-700 mb-2">Agency Invitation Code</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center justify-between bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2">
+                  <code className="text-sm font-mono text-neutral-800">{agencyTeamData.invitationCode}</code>
+                  <button
+                    onClick={() => handleCopyCode(agencyTeamData.invitationCode)}
+                    className="p-1.5 text-neutral-500 hover:text-primary hover:bg-neutral-100 rounded-md transition-colors"
+                    title="Copy code"
+                  >
+                    {copiedCode === agencyTeamData.invitationCode ? (
+                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <CopyIcon className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-neutral-500 mt-1">
+                Share this code with agents to let them join your agency
+              </p>
+            </div>
+          )}
+
+          {/* Agent Coupons Section */}
+          {agencyTeamData.agentCoupons && (
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-medium text-neutral-700">Agent Subscription Coupons</p>
+                  <p className="text-xs text-neutral-500">
+                    {agencyTeamData.agentCoupons.available} available • {agencyTeamData.agentCoupons.used} used
+                  </p>
+                </div>
+                {agencyTeamData.agentCoupons.canGenerateMore && (
+                  <button
+                    onClick={handleGenerateCoupons}
+                    disabled={generatingCoupons}
+                    className="text-sm text-primary hover:text-primary-dark font-medium disabled:opacity-50"
+                  >
+                    {generatingCoupons ? 'Generating...' : '+ Generate Coupons'}
+                  </button>
+                )}
+              </div>
+
+              {/* Available coupons list */}
+              {agencyTeamData.agentCoupons.coupons.filter(c => c.status === 'available').length > 0 ? (
+                <div className="space-y-2">
+                  {agencyTeamData.agentCoupons.coupons
+                    .filter(c => c.status === 'available')
+                    .map((coupon, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                          <code className="text-sm font-mono text-green-800">{coupon.code}</code>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-green-600">
+                            Expires: {new Date(coupon.expiresAt).toLocaleDateString()}
+                          </span>
+                          <button
+                            onClick={() => handleCopyCode(coupon.code)}
+                            className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors"
+                            title="Copy coupon"
+                          >
+                            {copiedCode === coupon.code ? (
+                              <CheckCircleIcon className="w-4 h-4" />
+                            ) : (
+                              <CopyIcon className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 bg-neutral-50 rounded-lg">
+                  <p className="text-sm text-neutral-500">No available coupons</p>
+                  <p className="text-xs text-neutral-400 mt-1">
+                    Generate coupons to invite agents to your agency
+                  </p>
+                </div>
+              )}
+
+              {/* Used coupons summary */}
+              {agencyTeamData.agentCoupons.used > 0 && (
+                <div className="mt-3 pt-3 border-t border-neutral-100">
+                  <p className="text-xs text-neutral-500">
+                    {agencyTeamData.agentCoupons.used} coupon{agencyTeamData.agentCoupons.used !== 1 ? 's' : ''} redeemed by agents
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Info about agent benefits */}
+          <div className="mt-4 pt-4 border-t border-neutral-100">
+            <div className="bg-purple-50 rounded-lg p-3">
+              <p className="text-xs text-purple-700">
+                <strong>Agent Benefits:</strong> Each agent gets 20 active listings per month with their subscription coupon.
+                Agents can use the agency promotion pool for featured listings.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Coupon Info Card */}
       {subscriptionDetails.isCoupon && (

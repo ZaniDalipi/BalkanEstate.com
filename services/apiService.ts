@@ -1212,6 +1212,86 @@ export const findAgencyByInvitationCode = async (code: string): Promise<{success
   });
 };
 
+// --- AGENCY COUPON API ---
+
+export interface AgentCoupon {
+  code: string;
+  status: 'available' | 'used' | 'expired';
+  generatedAt: string;
+  expiresAt: string;
+  usedBy?: string;
+  usedAt?: string;
+}
+
+export interface AgencyCouponsResponse {
+  subscription: {
+    status: string;
+    expiresAt: string;
+    isActive: boolean;
+  };
+  agentCoupons: {
+    coupons: AgentCoupon[];
+    available: number;
+    used: number;
+    expired: number;
+    canGenerateMore: boolean;
+  } | null;
+  promotionCoupons: {
+    monthly: number;
+    available: number;
+    used: number;
+    lastRefresh: string;
+  };
+}
+
+export const getAgencyCoupons = async (agencyId: string): Promise<AgencyCouponsResponse> => {
+  return await apiRequest(`/agencies/${agencyId}/coupons`, {
+    requiresAuth: true,
+  });
+};
+
+export const generateAgentCoupons = async (agencyId: string): Promise<{
+  message: string;
+  coupons: { code: string; expiresAt: string }[];
+  totalAvailable: number;
+}> => {
+  return await apiRequest(`/agencies/${agencyId}/coupons/generate`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+export const getAgencyAgentsDetailed = async (agencyId: string): Promise<{
+  count: number;
+  agents: Array<{
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    avatarUrl?: string;
+    subscription: {
+      tier: string;
+      status: string;
+      listingsLimit: number;
+      activeListingsCount: number;
+      expiresAt?: string;
+    };
+    license?: {
+      number: string;
+      country: string;
+      status: string;
+      isVerified: boolean;
+    };
+    joinedAt?: string;
+    couponCode?: string;
+    isActive: boolean;
+  }>;
+}> => {
+  return await apiRequest(`/agencies/${agencyId}/agents`, {
+    requiresAuth: true,
+  });
+};
+
 // --- PROMOTION API ---
 
 export interface PromotionTier {
