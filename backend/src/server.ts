@@ -41,6 +41,7 @@ validateEnvironment();
 import authRoutes from './routes/authRoutes';
 import propertyRoutes from './routes/propertyRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
+import savedAgentRoutes from './routes/savedAgentRoutes';
 import savedSearchRoutes from './routes/savedSearchRoutes';
 import conversationRoutes from './routes/conversationRoutes';
 import paymentRoutes from './routes/paymentRoutes';
@@ -210,6 +211,7 @@ app.use('/api/webhooks', webhookRoutes); // Webhooks from Stripe - no rate limit
 // Standard API routes
 app.use('/api/properties', propertyRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/saved-agents', savedAgentRoutes);
 app.use('/api/saved-searches', savedSearchRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/products', productRoutes);

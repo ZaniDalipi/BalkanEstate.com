@@ -103,3 +103,33 @@ export const leaveAgency = async (): Promise<{
     requiresAuth: true,
   });
 };
+
+// --- Saved Agents API ---
+
+export const toggleSavedAgent = async (
+  agentId: string
+): Promise<{ isSaved: boolean; message: string }> => {
+  return apiRequest('/saved-agents/toggle', {
+    method: 'POST',
+    body: { agentId },
+    requiresAuth: true,
+  });
+};
+
+export const getSavedAgents = async (): Promise<Agent[]> => {
+  const response = await apiRequest<{ savedAgents: any[] }>('/saved-agents', {
+    requiresAuth: true,
+  });
+
+  return response.savedAgents
+    .filter((saved) => saved.agentId)
+    .map((saved) => transformBackendAgent(saved.agentId));
+};
+
+export const checkSavedAgent = async (
+  agentId: string
+): Promise<{ isSaved: boolean }> => {
+  return apiRequest(`/saved-agents/check/${agentId}`, {
+    requiresAuth: true,
+  });
+};

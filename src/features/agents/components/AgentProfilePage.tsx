@@ -82,7 +82,7 @@ import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { slugify } from '@/utils/slug';
 import { getAgencyAgents, getAllAgents } from '@/services/apiService';
 import { useTrackView } from '@/src/features/view-stats/hooks';
-import { updateAgentProfile } from '@/src/features/agents/api/agentApi';
+import { updateAgentProfile, toggleSavedAgent, checkSavedAgent } from '@/src/features/agents/api/agentApi';
 
 
 interface AgentProfilePageProps {
@@ -245,29 +245,38 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         window.history.pushState({}, '', '/agents');
     };
 
-    const handleSaveAgent = () => {
+    const handleSaveAgent = async () => {
         if (!state.isAuthenticated) {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
             return;
         }
-        setSavedAgent(!savedAgent);
-        // Store in localStorage for persistence
-        const savedAgents = JSON.parse(localStorage.getItem('savedAgents') || '[]');
-        if (!savedAgent) {
-            savedAgents.push({ id: agent.id, name: agent.name, savedAt: new Date().toISOString() });
-        } else {
-            const index = savedAgents.findIndex((a: any) => a.id === agent.id);
-            if (index > -1) savedAgents.splice(index, 1);
+        try {
+            // Optimistic update
+            setSavedAgent(!savedAgent);
+            // Save to backend
+            const response = await toggleSavedAgent(agent.id);
+            // Sync with backend response
+            setSavedAgent(response.isSaved);
+        } catch (error) {
+            // Revert on error
+            setSavedAgent(savedAgent);
+            console.error('Error saving agent:', error);
         }
-        localStorage.setItem('savedAgents', JSON.stringify(savedAgents));
     };
 
     // Check if agent is saved on mount
     useEffect(() => {
-        const savedAgents = JSON.parse(localStorage.getItem('savedAgents') || '[]');
-        const isSaved = savedAgents.some((a: any) => a.id === agent.id);
-        setSavedAgent(isSaved);
-    }, [agent.id]);
+        const checkIfSaved = async () => {
+            if (!state.isAuthenticated || !agent.id) return;
+            try {
+                const response = await checkSavedAgent(agent.id);
+                setSavedAgent(response.isSaved);
+            } catch (error) {
+                console.error('Error checking saved agent:', error);
+            }
+        };
+        checkIfSaved();
+    }, [agent.id, state.isAuthenticated]);
 
     const handleShareAgent = async () => {
         const shareUrl = window.location.href;
