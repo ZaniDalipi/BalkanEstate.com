@@ -150,6 +150,28 @@ export const updateSavedSearch = async (
   }
 };
 
+// @desc    Delete all saved searches for user
+// @route   DELETE /api/saved-searches/all
+// @access  Private
+export const deleteAllSavedSearches = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const result = await SavedSearch.deleteMany({ userId: String((req.user as IUser)._id) });
+
+    res.json({ message: `Deleted ${result.deletedCount} saved searches` });
+  } catch (error: any) {
+    console.error('Delete all saved searches error:', error);
+    res.status(500).json({ message: 'Error deleting saved searches', error: error.message });
+  }
+};
+
 // @desc    Delete saved search
 // @route   DELETE /api/saved-searches/:id
 // @access  Private

@@ -117,6 +117,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, savedSearches: state.savedSearches.map(s => s.id === action.payload.id ? action.payload : s) };
     case 'REMOVE_SAVED_SEARCH':
       return { ...state, savedSearches: state.savedSearches.filter(s => s.id !== action.payload) };
+    case 'CLEAR_ALL_SAVED_SEARCHES':
+      return { ...state, savedSearches: [] };
     case 'TOGGLE_SAVED_HOME':
         const isSaved = state.savedHomes.some(p => p.id === action.payload.id);
         return { ...state, savedHomes: isSaved ? state.savedHomes.filter(p => p.id !== action.payload.id) : [action.payload, ...state.savedHomes] };

@@ -2,12 +2,13 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import SavedSearchAccordion from './SavedSearchAccordion';
-import { MagnifyingGlassPlusIcon } from '@/constants';
+import { MagnifyingGlassPlusIcon, TrashIcon } from '@/constants';
 import { SavedSearch, Filters, SellerType } from '@/types';
 import AdvertisementBanner from '@/src/features/seller/components/AdvertisementBanner';
 import Footer from '@/components/shared/Footer';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { SEO } from '@/src/components/seo';
+import * as api from '@/services/apiService';
 
 const initialFilters: Filters = {
     query: '',
@@ -69,6 +70,7 @@ const SavedSearchesPage: React.FC = () => {
   const { state, dispatch, fetchProperties } = useAppContext();
   const { savedSearches, isAuthenticated, properties } = state;
   const [sortBy, setSortBy] = useState<'createdAt' | 'name' | 'lastAccessed'>('createdAt');
+  const [isClearing, setIsClearing] = useState(false);
 
   // Fetch properties if not already loaded
   useEffect(() => {
@@ -81,6 +83,22 @@ const SavedSearchesPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [sortBy]);
+
+  const handleClearAll = async () => {
+    if (!confirm('Are you sure you want to delete all saved searches? This cannot be undone.')) {
+      return;
+    }
+    setIsClearing(true);
+    try {
+      await api.deleteAllSavedSearches();
+      dispatch({ type: 'CLEAR_ALL_SAVED_SEARCHES' });
+    } catch (error) {
+      console.error('Failed to clear saved searches:', error);
+      alert('Failed to clear saved searches');
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   const sortedSearches = useMemo(() => {
     const sorted = [...savedSearches];
@@ -159,12 +177,20 @@ const SavedSearchesPage: React.FC = () => {
     
     return (
         <>
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
                     <SortButton label={t('sort.newest')} isActive={sortBy === 'createdAt'} onClick={() => setSortBy('createdAt')} />
                     <SortButton label={t('sort.name')} isActive={sortBy === 'name'} onClick={() => setSortBy('name')} />
                     <SortButton label={t('sort.lastActive')} isActive={sortBy === 'lastAccessed'} onClick={() => setSortBy('lastAccessed')} />
                 </div>
+                <button
+                    onClick={handleClearAll}
+                    disabled={isClearing}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                >
+                    <TrashIcon className="w-4 h-4" />
+                    {isClearing ? 'Clearing...' : 'Clear All'}
+                </button>
             </div>
             <div className="space-y-4">
               {sortedSearches.map((search) => (

@@ -656,6 +656,14 @@ export const deleteSavedSearch = async (searchId: string): Promise<void> => {
   });
 };
 
+export const deleteAllSavedSearches = async (): Promise<{ message: string }> => {
+  const response = await apiRequest<{ message: string }>('/saved-searches/all', {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+  return response;
+};
+
 // --- CONVERSATIONS/MESSAGING API ---
 
 export const getConversations = async (): Promise<Conversation[]> => {
