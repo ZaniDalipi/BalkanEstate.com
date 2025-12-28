@@ -30,7 +30,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
     const currentYear = new Date().getFullYear();
     const { dispatch, state } = useAppContext();
 
-    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin') => {
+    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works') => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
         window.history.pushState({}, '', `/${view === 'search' ? '' : view}`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -171,6 +171,12 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             © {currentYear} <span className="font-semibold text-gray-900">{t('common:appName')}</span>. {t('footer:legal.allRightsReserved')}
                         </p>
                         <div className="flex flex-wrap gap-6 justify-center">
+                            <button
+                                onClick={() => handleNavigation('how-it-works')}
+                                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                            >
+                                How It Works
+                            </button>
                             <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">{t('footer:legal.privacyPolicy')}</a>
                             <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">{t('footer:legal.termsOfService')}</a>
                             <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">{t('footer:legal.cookiePolicy')}</a>

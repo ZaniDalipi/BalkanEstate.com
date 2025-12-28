@@ -42,6 +42,7 @@ const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameMod
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
 const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
+const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -120,6 +121,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/admin': 'admin',
         '/reset-password': 'reset-password',
         '/analytics': 'analytics',
+        '/how-it-works': 'how-it-works',
       };
 
       const view = routeMap[path];
@@ -283,6 +285,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <ResetPasswordPage />;
       case 'analytics':
         return <AnalyticsPage />;
+      case 'how-it-works':
+        return <HowItWorksPage />;
       case 'search':
       default:
         return <SearchPage onToggleSidebar={onToggleSidebar} />;
