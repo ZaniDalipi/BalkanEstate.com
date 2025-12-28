@@ -26,60 +26,53 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const { state, dispatch, updateSavedSearchAccessTime } = useAppContext();
   const { isLoadingProperties, allMunicipalities, properties } = state;
 
-  // Helper function to safely parse drawnBoundsJSON - ultra-robust validation
+  // Helper function to safely parse drawnBoundsJSON
   const parsedBounds = useMemo(() => {
     try {
-      // Bail early if no data
-      if (!search.drawnBoundsJSON) return null;
+      console.log('[SavedSearch] drawnBoundsJSON:', search.drawnBoundsJSON, 'type:', typeof search.drawnBoundsJSON);
+
+      if (!search.drawnBoundsJSON) {
+        console.log('[SavedSearch] No drawnBoundsJSON');
+        return null;
+      }
 
       let parsed: any = search.drawnBoundsJSON;
 
-      // If it's a string, try to parse it
+      // If it's a string, parse it
       if (typeof parsed === 'string') {
-        // Skip empty strings or invalid values
         const trimmed = parsed.trim();
-        if (!trimmed || trimmed.length < 20 || trimmed === 'null' || trimmed === 'undefined') {
-          return null;
-        }
-        // Must be valid JSON object format with required keys
-        if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
-          return null;
-        }
-        // Must contain required nested structure
-        if (!trimmed.includes('_southWest') || !trimmed.includes('_northEast') || !trimmed.includes('lat') || !trimmed.includes('lng')) {
+        if (!trimmed || trimmed === 'null' || trimmed === 'undefined') {
+          console.log('[SavedSearch] Empty or invalid string');
           return null;
         }
         parsed = JSON.parse(trimmed);
+        console.log('[SavedSearch] Parsed from string:', parsed);
       }
 
-      // Validate parsed is a proper object
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      // Validate structure
+      if (!parsed || typeof parsed !== 'object') {
+        console.log('[SavedSearch] Not an object');
+        return null;
+      }
+      if (!parsed._southWest || !parsed._northEast) {
+        console.log('[SavedSearch] Missing _southWest or _northEast');
         return null;
       }
 
-      // Validate has required properties with proper nesting
-      if (!parsed._southWest || typeof parsed._southWest !== 'object' ||
-          !parsed._northEast || typeof parsed._northEast !== 'object') {
-        return null;
-      }
-
-      // Validate lat/lng are numbers
       const sw = parsed._southWest;
       const ne = parsed._northEast;
+
+      // Check lat/lng exist and are numbers
       if (typeof sw.lat !== 'number' || typeof sw.lng !== 'number' ||
           typeof ne.lat !== 'number' || typeof ne.lng !== 'number') {
+        console.log('[SavedSearch] lat/lng not numbers:', sw, ne);
         return null;
       }
 
-      // Validate lat/lng are in valid range
-      if (sw.lat < -90 || sw.lat > 90 || ne.lat < -90 || ne.lat > 90 ||
-          sw.lng < -180 || sw.lng > 180 || ne.lng < -180 || ne.lng > 180) {
-        return null;
-      }
-
+      console.log('[SavedSearch] Valid bounds:', parsed);
       return parsed;
-    } catch {
-      // Silently fail for any error - corrupted saved search data
+    } catch (e) {
+      console.error('[SavedSearch] Parse error:', e);
       return null;
     }
   }, [search.drawnBoundsJSON]);
