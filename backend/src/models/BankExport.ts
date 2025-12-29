@@ -129,7 +129,7 @@ const BankExportSchema: Schema = new Schema(
     stores: [
       {
         type: String,
-        enum: ['google', 'apple', 'stripe', 'paysera', 'web'],
+        enum: ['google', 'apple', 'stripe', 'paddle', 'web'],
       },
     ],
     minAmount: {

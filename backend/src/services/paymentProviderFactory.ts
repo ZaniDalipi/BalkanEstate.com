@@ -7,14 +7,15 @@
  *
  * Provider Selection:
  * - Stripe: EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
- * - PaySera: Non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ * - Paddle: Non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ *   Paddle is a Merchant of Record (MoR) handling VAT/tax compliance globally
  */
 
 import Stripe from 'stripe';
-import { payseraService, PayseraPaymentRequest } from './payseraService';
+import { paddleService } from './paddleService';
 
 // Payment provider types
-export type PaymentProvider = 'stripe' | 'paysera';
+export type PaymentProvider = 'stripe' | 'paddle';
 
 // Country to provider mapping
 export interface CountryProviderMapping {
@@ -73,11 +74,11 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
     isSEPA: true,
   },
 
-  // Non-EU Balkans - Use PaySera (Stripe not available)
+  // Non-EU Balkans - Use Paddle (Merchant of Record with VAT compliance)
   RS: {
     countryCode: 'RS',
     countryName: 'Serbia',
-    provider: 'paysera',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: true, // Joined SEPA in 2025
@@ -85,7 +86,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   AL: {
     countryCode: 'AL',
     countryName: 'Albania',
-    provider: 'paysera',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: true, // Joined SEPA in 2024
@@ -93,7 +94,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   BA: {
     countryCode: 'BA',
     countryName: 'Bosnia and Herzegovina',
-    provider: 'paysera',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: false,
@@ -101,7 +102,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   MK: {
     countryCode: 'MK',
     countryName: 'North Macedonia',
-    provider: 'paysera',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: true, // Joined SEPA in 2025
@@ -109,7 +110,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   ME: {
     countryCode: 'ME',
     countryName: 'Montenegro',
-    provider: 'paysera',
+    provider: 'paddle',
     currency: 'EUR', // Uses EUR as official currency
     isEU: false,
     isSEPA: true, // Joined SEPA in 2024
@@ -117,7 +118,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   XK: {
     countryCode: 'XK',
     countryName: 'Kosovo',
-    provider: 'paysera',
+    provider: 'paddle',
     currency: 'EUR', // Uses EUR
     isEU: false,
     isSEPA: false,
@@ -216,8 +217,8 @@ class PaymentProviderFactory {
     switch (provider) {
       case 'stripe':
         return this.createStripePayment(params);
-      case 'paysera':
-        return this.createPayseraPayment(params);
+      case 'paddle':
+        return this.createPaddlePayment(params);
       default:
         return {
           success: false,
@@ -295,56 +296,88 @@ class PaymentProviderFactory {
   }
 
   /**
-   * Create a PaySera payment
+   * Create a Paddle payment
    */
-  private async createPayseraPayment(params: CreatePaymentParams): Promise<PaymentResult> {
+  private async createPaddlePayment(params: CreatePaymentParams): Promise<PaymentResult> {
     try {
-      // Check if PaySera is configured
-      if (!payseraService.isConfigured()) {
-        // Fallback to Stripe if PaySera is not configured
-        console.warn('⚠️ PaySera not configured, falling back to Stripe');
+      // Check if Paddle is configured
+      if (!paddleService.isConfigured()) {
+        // Fallback to Stripe if Paddle is not configured
+        console.warn('⚠️ Paddle not configured, falling back to Stripe');
         return this.createStripePayment(params);
       }
 
-      const amountInCents = Math.round(params.amount * 100);
-      const orderId = `BE_${params.userId}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-      const payseraRequest: PayseraPaymentRequest = {
-        orderId,
-        amount: amountInCents,
-        currency: 'EUR',
-        country: params.countryCode,
-        description: `BalkanEstate ${params.planName} Subscription`,
-        email: params.userEmail,
+      // For Paddle, we need to use their price IDs from dashboard
+      // Or create a transaction with inline pricing
+      const result = await paddleService.createCheckout({
+        priceId: this.getPaddlePriceId(params.planName, params.planInterval),
         userId: params.userId,
+        userEmail: params.userEmail,
         productId: params.productId,
         planName: params.planName,
         planInterval: params.planInterval,
-        firstName: params.firstName,
-        lastName: params.lastName,
-        language: params.language,
-      };
-
-      const result = await payseraService.createPayment(payseraRequest);
+        successUrl: `${baseUrl}/payment/success?provider=paddle`,
+        cancelUrl: `${baseUrl}/payment/cancel?provider=paddle`,
+      });
 
       if (!result.success) {
-        // Fallback to Stripe if PaySera fails
-        console.warn('⚠️ PaySera payment creation failed, falling back to Stripe');
+        // Fallback to Stripe if Paddle fails
+        console.warn('⚠️ Paddle payment creation failed, falling back to Stripe');
         return this.createStripePayment(params);
       }
 
       return {
         success: true,
-        provider: 'paysera',
-        paymentUrl: result.paymentUrl,
-        orderId: result.orderId,
+        provider: 'paddle',
+        paymentUrl: result.checkoutUrl,
+        sessionId: result.transactionId,
       };
     } catch (error: any) {
-      console.error('❌ PaySera payment creation failed:', error);
+      console.error('❌ Paddle payment creation failed:', error);
       // Fallback to Stripe
-      console.warn('⚠️ Falling back to Stripe due to PaySera error');
+      console.warn('⚠️ Falling back to Stripe due to Paddle error');
       return this.createStripePayment(params);
     }
+  }
+
+  /**
+   * Get Paddle price ID based on plan
+   * These should be configured in Paddle dashboard and stored as env vars
+   */
+  private getPaddlePriceId(planName: string, interval: string): string {
+    // Map plan names to Paddle price IDs
+    const priceMap: Record<string, Record<string, string>> = {
+      'Pro': {
+        'month': process.env.PADDLE_PRICE_PRO_MONTHLY || '',
+        'year': process.env.PADDLE_PRICE_PRO_YEARLY || '',
+      },
+      'Pro Monthly': {
+        'month': process.env.PADDLE_PRICE_PRO_MONTHLY || '',
+      },
+      'Pro Yearly': {
+        'year': process.env.PADDLE_PRICE_PRO_YEARLY || '',
+      },
+      'Agency': {
+        'month': process.env.PADDLE_PRICE_AGENCY_MONTHLY || '',
+        'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
+      },
+      'Agency Monthly': {
+        'month': process.env.PADDLE_PRICE_AGENCY_MONTHLY || '',
+      },
+      'Agency Yearly': {
+        'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
+      },
+    };
+
+    const planPrices = priceMap[planName];
+    if (planPrices && planPrices[interval]) {
+      return planPrices[interval];
+    }
+
+    // Default to Pro monthly if no match
+    return process.env.PADDLE_PRICE_PRO_MONTHLY || '';
   }
 
   /**
@@ -374,11 +407,11 @@ class PaymentProviderFactory {
           description: 'Secure card payments with Stripe',
           fees: '~2.9% + €0.25',
         };
-      case 'paysera':
+      case 'paddle':
         return {
-          name: 'PaySera',
-          description: 'Bank transfers and cards via PaySera',
-          fees: '~1.5-2.5%',
+          name: 'Paddle',
+          description: 'Secure payments with automatic VAT handling',
+          fees: '~5% + €0.50',
         };
       default:
         return {

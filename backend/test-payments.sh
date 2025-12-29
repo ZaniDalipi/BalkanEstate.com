@@ -21,11 +21,11 @@ else
 fi
 echo ""
 
-# Test 2: Get provider for Serbia (non-EU - should return PaySera)
+# Test 2: Get provider for Serbia (non-EU - should return Paddle)
 echo "2. Testing GET /api/payments/providers/RS (Serbia)..."
 SERBIA=$(curl -s "$API_URL/api/payments/providers/RS")
-if echo "$SERBIA" | grep -q "paysera"; then
-    echo "   ✅ Serbia correctly routes to PaySera!"
+if echo "$SERBIA" | grep -q "paddle"; then
+    echo "   ✅ Serbia correctly routes to Paddle!"
 else
     echo "   ❌ Serbia routing failed"
     echo "   Response: $SERBIA"
@@ -43,11 +43,11 @@ else
 fi
 echo ""
 
-# Test 4: Get provider for Albania (non-EU - should return PaySera)
+# Test 4: Get provider for Albania (non-EU - should return Paddle)
 echo "4. Testing GET /api/payments/providers/AL (Albania)..."
 ALBANIA=$(curl -s "$API_URL/api/payments/providers/AL")
-if echo "$ALBANIA" | grep -q "paysera"; then
-    echo "   ✅ Albania correctly routes to PaySera!"
+if echo "$ALBANIA" | grep -q "paddle"; then
+    echo "   ✅ Albania correctly routes to Paddle!"
 else
     echo "   ❌ Albania routing failed"
     echo "   Response: $ALBANIA"
@@ -74,7 +74,7 @@ echo "1. Start the server: cd backend && npm run dev"
 echo "2. Login and get a token"
 echo "3. Use the token to test:"
 echo ""
-echo "   # Create payment for Serbia (PaySera)"
+echo "   # Create payment for Serbia (Paddle)"
 echo "   curl -X POST $API_URL/api/payments/create-payment \\"
 echo "     -H 'Content-Type: application/json' \\"
 echo "     -H 'Authorization: Bearer YOUR_TOKEN' \\"

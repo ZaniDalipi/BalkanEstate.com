@@ -74,7 +74,7 @@ export interface SupportedCountriesResponse {
     };
   }>;
   stripeCountries: Array<{ countryCode: string; countryName: string }>;
-  payseraCountries: Array<{ countryCode: string; countryName: string }>;
+  paddleCountries: Array<{ countryCode: string; countryName: string }>;
 }
 
 export interface VerifyPaymentResponse {
@@ -196,8 +196,8 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       stripeCountries: countries
         .filter(c => c.provider === 'stripe')
         .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
-      payseraCountries: countries
-        .filter(c => c.provider === 'paysera')
+      paddleCountries: countries
+        .filter(c => c.provider === 'paddle')
         .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
     };
   }
@@ -225,21 +225,21 @@ export async function verifyStripePayment(sessionId: string): Promise<VerifyPaym
 }
 
 /**
- * Verify a PaySera payment by order ID
+ * Verify a Paddle payment by transaction ID
  */
-export async function verifyPayseraPayment(orderId: string): Promise<VerifyPaymentResponse> {
+export async function verifyPaddlePayment(transactionId: string): Promise<VerifyPaymentResponse> {
   try {
     const response = await apiRequest<VerifyPaymentResponse>(
-      `/payments/paysera/verify/${orderId}`,
+      `/payments/paddle/verify/${transactionId}`,
       { method: 'GET', requiresAuth: true }
     );
-    return { ...response, provider: 'paysera' };
+    return { ...response, provider: 'paddle' };
   } catch (error: any) {
-    console.error('Error verifying PaySera payment:', error);
+    console.error('Error verifying Paddle payment:', error);
     return {
       success: false,
       paymentStatus: 'error',
-      provider: 'paysera',
+      provider: 'paddle',
       message: error.message,
     };
   }
@@ -253,8 +253,8 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
   const sessionId = params.get('session_id');
   const orderId = params.get('order_id');
 
-  if (provider === 'paysera' && orderId) {
-    return verifyPayseraPayment(orderId);
+  if (provider === 'paddle' && orderId) {
+    return verifyPaddlePayment(orderId);
   } else if (sessionId) {
     return verifyStripePayment(sessionId);
   }
@@ -365,7 +365,7 @@ export default {
   getPaymentProvider,
   getSupportedCountries,
   verifyStripePayment,
-  verifyPayseraPayment,
+  verifyPaddlePayment,
   verifyPayment,
   getSubscriptionStatus,
   cancelSubscription,

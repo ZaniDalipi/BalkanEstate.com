@@ -2,21 +2,22 @@
  * Payment Configuration
  *
  * This file contains all payment-related configuration including:
- * - Supported payment providers (Stripe for EU, PaySera for non-EU Balkans)
+ * - Supported payment providers (Stripe for EU, Paddle for non-EU Balkans)
  * - Supported payment methods per provider
  * - Payment method priorities for different user types
  * - Country to provider routing
  *
  * Provider Selection Strategy:
  * - Stripe: EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia) - ~2.9% fees
- * - PaySera: Non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo) - ~2% fees
+ * - Paddle: Non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ *   Paddle is a Merchant of Record (MoR) handling VAT/tax compliance globally - ~5% fees
  *
  * Easy to modify and maintain as payment options change over time
  */
 
 // ====== PAYMENT PROVIDERS ======
 
-export type PaymentProvider = 'stripe' | 'paysera';
+export type PaymentProvider = 'stripe' | 'paddle';
 
 export interface PaymentProviderInfo {
   id: PaymentProvider;
@@ -38,14 +39,14 @@ export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
     supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI'],
     supportedMethods: ['card', 'sepa_debit', 'apple_pay', 'google_pay', 'klarna', 'ideal', 'bancontact', 'giropay', 'eps'],
   },
-  paysera: {
-    id: 'paysera',
-    name: 'PaySera',
-    description: 'Bank transfers and cards for Balkan countries',
-    fees: '~1.5-2.5%',
-    logo: 'paysera',
+  paddle: {
+    id: 'paddle',
+    name: 'Paddle',
+    description: 'Secure payments with automatic VAT handling for Balkan countries',
+    fees: '~5% + €0.50',
+    logo: 'paddle',
     supportedCountries: ['RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
-    supportedMethods: ['card', 'bank_transfer', 'wallet'],
+    supportedMethods: ['card', 'paypal', 'apple_pay', 'google_pay'],
   },
 };
 
@@ -68,13 +69,13 @@ export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
   BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
   RO: { countryCode: 'RO', countryName: 'Romania', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
   SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
-  // Non-EU Balkans - Use PaySera
-  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
-  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
-  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
-  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
-  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
-  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
+  // Non-EU Balkans - Use Paddle (Merchant of Record with VAT compliance)
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
+  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
+  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
+  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
+  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
+  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
 };
 
 /**

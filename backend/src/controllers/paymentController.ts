@@ -225,7 +225,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
         providerInfo: paymentProviderFactory.getProviderInfo(c.provider),
       })),
       stripeCountries: paymentProviderFactory.getCountriesByProvider('stripe'),
-      payseraCountries: paymentProviderFactory.getCountriesByProvider('paysera'),
+      paddleCountries: paymentProviderFactory.getCountriesByProvider('paddle'),
     });
   } catch (error: any) {
     console.error('Error getting supported countries:', error);

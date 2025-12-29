@@ -12,9 +12,10 @@ import {
   applyFreeSubscription,
 } from '../controllers/paymentController';
 import {
-  handlePayseraWebhook,
-  verifyPayseraPayment,
-} from '../controllers/payseraWebhookController';
+  handlePaddleWebhook,
+  verifyPaddlePayment,
+  getPaddleConfig,
+} from '../controllers/paddleWebhookController';
 import { protect } from '../middleware/auth';
 
 const router = express.Router();
@@ -57,16 +58,18 @@ router.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook
 router.get('/verify-session/:sessionId', protect, verifySession);
 
 // ============================================================
-// PAYSERA ENDPOINTS
+// PADDLE ENDPOINTS
 // ============================================================
 
-// PaySera Webhook callback (public but verified with signature)
-// PaySera sends GET request with data and ss1 query parameters
-router.get('/paysera/webhook', handlePayseraWebhook);
-router.post('/paysera/webhook', handlePayseraWebhook);
+// Paddle Webhook (public but verified with signature)
+// Paddle sends POST request with JSON body
+router.post('/paddle/webhook', handlePaddleWebhook);
 
-// Verify PaySera payment by order ID (protected)
-router.get('/paysera/verify/:orderId', protect, verifyPayseraPayment);
+// Get Paddle client configuration for frontend
+router.get('/paddle/config', getPaddleConfig);
+
+// Verify Paddle payment by transaction ID (protected)
+router.get('/paddle/verify/:transactionId', protect, verifyPaddlePayment);
 
 // ============================================================
 // SUBSCRIPTION MANAGEMENT

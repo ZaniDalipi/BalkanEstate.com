@@ -80,7 +80,7 @@ const SubscriptionEventSchema: Schema = new Schema(
     },
     store: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'paysera', 'web'],
+      enum: ['google', 'apple', 'stripe', 'paddle', 'web'],
       required: true,
       index: true,
     },

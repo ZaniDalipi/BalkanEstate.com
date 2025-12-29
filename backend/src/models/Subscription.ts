@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type SubscriptionStore = 'google' | 'apple' | 'stripe' | 'paysera' | 'web';
+export type SubscriptionStore = 'google' | 'apple' | 'stripe' | 'paddle' | 'web';
 export type SubscriptionStatus =
   | 'active'
   | 'expired'
@@ -85,7 +85,7 @@ const SubscriptionSchema: Schema = new Schema(
     },
     store: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'paysera', 'web'],
+      enum: ['google', 'apple', 'stripe', 'paddle', 'web'],
       required: true,
       index: true,
     },
