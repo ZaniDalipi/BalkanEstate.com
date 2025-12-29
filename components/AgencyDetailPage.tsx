@@ -691,8 +691,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             </div>
 
-            {/* Right Side - Cover Controls (Only for owners) */}
-            {isOwner && (
+            {/* Right Side - Cover Controls (For owners and admins) */}
+            {isAdmin && (
               <div className="relative flex gap-2">
                 {/* Gradient Picker Button */}
                 <button

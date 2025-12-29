@@ -184,20 +184,26 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
       },
     };
 
-    let Model;
+    let updatedEntity: any;
     if (entityType === 'property') {
-      Model = Property;
+      updatedEntity = await Property.findByIdAndUpdate(
+        entityId,
+        updateData,
+        { new: true, runValidators: false }
+      );
     } else if (entityType === 'agent') {
-      Model = Agent;
+      updatedEntity = await Agent.findByIdAndUpdate(
+        entityId,
+        updateData,
+        { new: true, runValidators: false }
+      );
     } else {
-      Model = Agency;
+      updatedEntity = await Agency.findByIdAndUpdate(
+        entityId,
+        updateData,
+        { new: true, runValidators: false }
+      );
     }
-
-    const updatedEntity = await Model.findByIdAndUpdate(
-      entityId,
-      updateData,
-      { new: true, runValidators: false } // Skip validation for atomic updates
-    );
 
     if (updatedEntity && entityType === 'property' && updatedEntity.sellerId) {
       await incrementViewCount(String(updatedEntity.sellerId));
