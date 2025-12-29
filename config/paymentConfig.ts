@@ -2,12 +2,111 @@
  * Payment Configuration
  *
  * This file contains all payment-related configuration including:
- * - Supported payment methods
+ * - Supported payment providers (Stripe for EU, PaySera for non-EU Balkans)
+ * - Supported payment methods per provider
  * - Payment method priorities for different user types
- * - Payment provider settings
+ * - Country to provider routing
+ *
+ * Provider Selection Strategy:
+ * - Stripe: EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia) - ~2.9% fees
+ * - PaySera: Non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo) - ~2% fees
  *
  * Easy to modify and maintain as payment options change over time
  */
+
+// ====== PAYMENT PROVIDERS ======
+
+export type PaymentProvider = 'stripe' | 'paysera';
+
+export interface PaymentProviderInfo {
+  id: PaymentProvider;
+  name: string;
+  description: string;
+  fees: string;
+  logo: string;
+  supportedCountries: string[];
+  supportedMethods: PaymentMethodType[];
+}
+
+export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
+  stripe: {
+    id: 'stripe',
+    name: 'Stripe',
+    description: 'Secure card payments for EU countries',
+    fees: '~2.9% + €0.25',
+    logo: 'stripe',
+    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI'],
+    supportedMethods: ['card', 'sepa_debit', 'apple_pay', 'google_pay', 'klarna', 'ideal', 'bancontact', 'giropay', 'eps'],
+  },
+  paysera: {
+    id: 'paysera',
+    name: 'PaySera',
+    description: 'Bank transfers and cards for Balkan countries',
+    fees: '~1.5-2.5%',
+    logo: 'paysera',
+    supportedCountries: ['RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedMethods: ['card', 'bank_transfer', 'wallet'],
+  },
+};
+
+// ====== COUNTRY TO PROVIDER MAPPING ======
+
+export interface CountryPaymentInfo {
+  countryCode: string;
+  countryName: string;
+  provider: PaymentProvider;
+  currency: string;
+  isEU: boolean;
+  isSEPA: boolean;
+  flag: string;
+}
+
+export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
+  // EU Countries - Use Stripe
+  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
+  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
+  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
+  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
+  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
+  // Non-EU Balkans - Use PaySera
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
+  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
+  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
+  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
+  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
+  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'paysera', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
+};
+
+/**
+ * Get the payment provider for a country
+ */
+export function getProviderForCountry(countryCode: string): PaymentProvider {
+  const info = COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
+  return info?.provider || 'stripe'; // Default to Stripe
+}
+
+/**
+ * Get country payment info
+ */
+export function getCountryPaymentInfo(countryCode: string): CountryPaymentInfo | null {
+  return COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()] || null;
+}
+
+/**
+ * Get all supported countries
+ */
+export function getSupportedCountries(): CountryPaymentInfo[] {
+  return Object.values(COUNTRY_PAYMENT_MAP);
+}
+
+/**
+ * Check if a country is supported
+ */
+export function isCountrySupported(countryCode: string): boolean {
+  return !!COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
+}
+
+// ====== PAYMENT METHODS ======
 
 export type PaymentMethodType =
   | 'card'
@@ -19,7 +118,9 @@ export type PaymentMethodType =
   | 'bancontact'
   | 'giropay'
   | 'eps'
-  | 'paypal';
+  | 'paypal'
+  | 'bank_transfer'
+  | 'wallet';
 
 export interface PaymentMethod {
   id: PaymentMethodType;

@@ -51,7 +51,7 @@ export interface IUser extends Document {
   isSubscribed: boolean;
   subscriptionPlan?: string; // Product ID (e.g., 'buyer_pro_monthly')
   subscriptionProductName?: string; // Human-readable name (e.g., 'Buyer Pro Monthly')
-  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'web'; // Where subscription came from
+  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'paysera' | 'web'; // Where subscription came from
   subscriptionExpiresAt?: Date;
   subscriptionStartedAt?: Date;
   activeSubscriptionId?: mongoose.Types.ObjectId; // Link to active Subscription document
@@ -364,7 +364,7 @@ const UserSchema: Schema = new Schema(
     },
     subscriptionSource: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'web'],
+      enum: ['google', 'apple', 'stripe', 'paysera', 'web'],
       index: true, // Index for querying by subscription source
     },
     subscriptionExpiresAt: {

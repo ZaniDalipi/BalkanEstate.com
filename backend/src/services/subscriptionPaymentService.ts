@@ -14,7 +14,7 @@ import Product from '../models/Product';
 interface ProcessPaymentParams {
   userId: mongoose.Types.ObjectId | string;
   productId: string;
-  store: 'google' | 'apple' | 'stripe' | 'web';
+  store: 'google' | 'apple' | 'stripe' | 'paysera' | 'web';
   amount: number;
   currency: string;
   purchaseToken?: string;

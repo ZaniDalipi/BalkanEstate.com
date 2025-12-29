@@ -5,6 +5,7 @@ import Product from '../models/Product';
 import Subscription from '../models/Subscription';
 import DiscountCode from '../models/DiscountCode';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
+import { paymentProviderFactory } from '../services/paymentProviderFactory';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
@@ -83,6 +84,152 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
   } catch (error: any) {
     console.error('Error creating checkout session:', error);
     res.status(500).json({ message: 'Error creating checkout session', error: error.message });
+  }
+};
+
+/**
+ * @desc    Create a unified payment session (routes to appropriate provider based on country)
+ * @route   POST /api/payments/create-payment
+ * @access  Private
+ *
+ * This is the recommended endpoint for creating payments. It automatically
+ * selects the best payment provider based on the user's country:
+ * - Stripe for EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
+ * - PaySera for non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ */
+export const createUnifiedPayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { planName, planInterval, amount, productId, countryCode, language } = req.body;
+    const userId = (req as any).user?._id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Validate required fields
+    if (!amount || amount <= 0) {
+      res.status(400).json({ message: 'Invalid amount' });
+      return;
+    }
+
+    if (!planName) {
+      res.status(400).json({ message: 'Plan name is required' });
+      return;
+    }
+
+    // Use provided country code or try to detect from user profile
+    const userCountry = countryCode?.toUpperCase() || user.country?.toUpperCase() || 'GR';
+
+    // Check if country is supported
+    if (!paymentProviderFactory.isCountrySupported(userCountry)) {
+      console.warn(`⚠️ Country ${userCountry} not in our primary list, defaulting to Stripe`);
+    }
+
+    // Create payment using the factory
+    const result = await paymentProviderFactory.createPayment({
+      userId: userId.toString(),
+      userEmail: user.email,
+      countryCode: userCountry,
+      amount,
+      productId: productId || 'default',
+      planName,
+      planInterval: planInterval || 'month',
+      language: language || 'en',
+      firstName: user.name?.split(' ')[0],
+      lastName: user.name?.split(' ').slice(1).join(' '),
+    });
+
+    if (!result.success) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create payment session',
+        error: result.error,
+      });
+      return;
+    }
+
+    console.log(`✅ Unified payment created for user ${user.email} via ${result.provider}`);
+
+    res.status(200).json({
+      success: true,
+      provider: result.provider,
+      paymentUrl: result.paymentUrl,
+      sessionId: result.sessionId,
+      orderId: result.orderId,
+      countryCode: userCountry,
+      providerInfo: paymentProviderFactory.getProviderInfo(result.provider),
+    });
+  } catch (error: any) {
+    console.error('Error creating unified payment:', error);
+    res.status(500).json({ message: 'Error creating payment', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get available payment providers for a country
+ * @route   GET /api/payments/providers/:countryCode
+ * @access  Public
+ */
+export const getPaymentProviders = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { countryCode } = req.params;
+
+    if (!countryCode) {
+      res.status(400).json({ message: 'Country code is required' });
+      return;
+    }
+
+    const mapping = paymentProviderFactory.getCountryMapping(countryCode.toUpperCase());
+    const provider = paymentProviderFactory.getProviderForCountry(countryCode);
+    const providerInfo = paymentProviderFactory.getProviderInfo(provider);
+
+    res.status(200).json({
+      success: true,
+      countryCode: countryCode.toUpperCase(),
+      countryName: mapping?.countryName || 'Unknown',
+      provider,
+      providerInfo,
+      isEU: mapping?.isEU || false,
+      isSEPA: mapping?.isSEPA || false,
+      currency: mapping?.currency || 'EUR',
+      supportedMethods: provider === 'stripe'
+        ? ['card', 'sepa_debit', 'apple_pay', 'google_pay']
+        : ['card', 'bank_transfer', 'wallet'],
+    });
+  } catch (error: any) {
+    console.error('Error getting payment providers:', error);
+    res.status(500).json({ message: 'Error getting providers', error: error.message });
+  }
+};
+
+/**
+ * @desc    Get all supported countries and their payment providers
+ * @route   GET /api/payments/supported-countries
+ * @access  Public
+ */
+export const getSupportedCountries = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const countries = paymentProviderFactory.getSupportedCountries();
+
+    res.status(200).json({
+      success: true,
+      countries: countries.map(c => ({
+        ...c,
+        providerInfo: paymentProviderFactory.getProviderInfo(c.provider),
+      })),
+      stripeCountries: paymentProviderFactory.getCountriesByProvider('stripe'),
+      payseraCountries: paymentProviderFactory.getCountriesByProvider('paysera'),
+    });
+  } catch (error: any) {
+    console.error('Error getting supported countries:', error);
+    res.status(500).json({ message: 'Error getting countries', error: error.message });
   }
 };
 

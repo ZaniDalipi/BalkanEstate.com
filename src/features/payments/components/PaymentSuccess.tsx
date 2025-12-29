@@ -2,36 +2,58 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { CheckCircleIcon, ArrowLeftIcon } from '@/constants';
+import { verifyPayment as verifyPaymentApi, type VerifyPaymentResponse } from '../api/paymentApi';
+import { PaymentProvider } from '@/config/paymentConfig';
 
 interface PaymentDetails {
   paymentStatus?: string;
   amountTotal?: number;
   customerEmail?: string;
+  provider?: PaymentProvider;
+  orderId?: string;
+  subscription?: {
+    plan: string;
+    expiresAt: string;
+    status: string;
+  };
 }
 
 const PaymentSuccess: React.FC = () => {
   const { t } = useTranslation(['payment']);
   const { dispatch } = useAppContext();
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [provider, setProvider] = useState<PaymentProvider | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
 
   useEffect(() => {
-    // Get session ID from URL
+    // Get parameters from URL - supports both Stripe and PaySera
     const params = new URLSearchParams(window.location.search);
+    const providerParam = params.get('provider') as PaymentProvider | null;
     const sid = params.get('session_id');
+    const oid = params.get('order_id');
+
+    setProvider(providerParam);
 
     if (sid) {
       setSessionId(sid);
-      verifyPayment(sid);
+    }
+    if (oid) {
+      setOrderId(oid);
+    }
+
+    // Verify payment based on available parameters
+    if (sid || oid) {
+      verifyPayment(params);
     } else {
       setError(t('success.noSessionFound'));
       setIsVerifying(false);
     }
   }, []);
 
-  const verifyPayment = async (sessionId: string) => {
+  const verifyPayment = async (params: URLSearchParams) => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
 
@@ -39,21 +61,23 @@ const PaymentSuccess: React.FC = () => {
         throw new Error(t('success.loginToVerify'));
       }
 
-      const response = await fetch(`http://localhost:5001/api/payments/verify-session/${sessionId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // Use the unified verification API
+      const result = await verifyPaymentApi(params);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to verify payment');
+      if (!result.success && result.paymentStatus === 'error') {
+        throw new Error(result.message || 'Failed to verify payment');
       }
 
-      setPaymentDetails(data);
+      setPaymentDetails({
+        paymentStatus: result.paymentStatus,
+        amountTotal: result.amountTotal,
+        customerEmail: result.customerEmail,
+        provider: result.provider,
+        orderId: result.orderId,
+        subscription: result.subscription,
+      });
 
+      // Clear pending payment from session storage
       const pendingPayment = sessionStorage.getItem('pending_payment');
       if (pendingPayment) {
         sessionStorage.removeItem('pending_payment');
@@ -152,11 +176,21 @@ const PaymentSuccess: React.FC = () => {
                     </span>
                   </div>
                 )}
-                {sessionId && (
+                {paymentDetails.provider && (
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">Provider:</span>
+                    <span className="font-medium text-neutral-800 capitalize">
+                      {paymentDetails.provider === 'stripe' ? 'Stripe' : 'PaySera'}
+                    </span>
+                  </div>
+                )}
+                {(sessionId || orderId) && (
                   <div className="flex justify-between mt-4 pt-4 border-t border-neutral-300">
-                    <span className="text-neutral-500 text-xs">{t('success.sessionId')}:</span>
+                    <span className="text-neutral-500 text-xs">
+                      {sessionId ? t('success.sessionId') : 'Order ID'}:
+                    </span>
                     <span className="font-mono text-xs text-neutral-400 truncate ml-2 max-w-[200px]">
-                      {sessionId}
+                      {sessionId || orderId}
                     </span>
                   </div>
                 )}
