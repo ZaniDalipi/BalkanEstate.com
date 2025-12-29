@@ -199,7 +199,6 @@ export const generateDescriptionFromImages = async (images: File[], language: st
             config: {
                 responseMimeType: 'application/json',
                 responseSchema: responseSchema,
-                timeout: 60000, // 60 second timeout
             },
         })
     );
@@ -283,7 +282,6 @@ If a location type doesn't apply (e.g., sea for landlocked cities), use 999 to i
             config: {
                 responseMimeType: 'application/json',
                 responseSchema: responseSchema,
-                timeout: 30000, // 30 second timeout
             },
         })
     );
@@ -416,7 +414,6 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
             config: {
                 responseMimeType: 'application/json',
                 responseSchema: responseSchema,
-                timeout: 200000, // 20 second timeout
             },
         })
     );
@@ -489,9 +486,6 @@ export const generateSearchName = async (filters: Filters): Promise<string> => {
         ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
-            config: {
-                timeout: 15000, // 15 second timeout
-            },
         })
     );
 
@@ -587,9 +581,6 @@ export const generateSearchNameFromCoords = async (lat: number, lng: number, bou
         ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
-            config: {
-                timeout: 15000, // 15 second timeout
-            },
         })
     );
 
@@ -625,9 +616,6 @@ export const getNeighborhoodInsights = async (lat: number, lng: number, city: st
             ai.models.generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
-                config: {
-                    timeout: 20000, // 20 second timeout
-                },
             })
         );
         return result.text.trim();
