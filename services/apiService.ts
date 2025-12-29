@@ -608,6 +608,12 @@ export const getFavorites = async (): Promise<Property[]> => {
 // --- SAVED SEARCHES API ---
 
 export const addSavedSearch = async (search: SavedSearch): Promise<SavedSearch> => {
+  console.log('[apiService] Adding saved search:', {
+    name: search.name,
+    drawnBoundsJSON: search.drawnBoundsJSON,
+    drawnBoundsType: typeof search.drawnBoundsJSON,
+  });
+
   const response = await apiRequest<{ savedSearch: any }>('/saved-searches', {
     method: 'POST',
     body: {
@@ -618,6 +624,7 @@ export const addSavedSearch = async (search: SavedSearch): Promise<SavedSearch> 
     requiresAuth: true,
   });
 
+  console.log('[apiService] Backend response for saved search:', response.savedSearch);
   return transformBackendSavedSearch(response.savedSearch);
 };
 
@@ -625,6 +632,13 @@ export const getSavedSearches = async (): Promise<SavedSearch[]> => {
   const response = await apiRequest<{ savedSearches: any[] }>('/saved-searches', {
     requiresAuth: true,
   });
+
+  console.log('[apiService] Fetched saved searches from backend:', response.savedSearches.map(s => ({
+    id: s._id,
+    name: s.name,
+    drawnBoundsJSON: s.drawnBoundsJSON,
+    drawnBoundsType: typeof s.drawnBoundsJSON,
+  })));
 
   return response.savedSearches.map(transformBackendSavedSearch);
 };

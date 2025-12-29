@@ -567,11 +567,17 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             if (drawnBounds) { // Priority 1: A user-drawn area
                 const center = drawnBounds.getCenter();
                 const name = await generateSearchNameFromCoords(center.lat, center.lng, drawnBounds);
+                const serializedBounds = serializeBounds(drawnBounds);
+                console.log('[SearchPage] Saving drawn bounds:', {
+                    drawnBounds,
+                    serializedBounds,
+                    isAreaOnly,
+                });
                 newSearch = {
                     id: `ss-${now}`,
                     name,
                     filters: isAreaOnly ? initialFilters : filters,
-                    drawnBoundsJSON: serializeBounds(drawnBounds), // Always use serializeBounds for consistent format
+                    drawnBoundsJSON: serializedBounds, // Always use serializeBounds for consistent format
                     createdAt: now,
                     lastAccessed: now,
                     seenPropertyIds: [],

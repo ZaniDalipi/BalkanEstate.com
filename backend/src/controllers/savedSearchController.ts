@@ -41,6 +41,13 @@ export const createSavedSearch = async (
 
     const { name, filters, drawnBoundsJSON } = req.body;
 
+    console.log('[savedSearchController] Creating saved search:', {
+      name,
+      drawnBoundsJSON,
+      drawnBoundsType: typeof drawnBoundsJSON,
+      hasFilters: !!filters,
+    });
+
     if (!name || !filters) {
       res.status(400).json({ message: 'Name and filters are required' });
       return;
@@ -51,6 +58,11 @@ export const createSavedSearch = async (
       name,
       filters,
       drawnBoundsJSON: drawnBoundsJSON || null,
+    });
+
+    console.log('[savedSearchController] Created saved search:', {
+      id: savedSearch._id,
+      drawnBoundsJSON: savedSearch.drawnBoundsJSON,
     });
 
     res.status(201).json({ savedSearch });

@@ -29,7 +29,17 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   // Helper function to safely parse drawnBoundsJSON
   const parsedBounds = useMemo(() => {
     try {
-      if (!search.drawnBoundsJSON) return null;
+      console.log('[SavedSearchAccordion] Parsing drawnBoundsJSON:', {
+        searchId: search.id,
+        searchName: search.name,
+        drawnBoundsJSON: search.drawnBoundsJSON,
+        type: typeof search.drawnBoundsJSON,
+      });
+
+      if (!search.drawnBoundsJSON) {
+        console.log('[SavedSearchAccordion] No drawnBoundsJSON - returning null');
+        return null;
+      }
 
       let parsed: any = search.drawnBoundsJSON;
 
@@ -55,28 +65,42 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
         return null;
       }
 
+      console.log('[SavedSearchAccordion] Successfully parsed bounds:', parsed);
       return parsed;
-    } catch {
+    } catch (e) {
+      console.error('[SavedSearchAccordion] Failed to parse drawnBoundsJSON:', e);
       return null;
     }
   }, [search.drawnBoundsJSON]);
 
   const matchingProperties = useMemo(() => {
+      console.log('[SavedSearchAccordion] Computing matchingProperties:', {
+          searchId: search.id,
+          hasParsedBounds: !!parsedBounds,
+          propertiesCount: properties.length,
+      });
+
       // If there's a valid drawn area, prioritize geographic filtering
       if (parsedBounds) {
           try {
               const drawnBounds = L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
               // Only filter by bounds for drawn area searches
-              return properties.filter(p => p.lat && p.lng && drawnBounds.contains([p.lat, p.lng]));
+              const filtered = properties.filter(p => p.lat && p.lng && drawnBounds.contains([p.lat, p.lng]));
+              console.log('[SavedSearchAccordion] Filtered by bounds:', {
+                  originalCount: properties.length,
+                  filteredCount: filtered.length,
+              });
+              return filtered;
           } catch (e) {
-              console.error("Failed to create bounds from parsed data:", e);
+              console.error("[SavedSearchAccordion] Failed to create bounds from parsed data:", e);
               return [];
           }
       }
 
       // Otherwise use filter-based search
+      console.log('[SavedSearchAccordion] No parsed bounds, using filter-based search');
       return filterProperties(properties, search.filters);
-  }, [properties, search.filters, parsedBounds]);
+  }, [properties, search.filters, parsedBounds, search.id]);
 
   // Calculate new properties (properties not in seenPropertyIds)
   const newProperties = useMemo(() => {
