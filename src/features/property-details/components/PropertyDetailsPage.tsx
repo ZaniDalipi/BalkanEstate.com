@@ -22,6 +22,7 @@ import {
 } from '@/src/components/property';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
+import { useNotification } from '@/src/shared/hooks/useNotification';
 
 /**
  * PropertyDetailsPage Component
@@ -40,6 +41,7 @@ import PromotionModal from '@/src/features/promotions/components/PromotionModal'
 const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => {
   const { t } = useTranslation(['property']);
   const { state, dispatch, createConversation, toggleSavedHome } = useAppContext();
+  const { error } = useNotification();
 
   // Track page view for analytics
   useTrackView({
@@ -148,9 +150,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     } else {
       try {
         await toggleSavedHome(property);
-      } catch (error) {
-        console.error('Failed to toggle saved home:', error);
-        alert('Failed to save property. Please try again.');
+      } catch (err) {
+        console.error('Failed to toggle saved home:', err);
+        await error(t('property:errors.errorTitle', 'Error'), t('property:errors.saveFailed', 'Failed to save property. Please try again.'));
       }
     }
   };
@@ -167,8 +169,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     try {
       const conversation = await createConversation(property.id);
       dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-    } catch (error) {
-      alert('Failed to start conversation. Please try again.');
+    } catch (err) {
+      await error(t('property:errors.errorTitle', 'Error'), t('property:errors.conversationFailed', 'Failed to start conversation. Please try again.'));
     } finally {
       setIsCreatingConversation(false);
     }
@@ -306,6 +308,20 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
       {showCopiedToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-neutral-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium animate-fade-in">
           {t('property:toast.linkCopied')}
+        </div>
+      )}
+
+      {/* Sold Banner */}
+      {property.status === 'sold' && (
+        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-semibold text-sm md:text-base">
+              {t('property:status.soldBanner', 'This property has been sold')}
+            </span>
+          </div>
         </div>
       )}
 

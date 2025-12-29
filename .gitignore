@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-*
 dist-ssr
 *.local
 
@@ -16,13 +17,24 @@ dist-ssr
 .next
 out
 
-# Environment variables
+# Environment variables (keep .example files)
 .env
-.env.*
+.env.local
+.env.development
+.env.staging
+.env.production
 .env.*.local
+backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.staging
+backend/.env.production
 
-
-backend/.env.example
+# Keep example files
+!.env.example
+!.env.*.example
+!backend/.env.example
+!backend/.env.*.example
 
 # Editor directories and files
 .vscode/*
@@ -35,16 +47,15 @@ backend/.env.example
 *.sln
 *.sw?
 
-
+# Deployment files
 Dockerfile.txt
 
-
-balkanestatehost 
-balkanestatehost.pub 
+# SSH Keys (never commit!)
+*.pub
+*.pem
+balkanestatehost
 balkanestatewebversion
-balkanestatewebversion.pub
-yes 
-yes.pub
-.env*
-.env*
-.env*
+yes
+
+# Test coverage
+coverage/

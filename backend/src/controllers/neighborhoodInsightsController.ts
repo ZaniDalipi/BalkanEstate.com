@@ -12,7 +12,7 @@ const SUBSCRIBED_USER_MONTHLY_LIMIT = 20; // Subscribed users get 20 insights pe
  */
 export const getNeighborhoodInsights = async (req: Request, res: Response) => {
   try {
-    const { lat, lng, address, city, country } = req.body;
+    const { lat, lng, address, city, country, language } = req.body;
 
     // Validate required fields
     if (!lat || !lng || !address || !city || !country) {
@@ -20,6 +20,9 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
         message: 'Missing required fields: lat, lng, address, city, country',
       });
     }
+
+    // Default to English if no language specified
+    const responseLanguage = language || 'English';
 
     // Validate coordinates
     if (typeof lat !== 'number' || typeof lng !== 'number') {
@@ -87,7 +90,8 @@ export const getNeighborhoodInsights = async (req: Request, res: Response) => {
         Number(lng),
         String(address),
         String(city),
-        String(country)
+        String(country),
+        responseLanguage
       );
 
       // Increment usage counter

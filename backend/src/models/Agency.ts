@@ -333,7 +333,13 @@ const AgencySchema: Schema = new Schema(
       },
       expiresAt: {
         type: Date,
-        required: true,
+        required: false, // Made optional - will be set by default function
+        default: () => {
+          // Default to 30 days trial from now
+          const date = new Date();
+          date.setDate(date.getDate() + 30);
+          return date;
+        },
       },
       amount: {
         type: Number,

@@ -9,6 +9,8 @@ import PropertyCardSkeleton from '@/src/features/property-details/components/Pro
 import L from 'leaflet';
 import * as api from '@/services/apiService';
 import MapComponent from '@/src/features/map/components/MapComponent';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { useNotification } from '@/src/shared/hooks/useNotification';
 
 interface SavedSearchAccordionProps {
   search: SavedSearch;
@@ -25,6 +27,8 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const [mapFlyTarget, setMapFlyTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
   const { state, dispatch, updateSavedSearchAccessTime } = useAppContext();
   const { isLoadingProperties, allMunicipalities, properties } = state;
+  const { confirm } = useConfirmation();
+  const { error, warning } = useNotification();
 
   // Helper function to decode HTML entities (backend encodes quotes as &quot;)
   const decodeHtmlEntities = (str: string): string => {
@@ -170,7 +174,15 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent accordion from toggling
 
-    if (!confirm(t('accordion.confirmDelete', { name: search.name }))) {
+    const confirmed = await confirm({
+      title: t('accordion.deleteTitle', 'Delete Saved Search'),
+      message: t('accordion.confirmDelete', { name: search.name }),
+      confirmLabel: t('accordion.deleteButton', 'Delete'),
+      cancelLabel: t('accordion.cancelButton', 'Cancel'),
+      type: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -178,9 +190,9 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
     try {
       await api.deleteSavedSearch(search.id);
       dispatch({ type: 'REMOVE_SAVED_SEARCH', payload: search.id });
-    } catch (error) {
-      console.error('Failed to delete saved search:', error);
-      alert(t('accordion.deleteFailed'));
+    } catch (err) {
+      console.error('Failed to delete saved search:', err);
+      await error(t('accordion.errorTitle', 'Error'), t('accordion.deleteFailed'));
     } finally {
       setIsDeleting(false);
     }
@@ -202,7 +214,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
     e.stopPropagation();
 
     if (!newName.trim()) {
-      alert(t('accordion.enterName'));
+      await warning(t('accordion.warningTitle', 'Warning'), t('accordion.enterName'));
       return;
     }
 
@@ -211,9 +223,9 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       await api.updateSavedSearch(search.id, newName);
       dispatch({ type: 'UPDATE_SAVED_SEARCH', payload: { ...search, name: newName } });
       setIsRenaming(false);
-    } catch (error) {
-      console.error('Failed to rename saved search:', error);
-      alert(t('accordion.renameFailed'));
+    } catch (err) {
+      console.error('Failed to rename saved search:', err);
+      await error(t('accordion.errorTitle', 'Error'), t('accordion.renameFailed'));
     } finally {
       setIsUpdating(false);
     }

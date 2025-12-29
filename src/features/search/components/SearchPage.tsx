@@ -54,24 +54,26 @@ const MobileFilters: React.FC<{
     isSaving: boolean;
     onApply: () => void;
     searchMode: 'manual' | 'ai';
-}> = ({ onClose, propertyListProps, localFilters, onLocalFilterChange, onReset, onSave, isSaving, onApply, searchMode }) => (
+    t: (key: string) => string;
+}> = ({ onClose, propertyListProps, localFilters, onLocalFilterChange, onReset, onSave, isSaving, onApply, searchMode, t }) => (
     <div className="bg-white h-full w-full flex flex-col">
         <div className="flex-shrink-0 p-4 border-b border-neutral-200 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-neutral-800">Filters</h2>
+            <h2 className="text-lg font-bold text-neutral-800">{t('search:filters.title')}</h2>
             <button onClick={onClose} className="p-2 text-neutral-500 hover:text-neutral-800" aria-label="Close filters">
                 <XMarkIcon className="w-6 h-6" />
             </button>
         </div>
         <div className="flex-shrink-0 p-4 bg-neutral-50 border-b border-neutral-200">
-            <label className="block text-xs font-medium text-neutral-700 mb-2">Country</label>
+            <label className="block text-xs font-medium text-neutral-700 mb-2">{t('search:filters.country')}</label>
             <select
                 value={localFilters.country}
                 onChange={(e) => onLocalFilterChange('country', e.target.value)}
                 className="w-full bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm font-medium"
             >
-                {COUNTRY_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                        {option.label}
+                <option value="any">{t('search:filters.allCountries')}</option>
+                {Object.entries(BALKAN_COUNTRIES).map(([key, country]) => (
+                    <option key={key} value={key}>
+                        {country.name}
                     </option>
                 ))}
             </select>
@@ -828,16 +830,17 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Left Panel: List & Filters --- */}
                  <div className={`absolute inset-0 z-10 h-full w-full bg-white md:relative md:w-[55%] md:flex-shrink-0 md:border-r md:border-neutral-200 md:flex md:flex-col ${ isMobile && mobileView === 'list' ? 'translate-x-0' : 'translate-x-full md:translate-x-0' } transition-transform duration-300`}>
                     <div className="hidden md:flex p-3 border-b border-neutral-200 flex-shrink-0 items-center justify-between">
-                        <h2 className="text-base font-semibold text-neutral-800">Properties for Sale</h2>
+                        <h2 className="text-base font-semibold text-neutral-800">{t('search:propertiesForSale')}</h2>
                         <select
                             value={filters.country}
                             onChange={(e) => handleFilterChange('country', e.target.value)}
                             className="bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer"
                             style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                         >
-                            {COUNTRY_OPTIONS.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
+                            <option value="any">{t('search:filters.allCountries')}</option>
+                            {Object.entries(BALKAN_COUNTRIES).map(([key, country]) => (
+                                <option key={key} value={key}>
+                                    {country.name}
                                 </option>
                             ))}
                         </select>
@@ -968,6 +971,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 isSaving={isSaving}
                                 onApply={handleApplyFiltersFromModal}
                                 searchMode={searchMode}
+                                t={t}
                             />
                         </div>
                     </div>

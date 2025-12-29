@@ -171,41 +171,50 @@ export const trackView = async (req: Request, res: Response): Promise<void> => {
       isUnique,
     });
 
-    const entity = await findEntityById(entityType, entityId);
-    if (entity) {
-      entity.views = (entity.views || 0) + 1;
+    // Use atomic update to avoid full document validation issues
+    // This prevents errors when documents have missing optional fields
+    const updateData: Record<string, any> = {
+      $inc: {
+        views: 1,
+        'viewStats.totalViews': 1,
+        ...(isUnique ? { 'viewStats.uniqueViews': 1 } : {}),
+      },
+      $set: {
+        'viewStats.lastViewedAt': new Date(),
+      },
+    };
 
-      if (!entity.viewStats) {
-        entity.viewStats = {
-          totalViews: 0,
-          uniqueViews: 0,
-          viewsThisWeek: 0,
-          viewsThisMonth: 0,
-          viewsLastMonth: 0,
-          inquiriesFromViews: 0,
-          conversionRate: 0,
-        };
-      }
+    let updatedEntity: any;
+    if (entityType === 'property') {
+      updatedEntity = await Property.findByIdAndUpdate(
+        entityId,
+        updateData,
+        { new: true, runValidators: false }
+      );
+    } else if (entityType === 'agent') {
+      updatedEntity = await Agent.findByIdAndUpdate(
+        entityId,
+        updateData,
+        { new: true, runValidators: false }
+      );
+    } else {
+      updatedEntity = await Agency.findByIdAndUpdate(
+        entityId,
+        updateData,
+        { new: true, runValidators: false }
+      );
+    }
 
-      entity.viewStats.totalViews = (entity.viewStats.totalViews || 0) + 1;
-      if (isUnique) {
-        entity.viewStats.uniqueViews = (entity.viewStats.uniqueViews || 0) + 1;
-      }
-      entity.viewStats.lastViewedAt = new Date();
+    if (updatedEntity && entityType === 'property' && updatedEntity.sellerId) {
+      await incrementViewCount(String(updatedEntity.sellerId));
 
-      await entity.save();
-
-      if (entityType === 'property' && entity.sellerId) {
-        await incrementViewCount(String(entity.sellerId));
-
-        // Check for view milestones and send engagement notifications
-        // This runs async in the background to not block the response
-        checkViewMilestone(
-          entityId,
-          entity.views,
-          entity.isPromoted || false
-        ).catch((err) => console.error('Milestone check error:', err));
-      }
+      // Check for view milestones and send engagement notifications
+      // This runs async in the background to not block the response
+      checkViewMilestone(
+        entityId,
+        updatedEntity.views || 0,
+        updatedEntity.isPromoted || false
+      ).catch((err) => console.error('Milestone check error:', err));
     }
 
     res.status(201).json({

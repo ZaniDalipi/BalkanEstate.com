@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon } from '@/constants';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 interface User {
   _id: string;
@@ -26,6 +27,7 @@ interface User {
 
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
+  const { confirm } = useConfirmation();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +159,14 @@ const UserManager: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) return;
+    const confirmed = await confirm({
+      title: t('admin:users.deleteTitle', 'Delete User'),
+      message: t('admin:users.deleteConfirm', { name: userName, defaultValue: `Are you sure you want to delete user "${userName}"? This action cannot be undone.` }),
+      confirmLabel: t('admin:common.delete', 'Delete'),
+      cancelLabel: t('admin:common.cancel', 'Cancel'),
+      type: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('balkan_estate_token');

@@ -14,6 +14,8 @@ import Footer from './Footer';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { SEO } from '../../src/components/seo';
+import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
+import { useNotification } from '../../src/shared/hooks/useNotification';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -419,6 +421,22 @@ const ChangePasswordSection: React.FC = () => {
 const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({ logoutAllDevices }) => {
     const { t } = useTranslation(['account']);
     const { dispatch } = useAppContext();
+    const { confirm } = useConfirmation();
+
+    const handleLogoutAllDevices = async () => {
+        const confirmed = await confirm({
+            title: t('security.logoutAllDevicesTitle', 'Logout All Devices'),
+            message: t('security.confirmLogoutAllDevices'),
+            confirmLabel: t('security.logoutButton', 'Logout All'),
+            cancelLabel: t('security.cancelButton', 'Cancel'),
+            type: 'warning',
+        });
+
+        if (confirmed) {
+            await logoutAllDevices();
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -443,12 +461,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
                         </p>
                         <button
                             type="button"
-                            onClick={async () => {
-                                if (window.confirm(t('security.confirmLogoutAllDevices'))) {
-                                    await logoutAllDevices();
-                                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-                                }
-                            }}
+                            onClick={handleLogoutAllDevices}
                             className="mt-3 px-4 py-2 bg-yellow-600 text-white font-medium rounded-lg hover:bg-yellow-700 transition-colors text-sm"
                         >
                             {t('security.logoutAllDevices')}
@@ -466,6 +479,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
 const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     const { t } = useTranslation(['account']);
     const { updateUser, dispatch } = useAppContext();
+    const { success } = useNotification();
     const [formData, setFormData] = useState<User>(user);
     const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
@@ -838,7 +852,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             setIsSaved(true);
             setInvitationCode('');
             setError('');
-            alert(`✅ Successfully joined ${data.agency.name}!`);
+            await success('Joined Agency', `Successfully joined ${data.agency.name}!`);
             setTimeout(() => setIsSaved(false), 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to join agency');
@@ -1209,6 +1223,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 const MyAccountPage: React.FC = () => {
     const { t } = useTranslation(['account']);
     const { state, dispatch, logout, logoutAllDevices } = useAppContext();
+    const { success } = useNotification();
     const [activeTab, setActiveTab] = useState<AccountTab>('listings');
     const [performanceRefreshKey, setPerformanceRefreshKey] = useState(0);
 

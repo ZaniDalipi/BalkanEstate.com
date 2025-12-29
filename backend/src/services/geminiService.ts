@@ -52,11 +52,14 @@ export const getNeighborhoodInsights = async (
   lng: number,
   address: string,
   city: string,
-  country: string
+  country: string,
+  language: string = 'English'
 ): Promise<string> => {
   const prompt = `
 You are a helpful local guide for the "Balkan Estate" real estate agency.
 A user is looking at a property located at ${address}, ${city}, ${country} (coordinates: ${lat}, ${lng}).
+
+**IMPORTANT: Your entire response MUST be written in ${language}. Do not use English unless ${language} is English.**
 
 Based on these coordinates, generate a proximity-based summary of the neighborhood. Your response should be helpful for someone considering moving there. Structure your response as a short introductory paragraph followed by a bulleted list.
 
@@ -66,15 +69,9 @@ Based on these coordinates, generate a proximity-based summary of the neighborho
 - **Public Transport:** Name specific train, tram, or bus stations.
 - **Other Amenities:** Mention key markets, cafes, or cultural sites by name if they are significant landmarks.
 
-Use phrases like "a short walk to...", "just 5 minutes from...", "conveniently close to...". Keep the tone friendly and informative. Do not mention the specific coordinates in your response. The response should be in markdown format.
+Use phrases like "a short walk to...", "just 5 minutes from...", "conveniently close to..." (translated appropriately to ${language}). Keep the tone friendly and informative. Do not mention the specific coordinates in your response. The response should be in markdown format.
 
-Example response format:
-This property offers excellent connectivity and convenience, located in a well-established neighborhood. Everything you need is right on your doorstep.
-
-*   **Education:** It is a 5-minute walk from the highly-regarded **"Sveti Sava" Primary School**.
-*   **Recreation:** You'll be just around the corner from **Tašmajdan Park**, perfect for morning jogs or relaxing weekends.
-*   **Transport:** The main **Vukov Spomenik train station** is conveniently located a 10-minute walk away, providing easy access across the city.
-*   **Shopping:** The well-known **Kalenić Market** is also nearby for fresh, local produce.
+Remember: Write the ENTIRE response in ${language}.
 `;
 
   try {

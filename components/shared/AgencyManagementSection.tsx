@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../../types';
 import { getAgencies, verifyInvitationCode, createJoinRequest, leaveAgency } from '../../services/apiService';
 import { useAppContext } from '../../context/AppContext';
+import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
+import { useNotification } from '../../src/shared/hooks/useNotification';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -23,6 +25,8 @@ interface AgencyManagementSectionProps {
 
 const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ currentUser, onAgencyChange }) => {
   const { dispatch } = useAppContext();
+  const { confirm } = useConfirmation();
+  const { success } = useNotification();
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [selectedAgencyId, setSelectedAgencyId] = useState('');
   const [invitationCode, setInvitationCode] = useState('');
@@ -139,12 +143,9 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       setShowForm(false);
 
       // Show success message with better formatting
-      alert(
-        `✅ SUCCESS!\n\n` +
-        `Your join request has been sent to ${agencyName}.\n\n` +
-        `📋 Status: Pending Approval\n` +
-        `🔔 You will be notified when the agency responds.\n\n` +
-        `You can check your pending requests in the "Pending Join Requests" section above.`
+      await success(
+        'Request Sent!',
+        `Your join request has been sent to ${agencyName}.\n\nYou will be notified when the agency responds.`
       );
 
       // Fetch updated pending requests from server (to get real IDs)
@@ -174,7 +175,15 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   };
 
   const handleLeaveAgency = async () => {
-    if (!confirm(`Are you sure you want to leave ${currentUser.agencyName}? You will become an Independent Agent.`)) {
+    const confirmed = await confirm({
+      title: 'Leave Agency',
+      message: `Are you sure you want to leave ${currentUser.agencyName}? You will become an Independent Agent.`,
+      confirmLabel: 'Leave Agency',
+      cancelLabel: 'Cancel',
+      type: 'warning',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -194,10 +203,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         }
       });
 
-      alert(
-        `✅ You have successfully left the agency.\n\n` +
-        `You are now an Independent Agent.`
-      );
+      await success('Left Agency', 'You have successfully left the agency.\n\nYou are now an Independent Agent.');
 
       // Trigger refresh callback
       onAgencyChange();

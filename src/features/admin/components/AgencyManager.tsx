@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PencilIcon, TrashIcon, XMarkIcon, EyeIcon, BuildingOfficeIcon } from '@/constants';
 import { Agency } from '@/types';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 interface User {
   _id: string;
@@ -12,6 +13,7 @@ interface User {
 
 const AgencyManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
+  const { confirm } = useConfirmation();
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,7 +181,14 @@ const AgencyManager: React.FC = () => {
   };
 
   const handleDeleteAgency = async (agencyId: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? This will remove the agency and unassign all agents. This action cannot be undone.`)) return;
+    const confirmed = await confirm({
+      title: t('admin:agencies.deleteTitle', 'Delete Agency'),
+      message: t('admin:agencies.deleteConfirm', { name, defaultValue: `Are you sure you want to delete "${name}"? This will remove the agency and unassign all agents. This action cannot be undone.` }),
+      confirmLabel: t('admin:common.delete', 'Delete'),
+      cancelLabel: t('admin:common.cancel', 'Cancel'),
+      type: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('balkan_estate_token');

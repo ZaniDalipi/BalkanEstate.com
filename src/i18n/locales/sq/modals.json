@@ -16,6 +16,16 @@
     "continueToPayment": "Vazhdo te Pagesa",
     "securePayment": "Pagesë e sigurt nga Stripe",
     "loadingPlans": "Duke ngarkuar planet...",
+    "buyerPro": {
+      "name": "Blerës Pro",
+      "description": "Mos humbisni asnjë shpallje të re! Merrni njoftim sapo një pronë që përputhet me kriteret tuaja del në treg.",
+      "features": {
+        "notifications": "Njoftime të menjëhershme me email dhe SMS",
+        "unlimitedSearches": "Ruaj kërkime të pakufizuara",
+        "earlyAccess": "Qasje e hershme në shpallje të reja",
+        "marketInsights": "Njohuri të avancuara të tregut"
+      }
+    },
     "sellerPromotion": {
       "title": "Planet e Promovimit të Shpalljeve",
       "description": "Rritni dukshmërinë e shpalljeve tuaja për më shumë vizibilitet dhe kërkesa",

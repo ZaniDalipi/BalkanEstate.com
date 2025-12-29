@@ -8,6 +8,8 @@ import { CalendarIcon, UserCircleIcon, ChevronLeftIcon, BuildingOfficeIcon, Shie
 import { getConversation, sendMessage as sendMessageAPI, uploadMessageImage, getSecurityWarning } from '@/services/apiService';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { useNotification } from '@/src/shared/hooks/useNotification';
 
 interface ConversationViewProps {
     conversation: Conversation;
@@ -28,6 +30,8 @@ const MessageImage: React.FC<{imageUrl: string; t: (key: string) => string}> = (
 const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBack }) => {
     const { t } = useTranslation(['messages']);
     const { state, dispatch, deleteConversation } = useAppContext();
+    const { confirm } = useConfirmation();
+    const { error } = useNotification();
     const [imageError, setImageError] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -148,10 +152,10 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
         if (imageFile) {
             try {
                 imageUrl = await uploadMessageImage(conversation.id, imageFile);
-            } catch (error) {
-                console.error('Failed to upload image:', error);
-                alert(t('inbox.failedToUploadImage'));
-                throw error;
+            } catch (err) {
+                console.error('Failed to upload image:', err);
+                await error(t('inbox.errorTitle', 'Error'), t('inbox.failedToUploadImage'));
+                throw err;
             }
         }
 
@@ -188,24 +192,32 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 setShowSecurityAlert(true);
                 setTimeout(() => setShowSecurityAlert(false), 5000);
             }
-        } catch (error) {
-            console.error('Failed to send message:', error);
-            alert(t('inbox.failedToSendMessage'));
-            throw error;
+        } catch (err) {
+            console.error('Failed to send message:', err);
+            await error(t('inbox.errorTitle', 'Error'), t('inbox.failedToSendMessage'));
+            throw err;
         }
     };
 
     const handleDelete = async () => {
-        if (window.confirm(t('inbox.deleteConfirm'))) {
+        const confirmed = await confirm({
+            title: t('inbox.deleteTitle', 'Delete Conversation'),
+            message: t('inbox.deleteConfirm'),
+            confirmLabel: t('inbox.deleteButton', 'Delete'),
+            cancelLabel: t('inbox.cancelButton', 'Cancel'),
+            type: 'danger',
+        });
+
+        if (confirmed) {
             try {
                 await deleteConversation(conversation.id);
                 // Go back if on mobile, otherwise conversation list will update
                 if (onBack) {
                     onBack();
                 }
-            } catch (error) {
-                console.error('Failed to delete conversation:', error);
-                alert(t('inbox.failedToDeleteConversation'));
+            } catch (err) {
+                console.error('Failed to delete conversation:', err);
+                await error(t('inbox.errorTitle', 'Error'), t('inbox.failedToDeleteConversation'));
             }
         }
     };

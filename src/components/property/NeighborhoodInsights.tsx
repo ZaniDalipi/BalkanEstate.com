@@ -3,9 +3,29 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 import { useAppContext } from '../../../context/AppContext';
 import { SparklesIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
+
+// Map language codes to full language names for AI prompt
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  sq: 'Albanian',
+  mk: 'Macedonian',
+  sr: 'Serbian',
+  hr: 'Croatian',
+  sl: 'Slovenian',
+  bs: 'Bosnian',
+  me: 'Montenegrin',
+  bg: 'Bulgarian',
+  ro: 'Romanian',
+  el: 'Greek',
+  tr: 'Turkish',
+  de: 'German',
+  it: 'Italian',
+  fr: 'French',
+};
 
 interface NeighborhoodInsightsProps {
   lat: number;
@@ -63,13 +83,17 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const token = localStorage.getItem('balkan_estate_token');
 
+      // Get current language for AI response
+      const currentLang = i18n.language?.split('-')[0] || 'en';
+      const languageName = LANGUAGE_NAMES[currentLang] || 'English';
+
       const response = await fetch(`${API_URL}/neighborhood-insights`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ lat, lng, address, city, country }),
+        body: JSON.stringify({ lat, lng, address, city, country, language: languageName }),
       });
 
       const data = await response.json();

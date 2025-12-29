@@ -5,6 +5,7 @@ import PaymentWindow from '@/components/shared/PaymentWindow';
 import { AtSymbolIcon, UserIcon, BuildingOfficeIcon, CheckCircleIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { fetchBuyerProducts, Product } from '@/utils/api';
+import { useNotification } from '@/shared/hooks/useNotification';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface SubscriptionModalProps {
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, initialEmail }) => {
   const { t } = useTranslation(['modals']);
   const { state, dispatch } = useAppContext();
+  const { success, warning } = useNotification();
   const [activeTab, setActiveTab] = useState<'buyer' | 'seller'>('buyer');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [email, setEmail] = useState(initialEmail || state.currentUser?.email || '');
@@ -49,7 +51,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     }, 150);
   };
 
-  const handleSubscribeClick = (e: React.FormEvent) => {
+  const handleSubscribeClick = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Check if user is authenticated (check both flag and user object)
@@ -77,19 +79,19 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     }
 
     if (!email || !email.includes('@')) {
-      alert('Please enter a valid email address');
+      await warning('Invalid Email', 'Please enter a valid email address');
       return;
     }
     setShowPaymentWindow(true);
   };
 
-  const handlePaymentSuccess = (paymentIntentId: string) => {
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
     console.log('Payment successful:', paymentIntentId);
     // TODO: Update user subscription status via API
     setShowPaymentWindow(false);
     onClose();
     // Show success message
-    alert('Subscription activated successfully!');
+    await success('Subscription Activated', 'Your subscription has been activated successfully!');
   };
 
   const handlePaymentError = (error: string) => {
@@ -102,12 +104,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   // Get buyer product (default to first buyer product or fallback values)
   const buyerProduct = buyerProducts.find(p => p.productId === 'buyer_pro_monthly') || buyerProducts[0];
   const buyerPrice = buyerProduct?.price || 1.50;
-  const buyerName = buyerProduct?.name || 'Buyer Pro';
+  const buyerName = buyerProduct?.name || t('modals:subscription.buyerPro.name');
   const buyerFeatures = buyerProduct?.features || [
-    'Instant email & SMS notifications',
-    'Save unlimited searches',
-    'Early access to new listings',
-    'Advanced market insights',
+    t('modals:subscription.buyerPro.features.notifications'),
+    t('modals:subscription.buyerPro.features.unlimitedSearches'),
+    t('modals:subscription.buyerPro.features.earlyAccess'),
+    t('modals:subscription.buyerPro.features.marketInsights'),
   ];
 
   const renderBuyerPlan = () => (
@@ -125,7 +127,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
                   <span className="text-3xl sm:text-4xl font-extrabold text-primary">€{buyerPrice}</span>
                   <span className="text-base sm:text-lg font-semibold text-neutral-500">{t('modals:subscription.perMonth')}</span>
                </div>
-               <p className="text-neutral-600 mt-3 text-sm sm:text-base">{buyerProduct?.description || 'Never miss a new listing! Get notified the moment a property matching your criteria hits the market.'}</p>
+               <p className="text-neutral-600 mt-3 text-sm sm:text-base">{buyerProduct?.description || t('modals:subscription.buyerPro.description')}</p>
               <ul className="mt-8 space-y-4 text-neutral-700 text-sm sm:text-base">
                   {buyerFeatures.map((feature, index) => (
                     <li key={index} className="flex items-start gap-3">

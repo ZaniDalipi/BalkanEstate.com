@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlusIcon, TrashIcon, XMarkIcon } from '@/constants';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 interface DiscountCode {
   _id: string;
@@ -20,6 +21,7 @@ interface DiscountCode {
 }
 
 const DiscountCodeManager: React.FC = () => {
+  const { confirm } = useConfirmation();
   const [codes, setCodes] = useState<DiscountCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -155,7 +157,14 @@ const DiscountCodeManager: React.FC = () => {
   };
 
   const handleDeactivate = async (id: string) => {
-    if (!confirm('Are you sure you want to deactivate this discount code?')) return;
+    const confirmed = await confirm({
+      title: 'Deactivate Discount Code',
+      message: 'Are you sure you want to deactivate this discount code?',
+      confirmLabel: 'Deactivate',
+      cancelLabel: 'Cancel',
+      type: 'warning',
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
@@ -178,7 +187,14 @@ const DiscountCodeManager: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to permanently delete this discount code?')) return;
+    const confirmed = await confirm({
+      title: 'Delete Discount Code',
+      message: 'Are you sure you want to permanently delete this discount code?',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      type: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('balkan_estate_token');

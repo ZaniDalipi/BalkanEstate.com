@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import { useAppContext } from '../context/AppContext';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon } from '../constants';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
@@ -14,6 +16,25 @@ import { Agency } from '../types';
 import { socketService } from '../services/socketService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
 import { useTrackView } from '../src/features/view-stats/hooks';
+import { useConfirmation } from '../src/shared/hooks/useConfirmation';
+import { useNotification } from '../src/shared/hooks/useNotification';
+
+// Map icon SVG for section headers
+const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+  </svg>
+);
+
+// Map invalidator component
+const MapInvalidator: React.FC = () => {
+  const map = useMap();
+  useEffect(() => {
+    const timer = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(timer);
+  }, [map]);
+  return null;
+};
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -63,6 +84,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation('agencyDetails');
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
+  const { confirm } = useConfirmation();
+  const { success, error, warning, info } = useNotification();
 
   // Track page view for analytics
   useTrackView({
@@ -263,8 +286,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       // If code is valid, send join request with the code
       await createJoinRequest(agency._id, `Joining with invitation code: ${code}`);
-      alert('Join request sent successfully! The agency admin will review your request.');
       setIsInvitationCodeModalOpen(false);
+      await success(t('messages.requestSent', 'Request Sent'), 'Join request sent successfully! The agency admin will review your request.');
     } catch (error) {
       throw error; // Let the modal handle the error display
     }
@@ -272,14 +295,18 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleToggleAdmin = async (agentId: string, agentName: string, isCurrentlyAdmin: boolean) => {
     if (!isOwner) {
-      alert(t('messages.onlyOwnerCanManage'));
+      await warning(t('messages.accessDenied', 'Access Denied'), t('messages.onlyOwnerCanManage'));
       return;
     }
 
     const action = isCurrentlyAdmin ? t('confirmations.removeAdminRights') : t('confirmations.makeAdminRights');
-    const confirmed = window.confirm(
-      t('confirmations.toggleAdmin', { action, name: agentName })
-    );
+    const confirmed = await confirm({
+      title: isCurrentlyAdmin ? t('confirmations.removeAdminTitle', 'Remove Admin') : t('confirmations.makeAdminTitle', 'Make Admin'),
+      message: t('confirmations.toggleAdmin', { action, name: agentName }),
+      confirmLabel: isCurrentlyAdmin ? t('confirmations.removeButton', 'Remove') : t('confirmations.makeAdminButton', 'Make Admin'),
+      cancelLabel: t('confirmations.cancelButton', 'Cancel'),
+      type: isCurrentlyAdmin ? 'warning' : 'info',
+    });
 
     if (!confirmed) return;
 
@@ -290,30 +317,33 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           ...prev,
           admins: prev.admins?.filter(id => id !== agentId) || []
         }));
-        alert(t('messages.adminRemoved', { name: agentName }));
+        await success(t('messages.adminRemovedTitle', 'Admin Removed'), t('messages.adminRemoved', { name: agentName }));
       } else {
         await addAgencyAdmin(agencyData._id, agentId);
         setAgencyData(prev => ({
           ...prev,
           admins: [...(prev.admins || []), agentId]
         }));
-        alert(t('messages.adminAdded', { name: agentName }));
+        await success(t('messages.adminAddedTitle', 'Admin Added'), t('messages.adminAdded', { name: agentName }));
       }
-    } catch (error) {
-      alert(error instanceof Error ? error.message : t('messages.onlyOwnerCanManage'));
+    } catch (err) {
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.onlyOwnerCanManage'));
     }
   };
 
   const handleRemoveAgent = async (agentId: string, agentName: string) => {
     if (!isAdmin) {
-      alert(t('messages.onlyAdminCanRemove'));
+      await warning(t('messages.accessDenied', 'Access Denied'), t('messages.onlyAdminCanRemove'));
       return;
     }
 
-    const confirmed = window.confirm(
-      t('confirmations.removeAgent', { name: agentName, agency: agencyData.name }) + '\n\n' +
-      t('confirmations.removeAgentDetails')
-    );
+    const confirmed = await confirm({
+      title: t('confirmations.removeAgentTitle', 'Remove Agent'),
+      message: t('confirmations.removeAgent', { name: agentName, agency: agencyData.name }) + '\n\n' + t('confirmations.removeAgentDetails'),
+      confirmLabel: t('confirmations.removeButton', 'Remove'),
+      cancelLabel: t('confirmations.cancelButton', 'Cancel'),
+      type: 'danger',
+    });
 
     if (!confirmed) return;
 
@@ -332,20 +362,23 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         totalAgents: prev.totalAgents - 1
       }));
 
-      alert(t('messages.agentRemoved', { name: agentName }));
-    } catch (error: any) {
-      console.error('Error removing agent:', error);
-      alert(error.message || t('messages.onlyAdminCanRemove'));
+      await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
+    } catch (err: any) {
+      console.error('Error removing agent:', err);
+      await error(t('messages.errorTitle', 'Error'), err.message || t('messages.onlyAdminCanRemove'));
     } finally {
       setRemovingAgentId(null);
     }
   };
 
   const handleLeaveAgency = async () => {
-    const confirmed = window.confirm(
-      t('confirmations.leaveAgency', { agency: agencyData.name }) + '\n\n' +
-      t('confirmations.leaveAgencyDetails')
-    );
+    const confirmed = await confirm({
+      title: t('confirmations.leaveAgencyTitle', 'Leave Agency'),
+      message: t('confirmations.leaveAgency', { agency: agencyData.name }) + '\n\n' + t('confirmations.leaveAgencyDetails'),
+      confirmLabel: t('confirmations.leaveButton', 'Leave'),
+      cancelLabel: t('confirmations.cancelButton', 'Cancel'),
+      type: 'warning',
+    });
 
     if (!confirmed) return;
 
@@ -367,13 +400,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         } as any);
       }
 
-      alert(response.message || t('messages.leftAgency', { agency: agencyData.name }));
+      await success(t('messages.leftAgencyTitle', 'Left Agency'), response.message || t('messages.leftAgency', { agency: agencyData.name }));
 
       // Redirect to home or agencies page
       window.location.href = '/';
-    } catch (error: any) {
-      console.error('Error leaving agency:', error);
-      alert(error.message || t('messages.leftAgency', { agency: agencyData.name }));
+    } catch (err: any) {
+      console.error('Error leaving agency:', err);
+      await error(t('messages.errorTitle', 'Error'), err.message || t('messages.leftAgency', { agency: agencyData.name }));
     } finally {
       setIsLeavingAgency(false);
     }
@@ -447,10 +480,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
       setAgencyData(data.agency);
       setIsEditModalOpen(false);
-      alert(t('messages.agencyUpdated'));
-    } catch (error) {
-      console.error('Error updating agency:', error);
-      alert(error instanceof Error ? error.message : t('messages.agencyUpdated'));
+      await success(t('messages.agencyUpdatedTitle', 'Agency Updated'), t('messages.agencyUpdated'));
+    } catch (err) {
+      console.error('Error updating agency:', err);
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update agency'));
     }
   };
 
@@ -490,9 +523,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       setAgencyData(data.agency);
-      alert(t('messages.logoUpdated'));
+      await success(t('messages.logoUpdatedTitle', 'Logo Updated'), t('messages.logoUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.logoUpdated'));
+      setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
     } finally {
       setIsUploadingLogo(false);
     }
@@ -534,16 +567,16 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       setAgencyData(data.agency);
-      alert(t('messages.coverUpdated'));
+      await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.coverUpdated'));
+      setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
     } finally {
       setIsUploadingCover(false);
     }
   };
 
   const handleGradientSelect = async (gradientId: string) => {
-    if (!isOwner) return;
+    if (!isAdmin) return;
 
     try {
       const gradient = GRADIENT_PRESETS.find(g => g.id === gradientId);
@@ -569,9 +602,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       setAgencyData(data.agency);
       setShowGradientPicker(false);
-      alert(t('messages.gradientUpdated'));
+      await success(t('messages.gradientUpdatedTitle', 'Gradient Updated'), t('messages.gradientUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.gradientUpdated'));
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update gradient'));
     }
   };
 
@@ -595,7 +628,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   }, [propertyView]);
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-y-auto">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-y-auto">
       {/* SEO Meta Tags */}
       <SEO
         title={`${agencyData.name} - Real Estate Agency`}
@@ -613,153 +646,169 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         }}
       />
 
-      {/* Breadcrumbs */}
-      <div className="absolute top-4 left-4 z-20">
-        <Breadcrumbs
-          items={generateAgencyBreadcrumbs({
-            slug: agency.slug || '',
-            name: agencyData.name,
-            country: agencyData.country,
-          })}
-          className="text-white/80"
-        />
-      </div>
-
-      {/* Hero Banner with Cover Image - Larger for agency branding */}
-      <div className="relative h-[32rem] md:h-[36rem] bg-gradient-to-br from-primary to-primary-dark overflow-hidden flex-shrink-0">
+      {/* Hero Banner - Professional Design */}
+      <div className="relative h-[28rem] md:h-[32rem] overflow-hidden flex-shrink-0">
+        {/* Background Layer */}
         {agencyData.coverImage ? (
           <>
             <img
               src={agencyData.coverImage}
               alt={agencyData.name}
-              className="absolute inset-0 w-full h-full object-cover opacity-40"
+              className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/90" />
           </>
         ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${(agencyData as any).coverGradient || 'from-primary via-primary-dark to-black/80'}`} />
+          <div className={`absolute inset-0 bg-gradient-to-br ${(agencyData as any).coverGradient || 'from-slate-800 via-slate-900 to-slate-950'}`} />
         )}
 
-        {/* Cover Controls - Only for owners */}
-        {isOwner && (
-          <div className="absolute top-6 right-6 z-10 flex gap-3">
-            {/* Gradient Picker Button */}
-            <button
-              onClick={() => setShowGradientPicker(!showGradientPicker)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-sm text-white font-semibold rounded-lg hover:bg-black/50 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-              </svg>
-              {t('banner.gradients')}
-            </button>
+        {/* Subtle Pattern Overlay */}
+        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
-            {/* Upload Image Button */}
-            <input
-              type="file"
-              id="cover-upload"
-              accept="image/*"
-              onChange={handleCoverUpload}
-              disabled={isUploadingCover}
-              className="hidden"
-            />
-            <label
-              htmlFor="cover-upload"
-              className={`inline-flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-sm text-white font-semibold rounded-lg hover:bg-black/50 transition-colors cursor-pointer ${
-                isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isUploadingCover ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  {t('banner.uploading')}
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        {/* Top Navigation Bar */}
+        <div className="absolute top-0 left-0 right-0 z-20 px-4 md:px-6 py-4">
+          <div className="flex items-start justify-between">
+            {/* Left Side - Back Button and Breadcrumbs stacked */}
+            <div className="flex flex-col gap-2">
+              {/* Back Button */}
+              <button
+                onClick={handleBack}
+                className="inline-flex items-center gap-2 text-white/90 font-medium px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 w-fit"
+                aria-label={t('navigation.backToAgencies')}
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+                {t('navigation.back')}
+              </button>
+
+              {/* Breadcrumbs - Below back button */}
+              <div className="ml-1">
+                <Breadcrumbs
+                  items={generateAgencyBreadcrumbs({
+                    slug: agency.slug || '',
+                    name: agencyData.name,
+                    country: agencyData.country,
+                  })}
+                  className="text-white/70 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Right Side - Cover Controls (For owners and admins) */}
+            {isAdmin && (
+              <div className="relative flex gap-2">
+                {/* Gradient Picker Button */}
+                <button
+                  onClick={() => setShowGradientPicker(!showGradientPicker)}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                   </svg>
-                  {t('banner.uploadImage')}
-                </>
-              )}
-            </label>
+                  <span className="hidden sm:inline">{t('banner.gradients')}</span>
+                </button>
 
-            {/* Gradient Picker Dropdown */}
-            {showGradientPicker && (
-              <div className="absolute top-full right-0 mt-2 bg-white rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">{t('banner.chooseGradient')}</h3>
-                  <button
-                    onClick={() => setShowGradientPicker(false)}
-                    className="text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {GRADIENT_PRESETS.map((preset) => (
-                    <button
-                      key={preset.id}
-                      onClick={() => handleGradientSelect(preset.id)}
-                      className="group relative h-24 rounded-xl overflow-hidden border-2 border-gray-200 hover:border-primary transition-all hover:scale-105"
-                    >
-                      <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}`} />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-white font-bold text-sm drop-shadow-lg">
-                          {preset.name}
-                        </span>
-                      </div>
-                      {(agencyData as any).coverGradient === preset.gradient && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-500 mt-3 text-center">
-                  {t('banner.customImageHint')}
-                </p>
+                {/* Upload Image Button */}
+                <input
+                  type="file"
+                  id="cover-upload"
+                  accept="image/*"
+                  onChange={handleCoverUpload}
+                  disabled={isUploadingCover}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="cover-upload"
+                  className={`inline-flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-md text-white text-sm font-medium rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
+                    isUploadingCover ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isUploadingCover ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                      <span className="hidden sm:inline">{t('banner.uploading')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="hidden sm:inline">{t('banner.uploadImage')}</span>
+                    </>
+                  )}
+                </label>
+
+                {/* Gradient Picker Dropdown */}
+                {showGradientPicker && (
+                  <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 w-80 max-h-96 overflow-y-auto border border-slate-200 z-50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900">{t('banner.chooseGradient')}</h3>
+                      <button
+                        onClick={() => setShowGradientPicker(false)}
+                        className="text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        <XMarkIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {GRADIENT_PRESETS.map((preset) => (
+                        <button
+                          key={preset.id}
+                          onClick={() => handleGradientSelect(preset.id)}
+                          className="group relative h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-primary transition-all duration-300 hover:scale-[1.02]"
+                        >
+                          <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}`} />
+                          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-white font-medium text-xs drop-shadow-lg">
+                              {preset.name}
+                            </span>
+                          </div>
+                          {(agencyData as any).coverGradient === preset.gradient && (
+                            <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
+                              <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-3 text-center">
+                      {t('banner.customImageHint')}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
+        </div>
 
-        {/* Back Button - positioned to avoid sidebar on desktop */}
-        <button
-          onClick={handleBack}
-          className="absolute top-6 left-6 md:left-24 flex items-center gap-2 text-white font-semibold px-4 py-2 rounded-lg bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors z-10"
-          aria-label={t('navigation.backToAgencies')}
-        >
-          <ArrowLeftIcon className="w-5 h-5" />
-          {t('navigation.back')}
-        </button>
-
-        {/* Agency Logo and Name */}
+        {/* Agency Identity - Centered Content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+          {/* Logo Container */}
           <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
             {agencyData.logo ? (
               <img
                 src={agencyData.logo}
                 alt={agencyData.name}
-                className="w-40 h-40 rounded-3xl border-4 border-white shadow-2xl object-cover"
+                className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl object-cover backdrop-blur-sm"
               />
             ) : (
-              <div className="w-40 h-40 rounded-3xl border-4 border-white shadow-2xl bg-white flex items-center justify-center">
-                <BuildingOfficeIcon className="w-20 h-20 text-primary" />
+              <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl bg-white/10 backdrop-blur-md flex items-center justify-center">
+                <BuildingOfficeIcon className="w-14 h-14 text-white" />
               </div>
             )}
+
+            {/* Featured Badge */}
             {agencyData.isFeatured && (
-              <div className="absolute -top-2 -right-2 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-                <StarIcon className="w-4 h-4" />
+              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
+                <StarIcon className="w-3 h-3 fill-current" />
                 {t('common.featured')}
               </div>
             )}
 
-            {/* Logo Upload Button - Only for owners */}
+            {/* Logo Upload Button */}
             {isOwner && (
               <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
                 <input
@@ -772,13 +821,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 />
                 <label
                   htmlFor="logo-upload"
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 bg-white text-primary font-semibold rounded-full shadow-lg hover:bg-gray-100 transition-colors cursor-pointer text-sm ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-700 font-medium rounded-lg shadow-lg hover:bg-slate-50 transition-all duration-300 cursor-pointer text-xs ${
                     isUploadingLogo ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {isUploadingLogo ? (
                     <>
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-300 border-t-primary"></div>
                       {t('banner.uploading')}
                     </>
                   ) : (
@@ -789,226 +838,229 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             )}
           </div>
 
-          <h1 className="mt-6 text-4xl md:text-5xl font-bold text-white text-center drop-shadow-lg">
+          {/* Agency Name */}
+          <h1 className="mt-8 text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center tracking-tight">
             {agencyData.name}
           </h1>
 
-          <div className="mt-4 flex items-center gap-2 text-white/90 text-lg">
-            <MapPinIcon className="w-5 h-5" />
-            <span>{agencyData.city}, {agencyData.country}</span>
+          {/* Location Badge */}
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+            <MapPinIcon className="w-4 h-4 text-white/80" />
+            <span className="text-white/90 font-medium text-sm">{agencyData.city}, {agencyData.country}</span>
+          </div>
+
+          {/* Quick Stats Row */}
+          <div className="mt-6 flex items-center gap-6 md:gap-8">
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-bold text-white">{agencyProperties.length}</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Listings</p>
+            </div>
+            <div className="w-px h-8 bg-white/20"></div>
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.totalAgents}</p>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Agents</p>
+            </div>
+            <div className="w-px h-8 bg-white/20"></div>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1">
+                <StarIcon className="w-5 h-5 text-amber-400 fill-current" />
+                <p className="text-2xl md:text-3xl font-bold text-white">4.8</p>
+              </div>
+              <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">Rating</p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 pb-16">
         {/* Upload Error Message */}
         {uploadError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-3">
+            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <p className="text-sm font-medium">{uploadError}</p>
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-medium">{t('stats.totalListings')}</p>
-                <p className="text-3xl font-bold text-primary mt-1">{agencyProperties.length}</p>
-              </div>
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                <HomeIcon className="w-7 h-7 text-primary" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-medium">{t('stats.totalAgents')}</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{agencyData.totalAgents}</p>
-              </div>
-              <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
-                <UsersIcon className="w-7 h-7 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-medium">{t('stats.yearsInBusiness')}</p>
-                <p className="text-3xl font-bold text-blue-600 mt-1">{agencyData.yearsInBusiness || t('stats.notAvailable')}</p>
-              </div>
-              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
-                <ChartBarIcon className="w-7 h-7 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-medium">{t('stats.rating')}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <StarIcon className="w-6 h-6 text-amber-500 fill-current" />
-                  <p className="text-3xl font-bold text-gray-900">4.8</p>
-                </div>
-              </div>
-              <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center">
-                <TrophyIcon className="w-7 h-7 text-amber-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Sales Statistics */}
+        {/* Sales Performance Card - Prominent Position */}
         {soldProperties.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('salesPerformance.title')}</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.salesLast12Months')}</p>
-                <p className="text-3xl font-bold text-primary">{salesLast12Months}</p>
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100 overflow-hidden relative">
+            {/* Decorative gradient */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 via-blue-500/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/4"></div>
+
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg shadow-primary/25">
+                  <ChartBarIcon className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">{t('salesPerformance.title')}</h2>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.totalSales')}</p>
-                <p className="text-3xl font-bold text-green-600">{totalSales}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.priceRange')}</p>
-                <p className="text-lg font-bold text-blue-600">
-                  {minPrice > 0 && maxPrice > 0 ? (
-                    <>
-                      {formatPrice(minPrice, agencyData.country || 'Serbia')} - {formatPrice(maxPrice, agencyData.country || 'Serbia')}
-                    </>
-                  ) : (
-                    t('stats.notAvailable')
-                  )}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 font-medium mb-2">{t('salesPerformance.averagePrice')}</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {averagePrice > 0 ? formatPrice(averagePrice, agencyData.country || 'Serbia') : t('stats.notAvailable')}
-                </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                  <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.salesLast12Months')}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-slate-900">{salesLast12Months}</p>
+                </div>
+                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                  <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.totalSales')}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-green-600">{totalSales}</p>
+                </div>
+                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                  <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.priceRange')}</p>
+                  <p className="text-sm md:text-base font-bold text-slate-700">
+                    {minPrice > 0 && maxPrice > 0 ? (
+                      <>
+                        {formatPrice(minPrice, agencyData.country || 'Serbia')} - {formatPrice(maxPrice, agencyData.country || 'Serbia')}
+                      </>
+                    ) : (
+                      t('stats.notAvailable')
+                    )}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                  <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.averagePrice')}</p>
+                  <p className="text-lg md:text-xl font-bold text-primary">
+                    {averagePrice > 0 ? formatPrice(averagePrice, agencyData.country || 'Serbia') : t('stats.notAvailable')}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* About Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">About {agencyData.name}</h2>
+        {/* About Section - Clean Two-Column Layout */}
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
+          {/* Section Header */}
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">About {agencyData.name}</h2>
+              {agencyData.yearsInBusiness && (
+                <p className="text-sm text-slate-500">{agencyData.yearsInBusiness}+ years of excellence in real estate</p>
+              )}
+            </div>
+          </div>
+
           {agencyData.description && (
-            <p className="text-gray-600 text-lg leading-relaxed mb-6">{agencyData.description}</p>
+            <p className="text-slate-600 leading-relaxed mb-8 text-base">{agencyData.description}</p>
           )}
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Contact Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Contact Information</h3>
-              <div className="space-y-3">
-                <a href={`tel:${agencyData.phone}`} className="flex items-center gap-3 text-gray-600 hover:text-primary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <PhoneIcon className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="font-medium">{agencyData.phone}</span>
-                </a>
-                <a href={`mailto:${agencyData.email}`} className="flex items-center gap-3 text-gray-600 hover:text-primary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <EnvelopeIcon className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="font-medium">{agencyData.email}</span>
-                </a>
-                {agencyData.address && (
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <MapPinIcon className="w-5 h-5 text-primary" />
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Left Column - Contact */}
+            <div className="space-y-6">
+              {/* Contact Card */}
+              <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-5 border border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Contact Information</h3>
+                <div className="space-y-4">
+                  <a href={`tel:${agencyData.phone}`} className="flex items-center gap-3 text-slate-600 hover:text-primary transition-colors group">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                      <PhoneIcon className="w-4 h-4 text-primary" />
                     </div>
-                    <span className="font-medium">{agencyData.address}</span>
-                  </div>
-                )}
+                    <span className="font-medium text-sm">{agencyData.phone}</span>
+                  </a>
+                  <a href={`mailto:${agencyData.email}`} className="flex items-center gap-3 text-slate-600 hover:text-primary transition-colors group">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                      <EnvelopeIcon className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className="font-medium text-sm">{agencyData.email}</span>
+                  </a>
+                  {agencyData.address && (
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <MapPinIcon className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="font-medium text-sm">{agencyData.address}</span>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Service Areas */}
+              {agencyData.serviceAreas && agencyData.serviceAreas.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Service Areas</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {agencyData.serviceAreas.map((area, index) => (
+                      <span key={index} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium border border-emerald-100">
+                        {area}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Specialties */}
-            {agencyData.specialties && agencyData.specialties.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Specialties</h3>
-                <div className="flex flex-wrap gap-2">
-                  {agencyData.specialties.map((specialty, index) => (
-                    <span key={index} className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                      {specialty}
-                    </span>
-                  ))}
+            {/* Right Column - Expertise */}
+            <div className="space-y-6">
+              {/* Specialties */}
+              {agencyData.specialties && agencyData.specialties.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Specialties</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {agencyData.specialties.map((specialty, index) => (
+                      <span key={index} className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-semibold">
+                        {specialty}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Specializations */}
-            {agencyData.specializations && agencyData.specializations.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Specializations</h3>
-                <div className="flex flex-wrap gap-2">
-                  {agencyData.specializations.map((spec, index) => (
-                    <span key={index} className="px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-200">
-                      {spec}
-                    </span>
-                  ))}
+              {/* Specializations */}
+              {agencyData.specializations && agencyData.specializations.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Specializations</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {agencyData.specializations.map((spec, index) => (
+                      <span key={index} className="px-3 py-1.5 bg-violet-50 text-violet-700 rounded-lg text-xs font-medium border border-violet-100">
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Service Areas */}
-            {agencyData.serviceAreas && agencyData.serviceAreas.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Service Areas</h3>
-                <div className="flex flex-wrap gap-2">
-                  {agencyData.serviceAreas.map((area, index) => (
-                    <span key={index} className="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-200">
-                      {area}
-                    </span>
-                  ))}
+              {/* Languages */}
+              {agencyData.languages && agencyData.languages.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Languages</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {agencyData.languages.map((lang, index) => (
+                      <span key={index} className="px-3 py-1.5 bg-sky-50 text-sky-700 rounded-lg text-xs font-medium border border-sky-100">
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* Languages Spoken */}
-            {agencyData.languages && agencyData.languages.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Languages Spoken</h3>
-                <div className="flex flex-wrap gap-2">
-                  {agencyData.languages.map((lang, index) => (
-                    <span key={index} className="px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
-                      {lang}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Admin Section - Invitation Code */}
           {isAdmin && agencyData.invitationCode && (
-            <div className="mt-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
-              <div className="flex items-start gap-3">
-                <ShieldCheckIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="mt-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
+                  <ShieldCheckIcon className="w-5 h-5 text-white" />
+                </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 mb-1">Agency Invitation Code</h4>
-                  <p className="text-sm text-gray-600 mb-2">Share this code with agents you want to join your agency</p>
-                  <div className="flex items-center gap-2">
-                    <code className="px-4 py-2 bg-white border border-amber-300 rounded-lg font-mono text-lg font-semibold text-primary tracking-wider">
+                  <h4 className="font-semibold text-slate-900 mb-1">Agency Invitation Code</h4>
+                  <p className="text-sm text-slate-600 mb-3">Share this code with agents you want to join your agency</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <code className="px-4 py-2.5 bg-white border border-amber-200 rounded-lg font-mono text-base font-bold text-slate-900 tracking-widest shadow-sm">
                       {agencyData.invitationCode}
                     </code>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         navigator.clipboard.writeText(agencyData.invitationCode || '');
-                        alert('Invitation code copied to clipboard!');
+                        await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
                       }}
-                      className="px-3 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-all duration-300 shadow-md shadow-amber-500/25"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
                       Copy
                     </button>
                   </div>
@@ -1018,21 +1070,21 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           )}
 
           {/* Action Buttons */}
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
             {isAdmin && (
               <>
                 <button
                   onClick={handleOpenEditModal}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-lg shadow-slate-900/25"
                 >
-                  <PencilIcon className="w-5 h-5" />
+                  <PencilIcon className="w-4 h-4" />
                   Edit Agency
                 </button>
                 <button
                   onClick={() => setIsJoinRequestsModalOpen(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
                 >
-                  <BellIcon className="w-5 h-5" />
+                  <BellIcon className="w-4 h-4" />
                   Manage Join Requests
                 </button>
               </>
@@ -1041,8 +1093,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {canRequestToJoin && (
               <button
                 onClick={handleRequestToJoin}
-                className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-600/25"
               >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
                 Request to Join Agency
               </button>
             )}
@@ -1051,50 +1106,68 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
         {/* Featured Subscription Section - Only visible to agency owner */}
         {isOwner && (
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Featured Subscription</h2>
-              <span className="text-sm text-gray-500">Boost Your Visibility</span>
-            </div>
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100 overflow-hidden relative">
+            {/* Decorative gradient */}
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-violet-500/5 via-purple-500/5 to-transparent rounded-full translate-y-1/2 -translate-x-1/4"></div>
 
-            <FeaturedSubscriptionCard
-              key={subscriptionKey}
-              agencyId={agencyData._id}
-              onUpgrade={() => setIsFeaturedSubscriptionDialogOpen(true)}
-            />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+                    <StarIcon className="w-5 h-5 text-white fill-current" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">Featured Subscription</h2>
+                    <p className="text-xs text-slate-500">Boost your visibility</p>
+                  </div>
+                </div>
+              </div>
 
-            <div className="mt-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <p className="text-sm text-gray-700">
-                <strong>💡 Pro Tip:</strong> Featured agencies get up to 5x more visibility and appear at the top of search results!
-              </p>
+              <FeaturedSubscriptionCard
+                key={subscriptionKey}
+                agencyId={agencyData._id}
+                onUpgrade={() => setIsFeaturedSubscriptionDialogOpen(true)}
+              />
+
+              <div className="mt-5 p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-100">
+                <p className="text-sm text-slate-700">
+                  <span className="font-semibold text-violet-700">Pro Tip:</span> Featured agencies get up to 5x more visibility and appear at the top of search results!
+                </p>
+              </div>
             </div>
           </div>
         )}
 
         {/* Team Members Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-gray-900">Team Members</h2>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowAllMembers(!showAllMembers)}
-                className="px-4 py-2 text-sm font-medium text-primary border-2 border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
-              >
-                {showAllMembers ? 'Show Top Performers' : 'Show All Members'}
-              </button>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <TrophyIcon className="w-5 h-5" />
-                <span>Ranked by Performance</span>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/25">
+                <UsersIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Team Members</h2>
+                <p className="text-xs text-slate-500">{agents.length} agents • Ranked by performance</p>
               </div>
             </div>
+            <button
+              onClick={() => setShowAllMembers(!showAllMembers)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+            >
+              <TrophyIcon className="w-4 h-4 text-amber-500" />
+              {showAllMembers ? 'Show Top Performers' : 'Show All Members'}
+            </button>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
+            <div className="flex items-center justify-center py-16">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary/30 border-t-primary"></div>
+                <p className="text-sm text-slate-500">Loading team members...</p>
+              </div>
             </div>
           ) : rankedAgents.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {(showAllMembers ? rankedAgents : rankedAgents.slice(0, 3)).map((agent, index) => {
                 const rank = getRankBadge(index);
                 const agentId = agent.id || agent._id || '';
@@ -1107,106 +1180,106 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <div
                     key={agentId}
                     onClick={() => handleAgentClick(agentId)}
-                    className="relative bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                    className="group relative bg-white rounded-xl shadow-md shadow-slate-200/50 border border-slate-100 p-5 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 cursor-pointer hover:border-slate-200"
                   >
                     {/* Rank Badge */}
                     {rank && (
-                      <div className={`absolute -top-3 -right-3 bg-gradient-to-r ${rank.color} text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2`}>
-                        <span className="text-lg">{rank.emoji}</span>
+                      <div className={`absolute -top-2.5 -right-2.5 bg-gradient-to-r ${rank.color} text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5`}>
+                        <span className="text-sm">{rank.emoji}</span>
                         <span>{rank.text}</span>
                       </div>
                     )}
 
                     <div className="flex items-start gap-4">
                       {/* Agent Photo */}
-                      <div className="relative">
+                      <div className="relative flex-shrink-0">
                         {agent.avatarUrl ? (
                           <img
                             src={agent.avatarUrl}
                             alt={agent.name}
-                            className="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
+                            className="w-16 h-16 rounded-xl object-cover border border-slate-200 group-hover:border-slate-300 transition-colors"
                           />
                         ) : (
-                          <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center border-2 border-gray-200">
-                            <UserCircleIcon className="w-12 h-12 text-white" />
+                          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center border border-slate-200">
+                            <UserCircleIcon className="w-9 h-9 text-slate-400" />
                           </div>
                         )}
                         {agent.stats?.rating && agent.stats.rating >= 4.5 && (
-                          <div className="absolute -bottom-2 -right-2 bg-amber-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow">
-                            <StarIcon className="w-3 h-3 inline fill-current" />
+                          <div className="absolute -bottom-1.5 -right-1.5 bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[10px] font-bold shadow flex items-center gap-0.5">
+                            <StarIcon className="w-2.5 h-2.5 fill-current" />
                             {agent.stats.rating.toFixed(1)}
                           </div>
                         )}
                       </div>
 
                       {/* Agent Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-xl font-bold text-gray-900">{agent.name}</h3>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h3 className="text-base font-bold text-slate-900 truncate">{agent.name}</h3>
                           {isAgentOwner && (
-                            <span className="px-2 py-1 bg-gradient-to-r from-purple-500 to-purple-700 text-white text-xs font-bold rounded-full flex items-center gap-1">
-                              <ShieldCheckIcon className="w-3 h-3" />
+                            <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
+                              <ShieldCheckIcon className="w-2.5 h-2.5" />
                               Owner
                             </span>
                           )}
                           {isAgentAdmin && !isAgentOwner && (
-                            <span className="px-2 py-1 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-xs font-bold rounded-full flex items-center gap-1">
-                              <ShieldCheckIcon className="w-3 h-3" />
+                            <span className="px-2 py-0.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
+                              <ShieldCheckIcon className="w-2.5 h-2.5" />
                               Admin
                             </span>
                           )}
                         </div>
                         {agent.licenseNumber && (
-                          <p className="text-sm text-gray-500">License: {agent.licenseNumber}</p>
+                          <p className="text-xs text-slate-400 mb-3">License: {agent.licenseNumber}</p>
                         )}
 
                         {/* Performance Stats */}
-                        <div className="mt-4 grid grid-cols-3 gap-4">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Total Sales</p>
-                            <p className="text-lg font-bold text-primary">
-                              {formatPrice(agent.stats?.totalSalesValue || 0, agency.country || 'Serbia')}
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="bg-slate-50 rounded-lg p-2 text-center">
+                            <p className="text-[10px] text-slate-400 font-medium uppercase">Sales Value</p>
+                            <p className="text-sm font-bold text-slate-700">
+                              {formatPrice(agent.stats?.totalSalesValue || 0, agency.country || 'Serbia').replace(/\.\d+/, '')}
                             </p>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Properties Sold</p>
-                            <p className="text-lg font-bold text-green-600">{agent.stats?.propertiesSold || 0}</p>
+                          <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                            <p className="text-[10px] text-slate-400 font-medium uppercase">Sold</p>
+                            <p className="text-sm font-bold text-emerald-600">{agent.stats?.propertiesSold || 0}</p>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Active Listings</p>
-                            <p className="text-lg font-bold text-blue-600">{agent.stats?.activeListings || 0}</p>
+                          <div className="bg-sky-50 rounded-lg p-2 text-center">
+                            <p className="text-[10px] text-slate-400 font-medium uppercase">Active</p>
+                            <p className="text-sm font-bold text-sky-600">{agent.stats?.activeListings || 0}</p>
                           </div>
                         </div>
 
                         {/* Contact and Actions */}
-                        <div className="mt-3 flex flex-col gap-2">
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
                           {agent.phone && (
                             <a
                               href={`tel:${agent.phone}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-primary transition-colors"
                             >
-                              <PhoneIcon className="w-4 h-4" />
+                              <PhoneIcon className="w-3.5 h-3.5" />
                               {agent.phone}
                             </a>
                           )}
 
                           {/* Admin Actions - Only visible to owner */}
                           {isOwner && !isAgentOwner && (
-                            <div className="flex gap-2">
+                            <div className="flex gap-1.5 ml-auto">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleToggleAdmin(agentId, agent.name, isAgentAdmin || false);
                                 }}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
                                   isAgentAdmin
-                                    ? 'text-gray-600 bg-gray-100 hover:bg-gray-200'
-                                    : 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                                    ? 'text-slate-500 bg-slate-100 hover:bg-slate-200'
+                                    : 'text-sky-600 bg-sky-50 hover:bg-sky-100'
                                 }`}
                                 title={isAgentAdmin ? 'Remove admin rights' : 'Make admin'}
                               >
-                                <ShieldCheckIcon className="w-4 h-4" />
+                                <ShieldCheckIcon className="w-3 h-3" />
                                 {isAgentAdmin ? 'Remove Admin' : 'Make Admin'}
                               </button>
 
@@ -1216,17 +1289,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                                   handleRemoveAgent(agentId, agent.name);
                                 }}
                                 disabled={removingAgentId === agentId}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
                                 title="Remove agent from agency"
                               >
                                 {removingAgentId === agentId ? (
                                   <>
-                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>
+                                    <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
                                     Removing...
                                   </>
                                 ) : (
                                   <>
-                                    <XMarkIcon className="w-4 h-4" />
+                                    <XMarkIcon className="w-3 h-3" />
                                     Remove
                                   </>
                                 )}
@@ -1236,24 +1309,24 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
                           {/* Leave Agency Button - Only visible to current user who is not the owner */}
                           {!isOwner && currentUser && agentId && (String(agentId) === String(currentUser.id) || String(agentId) === String(currentUser._id)) && !isAgentOwner && (
-                            <div className="flex gap-2">
+                            <div className="flex gap-1.5 ml-auto">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleLeaveAgency();
                                 }}
                                 disabled={isLeavingAgency}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
                                 title="Leave this agency"
                               >
                                 {isLeavingAgency ? (
                                   <>
-                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>
+                                    <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
                                     Leaving...
                                   </>
                                 ) : (
                                   <>
-                                    <XMarkIcon className="w-4 h-4" />
+                                    <XMarkIcon className="w-3 h-3" />
                                     Leave Agency
                                   </>
                                 )}
@@ -1268,74 +1341,228 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               })}
             </div>
           ) : (
-            <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center">
-              <UsersIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No agents found for this agency</p>
+            <div className="bg-white p-12 rounded-2xl border border-slate-100 text-center shadow-sm">
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <UsersIcon className="w-8 h-8 text-slate-300" />
+              </div>
+              <p className="text-slate-500 font-medium">No agents found for this agency</p>
+              <p className="text-sm text-slate-400 mt-1">Team members will appear here once they join</p>
             </div>
           )}
         </div>
 
-        {/* Agency Stats Cards */}
-        <div className="mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div
-                className={`text-center p-6 rounded-lg cursor-pointer transition-all ${
-                  propertyView === 'active' ? 'bg-primary text-white shadow-lg' : 'bg-white hover:bg-neutral-50 border border-neutral-200'
-                }`}
-                onClick={() => setPropertyView('active')}
-              >
-                <p className={`text-sm font-semibold mb-2 ${propertyView === 'active' ? 'text-white' : 'text-neutral-600'}`}>
-                  ACTIVE LISTINGS
-                </p>
-                <p className={`text-3xl font-bold ${propertyView === 'active' ? 'text-white' : 'text-neutral-900'}`}>
-                  {agencyProperties.filter(p => p.status === 'active').length}
-                </p>
+        {/* Properties Map Section */}
+        {agencyProperties.length > 0 && agencyProperties.some(p => p.lat && p.lng) && (
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <MapIcon className="w-5 h-5 text-white" />
               </div>
-              <div
-                className={`text-center p-6 rounded-lg cursor-pointer transition-all ${
-                  propertyView === 'sold' ? 'bg-primary text-white shadow-lg' : 'bg-white hover:bg-neutral-50 border border-neutral-200'
-                }`}
-                onClick={() => setPropertyView('sold')}
-              >
-                <p className={`text-sm font-semibold mb-2 ${propertyView === 'sold' ? 'text-white' : 'text-neutral-600'}`}>
-                  SOLD PROPERTIES
-                </p>
-                <p className={`text-3xl font-bold ${propertyView === 'sold' ? 'text-white' : 'text-neutral-900'}`}>
-                  {agencyProperties.filter(p => p.status === 'sold').length}
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Properties Map</h2>
+                <p className="text-xs text-slate-500">
+                  ({agencyProperties.filter(p => p.status === 'active').length} active, {agencyProperties.filter(p => p.status === 'sold').length} sold)
                 </p>
               </div>
             </div>
-        </div>
+            <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
+              <MapContainer
+                center={agencyProperties.filter(p => p.lat && p.lng)[0] ? [agencyProperties.filter(p => p.lat && p.lng)[0].lat!, agencyProperties.filter(p => p.lat && p.lng)[0].lng!] : [agencyData.lat || 42.0, agencyData.lng || 21.0]}
+                zoom={12}
+                scrollWheelZoom={true}
+                className="w-full h-[400px] md:h-[500px]"
+                maxZoom={18}
+                minZoom={3}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapInvalidator />
+                {agencyProperties.filter(p => p.lat && p.lng).map((property) => (
+                  <Marker
+                    key={property.id || property._id}
+                    position={[property.lat!, property.lng!]}
+                    icon={L.icon({
+                      iconUrl: property.status === 'sold'
+                        ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png'
+                        : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                      iconSize: [25, 41],
+                      iconAnchor: [12, 41],
+                      popupAnchor: [1, -34],
+                      shadowSize: [41, 41]
+                    })}
+                  >
+                    <Popup>
+                      <div className="min-w-[250px]">
+                        {property.imageUrl && (
+                          <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" />
+                        )}
+                        <p className="font-semibold text-sm mb-1 text-slate-900 line-clamp-2">{property.address}</p>
+                        <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>
+                        <p className="font-bold text-emerald-600 mb-2">{formatPrice(property.price, property.country)}</p>
+                        <div className="flex gap-2 text-xs text-slate-600 mb-3">
+                          <span>{property.beds} beds</span>
+                          <span>•</span>
+                          <span>{property.baths} baths</span>
+                          <span>•</span>
+                          <span>{property.sqft} m²</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const propertyId = property.id || property._id;
+                            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+                            window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
+                          }}
+                          className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                <span className="text-slate-600">For Sale ({agencyProperties.filter(p => p.status === 'active').length})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                <span className="text-slate-600">Sold ({agencyProperties.filter(p => p.status === 'sold').length})</span>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Properties Section */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-gray-900">
-              {propertyView === 'active' ? 'Active Listings' : 'Sold Properties'}
-            </h2>
-            <span className="text-sm text-gray-500">
-              {agencyProperties.filter(p => p.status === propertyView).length} properties
-            </span>
+        {/* Service Area Location Map */}
+        {agencyData.lat != null && agencyData.lng != null && !isNaN(agencyData.lat) && !isNaN(agencyData.lng) && (
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-500/25">
+                <MapPinIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Service Area Location</h2>
+                <p className="text-xs text-slate-500">{agencyData.city}, {agencyData.country}</p>
+              </div>
+            </div>
+            <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
+              <MapContainer
+                center={[agencyData.lat, agencyData.lng]}
+                zoom={13}
+                scrollWheelZoom={true}
+                className="w-full h-80"
+                maxZoom={18}
+                minZoom={3}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapInvalidator />
+                <Marker
+                  position={[agencyData.lat, agencyData.lng]}
+                  icon={L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                  })}
+                >
+                  <Popup>
+                    <div className="text-center min-w-[200px]">
+                      {agencyData.logo && (
+                        <img src={agencyData.logo} alt={agencyData.name} className="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-slate-300" />
+                      )}
+                      <h3 className="font-bold text-slate-900">{agencyData.name}</h3>
+                      {agencyData.address && <p className="text-sm text-slate-600 mt-1">{agencyData.address}</p>}
+                      <p className="text-sm font-medium text-slate-700">{agencyData.city}, {agencyData.country}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Properties Section with Tab Navigation */}
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 border border-slate-100">
+          {/* Section Header with Tabs */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                <HomeIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Property Portfolio</h2>
+                <p className="text-xs text-slate-500">{agencyProperties.length} total properties</p>
+              </div>
+            </div>
+
+            {/* Tab Buttons */}
+            <div className="flex bg-slate-100 rounded-xl p-1">
+              <button
+                onClick={() => setPropertyView('active')}
+                className={`relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                  propertyView === 'active'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${propertyView === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
+                Active
+                <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
+                  propertyView === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {agencyProperties.filter(p => p.status === 'active').length}
+                </span>
+              </button>
+              <button
+                onClick={() => setPropertyView('sold')}
+                className={`relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                  propertyView === 'sold'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${propertyView === 'sold' ? 'bg-amber-500' : 'bg-slate-300'}`}></span>
+                Sold
+                <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
+                  propertyView === 'sold' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {agencyProperties.filter(p => p.status === 'sold').length}
+                </span>
+              </button>
+            </div>
           </div>
 
+          {/* Properties Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3].map(i => <PropertyCardSkeleton key={i} />)}
             </div>
           ) : agencyProperties.filter(p => p.status === propertyView).length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {agencyProperties.filter(p => p.status === propertyView).map(property => (
                 <PropertyCard key={property.id || property._id} property={property} />
               ))}
             </div>
           ) : (
-            <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center">
-              <HomeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">
+            <div className="py-16 text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <HomeIcon className="w-8 h-8 text-slate-300" />
+              </div>
+              <p className="text-slate-500 font-medium">
                 {propertyView === 'active' ? 'No active listings at the moment' : 'No sold properties yet'}
               </p>
-              <p className="text-gray-400 text-sm mt-2">
-                {propertyView === 'active' ? 'Check back soon for new properties' : 'Sold properties will appear here'}
+              <p className="text-sm text-slate-400 mt-1">
+                {propertyView === 'active' ? 'New listings will appear here' : 'Sold properties will be shown here'}
               </p>
             </div>
           )}
@@ -1368,157 +1595,174 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       {/* Edit Agency Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h3 className="text-2xl font-bold text-gray-900">Edit Agency</h3>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/25">
+                  <PencilIcon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Edit Agency</h3>
+                  <p className="text-xs text-slate-500">Update your agency information</p>
+                </div>
+              </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveAgency} className="p-6 space-y-6">
+            <form onSubmit={handleSaveAgency} className="p-6 space-y-8 overflow-y-auto max-h-[calc(90vh-140px)]">
               {/* Basic Information */}
               <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-gray-900">Basic Information</h4>
+                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Basic Information
+                </h4>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
                     Agency Name *
                   </label>
                   <input
                     type="text"
                     value={editForm.name}
                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
                     Description
                   </label>
                   <textarea
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm resize-none"
                     rows={4}
+                    placeholder="Tell clients about your agency..."
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       Email *
                     </label>
                     <input
                       type="email"
                       value={editForm.email}
                       onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       Phone *
                     </label>
                     <input
                       type="tel"
                       value={editForm.phone}
                       onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Website
-                  </label>
-                  <input
-                    type="url"
-                    value={editForm.website}
-                    onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="https://example.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Years in Business
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={editForm.yearsInBusiness}
-                    onChange={(e) => setEditForm({ ...editForm, yearsInBusiness: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Location */}
-              <div className="space-y-4 border-t pt-6">
-                <h4 className="text-lg font-semibold text-gray-900">Location</h4>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.address}
-                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.city}
-                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Country
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.country}
-                      onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Zip Code
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.zipCode}
-                      onChange={(e) => setEditForm({ ...editForm, zipCode: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                      Website
+                    </label>
+                    <input
+                      type="url"
+                      value={editForm.website}
+                      onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                      Years in Business
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={editForm.yearsInBusiness}
+                      onChange={(e) => setEditForm({ ...editForm, yearsInBusiness: Number(e.target.value) })}
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Location
+                </h4>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.address}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.city}
+                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.country}
+                      onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                      Zip Code
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.zipCode}
+                      onChange={(e) => setEditForm({ ...editForm, zipCode: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       Latitude
                     </label>
                     <input
@@ -1526,12 +1770,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       step="any"
                       value={editForm.lat}
                       onChange={(e) => setEditForm({ ...editForm, lat: Number(e.target.value) })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       placeholder="e.g., 42.6629"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       Longitude
                     </label>
                     <input
@@ -1539,7 +1783,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       step="any"
                       value={editForm.lng}
                       onChange={(e) => setEditForm({ ...editForm, lng: Number(e.target.value) })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       placeholder="e.g., 21.1655"
                     />
                   </div>
@@ -1547,54 +1791,57 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
 
               {/* Social Media */}
-              <div className="space-y-4 border-t pt-6">
-                <h4 className="text-lg font-semibold text-gray-900">Social Media</h4>
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                  Social Media
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       Facebook URL
                     </label>
                     <input
                       type="url"
                       value={editForm.facebookUrl}
                       onChange={(e) => setEditForm({ ...editForm, facebookUrl: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       placeholder="https://facebook.com/..."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       Instagram URL
                     </label>
                     <input
                       type="url"
                       value={editForm.instagramUrl}
                       onChange={(e) => setEditForm({ ...editForm, instagramUrl: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       placeholder="https://instagram.com/..."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       LinkedIn URL
                     </label>
                     <input
                       type="url"
                       value={editForm.linkedinUrl}
                       onChange={(e) => setEditForm({ ...editForm, linkedinUrl: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       placeholder="https://linkedin.com/..."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       Twitter URL
                     </label>
                     <input
                       type="url"
                       value={editForm.twitterUrl}
                       onChange={(e) => setEditForm({ ...editForm, twitterUrl: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                       placeholder="https://twitter.com/..."
                     />
                   </div>
@@ -1602,10 +1849,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
 
               {/* Specialties & Certifications */}
-              <div className="space-y-4 border-t pt-6">
-                <h4 className="text-lg font-semibold text-gray-900">Specialties & Certifications</h4>
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                  Specialties & Certifications
+                </h4>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
                     Specialties (comma-separated)
                   </label>
                   <input
@@ -1615,12 +1865,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       ...editForm,
                       specialties: e.target.value.split(',').map(s => s.trim())
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                     placeholder="Residential, Commercial, Luxury Properties"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
                     Certifications (comma-separated)
                   </label>
                   <input
@@ -1630,12 +1880,12 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       ...editForm,
                       certifications: e.target.value.split(',').map(s => s.trim())
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                     placeholder="Licensed Real Estate Agency, ISO Certified"
                   />
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
                     Languages Spoken (comma-separated)
                   </label>
                   <input
@@ -1645,21 +1895,24 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       ...editForm,
                       languages: e.target.value.split(',').map(s => s.trim())
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
                     placeholder="English, Serbian, Croatian, Albanian"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Languages are auto-synced when agents join/leave</p>
+                  <p className="text-xs text-slate-400 mt-1.5">Languages are auto-synced when agents join/leave</p>
                 </div>
               </div>
 
               {/* Business Hours */}
-              <div className="space-y-4 border-t pt-6">
-                <h4 className="text-lg font-semibold text-gray-900">Business Hours</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  Business Hours
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
                     <div key={day}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
-                        {day}
+                      <label className="block text-xs font-medium text-slate-600 mb-1.5 capitalize">
+                        {day.slice(0, 3)}
                       </label>
                       <input
                         type="text"
@@ -1668,31 +1921,33 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           ...editForm,
                           businessHours: { ...editForm.businessHours, [day]: e.target.value }
                         })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="9:00 AM - 6:00 PM"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-xs"
+                        placeholder="9AM - 6PM"
                       />
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-6 border-t sticky bottom-0 bg-white">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark font-medium transition-colors"
-                >
-                  Save Changes
-                </button>
-              </div>
             </form>
+
+            {/* Action Buttons - Fixed Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 flex gap-3 bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1 px-5 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-white font-medium transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="editAgencyForm"
+                onClick={handleSaveAgency}
+                className="flex-1 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 font-medium transition-colors text-sm shadow-lg shadow-primary/25"
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
       )}
