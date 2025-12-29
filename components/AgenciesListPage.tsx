@@ -337,6 +337,20 @@ const AgenciesListPage: React.FC = () => {
     </div>
   );
 
+  // Mouse position state for parallax effect
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 20;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      setMousePosition({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   // CSS animations inline style
   const cssAnimations = `
     @keyframes fadeInUp {
@@ -349,7 +363,7 @@ const AgenciesListPage: React.FC = () => {
         transform: translateY(0);
       }
     }
-    
+
     @keyframes gradientX {
       0%, 100% {
         background-position: 0% 50%;
@@ -358,11 +372,20 @@ const AgenciesListPage: React.FC = () => {
         background-position: 100% 50%;
       }
     }
-    
+
+    @keyframes meshFloat {
+      0%, 100% {
+        transform: translateY(0) rotateX(0deg);
+      }
+      50% {
+        transform: translateY(-5px) rotateX(2deg);
+      }
+    }
+
     .animate-fade-in-up {
       animation: fadeInUp 0.8s ease-out forwards;
     }
-    
+
     .animate-gradient-x {
       background-size: 200% auto;
       background-image: linear-gradient(to right, #3b82f6, #8b5cf6, #3b82f6);
@@ -370,6 +393,15 @@ const AgenciesListPage: React.FC = () => {
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+    }
+
+    .mesh-3d {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+    }
+
+    .mesh-layer {
+      transition: transform 0.1s ease-out;
     }
   `;
 
@@ -387,18 +419,63 @@ const AgenciesListPage: React.FC = () => {
       <style>{cssAnimations}</style>
 
       {/* Hero Section with Integrated Search */}
-      <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-white w-full">
-        {/* Subtle geometric pattern overlay */}
-        <div className="absolute inset-0 opacity-5">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <div className="relative bg-gradient-to-b from-neutral-100 via-neutral-50 to-white w-full overflow-hidden mesh-3d">
+        {/* 3D Mesh Background with Parallax */}
+        <div
+          className="absolute inset-0 mesh-layer"
+          style={{
+            transform: `translate3d(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px, 0) rotateX(${mousePosition.y * 0.05}deg) rotateY(${mousePosition.x * 0.05}deg)`,
+          }}
+        >
+          {/* Primary mesh layer */}
+          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
             <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
+              <linearGradient id="meshGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#e5e7eb" stopOpacity="0.4" />
+                <stop offset="50%" stopColor="#d1d5db" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#e5e7eb" stopOpacity="0.4" />
+              </linearGradient>
+              <pattern id="mesh3d" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="url(#meshGradient1)" strokeWidth="1"/>
+                <circle cx="0" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
+                <circle cx="60" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
+                <circle cx="0" cy="60" r="1.5" fill="#d1d5db" opacity="0.5"/>
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
+            <rect width="100%" height="100%" fill="url(#mesh3d)" />
           </svg>
         </div>
+
+        {/* Secondary floating mesh layer - moves opposite */}
+        <div
+          className="absolute inset-0 mesh-layer opacity-30"
+          style={{
+            transform: `translate3d(${-mousePosition.x * 0.3}px, ${-mousePosition.y * 0.3}px, 50px)`,
+          }}
+        >
+          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <defs>
+              <pattern id="mesh3d-secondary" width="120" height="120" patternUnits="userSpaceOnUse">
+                <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#d1d5db" strokeWidth="0.5" strokeDasharray="4 4"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#mesh3d-secondary)" />
+          </svg>
+        </div>
+
+        {/* Subtle gradient orbs for depth */}
+        <div
+          className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-br from-neutral-200/30 to-transparent rounded-full blur-3xl mesh-layer"
+          style={{
+            transform: `translate3d(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px, 0)`,
+          }}
+        />
+        <div
+          className="absolute bottom-20 right-1/4 w-80 h-80 bg-gradient-to-tl from-neutral-200/20 to-transparent rounded-full blur-3xl mesh-layer"
+          style={{
+            transform: `translate3d(${-mousePosition.x * 0.6}px, ${-mousePosition.y * 0.6}px, 0)`,
+          }}
+        />
 
         {/* Hero Content */}
         <div className="relative w-full pt-8 pb-16 lg:pt-12 lg:pb-20">
@@ -424,7 +501,7 @@ const AgenciesListPage: React.FC = () => {
             </div>
 
             {/* Search Section - Integrated into Hero */}
-            <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl border border-neutral-100 p-6 sm:p-8 animate-fade-in-up animation-delay-200 mt-8">
+            <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-neutral-200/60 p-6 sm:p-8 animate-fade-in-up animation-delay-200 mt-8">
               <div className="text-center mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
                   {t('agencies.findIdealAgency')}
