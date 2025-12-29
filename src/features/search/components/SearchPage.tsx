@@ -571,7 +571,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     id: `ss-${now}`,
                     name,
                     filters: isAreaOnly ? initialFilters : filters,
-                    drawnBoundsJSON: drawnBoundsJSON,
+                    drawnBoundsJSON: serializeBounds(drawnBounds), // Always use serializeBounds for consistent format
                     createdAt: now,
                     lastAccessed: now,
                     seenPropertyIds: [],
@@ -614,7 +614,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         } finally {
             setIsSaving(false);
         }
-    }, [isAuthenticated, dispatch, addSavedSearch, filters, isFormSearchActive, showToast, drawnBounds, drawnBoundsJSON, mapBounds]);
+    }, [isAuthenticated, dispatch, addSavedSearch, filters, isFormSearchActive, showToast, drawnBounds, mapBounds]);
     
     const handleMapMove = useCallback((newBounds: L.LatLngBounds, newCenter: L.LatLng) => {
         if (isMobile && isFiltersOpen) return;
