@@ -28,8 +28,20 @@ import { apiCache } from './middleware/cache';
 // Import Swagger configuration
 import { setupSwagger } from './config/swagger';
 
-// Load environment variables
+// Load environment variables based on NODE_ENV
+const envFile = process.env.NODE_ENV === 'production'
+  ? '.env.production'
+  : process.env.NODE_ENV === 'staging'
+    ? '.env.staging'
+    : '.env.development';
+
+dotenv.config({ path: envFile });
+
+// Fallback to .env if environment-specific file doesn't exist
 dotenv.config();
+
+console.log(`🚀 Server starting in ${process.env.NODE_ENV || 'development'} mode`);
+console.log(`📁 Loading environment from: ${envFile}`);
 
 // Initialize Sentry first (before anything else)
 initSentry();

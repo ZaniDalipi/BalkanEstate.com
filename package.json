@@ -4,9 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "vite --mode development",
+    "dev:staging": "vite --mode staging",
+    "dev:prod": "vite --mode production",
+    "build": "vite build --mode production",
+    "build:dev": "vite build --mode development",
+    "build:staging": "vite build --mode staging",
+    "preview": "vite preview --mode production",
+    "preview:staging": "vite preview --mode staging",
+    "start": "npm run dev",
+    "start:staging": "npm run dev:staging",
+    "start:prod": "npm run build && npm run preview"
   },
   "dependencies": {
     "@google/genai": "^1.27.0",
