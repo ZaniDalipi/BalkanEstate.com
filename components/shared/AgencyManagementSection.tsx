@@ -26,7 +26,7 @@ interface AgencyManagementSectionProps {
 const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ currentUser, onAgencyChange }) => {
   const { dispatch } = useAppContext();
   const { confirm } = useConfirmation();
-  const { success, error, info } = useNotification();
+  const { success } = useNotification();
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [selectedAgencyId, setSelectedAgencyId] = useState('');
   const [invitationCode, setInvitationCode] = useState('');
