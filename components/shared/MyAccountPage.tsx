@@ -15,6 +15,7 @@ import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { SEO } from '../../src/components/seo';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
+import { useNotification } from '../../src/shared/hooks/useNotification';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -478,6 +479,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
 const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
     const { t } = useTranslation(['account']);
     const { updateUser, dispatch } = useAppContext();
+    const { success } = useNotification();
     const [formData, setFormData] = useState<User>(user);
     const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
@@ -850,7 +852,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             setIsSaved(true);
             setInvitationCode('');
             setError('');
-            alert(`✅ Successfully joined ${data.agency.name}!`);
+            await success('Joined Agency', `Successfully joined ${data.agency.name}!`);
             setTimeout(() => setIsSaved(false), 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to join agency');
@@ -1221,6 +1223,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
 const MyAccountPage: React.FC = () => {
     const { t } = useTranslation(['account']);
     const { state, dispatch, logout, logoutAllDevices } = useAppContext();
+    const { success } = useNotification();
     const [activeTab, setActiveTab] = useState<AccountTab>('listings');
     const [performanceRefreshKey, setPerformanceRefreshKey] = useState(0);
 

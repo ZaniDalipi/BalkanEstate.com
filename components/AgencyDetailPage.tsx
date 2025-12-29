@@ -17,6 +17,7 @@ import { socketService } from '../services/socketService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
 import { useTrackView } from '../src/features/view-stats/hooks';
 import { useConfirmation } from '../src/shared/hooks/useConfirmation';
+import { useNotification } from '../src/shared/hooks/useNotification';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -84,6 +85,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
   const { confirm } = useConfirmation();
+  const { success, error, warning, info } = useNotification();
 
   // Track page view for analytics
   useTrackView({
@@ -284,8 +286,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       // If code is valid, send join request with the code
       await createJoinRequest(agency._id, `Joining with invitation code: ${code}`);
-      alert('Join request sent successfully! The agency admin will review your request.');
       setIsInvitationCodeModalOpen(false);
+      await success(t('messages.requestSent', 'Request Sent'), 'Join request sent successfully! The agency admin will review your request.');
     } catch (error) {
       throw error; // Let the modal handle the error display
     }
@@ -293,7 +295,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleToggleAdmin = async (agentId: string, agentName: string, isCurrentlyAdmin: boolean) => {
     if (!isOwner) {
-      alert(t('messages.onlyOwnerCanManage'));
+      await warning(t('messages.accessDenied', 'Access Denied'), t('messages.onlyOwnerCanManage'));
       return;
     }
 
@@ -315,23 +317,23 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           ...prev,
           admins: prev.admins?.filter(id => id !== agentId) || []
         }));
-        alert(t('messages.adminRemoved', { name: agentName }));
+        await success(t('messages.adminRemovedTitle', 'Admin Removed'), t('messages.adminRemoved', { name: agentName }));
       } else {
         await addAgencyAdmin(agencyData._id, agentId);
         setAgencyData(prev => ({
           ...prev,
           admins: [...(prev.admins || []), agentId]
         }));
-        alert(t('messages.adminAdded', { name: agentName }));
+        await success(t('messages.adminAddedTitle', 'Admin Added'), t('messages.adminAdded', { name: agentName }));
       }
-    } catch (error) {
-      alert(error instanceof Error ? error.message : t('messages.onlyOwnerCanManage'));
+    } catch (err) {
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.onlyOwnerCanManage'));
     }
   };
 
   const handleRemoveAgent = async (agentId: string, agentName: string) => {
     if (!isAdmin) {
-      alert(t('messages.onlyAdminCanRemove'));
+      await warning(t('messages.accessDenied', 'Access Denied'), t('messages.onlyAdminCanRemove'));
       return;
     }
 
@@ -360,10 +362,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         totalAgents: prev.totalAgents - 1
       }));
 
-      alert(t('messages.agentRemoved', { name: agentName }));
-    } catch (error: any) {
-      console.error('Error removing agent:', error);
-      alert(error.message || t('messages.onlyAdminCanRemove'));
+      await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
+    } catch (err: any) {
+      console.error('Error removing agent:', err);
+      await error(t('messages.errorTitle', 'Error'), err.message || t('messages.onlyAdminCanRemove'));
     } finally {
       setRemovingAgentId(null);
     }
@@ -398,13 +400,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         } as any);
       }
 
-      alert(response.message || t('messages.leftAgency', { agency: agencyData.name }));
+      await success(t('messages.leftAgencyTitle', 'Left Agency'), response.message || t('messages.leftAgency', { agency: agencyData.name }));
 
       // Redirect to home or agencies page
       window.location.href = '/';
-    } catch (error: any) {
-      console.error('Error leaving agency:', error);
-      alert(error.message || t('messages.leftAgency', { agency: agencyData.name }));
+    } catch (err: any) {
+      console.error('Error leaving agency:', err);
+      await error(t('messages.errorTitle', 'Error'), err.message || t('messages.leftAgency', { agency: agencyData.name }));
     } finally {
       setIsLeavingAgency(false);
     }
@@ -478,10 +480,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const data = await response.json();
       setAgencyData(data.agency);
       setIsEditModalOpen(false);
-      alert(t('messages.agencyUpdated'));
-    } catch (error) {
-      console.error('Error updating agency:', error);
-      alert(error instanceof Error ? error.message : t('messages.agencyUpdated'));
+      await success(t('messages.agencyUpdatedTitle', 'Agency Updated'), t('messages.agencyUpdated'));
+    } catch (err) {
+      console.error('Error updating agency:', err);
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update agency'));
     }
   };
 
@@ -521,9 +523,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       setAgencyData(data.agency);
-      alert(t('messages.logoUpdated'));
+      await success(t('messages.logoUpdatedTitle', 'Logo Updated'), t('messages.logoUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.logoUpdated'));
+      setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
     } finally {
       setIsUploadingLogo(false);
     }
@@ -565,16 +567,16 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       setAgencyData(data.agency);
-      alert(t('messages.coverUpdated'));
+      await success(t('messages.coverUpdatedTitle', 'Cover Updated'), t('messages.coverUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.coverUpdated'));
+      setUploadError(err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed'));
     } finally {
       setIsUploadingCover(false);
     }
   };
 
   const handleGradientSelect = async (gradientId: string) => {
-    if (!isOwner) return;
+    if (!isAdmin) return;
 
     try {
       const gradient = GRADIENT_PRESETS.find(g => g.id === gradientId);
@@ -600,9 +602,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       setAgencyData(data.agency);
       setShowGradientPicker(false);
-      alert(t('messages.gradientUpdated'));
+      await success(t('messages.gradientUpdatedTitle', 'Gradient Updated'), t('messages.gradientUpdated'));
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : t('messages.gradientUpdated'));
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update gradient'));
     }
   };
 
@@ -1050,9 +1052,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       {agencyData.invitationCode}
                     </code>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         navigator.clipboard.writeText(agencyData.invitationCode || '');
-                        alert('Invitation code copied to clipboard!');
+                        await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
                       }}
                       className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-all duration-300 shadow-md shadow-amber-500/25"
                     >

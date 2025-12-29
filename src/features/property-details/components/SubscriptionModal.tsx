@@ -5,6 +5,7 @@ import PaymentWindow from '@/components/shared/PaymentWindow';
 import { AtSymbolIcon, UserIcon, BuildingOfficeIcon, CheckCircleIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { fetchBuyerProducts, Product } from '@/utils/api';
+import { useNotification } from '@/shared/hooks/useNotification';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface SubscriptionModalProps {
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, initialEmail }) => {
   const { t } = useTranslation(['modals']);
   const { state, dispatch } = useAppContext();
+  const { success, warning } = useNotification();
   const [activeTab, setActiveTab] = useState<'buyer' | 'seller'>('buyer');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [email, setEmail] = useState(initialEmail || state.currentUser?.email || '');
@@ -49,7 +51,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     }, 150);
   };
 
-  const handleSubscribeClick = (e: React.FormEvent) => {
+  const handleSubscribeClick = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Check if user is authenticated (check both flag and user object)
@@ -77,19 +79,19 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     }
 
     if (!email || !email.includes('@')) {
-      alert('Please enter a valid email address');
+      await warning('Invalid Email', 'Please enter a valid email address');
       return;
     }
     setShowPaymentWindow(true);
   };
 
-  const handlePaymentSuccess = (paymentIntentId: string) => {
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
     console.log('Payment successful:', paymentIntentId);
     // TODO: Update user subscription status via API
     setShowPaymentWindow(false);
     onClose();
     // Show success message
-    alert('Subscription activated successfully!');
+    await success('Subscription Activated', 'Your subscription has been activated successfully!');
   };
 
   const handlePaymentError = (error: string) => {

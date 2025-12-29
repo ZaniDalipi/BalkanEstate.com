@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { XMarkIcon, UserCircleIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../constants';
 import { getAgencyJoinRequests, approveJoinRequest, rejectJoinRequest } from '../services/apiService';
 import { formatPrice } from '../utils/currency';
+import { useNotification } from '../src/shared/hooks/useNotification';
 
 interface JoinRequest {
   _id: string;
@@ -34,6 +35,7 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
   agencyId,
   agencyName
 }) => {
+  const { error } = useNotification();
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
@@ -60,8 +62,8 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
     try {
       await approveJoinRequest(requestId);
       await fetchRequests();
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to approve request');
+    } catch (err) {
+      await error('Error', err instanceof Error ? err.message : 'Failed to approve request');
     }
   };
 
@@ -69,8 +71,8 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
     try {
       await rejectJoinRequest(requestId);
       await fetchRequests();
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to reject request');
+    } catch (err) {
+      await error('Error', err instanceof Error ? err.message : 'Failed to reject request');
     }
   };
 
