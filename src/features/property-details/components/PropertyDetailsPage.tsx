@@ -22,6 +22,7 @@ import {
 } from '@/src/components/property';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
+import { useNotification } from '@/src/shared/hooks/useNotification';
 
 /**
  * PropertyDetailsPage Component
@@ -40,6 +41,7 @@ import PromotionModal from '@/src/features/promotions/components/PromotionModal'
 const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => {
   const { t } = useTranslation(['property']);
   const { state, dispatch, createConversation, toggleSavedHome } = useAppContext();
+  const { error } = useNotification();
 
   // Track page view for analytics
   useTrackView({
@@ -148,9 +150,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     } else {
       try {
         await toggleSavedHome(property);
-      } catch (error) {
-        console.error('Failed to toggle saved home:', error);
-        alert('Failed to save property. Please try again.');
+      } catch (err) {
+        console.error('Failed to toggle saved home:', err);
+        await error(t('property:errors.errorTitle', 'Error'), t('property:errors.saveFailed', 'Failed to save property. Please try again.'));
       }
     }
   };
@@ -167,8 +169,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     try {
       const conversation = await createConversation(property.id);
       dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-    } catch (error) {
-      alert('Failed to start conversation. Please try again.');
+    } catch (err) {
+      await error(t('property:errors.errorTitle', 'Error'), t('property:errors.conversationFailed', 'Failed to start conversation. Please try again.'));
     } finally {
       setIsCreatingConversation(false);
     }
