@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import { useAppContext } from '../context/AppContext';
 import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon } from '../constants';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
@@ -15,6 +17,23 @@ import { socketService } from '../services/socketService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
 import { useTrackView } from '../src/features/view-stats/hooks';
 import { useConfirmation } from '../src/shared/hooks/useConfirmation';
+
+// Map icon SVG for section headers
+const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+  </svg>
+);
+
+// Map invalidator component
+const MapInvalidator: React.FC = () => {
+  const map = useMap();
+  useEffect(() => {
+    const timer = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(timer);
+  }, [map]);
+  return null;
+};
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -1329,6 +1348,145 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
           )}
         </div>
+
+        {/* Properties Map Section */}
+        {agencyProperties.length > 0 && agencyProperties.some(p => p.lat && p.lng) && (
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <MapIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Properties Map</h2>
+                <p className="text-xs text-slate-500">
+                  ({agencyProperties.filter(p => p.status === 'active').length} active, {agencyProperties.filter(p => p.status === 'sold').length} sold)
+                </p>
+              </div>
+            </div>
+            <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
+              <MapContainer
+                center={agencyProperties.filter(p => p.lat && p.lng)[0] ? [agencyProperties.filter(p => p.lat && p.lng)[0].lat!, agencyProperties.filter(p => p.lat && p.lng)[0].lng!] : [agencyData.lat || 42.0, agencyData.lng || 21.0]}
+                zoom={12}
+                scrollWheelZoom={true}
+                className="w-full h-[400px] md:h-[500px]"
+                maxZoom={18}
+                minZoom={3}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapInvalidator />
+                {agencyProperties.filter(p => p.lat && p.lng).map((property) => (
+                  <Marker
+                    key={property.id || property._id}
+                    position={[property.lat!, property.lng!]}
+                    icon={L.icon({
+                      iconUrl: property.status === 'sold'
+                        ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png'
+                        : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                      iconSize: [25, 41],
+                      iconAnchor: [12, 41],
+                      popupAnchor: [1, -34],
+                      shadowSize: [41, 41]
+                    })}
+                  >
+                    <Popup>
+                      <div className="min-w-[250px]">
+                        {property.imageUrl && (
+                          <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" />
+                        )}
+                        <p className="font-semibold text-sm mb-1 text-slate-900 line-clamp-2">{property.address}</p>
+                        <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>
+                        <p className="font-bold text-emerald-600 mb-2">{formatPrice(property.price, property.country)}</p>
+                        <div className="flex gap-2 text-xs text-slate-600 mb-3">
+                          <span>{property.beds} beds</span>
+                          <span>•</span>
+                          <span>{property.baths} baths</span>
+                          <span>•</span>
+                          <span>{property.sqft} m²</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property });
+                            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'propertyDetail' });
+                          }}
+                          className={`w-full text-white px-3 py-2 rounded-lg font-semibold text-sm ${property.status === 'sold' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                <span className="text-slate-600">For Sale ({agencyProperties.filter(p => p.status === 'active').length})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                <span className="text-slate-600">Sold ({agencyProperties.filter(p => p.status === 'sold').length})</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Service Area Location Map */}
+        {agencyData.lat != null && agencyData.lng != null && !isNaN(agencyData.lat) && !isNaN(agencyData.lng) && (
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-500/25">
+                <MapPinIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Service Area Location</h2>
+                <p className="text-xs text-slate-500">{agencyData.city}, {agencyData.country}</p>
+              </div>
+            </div>
+            <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
+              <MapContainer
+                center={[agencyData.lat, agencyData.lng]}
+                zoom={13}
+                scrollWheelZoom={true}
+                className="w-full h-80"
+                maxZoom={18}
+                minZoom={3}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapInvalidator />
+                <Marker
+                  position={[agencyData.lat, agencyData.lng]}
+                  icon={L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                  })}
+                >
+                  <Popup>
+                    <div className="text-center min-w-[200px]">
+                      {agencyData.logo && (
+                        <img src={agencyData.logo} alt={agencyData.name} className="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-slate-300" />
+                      )}
+                      <h3 className="font-bold text-slate-900">{agencyData.name}</h3>
+                      {agencyData.address && <p className="text-sm text-slate-600 mt-1">{agencyData.address}</p>}
+                      <p className="text-sm font-medium text-slate-700">{agencyData.city}, {agencyData.country}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          </div>
+        )}
 
         {/* Properties Section with Tab Navigation */}
         <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 border border-slate-100">
