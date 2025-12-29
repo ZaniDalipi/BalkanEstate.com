@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlusIcon, XMarkIcon } from '@/constants';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 interface PromotionCoupon {
   _id: string;
@@ -23,6 +24,7 @@ interface PromotionCoupon {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const PromotionCouponManager: React.FC = () => {
+  const { confirm } = useConfirmation();
   const [coupons, setCoupons] = useState<PromotionCoupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -122,7 +124,14 @@ const PromotionCouponManager: React.FC = () => {
   };
 
   const handleDisableCoupon = async (id: string) => {
-    if (!confirm('Are you sure you want to disable this coupon?')) return;
+    const confirmed = await confirm({
+      title: 'Disable Coupon',
+      message: 'Are you sure you want to disable this coupon?',
+      confirmLabel: 'Disable',
+      cancelLabel: 'Cancel',
+      type: 'warning',
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('balkan_estate_token');

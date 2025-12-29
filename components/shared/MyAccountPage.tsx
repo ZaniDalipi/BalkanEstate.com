@@ -14,6 +14,7 @@ import Footer from './Footer';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
 import { SEO } from '../../src/components/seo';
+import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -419,6 +420,22 @@ const ChangePasswordSection: React.FC = () => {
 const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({ logoutAllDevices }) => {
     const { t } = useTranslation(['account']);
     const { dispatch } = useAppContext();
+    const { confirm } = useConfirmation();
+
+    const handleLogoutAllDevices = async () => {
+        const confirmed = await confirm({
+            title: t('security.logoutAllDevicesTitle', 'Logout All Devices'),
+            message: t('security.confirmLogoutAllDevices'),
+            confirmLabel: t('security.logoutButton', 'Logout All'),
+            cancelLabel: t('security.cancelButton', 'Cancel'),
+            type: 'warning',
+        });
+
+        if (confirmed) {
+            await logoutAllDevices();
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -443,12 +460,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
                         </p>
                         <button
                             type="button"
-                            onClick={async () => {
-                                if (window.confirm(t('security.confirmLogoutAllDevices'))) {
-                                    await logoutAllDevices();
-                                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-                                }
-                            }}
+                            onClick={handleLogoutAllDevices}
                             className="mt-3 px-4 py-2 bg-yellow-600 text-white font-medium rounded-lg hover:bg-yellow-700 transition-colors text-sm"
                         >
                             {t('security.logoutAllDevices')}

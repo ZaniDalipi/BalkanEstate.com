@@ -9,6 +9,7 @@ import Footer from '@/components/shared/Footer';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { SEO } from '@/src/components/seo';
 import * as api from '@/services/apiService';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 const initialFilters: Filters = {
     query: '',
@@ -77,6 +78,7 @@ const SavedSearchesPage: React.FC = () => {
   const { savedSearches, isAuthenticated, properties } = state;
   const [sortBy, setSortBy] = useState<'createdAt' | 'name' | 'lastAccessed'>('createdAt');
   const [isClearing, setIsClearing] = useState(false);
+  const { confirm } = useConfirmation();
 
   // Fetch properties if not already loaded
   useEffect(() => {
@@ -91,7 +93,15 @@ const SavedSearchesPage: React.FC = () => {
   }, [sortBy]);
 
   const handleClearAll = async () => {
-    if (!confirm('Are you sure you want to delete all saved searches? This cannot be undone.')) {
+    const confirmed = await confirm({
+      title: t('clearAll.confirmTitle', 'Delete All Saved Searches'),
+      message: t('clearAll.confirmMessage', 'Are you sure you want to delete all saved searches? This cannot be undone.'),
+      confirmLabel: t('clearAll.confirmButton', 'Delete All'),
+      cancelLabel: t('clearAll.cancelButton', 'Cancel'),
+      type: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     setIsClearing(true);

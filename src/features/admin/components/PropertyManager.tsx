@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon, EyeIcon } from '@/constants';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 interface Property {
   _id: string;
@@ -36,6 +37,7 @@ interface Property {
 
 const PropertyManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
+  const { confirm } = useConfirmation();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,7 +172,14 @@ const PropertyManager: React.FC = () => {
   };
 
   const handleDeleteProperty = async (propertyId: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) return;
+    const confirmed = await confirm({
+      title: t('admin:properties.deleteTitle', 'Delete Property'),
+      message: t('admin:properties.deleteConfirm', { title, defaultValue: `Are you sure you want to delete "${title}"? This action cannot be undone.` }),
+      confirmLabel: t('admin:common.delete', 'Delete'),
+      cancelLabel: t('admin:common.cancel', 'Cancel'),
+      type: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('balkan_estate_token');

@@ -14,6 +14,7 @@ import { Agency } from '../types';
 import { socketService } from '../services/socketService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';
 import { useTrackView } from '../src/features/view-stats/hooks';
+import { useConfirmation } from '../src/shared/hooks/useConfirmation';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -63,6 +64,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation('agencyDetails');
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
+  const { confirm } = useConfirmation();
 
   // Track page view for analytics
   useTrackView({
@@ -277,9 +279,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
 
     const action = isCurrentlyAdmin ? t('confirmations.removeAdminRights') : t('confirmations.makeAdminRights');
-    const confirmed = window.confirm(
-      t('confirmations.toggleAdmin', { action, name: agentName })
-    );
+    const confirmed = await confirm({
+      title: isCurrentlyAdmin ? t('confirmations.removeAdminTitle', 'Remove Admin') : t('confirmations.makeAdminTitle', 'Make Admin'),
+      message: t('confirmations.toggleAdmin', { action, name: agentName }),
+      confirmLabel: isCurrentlyAdmin ? t('confirmations.removeButton', 'Remove') : t('confirmations.makeAdminButton', 'Make Admin'),
+      cancelLabel: t('confirmations.cancelButton', 'Cancel'),
+      type: isCurrentlyAdmin ? 'warning' : 'info',
+    });
 
     if (!confirmed) return;
 
@@ -310,10 +316,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       return;
     }
 
-    const confirmed = window.confirm(
-      t('confirmations.removeAgent', { name: agentName, agency: agencyData.name }) + '\n\n' +
-      t('confirmations.removeAgentDetails')
-    );
+    const confirmed = await confirm({
+      title: t('confirmations.removeAgentTitle', 'Remove Agent'),
+      message: t('confirmations.removeAgent', { name: agentName, agency: agencyData.name }) + '\n\n' + t('confirmations.removeAgentDetails'),
+      confirmLabel: t('confirmations.removeButton', 'Remove'),
+      cancelLabel: t('confirmations.cancelButton', 'Cancel'),
+      type: 'danger',
+    });
 
     if (!confirmed) return;
 
@@ -342,10 +351,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const handleLeaveAgency = async () => {
-    const confirmed = window.confirm(
-      t('confirmations.leaveAgency', { agency: agencyData.name }) + '\n\n' +
-      t('confirmations.leaveAgencyDetails')
-    );
+    const confirmed = await confirm({
+      title: t('confirmations.leaveAgencyTitle', 'Leave Agency'),
+      message: t('confirmations.leaveAgency', { agency: agencyData.name }) + '\n\n' + t('confirmations.leaveAgencyDetails'),
+      confirmLabel: t('confirmations.leaveButton', 'Leave'),
+      cancelLabel: t('confirmations.cancelButton', 'Cancel'),
+      type: 'warning',
+    });
 
     if (!confirmed) return;
 

@@ -8,6 +8,7 @@ import { CalendarIcon, UserCircleIcon, ChevronLeftIcon, BuildingOfficeIcon, Shie
 import { getConversation, sendMessage as sendMessageAPI, uploadMessageImage, getSecurityWarning } from '@/services/apiService';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 interface ConversationViewProps {
     conversation: Conversation;
@@ -28,6 +29,7 @@ const MessageImage: React.FC<{imageUrl: string; t: (key: string) => string}> = (
 const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBack }) => {
     const { t } = useTranslation(['messages']);
     const { state, dispatch, deleteConversation } = useAppContext();
+    const { confirm } = useConfirmation();
     const [imageError, setImageError] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -196,7 +198,15 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
     };
 
     const handleDelete = async () => {
-        if (window.confirm(t('inbox.deleteConfirm'))) {
+        const confirmed = await confirm({
+            title: t('inbox.deleteTitle', 'Delete Conversation'),
+            message: t('inbox.deleteConfirm'),
+            confirmLabel: t('inbox.deleteButton', 'Delete'),
+            cancelLabel: t('inbox.cancelButton', 'Cancel'),
+            type: 'danger',
+        });
+
+        if (confirmed) {
             try {
                 await deleteConversation(conversation.id);
                 // Go back if on mobile, otherwise conversation list will update

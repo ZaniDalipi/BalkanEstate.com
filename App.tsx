@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
+import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from './src/components/seo';
@@ -510,20 +511,22 @@ const App: React.FC = () => {
         <QueryProvider>
           <AppProvider>
             <AlertProvider>
-              {/* Global SEO Components */}
-              <SEO />
-              <OrganizationSchema />
-              <FAQSchema faqs={realEstateFAQs} />
+              <ConfirmationProvider>
+                {/* Global SEO Components */}
+                <SEO />
+                <OrganizationSchema />
+                <FAQSchema faqs={realEstateFAQs} />
 
-              {/* Analytics - only loaded if IDs are provided */}
-              {(googleAnalyticsId || facebookPixelId) && (
-                <Analytics
-                  googleAnalyticsId={googleAnalyticsId}
-                  facebookPixelId={facebookPixelId}
-                />
-              )}
+                {/* Analytics - only loaded if IDs are provided */}
+                {(googleAnalyticsId || facebookPixelId) && (
+                  <Analytics
+                    googleAnalyticsId={googleAnalyticsId}
+                    facebookPixelId={facebookPixelId}
+                  />
+                )}
 
-              <AppWrapper />
+                <AppWrapper />
+              </ConfirmationProvider>
             </AlertProvider>
           </AppProvider>
         </QueryProvider>

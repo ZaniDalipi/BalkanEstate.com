@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../../types';
 import { getAgencies, verifyInvitationCode, createJoinRequest, leaveAgency } from '../../services/apiService';
 import { useAppContext } from '../../context/AppContext';
+import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -23,6 +24,7 @@ interface AgencyManagementSectionProps {
 
 const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ currentUser, onAgencyChange }) => {
   const { dispatch } = useAppContext();
+  const { confirm } = useConfirmation();
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [selectedAgencyId, setSelectedAgencyId] = useState('');
   const [invitationCode, setInvitationCode] = useState('');
@@ -174,7 +176,15 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   };
 
   const handleLeaveAgency = async () => {
-    if (!confirm(`Are you sure you want to leave ${currentUser.agencyName}? You will become an Independent Agent.`)) {
+    const confirmed = await confirm({
+      title: 'Leave Agency',
+      message: `Are you sure you want to leave ${currentUser.agencyName}? You will become an Independent Agent.`,
+      confirmLabel: 'Leave Agency',
+      cancelLabel: 'Cancel',
+      type: 'warning',
+    });
+
+    if (!confirmed) {
       return;
     }
 
