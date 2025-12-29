@@ -122,6 +122,7 @@
     "airConditioning": "Air Conditioning",
     "pool": "Swimming Pool",
     "petsAllowed": "Pets Allowed",
+    "has360Tour": "360° Virtuelna Tura",
     "placeholder": "Type amenity and press Enter (e.g., gym, pool)"
   },
   "distance": {

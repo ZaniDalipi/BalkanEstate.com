@@ -57,6 +57,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const hasAirConditioningMatch = filters.hasAirConditioning !== null ? p.hasAirConditioning === filters.hasAirConditioning : true;
         const hasPoolMatch = filters.hasPool !== null ? p.hasPool === filters.hasPool : true;
         const petsAllowedMatch = filters.petsAllowed !== null ? p.petsAllowed === filters.petsAllowed : true;
+        const has360TourMatch = filters.has360Tour !== null ? p.hasVirtualTour360 === filters.has360Tour : true;
 
         // Floor number filters
         const minFloorNumberMatch = filters.minFloorNumber !== null ? (p.floorNumber !== undefined && p.floorNumber >= filters.minFloorNumber) : true;
@@ -111,6 +112,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                hasAirConditioningMatch &&
                hasPoolMatch &&
                petsAllowedMatch &&
+               has360TourMatch &&
                minFloorNumberMatch &&
                maxFloorNumberMatch &&
                maxDistanceToCenterMatch &&

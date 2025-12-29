@@ -477,6 +477,12 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 onChange={(value) => onFilterChange('petsAllowed', value)}
                                 t={t}
                             />
+                            <ToggleSwitch
+                                label={t('search:amenities.has360Tour')}
+                                value={filters.has360Tour}
+                                onChange={(value) => onFilterChange('has360Tour', value)}
+                                t={t}
+                            />
                         </div>
 
                         {/* Distance Filters */}
