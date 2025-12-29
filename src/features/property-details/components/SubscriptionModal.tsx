@@ -102,12 +102,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   // Get buyer product (default to first buyer product or fallback values)
   const buyerProduct = buyerProducts.find(p => p.productId === 'buyer_pro_monthly') || buyerProducts[0];
   const buyerPrice = buyerProduct?.price || 1.50;
-  const buyerName = buyerProduct?.name || 'Buyer Pro';
+  const buyerName = buyerProduct?.name || t('modals:subscription.buyerPro.name');
   const buyerFeatures = buyerProduct?.features || [
-    'Instant email & SMS notifications',
-    'Save unlimited searches',
-    'Early access to new listings',
-    'Advanced market insights',
+    t('modals:subscription.buyerPro.features.notifications'),
+    t('modals:subscription.buyerPro.features.unlimitedSearches'),
+    t('modals:subscription.buyerPro.features.earlyAccess'),
+    t('modals:subscription.buyerPro.features.marketInsights'),
   ];
 
   const renderBuyerPlan = () => (
@@ -125,7 +125,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
                   <span className="text-3xl sm:text-4xl font-extrabold text-primary">€{buyerPrice}</span>
                   <span className="text-base sm:text-lg font-semibold text-neutral-500">{t('modals:subscription.perMonth')}</span>
                </div>
-               <p className="text-neutral-600 mt-3 text-sm sm:text-base">{buyerProduct?.description || 'Never miss a new listing! Get notified the moment a property matching your criteria hits the market.'}</p>
+               <p className="text-neutral-600 mt-3 text-sm sm:text-base">{buyerProduct?.description || t('modals:subscription.buyerPro.description')}</p>
               <ul className="mt-8 space-y-4 text-neutral-700 text-sm sm:text-base">
                   {buyerFeatures.map((feature, index) => (
                     <li key={index} className="flex items-start gap-3">
