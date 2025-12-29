@@ -26,6 +26,13 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const { state, dispatch, updateSavedSearchAccessTime } = useAppContext();
   const { isLoadingProperties, allMunicipalities, properties } = state;
 
+  // Helper function to decode HTML entities (backend encodes quotes as &quot;)
+  const decodeHtmlEntities = (str: string): string => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = str;
+    return textarea.value;
+  };
+
   // Helper function to safely parse drawnBoundsJSON
   const parsedBounds = useMemo(() => {
     try {
@@ -45,10 +52,17 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
       // If it's a string, parse it
       if (typeof parsed === 'string') {
-        const trimmed = parsed.trim();
+        let trimmed = parsed.trim();
         if (!trimmed || trimmed === 'null' || trimmed === 'undefined') {
           return null;
         }
+
+        // Decode HTML entities if present (backend may encode quotes as &quot;)
+        if (trimmed.includes('&quot;') || trimmed.includes('&#')) {
+          trimmed = decodeHtmlEntities(trimmed);
+          console.log('[SavedSearchAccordion] Decoded HTML entities:', trimmed);
+        }
+
         parsed = JSON.parse(trimmed);
       }
 
