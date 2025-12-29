@@ -15,6 +15,16 @@ import Modal from '@/components/shared/Modal';
 import { COUNTRY_OPTIONS, BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { SEO, generateSearchBreadcrumbs, Breadcrumbs } from '@/src/components/seo';
 
+// Helper to serialize Leaflet bounds to a consistent JSON format
+const serializeBounds = (bounds: L.LatLngBounds): string => {
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    return JSON.stringify({
+        _southWest: { lat: sw.lat, lng: sw.lng },
+        _northEast: { lat: ne.lat, lng: ne.lng }
+    });
+};
+
 interface SearchPageProps {
     onToggleSidebar: () => void;
 }
@@ -204,7 +214,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     };
 
     const handleDrawComplete = useCallback((bounds: L.LatLngBounds | null) => {
-        updateSearchPageState({ drawnBoundsJSON: bounds ? JSON.stringify(bounds) : null, activeFilters: {...filters, query: ''} });
+        updateSearchPageState({ drawnBoundsJSON: bounds ? serializeBounds(bounds) : null, activeFilters: {...filters, query: ''} });
         setIsDrawing(false);
     }, [updateSearchPageState, filters]);
     
@@ -482,7 +492,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 updateSearchPageState({
                     filters: newFilters,
                     activeFilters: newFilters,
-                    drawnBoundsJSON: JSON.stringify(bounds), // Set the country bounds as the search area
+                    drawnBoundsJSON: serializeBounds(bounds), // Set the country bounds as the search area
                 });
                 return;
             }
@@ -584,7 +594,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     id: `ss-${now}`,
                     name: `Area near ${name}`,
                     filters: initialFilters, // Save only the area, not other empty filters
-                    drawnBoundsJSON: JSON.stringify(mapBounds), // Save the current map view as the search area
+                    drawnBoundsJSON: serializeBounds(mapBounds), // Save the current map view as the search area
                     createdAt: now,
                     lastAccessed: now,
                     seenPropertyIds: [],
@@ -614,7 +624,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             setShowAllOnMobile(false);
         }
 
-        const newState: Partial<SearchPageState> = { mapBoundsJSON: JSON.stringify(newBounds) };
+        const newState: Partial<SearchPageState> = { mapBoundsJSON: serializeBounds(newBounds) };
         updateSearchPageState(newState);
     }, [isMobile, isFiltersOpen, showAllOnMobile, updateSearchPageState]);
 
@@ -653,7 +663,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         [north, east],
                     ]);
                     updateSearchPageState({
-                        mapBoundsJSON: JSON.stringify(searchBounds),
+                        mapBoundsJSON: serializeBounds(searchBounds),
                     });
                     setFlyToTarget({ center: [Number(results[0].lat), Number(results[0].lon)], zoom: 12 });
                 }
