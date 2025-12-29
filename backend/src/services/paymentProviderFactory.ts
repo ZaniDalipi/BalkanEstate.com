@@ -124,10 +124,20 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   },
 };
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-});
+// Lazy Stripe initialization to avoid crash when API key not set
+let _stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+      throw new Error('STRIPE_SECRET_KEY not configured');
+    }
+    _stripe = new Stripe(apiKey, {
+      apiVersion: '2025-10-29.clover',
+    });
+  }
+  return _stripe;
+}
 
 export interface CreatePaymentParams {
   userId: string;
@@ -264,7 +274,7 @@ class PaymentProviderFactory {
         locale: this.mapStripeLocale(params.language),
       };
 
-      const session = await stripe.checkout.sessions.create(sessionConfig);
+      const session = await getStripe().checkout.sessions.create(sessionConfig);
 
       console.log(`✅ Stripe checkout session created: ${session.id}`);
 
