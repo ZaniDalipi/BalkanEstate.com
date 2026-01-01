@@ -188,7 +188,13 @@
     "tips": "💡 Tips: Use the search box to find your village/town, zoom with +/- buttons or scroll wheel, pan by dragging the map, and drag the red marker to your exact property location.",
     "latitude": "Latitude:",
     "longitude": "Longitude:",
-    "location": "Location"
+    "location": "Location",
+    "nightMode": "Night Mode",
+    "dayMode": "Day Mode",
+    "heatMap": "Heat Map",
+    "showHeatMap": "Show Heat Map",
+    "hideHeatMap": "Hide Heat Map",
+    "heat": "Heat"
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

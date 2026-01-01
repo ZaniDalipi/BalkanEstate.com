@@ -722,23 +722,36 @@ export const HighlightedPropertyMarkers: React.FC<HighlightedPropertyMarkersProp
  * Legend Component
  *
  * Shows color legend for different property types and promotion tiers.
+ * Supports night mode styling for dark map theme.
  */
-export const Legend: React.FC = () => {
+interface LegendProps {
+  isNightMode?: boolean;
+}
+
+export const Legend: React.FC<LegendProps> = ({ isNightMode = false }) => {
   const { t } = useTranslation(['property']);
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-neutral-200 animate-fade-in">
-      <h4 className="font-bold text-sm mb-2 text-neutral-800">{t('map.legend')}</h4>
+    <div className={`${
+      isNightMode
+        ? 'bg-slate-900/90 border-slate-700'
+        : 'bg-white/80 border-neutral-200'
+    } backdrop-blur-sm p-3 rounded-lg shadow-lg border animate-fade-in transition-colors duration-300`}>
+      <h4 className={`font-bold text-sm mb-2 ${isNightMode ? 'text-white' : 'text-neutral-800'}`}>
+        {t('map.legend')}
+      </h4>
 
       {/* Property Types */}
       <div className="space-y-1.5 mb-3">
         {Object.entries(PROPERTY_TYPE_COLORS).map(([type, color]) => (
           <div key={type} className="flex items-center gap-2">
             <span
-              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm"
+              className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${
+                isNightMode ? 'border-slate-700' : 'border-white'
+              }`}
               style={{ backgroundColor: color }}
             ></span>
-            <span className="text-xs font-semibold text-neutral-700">
+            <span className={`text-xs font-semibold ${isNightMode ? 'text-slate-300' : 'text-neutral-700'}`}>
               {t(`map.propertyTypes.${type}`)}
             </span>
           </div>
@@ -746,32 +759,56 @@ export const Legend: React.FC = () => {
       </div>
 
       {/* Promotion Tiers Separator */}
-      <div className="border-t border-neutral-200 pt-2 mt-2">
-        <h5 className="text-xs font-bold text-neutral-600 mb-1.5">{t('map.promotedListings', 'Promoted')}</h5>
+      <div className={`border-t ${isNightMode ? 'border-slate-700' : 'border-neutral-200'} pt-2 mt-2`}>
+        <h5 className={`text-xs font-bold mb-1.5 ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+          {t('map.promotedListings', 'Promoted')}
+        </h5>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span
-              className="w-3.5 h-3.5 rounded-full border-2 shadow-sm"
-              style={{ borderColor: PROMOTION_TIER_COLORS.premium, backgroundColor: 'white' }}
+              className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${isNightMode ? 'bg-slate-800' : 'bg-white'}`}
+              style={{ borderColor: PROMOTION_TIER_COLORS.premium }}
             ></span>
-            <span className="text-xs text-neutral-600">👑 {t('map.tiers.premium', 'Premium Premiere')}</span>
+            <span className={`text-xs ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+              👑 {t('map.tiers.premium', 'Premium Premiere')}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <span
-              className="w-3.5 h-3.5 rounded-full border-2 shadow-sm"
-              style={{ borderColor: PROMOTION_TIER_COLORS.highlight, backgroundColor: 'white' }}
+              className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${isNightMode ? 'bg-slate-800' : 'bg-white'}`}
+              style={{ borderColor: PROMOTION_TIER_COLORS.highlight }}
             ></span>
-            <span className="text-xs text-neutral-600">💎 {t('map.tiers.highlight', 'Highlight Listing')}</span>
+            <span className={`text-xs ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+              💎 {t('map.tiers.highlight', 'Highlight Listing')}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <span
-              className="w-3.5 h-3.5 rounded-full border-2 shadow-sm"
-              style={{ borderColor: PROMOTION_TIER_COLORS.featured, backgroundColor: 'white' }}
+              className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${isNightMode ? 'bg-slate-800' : 'bg-white'}`}
+              style={{ borderColor: PROMOTION_TIER_COLORS.featured }}
             ></span>
-            <span className="text-xs text-neutral-600">⭐ {t('map.tiers.featured', 'Featured Listing')}</span>
+            <span className={`text-xs ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+              ⭐ {t('map.tiers.featured', 'Featured Listing')}
+            </span>
           </div>
         </div>
       </div>
+
+      {/* Heat Map Legend - Only in Night Mode */}
+      {isNightMode && (
+        <div className="border-t border-slate-700 pt-2 mt-2">
+          <h5 className="text-xs font-bold text-slate-400 mb-1.5">
+            {t('map.heatMapLegend', 'Property Density')}
+          </h5>
+          <div className="flex items-center gap-1">
+            <div className="h-2 flex-1 rounded-full bg-gradient-to-r from-cyan-400 via-yellow-400 to-red-500" />
+          </div>
+          <div className="flex justify-between mt-0.5">
+            <span className="text-[9px] text-slate-500">{t('map.low', 'Low')}</span>
+            <span className="text-[9px] text-slate-500">{t('map.high', 'High')}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

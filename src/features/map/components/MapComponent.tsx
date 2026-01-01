@@ -11,8 +11,12 @@ import {
   SearchPlusIcon,
   MapLegendIcon,
   CrosshairsIcon,
+  MoonIcon,
+  SunIcon,
+  FireHeatIcon,
 } from '@/constants';
 import { CadastreLayer } from './CadastreLayer';
+import HeatMapLayer from './HeatMapLayer';
 import {
   FlyToController,
   MapEvents,
@@ -44,6 +48,11 @@ const TILE_LAYERS = {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution:
       'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+  },
+  night: {
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
   },
 };
 
@@ -115,6 +124,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [mapType, setMapType] = useState<TileLayerType>('street');
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [showCadastre, setShowCadastre] = useState(false);
+  const [showHeatMap, setShowHeatMap] = useState(false);
+
+  // Check if we're in night mode
+  const isNightMode = mapType === 'night';
 
   const validProperties = useMemo(() => {
     return properties.filter(
@@ -175,6 +188,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             updateInterval={150}
           />
           <CadastreLayer enabled={showCadastre && mapType === 'satellite'} opacity={0.7} />
+          <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
           <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} />
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
@@ -183,21 +197,23 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {!isMobile && (
         <>
           <div className="absolute bottom-12 right-4 z-[1000] flex flex-col items-end gap-3">
-            <div className="bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg flex items-center gap-2">
+            <div className={`${isNightMode ? 'bg-slate-900/90' : 'bg-white/80'} backdrop-blur-sm p-2 rounded-full shadow-lg flex items-center gap-2 transition-colors duration-300`}>
               <button
                 onClick={onRecenter}
-                className="p-2 rounded-full hover:bg-black/10 transition-colors"
+                className={`p-2 rounded-full transition-colors ${isNightMode ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
                 title={t('search:map.centerOnLocation')}
               >
-                <CrosshairsIcon className="w-6 h-6 text-neutral-700" />
+                <CrosshairsIcon className={`w-6 h-6 ${isNightMode ? 'text-white' : 'text-neutral-700'}`} />
               </button>
-              <div className="flex items-center gap-1 bg-neutral-200/50 p-1 rounded-full">
+              <div className={`flex items-center gap-1 ${isNightMode ? 'bg-slate-800/50' : 'bg-neutral-200/50'} p-1 rounded-full`}>
                 <button
                   onClick={() => setMapType('street')}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     mapType === 'street'
                       ? 'bg-white shadow text-primary'
-                      : 'text-neutral-600 hover:bg-white/50'
+                      : isNightMode
+                        ? 'text-slate-300 hover:bg-white/10'
+                        : 'text-neutral-600 hover:bg-white/50'
                   }`}
                 >
                   {t('search:map.street')}
@@ -207,12 +223,30 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     mapType === 'satellite'
                       ? 'bg-white shadow text-primary'
-                      : 'text-neutral-600 hover:bg-white/50'
+                      : isNightMode
+                        ? 'text-slate-300 hover:bg-white/10'
+                        : 'text-neutral-600 hover:bg-white/50'
                   }`}
                 >
                   {t('search:map.satellite')}
                 </button>
               </div>
+              {/* Night Mode Toggle */}
+              <button
+                onClick={() => setMapType(isNightMode ? 'street' : 'night')}
+                className={`p-2 rounded-full transition-all ${
+                  isNightMode
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                    : 'hover:bg-black/10 text-neutral-600'
+                }`}
+                title={t('search:map.nightMode', 'Night Mode')}
+              >
+                {isNightMode ? (
+                  <SunIcon className="w-5 h-5" />
+                ) : (
+                  <MoonIcon className="w-5 h-5" />
+                )}
+              </button>
               <button
                 onClick={onDrawStart}
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-md transition-colors ${
@@ -225,6 +259,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <span>{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
               </button>
             </div>
+
+            {/* Heat Map Toggle - appears when in night mode */}
+            {isNightMode && (
+              <button
+                onClick={() => setShowHeatMap(!showHeatMap)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-lg transition-all animate-fade-in ${
+                  showHeatMap
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-orange-500/30'
+                    : 'bg-slate-800/90 text-white hover:bg-slate-700/90'
+                }`}
+                title={t('search:map.heatMap', 'Heat Map')}
+              >
+                <FireHeatIcon className={`w-5 h-5 ${showHeatMap ? 'animate-pulse' : ''}`} />
+                <span>{showHeatMap ? t('search:map.hideHeatMap', 'Hide Heat Map') : t('search:map.showHeatMap', 'Show Heat Map')}</span>
+              </button>
+            )}
 
             {mapType === 'satellite' && (
               <button
@@ -263,7 +313,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             )}
           </div>
           <div className="absolute bottom-4 left-4 z-[1000]">
-            <Legend />
+            <Legend isNightMode={isNightMode} />
           </div>
         </>
       )}
@@ -272,8 +322,25 @@ const MapComponent: React.FC<MapComponentProps> = ({
         <div className="absolute bottom-20 left-4 z-[1000] pointer-events-none flex flex-col gap-2">
           {isLegendOpen && (
             <div className="absolute bottom-full mb-2 pointer-events-auto">
-              <Legend />
+              <Legend isNightMode={isNightMode} />
             </div>
+          )}
+          {/* Heat Map Toggle - Mobile */}
+          {isNightMode && (
+            <button
+              onClick={() => setShowHeatMap(!showHeatMap)}
+              className={`pointer-events-auto px-3 py-2 text-xs font-bold rounded-full shadow-lg transition-all animate-fade-in ${
+                showHeatMap
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                  : 'bg-slate-800/90 text-white'
+              }`}
+              title={t('search:map.heatMap', 'Heat Map')}
+            >
+              <span className="flex items-center gap-1.5">
+                <FireHeatIcon className={`w-4 h-4 ${showHeatMap ? 'animate-pulse' : ''}`} />
+                {showHeatMap ? t('search:map.heat', 'Heat') : t('search:map.heat', 'Heat')}
+              </span>
+            </button>
           )}
           {mapType === 'satellite' && (
             <button
@@ -288,12 +355,32 @@ const MapComponent: React.FC<MapComponentProps> = ({
               {showCadastre ? '✓ ' : ''}{t('search:map.parcels')}
             </button>
           )}
+          {/* Night Mode Toggle - Mobile */}
+          <button
+            onClick={() => setMapType(isNightMode ? 'street' : 'night')}
+            className={`pointer-events-auto p-2.5 rounded-full shadow-lg transition-all ${
+              isNightMode
+                ? 'bg-indigo-600 text-white shadow-indigo-500/30'
+                : 'bg-white/80 backdrop-blur-sm text-neutral-800'
+            }`}
+            title={t('search:map.nightMode', 'Night Mode')}
+          >
+            {isNightMode ? (
+              <SunIcon className="w-5 h-5" />
+            ) : (
+              <MoonIcon className="w-5 h-5" />
+            )}
+          </button>
           <button
             onClick={() => setIsLegendOpen((p) => !p)}
-            className="bg-white/80 backdrop-blur-sm p-2.5 rounded-full shadow-lg pointer-events-auto"
+            className={`p-2.5 rounded-full shadow-lg pointer-events-auto transition-colors ${
+              isNightMode
+                ? 'bg-slate-800/90 backdrop-blur-sm'
+                : 'bg-white/80 backdrop-blur-sm'
+            }`}
             title={t('search:map.mapLegend')}
           >
-            <MapLegendIcon className="w-6 h-6 text-neutral-800" />
+            <MapLegendIcon className={`w-6 h-6 ${isNightMode ? 'text-white' : 'text-neutral-800'}`} />
           </button>
         </div>
       )}

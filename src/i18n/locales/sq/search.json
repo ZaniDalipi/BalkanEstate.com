@@ -183,7 +183,13 @@
     "tips": "💡 Këshilla: Përdorni kutinë e kërkimit për të gjetur fshatin/qytetin tuaj, zmadho me butonat +/- ose rrotën e miut, lëviz hartën duke e tërhequr dhe tërhiq shënuesin e kuq në vendndodhjen e saktë të pronës.",
     "latitude": "Gjerësia:",
     "longitude": "Gjatësia:",
-    "location": "Vendndodhja"
+    "location": "Vendndodhja",
+    "nightMode": "Mënyra e Natës",
+    "dayMode": "Mënyra e Ditës",
+    "heatMap": "Harta e Nxehtësisë",
+    "showHeatMap": "Shfaq Hartën e Nxehtësisë",
+    "hideHeatMap": "Fshih Hartën e Nxehtësisë",
+    "heat": "Nxehtësia"
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

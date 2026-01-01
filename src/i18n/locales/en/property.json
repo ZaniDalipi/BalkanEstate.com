@@ -268,7 +268,10 @@
         "3": "Worth considering - featured by the owner.",
         "4": "Take a closer look at this featured home!"
       }
-    }
+    },
+    "heatMapLegend": "Property Density",
+    "low": "Low",
+    "high": "High"
   },
   "neighborhood": {
     "title": "Neighborhood Insights",

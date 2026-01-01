@@ -240,7 +240,10 @@
       "apartment": "Banesë",
       "villa": "Vilë",
       "other": "Tjetër"
-    }
+    },
+    "heatMapLegend": "Dendësia e Pronave",
+    "low": "E ulët",
+    "high": "E lartë"
   },
   "neighborhood": {
     "title": "Informacione për Lagjen",
