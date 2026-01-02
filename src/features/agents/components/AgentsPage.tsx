@@ -527,102 +527,165 @@ const AgentsPage: React.FC = () => {
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           {/* Search Section - Same as Agencies Page */}
-          <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-6 sm:p-8 mb-6">
-            <div className="text-center mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
-                {t('agents:search.title', 'Find Your Ideal Agent')}
-              </h2>
-              <p className="text-neutral-600 text-sm sm:text-base">
-                {t('agents:search.subtitle', { count: agents.length })}
-              </p>
+          <div className="relative bg-gradient-to-b from-neutral-100 via-neutral-50 to-white rounded-2xl shadow-lg border border-neutral-200 p-6 sm:p-8 mb-6 overflow-hidden">
+            {/* 3D Mesh Background with Parallax */}
+            <div
+              className="absolute inset-0"
+              style={{
+                transform: `translate3d(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px, 0)`,
+                transition: 'transform 0.1s ease-out',
+              }}
+            >
+              <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="searchMeshGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#e5e7eb" stopOpacity="0.4" />
+                    <stop offset="50%" stopColor="#d1d5db" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#e5e7eb" stopOpacity="0.4" />
+                  </linearGradient>
+                  <pattern id="searchMesh3d" width="60" height="60" patternUnits="userSpaceOnUse">
+                    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="url(#searchMeshGradient)" strokeWidth="1"/>
+                    <circle cx="0" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
+                    <circle cx="60" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
+                    <circle cx="0" cy="60" r="1.5" fill="#d1d5db" opacity="0.5"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#searchMesh3d)" />
+              </svg>
             </div>
 
-            {/* Universal Search Input */}
-            <div className="relative mb-6">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
-                <MagnifyingGlassIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 ${
-                  searchQuery ? 'text-primary scale-110' : 'text-neutral-400'
-                }`} />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
-                placeholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
-                className="w-full pl-12 pr-32 sm:pl-14 sm:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="p-1 sm:p-2 hover:bg-neutral-100 rounded-lg transition-all duration-200"
-                    title="Clear search"
-                  >
-                    <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
-                  </button>
-                )}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    fetchAgents(searchQuery);
-                  }}
-                  className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-lg hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-1.5"
-                >
-                  <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">{t('agents:search.searchButton', 'Search')}</span>
-                </button>
-              </div>
+            {/* Secondary floating mesh layer - moves opposite */}
+            <div
+              className="absolute inset-0 opacity-30"
+              style={{
+                transform: `translate3d(${-mousePosition.x * 0.3}px, ${-mousePosition.y * 0.3}px, 0)`,
+                transition: 'transform 0.1s ease-out',
+              }}
+            >
+              <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                <defs>
+                  <pattern id="searchMesh3d-secondary" width="120" height="120" patternUnits="userSpaceOnUse">
+                    <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#d1d5db" strokeWidth="0.5" strokeDasharray="4 4"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#searchMesh3d-secondary)" />
+              </svg>
             </div>
 
-            {/* Quick Search Suggestions */}
-            {!searchQuery && (
-              <div className="mb-4">
-                <p className="text-center text-xs sm:text-sm text-neutral-600 mb-3">
-                  {t('agents:search.popularSearches', 'Popular searches:')}
+            {/* Subtle gradient orbs for depth */}
+            <div
+              className="absolute top-0 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-100/40 to-transparent rounded-full blur-3xl"
+              style={{
+                transform: `translate3d(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px, 0)`,
+                transition: 'transform 0.15s ease-out',
+              }}
+            />
+            <div
+              className="absolute bottom-0 right-1/4 w-48 h-48 bg-gradient-to-tl from-purple-100/30 to-transparent rounded-full blur-3xl"
+              style={{
+                transform: `translate3d(${-mousePosition.x * 0.6}px, ${-mousePosition.y * 0.6}px, 0)`,
+                transition: 'transform 0.15s ease-out',
+              }}
+            />
+
+            {/* Content - relative to appear above mesh */}
+            <div className="relative z-10">
+              <div className="text-center mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
+                  {t('agents:search.title', 'Find Your Ideal Agent')}
+                </h2>
+                <p className="text-neutral-600 text-sm sm:text-base">
+                  {t('agents:search.subtitle', { count: agents.length })}
                 </p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential'].map((term) => (
+              </div>
+
+              {/* Universal Search Input */}
+              <div className="relative mb-6">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
+                  <MagnifyingGlassIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 ${
+                    searchQuery ? 'text-primary scale-110' : 'text-neutral-400'
+                  }`} />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
+                  placeholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
+                  className="w-full pl-12 pr-32 sm:pl-14 sm:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
+                  {searchQuery && (
                     <button
-                      key={term}
-                      onClick={() => setSearchQuery(term)}
-                      className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
+                      onClick={() => setSearchQuery('')}
+                      className="p-1 sm:p-2 hover:bg-neutral-100 rounded-lg transition-all duration-200"
+                      title="Clear search"
                     >
-                      {term}
+                      <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
                     </button>
-                  ))}
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      fetchAgents(searchQuery);
+                    }}
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-lg hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-1.5"
+                  >
+                    <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">{t('agents:search.searchButton', 'Search')}</span>
+                  </button>
                 </div>
               </div>
-            )}
 
-            {/* Live Stats */}
-            <div className="pt-6 border-t border-neutral-200/50">
-              <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
-                <div className="flex items-center gap-3 bg-gradient-to-br from-green-50 to-emerald-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-green-100">
-                  <div className="p-2.5 bg-green-500 rounded-xl shadow-md">
-                    <UsersIcon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{agents.length}</div>
-                    <div className="text-green-700 text-xs sm:text-sm font-medium">{t('agents:stats.expertAgents', 'Expert Agents')}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-gradient-to-br from-blue-50 to-indigo-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100">
-                  <div className="p-2.5 bg-blue-500 rounded-xl shadow-md">
-                    <BuildingOfficeIcon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{agencies.length}</div>
-                    <div className="text-blue-700 text-xs sm:text-sm font-medium">{t('agents:stats.professionalAgencies', 'Professional Agencies')}</div>
+              {/* Quick Search Suggestions */}
+              {!searchQuery && (
+                <div className="mb-4">
+                  <p className="text-center text-xs sm:text-sm text-neutral-600 mb-3">
+                    {t('agents:search.popularSearches', 'Popular searches:')}
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential'].map((term) => (
+                      <button
+                        key={term}
+                        onClick={() => setSearchQuery(term)}
+                        className="px-3 py-1.5 text-xs sm:text-sm bg-white/80 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium backdrop-blur-sm"
+                      >
+                        {term}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <div className="flex items-center gap-3 bg-gradient-to-br from-purple-50 to-violet-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-purple-100">
-                  <div className="p-2.5 bg-purple-500 rounded-xl shadow-md">
-                    <HomeIcon className="w-5 h-5 text-white" />
+              )}
+
+              {/* Live Stats */}
+              <div className="pt-6 border-t border-neutral-200/50">
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+                  <div className="flex items-center gap-3 bg-gradient-to-br from-green-50 to-emerald-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-green-100">
+                    <div className="p-2.5 bg-green-500 rounded-xl shadow-md">
+                      <UsersIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{agents.length}</div>
+                      <div className="text-green-700 text-xs sm:text-sm font-medium">{t('agents:stats.expertAgents', 'Expert Agents')}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-bold text-2xl sm:text-3xl text-neutral-900">8</div>
-                    <div className="text-purple-700 text-xs sm:text-sm font-medium">{t('agents:stats.listedProperties', 'Listed Properties')}</div>
+                  <div className="flex items-center gap-3 bg-gradient-to-br from-blue-50 to-indigo-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100">
+                    <div className="p-2.5 bg-blue-500 rounded-xl shadow-md">
+                      <BuildingOfficeIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{agencies.length}</div>
+                      <div className="text-blue-700 text-xs sm:text-sm font-medium">{t('agents:stats.professionalAgencies', 'Professional Agencies')}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-gradient-to-br from-purple-50 to-violet-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-purple-100">
+                    <div className="p-2.5 bg-purple-500 rounded-xl shadow-md">
+                      <HomeIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-2xl sm:text-3xl text-neutral-900">8</div>
+                      <div className="text-purple-700 text-xs sm:text-sm font-medium">{t('agents:stats.listedProperties', 'Listed Properties')}</div>
+                    </div>
                   </div>
                 </div>
               </div>
