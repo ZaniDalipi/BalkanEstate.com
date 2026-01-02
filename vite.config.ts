@@ -51,14 +51,14 @@ export default defineConfig(({ mode }) => {
           '@/shared': path.resolve(__dirname, 'src/shared'),
           '@/features': path.resolve(__dirname, 'src/features'),
           '@/hooks': path.resolve(__dirname, 'src/hooks'),
-          '@/utils': path.resolve(__dirname, 'src/utils'),
           '@/lib': path.resolve(__dirname, 'src/lib'),
           '@/domain': path.resolve(__dirname, 'src/domain'),
           '@/app': path.resolve(__dirname, 'src/app'),
           '@/data': path.resolve(__dirname, 'src/data'),
           '@/i18n': path.resolve(__dirname, 'src/i18n'),
           '@/presentation': path.resolve(__dirname, 'src/presentation'),
-          // Folders at root level
+          // Folders at root level (most utils, context, components are here)
+          '@/utils': path.resolve(__dirname, 'utils'),
           '@/context': path.resolve(__dirname, 'context'),
           '@/components': path.resolve(__dirname, 'components'),
           '@/constants': path.resolve(__dirname, 'constants'),
