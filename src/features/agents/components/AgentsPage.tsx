@@ -6,10 +6,11 @@ import { getAllAgents, getAgencies } from '@/services/apiService';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
-import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon } from '@/constants';
+import HeroSearchSection from '@/components/shared/HeroSearchSection';
+import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
-type SearchTab = 'location' | 'name' | 'specialization';
+
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 
 const AgentsPage: React.FC = () => {
@@ -17,7 +18,7 @@ const AgentsPage: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { selectedAgentId, activeView } = state;
 
-  const [searchTab, setSearchTab] = useState<SearchTab>('location');
+  // Universal search state - searches across name, city, country, specializations, languages, bio
   const [searchQuery, setSearchQuery] = useState('');
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
@@ -66,10 +67,13 @@ const AgentsPage: React.FC = () => {
     }
   }, [activeView]);
 
-  const fetchAgents = async () => {
+  const fetchAgents = async (searchTerm?: string) => {
     try {
       setLoading(true);
-      const response = await getAllAgents();
+      const response = await getAllAgents({
+        search: searchTerm || undefined,
+        limit: 100,
+      });
       setAgents(response.agents || []);
     } catch (error) {
       console.error('Failed to fetch agents:', error);
@@ -78,6 +82,17 @@ const AgentsPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (activeView === 'agents') {
+        fetchAgents(searchQuery);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, activeView]);
 
   const fetchAgencies = async () => {
     try {
@@ -126,33 +141,7 @@ const AgentsPage: React.FC = () => {
   const filteredAgents = useMemo(() => {
     let result = [...agents];
 
-    // Apply search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      result = result.filter(agent => {
-        if (searchTab === 'location') {
-          // Search by city, country, address
-          const city = (agent.city || '').toLowerCase();
-          const country = (agent.country || '').toLowerCase();
-          const address = (agent.address || '').toLowerCase();
-          const fullLocation = `${address} ${city} ${country}`.trim();
-
-          return city.includes(query) ||
-                 country.includes(query) ||
-                 address.includes(query) ||
-                 fullLocation.includes(query);
-        } else if (searchTab === 'name') {
-          // Search by agent name
-          return agent.name.toLowerCase().includes(query);
-        } else if (searchTab === 'specialization') {
-          // Search by specializations and bio
-          const specializations = (agent.specializations || []).map(s => s.toLowerCase());
-          const bio = (agent.bio || '').toLowerCase();
-          return specializations.some(spec => spec.includes(query)) || bio.includes(query);
-        }
-        return true;
-      });
-    }
+    // Server handles the search query now, but apply local advanced filters
 
     // Apply advanced filters
     result = result.filter(agent => {
@@ -217,7 +206,7 @@ const AgentsPage: React.FC = () => {
     });
 
     return result;
-  }, [agents, searchQuery, searchTab, filters, sortBy]);
+  }, [agents, filters, sortBy]);
 
   const selectedAgent = useMemo(() => {
     if (!selectedAgentId) return null;
@@ -249,17 +238,6 @@ const AgentsPage: React.FC = () => {
 
   if (selectedAgent) {
     return <AgentProfilePage agent={selectedAgent} />;
-  }
-
-  if (loading) {
-    return (
-      <div className="bg-neutral-50 min-h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-neutral-600">{t('agents:loading')}</p>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -314,6 +292,7 @@ const AgentsPage: React.FC = () => {
         
         .animate-fade-in-up {
           animation: fadeInUp 0.8s ease-out forwards;
+          opacity: 1;
         }
         
         .animate-gradient-x {
@@ -373,324 +352,36 @@ const AgentsPage: React.FC = () => {
         }
       `}</style>
 
-      {/* Hero Section - Fixed height and proper positioning */}
-      <div className="relative bg-gradient-to-b from-neutral-100 via-neutral-50 to-white w-full overflow-hidden mesh-3d">
-        {/* 3D Mesh Background with Parallax */}
-        <div
-          className="absolute inset-0 mesh-layer"
-          style={{
-            transform: `translate3d(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px, 0) rotateX(${mousePosition.y * 0.05}deg) rotateY(${mousePosition.x * 0.05}deg)`,
-          }}
-        >
-          {/* Primary mesh layer */}
-          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="agentMeshGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#e5e7eb" stopOpacity="0.4" />
-                <stop offset="50%" stopColor="#d1d5db" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#e5e7eb" stopOpacity="0.4" />
-              </linearGradient>
-              <pattern id="agentMesh3d" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="url(#agentMeshGradient1)" strokeWidth="1"/>
-                <circle cx="0" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
-                <circle cx="60" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
-                <circle cx="0" cy="60" r="1.5" fill="#d1d5db" opacity="0.5"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#agentMesh3d)" />
-          </svg>
-        </div>
+      {/* Hero Section with Integrated Search */}
+      <HeroSearchSection
+        badge={t('agents:hero.badge')}
+        title={t('agents:hero.title')}
+        titleHighlight={t('agents:hero.titleHighlight')}
+        subtitle={t('agents:hero.subtitle')}
+        searchTitle={t('agents:search.title')}
+        searchSubtitle={t('agents:search.subtitle', { count: agents.length })}
+        searchPlaceholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSearch={() => fetchAgents(searchQuery)}
+        popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
+        popularSearchesLabel={t('agents:search.popularSearches')}
+        stats={[
+          { icon: 'users', count: agents.length, label: t('agents:stats.expertAgents', 'Expert Agents'), color: 'green' },
+          { icon: 'building', count: agencies.length, label: t('agents:stats.professionalAgencies', 'Professional Agencies'), color: 'blue' },
+          { icon: 'home', count: 8, label: t('agents:stats.listedProperties', 'Listed Properties'), color: 'purple' }
+        ]}
+        mousePosition={mousePosition}
+      />
 
-        {/* Secondary floating mesh layer - moves opposite */}
-        <div
-          className="absolute inset-0 mesh-layer opacity-30"
-          style={{
-            transform: `translate3d(${-mousePosition.x * 0.3}px, ${-mousePosition.y * 0.3}px, 50px)`,
-          }}
-        >
-          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-            <defs>
-              <pattern id="agentMesh3d-secondary" width="120" height="120" patternUnits="userSpaceOnUse">
-                <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#d1d5db" strokeWidth="0.5" strokeDasharray="4 4"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#agentMesh3d-secondary)" />
-          </svg>
-        </div>
-
-        {/* Subtle gradient orbs for depth */}
-        <div
-          className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-br from-neutral-200/30 to-transparent rounded-full blur-3xl mesh-layer"
-          style={{
-            transform: `translate3d(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px, 0)`,
-          }}
-        />
-        <div
-          className="absolute bottom-20 right-1/4 w-80 h-80 bg-gradient-to-tl from-neutral-200/20 to-transparent rounded-full blur-3xl mesh-layer"
-          style={{
-            transform: `translate3d(${-mousePosition.x * 0.6}px, ${-mousePosition.y * 0.6}px, 0)`,
-          }}
-        />
-
-        {/* Hero Content - Fixed layout without interfering with main content */}
-        <div className="relative w-full pt-8 pb-16 lg:pt-12 lg:pb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Main Title Section */}
-            <div className="text-center max-w-4xl mx-auto mb-8 animate-fade-in-up">
-              <div className="inline-flex items-center justify-center px-4 py-2 bg-primary/10 rounded-full mb-6">
-                <span className="text-primary font-semibold text-sm uppercase tracking-wider">
-                  {t('agents:hero.badge')}
-                </span>
-              </div>
-
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-neutral-900 mb-4 sm:mb-6 leading-tight">
-                {t('agents:hero.title')}
-                <span className="block mt-2 sm:mt-3 animate-gradient-x">
-                  {t('agents:hero.titleHighlight')}
-                </span>
-              </h1>
-
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
-                {t('agents:hero.subtitle')}
-              </p>
-            </div>
-
-            {/* Search Section - Clean and Integrated */}
-            <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-neutral-200/60 p-4 sm:p-6 md:p-8 animate-fade-in-up animation-delay-200 mt-6 sm:mt-8">
-              <div className="text-center mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-1.5 sm:mb-2">
-                  {t('agents:search.title')}
-                </h2>
-                <p className="text-neutral-600 text-xs sm:text-sm md:text-base">
-                  {t('agents:search.subtitle', { count: agents.length })}
-                </p>
-              </div>
-
-              {/* Search Tabs */}
-              <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 p-1 sm:p-1.5 bg-neutral-100 rounded-xl sm:rounded-2xl w-fit mx-auto">
-                <button
-                  onClick={() => setSearchTab('location')}
-                  className={`px-2.5 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-semibold transition-all duration-300 relative min-w-[90px] sm:min-w-[100px] md:min-w-[120px] text-xs sm:text-sm md:text-base ${
-                    searchTab === 'location'
-                      ? 'text-white shadow-lg'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-white'
-                  }`}
-                  style={{
-                    background: searchTab === 'location'
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'
-                      : 'transparent'
-                  }}
-                >
-                  <span className="flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {t('agents:search.tabs.location')}
-                  </span>
-                </button>
-                <button
-                  onClick={() => setSearchTab('name')}
-                  className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 relative min-w-[100px] sm:min-w-[120px] ${
-                    searchTab === 'name'
-                      ? 'text-white shadow-lg'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-white'
-                  }`}
-                  style={{
-                    background: searchTab === 'name'
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'
-                      : 'transparent'
-                  }}
-                >
-                  <span className="flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    {t('agents:search.tabs.name')}
-                  </span>
-                </button>
-                <button
-                  onClick={() => setSearchTab('specialization')}
-                  className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 relative min-w-[100px] sm:min-w-[120px] ${
-                    searchTab === 'specialization'
-                      ? 'text-white shadow-lg'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-white'
-                  }`}
-                  style={{
-                    background: searchTab === 'specialization'
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'
-                      : 'transparent'
-                  }}
-                >
-                  <span className="flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    {t('agents:search.tabs.specialization')}
-                  </span>
-                </button>
-              </div>
-
-              {/* Search Input */}
-              <div className="relative mb-6">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
-                  <MagnifyingGlassIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 ${
-                    searchQuery ? 'text-primary scale-110' : 'text-neutral-400'
-                  }`} />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={
-                    searchTab === 'location'
-                      ? t('agents:search.placeholders.location')
-                      : searchTab === 'name'
-                      ? t('agents:search.placeholders.name')
-                      : t('agents:search.placeholders.specialization')
-                  }
-                  className="w-full pl-10 sm:pl-12 pr-20 sm:pr-32 md:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="p-1 sm:p-2 hover:bg-neutral-100 rounded-lg transition-all duration-200"
-                      title={t('agents:search.clearSearch')}
-                    >
-                      <span className="text-neutral-400 hover:text-neutral-600 text-sm">
-                        ✕
-                      </span>
-                    </button>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // Trigger search
-                    }}
-                    className="px-2.5 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-lg hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm md:text-base whitespace-nowrap"
-                    aria-label={t('agents:search.searchButton')}
-                  >
-                    <MagnifyingGlassIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 flex-shrink-0" />
-                    <span className="hidden xs:inline">{t('agents:search.searchButton')}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Quick Search Suggestions */}
-              {!searchQuery && (
-                <div className="mb-4">
-                  <p className="text-center text-xs sm:text-sm text-neutral-600 mb-3">
-                    {t('agents:search.popularSearches')}
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {searchTab === 'location' ? (
-                      <>
-                        <button
-                          onClick={() => setSearchQuery('Belgrade')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          Belgrade
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Zagreb')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          Zagreb
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Sarajevo')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          Sarajevo
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Novi Sad')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          Novi Sad
-                        </button>
-                      </>
-                    ) : searchTab === 'name' ? (
-                      <>
-                        <button
-                          onClick={() => setSearchQuery('')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          {t('agents:search.viewAll')}
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => setSearchQuery('Residential')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          {t('agents:filters.types.residential')}
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Luxury')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          {t('agents:filters.types.luxury')}
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Commercial')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          {t('agents:filters.types.commercial')}
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Investment')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          {t('agents:filters.types.investment')}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Live Stats */}
-              <div className="pt-6 border-t border-neutral-200/50">
-                <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm sm:text-base">
-                  <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <div className="text-center">
-                      <div className="font-bold text-lg sm:text-2xl text-neutral-900">{agents.length}+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.verifiedAgents')}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                    <div className="text-center">
-                      <div className="font-bold text-lg sm:text-2xl text-neutral-900">{agencies.length}+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.professionalAgencies')}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-pulse"></div>
-                    <div className="text-center">
-                      <div className="font-bold text-lg sm:text-2xl text-neutral-900">5000+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.successfulTransactions')}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content - Now this flows properly after the hero section */}
+      {/* Main Content */}
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           {/* Filters and Sort Section */}
           <div className="mb-6">
             <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
               {/* Top Row: Sort and Filters Toggle */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-wrap">
                   <span className="text-sm font-medium text-gray-700">{t('agents:filters.sortBy')}</span>
                   <select
@@ -849,7 +540,12 @@ const AgentsPage: React.FC = () => {
           </div>
 
           {/* Agent Cards Grid */}
-          {filteredAgents.length === 0 ? (
+          {loading ? (
+            <div className="bg-white rounded-xl shadow-md border p-8 sm:p-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-neutral-600">{t('agents:loading')}</p>
+            </div>
+          ) : filteredAgents.length === 0 ? (
             <div className="bg-white rounded-xl shadow-md border p-8 sm:p-12 text-center">
               <UserGroupIcon className="w-12 h-12 sm:w-16 sm:h-16 text-neutral-300 mx-auto mb-4" />
               <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-2">{t('agents:results.noAgentsFound')}</h3>
@@ -866,7 +562,7 @@ const AgentsPage: React.FC = () => {
           )}
 
           {/* View More Button */}
-          {filteredAgents.length > 0 && (
+          {!loading && filteredAgents.length > 0 && (
             <div className="text-center mb-12">
               <button
                 onClick={() => {

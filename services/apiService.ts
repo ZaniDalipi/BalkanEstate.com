@@ -1068,9 +1068,25 @@ function transformBackendMessage(backendMsg: any): Message {
 
 // --- AGENCY API ---
 
-export const getAgencies = async (filters?: { city?: string; featured?: boolean; page?: number; limit?: number }): Promise<any> => {
+export const getAgencies = async (filters?: {
+  city?: string;
+  name?: string;
+  search?: string; // Universal search across name, city, country, description, specialties
+  featured?: boolean;
+  page?: number;
+  limit?: number
+}): Promise<any> => {
   const params = new URLSearchParams();
-  if (filters?.city) params.append('city', filters.city);
+
+  // Universal search takes priority (searches across all fields)
+  if (filters?.search) {
+    params.append('search', filters.search);
+  } else {
+    // Legacy individual field filters
+    if (filters?.city) params.append('city', filters.city);
+    if (filters?.name) params.append('name', filters.name);
+  }
+
   if (filters?.featured !== undefined) params.append('featured', String(filters.featured));
   if (filters?.page) params.append('page', String(filters.page));
   if (filters?.limit) params.append('limit', String(filters.limit));
@@ -1797,8 +1813,19 @@ function transformBackendAgent(backendAgent: any): any {
   };
 }
 
-export const getAllAgents = async (): Promise<any> => {
-  const response = await apiRequest<{ agents?: any[] }>("/agents");
+export const getAllAgents = async (filters?: {
+  search?: string; // Universal search across name, city, country, specializations, languages, bio
+  page?: number;
+  limit?: number;
+}): Promise<any> => {
+  const params = new URLSearchParams();
+
+  if (filters?.search) params.append('search', filters.search);
+  if (filters?.page) params.append('page', String(filters.page));
+  if (filters?.limit) params.append('limit', String(filters.limit));
+
+  const queryString = params.toString();
+  const response = await apiRequest<{ agents?: any[] }>(`/agents${queryString ? `?${queryString}` : ''}`);
   if (response.agents) {
     response.agents = response.agents.map(transformBackendAgent);
   }

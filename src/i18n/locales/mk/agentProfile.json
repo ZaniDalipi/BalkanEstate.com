@@ -1,103 +1,103 @@
 {
   "navigation": {
-    "back": "Назад кон Агенти"
+    "back": "Назад кон агентите"
   },
   "tabs": {
     "overview": "Преглед",
     "listings": "Огласи",
     "reviews": "Рецензии",
-    "about": "За Агентот"
+    "about": "За агентот"
   },
   "badges": {
-    "premierAgent": "Премиер Агент",
-    "topRated": "Најдобро Оценет",
+    "premierAgent": "Премиер агент",
+    "topRated": "Високо оценет",
     "verified": "Верифициран",
     "superhost": "Суперхост"
   },
   "contact": {
-    "title": "Контактирајте го Агентот",
+    "title": "Контактирај го агентот",
     "phone": "Телефон",
     "email": "Е-пошта",
     "whatsapp": "WhatsApp",
-    "callNow": "Јавете се Сега",
-    "sendEmail": "Испратете Е-пошта",
-    "sendMessage": "Испратете Порака",
-    "scheduleCall": "Закажете Повик"
+    "callNow": "Јави се сега",
+    "sendEmail": "Испрати е-пошта",
+    "sendMessage": "Испрати порака",
+    "scheduleCall": "Закажи повик"
   },
   "stats": {
-    "totalSales": "Вкупна Продажба",
-    "propertiesSold": "Продадени Недвижности",
-    "activeListings": "Активни Огласи",
-    "yearsExperience": "Години Искуство",
-    "avgResponseTime": "Просечно Време на Одговор",
-    "satisfactionRate": "Стапка на Задоволство",
-    "languages": "Јазици што ги Зборува"
+    "totalSales": "Вкупна продажба",
+    "propertiesSold": "Продадени недвижности",
+    "activeListings": "Активни огласи",
+    "yearsExperience": "Години искуство",
+    "avgResponseTime": "Просечно време на одговор",
+    "satisfactionRate": "Стапка на задоволство",
+    "languages": "Јазици"
   },
   "overview": {
-    "aboutMe": "За Мене",
+    "aboutMe": "За мене",
     "specializations": "Специјализации",
-    "serviceAreas": "Сервисни Области",
+    "serviceAreas": "Области на работа",
     "certifications": "Сертификати",
     "languages": "Јазици"
   },
   "listings": {
-    "title": "Огласи на Агентот",
-    "activeListings": "Активни Огласи",
-    "soldListings": "Продадени Огласи",
-    "noListings": "Нема достапни огласи",
-    "viewAll": "Погледни Сите Огласи"
+    "title": "Огласи од агентот",
+    "activeListings": "Активни огласи",
+    "soldListings": "Продадени огласи",
+    "noListings": "Нема достапни огласи во моментов",
+    "viewAll": "Погледни ги сите огласи"
   },
   "reviews": {
-    "title": "Рецензии од Клиенти",
-    "writeReview": "Напишете Рецензија",
-    "averageRating": "Просечна Оценка",
-    "totalReviews": "Вкупно Рецензии",
+    "title": "Мислења од клиенти",
+    "writeReview": "Остави рецензија",
+    "averageRating": "Просечна оцена",
+    "totalReviews": "Вкупно рецензии",
     "noReviews": "Сè уште нема рецензии",
-    "beFirst": "Бидете први што ќе оставите рецензија за овој агент",
-    "verifiedPurchase": "Верифицирано Купување",
+    "beFirst": "Биди прв што ќе остави рецензија за овој агент",
+    "verifiedPurchase": "Верифициран клиент",
     "helpful": "Корисно",
-    "reportReview": "Пријави Рецензија"
+    "reportReview": "Пријави рецензија"
   },
   "consultation": {
-    "title": "Закажете Консултација",
-    "description": "Закажете бесплатна консултација со овој агент за да разговарате за вашите потреби за недвижности",
-    "selectDate": "Изберете Датум",
-    "selectTime": "Изберете Време",
-    "yourName": "Вашето Име",
-    "yourEmail": "Вашата Е-пошта",
-    "yourPhone": "Вашиот Телефон",
+    "title": "Закажи консултација",
+    "description": "Закажи бесплатна консултација за да разговараш со агентот околу твоите потреби за недвижности",
+    "selectDate": "Избери датум",
+    "selectTime": "Избери време",
+    "yourName": "Твоето име",
+    "yourEmail": "Твојата е-пошта",
+    "yourPhone": "Твојот телефон",
     "message": "Порака (опционално)",
-    "messagePlaceholder": "Кажете ни за вашите барања за недвижност...",
-    "bookNow": "Закажи Консултација",
-    "confirmBooking": "Потврди Резервација"
+    "messagePlaceholder": "Накратко опиши што бараш...",
+    "bookNow": "Закажи",
+    "confirmBooking": "Потврди закажување"
   },
   "appraisal": {
-    "title": "Побарајте Проценка на Недвижност",
-    "description": "Добијте бесплатна проценка на недвижност од овој стручен агент",
-    "propertyAddress": "Адреса на Недвижност",
-    "propertyType": "Тип на Недвижност",
-    "requestAppraisal": "Побарај Проценка"
+    "title": "Побарај проценка на недвижност",
+    "description": "Добиј бесплатна проценка од овој искусен агент",
+    "propertyAddress": "Адреса на недвижноста",
+    "propertyType": "Тип на недвижност",
+    "requestAppraisal": "Побарај проценка"
   },
   "agency": {
     "partOf": "Дел од",
-    "viewAgency": "Погледни Агенција",
-    "independentAgent": "Независен Агент"
+    "viewAgency": "Погледни агенција",
+    "independentAgent": "Независен агент"
   },
   "similarAgents": {
-    "title": "Слични Агенти",
+    "title": "Слични агенти",
     "inArea": "во {area}",
-    "viewAll": "Погледни Сите Агенти"
+    "viewAll": "Погледни ги сите агенти"
   },
   "actions": {
-    "shareProfile": "Сподели Профил",
-    "saveAgent": "Зачувај Агент",
-    "reportAgent": "Пријави Агент"
+    "shareProfile": "Сподели профил",
+    "saveAgent": "Зачувај агент",
+    "reportAgent": "Пријави агент"
   },
   "messages": {
-    "consultationBooked": "Консултацијата успешно закажана!",
-    "appraisalRequested": "Барањето за проценка успешно испратено!",
-    "profileShared": "Линкот на профилот е копиран во клипборд!",
-    "agentSaved": "Агентот е зачуван во вашите омилени!",
-    "reviewSubmitted": "Рецензијата успешно испратена!"
+    "consultationBooked": "Консултацијата е успешно закажана.",
+    "appraisalRequested": "Барањето за проценка е испратено.",
+    "profileShared": "Линкот од профилот е копиран.",
+    "agentSaved": "Агентот е додаден во омилени.",
+    "reviewSubmitted": "Рецензијата е успешно објавена."
   }
 }

@@ -154,3 +154,86 @@ export async function geocodeProperty(propertyData: {
 
   return {};
 }
+
+/**
+ * Geocode a free-form location string (e.g., "Belgrade, Serbia" or "Novi Sad")
+ */
+export async function geocodeFreeformLocation(location: string): Promise<GeocodeResult | null> {
+  try {
+    if (!location || location.trim().length < 2) {
+      console.log('⚠️ Geocoding skipped: location string too short');
+      return null;
+    }
+
+    console.log(`📍 Geocoding freeform location: ${location}`);
+
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: {
+        q: location.trim(),
+        format: 'json',
+        limit: 1,
+        addressdetails: 1,
+      },
+      headers: {
+        'User-Agent': 'BalkanEstateApp/1.0',
+      },
+      timeout: 5000,
+    });
+
+    if (response.data && response.data.length > 0) {
+      const result = response.data[0];
+
+      const geocodeResult: GeocodeResult = {
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon),
+        display_name: result.display_name,
+      };
+
+      console.log(`✅ Geocoded freeform: ${geocodeResult.lat}, ${geocodeResult.lng}`);
+      return geocodeResult;
+    } else {
+      console.log(`⚠️ No geocoding results found for: ${location}`);
+      return null;
+    }
+  } catch (error: any) {
+    console.error('❌ Freeform geocoding error:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Calculate distance between two coordinates using Haversine formula
+ * @returns Distance in kilometers
+ */
+export function calculateDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLng = toRadians(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+}
+
+function toRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
+
+/**
+ * Check if a point is within a certain radius of another point
+ */
+export function isWithinRadius(
+  centerLat: number,
+  centerLng: number,
+  pointLat: number,
+  pointLng: number,
+  radiusKm: number
+): boolean {
+  const distance = calculateDistanceKm(centerLat, centerLng, pointLat, pointLng);
+  return distance <= radiusKm;
+}

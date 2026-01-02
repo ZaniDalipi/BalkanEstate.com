@@ -1,158 +1,158 @@
 {
   "navigation": {
     "back": "Назад",
-    "backToAgencies": "Назад кон Агенции"
+    "backToAgencies": "Назад кон агенциите"
   },
   "seo": {
-    "title": "{{name}} - Агенција за Недвижности",
-    "description": "{{name}} е доверлива агенција за недвижности во {{city}}. Прегледајте {{properties}} огласи и поврзете се со {{agents}} професионални агенти."
+    "title": "{{name}} | Агенција за недвижности",
+    "description": "{{name}} е доверлива агенција за недвижности во {{city}}. Погледнете {{properties}} активни огласи и стапете во контакт со {{agents}} професионални агенти."
   },
   "banner": {
     "gradients": "Градиенти",
-    "uploadImage": "Прикачи Слика",
-    "uploading": "Прикачување...",
-    "chooseGradient": "Изберете Градиент",
-    "customImageHint": "Или прикачете прилагодена слика користејќи го копчето погоре",
-    "changeLogo": "Промени Лого"
+    "uploadImage": "Прикачи слика",
+    "uploading": "Се прикачува...",
+    "chooseGradient": "Избери градиент",
+    "customImageHint": "Или прикачете сопствена слика преку копчето погоре",
+    "changeLogo": "Промени лого"
   },
   "gradientPresets": {
-    "oceanBlue": "Океанско Сина",
+    "oceanBlue": "Океанско сино",
     "sunset": "Зајдисонце",
     "forest": "Шума",
-    "royalPurple": "Кралска Виолетова",
+    "royalPurple": "Кралска виолетова",
     "fire": "Оган",
-    "nightSky": "Ноќно Небо",
-    "mintFresh": "Свежа Нане",
-    "roseGold": "Розово Злато"
+    "nightSky": "Ноќно небо",
+    "mintFresh": "Свежо нане",
+    "roseGold": "Розово злато"
   },
   "stats": {
-    "totalListings": "Вкупно Огласи",
-    "totalAgents": "Вкупно Агенти",
-    "yearsInBusiness": "Години во Бизнис",
+    "totalListings": "Вкупно огласи",
+    "totalAgents": "Вкупно агенти",
+    "yearsInBusiness": "Години искуство",
     "rating": "Оценка",
-    "notAvailable": "Н/Д"
+    "notAvailable": "Нема податоци"
   },
   "salesPerformance": {
-    "title": "Продажна Перформанса",
+    "title": "Продажни резултати",
     "salesLast12Months": "Продажби во последните 12 месеци",
     "totalSales": "Вкупна продажба",
     "priceRange": "Ценовен опсег",
     "averagePrice": "Просечна цена"
   },
   "about": {
-    "title": "За {agencyName}",
-    "contactInfo": "Контакт Информации",
-    "specialties": "Специјалности",
+    "title": "За агенцијата {agencyName}",
+    "contactInfo": "Контакт информации",
+    "specialties": "Области на експертиза",
     "specializations": "Специјализации",
-    "serviceAreas": "Сервисни Области",
-    "languagesSpoken": "Јазици што се Зборуваат"
+    "serviceAreas": "Области на работа",
+    "languagesSpoken": "Јазици"
   },
   "invitationCode": {
-    "title": "Код за Покана на Агенција",
-    "description": "Споделете го овој код со агенти што сакате да се придружат на вашата агенција",
-    "copy": "Копирај"
+    "title": "Код за покана",
+    "description": "Испратете го овој код до агенти што сакате да се приклучат на вашата агенција",
+    "copy": "Копирај код"
   },
   "actions": {
-    "editAgency": "Уреди Агенција",
-    "manageJoinRequests": "Управувај со Барања за Придружување",
-    "requestToJoin": "Барај Придружување на Агенција"
+    "editAgency": "Уреди агенција",
+    "manageJoinRequests": "Барања за приклучување",
+    "requestToJoin": "Побарај приклучување"
   },
   "featuredSubscription": {
-    "title": "Истакната Претплата",
-    "subtitle": "Зголемете ја Вашата Видливост",
-    "proTip": "Про Совет:",
-    "proTipMessage": "Истакнатите агенции добиваат до 5x поголема видливост и се појавуваат на врвот од резултатите од пребарување!"
+    "title": "Истакната претплата",
+    "subtitle": "Бидете повидливи од конкуренцијата",
+    "proTip": "Совет:",
+    "proTipMessage": "Истакнатите агенции добиваат до 5 пати повеќе прегледи и се појавуваат на врвот од резултатите."
   },
   "teamMembers": {
-    "title": "Членови на Тимот",
-    "showTopPerformers": "Прикажи Најдобри Извршители",
-    "showAllMembers": "Прикажи Сите Членови",
-    "rankedByPerformance": "Рангирано по Перформанса",
-    "topAgent": "Најдобар Агент",
-    "secondPlace": "2. Место",
-    "thirdPlace": "3. Место",
+    "title": "Тим",
+    "showTopPerformers": "Прикажи најдобри агенти",
+    "showAllMembers": "Прикажи го целиот тим",
+    "rankedByPerformance": "Подредени според резултати",
+    "topAgent": "Најдобар агент",
+    "secondPlace": "2 место",
+    "thirdPlace": "3 место",
     "owner": "Сопственик",
     "admin": "Администратор",
     "license": "Лиценца",
-    "totalSales": "Вкупна Продажба",
-    "propertiesSold": "Продадени Недвижности",
-    "activeListings": "Активни Огласи",
-    "removeAdmin": "Отстрани Администратор",
-    "makeAdmin": "Направи Администратор",
+    "totalSales": "Вкупна продажба",
+    "propertiesSold": "Продадени недвижности",
+    "activeListings": "Активни огласи",
+    "removeAdmin": "Отстрани администратор",
+    "makeAdmin": "Назначи администратор",
     "remove": "Отстрани",
-    "removing": "Отстранување...",
-    "leaveAgency": "Напушти Агенција",
-    "leaving": "Напуштање...",
-    "noAgentsFound": "Не се пронајдени агенти за оваа агенција"
+    "removing": "Се отстранува...",
+    "leaveAgency": "Напушти агенција",
+    "leaving": "Се напушта...",
+    "noAgentsFound": "Нема агенти во оваа агенција"
   },
   "properties": {
     "activeListings": "АКТИВНИ ОГЛАСИ",
     "soldProperties": "ПРОДАДЕНИ НЕДВИЖНОСТИ",
-    "activeListingsTitle": "Активни Огласи",
-    "soldPropertiesTitle": "Продадени Недвижности",
+    "activeListingsTitle": "Активни огласи",
+    "soldPropertiesTitle": "Продадени недвижности",
     "propertiesCount": "{count} недвижности",
     "noActiveListings": "Моментално нема активни огласи",
     "noSoldProperties": "Сè уште нема продадени недвижности",
-    "checkBackSoon": "Проверете наскоро за нови недвижности",
-    "soldWillAppear": "Продадените недвижности ќе се појават тука"
+    "checkBackSoon": "Проверете повторно наскоро",
+    "soldWillAppear": "Продадените недвижности ќе се прикажат тука"
   },
   "editModal": {
-    "title": "Уреди Агенција",
-    "basicInfo": "Основни Информации",
-    "agencyName": "Име на Агенција",
+    "title": "Уреди податоци за агенцијата",
+    "basicInfo": "Основни информации",
+    "agencyName": "Име на агенција",
     "description": "Опис",
     "email": "Е-пошта",
     "phone": "Телефон",
-    "website": "Веб Страница",
-    "yearsInBusiness": "Години во Бизнис",
+    "website": "Веб-страница",
+    "yearsInBusiness": "Години искуство",
     "location": "Локација",
     "address": "Адреса",
     "city": "Град",
     "country": "Држава",
-    "zipCode": "Поштенски Број",
-    "latitude": "Географска Ширина",
-    "longitude": "Географска Должина",
-    "socialMedia": "Социјални Мрежи",
-    "facebookUrl": "Facebook URL",
-    "instagramUrl": "Instagram URL",
-    "linkedinUrl": "LinkedIn URL",
-    "twitterUrl": "Twitter URL",
-    "specialtiesCerts": "Специјалности и Сертификати",
+    "zipCode": "Поштенски број",
+    "latitude": "Географска ширина",
+    "longitude": "Географска должина",
+    "socialMedia": "Социјални мрежи",
+    "facebookUrl": "Facebook линк",
+    "instagramUrl": "Instagram линк",
+    "linkedinUrl": "LinkedIn линк",
+    "twitterUrl": "X / Twitter линк",
+    "specialtiesCerts": "Специјалности и сертификати",
     "specialtiesLabel": "Специјалности (одделени со запирка)",
-    "specialtiesPlaceholder": "Станбени, Комерцијални, Луксузни Недвижности",
+    "specialtiesPlaceholder": "Станбени, Комерцијални, Луксузни",
     "certificationsLabel": "Сертификати (одделени со запирка)",
-    "certificationsPlaceholder": "Лиценцирана Агенција, ISO Сертифицирано",
-    "languagesLabel": "Јазици што се Зборуваат (одделени со запирка)",
+    "certificationsPlaceholder": "Лиценцирана агенција, ISO сертификат",
+    "languagesLabel": "Јазици (одделени со запирка)",
     "languagesPlaceholder": "Македонски, Англиски, Албански",
-    "languagesHint": "Јазиците автоматски се синхронизираат кога агентите се придружуваат/напуштаат",
-    "businessHours": "Работно Време",
-    "businessHoursPlaceholder": "9:00 - 18:00",
-    "saveChanges": "Зачувај Промени"
+    "languagesHint": "Јазиците автоматски се ажурираат според агентите",
+    "businessHours": "Работно време",
+    "businessHoursPlaceholder": "09:00 – 18:00",
+    "saveChanges": "Зачувај промени"
   },
   "confirmations": {
-    "removeAgent": "Дали сте сигурни дека сакате да го отстраните {name} од {agency}?",
-    "removeAgentDetails": "Ова ќе:\n- Ги отстрани од вашата агенција\n- Ја избрише нивната припадност на агенција\n- Ги задржи нивните недвижности и рецензии непроменети",
-    "leaveAgency": "Дали сте сигурни дека сакате да ја напуштите {agency}?",
-    "leaveAgencyDetails": "Ова ќе:\n- Ве отстрани од оваа агенција\n- Ја избрише вашата припадност на агенција\n- Ги задржи вашите недвижности и рецензии непроменети\n- Го промени вашиот статус во Независен Агент",
-    "toggleAdmin": "Дали сте сигурни дека сакате да {action} {name}?",
+    "removeAgent": "Дали сигурно сакате да го отстраните {name} од {agency}?",
+    "removeAgentDetails": "Со ова:\n- агентот ќе биде отстранет од агенцијата\n- неговите огласи и рецензии ќе останат непроменети",
+    "leaveAgency": "Дали сигурно сакате да ја напуштите агенцијата {agency}?",
+    "leaveAgencyDetails": "Со ова:\n- ќе бидете отстранети од агенцијата\n- ќе продолжите како независен агент",
+    "toggleAdmin": "Дали сакате да {action} {name}?",
     "removeAdminRights": "ги отстраните администраторските права од",
-    "makeAdminRights": "го направите администратор"
+    "makeAdminRights": "го назначите за администратор"
   },
   "messages": {
-    "logoUpdated": "Логото успешно ажурирано!",
-    "coverUpdated": "Насловната слика успешно ажурирана!",
-    "gradientUpdated": "Градиентот на банерот успешно ажуриран!",
-    "agencyUpdated": "Агенцијата успешно ажурирана!",
-    "agentRemoved": "{name} е успешно отстранет од агенцијата.",
-    "leftAgency": "Успешно ја напуштивте {agency}",
-    "invitationCopied": "Кодот за покана е копиран во клипборд!",
-    "joinRequestSent": "Барањето за придружување е успешно испратено! Администраторот на агенцијата ќе го прегледа вашето барање.",
-    "adminAdded": "{name} сега е администратор!",
-    "adminRemoved": "{name} веќе не е администратор.",
-    "onlyOwnerCanManage": "Само сопственикот на агенцијата може да управува со администратори",
-    "onlyAdminCanRemove": "Само администраторите на агенцијата можат да отстрануваат агенти",
-    "selectImageFile": "Ве молиме изберете датотека со слика",
-    "imageSizeLimit": "Големината на сликата мора да биде помала од 5MB"
+    "logoUpdated": "Логото е успешно ажурирано.",
+    "coverUpdated": "Насловната слика е успешно ажурирана.",
+    "gradientUpdated": "Градиентот е успешно променет.",
+    "agencyUpdated": "Податоците за агенцијата се ажурирани.",
+    "agentRemoved": "{name} е отстранет од агенцијата.",
+    "leftAgency": "Ја напуштивте агенцијата {agency}.",
+    "invitationCopied": "Кодот за покана е копиран.",
+    "joinRequestSent": "Барањето е испратено. Администраторот ќе го разгледа.",
+    "adminAdded": "{name} е назначен за администратор.",
+    "adminRemoved": "{name} повеќе не е администратор.",
+    "onlyOwnerCanManage": "Само сопственикот може да управува со администратори.",
+    "onlyAdminCanRemove": "Само администратор може да отстрани агент.",
+    "selectImageFile": "Изберете слика",
+    "imageSizeLimit": "Сликата мора да биде помала од 5MB"
   },
   "weekdays": {
     "monday": "Понеделник",
@@ -166,11 +166,11 @@
   "common": {
     "cancel": "Откажи",
     "featured": "Истакнато",
-    "required": "*"
+    "required": "* задолжително"
   },
   "labels": {
     "call": "Повикај",
-    "email": "Емаил",
-    "website": "Веб страна"
+    "email": "Е-пошта",
+    "website": "Веб-страница"
   }
 }

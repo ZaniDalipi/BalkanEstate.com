@@ -186,23 +186,39 @@ export const getAgencies = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { city, country, featured, page = 1, limit = 12, name } = req.query;
+    const { city, country, featured, page = 1, limit = 12, name, search } = req.query;
 
     const filter: any = {};
 
-    if (city) {
-      filter.city = new RegExp(city as string, 'i');
-      console.log(`🔍 Filtering agencies by city: ${city}`);
-    }
+    // Universal search - searches across multiple fields
+    if (search && typeof search === 'string' && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { name: searchRegex },
+        { city: searchRegex },
+        { country: searchRegex },
+        { address: searchRegex },
+        { description: searchRegex },
+        { specialties: { $elemMatch: { $regex: searchRegex } } },
+        { type: searchRegex },
+      ];
+      console.log(`🔍 Universal search for agencies: "${search}"`);
+    } else {
+      // Legacy individual field filters (for backward compatibility)
+      if (city) {
+        filter.city = new RegExp(city as string, 'i');
+        console.log(`🔍 Filtering agencies by city: ${city}`);
+      }
 
-    if (country) {
-      filter.country = new RegExp(country as string, 'i');
-      console.log(`🔍 Filtering agencies by country: ${country}`);
-    }
+      if (country) {
+        filter.country = new RegExp(country as string, 'i');
+        console.log(`🔍 Filtering agencies by country: ${country}`);
+      }
 
-    if (name) {
-      filter.name = new RegExp(name as string, 'i');
-      console.log(`🔍 Filtering agencies by name: ${name}`);
+      if (name) {
+        filter.name = new RegExp(name as string, 'i');
+        console.log(`🔍 Filtering agencies by name: ${name}`);
+      }
     }
 
     if (featured === 'true') {

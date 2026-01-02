@@ -2,12 +2,112 @@
  * Payment Configuration
  *
  * This file contains all payment-related configuration including:
- * - Supported payment methods
+ * - Supported payment providers (Stripe for EU, Paddle for non-EU Balkans)
+ * - Supported payment methods per provider
  * - Payment method priorities for different user types
- * - Payment provider settings
+ * - Country to provider routing
+ *
+ * Provider Selection Strategy:
+ * - Stripe: EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia) - ~2.9% fees
+ * - Paddle: Non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ *   Paddle is a Merchant of Record (MoR) handling VAT/tax compliance globally - ~5% fees
  *
  * Easy to modify and maintain as payment options change over time
  */
+
+// ====== PAYMENT PROVIDERS ======
+
+export type PaymentProvider = 'stripe' | 'paddle';
+
+export interface PaymentProviderInfo {
+  id: PaymentProvider;
+  name: string;
+  description: string;
+  fees: string;
+  logo: string;
+  supportedCountries: string[];
+  supportedMethods: PaymentMethodType[];
+}
+
+export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
+  stripe: {
+    id: 'stripe',
+    name: 'Stripe',
+    description: 'Secure card payments for EU countries',
+    fees: '~2.9% + €0.25',
+    logo: 'stripe',
+    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI'],
+    supportedMethods: ['card', 'sepa_debit', 'apple_pay', 'google_pay', 'klarna', 'ideal', 'bancontact', 'giropay', 'eps'],
+  },
+  paddle: {
+    id: 'paddle',
+    name: 'Paddle',
+    description: 'Secure payments with automatic VAT handling for Balkan countries',
+    fees: '~5% + €0.50',
+    logo: 'paddle',
+    supportedCountries: ['RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
+    supportedMethods: ['card', 'paypal', 'apple_pay', 'google_pay'],
+  },
+};
+
+// ====== COUNTRY TO PROVIDER MAPPING ======
+
+export interface CountryPaymentInfo {
+  countryCode: string;
+  countryName: string;
+  provider: PaymentProvider;
+  currency: string;
+  isEU: boolean;
+  isSEPA: boolean;
+  flag: string;
+}
+
+export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
+  // EU Countries - Use Stripe
+  GR: { countryCode: 'GR', countryName: 'Greece', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇬🇷' },
+  HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
+  BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
+  RO: { countryCode: 'RO', countryName: 'Romania', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
+  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
+  // Non-EU Balkans - Use Paddle (Merchant of Record with VAT compliance)
+  RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
+  AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },
+  BA: { countryCode: 'BA', countryName: 'Bosnia and Herzegovina', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇧🇦' },
+  MK: { countryCode: 'MK', countryName: 'North Macedonia', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇰' },
+  ME: { countryCode: 'ME', countryName: 'Montenegro', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇲🇪' },
+  XK: { countryCode: 'XK', countryName: 'Kosovo', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: false, flag: '🇽🇰' },
+};
+
+/**
+ * Get the payment provider for a country
+ */
+export function getProviderForCountry(countryCode: string): PaymentProvider {
+  const info = COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
+  return info?.provider || 'stripe'; // Default to Stripe
+}
+
+/**
+ * Get country payment info
+ */
+export function getCountryPaymentInfo(countryCode: string): CountryPaymentInfo | null {
+  return COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()] || null;
+}
+
+/**
+ * Get all supported countries
+ */
+export function getSupportedCountries(): CountryPaymentInfo[] {
+  return Object.values(COUNTRY_PAYMENT_MAP);
+}
+
+/**
+ * Check if a country is supported
+ */
+export function isCountrySupported(countryCode: string): boolean {
+  return !!COUNTRY_PAYMENT_MAP[countryCode.toUpperCase()];
+}
+
+// ====== PAYMENT METHODS ======
 
 export type PaymentMethodType =
   | 'card'
@@ -19,7 +119,9 @@ export type PaymentMethodType =
   | 'bancontact'
   | 'giropay'
   | 'eps'
-  | 'paypal';
+  | 'paypal'
+  | 'bank_transfer'
+  | 'wallet';
 
 export interface PaymentMethod {
   id: PaymentMethodType;

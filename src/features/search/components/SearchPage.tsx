@@ -829,12 +829,56 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <div className={`flex h-full w-full flex-col md:flex-row transition-all duration-300 relative ${isMobile && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
                  <div className={`absolute inset-0 z-10 h-full w-full bg-white md:relative md:w-[55%] md:flex-shrink-0 md:border-r md:border-neutral-200 md:flex md:flex-col ${ isMobile && mobileView === 'list' ? 'translate-x-0' : 'translate-x-full md:translate-x-0' } transition-transform duration-300`}>
-                    <div className="hidden md:flex p-3 border-b border-neutral-200 flex-shrink-0 items-center justify-between">
-                        <h2 className="text-base font-semibold text-neutral-800">{t('search:propertiesForSale')}</h2>
+                    <div className="hidden md:flex p-3 border-b border-neutral-200 flex-shrink-0 items-center gap-3">
+                        <h2 className="text-base font-semibold text-neutral-800 flex-shrink-0">{t('search:propertiesForSale')}</h2>
+                        {/* Desktop Search Bar */}
+                        <div className="flex-grow max-w-md" ref={searchWrapperRef}>
+                            <div className="relative">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <SearchIcon className="h-4 w-4 text-neutral-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder={t('search:searchPlaceholder')}
+                                    value={filters.query}
+                                    onChange={(e) => handleFilterChange('query', e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    onFocus={() => setIsQueryInputFocused(true)}
+                                    className="block w-full bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm px-3 py-2 pl-9 pr-8 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-neutral-400"
+                                />
+                                {filters.query && !isSearchingLocation && (
+                                    <button
+                                        onClick={() => handleFilterChange('query', '')}
+                                        className="absolute inset-y-0 right-0 flex items-center pr-2 text-neutral-400 hover:text-neutral-800"
+                                    >
+                                        <XMarkIcon className="h-4 w-4" />
+                                    </button>
+                                )}
+                                {isSearchingLocation && (
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                                        <SpinnerIcon className="h-4 w-4 text-primary" />
+                                    </div>
+                                )}
+                                {suggestions.length > 0 && isQueryInputFocused && (
+                                    <ul className="absolute z-30 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        {suggestions.map((suggestion) => (
+                                            <li
+                                                key={suggestion.place_id}
+                                                onMouseDown={() => handleSuggestionClick(suggestion)}
+                                                className="px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-100 cursor-pointer flex items-center gap-2"
+                                            >
+                                                <MapPinIcon className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                                                <span>{suggestion.display_name}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </div>
                         <select
                             value={filters.country}
                             onChange={(e) => handleFilterChange('country', e.target.value)}
-                            className="bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer"
+                            className="bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer flex-shrink-0"
                             style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                         >
                             <option value="any">{t('search:filters.allCountries')}</option>
