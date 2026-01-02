@@ -1,106 +1,176 @@
 {
-  "hero": {
-    "badge": "Премиер мрежа за недвижности",
-    "title": "Најдобрите агенции за",
-    "titleHighlight": "недвижности на Балканот",
-    "subtitle": "Поврзете се со проверени агенции што нудат знаење, доверба и вистински резултати при купување, продавање или изнајмување недвижности."
+  "navigation": {
+    "back": "Назад",
+    "backToAgencies": "Назад кон агенциите"
   },
-  "search": {
-    "title": "Пронајдете ја вистинската агенција за вас",
-    "subtitle": "Пребарајте меѓу {count}+ професионални агенции низ Балканот",
-    "tabs": {
-      "city": "Град",
-      "agencyName": "Име на агенција"
-    },
-    "placeholder": {
-      "city": "Внесете град или локација...",
-      "name": "Внесете име на агенција..."
-    },
-    "clearSearch": "Исчисти пребарување",
-    "popularSearches": "Чести пребарувања:"
+  "seo": {
+    "title": "{{name}} | Агенција за недвижности",
+    "description": "{{name}} е доверлива агенција за недвижности во {{city}}. Погледнете {{properties}} активни огласи и стапете во контакт со {{agents}} професионални агенти."
+  },
+  "banner": {
+    "gradients": "Градиенти",
+    "uploadImage": "Прикачи слика",
+    "uploading": "Се прикачува...",
+    "chooseGradient": "Избери градиент",
+    "customImageHint": "Или прикачете сопствена слика преку копчето погоре",
+    "changeLogo": "Промени лого"
+  },
+  "gradientPresets": {
+    "oceanBlue": "Океанско сино",
+    "sunset": "Зајдисонце",
+    "forest": "Шума",
+    "royalPurple": "Кралска виолетова",
+    "fire": "Оган",
+    "nightSky": "Ноќно небо",
+    "mintFresh": "Свежо нане",
+    "roseGold": "Розово злато"
   },
   "stats": {
-    "professionalAgencies": "Професионални агенции",
-    "expertAgents": "Искусни агенти",
-    "listedProperties": "Активни недвижности"
+    "totalListings": "Вкупно огласи",
+    "totalAgents": "Вкупно агенти",
+    "yearsInBusiness": "Години искуство",
+    "rating": "Оценка",
+    "notAvailable": "Нема податоци"
   },
-  "filters": {
-    "allAgencies": "Сите агенции",
-    "featured": "Истакнати",
-    "myAgency": "Моја агенција"
+  "salesPerformance": {
+    "title": "Продажни резултати",
+    "salesLast12Months": "Продажби во последните 12 месеци",
+    "totalSales": "Вкупна продажба",
+    "priceRange": "Ценовен опсег",
+    "averagePrice": "Просечна цена"
   },
-  "sort": {
-    "mostProperties": "Најмногу недвижности",
-    "mostAgents": "Најмногу агенти",
-    "mostExperienced": "Најискусни",
-    "alphabetical": "По азбучен ред"
+  "about": {
+    "title": "За агенцијата {agencyName}",
+    "contactInfo": "Контакт информации",
+    "specialties": "Области на експертиза",
+    "specializations": "Специјализации",
+    "serviceAreas": "Области на работа",
+    "languagesSpoken": "Јазици"
   },
-  "results": {
-    "title": "Агенции за недвижности",
-    "featuredTitle": "Истакнати агенции",
-    "yourAgencyTitle": "Вашата агенција",
-    "showingMatching": "Прикажуваме {count} агенции што одговараат на „{query}“",
-    "browseAgencies": "Истражете агенции со професионални и искусни тимови",
-    "agenciesFound": "пронајдени агенции",
-    "moreAgencies": "Прикажи повеќе"
+  "invitationCode": {
+    "title": "Код за покана",
+    "description": "Испратете го овој код до агенти што сакате да се приклучат на вашата агенција",
+    "copy": "Копирај код"
   },
-  "card": {
-    "featured": "Истакната",
-    "certified": "Сертифицирана",
-    "properties": "Недвижности",
-    "agents": "Агенти",
-    "years": "Години искуство",
-    "certs": "Сертификати",
-    "viewProfile": "Отвори профил",
-    "view": "Погледни",
-    "more": "+{count} повеќе"
+  "actions": {
+    "editAgency": "Уреди агенција",
+    "manageJoinRequests": "Барања за приклучување",
+    "requestToJoin": "Побарај приклучување"
   },
-  "statsCards": {
-    "mostProperties": "Најголема понуда",
-    "mostAgents": "Најголем тим",
-    "mostExperience": "Најмногу искуство"
+  "featuredSubscription": {
+    "title": "Истакната претплата",
+    "subtitle": "Бидете повидливи од конкуренцијата",
+    "proTip": "Совет:",
+    "proTipMessage": "Истакнатите агенции добиваат до 5 пати повеќе прегледи и се појавуваат на врвот од резултатите."
   },
-  "empty": {
-    "noAgenciesTitle": "Нема пронајдени агенции",
-    "noAgenciesYet": "Сè уште нема достапни агенции",
-    "noMyAgency": "Вашата агенција не е пронајдена",
-    "adjustSearch": "Променете ги критериумите за пребарување или прегледајте ги сите агенции.",
-    "noMyAgencyMessage": "Сè уште немате креирано агенција. Време е да започнете.",
-    "beFirst": "Бидете први што ќе креираат агенција и ќе ги претстават своите недвижности."
+  "teamMembers": {
+    "title": "Тим",
+    "showTopPerformers": "Прикажи најдобри агенти",
+    "showAllMembers": "Прикажи го целиот тим",
+    "rankedByPerformance": "Подредени според резултати",
+    "topAgent": "Најдобар агент",
+    "secondPlace": "2 место",
+    "thirdPlace": "3 место",
+    "owner": "Сопственик",
+    "admin": "Администратор",
+    "license": "Лиценца",
+    "totalSales": "Вкупна продажба",
+    "propertiesSold": "Продадени недвижности",
+    "activeListings": "Активни огласи",
+    "removeAdmin": "Отстрани администратор",
+    "makeAdmin": "Назначи администратор",
+    "remove": "Отстрани",
+    "removing": "Се отстранува...",
+    "leaveAgency": "Напушти агенција",
+    "leaving": "Се напушта...",
+    "noAgentsFound": "Нема агенти во оваа агенција"
   },
-  "cta": {
-    "createAgency": "Креирај агенција",
-    "readyToGrow": "Подготвени сте да ја развиете вашата агенција?",
-    "ctaDescription": "Станете дел од нашата премиер мрежа на агенции за недвижности. Прикажете ги вашите огласи, поврзете се со сериозни клиенти и проширете го вашиот бизнис.",
-    "createToday": "Креирајте ја вашата агенција денес"
+  "properties": {
+    "activeListings": "АКТИВНИ ОГЛАСИ",
+    "soldProperties": "ПРОДАДЕНИ НЕДВИЖНОСТИ",
+    "activeListingsTitle": "Активни огласи",
+    "soldPropertiesTitle": "Продадени недвижности",
+    "propertiesCount": "{count} недвижности",
+    "noActiveListings": "Моментално нема активни огласи",
+    "noSoldProperties": "Сè уште нема продадени недвижности",
+    "checkBackSoon": "Проверете повторно наскоро",
+    "soldWillAppear": "Продадените недвижности ќе се прикажат тука"
   },
-  "loading": {
-    "title": "Ги пронаоѓаме најдобрите агенции...",
-    "message": "Пребаруваме низ нашата мрежа на професионални партнери"
+  "editModal": {
+    "title": "Уреди податоци за агенцијата",
+    "basicInfo": "Основни информации",
+    "agencyName": "Име на агенција",
+    "description": "Опис",
+    "email": "Е-пошта",
+    "phone": "Телефон",
+    "website": "Веб-страница",
+    "yearsInBusiness": "Години искуство",
+    "location": "Локација",
+    "address": "Адреса",
+    "city": "Град",
+    "country": "Држава",
+    "zipCode": "Поштенски број",
+    "latitude": "Географска ширина",
+    "longitude": "Географска должина",
+    "socialMedia": "Социјални мрежи",
+    "facebookUrl": "Facebook линк",
+    "instagramUrl": "Instagram линк",
+    "linkedinUrl": "LinkedIn линк",
+    "twitterUrl": "X / Twitter линк",
+    "specialtiesCerts": "Специјалности и сертификати",
+    "specialtiesLabel": "Специјалности (одделени со запирка)",
+    "specialtiesPlaceholder": "Станбени, Комерцијални, Луксузни",
+    "certificationsLabel": "Сертификати (одделени со запирка)",
+    "certificationsPlaceholder": "Лиценцирана агенција, ISO сертификат",
+    "languagesLabel": "Јазици (одделени со запирка)",
+    "languagesPlaceholder": "Македонски, Англиски, Албански",
+    "languagesHint": "Јазиците автоматски се ажурираат според агентите",
+    "businessHours": "Работно време",
+    "businessHoursPlaceholder": "09:00 – 18:00",
+    "saveChanges": "Зачувај промени"
   },
-  "error": {
-    "unableToLoad": "Настана проблем при вчитување на агенциите"
+  "confirmations": {
+    "removeAgent": "Дали сигурно сакате да го отстраните {name} од {agency}?",
+    "removeAgentDetails": "Со ова:\n- агентот ќе биде отстранет од агенцијата\n- неговите огласи и рецензии ќе останат непроменети",
+    "leaveAgency": "Дали сигурно сакате да ја напуштите агенцијата {agency}?",
+    "leaveAgencyDetails": "Со ова:\n- ќе бидете отстранети од агенцијата\n- ќе продолжите како независен агент",
+    "toggleAdmin": "Дали сакате да {action} {name}?",
+    "removeAdminRights": "ги отстраните администраторските права од",
+    "makeAdminRights": "го назначите за администратор"
   },
-  "featured": {
-    "title": "Истакнати агенции",
-    "subtitle": "Избрани партнери на кои можете да им верувате",
-    "badge": "Истакнато",
-    "viewAgency": "Погледни агенција",
-    "exploreAll": "Види ги сите агенции",
-    "selectedByAlgorithm": "Агенциите се избрани врз основа на квалитет, активност и доверба",
-    "selectedByAlgorithmMobile": "Внимателно избрани агенции",
-    "properties": "Недвижности",
-    "agents": "Агенти",
-    "agencyTypes": {
-      "luxury": "Луксузни недвижности",
-      "commercial": "Комерцијални недвижности",
-      "boutique": "Бутик агенција",
-      "team": "Тимска агенција",
-      "default": "Недвижности"
-    },
-    "empty": {
-      "title": "Нема истакнати агенции во моментов",
-      "message": "Погледнете повторно наскоро. Нови партнери доаѓаат."
-    }
+  "messages": {
+    "logoUpdated": "Логото е успешно ажурирано.",
+    "coverUpdated": "Насловната слика е успешно ажурирана.",
+    "gradientUpdated": "Градиентот е успешно променет.",
+    "agencyUpdated": "Податоците за агенцијата се ажурирани.",
+    "agentRemoved": "{name} е отстранет од агенцијата.",
+    "leftAgency": "Ја напуштивте агенцијата {agency}.",
+    "invitationCopied": "Кодот за покана е копиран.",
+    "joinRequestSent": "Барањето е испратено. Администраторот ќе го разгледа.",
+    "adminAdded": "{name} е назначен за администратор.",
+    "adminRemoved": "{name} повеќе не е администратор.",
+    "onlyOwnerCanManage": "Само сопственикот може да управува со администратори.",
+    "onlyAdminCanRemove": "Само администратор може да отстрани агент.",
+    "selectImageFile": "Изберете слика",
+    "imageSizeLimit": "Сликата мора да биде помала од 5MB"
+  },
+  "weekdays": {
+    "monday": "Понеделник",
+    "tuesday": "Вторник",
+    "wednesday": "Среда",
+    "thursday": "Четврток",
+    "friday": "Петок",
+    "saturday": "Сабота",
+    "sunday": "Недела"
+  },
+  "common": {
+    "cancel": "Откажи",
+    "featured": "Истакнато",
+    "required": "* задолжително"
+  },
+  "labels": {
+    "call": "Повикај",
+    "email": "Е-пошта",
+    "website": "Веб-страница"
   }
 }
