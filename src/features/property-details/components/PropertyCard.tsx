@@ -150,7 +150,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         )}
 
         {/* Top badges row */}
-        <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10">
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
           <div className="flex flex-col gap-1.5">
             {/* Sold Badge */}
             {isSold && (
