@@ -362,66 +362,9 @@ const AgentsPage: React.FC = () => {
         }
       `}</style>
 
-      {/* Hero Section - Fixed height and proper positioning */}
-      <div className="relative bg-gradient-to-b from-neutral-100 via-neutral-50 to-white w-full overflow-hidden mesh-3d">
-        {/* 3D Mesh Background with Parallax */}
-        <div
-          className="absolute inset-0 mesh-layer"
-          style={{
-            transform: `translate3d(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px, 0) rotateX(${mousePosition.y * 0.05}deg) rotateY(${mousePosition.x * 0.05}deg)`,
-          }}
-        >
-          {/* Primary mesh layer */}
-          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="agentMeshGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#e5e7eb" stopOpacity="0.4" />
-                <stop offset="50%" stopColor="#d1d5db" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#e5e7eb" stopOpacity="0.4" />
-              </linearGradient>
-              <pattern id="agentMesh3d" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="url(#agentMeshGradient1)" strokeWidth="1"/>
-                <circle cx="0" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
-                <circle cx="60" cy="0" r="1.5" fill="#d1d5db" opacity="0.5"/>
-                <circle cx="0" cy="60" r="1.5" fill="#d1d5db" opacity="0.5"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#agentMesh3d)" />
-          </svg>
-        </div>
-
-        {/* Secondary floating mesh layer - moves opposite */}
-        <div
-          className="absolute inset-0 mesh-layer opacity-30"
-          style={{
-            transform: `translate3d(${-mousePosition.x * 0.3}px, ${-mousePosition.y * 0.3}px, 50px)`,
-          }}
-        >
-          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-            <defs>
-              <pattern id="agentMesh3d-secondary" width="120" height="120" patternUnits="userSpaceOnUse">
-                <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#d1d5db" strokeWidth="0.5" strokeDasharray="4 4"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#agentMesh3d-secondary)" />
-          </svg>
-        </div>
-
-        {/* Subtle gradient orbs for depth */}
-        <div
-          className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-br from-neutral-200/30 to-transparent rounded-full blur-3xl mesh-layer"
-          style={{
-            transform: `translate3d(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px, 0)`,
-          }}
-        />
-        <div
-          className="absolute bottom-20 right-1/4 w-80 h-80 bg-gradient-to-tl from-neutral-200/20 to-transparent rounded-full blur-3xl mesh-layer"
-          style={{
-            transform: `translate3d(${-mousePosition.x * 0.6}px, ${-mousePosition.y * 0.6}px, 0)`,
-          }}
-        />
-
-        {/* Hero Content - Fixed layout without interfering with main content */}
+      {/* Hero Section with Integrated Search */}
+      <div className="relative bg-gradient-to-b from-neutral-100 via-neutral-50 to-white w-full overflow-hidden">
+        {/* Hero Content */}
         <div className="relative w-full pt-8 pb-16 lg:pt-12 lg:pb-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Main Title Section */}
