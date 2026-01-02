@@ -188,8 +188,9 @@ const getPromotedMarkerInnerClass = (property: Property): string => {
 
 /**
  * Create simple circular marker for zoomed out view
+ * Supports night mode with neon glow effects
  */
-const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) => {
+const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false) => {
   const price = formatMarkerPrice(property.price);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
 
@@ -218,15 +219,27 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) 
     ringWidth = 4;
   }
 
-  const baseFilter = 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
+  // Night mode: Add cyan neon glow effect
+  const nightModeGlow = isNightMode
+    ? 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.8)) drop-shadow(0 0 16px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 24px rgba(0, 150, 255, 0.3))'
+    : '';
+  const baseFilter = isNightMode
+    ? nightModeGlow
+    : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
+
+  // In night mode, use brighter colors
+  const markerColor = isNightMode ? lightenColor(color, 20) : color;
+  const strokeColorFinal = isNightMode && ringColor === 'none' ? '#00ffff' : (ringColor !== 'none' ? ringColor : '#FFFFFF');
+
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
+  const nightModeClass = isNightMode ? 'night-mode-marker-pulse' : '';
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper" style="width: 30px; height: 30px;">
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 30px; height: 30px;">
       <div class="${promotedInnerClass}" style="width: 30px; height: 30px;">
         <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${color}" stroke="${ringColor !== 'none' ? ringColor : '#FFFFFF'}" stroke-width="${ringWidth}"/>
+            <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
             <text x="15" y="16" font-family="Inter, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
@@ -245,9 +258,22 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false) 
 };
 
 /**
- * Create detailed house-shaped marker for zoomed in view
+ * Helper function to lighten a hex color
  */
-const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false) => {
+const lightenColor = (hex: string, percent: number): string => {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.min(255, (num >> 16) + amt);
+  const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+  const B = Math.min(255, (num & 0x0000FF) + amt);
+  return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
+};
+
+/**
+ * Create detailed house-shaped marker for zoomed in view
+ * Supports night mode with neon glow effects
+ */
+const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false) => {
   const price = formatMarkerPrice(property.price);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
 
@@ -276,17 +302,30 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     strokeWidth = 4;
   }
 
+  // Night mode: Add cyan neon glow effect
+  const nightModeGlow = isNightMode
+    ? 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.9)) drop-shadow(0 0 20px rgba(0, 200, 255, 0.6)) drop-shadow(0 0 30px rgba(0, 150, 255, 0.4))'
+    : '';
+  const baseFilter = isNightMode
+    ? nightModeGlow
+    : 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))';
+
+  // In night mode, use brighter colors and cyan stroke
+  const markerColor = isNightMode ? lightenColor(color, 20) : color;
+  const strokeColorFinal = isNightMode && strokeColor === '#FFFFFF' ? '#00ffff' : strokeColor;
+  const pointerColor = isNightMode ? '#001a33' : '#003A96';
+
   const scale = isHovered ? 1.25 : 1;
-  const baseFilter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))';
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
+  const nightModeClass = isNightMode ? 'night-mode-marker-pulse' : '';
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper" style="width: 45px; height: 36px;">
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 45px; height: 36px;">
       <div class="${promotedInnerClass}" style="width: 45px; height: 36px;">
         <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <path d="M35 56L25 44H45L35 56Z" fill="#003A96" />
-            <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+            <path d="M35 56L25 44H45L35 56Z" fill="${pointerColor}" />
+            <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
             <text x="35" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
@@ -306,12 +345,13 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
 /**
  * Create appropriate marker icon based on zoom level
+ * Supports night mode with glowing neon effects
  */
-const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boolean = false): L.DivIcon => {
+const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boolean = false, isNightMode: boolean = false): L.DivIcon => {
   if (zoom < ZOOM_THRESHOLD) {
-    return createSimpleMarkerIcon(property, isHovered);
+    return createSimpleMarkerIcon(property, isHovered, isNightMode);
   }
-  return createDetailedMarkerIcon(property, isHovered);
+  return createDetailedMarkerIcon(property, isHovered, isNightMode);
 };
 
 // Tier badge configurations for popup
@@ -625,14 +665,16 @@ const PropertyPopup: React.FC<{
  * Markers Component
  *
  * Renders all property markers on the map with zoom-responsive icons.
+ * Supports night mode with glowing neon-style markers.
  */
 interface MarkersProps {
   properties: Property[];
   onPopupClick: (id: string) => void;
   hoveredPropertyId?: string | null;
+  isNightMode?: boolean;
 }
 
-export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hoveredPropertyId }) => {
+export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hoveredPropertyId, isNightMode = false }) => {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
   const markerRefsMap = React.useRef<Map<string, L.Marker>>(new Map());
@@ -643,17 +685,17 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
     },
   });
 
-  // Update marker icon when hover state changes
+  // Update marker icon when hover state or night mode changes
   React.useEffect(() => {
     properties.forEach((prop) => {
       const marker = markerRefsMap.current.get(prop.id);
       if (marker) {
         const isHovered = prop.id === hoveredPropertyId;
-        const newIcon = createCustomMarkerIcon(prop, zoom, isHovered);
+        const newIcon = createCustomMarkerIcon(prop, zoom, isHovered, isNightMode);
         marker.setIcon(newIcon);
       }
     });
-  }, [hoveredPropertyId, zoom, properties]);
+  }, [hoveredPropertyId, zoom, properties, isNightMode]);
 
   // Helper to check if property is actively promoted
   const isPropertyPromoted = (prop: Property) =>
@@ -667,7 +709,7 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
           <Marker
             key={prop.id}
             position={[prop.lat, prop.lng]}
-            icon={createCustomMarkerIcon(prop, zoom, prop.id === hoveredPropertyId)}
+            icon={createCustomMarkerIcon(prop, zoom, prop.id === hoveredPropertyId, isNightMode)}
             ref={(marker) => {
               if (marker) {
                 markerRefsMap.current.set(prop.id, marker);
@@ -678,7 +720,7 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             <Popup
               maxWidth={isPromoted ? 300 : 230}
               minWidth={isPromoted ? 288 : 220}
-              className={isPromoted ? 'promoted-property-popup' : ''}
+              className={`${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>

@@ -17,6 +17,7 @@ import {
 } from '@/constants';
 import { CadastreLayer } from './CadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
+import SnapchatMapOverlay from './SnapchatMapOverlay';
 import {
   FlyToController,
   MapEvents,
@@ -152,12 +153,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   return (
     <HighlightedPropertiesProvider properties={propertiesInView}>
-      <div className="w-full h-full relative">
+      <div className={`w-full h-full relative ${isNightMode ? 'night-mode' : ''}`}>
+        {/* Snapchat-style sparkle overlay */}
+        <SnapchatMapOverlay enabled={isNightMode} />
+
         <MapContainer
           center={center}
           zoom={zoom}
           scrollWheelZoom={true}
-          className="w-full h-full"
+          className={`w-full h-full ${isNightMode ? 'night-mode' : ''}`}
           maxZoom={18}
           minZoom={7}
           zoomControl={false}
@@ -175,7 +179,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
           {drawnBounds && !isDrawing && (
             <Rectangle
               bounds={drawnBounds}
-              pathOptions={{ color: '#0252CD', weight: 3, fillOpacity: 0.2 }}
+              pathOptions={{
+                color: isNightMode ? '#00ffff' : '#0252CD',
+                weight: isNightMode ? 2 : 3,
+                fillOpacity: isNightMode ? 0.15 : 0.2,
+                fillColor: isNightMode ? '#00ffff' : '#0252CD',
+                className: isNightMode ? 'night-mode-rectangle' : '',
+              }}
             />
           )}
           <TileLayer
@@ -189,7 +199,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
           <CadastreLayer enabled={showCadastre && mapType === 'satellite'} opacity={0.7} />
           <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
-          <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} />
+          <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={isNightMode} />
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
         </MapContainer>
