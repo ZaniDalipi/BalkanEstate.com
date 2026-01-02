@@ -167,6 +167,26 @@ export const extendPromotion = async (
     });
   } catch (error: any) {
     console.error('Extend promotion error:', error);
+
+    // Check for specific error types
+    if (error.message?.includes('STRIPE_SECRET_KEY')) {
+      res.status(503).json({
+        message: 'Payment service not configured',
+        code: 'PAYMENT_NOT_CONFIGURED',
+        error: 'Stripe is not configured. Please contact support.'
+      });
+      return;
+    }
+
+    if (error.type === 'StripeAuthenticationError') {
+      res.status(503).json({
+        message: 'Payment service authentication error',
+        code: 'PAYMENT_AUTH_ERROR',
+        error: 'Unable to process payment. Please try again later.'
+      });
+      return;
+    }
+
     res.status(500).json({ message: 'Error extending promotion', error: error.message });
   }
 };

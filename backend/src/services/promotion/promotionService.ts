@@ -19,10 +19,46 @@ import {
   PromotionDuration,
 } from '../../config/promotionTiers';
 
-// Initialize Stripe
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2025-10-29.clover',
-});
+// Lazy Stripe initialization to avoid crash when API key not set
+let _stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not configured');
+    }
+    _stripe = new Stripe(apiKey, {
+      apiVersion: '2025-10-29.clover',
+    });
+  }
+  return _stripe;
+}
+
+// Export stripe getter for backward compatibility
+export const stripe = {
+  get checkout() {
+    return getStripe().checkout;
+  },
+  get customers() {
+    return getStripe().customers;
+  },
+  get subscriptions() {
+    return getStripe().subscriptions;
+  },
+  get paymentIntents() {
+    return getStripe().paymentIntents;
+  },
+  get prices() {
+    return getStripe().prices;
+  },
+  get products() {
+    return getStripe().products;
+  },
+  get webhooks() {
+    return getStripe().webhooks;
+  },
+};
 
 // Re-export tier config for convenience
 export {
