@@ -76,11 +76,11 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({ enabled, style = 'n
         // Load building data
         osmb.load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
 
-        // Set Snapchat-style dark building colors
+        // Set building colors - more visible with better contrast
         if (style === 'night') {
           osmb.style({
-            wallColor: 'rgba(20, 30, 50, 0.95)',      // Dark navy walls
-            roofColor: 'rgba(30, 45, 70, 0.9)',       // Slightly lighter roofs
+            wallColor: 'rgba(45, 55, 85, 0.92)',       // Lighter navy walls - more visible
+            roofColor: 'rgba(70, 85, 120, 0.88)',      // Brighter roofs for contrast
             shadows: true,
           });
         } else {
@@ -117,8 +117,8 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({ enabled, style = 'n
       try {
         if (style === 'night') {
           osmBuildingsRef.current.style({
-            wallColor: 'rgba(20, 30, 50, 0.95)',
-            roofColor: 'rgba(30, 45, 70, 0.9)',
+            wallColor: 'rgba(45, 55, 85, 0.92)',       // Lighter navy walls - more visible
+            roofColor: 'rgba(70, 85, 120, 0.88)',      // Brighter roofs for contrast
             shadows: true,
           });
         } else {

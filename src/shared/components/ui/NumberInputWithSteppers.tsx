@@ -42,6 +42,14 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
         }
     };
 
+    // Prevent Enter key from submitting the form
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            (e.target as HTMLInputElement).blur();
+        }
+    };
+
     return (
         <div className="relative">
             <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
@@ -60,6 +68,7 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
                     id={id}
                     value={value === undefined || value === null ? '' : value}
                     onChange={handleChange}
+                    onKeyDown={handleKeyDown}
                     className="w-full text-center text-lg font-semibold text-neutral-900 border-none focus:ring-0 bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min={min}
                     max={max}

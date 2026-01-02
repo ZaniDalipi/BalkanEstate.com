@@ -149,15 +149,19 @@ export const MapEvents: React.FC<{
  *
  * Automatically switches between street and satellite view based on zoom level.
  * Switches to satellite at zoom level 18+ for better detail.
+ * Night mode is excluded from auto-switching - it persists at all zoom levels.
  */
 export const ZoomBasedTileSwitch: React.FC<{
-  mapType: 'street' | 'satellite';
-  setMapType: (type: 'street' | 'satellite') => void;
+  mapType: 'street' | 'satellite' | 'night';
+  setMapType: (type: 'street' | 'satellite' | 'night') => void;
 }> = ({ mapType, setMapType }) => {
   const map = useMap();
 
   useEffect(() => {
     const handleZoomEnd = () => {
+      // Don't auto-switch when in night mode - let user control it
+      if (mapType === 'night') return;
+
       const currentZoom = map.getZoom();
 
       if (currentZoom >= 18) {
