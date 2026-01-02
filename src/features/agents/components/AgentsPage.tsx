@@ -467,16 +467,18 @@ const AgentsPage: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
                   placeholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
-                  className="w-full pl-10 sm:pl-12 pr-20 sm:pr-32 md:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
+                  className="w-full pl-12 pr-32 sm:pl-14 sm:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
                       className="p-1 sm:p-2 hover:bg-neutral-100 rounded-lg transition-all duration-200"
-                      title={t('agents:search.clearSearch')}
+                      title="Clear search"
                     >
-                      <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
+                      <span className="text-neutral-400 hover:text-neutral-600 text-sm">
+                        ✕
+                      </span>
                     </button>
                   )}
                   <button
@@ -485,7 +487,7 @@ const AgentsPage: React.FC = () => {
                       fetchAgents(searchQuery);
                     }}
                     className="px-2.5 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-lg hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm md:text-base whitespace-nowrap"
-                    aria-label={t('agents:search.searchButton')}
+                    aria-label="Search agents"
                   >
                     <MagnifyingGlassIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 flex-shrink-0" />
                     <span className="hidden xs:inline">{t('agents:search.searchButton', 'Search')}</span>
