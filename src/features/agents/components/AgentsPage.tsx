@@ -240,17 +240,6 @@ const AgentsPage: React.FC = () => {
     return <AgentProfilePage agent={selectedAgent} />;
   }
 
-  if (loading) {
-    return (
-      <div className="bg-neutral-50 min-h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-neutral-600">{t('agents:loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-neutral-50 min-h-screen flex flex-col">
       {/* SEO Meta Tags */}
@@ -551,7 +540,12 @@ const AgentsPage: React.FC = () => {
           </div>
 
           {/* Agent Cards Grid */}
-          {filteredAgents.length === 0 ? (
+          {loading ? (
+            <div className="bg-white rounded-xl shadow-md border p-8 sm:p-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-neutral-600">{t('agents:loading')}</p>
+            </div>
+          ) : filteredAgents.length === 0 ? (
             <div className="bg-white rounded-xl shadow-md border p-8 sm:p-12 text-center">
               <UserGroupIcon className="w-12 h-12 sm:w-16 sm:h-16 text-neutral-300 mx-auto mb-4" />
               <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-2">{t('agents:results.noAgentsFound')}</h3>
@@ -568,7 +562,7 @@ const AgentsPage: React.FC = () => {
           )}
 
           {/* View More Button */}
-          {filteredAgents.length > 0 && (
+          {!loading && filteredAgents.length > 0 && (
             <div className="text-center mb-12">
               <button
                 onClick={() => {
