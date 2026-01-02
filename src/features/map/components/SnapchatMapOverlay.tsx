@@ -140,6 +140,26 @@ const SnapchatMapOverlay: React.FC<SnapchatMapOverlayProps> = ({ enabled }) => {
           filter: saturate(1.2) brightness(0.95);
         }
 
+        /* 3D Buildings - Snapchat style with glowing edges */
+        .night-mode .osmb-buildings {
+          filter: drop-shadow(0 0 4px rgba(0, 150, 255, 0.4));
+        }
+
+        /* Building canvas styling */
+        .night-mode canvas.osmb {
+          filter: contrast(1.1) brightness(0.9);
+        }
+
+        /* Add subtle blue glow to building edges */
+        @keyframes buildingGlow {
+          0%, 100% {
+            filter: drop-shadow(0 2px 4px rgba(0, 100, 150, 0.5));
+          }
+          50% {
+            filter: drop-shadow(0 2px 8px rgba(0, 150, 200, 0.7));
+          }
+        }
+
         /* Glow effect for drawn rectangles in night mode */
         .night-mode .leaflet-interactive {
           filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.6));

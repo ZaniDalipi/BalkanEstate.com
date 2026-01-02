@@ -18,6 +18,7 @@ import {
 import { CadastreLayer } from './CadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
 import SnapchatMapOverlay from './SnapchatMapOverlay';
+import Buildings3DLayer from './Buildings3DLayer';
 import {
   FlyToController,
   MapEvents,
@@ -197,6 +198,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
             updateWhenZooming={false}
             updateInterval={150}
           />
+          {/* 3D Buildings - Snapchat style */}
+          <Buildings3DLayer enabled={isNightMode} style="night" />
           <CadastreLayer enabled={showCadastre && mapType === 'satellite'} opacity={0.7} />
           <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
           <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={isNightMode} />
