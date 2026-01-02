@@ -14,13 +14,82 @@ import { getSocketInstance } from '../utils/socketInstance';
 // @access  Public
 export const getAgents = async (req: Request, res: Response): Promise<void> => {
   try {
-    const agents = await Agent.find({ isActive: true })
+    const { search, page = 1, limit = 50 } = req.query;
+
+    let filter: any = { isActive: true };
+
+    // Universal search - searches across multiple fields
+    if (search && typeof search === 'string' && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { agencyName: searchRegex },
+        { bio: searchRegex },
+        { officeAddress: searchRegex },
+        { specializations: { $elemMatch: { $regex: searchRegex } } },
+        { serviceAreas: { $elemMatch: { $regex: searchRegex } } },
+        { languages: { $elemMatch: { $regex: searchRegex } } },
+      ];
+      console.log(`🔍 Universal search for agents: "${search}"`);
+    }
+
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    let agents = await Agent.find(filter)
       .populate('userId', 'name email phone avatarUrl city country address')
       .populate('agencyId', 'name logo coverGradient coverImage slug type')
       .populate('testimonials.userId', 'name avatarUrl')
-      .sort({ rating: -1, totalSales: -1 });
+      .sort({ rating: -1, totalSales: -1 })
+      .skip(skip)
+      .limit(limitNum);
 
-    res.json({ agents });
+    // If search is provided, also filter by populated user fields (name, city, country)
+    if (search && typeof search === 'string' && search.trim()) {
+      const searchLower = search.trim().toLowerCase();
+      agents = agents.filter(agent => {
+        const user = agent.userId as any;
+        if (!user) return true; // Keep agents that matched on Agent model fields
+
+        const userName = (user.name || '').toLowerCase();
+        const userCity = (user.city || '').toLowerCase();
+        const userCountry = (user.country || '').toLowerCase();
+        const userAddress = (user.address || '').toLowerCase();
+        const agencyName = (agent.agencyName || '').toLowerCase();
+        const bio = (agent.bio || '').toLowerCase();
+        const officeAddress = (agent.officeAddress || '').toLowerCase();
+        const specializations = (agent.specializations || []).map((s: string) => s.toLowerCase());
+        const serviceAreas = (agent.serviceAreas || []).map((s: string) => s.toLowerCase());
+        const languages = (agent.languages || []).map((l: string) => l.toLowerCase());
+
+        return (
+          userName.includes(searchLower) ||
+          userCity.includes(searchLower) ||
+          userCountry.includes(searchLower) ||
+          userAddress.includes(searchLower) ||
+          agencyName.includes(searchLower) ||
+          bio.includes(searchLower) ||
+          officeAddress.includes(searchLower) ||
+          specializations.some((s: string) => s.includes(searchLower)) ||
+          serviceAreas.some((s: string) => s.includes(searchLower)) ||
+          languages.some((l: string) => l.includes(searchLower))
+        );
+      });
+    }
+
+    const total = await Agent.countDocuments(filter);
+
+    console.log(`✅ Found ${agents.length} agents${search ? ` matching "${search}"` : ''}`);
+
+    res.json({
+      agents,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (error: any) {
     console.error('Get agents error:', error);
     res.status(500).json({ message: 'Error fetching agents', error: error.message });
