@@ -6,7 +6,7 @@ import { getAllAgents, getAgencies } from '@/services/apiService';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
-import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon } from '@/constants';
+import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 
@@ -543,25 +543,31 @@ const AgentsPage: React.FC = () => {
               {/* Live Stats */}
               <div className="pt-6 border-t border-neutral-200/50">
                 <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm sm:text-base">
-                  <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <div className="text-center">
-                      <div className="font-bold text-lg sm:text-2xl text-neutral-900">{agents.length}+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.verifiedAgents')}</div>
+                  <div className="flex items-center gap-3 bg-gradient-to-br from-green-50 to-emerald-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-green-100">
+                    <div className="p-2.5 bg-green-500 rounded-xl shadow-md">
+                      <UsersIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{agents.length}</div>
+                      <div className="text-green-700 text-xs sm:text-sm font-medium">{t('agents:stats.expertAgents', 'Expert Agents')}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                    <div className="text-center">
-                      <div className="font-bold text-lg sm:text-2xl text-neutral-900">{agencies.length}+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.professionalAgencies')}</div>
+                  <div className="flex items-center gap-3 bg-gradient-to-br from-blue-50 to-indigo-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100">
+                    <div className="p-2.5 bg-blue-500 rounded-xl shadow-md">
+                      <BuildingOfficeIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{agencies.length}</div>
+                      <div className="text-blue-700 text-xs sm:text-sm font-medium">{t('agents:stats.professionalAgencies', 'Professional Agencies')}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/90 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-pulse"></div>
-                    <div className="text-center">
-                      <div className="font-bold text-lg sm:text-2xl text-neutral-900">5000+</div>
-                      <div className="text-neutral-600 text-xs sm:text-sm">{t('agents:stats.successfulTransactions')}</div>
+                  <div className="flex items-center gap-3 bg-gradient-to-br from-purple-50 to-violet-50 px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-purple-100">
+                    <div className="p-2.5 bg-purple-500 rounded-xl shadow-md">
+                      <HomeIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-2xl sm:text-3xl text-neutral-900">8</div>
+                      <div className="text-purple-700 text-xs sm:text-sm font-medium">{t('agents:stats.listedProperties', 'Listed Properties')}</div>
                     </div>
                   </div>
                 </div>
@@ -574,49 +580,6 @@ const AgentsPage: React.FC = () => {
       {/* Main Content - Now this flows properly after the hero section */}
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          {/* Search Bar - Main Content Area */}
-          <div className="mb-6">
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-3 sm:left-4 flex items-center pointer-events-none z-10">
-                  <MagnifyingGlassIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 ${
-                    searchQuery ? 'text-primary scale-110' : 'text-neutral-400'
-                  }`} />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
-                  placeholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
-                  className="w-full pl-10 sm:pl-12 pr-24 sm:pr-36 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="p-1.5 sm:p-2 hover:bg-neutral-100 rounded-lg transition-all duration-200"
-                      title={t('agents:search.clearSearch', 'Clear search')}
-                    >
-                      <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      fetchAgents(searchQuery);
-                    }}
-                    className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-lg hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm sm:text-base whitespace-nowrap"
-                    aria-label={t('agents:search.searchButton', 'Search')}
-                  >
-                    <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span className="hidden sm:inline">{t('agents:search.searchButton', 'Search')}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Filters and Sort Section */}
           <div className="mb-6">
             <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
