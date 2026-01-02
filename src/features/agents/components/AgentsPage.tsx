@@ -574,11 +574,54 @@ const AgentsPage: React.FC = () => {
       {/* Main Content - Now this flows properly after the hero section */}
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          {/* Search Bar - Main Content Area */}
+          <div className="mb-6">
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-3 sm:left-4 flex items-center pointer-events-none z-10">
+                  <MagnifyingGlassIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 ${
+                    searchQuery ? 'text-primary scale-110' : 'text-neutral-400'
+                  }`} />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
+                  placeholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
+                  className="w-full pl-10 sm:pl-12 pr-24 sm:pr-36 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="p-1.5 sm:p-2 hover:bg-neutral-100 rounded-lg transition-all duration-200"
+                      title={t('agents:search.clearSearch', 'Clear search')}
+                    >
+                      <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      fetchAgents(searchQuery);
+                    }}
+                    className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-lg hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-1 sm:gap-2 text-sm sm:text-base whitespace-nowrap"
+                    aria-label={t('agents:search.searchButton', 'Search')}
+                  >
+                    <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="hidden sm:inline">{t('agents:search.searchButton', 'Search')}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Filters and Sort Section */}
           <div className="mb-6">
             <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
               {/* Top Row: Sort and Filters Toggle */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-wrap">
                   <span className="text-sm font-medium text-gray-700">{t('agents:filters.sortBy')}</span>
                   <select
