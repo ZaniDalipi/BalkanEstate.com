@@ -32,7 +32,12 @@
     "test:engagement": "ts-node src/scripts/testEngagementNotifications.ts",
     "test": "jest --detectOpenHandles --forceExit",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:payments": "jest --testPathPattern=payment --detectOpenHandles --forceExit",
+    "test:payments:unit": "jest --testPathPattern=payment-services --detectOpenHandles --forceExit",
+    "test:payments:integration": "jest --testPathPattern=payment-integration --detectOpenHandles --forceExit",
+    "test:payments:api": "./test-payments.sh",
+    "test:staging": "./scripts/test-staging-payments.sh"
   },
   "keywords": [
     "real-estate",
