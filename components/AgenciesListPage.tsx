@@ -31,8 +31,6 @@ import { SEO } from '../src/components/seo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
-type SearchTab = 'city' | 'name';
-
 const AgenciesListPage: React.FC = () => {
   const { t } = useTranslation(['agents']);
   const { dispatch, state } = useAppContext();
@@ -44,8 +42,7 @@ const AgenciesListPage: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'featured' | 'myAgency'>('all');
   const [sortBy, setSortBy] = useState<'properties' | 'agents' | 'years' | 'name'>('properties');
 
-  // New search state
-  const [searchTab, setSearchTab] = useState<SearchTab>('city');
+  // Universal search state - searches across name, city, country, description, specialties
   const [searchQuery, setSearchQuery] = useState('');
 
   const currentUser = state.currentUser;
@@ -83,8 +80,7 @@ const AgenciesListPage: React.FC = () => {
       } else {
         const response = await getAgencies({
           featured: filter === 'featured' ? true : undefined,
-          city: searchTab === 'city' && searchQuery ? searchQuery : undefined,
-          name: searchTab === 'name' && searchQuery ? searchQuery : undefined,
+          search: searchQuery ? searchQuery : undefined, // Universal search across all fields
           limit: 50,
         });
         const fetchedAgencies = response.agencies || [];
@@ -511,47 +507,7 @@ const AgenciesListPage: React.FC = () => {
                 </p>
               </div>
 
-              {/* Search Tabs */}
-              <div className="flex gap-2 mb-6 p-1.5 bg-neutral-100 rounded-2xl w-fit mx-auto">
-                <button
-                  onClick={() => setSearchTab('city')}
-                  className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 relative min-w-[120px] sm:min-w-[140px] ${
-                    searchTab === 'city'
-                      ? 'text-white shadow-lg'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-white'
-                  }`}
-                  style={{
-                    background: searchTab === 'city' 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' 
-                      : 'transparent'
-                  }}
-                >
-                  <span className="flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
-                    <MapPinIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                    {t('agencies.searchByCity')}
-                  </span>
-                </button>
-                <button
-                  onClick={() => setSearchTab('name')}
-                  className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 relative min-w-[120px] sm:min-w-[140px] ${
-                    searchTab === 'name'
-                      ? 'text-white shadow-lg'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-white'
-                  }`}
-                  style={{
-                    background: searchTab === 'name'
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'
-                      : 'transparent'
-                  }}
-                >
-                  <span className="flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base">
-                    <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                    {t('agencies.searchByName')}
-                  </span>
-                </button>
-              </div>
-
-              {/* Search Input */}
+              {/* Universal Search Input */}
               <div className="relative mb-6">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
                   <MagnifyingGlassIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 ${
@@ -562,9 +518,8 @@ const AgenciesListPage: React.FC = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={searchTab === 'city'
-                    ? t('agencies.searchByCityPlaceholder')
-                    : t('agencies.searchByNamePlaceholder')}
+                  onKeyDown={(e) => e.key === 'Enter' && fetchAgencies()}
+                  placeholder={t('agencies.universalSearchPlaceholder', 'Search by name, city, country, or specialty...')}
                   className="w-full pl-12 pr-32 sm:pl-14 sm:pr-40 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300 bg-white text-base sm:text-lg placeholder:text-neutral-500"
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
@@ -588,7 +543,7 @@ const AgenciesListPage: React.FC = () => {
                     aria-label="Search agencies"
                   >
                     <MagnifyingGlassIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 flex-shrink-0" />
-                    <span className="hidden xs:inline">Search</span>
+                    <span className="hidden xs:inline">{t('agencies.search', 'Search')}</span>
                   </button>
                 </div>
               </div>
@@ -600,67 +555,42 @@ const AgenciesListPage: React.FC = () => {
                     {t('agencies.popularSearches')}
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {searchTab === 'city' ? (
-                      <>
-                        <button
-                          onClick={() => setSearchQuery('Belgrade')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          Belgrade
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Zagreb')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          Zagreb
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Sarajevo')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          Sarajevo
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Tirana')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                         Tirana
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Athina')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                         Athina
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Sofia')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                         Sofia
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Skopje')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                         Skopje
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => setSearchQuery('Top Rated')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          {t('agencies.topRated')}
-                        </button>
-                        <button
-                          onClick={() => setSearchQuery('Luxury')}
-                          className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
-                        >
-                          {t('agencies.luxurySpecialists')}
-                        </button>
-                      </>
-                    )}
+                    <button
+                      onClick={() => setSearchQuery('Belgrade')}
+                      className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
+                    >
+                      Belgrade
+                    </button>
+                    <button
+                      onClick={() => setSearchQuery('Zagreb')}
+                      className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
+                    >
+                      Zagreb
+                    </button>
+                    <button
+                      onClick={() => setSearchQuery('Luxury')}
+                      className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
+                    >
+                      Luxury
+                    </button>
+                    <button
+                      onClick={() => setSearchQuery('Tirana')}
+                      className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
+                    >
+                      Tirana
+                    </button>
+                    <button
+                      onClick={() => setSearchQuery('Commercial')}
+                      className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
+                    >
+                      Commercial
+                    </button>
+                    <button
+                      onClick={() => setSearchQuery('Residential')}
+                      className="px-3 py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-all duration-300 font-medium"
+                    >
+                      Residential
+                    </button>
                   </div>
                 </div>
               )}
