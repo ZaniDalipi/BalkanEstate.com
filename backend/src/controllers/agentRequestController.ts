@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import AgentRequest from '../models/AgentRequest';
 import Agent from '../models/Agent';
+import Agency from '../models/Agency';
+import emailService from '../services/emailService';
+import { geocodeFreeformLocation, calculateDistanceKm } from '../services/geocodingService';
+
+const SEARCH_RADIUS_KM = 25; // 20-25 km radius for finding nearby agents
 
 // Create a new agent request
 export const createAgentRequest = async (req: Request, res: Response): Promise<void> => {
@@ -25,87 +29,166 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
 
     await agentRequest.save();
 
-    // Find nearby agents based on location
-    // Parse location to extract city/country/address
+    // Geocode the user's location to get coordinates
+    const geocodeResult = await geocodeFreeformLocation(location);
+    let userLat: number | null = null;
+    let userLng: number | null = null;
+
+    if (geocodeResult) {
+      userLat = geocodeResult.lat;
+      userLng = geocodeResult.lng;
+      console.log(`📍 User location geocoded: ${userLat}, ${userLng} (${geocodeResult.display_name})`);
+    }
+
+    // Find nearby agents within SEARCH_RADIUS_KM
+    let matchedAgents: any[] = [];
+    let matchedAgencies: any[] = [];
     const locationLower = location.toLowerCase();
 
-    // Try to find agents in the same area
-    // Search serviceAreas (on Agent model) and officeAddress
-    const nearbyAgents = await Agent.find({
-      $or: [
-        { serviceAreas: { $elemMatch: { $regex: locationLower, $options: 'i' } } },
-        { officeAddress: { $regex: locationLower, $options: 'i' } },
-      ],
-      licenseVerified: true, // Only verified agents
-    })
-      .populate({
-        path: 'userId',
-        match: {
-          $or: [
-            { city: { $regex: locationLower, $options: 'i' } },
-            { country: { $regex: locationLower, $options: 'i' } },
-            { address: { $regex: locationLower, $options: 'i' } },
-          ],
-        },
-        select: 'city country address',
+    if (userLat !== null && userLng !== null) {
+      // === GEO-BASED SEARCH ===
+      // Find all agents with coordinates and filter by distance
+      const allAgentsWithCoords = await Agent.find({
+        lat: { $exists: true, $ne: null },
+        lng: { $exists: true, $ne: null },
+        isActive: true,
       })
-      .sort({ totalSales: -1 }) // Prioritize agents with more sales (correct field name)
-      .limit(10) // Get more initially, filter later
-      .select('_id agentId userId serviceAreas officeAddress');
-
-    // Filter to include agents who either:
-    // 1. Matched on serviceAreas/officeAddress (always have userId populated)
-    // 2. Matched on populated user fields (userId not null from match)
-    // Also re-query agents whose serviceAreas/officeAddress didn't match but user fields might
-    let matchedAgents = nearbyAgents.filter(agent => agent.userId !== null);
-
-    // If we didn't find enough from the first query, try a second query with User model search
-    if (matchedAgents.length < 5) {
-      const allAgents = await Agent.find({ licenseVerified: true })
         .populate({
           path: 'userId',
-          select: 'city country address',
+          select: 'name email phone city country',
+        })
+        .sort({ totalSales: -1, rating: -1 })
+        .select('_id agentId userId lat lng serviceAreas officeAddress officePhone');
+
+      // Filter agents within radius
+      for (const agent of allAgentsWithCoords) {
+        if (agent.lat && agent.lng) {
+          const distance = calculateDistanceKm(userLat, userLng, agent.lat, agent.lng);
+          if (distance <= SEARCH_RADIUS_KM) {
+            matchedAgents.push({ ...agent.toObject(), distance });
+          }
+        }
+      }
+
+      // Sort by distance (closest first)
+      matchedAgents.sort((a, b) => a.distance - b.distance);
+
+      // Find all agencies with coordinates and filter by distance
+      const allAgenciesWithCoords = await Agency.find({
+        lat: { $exists: true, $ne: null },
+        lng: { $exists: true, $ne: null },
+        isActive: true,
+      })
+        .select('_id name email phone lat lng address city country')
+        .sort({ memberCount: -1, rating: -1 });
+
+      // Filter agencies within radius
+      for (const agency of allAgenciesWithCoords) {
+        if (agency.lat && agency.lng) {
+          const distance = calculateDistanceKm(userLat, userLng, agency.lat, agency.lng);
+          if (distance <= SEARCH_RADIUS_KM) {
+            matchedAgencies.push({ ...agency.toObject(), distance });
+          }
+        }
+      }
+
+      // Sort agencies by distance
+      matchedAgencies.sort((a, b) => a.distance - b.distance);
+
+      console.log(`🔍 Found ${matchedAgents.length} agents and ${matchedAgencies.length} agencies within ${SEARCH_RADIUS_KM}km`);
+    }
+
+    // Fallback: If geo-search didn't find enough, use text-based search
+    if (matchedAgents.length < 3) {
+      console.log('📝 Using text-based fallback search for agents...');
+      const textMatchedAgents = await Agent.find({
+        $or: [
+          { serviceAreas: { $elemMatch: { $regex: locationLower, $options: 'i' } } },
+          { officeAddress: { $regex: locationLower, $options: 'i' } },
+        ],
+        isActive: true,
+      })
+        .populate({
+          path: 'userId',
+          select: 'name email phone city country',
         })
         .sort({ totalSales: -1 })
-        .limit(50)
-        .select('_id agentId userId serviceAreas officeAddress');
+        .limit(10)
+        .select('_id agentId userId serviceAreas officeAddress officePhone');
 
-      // Filter by location match on any field
-      const additionalAgents = allAgents.filter(agent => {
-        if (!agent.userId) return false;
-        const user = agent.userId as any;
-        const city = (user.city || '').toLowerCase();
-        const country = (user.country || '').toLowerCase();
-        const address = (user.address || '').toLowerCase();
-        const serviceAreas = (agent.serviceAreas || []).map((s: string) => s.toLowerCase());
-        const officeAddress = (agent.officeAddress || '').toLowerCase();
-
-        return city.includes(locationLower) ||
-               country.includes(locationLower) ||
-               address.includes(locationLower) ||
-               serviceAreas.some((area: string) => area.includes(locationLower)) ||
-               officeAddress.includes(locationLower);
-      });
-
-      // Merge and deduplicate
-      const existingIds = new Set(matchedAgents.map(a => (a._id as mongoose.Types.ObjectId).toString()));
-      for (const agent of additionalAgents) {
-        if (!existingIds.has((agent._id as mongoose.Types.ObjectId).toString())) {
-          matchedAgents.push(agent);
-          if (matchedAgents.length >= 5) break;
+      // Add text-matched agents not already in the list
+      const existingIds = new Set(matchedAgents.map((a: any) => a._id.toString()));
+      for (const agent of textMatchedAgents) {
+        if (!existingIds.has((agent._id as any).toString())) {
+          matchedAgents.push(agent.toObject());
         }
       }
     }
 
-    // Limit to 5 agents
-    matchedAgents = matchedAgents.slice(0, 5);
+    // Limit results
+    matchedAgents = matchedAgents.slice(0, 10);
+    matchedAgencies = matchedAgencies.slice(0, 5);
 
     // Assign matched agents to the request
     if (matchedAgents.length > 0) {
-      agentRequest.assignedAgents = matchedAgents.map(agent => agent._id as mongoose.Types.ObjectId);
+      agentRequest.assignedAgents = matchedAgents.map(agent => agent._id);
       agentRequest.status = 'assigned';
       await agentRequest.save();
     }
+
+    // Send email notifications to matched agents and agencies
+    const emailsSent: string[] = [];
+    const emailSubject = 'New Property Inquiry - BalkanEstate';
+
+    // Send to agents
+    for (const agent of matchedAgents) {
+      const user = agent.userId as any;
+      if (user?.email) {
+        try {
+          await emailService.sendEmail({
+            to: user.email,
+            subject: emailSubject,
+            html: generateAgentNotificationEmail({
+              agentName: user.name || 'Agent',
+              clientEmail: email,
+              clientPhone: phone,
+              location,
+              propertyDescription,
+              distance: agent.distance ? `${agent.distance.toFixed(1)} km away` : 'in your service area',
+            }),
+          });
+          emailsSent.push(user.email);
+        } catch (err) {
+          console.error(`Failed to send email to agent ${user.email}:`, err);
+        }
+      }
+    }
+
+    // Send to agencies
+    for (const agency of matchedAgencies) {
+      if (agency.email) {
+        try {
+          await emailService.sendEmail({
+            to: agency.email,
+            subject: emailSubject,
+            html: generateAgentNotificationEmail({
+              agentName: agency.name || 'Agency',
+              clientEmail: email,
+              clientPhone: phone,
+              location,
+              propertyDescription,
+              distance: agency.distance ? `${agency.distance.toFixed(1)} km away` : 'in your service area',
+              isAgency: true,
+            }),
+          });
+          emailsSent.push(agency.email);
+        } catch (err) {
+          console.error(`Failed to send email to agency ${agency.email}:`, err);
+        }
+      }
+    }
+
+    console.log(`📧 Sent ${emailsSent.length} notification emails`);
 
     res.status(201).json({
       message: 'Request submitted successfully',
@@ -114,10 +197,9 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
         email: agentRequest.email,
         location: agentRequest.location,
         status: agentRequest.status,
-        assignedAgents: matchedAgents.map(agent => ({
-          agentId: agent.agentId,
-          userId: agent.userId,
-        })),
+        matchedAgentsCount: matchedAgents.length,
+        matchedAgenciesCount: matchedAgencies.length,
+        notificationsSent: emailsSent.length,
       },
     });
   } catch (error) {
@@ -125,6 +207,90 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+/**
+ * Generate HTML email for agent/agency notification
+ */
+function generateAgentNotificationEmail(params: {
+  agentName: string;
+  clientEmail: string;
+  clientPhone: string;
+  location: string;
+  propertyDescription: string;
+  distance: string;
+  isAgency?: boolean;
+}): string {
+  const { agentName, clientEmail, clientPhone, location, propertyDescription, distance, isAgency } = params;
+  const recipientType = isAgency ? 'Agency' : 'Agent';
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Property Inquiry</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">New Property Inquiry</h1>
+    <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">A potential client is looking for help ${distance}</p>
+  </div>
+
+  <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none;">
+    <p style="margin: 0 0 20px 0;">Hello <strong>${agentName}</strong>,</p>
+
+    <p style="margin: 0 0 20px 0;">You have received a new property inquiry from a potential client through BalkanEstate. They are looking for properties in your service area.</p>
+
+    <div style="background: white; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+      <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 16px;">Client Details</h3>
+
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0; color: #64748b; width: 120px;">Email:</td>
+          <td style="padding: 8px 0;"><a href="mailto:${clientEmail}" style="color: #3b82f6; text-decoration: none;">${clientEmail}</a></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #64748b;">Phone:</td>
+          <td style="padding: 8px 0;"><a href="tel:${clientPhone}" style="color: #3b82f6; text-decoration: none;">${clientPhone}</a></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #64748b;">Location:</td>
+          <td style="padding: 8px 0; font-weight: 500;">${location}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+      <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 16px;">Property Requirements</h3>
+      <p style="margin: 0; color: #475569;">${propertyDescription}</p>
+    </div>
+
+    <div style="background: #fef3c7; border-radius: 8px; padding: 15px; border: 1px solid #f59e0b; margin-bottom: 20px;">
+      <p style="margin: 0; color: #92400e; font-size: 14px;">
+        <strong>💡 Tip:</strong> Contact this client as soon as possible. Quick response times significantly improve conversion rates!
+      </p>
+    </div>
+
+    <div style="text-align: center;">
+      <a href="mailto:${clientEmail}?subject=RE: Your Property Inquiry on BalkanEstate" style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+        Reply to Client
+      </a>
+    </div>
+  </div>
+
+  <div style="background: #1e293b; padding: 20px; border-radius: 0 0 12px 12px; text-align: center;">
+    <p style="margin: 0; color: #94a3b8; font-size: 12px;">
+      This email was sent by BalkanEstate because you're registered as a ${recipientType} in this area.
+    </p>
+    <p style="margin: 10px 0 0 0; color: #64748b; font-size: 11px;">
+      © ${new Date().getFullYear()} BalkanEstate. All rights reserved.
+    </p>
+  </div>
+</body>
+</html>
+  `.trim();
+}
 
 // Get all agent requests (admin only - can be added later)
 export const getAllAgentRequests = async (req: Request, res: Response): Promise<void> => {
