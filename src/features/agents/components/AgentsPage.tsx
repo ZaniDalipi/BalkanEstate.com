@@ -302,6 +302,7 @@ const AgentsPage: React.FC = () => {
         
         .animate-fade-in-up {
           animation: fadeInUp 0.8s ease-out forwards;
+          opacity: 1;
         }
         
         .animate-gradient-x {
@@ -424,7 +425,7 @@ const AgentsPage: React.FC = () => {
         <div className="relative w-full pt-8 pb-16 lg:pt-12 lg:pb-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Main Title Section */}
-            <div className="text-center max-w-4xl mx-auto mb-8 animate-fade-in-up">
+            <div className="text-center max-w-4xl mx-auto mb-8">
               <div className="inline-flex items-center justify-center px-4 py-2 bg-primary/10 rounded-full mb-6">
                 <span className="text-primary font-semibold text-sm uppercase tracking-wider">
                   {t('agents:hero.badge')}
@@ -444,7 +445,7 @@ const AgentsPage: React.FC = () => {
             </div>
 
             {/* Search Section - Clean and Integrated */}
-            <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-neutral-200/60 p-4 sm:p-6 md:p-8 animate-fade-in-up animation-delay-200 mt-6 sm:mt-8">
+            <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-neutral-200/60 p-4 sm:p-6 md:p-8 mt-6 sm:mt-8">
               <div className="text-center mb-4 sm:mb-6">
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-1.5 sm:mb-2">
                   {t('agents:search.title')}
