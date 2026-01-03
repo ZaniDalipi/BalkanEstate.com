@@ -174,7 +174,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const markersRef = useRef<L.Marker[]>([]);
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastBoundsRef = useRef<L.LatLngBounds | null>(null);
+  const lastBoundsKeyRef = useRef<string | null>(null);
 
   // Build Overpass API query for landmarks
   const buildOverpassQuery = useCallback((bounds: L.LatLngBounds): string => {
@@ -227,13 +227,13 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     const boundsKey = bounds.toBBoxString();
 
     // Skip if bounds haven't changed significantly
-    if (boundsKey === lastBoundsRef.current?.toBBoxString()) return;
+    if (boundsKey === lastBoundsKeyRef.current) return;
 
     // Check cache first
     const cached = landmarksCache.get(boundsKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       setLandmarks(cached.landmarks);
-      lastBoundsRef.current = bounds;
+      lastBoundsKeyRef.current = boundsKey;
       return;
     }
 
@@ -296,7 +296,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       cleanupCache();
 
       setLandmarks(limitedLandmarks);
-      lastBoundsRef.current = bounds;
+      lastBoundsKeyRef.current = boundsKey;
     } catch (error) {
       console.warn('Failed to fetch landmarks:', error);
     } finally {
