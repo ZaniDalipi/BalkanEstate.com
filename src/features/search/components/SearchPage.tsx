@@ -966,28 +966,18 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             </div>
                         </div>
 
-                        {mobileView === 'map' && (
-                            <div className="absolute inset-0 z-10 pointer-events-none p-2 flex flex-col justify-between pt-24 pb-24">
-                                {drawnBoundsJSON && !isDrawing && (
-                                    <div className="absolute top-1/2 right-2 -translate-y-1/2 pointer-events-auto flex flex-col gap-2">
-                                        {isAuthenticated && (<button onClick={() => handleSaveSearch(true)} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm font-bold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"><BellIcon className="w-4 h-4" /><span>{isSaving ? 'Saving...' : 'Save Area'}</span></button>)}
-                                        <button onClick={handleClearDrawnArea} className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-sm font-bold rounded-full shadow-lg hover:bg-neutral-900"><XCircleIcon className="w-4 h-4" /><span>Clear</span></button>
-                                    </div>
+                        {mobileView === 'map' && drawnBoundsJSON && !isDrawing && (
+                            <div className="absolute top-1/2 right-2 -translate-y-1/2 z-10 flex flex-col gap-2">
+                                {isAuthenticated && (
+                                    <button onClick={() => handleSaveSearch(true)} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm font-bold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
+                                        <BellIcon className="w-4 h-4" />
+                                        <span>{isSaving ? 'Saving...' : 'Save Area'}</span>
+                                    </button>
                                 )}
-                                <div className="pointer-events-auto flex justify-between items-end">
-                                    <div>
-                                        {/* This is where the mobile legend used to be */}
-                                    </div>
-                                    <div className="bg-white/80 text-neutral-800 p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
-                                        <button onClick={handleRecenterOnUser} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="My Location"><CrosshairsIcon className="w-4 h-4" /></button>
-                                        {isAuthenticated && !drawnBoundsJSON && (<button onClick={() => handleSaveSearch(false)} disabled={isSaving} className="p-2 rounded-full hover:bg-black/10 transition-colors disabled:opacity-50" title="Save Search"><BellIcon className="w-4 h-4" /></button>)}
-                                        {isAuthenticated ? (
-                                            <button onClick={() => updateSearchPageState({ isAiChatModalOpen: true })} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="AI Search"><SparklesIcon className="w-4 h-4 text-primary" /></button>
-                                        ) : (
-                                            <button onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } })} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="Sign in to use AI Search"><SparklesIcon className="w-4 h-4 text-primary" /></button>
-                                        )}
-                                    </div>
-                                </div>
+                                <button onClick={handleClearDrawnArea} className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-sm font-bold rounded-full shadow-lg hover:bg-neutral-900">
+                                    <XCircleIcon className="w-4 h-4" />
+                                    <span>Clear</span>
+                                </button>
                             </div>
                         )}
                     </>
