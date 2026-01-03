@@ -128,7 +128,8 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
     };
 
     updateTime();
-    const interval = setInterval(updateTime, 5000);
+    // Update every 10 seconds - gives the 5s transition time to complete smoothly
+    const interval = setInterval(updateTime, 10000);
     return () => clearInterval(interval);
   }, [longitude, useRealTime, enabled]);
 
@@ -218,7 +219,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 2s ease-out, top 2s ease-out, transform 1s ease-out',
+          transition: 'left 5s ease-in-out, top 5s ease-in-out, transform 2s ease-out',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
@@ -335,7 +336,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
-            transition: 'left 2s ease-out, top 2s ease-out',
+            transition: 'left 5s ease-in-out, top 5s ease-in-out',
           }}
         />
       )}
