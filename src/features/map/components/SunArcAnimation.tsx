@@ -119,8 +119,8 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   );
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
-  // Animate the sun - advances time extremely slowly for ultra-smooth timelapse
-  // Updates every 20 seconds, advances ~10 seconds of sun time per update
+  // Animate the sun - balanced speed for visible movement with slow time progression
+  // Updates every 6 seconds, advances ~18 seconds of sun time per update
   useEffect(() => {
     if (!enabled) return;
 
@@ -130,12 +130,13 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
 
     const interval = setInterval(() => {
       setSimulatedHour(prev => {
-        // Advance by 0.003 hours (~10 seconds) every 20 seconds
-        // Full day cycle takes ~44 hours (extremely slow timelapse)
-        const next = prev + 0.003;
+        // Advance by 0.005 hours (~18 seconds) every 6 real seconds
+        // Full day cycle takes ~8 hours
+        // Time moves slowly but sun updates frequently for visible movement
+        const next = prev + 0.005;
         return next >= 24 ? next - 24 : next;
       });
-    }, 20000); // Update every 20 seconds
+    }, 6000); // Update every 6 seconds
 
     return () => clearInterval(interval);
   }, [longitude, enabled]);
@@ -226,7 +227,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 18s linear, top 18s linear, transform 0.5s ease-out',
+          transition: 'left 5s linear, top 5s linear, transform 0.5s ease-out',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
@@ -343,7 +344,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
-            transition: 'left 18s linear, top 18s linear',
+            transition: 'left 5s linear, top 5s linear',
           }}
         />
       )}
