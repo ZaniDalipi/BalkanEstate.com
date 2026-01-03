@@ -131,6 +131,40 @@ const createLandmarkIcon = (type: LandmarkType, isNightMode: boolean): L.DivIcon
  *
  * Great for real estate - shows nearby amenities and attractions
  */
+// Global cache to persist across component remounts
+const landmarksCache = new Map<string, { landmarks: Landmark[]; timestamp: number }>();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
+const MIN_REQUEST_INTERVAL = 5000; // Minimum 5 seconds between API requests
+const MIN_ZOOM_FOR_FETCH = 13; // Only fetch at zoom 13+
+const DEBOUNCE_DELAY = 2000; // 2 second debounce
+const MAX_CACHE_SIZE = 20; // Maximum cache entries
+
+let lastRequestTime = 0;
+let requestInFlight = false;
+
+// Clean up old cache entries periodically
+const cleanupCache = () => {
+  const now = Date.now();
+  const entries = Array.from(landmarksCache.entries());
+
+  // Remove expired entries
+  entries.forEach(([key, value]) => {
+    if (now - value.timestamp > CACHE_TTL) {
+      landmarksCache.delete(key);
+    }
+  });
+
+  // If still too many entries, remove oldest
+  if (landmarksCache.size > MAX_CACHE_SIZE) {
+    const sortedEntries = entries
+      .filter(([key]) => landmarksCache.has(key))
+      .sort((a, b) => a[1].timestamp - b[1].timestamp);
+
+    const toRemove = sortedEntries.slice(0, sortedEntries.length - MAX_CACHE_SIZE);
+    toRemove.forEach(([key]) => landmarksCache.delete(key));
+  }
+};
+
 const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   enabled,
   isNightMode,
@@ -140,7 +174,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const markersRef = useRef<L.Marker[]>([]);
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastBoundsRef = useRef<string>('');
+  const lastBoundsRef = useRef<L.LatLngBounds | null>(null);
 
   // Build Overpass API query for landmarks
   const buildOverpassQuery = useCallback((bounds: L.LatLngBounds): string => {
@@ -188,13 +222,29 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     `.trim();
   }, []);
 
-  // Fetch landmarks from Overpass API
+  // Fetch landmarks from Overpass API with caching and rate limiting
   const fetchLandmarks = useCallback(async (bounds: L.LatLngBounds) => {
     const boundsKey = bounds.toBBoxString();
 
     // Skip if bounds haven't changed significantly
-    if (boundsKey === lastBoundsRef.current) return;
-    lastBoundsRef.current = boundsKey;
+    if (boundsKey === lastBoundsRef.current?.toBBoxString()) return;
+
+    // Check cache first
+    const cached = landmarksCache.get(boundsKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      setLandmarks(cached.landmarks);
+      lastBoundsRef.current = bounds;
+      return;
+    }
+
+    // Rate limiting: check if we can make a request
+    const now = Date.now();
+    if (requestInFlight || now - lastRequestTime < MIN_REQUEST_INTERVAL) {
+      return;
+    }
+
+    requestInFlight = true;
+    lastRequestTime = now;
 
     try {
       const query = buildOverpassQuery(bounds);
@@ -206,7 +256,13 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         },
       });
 
-      if (!response.ok) throw new Error('Overpass API request failed');
+      if (!response.ok) {
+        if (response.status === 429 || response.status === 504) {
+          // Rate limited or timeout - wait longer before next request
+          lastRequestTime = now + MIN_REQUEST_INTERVAL * 2;
+        }
+        throw new Error(`Overpass API request failed: ${response.status}`);
+      }
 
       const data = await response.json();
       const elements = data.elements || [];
@@ -230,13 +286,25 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
           index === self.findIndex((l) => l.name === landmark.name)
       );
 
-      setLandmarks(uniqueLandmarks.slice(0, 30)); // Limit to 30 landmarks
+      const limitedLandmarks = uniqueLandmarks.slice(0, 30); // Limit to 30 landmarks
+
+      // Cache the result and cleanup old entries
+      landmarksCache.set(boundsKey, {
+        landmarks: limitedLandmarks,
+        timestamp: Date.now(),
+      });
+      cleanupCache();
+
+      setLandmarks(limitedLandmarks);
+      lastBoundsRef.current = bounds;
     } catch (error) {
       console.warn('Failed to fetch landmarks:', error);
+    } finally {
+      requestInFlight = false;
     }
   }, [buildOverpassQuery]);
 
-  // Fetch landmarks on map move (debounced)
+  // Fetch landmarks on map move (debounced with longer delay)
   useEffect(() => {
     if (!enabled) return;
 
@@ -246,16 +314,16 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         clearTimeout(fetchTimeoutRef.current);
       }
 
-      // Only fetch at zoom level 12+
-      if (map.getZoom() < 12) {
+      // Only fetch at zoom level 13+ to reduce API calls
+      if (map.getZoom() < MIN_ZOOM_FOR_FETCH) {
         setLandmarks([]);
         return;
       }
 
-      // Debounce fetch
+      // Debounce fetch with longer delay to reduce API calls
       fetchTimeoutRef.current = setTimeout(() => {
         fetchLandmarks(map.getBounds());
-      }, 500);
+      }, DEBOUNCE_DELAY);
     };
 
     // Initial fetch
