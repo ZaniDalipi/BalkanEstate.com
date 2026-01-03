@@ -148,17 +148,17 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
       // Daytime sun position
       const dayProgress = (effectiveHour - sunrise) / daylightHours;
 
-      // X position: 92% (right/East) at sunrise → 8% (left/West) at sunset
-      const x = 92 - (dayProgress * 84);
+      // X position: 100% (right edge/East) at sunrise → 0% (left edge/West) at sunset
+      const x = 100 - (dayProgress * 100);
 
-      // Y position: Use sine curve for natural arc
+      // Y position: Use sine curve for natural arc centered in middle of screen
       // The arc height depends on the season (maxAltitude)
-      // Map maxAltitude (roughly 25-75° for Balkans) to arc height
-      const arcHeight = (maxAltitude / 90) * 70; // Higher altitude = higher arc
+      const arcHeight = (maxAltitude / 90) * 40; // Map altitude to arc height (max 40% of screen)
       const altitudeProgress = Math.sin(dayProgress * Math.PI);
 
-      // Y: 88% at horizon, goes up based on arc height
-      const y = 88 - (altitudeProgress * arcHeight);
+      // Y: 50% is center, arc goes from bottom-center to top-center and back
+      // At sunrise/sunset: y = 50% (center), at noon: y = 50% - arcHeight (higher)
+      const y = 50 - (altitudeProgress * arcHeight) + 10; // +10 to shift slightly down
 
       // Current altitude for color calculation
       const currentAltitude = altitudeProgress * maxAltitude;
@@ -186,10 +186,11 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
         nightProgress = (effectiveHour + (24 - sunset)) / nightHours;
       }
 
-      // Moon also goes East to West but lower arc
-      const x = 88 - (nightProgress * 76);
-      const arcHeight = 35; // Moon has gentler arc
-      const y = 85 - (Math.sin(nightProgress * Math.PI) * arcHeight);
+      // Moon also goes East to West edge to edge, but lower arc
+      const x = 100 - (nightProgress * 100);
+      const arcHeight = 25; // Moon has gentler arc
+      // Moon arc centered but lower than sun
+      const y = 55 - (Math.sin(nightProgress * Math.PI) * arcHeight);
 
       return {
         x,
