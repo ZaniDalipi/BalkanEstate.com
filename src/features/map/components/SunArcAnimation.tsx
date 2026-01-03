@@ -1,16 +1,21 @@
 // SunArcAnimation Component
 // Displays an animated sun/moon that circles around the map edges based on real time
-// Uses accurate astronomical calculations for realistic sun position
+// Features realistic motion effects with trails, particles, and dynamic glow
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 
 interface SunArcAnimationProps {
-  hour: number; // 0-23 (can be overridden by manual control)
+  hour: number;
   enabled: boolean;
   isNightMode: boolean;
-  longitude?: number; // Map center longitude for local solar time calculation
-  latitude?: number; // Map center latitude for seasonal calculations
-  useRealTime?: boolean; // If true, use current real time adjusted for location
+  longitude?: number;
+  latitude?: number;
+  useRealTime?: boolean;
+}
+
+interface Position {
+  x: number;
+  y: number;
 }
 
 /**
@@ -25,8 +30,6 @@ const getDayOfYear = (date: Date): number => {
 
 /**
  * Calculate solar declination angle in degrees
- * This determines how high the sun can get in the sky
- * Ranges from -23.45° (winter solstice) to +23.45° (summer solstice)
  */
 const getSolarDeclination = (dayOfYear: number): number => {
   return 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
@@ -76,31 +79,35 @@ const calculateLocalSolarTime = (longitude: number): number => {
 /**
  * Calculate sun color based on progress through day
  */
-const getSunColor = (progress: number, isRising: boolean): { body: string; glow: string; rays: string } => {
-  // Near sunrise/sunset (0-0.15 or 0.85-1.0)
+const getSunColor = (progress: number): { body: string; glow: string; rays: string; trail: string } => {
   if (progress < 0.15 || progress > 0.85) {
-    return { body: '#FF7043', glow: 'rgba(255,100,50,0.5)', rays: 'rgba(255,120,60,0.7)' };
+    return {
+      body: '#FF7043',
+      glow: 'rgba(255,100,50,0.5)',
+      rays: 'rgba(255,120,60,0.7)',
+      trail: 'rgba(255,100,50,0.3)'
+    };
   }
-  // Morning/evening (0.15-0.3 or 0.7-0.85)
   if (progress < 0.3 || progress > 0.7) {
-    return { body: '#FF9800', glow: 'rgba(255,150,0,0.45)', rays: 'rgba(255,180,50,0.65)' };
+    return {
+      body: '#FF9800',
+      glow: 'rgba(255,150,0,0.45)',
+      rays: 'rgba(255,180,50,0.65)',
+      trail: 'rgba(255,150,0,0.25)'
+    };
   }
-  // Mid-day (0.3-0.7)
-  return { body: '#FFD54F', glow: 'rgba(255,220,100,0.35)', rays: 'rgba(255,230,100,0.55)' };
+  return {
+    body: '#FFD54F',
+    glow: 'rgba(255,220,100,0.35)',
+    rays: 'rgba(255,230,100,0.55)',
+    trail: 'rgba(255,220,100,0.2)'
+  };
 };
 
 /**
- * Calculate position along a rounded rectangle path around the map edges
- * Progress 0-1 maps to a full circuit around the map
- *
- * Path:
- * - 0.00-0.25: Right edge (bottom to top) - SUNRISE/MORNING
- * - 0.25-0.50: Top edge (right to left) - MIDDAY
- * - 0.50-0.75: Left edge (top to bottom) - AFTERNOON/SUNSET
- * - 0.75-1.00: Bottom edge (left to right) - NIGHT
+ * Calculate position along a path around the map edges
  */
-const getPositionOnPath = (progress: number, padding: number = 8): { x: number; y: number } => {
-  // Normalize progress to 0-1
+const getPositionOnPath = (progress: number, padding: number = 8): Position => {
   const p = ((progress % 1) + 1) % 1;
 
   const minX = padding;
@@ -108,39 +115,23 @@ const getPositionOnPath = (progress: number, padding: number = 8): { x: number; 
   const minY = padding;
   const maxY = 100 - padding;
 
-  // Corner radius for smooth corners
-  const cornerSize = 15;
-
   if (p < 0.25) {
-    // Right edge: bottom-right corner to top-right corner
     const edgeProgress = p / 0.25;
-    const x = maxX;
-    const y = maxY - (edgeProgress * (maxY - minY));
-    return { x, y };
+    return { x: maxX, y: maxY - (edgeProgress * (maxY - minY)) };
   } else if (p < 0.5) {
-    // Top edge: top-right to top-left
     const edgeProgress = (p - 0.25) / 0.25;
-    const x = maxX - (edgeProgress * (maxX - minX));
-    const y = minY;
-    return { x, y };
+    return { x: maxX - (edgeProgress * (maxX - minX)), y: minY };
   } else if (p < 0.75) {
-    // Left edge: top-left to bottom-left
     const edgeProgress = (p - 0.5) / 0.25;
-    const x = minX;
-    const y = minY + (edgeProgress * (maxY - minY));
-    return { x, y };
+    return { x: minX, y: minY + (edgeProgress * (maxY - minY)) };
   } else {
-    // Bottom edge: bottom-left to bottom-right
     const edgeProgress = (p - 0.75) / 0.25;
-    const x = minX + (edgeProgress * (maxX - minX));
-    const y = maxY;
-    return { x, y };
+    return { x: minX + (edgeProgress * (maxX - minX)), y: maxY };
   }
 };
 
 /**
  * Map time of day to position on the path
- * Sunrise starts at bottom-right, noon at top-center, sunset at bottom-left
  */
 const getTimeToPathProgress = (
   hour: number,
@@ -151,35 +142,23 @@ const getTimeToPathProgress = (
   const nightHours = 24 - daylightHours;
 
   if (hour >= sunrise && hour < sunset) {
-    // Daytime: Sun travels from right edge (0) -> top (0.25-0.5) -> left edge (0.75)
     const dayProgress = (hour - sunrise) / daylightHours;
-    // Map 0-1 day progress to 0-0.75 path progress (right -> top -> left)
     const pathProgress = dayProgress * 0.75;
     return { progress: pathProgress, isSun: true };
   } else {
-    // Nighttime: Moon travels along bottom edge (0.75 -> 1.0/0)
     let nightProgress: number;
     if (hour >= sunset) {
       nightProgress = (hour - sunset) / nightHours;
     } else {
       nightProgress = (hour + (24 - sunset)) / nightHours;
     }
-    // Map night progress to 0.75-1.0 (bottom edge, left to right)
     const pathProgress = 0.75 + (nightProgress * 0.25);
     return { progress: pathProgress, isSun: false };
   }
 };
 
 /**
- * SunArcAnimation Component
- *
- * Shows an animated sun/moon circling around the map edges
- * - Sun rises from bottom-right corner (East)
- * - Travels up right edge in morning
- * - Crosses top of map at midday
- * - Descends left edge in afternoon
- * - Sets at bottom-left corner (West)
- * - Moon travels along bottom edge at night
+ * SunArcAnimation Component with realistic motion effects
  */
 const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   hour,
@@ -189,23 +168,28 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   latitude = 40,
   useRealTime = true,
 }) => {
-  // Real-time tracking with frequent updates
   const [realTimeHour, setRealTimeHour] = useState<number>(() =>
     calculateLocalSolarTime(longitude)
   );
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
-  // Update every 10 seconds for smooth real-time movement
+  // Track previous positions for trail effect
+  const [trailPositions, setTrailPositions] = useState<Position[]>([]);
+  const lastUpdateRef = useRef<number>(Date.now());
+
+  // Update every 2 seconds for smooth, visible movement
   useEffect(() => {
     if (!useRealTime || !enabled) return;
 
     const updateTime = () => {
-      setRealTimeHour(calculateLocalSolarTime(longitude));
+      const newHour = calculateLocalSolarTime(longitude);
+      setRealTimeHour(newHour);
       setCurrentDate(new Date());
+      lastUpdateRef.current = Date.now();
     };
 
     updateTime();
-    const interval = setInterval(updateTime, 10000); // Update every 10s
+    const interval = setInterval(updateTime, 2000); // Update every 2s for smoother motion
 
     return () => clearInterval(interval);
   }, [longitude, useRealTime, enabled]);
@@ -219,22 +203,17 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
     const { progress, isSun } = getTimeToPathProgress(effectiveHour, sunrise, sunset);
     const position = getPositionOnPath(progress);
 
-    // Calculate day progress for color
     const daylightHours = sunset - sunrise;
     let dayProgress = 0;
     if (isSun) {
       dayProgress = (effectiveHour - sunrise) / daylightHours;
     }
 
-    const colors = isSun ? getSunColor(dayProgress, dayProgress < 0.5) : null;
-
-    // Scale based on position (larger near edges/corners)
+    const colors = isSun ? getSunColor(dayProgress) : null;
     const isNearCorner =
       (position.x < 15 || position.x > 85) &&
       (position.y < 15 || position.y > 85);
-    const scale = isNearCorner ? 1.2 : 1.0;
-
-    // Glow intensity based on position
+    const scale = isNearCorner ? 1.15 : 1.0;
     const isGoldenHour = dayProgress < 0.15 || dayProgress > 0.85;
 
     return {
@@ -244,190 +223,325 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
       visible: true,
       scale,
       colors,
-      glowIntensity: isGoldenHour ? 0.8 : 0.5,
+      glowIntensity: isGoldenHour ? 0.85 : 0.55,
       isGoldenHour,
       progress,
+      dayProgress,
     };
   }, [effectiveHour, latitude, dayOfYear]);
 
+  // Update trail positions
+  useEffect(() => {
+    if (!enabled) return;
+
+    setTrailPositions(prev => {
+      const newTrail = [{ x: celestialBody.x, y: celestialBody.y }, ...prev.slice(0, 5)];
+      return newTrail;
+    });
+  }, [celestialBody.x, celestialBody.y, enabled]);
+
   if (!enabled) return null;
+
+  // Generate floating particles around sun
+  const particles = useMemo(() => {
+    return [...Array(8)].map((_, i) => ({
+      id: i,
+      angle: (i * 45) + (Date.now() / 50) % 360,
+      distance: 25 + (i % 3) * 8,
+      size: 2 + (i % 3),
+      opacity: 0.3 + (i % 4) * 0.15,
+      speed: 1 + (i % 2) * 0.5,
+    }));
+  }, [Math.floor(Date.now() / 100)]);
 
   return (
     <>
-      {/* Sun/Moon element */}
+      {/* Motion trail effect */}
+      {trailPositions.map((pos, index) => (
+        <div
+          key={index}
+          className="absolute pointer-events-none z-[399] rounded-full"
+          style={{
+            left: `${pos.x}%`,
+            top: `${pos.y}%`,
+            width: `${(6 - index) * 6}px`,
+            height: `${(6 - index) * 6}px`,
+            transform: 'translate(-50%, -50%)',
+            background: celestialBody.isSun && celestialBody.colors
+              ? `radial-gradient(circle, ${celestialBody.colors.trail} 0%, transparent 70%)`
+              : 'radial-gradient(circle, rgba(200,220,255,0.15) 0%, transparent 70%)',
+            opacity: (1 - index * 0.18),
+            transition: 'opacity 0.5s ease-out',
+          }}
+        />
+      ))}
+
+      {/* Main Sun/Moon element */}
       <div
         className="absolute pointer-events-none z-[401]"
         style={{
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 1.5s cubic-bezier(0.4, 0, 0.2, 1), top 1.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s ease-out',
+          transition: 'left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.5s ease-out',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
-          // Sun with dynamic colors
           <div className="relative">
-            {/* Outer atmospheric glow */}
+            {/* Outer heat shimmer effect */}
+            <div
+              className="absolute rounded-full animate-heat-shimmer"
+              style={{
+                width: '120px',
+                height: '120px',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: `radial-gradient(ellipse, ${celestialBody.colors.glow.replace(')', ', 0.1)')} 0%, transparent 60%)`,
+                filter: 'blur(8px)',
+              }}
+            />
+
+            {/* Atmospheric glow - pulsing */}
             <div
               className="absolute inset-0 rounded-full animate-sun-glow"
               style={{
-                width: celestialBody.isGoldenHour ? '90px' : '70px',
-                height: celestialBody.isGoldenHour ? '90px' : '70px',
-                background: `radial-gradient(circle, ${celestialBody.colors.glow} 0%, transparent 70%)`,
-                transform: `translate(-50%, -50%) scale(${celestialBody.isGoldenHour ? 2.5 : 2})`,
+                width: celestialBody.isGoldenHour ? '100px' : '80px',
+                height: celestialBody.isGoldenHour ? '100px' : '80px',
+                background: `radial-gradient(circle, ${celestialBody.colors.glow} 0%, transparent 65%)`,
+                transform: 'translate(-50%, -50%)',
                 left: '50%',
                 top: '50%',
                 opacity: celestialBody.glowIntensity,
               }}
             />
 
-            {/* Sun rays */}
-            <div
-              className="absolute inset-0 animate-sun-rays"
-              style={{ opacity: celestialBody.isGoldenHour ? 1 : 0.7 }}
-            >
+            {/* Floating particles */}
+            {particles.map((particle) => (
+              <div
+                key={particle.id}
+                className="absolute rounded-full animate-particle-float"
+                style={{
+                  width: `${particle.size}px`,
+                  height: `${particle.size}px`,
+                  left: '50%',
+                  top: '50%',
+                  background: celestialBody.colors?.rays || 'rgba(255,200,100,0.6)',
+                  transform: `translate(-50%, -50%) rotate(${particle.angle}deg) translateX(${particle.distance}px)`,
+                  opacity: particle.opacity,
+                  boxShadow: `0 0 ${particle.size * 2}px ${celestialBody.colors?.glow}`,
+                }}
+              />
+            ))}
+
+            {/* Rotating sun rays */}
+            <div className="absolute inset-0 animate-sun-rays">
               {[...Array(12)].map((_, i) => (
                 <div
                   key={i}
                   className="absolute"
                   style={{
-                    width: '4px',
-                    height: celestialBody.isGoldenHour ? '32px' : '24px',
+                    width: '3px',
+                    height: celestialBody.isGoldenHour ? '35px' : '26px',
                     left: '50%',
                     top: '50%',
                     background: `linear-gradient(to top, ${celestialBody.colors?.rays} 0%, transparent 100%)`,
                     transform: `translate(-50%, -100%) rotate(${i * 30}deg)`,
                     transformOrigin: 'center bottom',
+                    opacity: 0.6 + Math.sin((Date.now() / 500 + i) % Math.PI) * 0.4,
                   }}
                 />
               ))}
             </div>
 
-            {/* Sun body */}
+            {/* Inner corona */}
             <div
-              className="relative rounded-full shadow-lg animate-sun-pulse"
+              className="absolute rounded-full animate-corona-pulse"
               style={{
-                width: '40px',
-                height: '40px',
-                background: `radial-gradient(circle at 30% 30%,
-                  ${celestialBody.colors.body} 0%,
-                  ${celestialBody.colors.body}dd 50%,
-                  ${celestialBody.colors.body}aa 100%)`,
-                boxShadow: `
-                  0 0 40px ${celestialBody.colors.glow},
-                  0 0 80px ${celestialBody.colors.glow.replace('0.', '0.2')}
-                `,
+                width: '52px',
+                height: '52px',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: `radial-gradient(circle, ${celestialBody.colors.body}66 0%, transparent 70%)`,
+                filter: 'blur(4px)',
               }}
             />
 
-            {/* Golden hour lens flare */}
-            {celestialBody.isGoldenHour && (
+            {/* Sun body with internal animation */}
+            <div
+              className="relative rounded-full shadow-lg animate-sun-body"
+              style={{
+                width: '42px',
+                height: '42px',
+                background: `
+                  radial-gradient(circle at 35% 35%, #FFFFFF 0%, transparent 25%),
+                  radial-gradient(circle at 30% 30%, ${celestialBody.colors.body} 0%, ${celestialBody.colors.body}dd 50%, ${celestialBody.colors.body}99 100%)
+                `,
+                boxShadow: `
+                  0 0 20px ${celestialBody.colors.glow},
+                  0 0 40px ${celestialBody.colors.glow},
+                  0 0 60px ${celestialBody.colors.glow.replace('0.', '0.3')},
+                  inset 0 0 20px rgba(255,255,255,0.3)
+                `,
+              }}
+            >
+              {/* Surface detail - sunspots */}
               <div
-                className="absolute pointer-events-none animate-flare"
-                style={{
-                  width: '150px',
-                  height: '6px',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  background: `linear-gradient(90deg,
-                    transparent 0%,
-                    ${celestialBody.colors.rays} 20%,
-                    transparent 40%,
-                    ${celestialBody.colors.rays} 60%,
-                    transparent 80%,
-                    ${celestialBody.colors.rays} 100%)`,
-                  opacity: 0.5,
-                }}
+                className="absolute rounded-full opacity-20 animate-sunspot"
+                style={{ width: '6px', height: '6px', background: '#CC7000', top: '12px', left: '18px' }}
               />
+              <div
+                className="absolute rounded-full opacity-15 animate-sunspot"
+                style={{ width: '4px', height: '4px', background: '#CC7000', top: '22px', left: '10px', animationDelay: '0.5s' }}
+              />
+            </div>
+
+            {/* Lens flare for golden hour */}
+            {celestialBody.isGoldenHour && (
+              <>
+                <div
+                  className="absolute pointer-events-none animate-lens-flare"
+                  style={{
+                    width: '180px',
+                    height: '3px',
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%) rotate(-15deg)',
+                    background: `linear-gradient(90deg,
+                      transparent 0%,
+                      ${celestialBody.colors.rays} 15%,
+                      transparent 30%,
+                      ${celestialBody.colors.rays} 50%,
+                      transparent 70%,
+                      ${celestialBody.colors.rays} 85%,
+                      transparent 100%)`,
+                    opacity: 0.5,
+                  }}
+                />
+                {/* Secondary flare */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    left: '120%',
+                    top: '120%',
+                    borderRadius: '50%',
+                    background: `radial-gradient(circle, ${celestialBody.colors.glow.replace('0.5', '0.2')} 0%, transparent 70%)`,
+                  }}
+                />
+              </>
             )}
           </div>
         ) : (
-          // Moon
+          // Moon with motion effects
           <div className="relative">
+            {/* Moon trail glow */}
+            <div
+              className="absolute rounded-full animate-moon-trail"
+              style={{
+                width: '70px',
+                height: '70px',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'radial-gradient(circle, rgba(200,220,255,0.2) 0%, transparent 60%)',
+                filter: 'blur(6px)',
+              }}
+            />
+
             {/* Moon glow */}
             <div
               className="absolute inset-0 rounded-full animate-moon-pulse"
               style={{
-                width: '60px',
-                height: '60px',
-                background: 'radial-gradient(circle, rgba(200,220,255,0.4) 0%, rgba(150,180,255,0.15) 50%, transparent 70%)',
-                transform: 'translate(-50%, -50%) scale(1.8)',
+                width: '65px',
+                height: '65px',
+                background: 'radial-gradient(circle, rgba(200,220,255,0.35) 0%, rgba(150,180,255,0.12) 50%, transparent 70%)',
+                transform: 'translate(-50%, -50%) scale(1.6)',
                 left: '50%',
                 top: '50%',
               }}
             />
+
+            {/* Moon sparkles */}
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full animate-star-twinkle"
+                style={{
+                  width: '2px',
+                  height: '2px',
+                  left: '50%',
+                  top: '50%',
+                  background: '#FFFFFF',
+                  transform: `translate(-50%, -50%) rotate(${i * 72}deg) translateX(${35 + i * 5}px)`,
+                  opacity: 0.6,
+                  animationDelay: `${i * 0.3}s`,
+                  boxShadow: '0 0 4px rgba(255,255,255,0.8)',
+                }}
+              />
+            ))}
 
             {/* Moon body */}
             <div
               className="relative rounded-full animate-moon-glow"
               style={{
-                width: '32px',
-                height: '32px',
-                background: 'radial-gradient(circle at 35% 35%, #F8FAFF 0%, #E2E8F0 40%, #CBD5E1 100%)',
-                boxShadow: '0 0 25px rgba(200,220,255,0.6), inset -5px -5px 10px rgba(100,120,150,0.3)',
+                width: '34px',
+                height: '34px',
+                background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #F0F4FF 30%, #E2E8F0 60%, #CBD5E1 100%)',
+                boxShadow: '0 0 25px rgba(200,220,255,0.6), 0 0 50px rgba(200,220,255,0.3), inset -5px -5px 12px rgba(100,120,150,0.25)',
               }}
             >
-              {/* Moon craters */}
+              {/* Moon craters with subtle animation */}
               <div
-                className="absolute rounded-full opacity-25"
-                style={{ width: '7px', height: '7px', background: '#94A3B8', top: '6px', left: '5px' }}
+                className="absolute rounded-full opacity-30"
+                style={{ width: '8px', height: '8px', background: 'radial-gradient(circle, #94A3B8 0%, #A0AEC0 100%)', top: '6px', left: '6px' }}
               />
               <div
                 className="absolute rounded-full opacity-20"
-                style={{ width: '5px', height: '5px', background: '#94A3B8', top: '16px', left: '14px' }}
+                style={{ width: '5px', height: '5px', background: 'radial-gradient(circle, #94A3B8 0%, #A0AEC0 100%)', top: '18px', left: '16px' }}
               />
               <div
                 className="absolute rounded-full opacity-15"
-                style={{ width: '4px', height: '4px', background: '#94A3B8', top: '11px', left: '20px' }}
+                style={{ width: '4px', height: '4px', background: 'radial-gradient(circle, #94A3B8 0%, #A0AEC0 100%)', top: '12px', left: '22px' }}
               />
             </div>
 
-            {/* Moon halo */}
+            {/* Subtle moon halo */}
             <div
-              className="absolute rounded-full"
+              className="absolute rounded-full animate-halo-rotate"
               style={{
-                width: '50px',
-                height: '50px',
+                width: '54px',
+                height: '54px',
                 left: '50%',
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
-                border: '2px solid rgba(200,220,255,0.2)',
+                border: '1px solid rgba(200,220,255,0.25)',
+                background: 'transparent',
               }}
             />
           </div>
         )}
       </div>
 
-      {/* Trail/path indicator - subtle line showing the orbit path */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[400]"
-        style={{ padding: '8%' }}
-      >
-        <div
-          className="w-full h-full border-2 border-dashed rounded-lg opacity-10"
-          style={{
-            borderColor: celestialBody.isSun ? 'rgba(255,200,100,0.3)' : 'rgba(200,220,255,0.3)',
-          }}
-        />
-      </div>
-
-      {/* Light beam from sun */}
+      {/* Light beam from sun - animated */}
       {celestialBody.isSun && !isNightMode && celestialBody.colors && (
         <div
-          className="absolute pointer-events-none z-[397]"
+          className="absolute pointer-events-none z-[397] animate-light-beam"
           style={{
             left: `${celestialBody.x}%`,
             top: `${celestialBody.y}%`,
-            width: celestialBody.isGoldenHour ? '300px' : '200px',
-            height: celestialBody.isGoldenHour ? '500px' : '350px',
+            width: celestialBody.isGoldenHour ? '280px' : '180px',
+            height: celestialBody.isGoldenHour ? '450px' : '320px',
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom,
-              ${celestialBody.colors.glow.replace(')', ', 0.25)')} 0%,
-              ${celestialBody.colors.glow.replace(')', ', 0.08)')} 40%,
+              ${celestialBody.colors.glow.replace(')', ', 0.3)')} 0%,
+              ${celestialBody.colors.glow.replace(')', ', 0.1)')} 35%,
               transparent 100%)`,
-            opacity: celestialBody.glowIntensity * 0.5,
-            transition: 'all 1.5s ease-out',
+            opacity: celestialBody.glowIntensity * 0.4,
+            transition: 'left 0.8s ease-out, top 0.8s ease-out, width 1s ease, height 1s ease',
+            filter: 'blur(2px)',
           }}
         />
       )}
@@ -435,90 +549,91 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
       {/* CSS animations */}
       <style>{`
         @keyframes sun-glow {
-          0%, 100% {
-            transform: translate(-50%, -50%) scale(2);
-            opacity: 0.85;
-          }
-          50% {
-            transform: translate(-50%, -50%) scale(2.3);
-            opacity: 1;
-          }
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
         }
-
-        .animate-sun-glow {
-          animation: sun-glow 4s ease-in-out infinite;
-        }
+        .animate-sun-glow { animation: sun-glow 3s ease-in-out infinite; }
 
         @keyframes sun-rays {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
+        .animate-sun-rays { animation: sun-rays 30s linear infinite; }
 
-        .animate-sun-rays {
-          animation: sun-rays 45s linear infinite;
+        @keyframes sun-body {
+          0%, 100% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.02); filter: brightness(1.05); }
         }
+        .animate-sun-body { animation: sun-body 2s ease-in-out infinite; }
 
-        @keyframes sun-pulse {
-          0%, 100% {
-            transform: scale(1);
-            filter: brightness(1);
-          }
-          50% {
-            transform: scale(1.05);
-            filter: brightness(1.08);
-          }
+        @keyframes corona-pulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+          50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
         }
+        .animate-corona-pulse { animation: corona-pulse 2.5s ease-in-out infinite; }
 
-        .animate-sun-pulse {
-          animation: sun-pulse 3s ease-in-out infinite;
+        @keyframes heat-shimmer {
+          0%, 100% { transform: translate(-50%, -50%) scale(1) skewX(0deg); opacity: 0.3; }
+          25% { transform: translate(-50%, -50%) scale(1.05) skewX(2deg); opacity: 0.4; }
+          50% { transform: translate(-50%, -50%) scale(1.1) skewX(0deg); opacity: 0.5; }
+          75% { transform: translate(-50%, -50%) scale(1.05) skewX(-2deg); opacity: 0.4; }
         }
+        .animate-heat-shimmer { animation: heat-shimmer 4s ease-in-out infinite; }
+
+        @keyframes particle-float {
+          0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance)) scale(1); }
+          50% { opacity: 0.7; transform: translate(-50%, -50%) rotate(calc(var(--angle) + 180deg)) translateX(calc(var(--distance) + 5px)) scale(1.2); }
+        }
+        .animate-particle-float { animation: particle-float 3s ease-in-out infinite; }
+
+        @keyframes sunspot {
+          0%, 100% { opacity: 0.2; transform: scale(1); }
+          50% { opacity: 0.1; transform: scale(0.8); }
+        }
+        .animate-sunspot { animation: sunspot 5s ease-in-out infinite; }
+
+        @keyframes lens-flare {
+          0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) rotate(-15deg) scaleX(1); }
+          50% { opacity: 0.7; transform: translate(-50%, -50%) rotate(-15deg) scaleX(1.3); }
+        }
+        .animate-lens-flare { animation: lens-flare 2s ease-in-out infinite; }
 
         @keyframes moon-glow {
-          0%, 100% {
-            box-shadow: 0 0 25px rgba(200,220,255,0.6), inset -5px -5px 10px rgba(100,120,150,0.3);
-          }
-          50% {
-            box-shadow: 0 0 35px rgba(200,220,255,0.8), inset -5px -5px 10px rgba(100,120,150,0.3);
-          }
+          0%, 100% { box-shadow: 0 0 25px rgba(200,220,255,0.6), 0 0 50px rgba(200,220,255,0.3), inset -5px -5px 12px rgba(100,120,150,0.25); }
+          50% { box-shadow: 0 0 35px rgba(200,220,255,0.8), 0 0 70px rgba(200,220,255,0.4), inset -5px -5px 12px rgba(100,120,150,0.25); }
         }
-
-        .animate-moon-glow {
-          animation: moon-glow 4s ease-in-out infinite;
-        }
+        .animate-moon-glow { animation: moon-glow 4s ease-in-out infinite; }
 
         @keyframes moon-pulse {
-          0%, 100% {
-            transform: translate(-50%, -50%) scale(1.8);
-            opacity: 0.6;
-          }
-          50% {
-            transform: translate(-50%, -50%) scale(2);
-            opacity: 0.8;
-          }
+          0%, 100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0.5; }
+          50% { transform: translate(-50%, -50%) scale(1.8); opacity: 0.7; }
         }
+        .animate-moon-pulse { animation: moon-pulse 4s ease-in-out infinite; }
 
-        .animate-moon-pulse {
-          animation: moon-pulse 5s ease-in-out infinite;
+        @keyframes moon-trail {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+          50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
         }
+        .animate-moon-trail { animation: moon-trail 3s ease-in-out infinite; }
 
-        @keyframes flare {
-          0%, 100% {
-            opacity: 0.3;
-            transform: translate(-50%, -50%) scaleX(1);
-          }
-          50% {
-            opacity: 0.6;
-            transform: translate(-50%, -50%) scaleX(1.2);
-          }
+        @keyframes star-twinkle {
+          0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--dist)) scale(1); }
+          50% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--dist)) scale(1.5); }
         }
+        .animate-star-twinkle { animation: star-twinkle 2s ease-in-out infinite; }
 
-        .animate-flare {
-          animation: flare 3s ease-in-out infinite;
+        @keyframes halo-rotate {
+          0% { transform: translate(-50%, -50%) rotate(0deg); border-color: rgba(200,220,255,0.25); }
+          50% { border-color: rgba(200,220,255,0.4); }
+          100% { transform: translate(-50%, -50%) rotate(360deg); border-color: rgba(200,220,255,0.25); }
         }
+        .animate-halo-rotate { animation: halo-rotate 20s linear infinite; }
+
+        @keyframes light-beam {
+          0%, 100% { opacity: 0.3; filter: blur(2px); }
+          50% { opacity: 0.5; filter: blur(4px); }
+        }
+        .animate-light-beam { animation: light-beam 4s ease-in-out infinite; }
       `}</style>
     </>
   );
