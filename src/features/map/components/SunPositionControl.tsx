@@ -106,32 +106,26 @@ const SunCompass: React.FC<{
   const isNight = hour < 6 || hour >= 20;
 
   return (
-    <div className="relative w-32 h-32">
+    <div className="relative w-24 h-24">
       {/* Compass background */}
       <div className={`
-        absolute inset-0 rounded-full border-2
+        absolute inset-0 rounded-full border
         ${isNightMode
           ? 'bg-slate-800/80 border-cyan-500/30'
           : 'bg-white/90 border-neutral-300'
         }
       `}>
         {/* Cardinal direction markers */}
-        <div className={`absolute top-1 left-1/2 -translate-x-1/2 text-xs font-bold ${isNightMode ? 'text-red-400' : 'text-red-600'}`}>N</div>
-        <div className={`absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>S</div>
-        <div className={`absolute left-1 top-1/2 -translate-y-1/2 text-xs font-bold ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>W</div>
-        <div className={`absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>E</div>
-
-        {/* Intercardinal markers */}
-        <div className={`absolute top-3 right-3 text-[8px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>NE</div>
-        <div className={`absolute bottom-3 right-3 text-[8px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>SE</div>
-        <div className={`absolute bottom-3 left-3 text-[8px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>SW</div>
-        <div className={`absolute top-3 left-3 text-[8px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>NW</div>
+        <div className={`absolute top-0.5 left-1/2 -translate-x-1/2 text-[9px] font-bold ${isNightMode ? 'text-red-400' : 'text-red-600'}`}>N</div>
+        <div className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] font-bold ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>S</div>
+        <div className={`absolute left-0.5 top-1/2 -translate-y-1/2 text-[9px] font-bold ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>W</div>
+        <div className={`absolute right-0.5 top-1/2 -translate-y-1/2 text-[9px] font-bold ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>E</div>
 
         {/* Compass circle guides */}
-        <div className={`absolute inset-4 rounded-full border ${isNightMode ? 'border-slate-700' : 'border-neutral-200'}`} />
+        <div className={`absolute inset-3 rounded-full border ${isNightMode ? 'border-slate-700' : 'border-neutral-200'}`} />
 
         {/* Center point */}
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${isNightMode ? 'bg-cyan-400' : 'bg-primary'}`} />
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full ${isNightMode ? 'bg-cyan-400' : 'bg-primary'}`} />
 
         {/* Sun/Moon indicator - rotates based on azimuth */}
         <div
@@ -145,14 +139,14 @@ const SunCompass: React.FC<{
           <div
             className={`
               absolute left-1/2 -translate-x-1/2
-              w-6 h-6 rounded-full flex items-center justify-center
+              w-5 h-5 rounded-full flex items-center justify-center text-[10px]
               transition-all duration-300
               ${isNight
-                ? 'bg-indigo-900 text-yellow-200 shadow-lg shadow-indigo-500/30'
-                : 'bg-gradient-to-br from-yellow-300 to-orange-400 text-yellow-900 shadow-lg shadow-orange-300/50'
+                ? 'bg-indigo-900 shadow-md shadow-indigo-500/30'
+                : 'bg-gradient-to-br from-yellow-300 to-orange-400 shadow-md shadow-orange-300/50'
               }
             `}
-            style={{ top: '6px' }}
+            style={{ top: '4px' }}
           >
             {isNight ? '🌙' : '☀️'}
           </div>
@@ -160,13 +154,13 @@ const SunCompass: React.FC<{
           {/* Direction line from center to sun */}
           <div
             className={`
-              absolute left-1/2 -translate-x-1/2 w-0.5 h-10
+              absolute left-1/2 -translate-x-1/2 w-0.5 h-7
               ${isNight
                 ? 'bg-gradient-to-t from-transparent to-indigo-400/50'
                 : 'bg-gradient-to-t from-transparent to-orange-400/50'
               }
             `}
-            style={{ top: '28px' }}
+            style={{ top: '22px' }}
           />
         </div>
       </div>
@@ -292,35 +286,36 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
 
   return (
     <div className={`
+      w-[200px] max-w-[calc(100vw-2rem)]
       ${isNightMode ? 'bg-slate-900/95' : 'bg-white/95'}
       backdrop-blur-sm rounded-xl shadow-lg border
       ${isNightMode ? 'border-cyan-500/30' : 'border-neutral-200'}
       transition-all duration-300
-      ${isExpanded ? 'p-4' : 'p-2'}
+      ${isExpanded ? 'p-3' : 'p-2'}
     `}>
-      {/* Collapsed view - show time and compass direction */}
+      {/* Collapsed view - compact time and compass direction */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className={`
-          flex items-center gap-3 w-full
+          flex items-center gap-2 w-full
           ${isNightMode ? 'text-white' : 'text-neutral-800'}
         `}
       >
         <div className={`
-          p-1.5 rounded-lg bg-gradient-to-br ${getTimeGradient()}
+          p-1 rounded-md bg-gradient-to-br ${getTimeGradient()} flex-shrink-0
         `}>
           {getSunIcon()}
         </div>
-        <div className="flex flex-col items-start">
-          <span className="text-sm font-medium">
+        <div className="flex flex-col items-start min-w-0 flex-1">
+          <span className="text-xs font-semibold truncate">
             {formatHour(hour)}
           </span>
-          <span className={`text-xs ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
+          <span className={`text-[10px] truncate ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
             ☀️ {cardinalDirection} ({Math.round(sunAzimuth)}°)
           </span>
         </div>
         <svg
-          className={`w-4 h-4 ml-auto transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-3 h-3 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -331,31 +326,31 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
 
       {/* Expanded view - full controls with compass */}
       {isExpanded && (
-        <div className="mt-4 space-y-4">
-          {/* Sun Compass */}
+        <div className="mt-3 space-y-3">
+          {/* Sun Compass - smaller */}
           <div className="flex justify-center">
             <SunCompass sunAzimuth={sunAzimuth} hour={hour} isNightMode={isNightMode} />
           </div>
 
-          {/* Sun direction info */}
-          <div className={`text-center p-2 rounded-lg ${isNightMode ? 'bg-slate-800/50' : 'bg-neutral-100'}`}>
-            <p className={`text-xs ${isNightMode ? 'text-slate-400' : 'text-neutral-500'}`}>
+          {/* Sun direction info - compact */}
+          <div className={`text-center p-1.5 rounded-lg ${isNightMode ? 'bg-slate-800/50' : 'bg-neutral-100'}`}>
+            <p className={`text-[10px] ${isNightMode ? 'text-slate-400' : 'text-neutral-500'}`}>
               {t('search:map.sunDirection', 'Sun Direction')}
             </p>
-            <p className={`text-lg font-bold ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
+            <p className={`text-sm font-bold ${isNightMode ? 'text-cyan-400' : 'text-primary'}`}>
               {cardinalDirectionFull} ({Math.round(sunAzimuth)}°)
             </p>
-            <p className={`text-xs mt-1 ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
+            <p className={`text-[10px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
               {getTimePeriodName()}
             </p>
           </div>
 
-          {/* Property orientation tip */}
-          <div className={`text-xs p-2 rounded-lg ${isNightMode ? 'bg-cyan-900/30 border border-cyan-500/20' : 'bg-blue-50 border border-blue-200'}`}>
+          {/* Property orientation tip - compact */}
+          <div className={`text-[10px] p-1.5 rounded-lg ${isNightMode ? 'bg-cyan-900/30 border border-cyan-500/20' : 'bg-blue-50 border border-blue-200'}`}>
             <p className={`font-medium ${isNightMode ? 'text-cyan-300' : 'text-blue-700'}`}>
-              💡 {t('search:map.orientationTip', 'Property Tip')}:
+              💡 {t('search:map.orientationTip', 'Tip')}:
             </p>
-            <p className={isNightMode ? 'text-cyan-200/80' : 'text-blue-600'}>
+            <p className={`leading-tight ${isNightMode ? 'text-cyan-200/80' : 'text-blue-600'}`}>
               {hour >= 6 && hour < 12
                 ? t('search:map.eastWindows', 'East-facing windows get morning sun')
                 : hour >= 12 && hour < 18
@@ -366,7 +361,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
           </div>
 
           {/* Time slider */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <input
               type="range"
               min="0"
@@ -377,37 +372,37 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                 setHour(parseInt(e.target.value));
               }}
               className={`
-                w-full h-2 rounded-lg appearance-none cursor-pointer
+                w-full h-1.5 rounded-lg appearance-none cursor-pointer
                 ${isNightMode
                   ? 'bg-slate-700 [&::-webkit-slider-thumb]:bg-cyan-400'
                   : 'bg-neutral-200 [&::-webkit-slider-thumb]:bg-primary'
                 }
                 [&::-webkit-slider-thumb]:appearance-none
-                [&::-webkit-slider-thumb]:w-4
-                [&::-webkit-slider-thumb]:h-4
+                [&::-webkit-slider-thumb]:w-3
+                [&::-webkit-slider-thumb]:h-3
                 [&::-webkit-slider-thumb]:rounded-full
                 [&::-webkit-slider-thumb]:cursor-pointer
                 [&::-webkit-slider-thumb]:shadow-md
               `}
             />
-            <div className={`flex justify-between text-xs ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
-              <span>12 AM</span>
-              <span>6 AM</span>
-              <span>12 PM</span>
-              <span>6 PM</span>
-              <span>11 PM</span>
+            <div className={`flex justify-between text-[9px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
+              <span>12AM</span>
+              <span>6AM</span>
+              <span>12PM</span>
+              <span>6PM</span>
+              <span>11PM</span>
             </div>
           </div>
 
-          {/* Quick time buttons */}
-          <div className="flex items-center gap-2">
+          {/* Quick time buttons - icon only on small screens */}
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setTime(6)}
               className={`
-                flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium
+                flex-1 flex items-center justify-center p-1.5 rounded-md text-[10px] font-medium
                 transition-all
                 ${timePeriod === 'dawn'
-                  ? 'bg-gradient-to-r from-orange-400 to-pink-400 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-orange-400 to-pink-400 text-white shadow-sm'
                   : isNightMode
                     ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
@@ -415,17 +410,16 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               `}
               title={t('search:map.sunrise', 'Sunrise')}
             >
-              <SunriseIcon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('search:map.sunrise', 'Sunrise')}</span>
+              <SunriseIcon className="w-3 h-3" />
             </button>
 
             <button
               onClick={() => setTime(12)}
               className={`
-                flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium
+                flex-1 flex items-center justify-center p-1.5 rounded-md text-[10px] font-medium
                 transition-all
                 ${timePeriod === 'noon'
-                  ? 'bg-gradient-to-r from-yellow-300 to-sky-400 text-slate-800 shadow-md'
+                  ? 'bg-gradient-to-r from-yellow-300 to-sky-400 text-slate-800 shadow-sm'
                   : isNightMode
                     ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
@@ -433,17 +427,16 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               `}
               title={t('search:map.noon', 'Noon')}
             >
-              <NoonIcon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('search:map.noon', 'Noon')}</span>
+              <NoonIcon className="w-3 h-3" />
             </button>
 
             <button
               onClick={() => setTime(18)}
               className={`
-                flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium
+                flex-1 flex items-center justify-center p-1.5 rounded-md text-[10px] font-medium
                 transition-all
                 ${timePeriod === 'sunset'
-                  ? 'bg-gradient-to-r from-orange-500 to-purple-500 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-orange-500 to-purple-500 text-white shadow-sm'
                   : isNightMode
                     ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
@@ -451,37 +444,27 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               `}
               title={t('search:map.sunset', 'Sunset')}
             >
-              <SunsetIcon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('search:map.sunset', 'Sunset')}</span>
+              <SunsetIcon className="w-3 h-3" />
+            </button>
+
+            {/* Play/Pause - compact */}
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className={`
+                flex-1 flex items-center justify-center p-1.5 rounded-md
+                transition-all
+                ${isPlaying
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-sm'
+                  : isNightMode
+                    ? 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                }
+              `}
+              title={isPlaying ? t('search:map.pauseAnimation', 'Pause') : t('search:map.playAnimation', 'Play')}
+            >
+              {isPlaying ? <PauseIcon className="w-3 h-3" /> : <PlayIcon className="w-3 h-3" />}
             </button>
           </div>
-
-          {/* Play/Pause animation button */}
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className={`
-              w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
-              transition-all
-              ${isPlaying
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
-                : isNightMode
-                  ? 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 border border-neutral-200'
-              }
-            `}
-          >
-            {isPlaying ? (
-              <>
-                <PauseIcon className="w-4 h-4" />
-                {t('search:map.pauseAnimation', 'Pause')}
-              </>
-            ) : (
-              <>
-                <PlayIcon className="w-4 h-4" />
-                {t('search:map.playAnimation', 'Animate Day Cycle')}
-              </>
-            )}
-          </button>
         </div>
       )}
     </div>

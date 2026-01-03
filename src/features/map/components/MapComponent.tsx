@@ -227,19 +227,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
       {!isMobile && (
         <>
-          <div className="absolute bottom-12 right-4 z-[1000] flex flex-col items-end gap-3">
-            <div className={`${isNightMode ? 'bg-slate-900/90' : 'bg-white/80'} backdrop-blur-sm p-2 rounded-full shadow-lg flex items-center gap-2 transition-colors duration-300`}>
+          <div className="absolute bottom-12 right-4 z-[1000] flex flex-col items-end gap-2">
+            {/* Main control bar - compact */}
+            <div className={`${isNightMode ? 'bg-slate-900/90' : 'bg-white/90'} backdrop-blur-sm p-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-colors duration-300`}>
               <button
                 onClick={onRecenter}
-                className={`p-2 rounded-full transition-colors ${isNightMode ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
+                className={`p-1.5 rounded-full transition-colors ${isNightMode ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
                 title={t('search:map.centerOnLocation')}
               >
-                <CrosshairsIcon className={`w-6 h-6 ${isNightMode ? 'text-white' : 'text-neutral-700'}`} />
+                <CrosshairsIcon className={`w-5 h-5 ${isNightMode ? 'text-white' : 'text-neutral-700'}`} />
               </button>
-              <div className={`flex items-center gap-1 ${isNightMode ? 'bg-slate-800/50' : 'bg-neutral-200/50'} p-1 rounded-full`}>
+              <div className={`flex items-center ${isNightMode ? 'bg-slate-800/50' : 'bg-neutral-200/50'} p-0.5 rounded-full`}>
                 <button
                   onClick={() => setMapType('street')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
                     mapType === 'street'
                       ? 'bg-white shadow text-primary'
                       : isNightMode
@@ -251,7 +252,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 </button>
                 <button
                   onClick={() => setMapType('satellite')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
                     mapType === 'satellite'
                       ? 'bg-white shadow text-primary'
                       : isNightMode
@@ -265,7 +266,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               {/* Night Mode Toggle */}
               <button
                 onClick={() => setMapType(isNightMode ? 'street' : 'night')}
-                className={`p-2 rounded-full transition-all ${
+                className={`p-1.5 rounded-full transition-all ${
                   isNightMode
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
                     : 'hover:bg-black/10 text-neutral-600'
@@ -273,21 +274,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 title={t('search:map.nightMode', 'Night Mode')}
               >
                 {isNightMode ? (
-                  <SunIcon className="w-5 h-5" />
+                  <SunIcon className="w-4 h-4" />
                 ) : (
-                  <MoonIcon className="w-5 h-5" />
+                  <MoonIcon className="w-4 h-4" />
                 )}
               </button>
               <button
                 onClick={onDrawStart}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-md transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full shadow-md transition-colors ${
                   isDrawing
                     ? 'bg-red-600 text-white hover:bg-red-700'
                     : 'bg-neutral-800 text-white hover:bg-neutral-900'
                 }`}
               >
-                {isDrawing ? <XCircleIcon className="w-5 h-5" /> : <PencilIcon className="w-5 h-5" />}
-                <span>{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
+                {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+                <span className="hidden sm:inline">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
+                <span className="sm:hidden">{isDrawing ? '✕' : '✎'}</span>
               </button>
             </div>
 
@@ -295,84 +297,94 @@ const MapComponent: React.FC<MapComponentProps> = ({
             {isNightMode && (
               <button
                 onClick={() => setShowHeatMap(!showHeatMap)}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-lg transition-all animate-fade-in ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full shadow-lg transition-all animate-fade-in ${
                   showHeatMap
                     ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-orange-500/30'
                     : 'bg-slate-800/90 text-white hover:bg-slate-700/90'
                 }`}
                 title={t('search:map.heatMap', 'Heat Map')}
               >
-                <FireHeatIcon className={`w-5 h-5 ${showHeatMap ? 'animate-pulse' : ''}`} />
-                <span>{showHeatMap ? t('search:map.hideHeatMap', 'Hide Heat Map') : t('search:map.showHeatMap', 'Show Heat Map')}</span>
+                <FireHeatIcon className={`w-4 h-4 ${showHeatMap ? 'animate-pulse' : ''}`} />
+                <span className="hidden lg:inline">{showHeatMap ? t('search:map.hideHeatMap', 'Hide Heat Map') : t('search:map.showHeatMap', 'Show Heat Map')}</span>
+                <span className="lg:hidden">Heat</span>
               </button>
             )}
 
-            {/* 3D Buildings Toggle */}
-            <button
-              onClick={() => setShow3DBuildings(!show3DBuildings)}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-lg transition-all ${
-                show3DBuildings || isNightMode
-                  ? isNightMode
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-cyan-500/30'
-                    : 'bg-gradient-to-r from-slate-600 to-slate-700 text-white'
-                  : 'bg-white/90 text-neutral-800 hover:bg-white'
-              }`}
-              title={t('search:map.buildings3D', '3D Buildings')}
-            >
-              <span className="text-base">🏢</span>
-              <span>{show3DBuildings || isNightMode ? t('search:map.hide3DBuildings', 'Hide 3D') : t('search:map.show3DBuildings', 'Show 3D')}</span>
-            </button>
-
-            {/* Landmarks Toggle */}
-            <button
-              onClick={() => setShowLandmarks(!showLandmarks)}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-lg transition-all ${
-                showLandmarks
-                  ? isNightMode
-                    ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900'
-                    : 'bg-primary text-white'
-                  : isNightMode
-                    ? 'bg-slate-800/90 text-white hover:bg-slate-700/90'
-                    : 'bg-white/90 text-neutral-800 hover:bg-white'
-              }`}
-              title={t('search:map.landmarks', 'Landmarks')}
-            >
-              <span className="text-base">🏛️</span>
-              <span>{showLandmarks ? t('search:map.hideLandmarks', 'Hide Landmarks') : t('search:map.showLandmarks', 'Show Landmarks')}</span>
-            </button>
-
-            {mapType === 'satellite' && (
+            {/* Layer toggles - compact row */}
+            <div className={`flex items-center gap-1.5 ${isNightMode ? 'bg-slate-900/90' : 'bg-white/90'} backdrop-blur-sm p-1.5 rounded-full shadow-lg`}>
+              {/* 3D Buildings Toggle */}
               <button
-                onClick={() => setShowCadastre(!showCadastre)}
-                className={`px-4 py-2 text-sm font-bold rounded-full shadow-lg transition-all animate-fade-in ${
-                  showCadastre
-                    ? 'bg-primary text-white hover:bg-primary-dark'
-                    : 'bg-white/90 text-neutral-800 hover:bg-white'
+                onClick={() => setShow3DBuildings(!show3DBuildings)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  show3DBuildings || isNightMode
+                    ? isNightMode
+                      ? 'bg-cyan-500 text-white'
+                      : 'bg-slate-700 text-white'
+                    : isNightMode
+                      ? 'text-slate-300 hover:bg-white/10'
+                      : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title={t('search:map.cadastralParcels')}
+                title={t('search:map.buildings3D', '3D Buildings')}
               >
-                {showCadastre ? '✓ ' : ''} {t('search:map.cadastralParcels')}
+                <span className="text-sm">🏢</span>
+                <span className="hidden sm:inline">3D</span>
               </button>
-            )}
+
+              {/* Landmarks Toggle */}
+              <button
+                onClick={() => setShowLandmarks(!showLandmarks)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  showLandmarks
+                    ? isNightMode
+                      ? 'bg-amber-500 text-slate-900'
+                      : 'bg-primary text-white'
+                    : isNightMode
+                      ? 'text-slate-300 hover:bg-white/10'
+                      : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title={t('search:map.landmarks', 'Landmarks')}
+              >
+                <span className="text-sm">🏛️</span>
+                <span className="hidden sm:inline">POI</span>
+              </button>
+
+              {/* Cadastre Toggle - only in satellite */}
+              {mapType === 'satellite' && (
+                <button
+                  onClick={() => setShowCadastre(!showCadastre)}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                    showCadastre
+                      ? 'bg-primary text-white'
+                      : 'text-neutral-600 hover:bg-neutral-200'
+                  }`}
+                  title={t('search:map.cadastralParcels')}
+                >
+                  <span className="text-sm">📐</span>
+                  <span className="hidden sm:inline">Parcels</span>
+                </button>
+              )}
+            </div>
 
             {drawnBounds && !isDrawing && (
-              <div className="flex flex-col items-end gap-2 animate-fade-in">
+              <div className="flex items-center gap-1.5 animate-fade-in">
                 {isAuthenticated && (
                   <button
                     onClick={onSaveSearch}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
                   >
-                    <SearchPlusIcon className="w-5 h-5" />
-                    <span>{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
+                    <SearchPlusIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
+                    <span className="sm:hidden">Save</span>
                   </button>
                 )}
                 <button
                   onClick={() => onDrawComplete(null)}
-                  className="flex items-center gap-2 px-4 py-2 bg-neutral-800 text-white font-bold rounded-full shadow-lg hover:bg-neutral-900"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-lg hover:bg-neutral-900"
                 >
-                  <XCircleIcon className="w-5 h-5" />
-                  <span>{t('search:map.clearArea')}</span>
+                  <XCircleIcon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t('search:map.clearArea')}</span>
+                  <span className="sm:hidden">Clear</span>
                 </button>
               </div>
             )}
@@ -395,70 +407,204 @@ const MapComponent: React.FC<MapComponentProps> = ({
       )}
 
       {isMobile && (
-        <div className="absolute bottom-20 left-4 z-[1000] pointer-events-none flex flex-col gap-2">
-          {isLegendOpen && (
-            <div className="absolute bottom-full mb-2 pointer-events-auto">
-              <Legend isNightMode={isNightMode} />
+        <>
+          {/* Mobile: Bottom-left controls */}
+          <div className="absolute bottom-20 left-4 z-[1000] pointer-events-none flex flex-col gap-2">
+            {isLegendOpen && (
+              <div className="absolute bottom-full mb-2 pointer-events-auto">
+                <Legend isNightMode={isNightMode} />
+              </div>
+            )}
+
+            {/* Layer toggles row - compact pills */}
+            <div className={`pointer-events-auto flex items-center gap-1 p-1 rounded-full shadow-lg ${isNightMode ? 'bg-slate-900/90' : 'bg-white/90'} backdrop-blur-sm`}>
+              {/* 3D Buildings Toggle */}
+              <button
+                onClick={() => setShow3DBuildings(!show3DBuildings)}
+                className={`p-2 rounded-full transition-all ${
+                  show3DBuildings || isNightMode
+                    ? isNightMode
+                      ? 'bg-cyan-500 text-white'
+                      : 'bg-slate-700 text-white'
+                    : isNightMode
+                      ? 'text-slate-300'
+                      : 'text-neutral-600'
+                }`}
+                title={t('search:map.buildings3D', '3D Buildings')}
+              >
+                <span className="text-base">🏢</span>
+              </button>
+
+              {/* Landmarks Toggle */}
+              <button
+                onClick={() => setShowLandmarks(!showLandmarks)}
+                className={`p-2 rounded-full transition-all ${
+                  showLandmarks
+                    ? isNightMode
+                      ? 'bg-amber-500 text-slate-900'
+                      : 'bg-primary text-white'
+                    : isNightMode
+                      ? 'text-slate-300'
+                      : 'text-neutral-600'
+                }`}
+                title={t('search:map.landmarks', 'Landmarks')}
+              >
+                <span className="text-base">🏛️</span>
+              </button>
+
+              {/* Heat Map Toggle - only in night mode */}
+              {isNightMode && (
+                <button
+                  onClick={() => setShowHeatMap(!showHeatMap)}
+                  className={`p-2 rounded-full transition-all ${
+                    showHeatMap
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                      : 'text-slate-300'
+                  }`}
+                  title={t('search:map.heatMap', 'Heat Map')}
+                >
+                  <FireHeatIcon className={`w-4 h-4 ${showHeatMap ? 'animate-pulse' : ''}`} />
+                </button>
+              )}
+
+              {/* Cadastre Toggle - only in satellite */}
+              {mapType === 'satellite' && (
+                <button
+                  onClick={() => setShowCadastre(!showCadastre)}
+                  className={`p-2 rounded-full transition-all ${
+                    showCadastre
+                      ? 'bg-primary text-white'
+                      : 'text-neutral-600'
+                  }`}
+                  title={t('search:map.cadastralParcels')}
+                >
+                  <span className="text-base">📐</span>
+                </button>
+              )}
+            </div>
+
+            {/* Night Mode Toggle - Mobile */}
+            <button
+              onClick={() => setMapType(isNightMode ? 'street' : 'night')}
+              className={`pointer-events-auto p-2.5 rounded-full shadow-lg transition-all ${
+                isNightMode
+                  ? 'bg-indigo-600 text-white shadow-indigo-500/30'
+                  : 'bg-white/80 backdrop-blur-sm text-neutral-800'
+              }`}
+              title={t('search:map.nightMode', 'Night Mode')}
+            >
+              {isNightMode ? (
+                <SunIcon className="w-5 h-5" />
+              ) : (
+                <MoonIcon className="w-5 h-5" />
+              )}
+            </button>
+
+            {/* Legend Toggle */}
+            <button
+              onClick={() => setIsLegendOpen((p) => !p)}
+              className={`p-2.5 rounded-full shadow-lg pointer-events-auto transition-colors ${
+                isNightMode
+                  ? 'bg-slate-800/90 backdrop-blur-sm'
+                  : 'bg-white/80 backdrop-blur-sm'
+              }`}
+              title={t('search:map.mapLegend')}
+            >
+              <MapLegendIcon className={`w-5 h-5 ${isNightMode ? 'text-white' : 'text-neutral-800'}`} />
+            </button>
+          </div>
+
+          {/* Mobile: Sun Position Control - top left when 3D buildings enabled */}
+          {(isNightMode || show3DBuildings) && (
+            <div className="absolute top-4 left-4 z-[1000]">
+              <SunPositionControl
+                onDateTimeChange={handleShadowTimeChange}
+                isNightMode={isNightMode}
+                enabled={isNightMode || show3DBuildings}
+              />
             </div>
           )}
-          {/* Heat Map Toggle - Mobile */}
-          {isNightMode && (
-            <button
-              onClick={() => setShowHeatMap(!showHeatMap)}
-              className={`pointer-events-auto px-3 py-2 text-xs font-bold rounded-full shadow-lg transition-all animate-fade-in ${
-                showHeatMap
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                  : 'bg-slate-800/90 text-white'
-              }`}
-              title={t('search:map.heatMap', 'Heat Map')}
-            >
-              <span className="flex items-center gap-1.5">
-                <FireHeatIcon className={`w-4 h-4 ${showHeatMap ? 'animate-pulse' : ''}`} />
-                {showHeatMap ? t('search:map.heat', 'Heat') : t('search:map.heat', 'Heat')}
-              </span>
-            </button>
-          )}
-          {mapType === 'satellite' && (
-            <button
-              onClick={() => setShowCadastre(!showCadastre)}
-              className={`pointer-events-auto px-3 py-2 text-xs font-bold rounded-full shadow-lg transition-all animate-fade-in ${
-                showCadastre
-                  ? 'bg-primary text-white hover:bg-primary-dark'
-                  : 'bg-white/90 text-neutral-800 hover:bg-white'
-              }`}
-              title={t('search:map.cadastralParcels')}
-            >
-              {showCadastre ? '✓ ' : ''}{t('search:map.parcels')}
-            </button>
-          )}
-          {/* Night Mode Toggle - Mobile */}
-          <button
-            onClick={() => setMapType(isNightMode ? 'street' : 'night')}
-            className={`pointer-events-auto p-2.5 rounded-full shadow-lg transition-all ${
-              isNightMode
-                ? 'bg-indigo-600 text-white shadow-indigo-500/30'
-                : 'bg-white/80 backdrop-blur-sm text-neutral-800'
-            }`}
-            title={t('search:map.nightMode', 'Night Mode')}
-          >
-            {isNightMode ? (
-              <SunIcon className="w-5 h-5" />
-            ) : (
-              <MoonIcon className="w-5 h-5" />
+
+          {/* Mobile: Top right controls - map type and draw */}
+          <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2 items-end">
+            {/* Map type toggle */}
+            <div className={`flex items-center gap-1 p-1 rounded-full shadow-lg ${isNightMode ? 'bg-slate-900/90' : 'bg-white/90'} backdrop-blur-sm`}>
+              <button
+                onClick={() => setMapType('street')}
+                className={`px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  mapType === 'street'
+                    ? 'bg-white shadow text-primary'
+                    : isNightMode
+                      ? 'text-slate-300'
+                      : 'text-neutral-600'
+                }`}
+              >
+                {t('search:map.street')}
+              </button>
+              <button
+                onClick={() => setMapType('satellite')}
+                className={`px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  mapType === 'satellite'
+                    ? 'bg-white shadow text-primary'
+                    : isNightMode
+                      ? 'text-slate-300'
+                      : 'text-neutral-600'
+                }`}
+              >
+                {t('search:map.satellite')}
+              </button>
+            </div>
+
+            {/* Draw area and recenter */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onRecenter}
+                className={`p-2 rounded-full shadow-lg transition-colors ${
+                  isNightMode
+                    ? 'bg-slate-800/90 text-white'
+                    : 'bg-white/90 text-neutral-700'
+                }`}
+                title={t('search:map.centerOnLocation')}
+              >
+                <CrosshairsIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onDrawStart}
+                className={`p-2 rounded-full shadow-lg transition-colors ${
+                  isDrawing
+                    ? 'bg-red-600 text-white'
+                    : 'bg-neutral-800 text-white'
+                }`}
+                title={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
+              >
+                {isDrawing ? <XCircleIcon className="w-5 h-5" /> : <PencilIcon className="w-5 h-5" />}
+              </button>
+            </div>
+
+            {/* Drawn bounds actions */}
+            {drawnBounds && !isDrawing && (
+              <div className="flex items-center gap-2 animate-fade-in">
+                {isAuthenticated && (
+                  <button
+                    onClick={onSaveSearch}
+                    disabled={isSaving}
+                    className="p-2 bg-primary text-white rounded-full shadow-lg disabled:opacity-50"
+                    title={isSaving ? t('search:map.saving') : t('search:map.saveArea')}
+                  >
+                    <SearchPlusIcon className="w-5 h-5" />
+                  </button>
+                )}
+                <button
+                  onClick={() => onDrawComplete(null)}
+                  className="p-2 bg-neutral-800 text-white rounded-full shadow-lg"
+                  title={t('search:map.clearArea')}
+                >
+                  <XCircleIcon className="w-5 h-5" />
+                </button>
+              </div>
             )}
-          </button>
-          <button
-            onClick={() => setIsLegendOpen((p) => !p)}
-            className={`p-2.5 rounded-full shadow-lg pointer-events-auto transition-colors ${
-              isNightMode
-                ? 'bg-slate-800/90 backdrop-blur-sm'
-                : 'bg-white/80 backdrop-blur-sm'
-            }`}
-            title={t('search:map.mapLegend')}
-          >
-            <MapLegendIcon className={`w-6 h-6 ${isNightMode ? 'text-white' : 'text-neutral-800'}`} />
-          </button>
-        </div>
+          </div>
+        </>
       )}
       </div>
     </HighlightedPropertiesProvider>
