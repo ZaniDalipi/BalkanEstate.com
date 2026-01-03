@@ -4,18 +4,30 @@ import { BALKAN_COUNTRIES } from '../constants/countries';
 export const filterProperties = (properties: Property[], filters: Filters): Property[] => {
     const query = filters.query?.toLowerCase().trim();
 
+    // Extract individual search terms from query (split by comma, space)
+    // This handles cases like "Grad Zagreb, Hrvatska" matching properties in "Zagreb"
+    const queryTerms = query ? query.split(/[,\s]+/).filter(term => term.length > 1) : [];
+
     return properties.filter(p => {
         // Ensure property has valid coordinates
         if (p.lat == null || p.lng == null || isNaN(p.lat) || isNaN(p.lng)) {
             return false;
         }
 
-        // Text search
+        // Text search - match if ANY query term matches city or address
         let queryMatch = true;
-        if (query) {
-            const addressMatch = p.address.toLowerCase().includes(query);
-            const cityMatch = p.city.toLowerCase().includes(query);
-            queryMatch = addressMatch || cityMatch;
+        if (query && queryTerms.length > 0) {
+            const addressLower = p.address.toLowerCase();
+            const cityLower = p.city.toLowerCase();
+
+            // Check if any term from the query matches the property's city or address
+            // Also check if the city/address contains any of the query terms
+            queryMatch = queryTerms.some(term =>
+                addressLower.includes(term) ||
+                cityLower.includes(term) ||
+                term.includes(cityLower) ||
+                term.includes(addressLower)
+            );
         }
 
         // Country filter
