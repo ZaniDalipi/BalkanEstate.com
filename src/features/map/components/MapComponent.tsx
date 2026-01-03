@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
 import { Property } from '@/types';
@@ -19,6 +19,8 @@ import { CadastreLayer } from './CadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
 import SnapchatMapOverlay from './SnapchatMapOverlay';
 import Buildings3DLayer from './Buildings3DLayer';
+import SunPositionControl from './SunPositionControl';
+import LandmarksLayer from './LandmarksLayer';
 import {
   FlyToController,
   MapEvents,
@@ -127,9 +129,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
+  const [showLandmarks, setShowLandmarks] = useState(true); // Show landmarks by default
+  const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
 
   // Check if we're in night mode
   const isNightMode = mapType === 'night';
+
+  // Handle shadow time change from SunPositionControl
+  const handleShadowTimeChange = useCallback((dateTime: Date) => {
+    setShadowDateTime(dateTime);
+  }, []);
 
   const validProperties = useMemo(() => {
     return properties.filter(
@@ -198,8 +207,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
             updateWhenZooming={false}
             updateInterval={150}
           />
-          {/* 3D Buildings - Snapchat style */}
-          <Buildings3DLayer enabled={isNightMode} style="night" />
+          {/* 3D Buildings with time-based shadows */}
+          <Buildings3DLayer
+            enabled={isNightMode}
+            style="night"
+            dateTime={shadowDateTime}
+          />
+          {/* Famous landmarks and POIs */}
+          <LandmarksLayer
+            enabled={showLandmarks}
+            isNightMode={isNightMode}
+          />
           <CadastreLayer enabled={showCadastre && mapType === 'satellite'} opacity={0.7} />
           <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
           <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={isNightMode} />
@@ -289,6 +307,24 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </button>
             )}
 
+            {/* Landmarks Toggle */}
+            <button
+              onClick={() => setShowLandmarks(!showLandmarks)}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-lg transition-all ${
+                showLandmarks
+                  ? isNightMode
+                    ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900'
+                    : 'bg-primary text-white'
+                  : isNightMode
+                    ? 'bg-slate-800/90 text-white hover:bg-slate-700/90'
+                    : 'bg-white/90 text-neutral-800 hover:bg-white'
+              }`}
+              title={t('search:map.landmarks', 'Landmarks')}
+            >
+              <span className="text-base">🏛️</span>
+              <span>{showLandmarks ? t('search:map.hideLandmarks', 'Hide Landmarks') : t('search:map.showLandmarks', 'Show Landmarks')}</span>
+            </button>
+
             {mapType === 'satellite' && (
               <button
                 onClick={() => setShowCadastre(!showCadastre)}
@@ -328,6 +364,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <div className="absolute bottom-4 left-4 z-[1000]">
             <Legend isNightMode={isNightMode} />
           </div>
+
+          {/* Sun Position Control - for shadow simulation in night mode */}
+          {isNightMode && (
+            <div className="absolute top-4 left-4 z-[1000]">
+              <SunPositionControl
+                onDateTimeChange={handleShadowTimeChange}
+                isNightMode={isNightMode}
+                enabled={isNightMode}
+              />
+            </div>
+          )}
         </>
       )}
 
