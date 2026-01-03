@@ -133,14 +133,23 @@ const createLandmarkIcon = (type: LandmarkType, isNightMode: boolean): L.DivIcon
  */
 // Global cache to persist across component remounts
 const landmarksCache = new Map<string, { landmarks: Landmark[]; timestamp: number }>();
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
-const MIN_REQUEST_INTERVAL = 5000; // Minimum 5 seconds between API requests
-const MIN_ZOOM_FOR_FETCH = 13; // Only fetch at zoom 13+
-const DEBOUNCE_DELAY = 2000; // 2 second debounce
-const MAX_CACHE_SIZE = 20; // Maximum cache entries
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache
+const MIN_REQUEST_INTERVAL = 10000; // Minimum 10 seconds between API requests
+const MIN_ZOOM_FOR_FETCH = 14; // Only fetch at zoom 14+ (more zoomed in)
+const DEBOUNCE_DELAY = 3000; // 3 second debounce
+const MAX_CACHE_SIZE = 15; // Maximum cache entries
+
+// Alternative Overpass API endpoints for fallback
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
 
 let lastRequestTime = 0;
 let requestInFlight = false;
+let currentEndpointIndex = 0;
+let consecutiveFailures = 0;
 
 // Clean up old cache entries periodically
 const cleanupCache = () => {
@@ -176,7 +185,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastBoundsKeyRef = useRef<string | null>(null);
 
-  // Build Overpass API query for landmarks
+  // Build Overpass API query for landmarks - simplified for performance
   const buildOverpassQuery = useCallback((bounds: L.LatLngBounds): string => {
     const south = bounds.getSouth();
     const west = bounds.getWest();
@@ -184,45 +193,20 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     const east = bounds.getEast();
     const bbox = `${south},${west},${north},${east}`;
 
-    // Query for various landmark types
+    // Simplified query - only essential landmarks to reduce API load
     return `
-      [out:json][timeout:10];
+      [out:json][timeout:25];
       (
-        // Tourist attractions
-        node["tourism"="attraction"]["name"](${bbox});
-        way["tourism"="attraction"]["name"](${bbox});
-        node["tourism"="museum"]["name"](${bbox});
-        way["tourism"="museum"]["name"](${bbox});
-        node["tourism"="viewpoint"]["name"](${bbox});
-
-        // Historic sites
-        node["historic"="monument"]["name"](${bbox});
-        node["historic"="memorial"]["name"](${bbox});
-        node["historic"="castle"]["name"](${bbox});
-        way["historic"="castle"]["name"](${bbox});
-
-        // Religious buildings (famous ones)
-        node["building"="church"]["name"]["tourism"](${bbox});
-        node["building"="mosque"]["name"]["tourism"](${bbox});
-        way["building"="church"]["name"]["tourism"](${bbox});
-
-        // Stadiums
+        node["tourism"~"museum|attraction"]["name"](${bbox});
+        node["historic"~"monument|castle"]["name"](${bbox});
         node["leisure"="stadium"]["name"](${bbox});
-        way["leisure"="stadium"]["name"](${bbox});
-
-        // Universities
         node["amenity"="university"]["name"](${bbox});
-        way["amenity"="university"]["name"](${bbox});
-
-        // Major parks
-        node["leisure"="park"]["name"]["wikipedia"](${bbox});
-        way["leisure"="park"]["name"]["wikipedia"](${bbox});
       );
-      out center 50;
+      out 20;
     `.trim();
   }, []);
 
-  // Fetch landmarks from Overpass API with caching and rate limiting
+  // Fetch landmarks from Overpass API with caching, rate limiting, and endpoint rotation
   const fetchLandmarks = useCallback(async (bounds: L.LatLngBounds) => {
     const boundsKey = bounds.toBBoxString();
 
@@ -243,27 +227,48 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       return;
     }
 
+    // Stop trying if too many consecutive failures
+    if (consecutiveFailures >= 3) {
+      // Reset after 5 minutes
+      if (now - lastRequestTime > 5 * 60 * 1000) {
+        consecutiveFailures = 0;
+      } else {
+        return;
+      }
+    }
+
     requestInFlight = true;
     lastRequestTime = now;
 
     try {
       const query = buildOverpassQuery(bounds);
-      const response = await fetch('https://overpass-api.de/api/interpreter', {
+      const endpoint = OVERPASS_ENDPOINTS[currentEndpointIndex];
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s client timeout
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: query,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        if (response.status === 429 || response.status === 504) {
-          // Rate limited or timeout - wait longer before next request
-          lastRequestTime = now + MIN_REQUEST_INTERVAL * 2;
-        }
+        consecutiveFailures++;
+        // Rotate to next endpoint on failure
+        currentEndpointIndex = (currentEndpointIndex + 1) % OVERPASS_ENDPOINTS.length;
+        // Wait longer before next request
+        lastRequestTime = now + MIN_REQUEST_INTERVAL * 3;
         throw new Error(`Overpass API request failed: ${response.status}`);
       }
 
+      // Success - reset failure counter
+      consecutiveFailures = 0;
       const data = await response.json();
       const elements = data.elements || [];
 
@@ -297,8 +302,16 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
 
       setLandmarks(limitedLandmarks);
       lastBoundsKeyRef.current = boundsKey;
-    } catch (error) {
-      console.warn('Failed to fetch landmarks:', error);
+    } catch (error: any) {
+      consecutiveFailures++;
+      // Rotate to next endpoint on any failure
+      currentEndpointIndex = (currentEndpointIndex + 1) % OVERPASS_ENDPOINTS.length;
+
+      if (error?.name === 'AbortError') {
+        console.warn('Landmarks fetch timed out, will try different endpoint');
+      } else {
+        console.warn('Failed to fetch landmarks:', error?.message || error);
+      }
     } finally {
       requestInFlight = false;
     }
@@ -314,7 +327,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         clearTimeout(fetchTimeoutRef.current);
       }
 
-      // Only fetch at zoom level 13+ to reduce API calls
+      // Only fetch at zoom level 14+ to reduce API calls
       if (map.getZoom() < MIN_ZOOM_FOR_FETCH) {
         setLandmarks([]);
         return;
