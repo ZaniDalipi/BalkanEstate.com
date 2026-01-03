@@ -120,7 +120,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
   // Animate the sun - advances time slowly for visible movement
-  // 1 real second = 2 minutes of sun time (full day cycle in ~12 minutes)
+  // Updates every 4 seconds, advances ~10 minutes of sun time per update
   useEffect(() => {
     if (!enabled) return;
 
@@ -130,11 +130,12 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
 
     const interval = setInterval(() => {
       setSimulatedHour(prev => {
-        // Advance by 0.033 hours (~2 minutes) every second for smooth movement
-        const next = prev + 0.033;
+        // Advance by 0.17 hours (~10 minutes) every 4 seconds
+        // Full day cycle takes ~10 minutes
+        const next = prev + 0.17;
         return next >= 24 ? next - 24 : next;
       });
-    }, 1000); // Update every second
+    }, 4000); // Update every 4 seconds
 
     return () => clearInterval(interval);
   }, [longitude, enabled]);
@@ -225,7 +226,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 1s linear, top 1s linear, transform 0.5s ease-out',
+          transition: 'left 3.5s ease-in-out, top 3.5s ease-in-out, transform 0.5s ease-out',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
@@ -342,7 +343,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
-            transition: 'left 1s linear, top 1s linear',
+            transition: 'left 3.5s ease-in-out, top 3.5s ease-in-out',
           }}
         />
       )}
