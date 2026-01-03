@@ -113,27 +113,33 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   latitude = 40,
   useRealTime = true,
 }) => {
-  const [realTimeHour, setRealTimeHour] = useState<number>(() =>
+  // Simulated hour for smooth demo animation
+  const [simulatedHour, setSimulatedHour] = useState<number>(() =>
     calculateLocalSolarTime(longitude)
   );
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
-  // Update time - every 5 seconds for smooth movement
+  // Animate the sun - advances time slowly for visible movement
+  // 1 real second = 2 minutes of sun time (full day cycle in ~12 minutes)
   useEffect(() => {
-    if (!useRealTime || !enabled) return;
+    if (!enabled) return;
 
-    const updateTime = () => {
-      setRealTimeHour(calculateLocalSolarTime(longitude));
-      setCurrentDate(new Date());
-    };
+    const startHour = calculateLocalSolarTime(longitude);
+    setSimulatedHour(startHour);
+    setCurrentDate(new Date());
 
-    updateTime();
-    // Update every 10 seconds - gives the 5s transition time to complete smoothly
-    const interval = setInterval(updateTime, 10000);
+    const interval = setInterval(() => {
+      setSimulatedHour(prev => {
+        // Advance by 0.033 hours (~2 minutes) every second for smooth movement
+        const next = prev + 0.033;
+        return next >= 24 ? next - 24 : next;
+      });
+    }, 1000); // Update every second
+
     return () => clearInterval(interval);
-  }, [longitude, useRealTime, enabled]);
+  }, [longitude, enabled]);
 
-  const effectiveHour = useRealTime ? realTimeHour : hour;
+  const effectiveHour = useRealTime ? simulatedHour : hour;
   const dayOfYear = getDayOfYear(currentDate);
 
   // Calculate sun/moon position with natural arc
@@ -219,7 +225,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 5s ease-in-out, top 5s ease-in-out, transform 2s ease-out',
+          transition: 'left 1s linear, top 1s linear, transform 0.5s ease-out',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
@@ -336,7 +342,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
-            transition: 'left 5s ease-in-out, top 5s ease-in-out',
+            transition: 'left 1s linear, top 1s linear',
           }}
         />
       )}
