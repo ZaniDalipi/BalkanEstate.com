@@ -190,8 +190,9 @@ export const ZoomBasedTileSwitch: React.FC<{
 /**
  * ZoomBased3DBuildings Component
  *
- * Automatically enables 3D buildings when zoomed in past level 16.
- * Disables when zooming out below level 15.
+ * Automatically enables 3D buildings when zoomed in past level 18
+ * (when standard map tiles no longer show useful detail).
+ * Disables when zooming out below level 17.
  * Uses hysteresis to prevent rapid toggling at threshold.
  */
 export const ZoomBased3DBuildings: React.FC<{
@@ -204,12 +205,12 @@ export const ZoomBased3DBuildings: React.FC<{
     const handleZoomEnd = () => {
       const currentZoom = map.getZoom();
 
-      // Enable 3D buildings at zoom 16+
-      if (currentZoom >= 16 && !show3DBuildings) {
+      // Enable 3D buildings at zoom 18+ (when flat map tiles are no longer useful)
+      if (currentZoom >= 18 && !show3DBuildings) {
         setShow3DBuildings(true);
       }
-      // Disable 3D buildings below zoom 15 (hysteresis to prevent rapid toggling)
-      else if (currentZoom < 15 && show3DBuildings) {
+      // Disable 3D buildings below zoom 17 (hysteresis to prevent rapid toggling)
+      else if (currentZoom < 17 && show3DBuildings) {
         setShow3DBuildings(false);
       }
     };
