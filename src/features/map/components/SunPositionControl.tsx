@@ -218,7 +218,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
     if (isPlaying && enabled) {
       animationRef.current = setInterval(() => {
         setHour((prev) => (prev + 1) % 24);
-      }, 400); // Change hour every 400ms
+      }, 4000); // Change hour every 400ms
     } else {
       if (animationRef.current) {
         clearInterval(animationRef.current);
