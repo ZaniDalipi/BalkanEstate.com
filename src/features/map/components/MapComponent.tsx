@@ -465,18 +465,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
             )}
           </div>
 
-          {/* Mobile: Sun Position Control - top left when 3D buildings enabled */}
-          {show3DBuildings && (
-            <div className="absolute top-20 left-2 z-[999] animate-slide-down md:hidden">
-              <SunPositionControl
-                onDateTimeChange={handleShadowTimeChange}
-                onSeasonChange={handleSeasonChange}
-                isNightMode={false}
-                enabled={show3DBuildings}
-              />
-            </div>
-          )}
-
           {/* Mobile: Top right controls - unified compact panel */}
           <div className="absolute top-20 right-2 z-[999] md:hidden">
             <div className="flex flex-col gap-2 items-end">
@@ -532,6 +520,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   <span className="text-[11px] font-semibold">{isDrawing ? t('search:map.cancel') : t('search:map.draw', 'Draw')}</span>
                 </button>
               </div>
+
+              {/* Sun Position Control - below map controls when 3D enabled */}
+              {show3DBuildings && (
+                <SunPositionControl
+                  onDateTimeChange={handleShadowTimeChange}
+                  onSeasonChange={handleSeasonChange}
+                  isNightMode={false}
+                  enabled={show3DBuildings}
+                />
+              )}
 
               {/* Drawn bounds actions - only when bounds exist */}
               {drawnBounds && !isDrawing && (
