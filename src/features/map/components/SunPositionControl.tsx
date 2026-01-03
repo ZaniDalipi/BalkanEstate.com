@@ -5,13 +5,23 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getTimePeriod, TimePeriod } from './Buildings3DLayer';
+import type { Season } from './SunArcAnimation';
 
 interface SunPositionControlProps {
   onDateTimeChange: (dateTime: Date) => void;
+  onSeasonChange?: (season: Season) => void;
   isNightMode: boolean;
   enabled: boolean;
   latitude?: number; // For accurate sun position calculation
 }
+
+// Season icons and labels
+const SEASONS: { id: Season; icon: string; label: string }[] = [
+  { id: 'spring', icon: '🌸', label: 'Spring' },
+  { id: 'summer', icon: '☀️', label: 'Summer' },
+  { id: 'autumn', icon: '🍂', label: 'Autumn' },
+  { id: 'winter', icon: '❄️', label: 'Winter' },
+];
 
 // Calculate sun azimuth (compass direction) based on time and approximate latitude
 // This is a simplified calculation - for Balkans region (roughly 42°N latitude)
@@ -183,6 +193,7 @@ const SunCompass: React.FC<{
  */
 const SunPositionControl: React.FC<SunPositionControlProps> = ({
   onDateTimeChange,
+  onSeasonChange,
   isNightMode,
   enabled,
   latitude = 42, // Default to Balkans latitude
@@ -191,7 +202,15 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
   const [hour, setHour] = useState(12); // 0-23
   const [isPlaying, setIsPlaying] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState<Season>('current');
   const animationRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Notify parent of season changes
+  useEffect(() => {
+    if (onSeasonChange) {
+      onSeasonChange(selectedSeason);
+    }
+  }, [selectedSeason, onSeasonChange]);
 
   // Calculate sun position
   const sunAzimuth = useMemo(() => calculateSunAzimuth(hour, latitude), [hour, latitude]);
@@ -464,6 +483,36 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
             >
               {isPlaying ? <PauseIcon className="w-3 h-3" /> : <PlayIcon className="w-3 h-3" />}
             </button>
+          </div>
+
+          {/* Season selector */}
+          <div className="space-y-1">
+            <p className={`text-[10px] ${isNightMode ? 'text-slate-400' : 'text-neutral-500'}`}>
+              {t('search:map.season', 'Season')}
+            </p>
+            <div className="flex items-center gap-1">
+              {SEASONS.map((season) => (
+                <button
+                  key={season.id}
+                  onClick={() => setSelectedSeason(season.id)}
+                  className={`
+                    flex-1 flex items-center justify-center p-1.5 rounded-md text-xs
+                    transition-all
+                    ${selectedSeason === season.id
+                      ? isNightMode
+                        ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/50'
+                        : 'bg-primary/20 text-primary border border-primary/50'
+                      : isNightMode
+                        ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                    }
+                  `}
+                  title={season.label}
+                >
+                  {season.icon}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

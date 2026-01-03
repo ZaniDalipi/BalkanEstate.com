@@ -20,7 +20,7 @@ import HeatMapLayer from './HeatMapLayer';
 import SnapchatMapOverlay from './SnapchatMapOverlay';
 import Buildings3DLayer from './Buildings3DLayer';
 import SunPositionControl from './SunPositionControl';
-import SunArcAnimation from './SunArcAnimation';
+import SunArcAnimation, { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
 import {
   FlyToController,
@@ -136,6 +136,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [mapCenterLng, setMapCenterLng] = useState<number>(22); // Default Balkans longitude
   const [mapCenterLat, setMapCenterLat] = useState<number>(41); // Default Balkans latitude
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
+  const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
 
   // Check if we're in night mode
   const isNightMode = mapType === 'night';
@@ -144,6 +145,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const handleShadowTimeChange = useCallback((dateTime: Date) => {
     setShadowDateTime(dateTime);
     setIsManualTimeControl(true); // User is now manually controlling time
+  }, []);
+
+  // Handle season change from SunPositionControl
+  const handleSeasonChange = useCallback((season: Season) => {
+    setSelectedSeason(season);
   }, []);
 
   // Reset to real time when 3D buildings is toggled off
@@ -198,6 +204,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           longitude={mapCenterLng}
           latitude={mapCenterLat}
           useRealTime={!isManualTimeControl}
+          season={selectedSeason}
         />
 
         <MapContainer
@@ -431,6 +438,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             <div className="absolute top-4 left-4 z-[1000]">
               <SunPositionControl
                 onDateTimeChange={handleShadowTimeChange}
+                onSeasonChange={handleSeasonChange}
                 isNightMode={isNightMode}
                 enabled={isNightMode || show3DBuildings}
               />
@@ -572,6 +580,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             <div className="absolute top-20 left-2 z-[999] animate-slide-down md:hidden">
               <SunPositionControl
                 onDateTimeChange={handleShadowTimeChange}
+                onSeasonChange={handleSeasonChange}
                 isNightMode={isNightMode}
                 enabled={isNightMode || show3DBuildings}
               />

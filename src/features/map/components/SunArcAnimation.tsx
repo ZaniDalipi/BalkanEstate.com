@@ -4,6 +4,17 @@
 
 import React, { useMemo, useEffect, useState, memo } from 'react';
 
+// Season types
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter' | 'current';
+
+// Map seasons to representative day of year
+const SEASON_DAY_OF_YEAR: Record<Exclude<Season, 'current'>, number> = {
+  spring: 80,   // March 21 - Spring equinox
+  summer: 172,  // June 21 - Summer solstice (longest day)
+  autumn: 266,  // September 23 - Autumn equinox
+  winter: 355,  // December 21 - Winter solstice (shortest day)
+};
+
 interface SunArcAnimationProps {
   hour: number;
   enabled: boolean;
@@ -11,6 +22,7 @@ interface SunArcAnimationProps {
   longitude?: number;
   latitude?: number;
   useRealTime?: boolean;
+  season?: Season;
 }
 
 // Pre-calculated constants for performance
@@ -148,18 +160,25 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   longitude = 23,
   latitude = 40,
   useRealTime = true,
+  season = 'current',
 }) => {
   const [simulatedHour, setSimulatedHour] = useState<number>(() =>
     calculateLocalSolarTime(longitude)
   );
-  const [dayOfYear, setDayOfYear] = useState<number>(() => getDayOfYear(new Date()));
+
+  // Get day of year based on season selection
+  const dayOfYear = useMemo(() => {
+    if (season === 'current') {
+      return getDayOfYear(new Date());
+    }
+    return SEASON_DAY_OF_YEAR[season];
+  }, [season]);
 
   // Animation effect - updates position periodically
   useEffect(() => {
     if (!enabled) return;
 
     setSimulatedHour(calculateLocalSolarTime(longitude));
-    setDayOfYear(getDayOfYear(new Date()));
 
     const interval = setInterval(() => {
       setSimulatedHour(prev => {
