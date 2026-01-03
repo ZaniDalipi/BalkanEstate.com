@@ -119,8 +119,8 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   );
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
-  // Animate the sun - balanced speed for visible movement with slow time progression
-  // Updates every 6 seconds, advances ~18 seconds of sun time per update
+  // Animate the sun - slow time progression so sun can reach position
+  // Updates every 6 seconds, advances only ~4 seconds of sun time per update
   useEffect(() => {
     if (!enabled) return;
 
@@ -130,10 +130,10 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
 
     const interval = setInterval(() => {
       setSimulatedHour(prev => {
-        // Advance by 0.005 hours (~18 seconds) every 6 real seconds
-        // Full day cycle takes ~8 hours
-        // Time moves slowly but sun updates frequently for visible movement
-        const next = prev + 0.005;
+        // Advance by 0.001 hours (~4 seconds) every 6 real seconds
+        // Full day cycle takes ~40 hours (very slow time slider)
+        // Sun has plenty of time to reach its position
+        const next = prev + 0.001;
         return next >= 24 ? next - 24 : next;
       });
     }, 6000); // Update every 6 seconds
