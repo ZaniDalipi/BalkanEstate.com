@@ -965,21 +965,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 </button>
                             </div>
                         </div>
-
-                        {mobileView === 'map' && drawnBoundsJSON && !isDrawing && (
-                            <div className="absolute top-1/2 right-2 -translate-y-1/2 z-10 flex flex-col gap-2">
-                                {isAuthenticated && (
-                                    <button onClick={() => handleSaveSearch(true)} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm font-bold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
-                                        <BellIcon className="w-4 h-4" />
-                                        <span>{isSaving ? 'Saving...' : 'Save Area'}</span>
-                                    </button>
-                                )}
-                                <button onClick={handleClearDrawnArea} className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-sm font-bold rounded-full shadow-lg hover:bg-neutral-900">
-                                    <XCircleIcon className="w-4 h-4" />
-                                    <span>Clear</span>
-                                </button>
-                            </div>
-                        )}
                     </>
                 )}
             </div>
