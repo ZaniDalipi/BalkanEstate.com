@@ -20,7 +20,7 @@ import HeatMapLayer from './HeatMapLayer';
 import SnapchatMapOverlay from './SnapchatMapOverlay';
 import Buildings3DLayer from './Buildings3DLayer';
 import SunPositionControl from './SunPositionControl';
-import SunArcAnimation, { type Season } from './SunArcAnimation';
+import SunArcAnimation, { type Season, type SunriseSunsetInfo } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
 import {
   FlyToController,
@@ -152,6 +152,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
     setSelectedSeason(season);
   }, []);
 
+  // Auto switch day/night mode based on sun position
+  const handleDayNightChange = useCallback((isDay: boolean, sunInfo: SunriseSunsetInfo) => {
+    // Only auto-switch when 3D buildings mode is enabled (sun animation is active)
+    if (show3DBuildings && !isNightMode) {
+      // When it becomes night, switch to night map
+      if (!isDay) {
+        setMapType('night');
+      }
+    } else if (isNightMode && isDay) {
+      // When in night mode and it becomes day, switch to street
+      setMapType('street');
+    }
+  }, [show3DBuildings, isNightMode]);
+
   // Reset to real time when 3D buildings is toggled off
   useEffect(() => {
     if (!show3DBuildings && !isNightMode) {
@@ -205,6 +219,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           latitude={mapCenterLat}
           useRealTime={!isManualTimeControl}
           season={selectedSeason}
+          onDayNightChange={handleDayNightChange}
         />
 
         <MapContainer

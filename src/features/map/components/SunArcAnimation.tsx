@@ -15,6 +15,14 @@ const SEASON_DAY_OF_YEAR: Record<Exclude<Season, 'current'>, number> = {
   winter: 355,  // December 21 - Winter solstice (shortest day)
 };
 
+// Export sunrise/sunset info type
+export interface SunriseSunsetInfo {
+  sunrise: number;
+  sunset: number;
+  isDay: boolean;
+  dayOfYear: number;
+}
+
 interface SunArcAnimationProps {
   hour: number;
   enabled: boolean;
@@ -23,6 +31,7 @@ interface SunArcAnimationProps {
   latitude?: number;
   useRealTime?: boolean;
   season?: Season;
+  onDayNightChange?: (isDay: boolean, sunInfo: SunriseSunsetInfo) => void;
 }
 
 // Pre-calculated constants for performance
@@ -43,6 +52,16 @@ const getDayOfYear = (date: Date): number => {
 };
 
 /**
+ * Get day of year for a season
+ */
+export const getSeasonDayOfYear = (season: Season): number => {
+  if (season === 'current') {
+    return getDayOfYear(new Date());
+  }
+  return SEASON_DAY_OF_YEAR[season];
+};
+
+/**
  * Calculate solar declination angle in degrees
  */
 const getSolarDeclination = (dayOfYear: number): number => {
@@ -51,8 +70,9 @@ const getSolarDeclination = (dayOfYear: number): number => {
 
 /**
  * Calculate sunrise and sunset hours based on latitude and day of year
+ * Exported for use in other components
  */
-const calculateSunriseSunset = (latitude: number, dayOfYear: number): { sunrise: number; sunset: number } => {
+export const calculateSunriseSunset = (latitude: number, dayOfYear: number): { sunrise: number; sunset: number } => {
   const declination = getSolarDeclination(dayOfYear);
   const latRad = latitude * DEG_TO_RAD;
   const decRad = declination * DEG_TO_RAD;
@@ -161,6 +181,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   latitude = 40,
   useRealTime = true,
   season = 'current',
+  onDayNightChange,
 }) => {
   const [simulatedHour, setSimulatedHour] = useState<number>(() =>
     calculateLocalSolarTime(longitude)
@@ -192,12 +213,25 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
 
   const effectiveHour = useRealTime ? simulatedHour : hour;
 
+  // Calculate sunrise/sunset for current season
+  const sunInfo = useMemo(() => {
+    const { sunrise, sunset } = calculateSunriseSunset(latitude, dayOfYear);
+    const isDay = effectiveHour >= sunrise && effectiveHour < sunset;
+    return { sunrise, sunset, isDay, dayOfYear };
+  }, [latitude, dayOfYear, effectiveHour]);
+
+  // Notify parent of day/night changes
+  useEffect(() => {
+    if (onDayNightChange && enabled) {
+      onDayNightChange(sunInfo.isDay, sunInfo);
+    }
+  }, [sunInfo.isDay, sunInfo, onDayNightChange, enabled]);
+
   // Calculate celestial body position - memoized
   const celestialBody = useMemo(() => {
-    const { sunrise, sunset } = calculateSunriseSunset(latitude, dayOfYear);
+    const { sunrise, sunset, isDay } = sunInfo;
     const maxAltitude = getMaxSunAltitude(latitude, dayOfYear);
     const daylightHours = sunset - sunrise;
-    const isDay = effectiveHour >= sunrise && effectiveHour < sunset;
 
     if (isDay) {
       const dayProgress = (effectiveHour - sunrise) / daylightHours;

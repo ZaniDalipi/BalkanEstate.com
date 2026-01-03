@@ -5,7 +5,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getTimePeriod, TimePeriod } from './Buildings3DLayer';
-import type { Season } from './SunArcAnimation';
+import { type Season, calculateSunriseSunset, getSeasonDayOfYear } from './SunArcAnimation';
 
 interface SunPositionControlProps {
   onDateTimeChange: (dateTime: Date) => void;
@@ -14,6 +14,15 @@ interface SunPositionControlProps {
   enabled: boolean;
   latitude?: number; // For accurate sun position calculation
 }
+
+// Helper to format decimal hours to time string
+const formatDecimalHour = (decimalHour: number): string => {
+  const hours = Math.floor(decimalHour);
+  const minutes = Math.round((decimalHour - hours) * 60);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
 
 // Season icons and labels
 const SEASONS: { id: Season; icon: string; label: string }[] = [
@@ -218,6 +227,17 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
   const cardinalDirectionFull = useMemo(() => getCardinalDirectionFull(sunAzimuth), [sunAzimuth]);
   const timePeriod = useMemo(() => getTimePeriod(hour), [hour]);
 
+  // Calculate sunrise/sunset for selected season
+  const sunriseSunset = useMemo(() => {
+    const dayOfYear = getSeasonDayOfYear(selectedSeason);
+    return calculateSunriseSunset(latitude, dayOfYear);
+  }, [selectedSeason, latitude]);
+
+  // Check if current hour is daytime
+  const isCurrentlyDay = useMemo(() => {
+    return hour >= sunriseSunset.sunrise && hour < sunriseSunset.sunset;
+  }, [hour, sunriseSunset]);
+
   // Create date with current date but specified hour
   const createDateTime = useCallback((h: number) => {
     const date = new Date();
@@ -413,10 +433,16 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
             </div>
           </div>
 
-          {/* Quick time buttons - icon only on small screens */}
+          {/* Sunrise/Sunset times display */}
+          <div className={`flex justify-between text-[10px] px-1 ${isNightMode ? 'text-cyan-300' : 'text-primary'}`}>
+            <span>🌅 {formatDecimalHour(sunriseSunset.sunrise)}</span>
+            <span>🌇 {formatDecimalHour(sunriseSunset.sunset)}</span>
+          </div>
+
+          {/* Quick time buttons - use actual sunrise/sunset times */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setTime(6)}
+              onClick={() => setTime(Math.round(sunriseSunset.sunrise))}
               className={`
                 flex-1 flex items-center justify-center p-1.5 rounded-md text-[10px] font-medium
                 transition-all
@@ -427,7 +453,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }
               `}
-              title={t('search:map.sunrise', 'Sunrise')}
+              title={`${t('search:map.sunrise', 'Sunrise')} - ${formatDecimalHour(sunriseSunset.sunrise)}`}
             >
               <SunriseIcon className="w-3 h-3" />
             </button>
@@ -450,7 +476,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
             </button>
 
             <button
-              onClick={() => setTime(18)}
+              onClick={() => setTime(Math.round(sunriseSunset.sunset))}
               className={`
                 flex-1 flex items-center justify-center p-1.5 rounded-md text-[10px] font-medium
                 transition-all
@@ -461,7 +487,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }
               `}
-              title={t('search:map.sunset', 'Sunset')}
+              title={`${t('search:map.sunset', 'Sunset')} - ${formatDecimalHour(sunriseSunset.sunset)}`}
             >
               <SunsetIcon className="w-3 h-3" />
             </button>
