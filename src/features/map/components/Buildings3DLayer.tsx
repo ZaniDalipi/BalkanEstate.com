@@ -18,6 +18,25 @@ declare global {
   }
 }
 
+// Patch canvas getContext to add willReadFrequently for better performance
+// This fixes the Chrome warning about multiple readback operations
+let canvasPatched = false;
+const patchCanvasContext = () => {
+  if (canvasPatched) return;
+  canvasPatched = true;
+
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function(
+    contextId: string,
+    options?: any
+  ): RenderingContext | null {
+    if (contextId === '2d') {
+      options = { ...options, willReadFrequently: true };
+    }
+    return originalGetContext.call(this, contextId, options);
+  } as typeof HTMLCanvasElement.prototype.getContext;
+};
+
 // Time periods for dynamic theming
 type TimePeriod = 'night' | 'dawn' | 'morning' | 'noon' | 'afternoon' | 'sunset' | 'dusk';
 
@@ -143,6 +162,9 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
     }
 
     const loadOSMBuildings = () => {
+      // Patch canvas context before OSMBuildings loads for better performance
+      patchCanvasContext();
+
       // Check if OSMBuildings is already loaded
       if (window.OSMBuildings && !osmBuildingsRef.current) {
         initBuildings();
