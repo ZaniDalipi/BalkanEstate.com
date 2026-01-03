@@ -521,13 +521,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 </button>
               </div>
 
-              {/* Sun Position Control - below map controls when 3D enabled */}
+              {/* Sun Position Control - compact version for mobile */}
               {show3DBuildings && (
                 <SunPositionControl
                   onDateTimeChange={handleShadowTimeChange}
                   onSeasonChange={handleSeasonChange}
                   isNightMode={false}
                   enabled={show3DBuildings}
+                  compact={true}
                 />
               )}
 
