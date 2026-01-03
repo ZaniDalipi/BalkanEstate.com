@@ -130,6 +130,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [showLandmarks, setShowLandmarks] = useState(true); // Show landmarks by default
+  const [show3DBuildings, setShow3DBuildings] = useState(false); // Toggle for 3D buildings
   const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
 
   // Check if we're in night mode
@@ -207,10 +208,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
             updateWhenZooming={false}
             updateInterval={150}
           />
-          {/* 3D Buildings with time-based shadows */}
+          {/* 3D Buildings with time-based shadows - enabled in night mode or manually */}
           <Buildings3DLayer
-            enabled={isNightMode}
-            style="night"
+            enabled={isNightMode || show3DBuildings}
             dateTime={shadowDateTime}
           />
           {/* Famous landmarks and POIs */}
@@ -307,6 +307,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </button>
             )}
 
+            {/* 3D Buildings Toggle */}
+            <button
+              onClick={() => setShow3DBuildings(!show3DBuildings)}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-full shadow-lg transition-all ${
+                show3DBuildings || isNightMode
+                  ? isNightMode
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-cyan-500/30'
+                    : 'bg-gradient-to-r from-slate-600 to-slate-700 text-white'
+                  : 'bg-white/90 text-neutral-800 hover:bg-white'
+              }`}
+              title={t('search:map.buildings3D', '3D Buildings')}
+            >
+              <span className="text-base">🏢</span>
+              <span>{show3DBuildings || isNightMode ? t('search:map.hide3DBuildings', 'Hide 3D') : t('search:map.show3DBuildings', 'Show 3D')}</span>
+            </button>
+
             {/* Landmarks Toggle */}
             <button
               onClick={() => setShowLandmarks(!showLandmarks)}
@@ -365,13 +381,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
             <Legend isNightMode={isNightMode} />
           </div>
 
-          {/* Sun Position Control - for shadow simulation in night mode */}
-          {isNightMode && (
+          {/* Sun Position Control - for shadow simulation when 3D buildings are enabled */}
+          {(isNightMode || show3DBuildings) && (
             <div className="absolute top-4 left-4 z-[1000]">
               <SunPositionControl
                 onDateTimeChange={handleShadowTimeChange}
                 isNightMode={isNightMode}
-                enabled={isNightMode}
+                enabled={isNightMode || show3DBuildings}
               />
             </div>
           )}
