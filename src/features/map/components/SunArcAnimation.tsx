@@ -119,8 +119,8 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   );
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
-  // Animate the sun - advances time very slowly for smooth timelapse
-  // Updates every 10 seconds, advances ~30 seconds of sun time per update
+  // Animate the sun - advances time extremely slowly for ultra-smooth timelapse
+  // Updates every 20 seconds, advances ~10 seconds of sun time per update
   useEffect(() => {
     if (!enabled) return;
 
@@ -130,12 +130,12 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
 
     const interval = setInterval(() => {
       setSimulatedHour(prev => {
-        // Advance by 0.008 hours (~30 seconds) every 10 seconds
-        // Full day cycle takes ~8 hours (very slow timelapse)
-        const next = prev + 0.008;
+        // Advance by 0.003 hours (~10 seconds) every 20 seconds
+        // Full day cycle takes ~44 hours (extremely slow timelapse)
+        const next = prev + 0.003;
         return next >= 24 ? next - 24 : next;
       });
-    }, 10000); // Update every 10 seconds
+    }, 20000); // Update every 20 seconds
 
     return () => clearInterval(interval);
   }, [longitude, enabled]);
@@ -226,7 +226,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 9s linear, top 9s linear, transform 0.5s ease-out',
+          transition: 'left 18s linear, top 18s linear, transform 0.5s ease-out',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
@@ -343,7 +343,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
-            transition: 'left 9s linear, top 9s linear',
+            transition: 'left 18s linear, top 18s linear',
           }}
         />
       )}
