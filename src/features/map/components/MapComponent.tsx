@@ -573,87 +573,93 @@ const MapComponent: React.FC<MapComponentProps> = ({
             </div>
           )}
 
-          {/* Mobile: Top right - single row of action buttons */}
-          <div className="absolute top-20 right-2 z-[999] flex items-center gap-1.5">
-            {/* Map type toggle - compact icons */}
+          {/* Mobile: Top right controls - stacked vertically with proper spacing */}
+          <div className="absolute top-20 right-2 z-[999] flex flex-col gap-3 items-end">
+            {/* Row 1: Map type toggle */}
             <div className={`
-              flex items-center p-0.5 rounded-xl shadow-lg backdrop-blur-md
-              ${isNightMode ? 'bg-slate-900/85' : 'bg-white/85'}
+              flex items-center p-1 rounded-xl shadow-lg backdrop-blur-md
+              ${isNightMode ? 'bg-slate-900/90' : 'bg-white/90'}
             `}>
               <button
                 onClick={() => setMapType('street')}
                 className={`
-                  px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200
+                  px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
                   ${mapType === 'street'
                     ? 'bg-white shadow-sm text-primary'
-                    : isNightMode ? 'text-slate-400' : 'text-neutral-400'
+                    : isNightMode ? 'text-slate-400' : 'text-neutral-500'
                   }
                 `}
               >
-                🗺️
+                {t('search:map.street')}
               </button>
               <button
                 onClick={() => setMapType('satellite')}
                 className={`
-                  px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200
+                  px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
                   ${mapType === 'satellite'
                     ? 'bg-white shadow-sm text-primary'
-                    : isNightMode ? 'text-slate-400' : 'text-neutral-400'
+                    : isNightMode ? 'text-slate-400' : 'text-neutral-500'
                   }
                 `}
               >
-                🛰️
+                {t('search:map.satellite')}
               </button>
             </div>
 
-            {/* Recenter */}
-            <button
-              onClick={onRecenter}
-              className={`
-                p-2 rounded-xl shadow-lg backdrop-blur-md transition-all duration-200 active:scale-95
-                ${isNightMode ? 'bg-slate-900/85 text-white' : 'bg-white/85 text-neutral-700'}
-              `}
-              title={t('search:map.centerOnLocation')}
-            >
-              <CrosshairsIcon className="w-4 h-4" />
-            </button>
+            {/* Row 2: Action buttons */}
+            <div className="flex items-center gap-2">
+              {/* Recenter */}
+              <button
+                onClick={onRecenter}
+                className={`
+                  p-2.5 rounded-xl shadow-lg backdrop-blur-md transition-all duration-200 active:scale-95
+                  ${isNightMode ? 'bg-slate-900/90 text-white' : 'bg-white/90 text-neutral-700'}
+                `}
+                title={t('search:map.centerOnLocation')}
+              >
+                <CrosshairsIcon className="w-5 h-5" />
+              </button>
 
-            {/* Draw */}
-            <button
-              onClick={onDrawStart}
-              className={`
-                p-2 rounded-xl shadow-lg transition-all duration-200 active:scale-95
-                ${isDrawing
-                  ? 'bg-red-500 text-white'
-                  : 'bg-neutral-800 text-white'
-                }
-              `}
-              title={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
-            >
-              {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
-            </button>
+              {/* Draw with text label */}
+              <button
+                onClick={onDrawStart}
+                className={`
+                  flex items-center gap-1.5 px-3 py-2.5 rounded-xl shadow-lg transition-all duration-200 active:scale-95
+                  ${isDrawing
+                    ? 'bg-red-500 text-white'
+                    : 'bg-neutral-800 text-white'
+                  }
+                `}
+                title={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
+              >
+                {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+                <span className="text-xs font-semibold">{isDrawing ? t('search:map.cancel') : t('search:map.draw', 'Draw')}</span>
+              </button>
+            </div>
 
-            {/* Drawn bounds actions - inline */}
+            {/* Row 3: Drawn bounds actions - only when bounds exist */}
             {drawnBounds && !isDrawing && (
-              <>
+              <div className="flex items-center gap-2 animate-slide-left">
                 {isAuthenticated && (
                   <button
                     onClick={onSaveSearch}
                     disabled={isSaving}
-                    className="p-2 bg-primary text-white rounded-xl shadow-lg disabled:opacity-50 transition-all duration-200 active:scale-95"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-xl shadow-lg disabled:opacity-50 transition-all duration-200 active:scale-95"
                     title={isSaving ? t('search:map.saving') : t('search:map.saveArea')}
                   >
                     <SearchPlusIcon className="w-4 h-4" />
+                    <span className="text-xs font-semibold">{t('search:map.save', 'Save')}</span>
                   </button>
                 )}
                 <button
                   onClick={() => onDrawComplete(null)}
-                  className="p-2 bg-red-600 text-white rounded-xl shadow-lg transition-all duration-200 active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-red-600 text-white rounded-xl shadow-lg transition-all duration-200 active:scale-95"
                   title={t('search:map.clearArea')}
                 >
                   <XCircleIcon className="w-4 h-4" />
+                  <span className="text-xs font-semibold">{t('search:map.clear', 'Clear')}</span>
                 </button>
-              </>
+              </div>
             )}
           </div>
         </>
