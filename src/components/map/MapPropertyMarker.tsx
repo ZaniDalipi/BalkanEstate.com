@@ -219,20 +219,21 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     ringWidth = 4;
   }
 
-  // Night mode: Add cyan neon glow effect
-  const nightModeGlow = isNightMode
+  // Night mode: Only promoted properties get glow effect
+  const shouldGlow = isNightMode && isActivelyPromoted;
+  const nightModeGlow = shouldGlow
     ? 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.8)) drop-shadow(0 0 16px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 24px rgba(0, 150, 255, 0.3))'
     : '';
-  const baseFilter = isNightMode
+  const baseFilter = shouldGlow
     ? nightModeGlow
     : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
 
-  // In night mode, use brighter colors
+  // In night mode, use brighter colors but no special stroke for non-promoted
   const markerColor = isNightMode ? lightenColor(color, 20) : color;
-  const strokeColorFinal = isNightMode && ringColor === 'none' ? '#00ffff' : (ringColor !== 'none' ? ringColor : '#FFFFFF');
+  const strokeColorFinal = ringColor !== 'none' ? ringColor : '#FFFFFF';
 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
-  const nightModeClass = isNightMode ? 'night-mode-marker-pulse' : '';
+  const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
@@ -302,22 +303,23 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     strokeWidth = 4;
   }
 
-  // Night mode: Add cyan neon glow effect
-  const nightModeGlow = isNightMode
+  // Night mode: Only promoted properties get glow effect
+  const shouldGlow = isNightMode && isActivelyPromoted;
+  const nightModeGlow = shouldGlow
     ? 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.9)) drop-shadow(0 0 20px rgba(0, 200, 255, 0.6)) drop-shadow(0 0 30px rgba(0, 150, 255, 0.4))'
     : '';
-  const baseFilter = isNightMode
+  const baseFilter = shouldGlow
     ? nightModeGlow
     : 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))';
 
-  // In night mode, use brighter colors and cyan stroke
+  // In night mode, use brighter colors but no special stroke for non-promoted
   const markerColor = isNightMode ? lightenColor(color, 20) : color;
-  const strokeColorFinal = isNightMode && strokeColor === '#FFFFFF' ? '#00ffff' : strokeColor;
+  const strokeColorFinal = strokeColor;
   const pointerColor = isNightMode ? '#001a33' : '#003A96';
 
   const scale = isHovered ? 1.25 : 1;
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
-  const nightModeClass = isNightMode ? 'night-mode-marker-pulse' : '';
+  const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
