@@ -240,19 +240,19 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
     });
   }, [celestialBody.x, celestialBody.y, enabled]);
 
-  if (!enabled) return null;
-
-  // Generate floating particles around sun
+  // Generate floating particles around sun - must be before early return to follow hooks rules
   const particles = useMemo(() => {
     return [...Array(8)].map((_, i) => ({
       id: i,
-      angle: (i * 45) + (Date.now() / 50) % 360,
+      angle: (i * 45),
       distance: 25 + (i % 3) * 8,
       size: 2 + (i % 3),
       opacity: 0.3 + (i % 4) * 0.15,
       speed: 1 + (i % 2) * 0.5,
     }));
-  }, [Math.floor(Date.now() / 100)]);
+  }, []);
+
+  if (!enabled) return null;
 
   return (
     <>
