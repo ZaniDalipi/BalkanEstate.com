@@ -76,71 +76,29 @@ const calculateLocalSolarTime = (longitude: number): number => {
   return ((localSolarTime % 24) + 24) % 24;
 };
 
-// Color stops for smooth gradient transitions at different altitudes
-// Format: [altitude, r, g, b, glowOpacity, raysOpacity]
-const COLOR_STOPS: [number, number, number, number, number, number][] = [
-  [0, 255, 87, 34, 0.6, 0.8],    // Horizon - deep orange/red
-  [5, 255, 120, 40, 0.55, 0.75], // Very low
-  [10, 255, 152, 0, 0.5, 0.7],   // Low - orange
-  [15, 255, 180, 30, 0.45, 0.65],// Golden hour end
-  [20, 255, 193, 7, 0.42, 0.6],  // Medium-low
-  [25, 255, 210, 50, 0.4, 0.55], // Medium
-  [30, 255, 225, 80, 0.38, 0.52],// Medium-high
-  [40, 255, 235, 59, 0.36, 0.5], // High
-  [90, 255, 245, 120, 0.35, 0.5],// Zenith - bright yellow
-];
+// Simple color presets for sun at different altitudes
+const SUN_COLORS = {
+  veryLow: { body: '#FF5722', glow: 'rgba(255,87,34,0.6)', rays: 'rgba(255,100,50,0.8)' },
+  low: { body: '#FF9800', glow: 'rgba(255,152,0,0.5)', rays: 'rgba(255,180,50,0.7)' },
+  medium: { body: '#FFC107', glow: 'rgba(255,193,7,0.4)', rays: 'rgba(255,210,80,0.6)' },
+  high: { body: '#FFEB3B', glow: 'rgba(255,235,59,0.35)', rays: 'rgba(255,245,120,0.5)' },
+} as const;
 
 /**
- * Linearly interpolate between two values
+ * Get sun color based on altitude - simple discrete buckets
  */
-const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
-
-/**
- * Get smoothly interpolated sun color based on altitude
- * Creates seamless transitions between color stops
- */
-const getSunColor = (altitude: number): { body: string; glow: string; rays: string } => {
-  // Clamp altitude to valid range
-  const alt = Math.max(0, Math.min(90, altitude));
-
-  // Find the two color stops to interpolate between
-  let lowerIdx = 0;
-  for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
-    if (COLOR_STOPS[i + 1][0] > alt) {
-      lowerIdx = i;
-      break;
-    }
-    lowerIdx = i;
-  }
-
-  const upperIdx = Math.min(lowerIdx + 1, COLOR_STOPS.length - 1);
-  const lower = COLOR_STOPS[lowerIdx];
-  const upper = COLOR_STOPS[upperIdx];
-
-  // Calculate interpolation factor (0-1) between the two stops
-  const range = upper[0] - lower[0];
-  const t = range > 0 ? (alt - lower[0]) / range : 0;
-
-  // Interpolate RGB values
-  const r = Math.round(lerp(lower[1], upper[1], t));
-  const g = Math.round(lerp(lower[2], upper[2], t));
-  const b = Math.round(lerp(lower[3], upper[3], t));
-  const glowOpacity = lerp(lower[4], upper[4], t);
-  const raysOpacity = lerp(lower[5], upper[5], t);
-
-  return {
-    body: `rgb(${r},${g},${b})`,
-    glow: `rgba(${r},${g},${b},${glowOpacity.toFixed(2)})`,
-    rays: `rgba(${r},${Math.min(255, g + 30)},${Math.min(255, b + 20)},${raysOpacity.toFixed(2)})`,
-  };
+const getSunColor = (altitude: number) => {
+  if (altitude < 5) return SUN_COLORS.veryLow;
+  if (altitude < 15) return SUN_COLORS.low;
+  if (altitude < 30) return SUN_COLORS.medium;
+  return SUN_COLORS.high;
 };
 
-// Type for interpolated colors
-type SunColorType = ReturnType<typeof getSunColor>;
+// Type for sun colors
+type SunColorType = typeof SUN_COLORS.high;
 
 /**
  * Sun rays component - memoized to prevent re-renders
- * Includes smooth color transitions for seamless shade changes
  */
 const SunRays = memo(({ colors, isGoldenHour }: { colors: SunColorType; isGoldenHour: boolean }) => (
   <div className="absolute inset-0 animate-spin" style={{ animationDuration: '60s' }}>
@@ -156,7 +114,6 @@ const SunRays = memo(({ colors, isGoldenHour }: { colors: SunColorType; isGolden
           background: `linear-gradient(to top, ${colors.rays} 0%, transparent 100%)`,
           transform: `translate(-50%, -100%) rotate(${angle}deg)`,
           transformOrigin: 'center bottom',
-          transition: 'background 2s ease-out, height 1s ease-out',
         }}
       />
     ))}
@@ -268,15 +225,15 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 5s linear, top 5s linear, transform 0.5s ease-out',
+          transition: 'left 1s ease-out, top 1s ease-out, transform 0.3s ease-out',
           willChange: 'left, top',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
           <div className="relative">
-            {/* Outer glow - smooth color transition */}
+            {/* Outer glow */}
             <div
-              className="absolute rounded-full"
+              className="absolute rounded-full animate-pulse"
               style={{
                 width: celestialBody.isGoldenHour ? '100px' : '80px',
                 height: celestialBody.isGoldenHour ? '100px' : '80px',
@@ -284,15 +241,13 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
                 background: `radial-gradient(circle, ${celestialBody.colors.glow} 0%, transparent 70%)`,
-                animation: 'pulse 3s ease-in-out infinite',
-                transition: 'background 2s ease-out, width 1s ease-out, height 1s ease-out',
               }}
             />
 
-            {/* Rotating rays - colors transition smoothly */}
+            {/* Rotating rays */}
             <SunRays colors={celestialBody.colors} isGoldenHour={celestialBody.isGoldenHour} />
 
-            {/* Sun body - smooth color gradient transition */}
+            {/* Sun body */}
             <div
               className="relative rounded-full"
               style={{
@@ -300,7 +255,6 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
                 height: '44px',
                 background: `radial-gradient(circle at 35% 35%, #FFFFFF 0%, ${celestialBody.colors.body} 40%, ${celestialBody.colors.body}cc 100%)`,
                 boxShadow: `0 0 30px ${celestialBody.colors.glow}, 0 0 60px ${celestialBody.colors.glow}`,
-                transition: 'background 2s ease-out, box-shadow 2s ease-out',
               }}
             />
 
@@ -316,7 +270,6 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
                   transform: 'translate(-50%, -50%) rotate(-20deg)',
                   background: `linear-gradient(90deg, transparent 0%, ${celestialBody.colors.rays} 20%, transparent 40%, ${celestialBody.colors.rays} 60%, transparent 80%, ${celestialBody.colors.rays} 100%)`,
                   opacity: 0.6,
-                  transition: 'background 2s ease-out, opacity 1s ease-out',
                 }}
               />
             )}
@@ -365,7 +318,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
-            transition: 'left 5s linear, top 5s linear, background 2s ease-out, width 1s ease-out',
+            transition: 'left 1s ease-out, top 1s ease-out',
             willChange: 'left, top',
           }}
         />
@@ -378,7 +331,6 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           style={{
             height: '25%',
             background: `linear-gradient(to top, ${celestialBody.colors.glow.replace('0.', '0.2')} 0%, transparent 100%)`,
-            transition: 'background 2s ease-out',
           }}
         />
       )}
