@@ -546,7 +546,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
           {/* Mobile: Sun Position Control - top left when 3D buildings enabled */}
           {(isNightMode || show3DBuildings) && (
-            <div className="absolute top-16 left-2 z-[1000] animate-slide-down">
+            <div className="absolute top-20 left-2 z-[999] animate-slide-down">
               <SunPositionControl
                 onDateTimeChange={handleShadowTimeChange}
                 isNightMode={isNightMode}
@@ -555,95 +555,87 @@ const MapComponent: React.FC<MapComponentProps> = ({
             </div>
           )}
 
-          {/* Mobile: Top right controls - map type and actions */}
-          <div className="absolute top-16 right-2 z-[1000] flex flex-col gap-2 items-end">
-            {/* Map type toggle - compact pill */}
+          {/* Mobile: Top right - single row of action buttons */}
+          <div className="absolute top-20 right-2 z-[999] flex items-center gap-1.5">
+            {/* Map type toggle - compact icons */}
             <div className={`
-              flex items-center gap-0.5 p-0.5 rounded-xl shadow-lg backdrop-blur-md
+              flex items-center p-0.5 rounded-xl shadow-lg backdrop-blur-md
               ${isNightMode ? 'bg-slate-900/85' : 'bg-white/85'}
-              transition-all duration-300 ease-out
             `}>
               <button
                 onClick={() => setMapType('street')}
                 className={`
-                  px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ease-out
+                  px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200
                   ${mapType === 'street'
                     ? 'bg-white shadow-sm text-primary'
-                    : isNightMode
-                      ? 'text-slate-400'
-                      : 'text-neutral-500'
+                    : isNightMode ? 'text-slate-400' : 'text-neutral-400'
                   }
                 `}
               >
-                {t('search:map.street')}
+                🗺️
               </button>
               <button
                 onClick={() => setMapType('satellite')}
                 className={`
-                  px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ease-out
+                  px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200
                   ${mapType === 'satellite'
                     ? 'bg-white shadow-sm text-primary'
-                    : isNightMode
-                      ? 'text-slate-400'
-                      : 'text-neutral-500'
+                    : isNightMode ? 'text-slate-400' : 'text-neutral-400'
                   }
                 `}
               >
-                {t('search:map.satellite')}
+                🛰️
               </button>
             </div>
 
-            {/* Action buttons - draw and recenter */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={onRecenter}
-                className={`
-                  p-2.5 rounded-xl shadow-lg backdrop-blur-md transition-all duration-200 ease-out active:scale-95
-                  ${isNightMode
-                    ? 'bg-slate-900/85 text-white'
-                    : 'bg-white/85 text-neutral-700'
-                  }
-                `}
-                title={t('search:map.centerOnLocation')}
-              >
-                <CrosshairsIcon className="w-5 h-5" />
-              </button>
-              <button
-                onClick={onDrawStart}
-                className={`
-                  p-2.5 rounded-xl shadow-lg transition-all duration-200 ease-out active:scale-95
-                  ${isDrawing
-                    ? 'bg-red-500 text-white shadow-red-500/30'
-                    : 'bg-neutral-800 text-white'
-                  }
-                `}
-                title={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
-              >
-                {isDrawing ? <XCircleIcon className="w-5 h-5" /> : <PencilIcon className="w-5 h-5" />}
-              </button>
-            </div>
+            {/* Recenter */}
+            <button
+              onClick={onRecenter}
+              className={`
+                p-2 rounded-xl shadow-lg backdrop-blur-md transition-all duration-200 active:scale-95
+                ${isNightMode ? 'bg-slate-900/85 text-white' : 'bg-white/85 text-neutral-700'}
+              `}
+              title={t('search:map.centerOnLocation')}
+            >
+              <CrosshairsIcon className="w-4 h-4" />
+            </button>
 
-            {/* Drawn bounds actions */}
+            {/* Draw */}
+            <button
+              onClick={onDrawStart}
+              className={`
+                p-2 rounded-xl shadow-lg transition-all duration-200 active:scale-95
+                ${isDrawing
+                  ? 'bg-red-500 text-white'
+                  : 'bg-neutral-800 text-white'
+                }
+              `}
+              title={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
+            >
+              {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+            </button>
+
+            {/* Drawn bounds actions - inline */}
             {drawnBounds && !isDrawing && (
-              <div className="flex items-center gap-1.5 animate-slide-left">
+              <>
                 {isAuthenticated && (
                   <button
                     onClick={onSaveSearch}
                     disabled={isSaving}
-                    className="p-2.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/30 disabled:opacity-50 transition-all duration-200 ease-out active:scale-95"
+                    className="p-2 bg-primary text-white rounded-xl shadow-lg disabled:opacity-50 transition-all duration-200 active:scale-95"
                     title={isSaving ? t('search:map.saving') : t('search:map.saveArea')}
                   >
-                    <SearchPlusIcon className="w-5 h-5" />
+                    <SearchPlusIcon className="w-4 h-4" />
                   </button>
                 )}
                 <button
                   onClick={() => onDrawComplete(null)}
-                  className="p-2.5 bg-neutral-800 text-white rounded-xl shadow-lg transition-all duration-200 ease-out active:scale-95"
+                  className="p-2 bg-red-600 text-white rounded-xl shadow-lg transition-all duration-200 active:scale-95"
                   title={t('search:map.clearArea')}
                 >
-                  <XCircleIcon className="w-5 h-5" />
+                  <XCircleIcon className="w-4 h-4" />
                 </button>
-              </div>
+              </>
             )}
           </div>
         </>
