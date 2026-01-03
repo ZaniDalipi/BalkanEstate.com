@@ -1,17 +1,13 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import Map, {
-  NavigationControl,
-  GeolocateControl,
-  Source,
-  Layer,
+import {
+  GoogleMap,
+  useJsApiLoader,
   Marker,
-  Popup,
-  useMap,
-} from 'react-map-gl/mapbox';
-import type { MapRef } from 'react-map-gl/mapbox';
-import type { MapMouseEvent, LngLatBoundsLike } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+  InfoWindow,
+  DrawingManager,
+  Rectangle,
+} from '@react-google-maps/api';
 import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import {
@@ -21,33 +17,57 @@ import {
   MapLegendIcon,
   CrosshairsIcon,
 } from '@/constants';
-import { CadastreLayerMapbox } from './CadastreLayerMapbox';
-import HeatMapLayerMapbox from './HeatMapLayerMapbox';
-import SunPositionControl from './SunPositionControl';
-import { type Season } from './SunArcAnimation';
-import LandmarksLayerMapbox from './LandmarksLayerMapbox';
-import { MarkersMapbox, Legend } from '@/src/components/map/MapPropertyMarkerMapbox';
-import MapAgentAvatar, { MapAgentAvatarInnerMapbox } from '@/src/components/map/MapAgentAvatarMapbox';
+import { formatPrice } from '@/utils/currency';
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 
-// Mapbox public token - for production, use environment variable
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiYmFsa2FuZXN0YXRlIiwiYSI6ImNtNWpxZGY4YjBhZ2cyaXF4bTVxaWV2eHQifQ.D8fMUFy9xfcmJQ6EPkXFRg';
+// Google Maps API key - for production, use environment variable
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-// Map styles
-const MAP_STYLES = {
-  street: 'mapbox://styles/mapbox/streets-v12',
-  satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
-  light: 'mapbox://styles/mapbox/light-v11',
-  dark: 'mapbox://styles/mapbox/dark-v11',
+// Map libraries to load
+const libraries: ("drawing" | "geometry" | "places" | "visualization")[] = ['drawing', 'places'];
+
+// Map styles for clean look (hide some POIs)
+const mapStyles: google.maps.MapTypeStyle[] = [
+  {
+    featureType: 'poi.business',
+    stylers: [{ visibility: 'off' }]
+  },
+  {
+    featureType: 'transit',
+    elementType: 'labels.icon',
+    stylers: [{ visibility: 'off' }]
+  }
+];
+
+// Map container style
+const containerStyle = {
+  width: '100%',
+  height: '100%'
 };
 
-type MapStyleType = keyof typeof MAP_STYLES;
+// Balkan region bounds
+const BALKAN_BOUNDS = {
+  north: 49,
+  south: 34,
+  west: 13,
+  east: 31
+};
 
-// Bounding box for the Balkan region
-const BALKAN_BOUNDS: LngLatBoundsLike = [
-  [13, 34], // Southwest corner (Western Croatia, Southern Greece)
-  [31, 49]  // Northeast corner (Eastern Bulgaria, Northern Romania)
-];
+// Property type colors
+const PROPERTY_TYPE_COLORS: Record<string, string> = {
+  house: '#0252CD',
+  apartment: '#28a745',
+  villa: '#6f42c1',
+  land: '#8B4513',
+  other: '#6c757d',
+};
+
+// Promotion tier colors
+const PROMOTION_TIER_COLORS: Record<string, string> = {
+  premium: '#FFB800',
+  highlight: '#0EA5E9',
+  featured: '#7C3AED',
+};
 
 interface MapComponentProps {
   properties: Property[];
@@ -70,17 +90,171 @@ interface MapComponentProps {
 }
 
 /**
- * MapComponent
- *
- * Main map component for property search using Mapbox GL JS with:
- * - Native 3D building extrusions
- * - Interactive property markers with popups
- * - Area drawing for custom search
- * - Street/Satellite view toggle
- * - Cadastral layer overlay
- * - Heat map visualization
- * - Landmarks/POI layer
- * - Sun position control for shadow simulation
+ * Format price for marker display
+ */
+const formatMarkerPrice = (price: number): string => {
+  if (price >= 1000000) {
+    return `€${(price / 1000000).toFixed(1).replace('.0', '')}M`;
+  }
+  if (price >= 1000) {
+    return `€${Math.round(price / 1000)}K`;
+  }
+  return `€${price}`;
+};
+
+/**
+ * PropertyInfoWindow Component
+ */
+const PropertyInfoWindow: React.FC<{
+  property: Property;
+  onClose: () => void;
+  onPropertyClick: (id: string) => void;
+}> = ({ property, onClose, onPropertyClick }) => {
+  const { t } = useTranslation(['property']);
+
+  const isActivelyPromoted = property.isPromoted &&
+    property.promotionEndDate &&
+    property.promotionEndDate > Date.now();
+
+  return (
+    <div
+      className="p-3 min-w-[220px] max-w-[280px] cursor-pointer"
+      onClick={() => onPropertyClick(property.id)}
+    >
+      {/* Image */}
+      <div className="relative mb-2 rounded-lg overflow-hidden">
+        <img
+          src={property.imageUrl}
+          alt={property.title || property.address}
+          className="w-full h-28 object-cover"
+        />
+        {isActivelyPromoted && (
+          <div className={`absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-lg shadow ${
+            property.promotionTier === 'premium' ? 'bg-amber-500' :
+            property.promotionTier === 'highlight' ? 'bg-sky-500' : 'bg-violet-500'
+          }`}>
+            {property.promotionTier === 'premium' ? '👑 PREMIUM' :
+             property.promotionTier === 'highlight' ? '💎 HIGHLIGHT' : '⭐ FEATURED'}
+          </div>
+        )}
+      </div>
+
+      {/* Price & Type */}
+      <div className="flex items-center justify-between mb-1">
+        <span className="font-bold text-lg text-primary">
+          {formatPrice(property.price, property.country)}
+        </span>
+        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
+          {property.propertyType}
+        </span>
+      </div>
+
+      {/* Title */}
+      {property.title && (
+        <p className="font-semibold text-sm text-neutral-900 mb-1 line-clamp-1">
+          {property.title}
+        </p>
+      )}
+
+      {/* Address */}
+      <p className="text-xs text-neutral-500 mb-2">
+        📍 {property.address}, {property.city}
+      </p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-1.5 mb-2">
+        <div className="text-center bg-neutral-50 rounded py-1">
+          <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
+          <div className="text-[9px] text-neutral-500">{t('map.beds', 'Beds')}</div>
+        </div>
+        <div className="text-center bg-neutral-50 rounded py-1">
+          <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
+          <div className="text-[9px] text-neutral-500">{t('map.baths', 'Baths')}</div>
+        </div>
+        <div className="text-center bg-neutral-50 rounded py-1">
+          <div className="font-bold text-sm text-neutral-800">{property.livingRooms}</div>
+          <div className="text-[9px] text-neutral-500">{t('map.living', 'Living')}</div>
+        </div>
+        <div className="text-center bg-neutral-100 rounded py-1">
+          <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
+          <div className="text-[9px] text-neutral-500">m²</div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="text-center pt-1 border-t border-neutral-200">
+        <p className="text-xs font-semibold text-primary">{t('map.clickForDetails', 'Click for details')}</p>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Legend Component
+ */
+const Legend: React.FC<{ isNightMode?: boolean }> = ({ isNightMode = false }) => {
+  const { t } = useTranslation(['property']);
+
+  return (
+    <div className={`${
+      isNightMode ? 'bg-slate-900/90 border-slate-700' : 'bg-white/90 border-neutral-200'
+    } backdrop-blur-sm p-3 rounded-lg shadow-lg border`}>
+      <h4 className={`font-bold text-sm mb-2 ${isNightMode ? 'text-white' : 'text-neutral-800'}`}>
+        {t('map.legend', 'Legend')}
+      </h4>
+
+      {/* Property Types */}
+      <div className="space-y-1.5 mb-3">
+        {Object.entries(PROPERTY_TYPE_COLORS).map(([type, color]) => (
+          <div key={type} className="flex items-center gap-2">
+            <span
+              className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${
+                isNightMode ? 'border-slate-700' : 'border-white'
+              }`}
+              style={{ backgroundColor: color }}
+            />
+            <span className={`text-xs font-semibold capitalize ${isNightMode ? 'text-slate-300' : 'text-neutral-700'}`}>
+              {t(`map.propertyTypes.${type}`, type)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Promotion Tiers */}
+      <div className={`border-t ${isNightMode ? 'border-slate-700' : 'border-neutral-200'} pt-2 mt-2`}>
+        <h5 className={`text-xs font-bold mb-1.5 ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+          {t('map.promotedListings', 'Promoted')}
+        </h5>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${isNightMode ? 'bg-slate-800' : 'bg-white'}`}
+              style={{ borderColor: PROMOTION_TIER_COLORS.premium }} />
+            <span className={`text-xs ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+              👑 Premium
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${isNightMode ? 'bg-slate-800' : 'bg-white'}`}
+              style={{ borderColor: PROMOTION_TIER_COLORS.highlight }} />
+            <span className={`text-xs ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+              💎 Highlight
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`w-3.5 h-3.5 rounded-full border-2 shadow-sm ${isNightMode ? 'bg-slate-800' : 'bg-white'}`}
+              style={{ borderColor: PROMOTION_TIER_COLORS.featured }} />
+            <span className={`text-xs ${isNightMode ? 'text-slate-400' : 'text-neutral-600'}`}>
+              ⭐ Featured
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * MapComponent with Google Maps
  */
 const MapComponent: React.FC<MapComponentProps> = ({
   properties,
@@ -103,62 +277,28 @@ const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
-  const mapRef = useRef<MapRef>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
-  const [mapStyle, setMapStyle] = useState<MapStyleType>('street');
+  const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
   const [isLegendOpen, setIsLegendOpen] = useState(false);
-  const [showCadastre, setShowCadastre] = useState(false);
-  const [showHeatMap, setShowHeatMap] = useState(false);
-  const [showLandmarks, setShowLandmarks] = useState(true);
   const [show3DBuildings, setShow3DBuildings] = useState(false);
-  const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
-  const [isManualTimeControl, setIsManualTimeControl] = useState(false);
-  const [selectedSeason, setSelectedSeason] = useState<Season>('current');
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [currentZoom, setCurrentZoom] = useState(7);
 
-  // Drawing state
-  const [drawStart, setDrawStart] = useState<[number, number] | null>(null);
-  const [drawEnd, setDrawEnd] = useState<[number, number] | null>(null);
+  // Load Google Maps
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
 
-  // Initial viewport
-  const initialViewState = useMemo(() => {
+  // Initial center
+  const center = useMemo(() => {
     if (userLocation) {
-      return {
-        longitude: userLocation[1],
-        latitude: userLocation[0],
-        zoom: 13,
-        pitch: 0,
-        bearing: 0
-      };
+      return { lat: userLocation[0], lng: userLocation[1] };
     }
-    return {
-      longitude: 22,
-      latitude: 41.5,
-      zoom: 7,
-      pitch: 0,
-      bearing: 0
-    };
+    return { lat: 41.5, lng: 22 }; // Balkan center
   }, [userLocation]);
-
-  const [viewState, setViewState] = useState(initialViewState);
-
-  // Handle shadow time change
-  const handleShadowTimeChange = useCallback((dateTime: Date) => {
-    setShadowDateTime(dateTime);
-    setIsManualTimeControl(true);
-  }, []);
-
-  // Handle season change
-  const handleSeasonChange = useCallback((season: Season) => {
-    setSelectedSeason(season);
-  }, []);
-
-  // Reset to real time when 3D buildings is toggled off
-  useEffect(() => {
-    if (!show3DBuildings) {
-      setIsManualTimeControl(false);
-    }
-  }, [show3DBuildings]);
 
   // Filter valid properties
   const validProperties = useMemo(() => {
@@ -172,337 +312,263 @@ const MapComponent: React.FC<MapComponentProps> = ({
     return validProperties.slice(0, 500);
   }, [validProperties]);
 
-  // Handle popup click
-  const handlePopupClick = (propertyId: string) => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-  };
+  // Handle map load
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
 
-  // Fly to target when provided
+  // Handle map unmount
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
+  // Handle bounds change
+  const onBoundsChanged = useCallback(() => {
+    if (!mapRef.current) return;
+
+    const bounds = mapRef.current.getBounds();
+    const center = mapRef.current.getCenter();
+    const zoom = mapRef.current.getZoom();
+
+    if (bounds && center && zoom !== undefined) {
+      setCurrentZoom(zoom);
+
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+
+      // Convert to Leaflet-compatible format
+      const leafletBounds = {
+        _southWest: { lat: sw.lat(), lng: sw.lng() },
+        _northEast: { lat: ne.lat(), lng: ne.lng() },
+        getSouthWest: () => ({ lat: sw.lat(), lng: sw.lng() }),
+        getNorthEast: () => ({ lat: ne.lat(), lng: ne.lng() }),
+        getSouth: () => sw.lat(),
+        getWest: () => sw.lng(),
+        getNorth: () => ne.lat(),
+        getEast: () => ne.lng(),
+      };
+
+      onMapMove(leafletBounds, { lat: center.lat(), lng: center.lng() });
+    }
+  }, [onMapMove]);
+
+  // Fly to target
   useEffect(() => {
     if (flyToTarget && mapRef.current) {
-      mapRef.current.flyTo({
-        center: [flyToTarget.center[1], flyToTarget.center[0]],
-        zoom: flyToTarget.zoom,
-        duration: 2500
+      mapRef.current.panTo({
+        lat: flyToTarget.center[0],
+        lng: flyToTarget.center[1]
       });
-      const timer = setTimeout(onFlyComplete, 2500);
+      mapRef.current.setZoom(flyToTarget.zoom);
+
+      const timer = setTimeout(onFlyComplete, 1500);
       return () => clearTimeout(timer);
     }
   }, [flyToTarget, onFlyComplete]);
 
-  // Handle map move
-  const onMove = useCallback((evt: any) => {
-    setViewState(evt.viewState);
-    setCurrentZoom(evt.viewState.zoom);
+  // Toggle 3D buildings (tilt the map)
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    if (show3DBuildings) {
+      mapRef.current.setTilt(45);
+      mapRef.current.setHeading(0);
+    } else {
+      mapRef.current.setTilt(0);
+    }
+  }, [show3DBuildings]);
+
+  // Handle property click
+  const handlePropertyClick = useCallback((propertyId: string) => {
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+    setSelectedProperty(null);
+  }, [dispatch]);
+
+  // Handle marker click
+  const handleMarkerClick = useCallback((property: Property) => {
+    setSelectedProperty(property);
   }, []);
 
-  // Handle map move end - report bounds
-  const onMoveEnd = useCallback(() => {
-    if (!mapRef.current) return;
-    const map = mapRef.current.getMap();
-    const bounds = map.getBounds();
-    const center = map.getCenter();
-
-    // Convert to Leaflet-compatible format for parent component
-    const leafletBounds = {
-      _southWest: { lat: bounds.getSouth(), lng: bounds.getWest() },
-      _northEast: { lat: bounds.getNorth(), lng: bounds.getEast() },
-      getSouthWest: () => ({ lat: bounds.getSouth(), lng: bounds.getWest() }),
-      getNorthEast: () => ({ lat: bounds.getNorth(), lng: bounds.getEast() }),
-      getSouth: () => bounds.getSouth(),
-      getWest: () => bounds.getWest(),
-      getNorth: () => bounds.getNorth(),
-      getEast: () => bounds.getEast(),
-    };
-    const leafletCenter = { lat: center.lat, lng: center.lng };
-
-    onMapMove(leafletBounds, leafletCenter);
-
-    // Auto-switch to satellite at high zoom
-    if (currentZoom >= 18 && mapStyle === 'street') {
-      setMapStyle('satellite');
-    } else if (currentZoom < 18 && mapStyle === 'satellite') {
-      setMapStyle('street');
-    }
-
-    // Auto-enable 3D buildings at very high zoom
-    if (currentZoom >= 16 && !show3DBuildings) {
-      setShow3DBuildings(true);
-    } else if (currentZoom < 15 && show3DBuildings) {
-      setShow3DBuildings(false);
-    }
-  }, [onMapMove, currentZoom, mapStyle, show3DBuildings]);
-
-  // Drawing handlers
-  const onMapClick = useCallback((evt: MapMouseEvent) => {
-    if (!isDrawing) return;
-
-    const coords: [number, number] = [evt.lngLat.lng, evt.lngLat.lat];
-
-    if (!drawStart) {
-      setDrawStart(coords);
-    } else {
-      setDrawEnd(coords);
-      // Calculate bounds and complete draw
-      const minLng = Math.min(drawStart[0], coords[0]);
-      const maxLng = Math.max(drawStart[0], coords[0]);
-      const minLat = Math.min(drawStart[1], coords[1]);
-      const maxLat = Math.max(drawStart[1], coords[1]);
-
-      const bounds = {
-        _southWest: { lat: minLat, lng: minLng },
-        _northEast: { lat: maxLat, lng: maxLng },
-        getSouthWest: () => ({ lat: minLat, lng: minLng }),
-        getNorthEast: () => ({ lat: maxLat, lng: maxLng }),
-        getSouth: () => minLat,
-        getWest: () => minLng,
-        getNorth: () => maxLat,
-        getEast: () => maxLng,
-      };
-
-      onDrawComplete(bounds);
-      setDrawStart(null);
-      setDrawEnd(null);
-    }
-  }, [isDrawing, drawStart, onDrawComplete]);
-
-  // Clear drawing state when drawing mode ends
-  useEffect(() => {
-    if (!isDrawing) {
-      setDrawStart(null);
-      setDrawEnd(null);
-    }
-  }, [isDrawing]);
-
-  // Recenter to user location
+  // Handle recenter
   const handleRecenter = useCallback(() => {
     if (userLocation && mapRef.current) {
-      mapRef.current.flyTo({
-        center: [userLocation[1], userLocation[0]],
-        zoom: 13,
-        duration: 1500
-      });
+      mapRef.current.panTo({ lat: userLocation[0], lng: userLocation[1] });
+      mapRef.current.setZoom(13);
     }
     onRecenter();
   }, [userLocation, onRecenter]);
 
-  // 3D building layer configuration - get time-based fill color
-  const buildingFillColor = useMemo(() => {
-    const hour = shadowDateTime.getHours();
+  // Handle rectangle complete
+  const onRectangleComplete = useCallback((rectangle: google.maps.Rectangle) => {
+    const bounds = rectangle.getBounds();
+    if (bounds) {
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
 
-    if (hour >= 0 && hour < 5) {
-      return 'rgba(30, 40, 65, 0.92)'; // night
-    } else if (hour >= 5 && hour < 7) {
-      return 'rgba(180, 140, 130, 0.9)'; // dawn
-    } else if (hour >= 7 && hour < 11) {
-      return 'rgba(200, 195, 180, 0.9)'; // morning
-    } else if (hour >= 11 && hour < 14) {
-      return 'rgba(220, 220, 215, 0.9)'; // noon
-    } else if (hour >= 14 && hour < 17) {
-      return 'rgba(210, 200, 180, 0.9)'; // afternoon
-    } else if (hour >= 17 && hour < 20) {
-      return 'rgba(200, 150, 100, 0.9)'; // sunset
-    } else if (hour >= 20 && hour < 22) {
-      return 'rgba(100, 90, 120, 0.9)'; // dusk
-    }
-    return 'rgba(200, 200, 200, 0.9)';
-  }, [shadowDateTime]);
+      const leafletBounds = {
+        _southWest: { lat: sw.lat(), lng: sw.lng() },
+        _northEast: { lat: ne.lat(), lng: ne.lng() },
+        getSouthWest: () => ({ lat: sw.lat(), lng: sw.lng() }),
+        getNorthEast: () => ({ lat: ne.lat(), lng: ne.lng() }),
+        getSouth: () => sw.lat(),
+        getWest: () => sw.lng(),
+        getNorth: () => ne.lat(),
+        getEast: () => ne.lng(),
+      };
 
-  // Set map pitch when 3D buildings enabled
-  useEffect(() => {
-    if (mapRef.current) {
-      const map = mapRef.current.getMap();
-      if (show3DBuildings) {
-        map.easeTo({ pitch: 45, duration: 500 });
-      } else {
-        map.easeTo({ pitch: 0, duration: 500 });
-      }
-    }
-  }, [show3DBuildings]);
-
-  // Sun position based lighting
-  useEffect(() => {
-    if (!mapRef.current || !show3DBuildings) return;
-
-    const map = mapRef.current.getMap();
-    if (!map.isStyleLoaded()) return;
-
-    const hour = shadowDateTime.getHours();
-    const minute = shadowDateTime.getMinutes();
-    const timeDecimal = hour + minute / 60;
-
-    // Calculate sun position (simplified)
-    // Sun rises from east (90°), sets in west (270°)
-    // Altitude varies by time of day
-    let azimuth = 90 + (timeDecimal - 6) * 15; // 15 degrees per hour
-    let altitude = 0;
-
-    if (timeDecimal >= 6 && timeDecimal <= 18) {
-      // Daytime - sun is up
-      altitude = Math.sin((timeDecimal - 6) / 12 * Math.PI) * 70;
-    } else {
-      // Nighttime - sun is below horizon
-      altitude = -10;
+      onDrawComplete(leafletBounds);
     }
 
-    try {
-      map.setLight({
-        anchor: 'viewport',
-        color: hour >= 17 && hour < 20 ? '#ffcc88' : '#ffffff',
-        intensity: altitude > 0 ? 0.5 : 0.2,
-        position: [1.5, azimuth, altitude]
-      });
-    } catch (e) {
-      // Light setting may fail if style not loaded
-    }
-  }, [shadowDateTime, show3DBuildings]);
+    // Remove the drawing
+    rectangle.setMap(null);
+  }, [onDrawComplete]);
 
-  // Drawn area rectangle
-  const drawnAreaGeoJSON = useMemo(() => {
-    if (!drawnBounds) return null;
+  // Create marker icon
+  const createMarkerIcon = useCallback((property: Property, isHovered: boolean): google.maps.Icon | google.maps.Symbol => {
+    const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+    const isPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
+    const promotionColor = isPromoted ? PROMOTION_TIER_COLORS[property.promotionTier || 'featured'] : null;
+    const scale = isHovered ? 1.2 : 1;
+    const price = formatMarkerPrice(property.price);
 
-    const sw = drawnBounds.getSouthWest();
-    const ne = drawnBounds.getNorthEast();
+    // Create SVG marker with house shape
+    const svg = `
+      <svg width="${60 * scale}" height="${48 * scale}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M35 56L25 44H45L35 56Z" fill="#003A96"/>
+        <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${color}" stroke="${promotionColor || '#FFFFFF'}" stroke-width="${promotionColor ? 3 : 2}"/>
+        <text x="35" y="30" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+      </svg>
+    `;
 
     return {
-      type: 'Feature' as const,
-      geometry: {
-        type: 'Polygon' as const,
-        coordinates: [[
-          [sw.lng, sw.lat],
-          [ne.lng, sw.lat],
-          [ne.lng, ne.lat],
-          [sw.lng, ne.lat],
-          [sw.lng, sw.lat]
-        ]]
-      },
-      properties: {}
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(60 * scale, 48 * scale),
+      anchor: new google.maps.Point(30 * scale, 48 * scale),
     };
-  }, [drawnBounds]);
+  }, []);
+
+  if (loadError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-neutral-100">
+        <div className="text-center p-4">
+          <p className="text-red-500 font-semibold mb-2">Failed to load Google Maps</p>
+          <p className="text-neutral-600 text-sm">Please check your API key configuration.</p>
+          <p className="text-neutral-500 text-xs mt-2">Add VITE_GOOGLE_MAPS_API_KEY to your .env file</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-neutral-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading map...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <HighlightedPropertiesProvider properties={propertiesInView}>
       <div className="w-full h-full relative overflow-hidden">
-        <Map
-          ref={mapRef}
-          {...viewState}
-          onMove={onMove}
-          onMoveEnd={onMoveEnd}
-          onClick={onMapClick}
-          mapboxAccessToken={MAPBOX_TOKEN}
-          mapStyle={MAP_STYLES[mapStyle]}
-          style={{ width: '100%', height: '100%' }}
-          maxBounds={BALKAN_BOUNDS}
-          minZoom={5}
-          maxZoom={22}
-          cursor={isDrawing ? 'crosshair' : 'grab'}
-          attributionControl={false}
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={center}
+          zoom={7}
+          onLoad={onMapLoad}
+          onUnmount={onMapUnmount}
+          onBoundsChanged={onBoundsChanged}
+          options={{
+            restriction: {
+              latLngBounds: BALKAN_BOUNDS,
+              strictBounds: false,
+            },
+            minZoom: 5,
+            maxZoom: 21,
+            mapTypeId: mapType,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false,
+            zoomControl: !isMobile,
+            styles: mapType === 'roadmap' ? mapStyles : undefined,
+            gestureHandling: 'greedy',
+          }}
         >
-          {/* Navigation controls */}
-          <NavigationControl position="bottom-right" showCompass={true} />
-          <GeolocateControl position="bottom-right" trackUserLocation={true} />
+          {/* Property Markers */}
+          {propertiesInView.map((property) => (
+            <Marker
+              key={property.id}
+              position={{ lat: property.lat, lng: property.lng }}
+              icon={createMarkerIcon(property, property.id === hoveredPropertyId)}
+              onClick={() => handleMarkerClick(property)}
+            />
+          ))}
 
-          {/* 3D Buildings Layer */}
-          {show3DBuildings && (
-            <Layer
-              id="3d-buildings"
-              source="composite"
-              source-layer="building"
-              filter={['==', 'extrude', 'true'] as any}
-              type="fill-extrusion"
-              minzoom={14}
-              paint={{
-                'fill-extrusion-color': buildingFillColor,
-                'fill-extrusion-height': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  14, 0,
-                  14.5, ['get', 'height']
-                ] as any,
-                'fill-extrusion-base': [
-                  'interpolate',
-                  ['linear'],
-                  ['zoom'],
-                  14, 0,
-                  14.5, ['get', 'min_height']
-                ] as any,
-                'fill-extrusion-opacity': 0.85
+          {/* Selected Property InfoWindow */}
+          {selectedProperty && (
+            <InfoWindow
+              position={{ lat: selectedProperty.lat, lng: selectedProperty.lng }}
+              onCloseClick={() => setSelectedProperty(null)}
+              options={{
+                pixelOffset: new google.maps.Size(0, -48),
+                maxWidth: 300,
+              }}
+            >
+              <PropertyInfoWindow
+                property={selectedProperty}
+                onClose={() => setSelectedProperty(null)}
+                onPropertyClick={handlePropertyClick}
+              />
+            </InfoWindow>
+          )}
+
+          {/* Drawn Area Rectangle */}
+          {drawnBounds && !isDrawing && (
+            <Rectangle
+              bounds={{
+                north: drawnBounds.getNorth(),
+                south: drawnBounds.getSouth(),
+                east: drawnBounds.getEast(),
+                west: drawnBounds.getWest(),
+              }}
+              options={{
+                fillColor: '#0252CD',
+                fillOpacity: 0.2,
+                strokeColor: '#0252CD',
+                strokeWeight: 3,
+                clickable: false,
               }}
             />
           )}
 
-          {/* Heat Map Layer */}
-          <HeatMapLayerMapbox
-            properties={propertiesInView}
-            enabled={showHeatMap}
-            intensity="medium"
-          />
-
-          {/* Landmarks Layer */}
-          <LandmarksLayerMapbox
-            enabled={showLandmarks}
-            isNightMode={mapStyle === 'dark'}
-          />
-
-          {/* Cadastre Layer */}
-          <CadastreLayerMapbox
-            enabled={showCadastre && mapStyle === 'satellite'}
-            opacity={0.7}
-          />
-
-          {/* Property Markers */}
-          <MarkersMapbox
-            properties={propertiesInView}
-            onPopupClick={handlePopupClick}
-            hoveredPropertyId={hoveredPropertyId}
-            isNightMode={mapStyle === 'dark'}
-            zoom={currentZoom}
-          />
-
-          {/* Drawn Area Rectangle */}
-          {drawnAreaGeoJSON && !isDrawing && (
-            <Source id="drawn-area" type="geojson" data={drawnAreaGeoJSON}>
-              <Layer
-                id="drawn-area-fill"
-                type="fill"
-                paint={{
-                  'fill-color': '#0252CD',
-                  'fill-opacity': 0.2
-                }}
-              />
-              <Layer
-                id="drawn-area-line"
-                type="line"
-                paint={{
-                  'line-color': '#0252CD',
-                  'line-width': 3
-                }}
-              />
-            </Source>
+          {/* Drawing Manager */}
+          {isDrawing && (
+            <DrawingManager
+              onRectangleComplete={onRectangleComplete}
+              options={{
+                drawingMode: google.maps.drawing.OverlayType.RECTANGLE,
+                drawingControl: false,
+                rectangleOptions: {
+                  fillColor: '#0252CD',
+                  fillOpacity: 0.2,
+                  strokeColor: '#0252CD',
+                  strokeWeight: 3,
+                  editable: false,
+                  draggable: false,
+                },
+              }}
+            />
           )}
-
-          {/* Drawing preview rectangle */}
-          {isDrawing && drawStart && (
-            <Marker
-              longitude={drawStart[0]}
-              latitude={drawStart[1]}
-              anchor="center"
-            >
-              <div className="w-3 h-3 bg-primary rounded-full border-2 border-white shadow-lg animate-pulse" />
-            </Marker>
-          )}
-
-          {/* Map Agent Avatar */}
-          <MapAgentAvatarInnerMapbox onPropertySelect={handlePopupClick} />
-        </Map>
+        </GoogleMap>
 
         {/* Desktop Controls */}
         {!isMobile && (
           <>
             <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
               {/* Main control bar */}
-              <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-colors duration-300">
+              <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-lg flex items-center gap-1.5">
                 <button
                   onClick={handleRecenter}
                   className="p-1.5 rounded-full transition-colors hover:bg-black/10"
@@ -512,9 +578,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 </button>
                 <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full">
                   <button
-                    onClick={() => setMapStyle('street')}
+                    onClick={() => setMapType('roadmap')}
                     className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                      mapStyle === 'street'
+                      mapType === 'roadmap'
                         ? 'bg-white shadow text-primary'
                         : 'text-neutral-600 hover:bg-white/50'
                     }`}
@@ -522,9 +588,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     {t('search:map.street')}
                   </button>
                   <button
-                    onClick={() => setMapStyle('satellite')}
+                    onClick={() => setMapType('satellite')}
                     className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                      mapStyle === 'satellite'
+                      mapType === 'satellite'
                         ? 'bg-white shadow text-primary'
                         : 'text-neutral-600 hover:bg-white/50'
                     }`}
@@ -541,8 +607,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   }`}
                 >
                   {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
-                  <span className="hidden sm:inline">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
-                  <span className="sm:hidden">{isDrawing ? '✕' : '✎'}</span>
+                  <span>{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
                 </button>
               </div>
 
@@ -556,57 +621,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       ? 'bg-slate-700 text-white'
                       : 'text-neutral-600 hover:bg-neutral-200'
                   }`}
-                  title={t('search:map.buildings3D', '3D Buildings')}
+                  title="3D Buildings (tilt view)"
                 >
                   <span className="text-sm">🏢</span>
-                  <span className="hidden sm:inline">3D</span>
-                </button>
-
-                {/* Landmarks Toggle */}
-                <button
-                  onClick={() => setShowLandmarks(!showLandmarks)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
-                    showLandmarks
-                      ? 'bg-primary text-white'
-                      : 'text-neutral-600 hover:bg-neutral-200'
-                  }`}
-                  title={t('search:map.landmarks', 'Landmarks')}
-                >
-                  <span className="text-sm">🏛️</span>
-                  <span className="hidden sm:inline">POI</span>
-                </button>
-
-                {/* Cadastre Toggle - only in satellite */}
-                {mapStyle === 'satellite' && (
-                  <button
-                    onClick={() => setShowCadastre(!showCadastre)}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
-                      showCadastre
-                        ? 'bg-primary text-white'
-                        : 'text-neutral-600 hover:bg-neutral-200'
-                    }`}
-                    title={t('search:map.cadastralParcels')}
-                  >
-                    <span className="text-sm">📐</span>
-                    <span className="hidden sm:inline">Parcels</span>
-                  </button>
-                )}
-
-                {/* Heat Map Toggle */}
-                <button
-                  onClick={() => setShowHeatMap(!showHeatMap)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
-                    showHeatMap
-                      ? 'bg-orange-500 text-white'
-                      : 'text-neutral-600 hover:bg-neutral-200'
-                  }`}
-                  title="Heat Map"
-                >
-                  <span className="text-sm">🔥</span>
-                  <span className="hidden sm:inline">Heat</span>
+                  <span>3D</span>
                 </button>
               </div>
 
+              {/* Drawn bounds actions */}
               {drawnBounds && !isDrawing && (
                 <div className="flex items-center gap-1.5 animate-fade-in">
                   {isAuthenticated && (
@@ -616,8 +638,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
                     >
                       <SearchPlusIcon className="w-4 h-4" />
-                      <span className="hidden sm:inline">{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
-                      <span className="sm:hidden">Save</span>
+                      <span>{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
                     </button>
                   )}
                   <button
@@ -625,82 +646,36 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-lg hover:bg-neutral-900"
                   >
                     <XCircleIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{t('search:map.clearArea')}</span>
-                    <span className="sm:hidden">Clear</span>
+                    <span>{t('search:map.clearArea')}</span>
                   </button>
                 </div>
               )}
             </div>
-            <div className="absolute bottom-4 left-4 z-[1000]">
-              <Legend isNightMode={mapStyle === 'dark'} />
-            </div>
 
-            {/* Sun Position Control */}
-            {show3DBuildings && (
-              <div className="absolute top-4 left-4 z-[1000]">
-                <SunPositionControl
-                  onDateTimeChange={handleShadowTimeChange}
-                  onSeasonChange={handleSeasonChange}
-                  isNightMode={mapStyle === 'dark'}
-                  enabled={show3DBuildings}
-                />
-              </div>
-            )}
+            {/* Legend */}
+            <div className="absolute bottom-4 left-4 z-[1000]">
+              <Legend />
+            </div>
           </>
         )}
 
         {/* Mobile Controls */}
         {isMobile && (
           <>
-            {/* Mobile: Bottom-left - Layer toggles */}
+            {/* Mobile: Bottom controls */}
             <div className="absolute bottom-24 left-2 right-2 z-[1000] flex justify-center pointer-events-none md:hidden">
-              <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/85 transition-all duration-300 ease-out">
+              <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/85">
                 {/* 3D Buildings Toggle */}
                 <button
                   onClick={() => setShow3DBuildings(!show3DBuildings)}
-                  className={`
-                    p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                    ${show3DBuildings
+                  className={`p-2.5 rounded-xl transition-all ${
+                    show3DBuildings
                       ? 'bg-slate-700 text-white shadow-md'
                       : 'text-neutral-500 hover:bg-neutral-100'
-                    }
-                  `}
-                  title={t('search:map.buildings3D', '3D Buildings')}
+                  }`}
                 >
                   <span className="text-lg">🏢</span>
                 </button>
-
-                {/* Landmarks Toggle */}
-                <button
-                  onClick={() => setShowLandmarks(!showLandmarks)}
-                  className={`
-                    p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                    ${showLandmarks
-                      ? 'bg-primary text-white shadow-md'
-                      : 'text-neutral-500 hover:bg-neutral-100'
-                    }
-                  `}
-                  title={t('search:map.landmarks', 'Landmarks')}
-                >
-                  <span className="text-lg">🏛️</span>
-                </button>
-
-                {/* Cadastre Toggle - only in satellite */}
-                {mapStyle === 'satellite' && (
-                  <button
-                    onClick={() => setShowCadastre(!showCadastre)}
-                    className={`
-                      p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                      ${showCadastre
-                        ? 'bg-primary text-white shadow-md'
-                        : 'text-neutral-500 hover:bg-neutral-100'
-                      }
-                    `}
-                    title={t('search:map.cadastralParcels')}
-                  >
-                    <span className="text-lg">📐</span>
-                  </button>
-                )}
 
                 {/* Divider */}
                 <div className="w-px h-6 mx-0.5 bg-neutral-200" />
@@ -708,14 +683,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 {/* Legend Toggle */}
                 <button
                   onClick={() => setIsLegendOpen((p) => !p)}
-                  className={`
-                    p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                    ${isLegendOpen
+                  className={`p-2.5 rounded-xl transition-all ${
+                    isLegendOpen
                       ? 'bg-neutral-200 text-neutral-700'
                       : 'text-neutral-500 hover:bg-neutral-100'
-                    }
-                  `}
-                  title={t('search:map.mapLegend')}
+                  }`}
                 >
                   <MapLegendIcon className="w-5 h-5" />
                 </button>
@@ -723,8 +695,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
               {/* Legend popup */}
               {isLegendOpen && (
-                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-auto animate-slide-up">
-                  <Legend isNightMode={mapStyle === 'dark'} />
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-auto">
+                  <Legend />
                 </div>
               )}
             </div>
@@ -732,14 +704,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
             {/* Mobile: Top right controls */}
             <div className="absolute top-20 right-2 z-[999] md:hidden">
               <div className="flex flex-col gap-2 items-end">
-                {/* Unified control bar */}
+                {/* Control bar */}
                 <div className="flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/95">
                   {/* Map type toggle */}
                   <div className="flex items-center bg-neutral-100 rounded-xl p-0.5">
                     <button
-                      onClick={() => setMapStyle('street')}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
-                        mapStyle === 'street'
+                      onClick={() => setMapType('roadmap')}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+                        mapType === 'roadmap'
                           ? 'bg-white shadow-sm text-primary'
                           : 'text-neutral-500'
                       }`}
@@ -747,9 +719,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       {t('search:map.street')}
                     </button>
                     <button
-                      onClick={() => setMapStyle('satellite')}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
-                        mapStyle === 'satellite'
+                      onClick={() => setMapType('satellite')}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+                        mapType === 'satellite'
                           ? 'bg-white shadow-sm text-primary'
                           : 'text-neutral-500'
                       }`}
@@ -764,8 +736,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   {/* Recenter */}
                   <button
                     onClick={handleRecenter}
-                    className="p-2 rounded-xl transition-all duration-200 active:scale-95 hover:bg-neutral-100 text-neutral-600"
-                    title={t('search:map.centerOnLocation')}
+                    className="p-2 rounded-xl hover:bg-neutral-100 text-neutral-600"
                   >
                     <CrosshairsIcon className="w-4 h-4" />
                   </button>
@@ -773,50 +744,34 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   {/* Draw */}
                   <button
                     onClick={onDrawStart}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition-all duration-200 active:scale-95 ${
-                      isDrawing
-                        ? 'bg-red-500 text-white'
-                        : 'bg-neutral-800 text-white'
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl ${
+                      isDrawing ? 'bg-red-500 text-white' : 'bg-neutral-800 text-white'
                     }`}
-                    title={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
                   >
                     {isDrawing ? <XCircleIcon className="w-3.5 h-3.5" /> : <PencilIcon className="w-3.5 h-3.5" />}
-                    <span className="text-[11px] font-semibold">{isDrawing ? t('search:map.cancel') : t('search:map.draw', 'Draw')}</span>
+                    <span className="text-[11px] font-semibold">{isDrawing ? t('search:map.cancel') : 'Draw'}</span>
                   </button>
                 </div>
 
-                {/* Sun Position Control - compact version for mobile */}
-                {show3DBuildings && (
-                  <SunPositionControl
-                    onDateTimeChange={handleShadowTimeChange}
-                    onSeasonChange={handleSeasonChange}
-                    isNightMode={mapStyle === 'dark'}
-                    enabled={show3DBuildings}
-                    compact={true}
-                  />
-                )}
-
                 {/* Drawn bounds actions */}
                 {drawnBounds && !isDrawing && (
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/95 animate-fade-in">
+                  <div className="flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/95">
                     {isAuthenticated && (
                       <button
                         onClick={onSaveSearch}
                         disabled={isSaving}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white rounded-xl disabled:opacity-50 transition-all duration-200 active:scale-95"
-                        title={isSaving ? t('search:map.saving') : t('search:map.saveArea')}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white rounded-xl disabled:opacity-50"
                       >
                         <SearchPlusIcon className="w-3.5 h-3.5" />
-                        <span className="text-[11px] font-semibold">{t('search:map.save', 'Save')}</span>
+                        <span className="text-[11px] font-semibold">Save</span>
                       </button>
                     )}
                     <button
                       onClick={() => onDrawComplete(null)}
-                      className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500 text-white rounded-xl transition-all duration-200 active:scale-95"
-                      title={t('search:map.clearArea')}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500 text-white rounded-xl"
                     >
                       <XCircleIcon className="w-3.5 h-3.5" />
-                      <span className="text-[11px] font-semibold">{t('search:map.clear', 'Clear')}</span>
+                      <span className="text-[11px] font-semibold">Clear</span>
                     </button>
                   </div>
                 )}
