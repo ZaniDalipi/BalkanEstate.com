@@ -134,6 +134,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [show3DBuildings, setShow3DBuildings] = useState(false); // Toggle for 3D buildings
   const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
   const [mapCenterLng, setMapCenterLng] = useState<number>(22); // Default Balkans longitude
+  const [mapCenterLat, setMapCenterLat] = useState<number>(41); // Default Balkans latitude
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
 
   // Check if we're in night mode
@@ -152,9 +153,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [show3DBuildings, isNightMode]);
 
-  // Update map center longitude when map moves
+  // Update map center coordinates when map moves
   const handleMapMoveWithCenter = useCallback((bounds: L.LatLngBounds, center: L.LatLng) => {
     setMapCenterLng(center.lng);
+    setMapCenterLat(center.lat);
     onMapMove(bounds, center);
   }, [onMapMove]);
 
@@ -194,6 +196,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           enabled={isNightMode || show3DBuildings}
           isNightMode={isNightMode}
           longitude={mapCenterLng}
+          latitude={mapCenterLat}
           useRealTime={!isManualTimeControl}
         />
 
@@ -254,9 +257,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
         </MapContainer>
 
+      {/* Desktop Controls - hidden on mobile via CSS as fallback */}
       {!isMobile && (
         <>
-          <div className="absolute bottom-12 right-4 z-[1000] flex flex-col items-end gap-2">
+          <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar - compact */}
             <div className={`${isNightMode ? 'bg-slate-900/90' : 'bg-white/90'} backdrop-blur-sm p-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-colors duration-300`}>
               <button
@@ -435,10 +439,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
         </>
       )}
 
+      {/* Mobile Controls - hidden on desktop via CSS as fallback */}
       {isMobile && (
         <>
           {/* Mobile: Bottom-left - Layer toggles in horizontal bar */}
-          <div className="absolute bottom-24 left-2 right-2 z-[1000] flex justify-center pointer-events-none">
+          <div className="absolute bottom-24 left-2 right-2 z-[1000] flex justify-center pointer-events-none md:hidden">
             <div className={`
               pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md
               ${isNightMode ? 'bg-slate-900/85' : 'bg-white/85'}
@@ -564,7 +569,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
           {/* Mobile: Sun Position Control - top left when 3D buildings enabled */}
           {(isNightMode || show3DBuildings) && (
-            <div className="absolute top-20 left-2 z-[999] animate-slide-down">
+            <div className="absolute top-20 left-2 z-[999] animate-slide-down md:hidden">
               <SunPositionControl
                 onDateTimeChange={handleShadowTimeChange}
                 isNightMode={isNightMode}
@@ -574,7 +579,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           )}
 
           {/* Mobile: Top right controls - stacked vertically with proper spacing */}
-          <div className="absolute top-20 right-2 z-[999] flex flex-col gap-3 items-end">
+          <div className="absolute top-20 right-2 z-[999] flex flex-col gap-3 items-end md:hidden">
             {/* Row 1: Map type toggle */}
             <div className={`
               flex items-center p-1 rounded-xl shadow-lg backdrop-blur-md
