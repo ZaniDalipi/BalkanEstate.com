@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
 import { Property } from '@/types';
@@ -133,6 +133,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [showLandmarks, setShowLandmarks] = useState(true); // Show landmarks by default
   const [show3DBuildings, setShow3DBuildings] = useState(false); // Toggle for 3D buildings
   const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
+  const [mapCenterLng, setMapCenterLng] = useState<number>(22); // Default Balkans longitude
+  const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
 
   // Check if we're in night mode
   const isNightMode = mapType === 'night';
@@ -140,7 +142,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
   // Handle shadow time change from SunPositionControl
   const handleShadowTimeChange = useCallback((dateTime: Date) => {
     setShadowDateTime(dateTime);
+    setIsManualTimeControl(true); // User is now manually controlling time
   }, []);
+
+  // Reset to real time when 3D buildings is toggled off
+  useEffect(() => {
+    if (!show3DBuildings && !isNightMode) {
+      setIsManualTimeControl(false);
+    }
+  }, [show3DBuildings, isNightMode]);
+
+  // Update map center longitude when map moves
+  const handleMapMoveWithCenter = useCallback((bounds: L.LatLngBounds, center: L.LatLng) => {
+    setMapCenterLng(center.lng);
+    onMapMove(bounds, center);
+  }, [onMapMove]);
 
   const validProperties = useMemo(() => {
     return properties.filter(
@@ -172,11 +188,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
         {/* Snapchat-style sparkle overlay */}
         <SnapchatMapOverlay enabled={isNightMode} />
 
-        {/* Animated sun/moon arc across the map */}
+        {/* Animated sun/moon arc across the map - uses real local solar time */}
         <SunArcAnimation
           hour={currentHour}
           enabled={isNightMode || show3DBuildings}
           isNightMode={isNightMode}
+          longitude={mapCenterLng}
+          useRealTime={!isManualTimeControl}
         />
 
         <MapContainer
@@ -195,7 +213,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           keepBuffer={2}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
-          <MapEvents onMove={onMapMove} mapBounds={mapBounds} searchMode={searchMode} />
+          <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {drawnBounds && !isDrawing && (

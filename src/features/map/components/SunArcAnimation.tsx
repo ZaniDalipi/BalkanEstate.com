@@ -1,13 +1,42 @@
 // SunArcAnimation Component
 // Displays an animated sun/moon that moves across the map based on time of day
+// Calculates local solar time based on longitude for accurate sun position
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 
 interface SunArcAnimationProps {
-  hour: number; // 0-23
+  hour: number; // 0-23 (can be overridden by manual control)
   enabled: boolean;
   isNightMode: boolean;
+  longitude?: number; // Map center longitude for local solar time calculation
+  useRealTime?: boolean; // If true, use current real time adjusted for location
 }
+
+/**
+ * Calculate local solar time based on longitude
+ * Solar noon occurs when the sun is at its highest point
+ * For every 15° of longitude, there's a 1-hour difference in solar time
+ *
+ * @param longitude - The longitude of the location
+ * @returns The local solar hour (0-24)
+ */
+const calculateLocalSolarTime = (longitude: number): number => {
+  const now = new Date();
+  const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+
+  // Solar time offset: longitude / 15 gives hours offset from UTC
+  // Positive longitude (East) = ahead of UTC
+  // Negative longitude (West) = behind UTC
+  const solarOffset = longitude / 15;
+
+  let localSolarTime = utcHours + solarOffset;
+
+  // Normalize to 0-24 range
+  while (localSolarTime < 0) localSolarTime += 24;
+  while (localSolarTime >= 24) localSolarTime -= 24;
+
+  return localSolarTime;
+};
 
 /**
  * SunArcAnimation Component
@@ -17,21 +46,54 @@ interface SunArcAnimationProps {
  * - Peaks at top (south) at noon
  * - Sets on right (west) in evening
  * - Moon appears at night
+ *
+ * For Greece (~23°E longitude):
+ * - Solar time is ~1.5 hours ahead of UTC
+ * - At UTC 12:00, Greece solar time is ~13:30
  */
-const SunArcAnimation: React.FC<SunArcAnimationProps> = ({ hour, enabled, isNightMode }) => {
+const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
+  hour,
+  enabled,
+  isNightMode,
+  longitude = 23, // Default to Greece/Balkans longitude
+  useRealTime = true,
+}) => {
+  // Track real-time updates
+  const [realTimeHour, setRealTimeHour] = useState<number>(() =>
+    calculateLocalSolarTime(longitude)
+  );
+
+  // Update real time every minute
+  useEffect(() => {
+    if (!useRealTime || !enabled) return;
+
+    const updateTime = () => {
+      setRealTimeHour(calculateLocalSolarTime(longitude));
+    };
+
+    // Update immediately
+    updateTime();
+
+    // Update every minute
+    const interval = setInterval(updateTime, 60000);
+
+    return () => clearInterval(interval);
+  }, [longitude, useRealTime, enabled]);
+
+  // Use manual hour if provided and different from real time, otherwise use real time
+  const effectiveHour = useRealTime ? realTimeHour : hour;
+
   // Calculate sun position along an arc
   const sunPosition = useMemo(() => {
-    // Normalize hour to 0-24 range, with 6am being start of day arc
-    // Sun visible from 5am to 9pm (hours 5-21)
+    // Sun visible from 5am to 9pm (hours 5-21) - approximate for Balkans region
     const sunriseHour = 5;
     const sunsetHour = 21;
 
-    const isDay = hour >= sunriseHour && hour < sunsetHour;
-    const isSun = isDay;
+    const isDay = effectiveHour >= sunriseHour && effectiveHour < sunsetHour;
 
     if (isDay) {
       // Calculate position along arc (0 = sunrise, 1 = sunset)
-      const dayProgress = (hour - sunriseHour) / (sunsetHour - sunriseHour);
+      const dayProgress = (effectiveHour - sunriseHour) / (sunsetHour - sunriseHour);
 
       // Arc from left to right
       // X: 5% at sunrise, 50% at noon, 95% at sunset
@@ -46,12 +108,12 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({ hour, enabled, isNigh
       // Night time - moon position
       let nightProgress: number;
 
-      if (hour >= sunsetHour) {
+      if (effectiveHour >= sunsetHour) {
         // Evening (21-24)
-        nightProgress = (hour - sunsetHour) / (24 - sunsetHour + sunriseHour);
+        nightProgress = (effectiveHour - sunsetHour) / (24 - sunsetHour + sunriseHour);
       } else {
         // Early morning (0-5)
-        nightProgress = (hour + (24 - sunsetHour)) / (24 - sunsetHour + sunriseHour);
+        nightProgress = (effectiveHour + (24 - sunsetHour)) / (24 - sunsetHour + sunriseHour);
       }
 
       // Moon arc (more subtle)
@@ -60,7 +122,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({ hour, enabled, isNigh
 
       return { x, y, isSun: false, visible: true, scale: 0.8 };
     }
-  }, [hour]);
+  }, [effectiveHour]);
 
   if (!enabled) return null;
 
@@ -180,7 +242,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({ hour, enabled, isNigh
             height: '300px',
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, rgba(255,220,100,0.15) 0%, rgba(255,200,50,0.05) 30%, transparent 100%)`,
-            opacity: Math.sin((hour - 5) / 16 * Math.PI) * 0.5,
+            opacity: Math.sin((effectiveHour - 5) / 16 * Math.PI) * 0.5,
           }}
         />
       )}
