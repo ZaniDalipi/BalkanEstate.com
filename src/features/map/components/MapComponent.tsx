@@ -153,16 +153,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
   }, []);
 
   // Auto switch day/night mode based on sun position
+  // Only active when 3D buildings mode is enabled
   const handleDayNightChange = useCallback((isDay: boolean, sunInfo: SunriseSunsetInfo) => {
-    // Only auto-switch when 3D buildings mode is enabled (sun animation is active)
-    if (show3DBuildings && !isNightMode) {
-      // When it becomes night, switch to night map
-      if (!isDay) {
-        setMapType('night');
-      }
-    } else if (isNightMode && isDay) {
-      // When in night mode and it becomes day, switch to street
+    // Only auto-switch when 3D buildings mode is enabled
+    if (!show3DBuildings) return;
+
+    if (isDay && isNightMode) {
+      // Daytime - switch to street mode
       setMapType('street');
+    } else if (!isDay && !isNightMode) {
+      // Nighttime - switch to night mode
+      setMapType('night');
     }
   }, [show3DBuildings, isNightMode]);
 
