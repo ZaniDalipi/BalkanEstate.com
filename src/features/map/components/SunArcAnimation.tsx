@@ -114,20 +114,20 @@ const SUN_COLORS = {
   low: { body: '#FF9800', glow: 'rgba(255,152,0,0.5)', rays: 'rgba(255,180,50,0.7)' },
   medium: { body: '#FFC107', glow: 'rgba(255,193,7,0.4)', rays: 'rgba(255,210,80,0.6)' },
   high: { body: '#FFEB3B', glow: 'rgba(255,235,59,0.35)', rays: 'rgba(255,245,120,0.5)' },
-} as const;
+};
+
+// Type for sun colors - flexible to accept any color preset
+type SunColorType = { body: string; glow: string; rays: string };
 
 /**
  * Get sun color based on altitude - simple discrete buckets
  */
-const getSunColor = (altitude: number) => {
+const getSunColor = (altitude: number): SunColorType => {
   if (altitude < 5) return SUN_COLORS.veryLow;
   if (altitude < 15) return SUN_COLORS.low;
   if (altitude < 30) return SUN_COLORS.medium;
   return SUN_COLORS.high;
 };
-
-// Type for sun colors
-type SunColorType = typeof SUN_COLORS.high;
 
 /**
  * Sun rays component - memoized to prevent re-renders
