@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMap } from 'react-map-gl';
+import { useMap } from 'react-map-gl/mapbox';
 import { useHighlightedProperties, PROMOTION_TIER_COLORS } from '../../context/HighlightedPropertiesContext';
 import { formatPrice } from '../../../utils/currency';
 

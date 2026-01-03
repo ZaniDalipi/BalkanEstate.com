@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import Map, {
   NavigationControl,
   GeolocateControl,
-  MapRef,
   Source,
   Layer,
   Marker,
-  Popup
-} from 'react-map-gl';
+  Popup,
+  useMap,
+} from 'react-map-gl/mapbox';
+import type { MapRef } from 'react-map-gl/mapbox';
 import type { MapMouseEvent, LngLatBoundsLike } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Property } from '@/types';
@@ -285,57 +286,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
     onRecenter();
   }, [userLocation, onRecenter]);
 
-  // 3D building layer configuration
-  const buildingLayer = useMemo(() => {
-    if (!show3DBuildings) return null;
-
+  // 3D building layer configuration - get time-based fill color
+  const buildingFillColor = useMemo(() => {
     const hour = shadowDateTime.getHours();
 
-    // Time-based colors
-    let fillColor = 'rgba(200, 200, 200, 0.9)';
     if (hour >= 0 && hour < 5) {
-      fillColor = 'rgba(30, 40, 65, 0.92)'; // night
+      return 'rgba(30, 40, 65, 0.92)'; // night
     } else if (hour >= 5 && hour < 7) {
-      fillColor = 'rgba(180, 140, 130, 0.9)'; // dawn
+      return 'rgba(180, 140, 130, 0.9)'; // dawn
     } else if (hour >= 7 && hour < 11) {
-      fillColor = 'rgba(200, 195, 180, 0.9)'; // morning
+      return 'rgba(200, 195, 180, 0.9)'; // morning
     } else if (hour >= 11 && hour < 14) {
-      fillColor = 'rgba(220, 220, 215, 0.9)'; // noon
+      return 'rgba(220, 220, 215, 0.9)'; // noon
     } else if (hour >= 14 && hour < 17) {
-      fillColor = 'rgba(210, 200, 180, 0.9)'; // afternoon
+      return 'rgba(210, 200, 180, 0.9)'; // afternoon
     } else if (hour >= 17 && hour < 20) {
-      fillColor = 'rgba(200, 150, 100, 0.9)'; // sunset
+      return 'rgba(200, 150, 100, 0.9)'; // sunset
     } else if (hour >= 20 && hour < 22) {
-      fillColor = 'rgba(100, 90, 120, 0.9)'; // dusk
+      return 'rgba(100, 90, 120, 0.9)'; // dusk
     }
-
-    return {
-      id: '3d-buildings',
-      source: 'composite',
-      'source-layer': 'building',
-      filter: ['==', 'extrude', 'true'],
-      type: 'fill-extrusion' as const,
-      minzoom: 14,
-      paint: {
-        'fill-extrusion-color': fillColor,
-        'fill-extrusion-height': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          14, 0,
-          14.5, ['get', 'height']
-        ],
-        'fill-extrusion-base': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          14, 0,
-          14.5, ['get', 'min_height']
-        ],
-        'fill-extrusion-opacity': 0.85
-      }
-    };
-  }, [show3DBuildings, shadowDateTime]);
+    return 'rgba(200, 200, 200, 0.9)';
+  }, [shadowDateTime]);
 
   // Set map pitch when 3D buildings enabled
   useEffect(() => {
@@ -432,8 +403,33 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <GeolocateControl position="bottom-right" trackUserLocation={true} />
 
           {/* 3D Buildings Layer */}
-          {buildingLayer && (
-            <Layer {...buildingLayer} />
+          {show3DBuildings && (
+            <Layer
+              id="3d-buildings"
+              source="composite"
+              source-layer="building"
+              filter={['==', 'extrude', 'true'] as any}
+              type="fill-extrusion"
+              minzoom={14}
+              paint={{
+                'fill-extrusion-color': buildingFillColor,
+                'fill-extrusion-height': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  14, 0,
+                  14.5, ['get', 'height']
+                ] as any,
+                'fill-extrusion-base': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  14, 0,
+                  14.5, ['get', 'min_height']
+                ] as any,
+                'fill-extrusion-opacity': 0.85
+              }}
+            />
           )}
 
           {/* Heat Map Layer */}

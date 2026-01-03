@@ -2,7 +2,7 @@
 // Shows famous landmarks, tourist attractions, and POIs on the Mapbox map
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useMap, Marker, Popup } from 'react-map-gl';
+import { useMap, Marker, Popup } from 'react-map-gl/mapbox';
 
 interface Landmark {
   id: number;

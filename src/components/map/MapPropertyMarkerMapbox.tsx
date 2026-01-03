@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Marker, Popup } from 'react-map-gl';
+import { Marker, Popup } from 'react-map-gl/mapbox';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
 import { BuildingOfficeIcon } from '../../../constants';
@@ -17,6 +17,7 @@ const PROPERTY_TYPE_COLORS: Record<
   house: '#0252CD',
   apartment: '#28a745',
   villa: '#6f42c1',
+  land: '#8B4513',
   other: '#6c757d',
 };
 

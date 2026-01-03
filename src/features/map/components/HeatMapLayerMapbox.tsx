@@ -2,7 +2,7 @@
 // Renders a heat map overlay using Mapbox GL
 
 import React, { useMemo } from 'react';
-import { Source, Layer } from 'react-map-gl';
+import { Source, Layer } from 'react-map-gl/mapbox';
 import { Property } from '@/types';
 
 interface HeatMapLayerMapboxProps {

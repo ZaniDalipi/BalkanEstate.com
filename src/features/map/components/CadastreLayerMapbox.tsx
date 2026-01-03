@@ -2,7 +2,7 @@
 // Renders WMS cadastral parcel layers on Mapbox GL map
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { useMap, Source, Layer } from 'react-map-gl';
+import { Source, Layer, useMap } from 'react-map-gl/mapbox';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM, type CadastreLayerConfig } from '@/config/cadastreLayers';
 
 interface CadastreLayerMapboxProps {
