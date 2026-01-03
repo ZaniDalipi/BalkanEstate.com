@@ -188,6 +188,46 @@ export const ZoomBasedTileSwitch: React.FC<{
 };
 
 /**
+ * ZoomBased3DBuildings Component
+ *
+ * Automatically enables 3D buildings when zoomed in past level 16.
+ * Disables when zooming out below level 15.
+ * Uses hysteresis to prevent rapid toggling at threshold.
+ */
+export const ZoomBased3DBuildings: React.FC<{
+  show3DBuildings: boolean;
+  setShow3DBuildings: (show: boolean) => void;
+}> = ({ show3DBuildings, setShow3DBuildings }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    const handleZoomEnd = () => {
+      const currentZoom = map.getZoom();
+
+      // Enable 3D buildings at zoom 16+
+      if (currentZoom >= 16 && !show3DBuildings) {
+        setShow3DBuildings(true);
+      }
+      // Disable 3D buildings below zoom 15 (hysteresis to prevent rapid toggling)
+      else if (currentZoom < 15 && show3DBuildings) {
+        setShow3DBuildings(false);
+      }
+    };
+
+    // Check initial zoom level
+    handleZoomEnd();
+
+    map.on('zoomend', handleZoomEnd);
+
+    return () => {
+      map.off('zoomend', handleZoomEnd);
+    };
+  }, [map, show3DBuildings, setShow3DBuildings]);
+
+  return null;
+};
+
+/**
  * MapDrawEvents Component
  *
  * Handles rectangle drawing on the map for area selection.
