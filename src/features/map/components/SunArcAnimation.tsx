@@ -42,10 +42,12 @@ const calculateLocalSolarTime = (longitude: number): number => {
  * SunArcAnimation Component
  *
  * Shows an animated sun/moon traveling across the sky in an arc
- * - Sun rises from left (east) in morning
- * - Peaks at top (south) at noon
- * - Sets on right (west) in evening
- * - Moon appears at night
+ * - Sun rises from RIGHT (East) in morning
+ * - Peaks at top (South) at noon
+ * - Sets on LEFT (West) in evening
+ * - Moon follows same East to West path at night
+ *
+ * Map orientation: North is UP, East is RIGHT, West is LEFT
  *
  * For Greece (~23°E longitude):
  * - Solar time is ~1.5 hours ahead of UTC
@@ -95,9 +97,9 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
       // Calculate position along arc (0 = sunrise, 1 = sunset)
       const dayProgress = (effectiveHour - sunriseHour) / (sunsetHour - sunriseHour);
 
-      // Arc from left to right
-      // X: 5% at sunrise, 50% at noon, 95% at sunset
-      const x = 5 + (dayProgress * 90);
+      // Arc from RIGHT (East) to LEFT (West) - sun rises in East, sets in West
+      // X: 95% at sunrise (right/east), 50% at noon (center), 5% at sunset (left/west)
+      const x = 95 - (dayProgress * 90);
 
       // Y: Arc using sine wave - highest at noon
       // Y: 80% at sunrise/sunset (near bottom), 10% at noon (near top)
@@ -105,7 +107,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
 
       return { x, y, isSun: true, visible: true, scale: 1 };
     } else {
-      // Night time - moon position
+      // Night time - moon position (also moves East to West)
       let nightProgress: number;
 
       if (effectiveHour >= sunsetHour) {
@@ -116,8 +118,9 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
         nightProgress = (effectiveHour + (24 - sunsetHour)) / (24 - sunsetHour + sunriseHour);
       }
 
-      // Moon arc (more subtle)
-      const x = 10 + (nightProgress * 80);
+      // Moon arc - also East to West (right to left)
+      // X: 90% at moonrise (right/east), 10% at moonset (left/west)
+      const x = 90 - (nightProgress * 80);
       const y = 70 - (Math.sin(nightProgress * Math.PI) * 40);
 
       return { x, y, isSun: false, visible: true, scale: 0.8 };
