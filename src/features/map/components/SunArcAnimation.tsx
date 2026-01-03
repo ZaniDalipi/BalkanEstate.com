@@ -148,9 +148,9 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
       // Daytime sun position
       const dayProgress = (effectiveHour - sunrise) / daylightHours;
 
-      // X position: 95% (East/right edge) at sunrise → 5% (West/left edge) at sunset
-      // Using 95% to 5% so the sun is fully visible at the edges
-      const x = 95 - (dayProgress * 90);
+      // X position: Start from right edge (East) to left edge (West)
+      // 100% = right edge, 0% = left edge - true edge to edge
+      const x = 100 - (dayProgress * 100);
 
       // Y position: Use sine curve for natural arc centered in middle of screen
       // The arc height depends on the season (maxAltitude)
