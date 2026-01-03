@@ -15,7 +15,7 @@ import { CadastreLayer } from './CadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
 import Buildings3DLayer from './Buildings3DLayer';
 import SunPositionControl from './SunPositionControl';
-import SunArcAnimation, { type Season } from './SunArcAnimation';
+import { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
 import {
   FlyToController,
@@ -174,23 +174,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
   };
 
-  // Get current hour from shadowDateTime for sun animation
-  const currentHour = shadowDateTime.getHours() + shadowDateTime.getMinutes() / 60;
-
   return (
     <HighlightedPropertiesProvider properties={propertiesInView}>
       <div className="w-full h-full relative overflow-hidden">
-        {/* Animated sun/moon arc across the map - uses real local solar time */}
-        <SunArcAnimation
-          hour={currentHour}
-          enabled={show3DBuildings}
-          isNightMode={false}
-          longitude={mapCenterLng}
-          latitude={mapCenterLat}
-          useRealTime={!isManualTimeControl}
-          season={selectedSeason}
-        />
-
         <MapContainer
           center={center}
           zoom={zoom}
