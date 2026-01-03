@@ -382,6 +382,110 @@ const SnapchatMapOverlay: React.FC<SnapchatMapOverlayProps> = ({ enabled }) => {
         .night-mode-marker-pulse {
           animation: nightGlowPulse 2s ease-in-out infinite;
         }
+
+        /* Smooth slide animations for mobile controls */
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 10px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slideLeft {
+          from {
+            opacity: 0;
+            transform: translateX(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes slideRight {
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .animate-slide-up {
+          animation: slideUp 0.3s ease-out forwards;
+        }
+
+        .animate-slide-down {
+          animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .animate-slide-left {
+          animation: slideLeft 0.3s ease-out forwards;
+        }
+
+        .animate-slide-right {
+          animation: slideRight 0.3s ease-out forwards;
+        }
+
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .animate-scale-in {
+          animation: scaleIn 0.25s ease-out forwards;
+        }
+
+        /* Smooth button press feedback */
+        .active\\:scale-95:active {
+          transform: scale(0.95);
+        }
+
+        /* Enhanced transition for all interactive elements */
+        button, .transition-all {
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Prevent layout shift on mobile */
+        .pointer-events-none > * {
+          will-change: transform, opacity;
+        }
       `}</style>
     </>
   );
