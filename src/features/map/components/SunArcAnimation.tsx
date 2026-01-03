@@ -119,8 +119,8 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   );
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
 
-  // Animate the sun - advances time slowly for visible movement
-  // Updates every 5 seconds, advances ~1 minute of sun time per update
+  // Animate the sun - advances time very slowly for smooth timelapse
+  // Updates every 10 seconds, advances ~30 seconds of sun time per update
   useEffect(() => {
     if (!enabled) return;
 
@@ -130,12 +130,12 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
 
     const interval = setInterval(() => {
       setSimulatedHour(prev => {
-        // Advance by 0.017 hours (~1 minute) every 5 seconds
-        // Full day cycle takes ~2 hours (slow timelapse)
-        const next = prev + 0.017;
+        // Advance by 0.008 hours (~30 seconds) every 10 seconds
+        // Full day cycle takes ~8 hours (very slow timelapse)
+        const next = prev + 0.008;
         return next >= 24 ? next - 24 : next;
       });
-    }, 5000); // Update every 5 seconds
+    }, 10000); // Update every 10 seconds
 
     return () => clearInterval(interval);
   }, [longitude, enabled]);
@@ -226,7 +226,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           left: `${celestialBody.x}%`,
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
-          transition: 'left 4.5s linear, top 4.5s linear, transform 0.5s ease-out',
+          transition: 'left 9s linear, top 9s linear, transform 0.5s ease-out',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
@@ -343,7 +343,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             transform: 'translate(-50%, 0)',
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
-            transition: 'left 4.5s linear, top 4.5s linear',
+            transition: 'left 9s linear, top 9s linear',
           }}
         />
       )}
