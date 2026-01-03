@@ -1,8 +1,8 @@
 // SunArcAnimation Component
 // Displays an animated sun/moon following natural astronomical path across the map
-// Path varies by season - higher arc in summer, lower in winter
+// Optimized for performance with memoization and GPU-accelerated animations
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, memo } from 'react';
 
 interface SunArcAnimationProps {
   hour: number;
@@ -13,22 +13,28 @@ interface SunArcAnimationProps {
   useRealTime?: boolean;
 }
 
+// Pre-calculated constants for performance
+const DEG_TO_RAD = Math.PI / 180;
+const RAD_TO_DEG = 180 / Math.PI;
+const SOLAR_DECLINATION_FACTOR = 2 * Math.PI / 365;
+const MS_PER_DAY = 86400000;
+
+// Static ray angles - calculated once
+const SUN_RAY_ANGLES = Array.from({ length: 12 }, (_, i) => i * 30);
+
 /**
  * Calculate the day of year (1-365/366)
  */
 const getDayOfYear = (date: Date): number => {
   const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date.getTime() - start.getTime();
-  const oneDay = 1000 * 60 * 60 * 24;
-  return Math.floor(diff / oneDay);
+  return Math.floor((date.getTime() - start.getTime()) / MS_PER_DAY);
 };
 
 /**
  * Calculate solar declination angle in degrees
- * Ranges from -23.45° (winter solstice) to +23.45° (summer solstice)
  */
 const getSolarDeclination = (dayOfYear: number): number => {
-  return 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+  return 23.45 * Math.sin(SOLAR_DECLINATION_FACTOR * (dayOfYear - 81));
 };
 
 /**
@@ -36,17 +42,15 @@ const getSolarDeclination = (dayOfYear: number): number => {
  */
 const calculateSunriseSunset = (latitude: number, dayOfYear: number): { sunrise: number; sunset: number } => {
   const declination = getSolarDeclination(dayOfYear);
-  const latRad = latitude * (Math.PI / 180);
-  const decRad = declination * (Math.PI / 180);
-
+  const latRad = latitude * DEG_TO_RAD;
+  const decRad = declination * DEG_TO_RAD;
   const cosHourAngle = -Math.tan(latRad) * Math.tan(decRad);
 
+  // Handle polar day/night
   if (cosHourAngle < -1) return { sunrise: 0, sunset: 24 };
   if (cosHourAngle > 1) return { sunrise: 12, sunset: 12 };
 
-  const hourAngle = Math.acos(cosHourAngle) * (180 / Math.PI);
-  const daylightHours = (2 * hourAngle) / 15;
-
+  const daylightHours = (2 * Math.acos(cosHourAngle) * RAD_TO_DEG) / 15;
   return {
     sunrise: 12 - (daylightHours / 2),
     sunset: 12 + (daylightHours / 2)
@@ -54,12 +58,10 @@ const calculateSunriseSunset = (latitude: number, dayOfYear: number): { sunrise:
 };
 
 /**
- * Calculate the maximum sun altitude for the day based on latitude and declination
+ * Calculate the maximum sun altitude for the day
  */
 const getMaxSunAltitude = (latitude: number, dayOfYear: number): number => {
-  const declination = getSolarDeclination(dayOfYear);
-  // Maximum altitude = 90 - |latitude - declination|
-  return 90 - Math.abs(latitude - declination);
+  return 90 - Math.abs(latitude - getSolarDeclination(dayOfYear));
 };
 
 /**
@@ -67,43 +69,74 @@ const getMaxSunAltitude = (latitude: number, dayOfYear: number): number => {
  */
 const calculateLocalSolarTime = (longitude: number): number => {
   const now = new Date();
-  const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
-  const solarOffset = longitude / 15;
+  const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60;
+  let localSolarTime = utcHours + (longitude / 15);
 
-  let localSolarTime = utcHours + solarOffset;
-  while (localSolarTime < 0) localSolarTime += 24;
-  while (localSolarTime >= 24) localSolarTime -= 24;
+  // Normalize to 0-24 range
+  return ((localSolarTime % 24) + 24) % 24;
+};
 
-  return localSolarTime;
+// Color presets for different sun altitudes - cached objects
+const SUN_COLORS = {
+  veryLow: { body: '#FF5722', glow: 'rgba(255,87,34,0.6)', rays: 'rgba(255,100,50,0.8)' },
+  low: { body: '#FF9800', glow: 'rgba(255,152,0,0.5)', rays: 'rgba(255,180,50,0.7)' },
+  medium: { body: '#FFC107', glow: 'rgba(255,193,7,0.4)', rays: 'rgba(255,210,80,0.6)' },
+  high: { body: '#FFEB3B', glow: 'rgba(255,235,59,0.35)', rays: 'rgba(255,245,120,0.5)' },
+} as const;
+
+/**
+ * Get sun color based on altitude
+ */
+const getSunColor = (altitude: number) => {
+  if (altitude < 5) return SUN_COLORS.veryLow;
+  if (altitude < 15) return SUN_COLORS.low;
+  if (altitude < 30) return SUN_COLORS.medium;
+  return SUN_COLORS.high;
 };
 
 /**
- * Get sun color based on altitude (atmospheric effects)
+ * Sun rays component - memoized to prevent re-renders
  */
-const getSunColor = (altitude: number): { body: string; glow: string; rays: string } => {
-  if (altitude < 5) {
-    // Very low - deep orange/red (sunrise/sunset)
-    return { body: '#FF5722', glow: 'rgba(255,87,34,0.6)', rays: 'rgba(255,100,50,0.8)' };
-  } else if (altitude < 15) {
-    // Low - orange (golden hour)
-    return { body: '#FF9800', glow: 'rgba(255,152,0,0.5)', rays: 'rgba(255,180,50,0.7)' };
-  } else if (altitude < 30) {
-    // Medium - yellow-orange
-    return { body: '#FFC107', glow: 'rgba(255,193,7,0.4)', rays: 'rgba(255,210,80,0.6)' };
-  } else {
-    // High - bright yellow
-    return { body: '#FFEB3B', glow: 'rgba(255,235,59,0.35)', rays: 'rgba(255,245,120,0.5)' };
-  }
-};
+const SunRays = memo(({ colors, isGoldenHour }: { colors: typeof SUN_COLORS.high; isGoldenHour: boolean }) => (
+  <div className="absolute inset-0 animate-spin" style={{ animationDuration: '60s' }}>
+    {SUN_RAY_ANGLES.map((angle) => (
+      <div
+        key={angle}
+        className="absolute"
+        style={{
+          width: '3px',
+          height: isGoldenHour ? '30px' : '22px',
+          left: '50%',
+          top: '50%',
+          background: `linear-gradient(to top, ${colors.rays} 0%, transparent 100%)`,
+          transform: `translate(-50%, -100%) rotate(${angle}deg)`,
+          transformOrigin: 'center bottom',
+        }}
+      />
+    ))}
+  </div>
+));
+SunRays.displayName = 'SunRays';
+
+/**
+ * Moon craters - static component
+ */
+const MoonCraters = memo(() => (
+  <>
+    <div className="absolute rounded-full opacity-25" style={{ width: '7px', height: '7px', background: '#94A3B8', top: '6px', left: '6px' }} />
+    <div className="absolute rounded-full opacity-20" style={{ width: '5px', height: '5px', background: '#94A3B8', top: '16px', left: '14px' }} />
+    <div className="absolute rounded-full opacity-15" style={{ width: '4px', height: '4px', background: '#94A3B8', top: '10px', left: '20px' }} />
+  </>
+));
+MoonCraters.displayName = 'MoonCraters';
 
 /**
  * SunArcAnimation Component
  *
- * Natural sun path across the sky:
- * - Rises from the RIGHT (East)
- * - Arcs across the TOP of the map
- * - Sets on the LEFT (West)
- * - Arc height varies by season (higher in summer, lower in winter)
+ * Optimized for performance:
+ * - Uses GPU-accelerated transforms via will-change
+ * - Memoizes calculations and sub-components
+ * - Minimal re-renders through careful state management
  */
 const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   hour,
@@ -113,114 +146,76 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   latitude = 40,
   useRealTime = true,
 }) => {
-  // Simulated hour for smooth demo animation
   const [simulatedHour, setSimulatedHour] = useState<number>(() =>
     calculateLocalSolarTime(longitude)
   );
-  const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
+  const [dayOfYear, setDayOfYear] = useState<number>(() => getDayOfYear(new Date()));
 
-  // Animate the sun - slow time progression so sun can reach position
-  // Updates every 6 seconds, advances only ~4 seconds of sun time per update
+  // Animation effect - updates position periodically
   useEffect(() => {
     if (!enabled) return;
 
-    const startHour = calculateLocalSolarTime(longitude);
-    setSimulatedHour(startHour);
-    setCurrentDate(new Date());
+    setSimulatedHour(calculateLocalSolarTime(longitude));
+    setDayOfYear(getDayOfYear(new Date()));
 
     const interval = setInterval(() => {
       setSimulatedHour(prev => {
-        // Advance by 0.001 hours (~4 seconds) every 6 real seconds
-        // Full day cycle takes ~40 hours (very slow time slider)
-        // Sun has plenty of time to reach its position
         const next = prev + 0.001;
         return next >= 24 ? next - 24 : next;
       });
-    }, 6000); // Update every 6 seconds
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [longitude, enabled]);
 
   const effectiveHour = useRealTime ? simulatedHour : hour;
-  const dayOfYear = getDayOfYear(currentDate);
 
-  // Calculate sun/moon position with natural arc
+  // Calculate celestial body position - memoized
   const celestialBody = useMemo(() => {
     const { sunrise, sunset } = calculateSunriseSunset(latitude, dayOfYear);
     const maxAltitude = getMaxSunAltitude(latitude, dayOfYear);
     const daylightHours = sunset - sunrise;
-    const nightHours = 24 - daylightHours;
-
     const isDay = effectiveHour >= sunrise && effectiveHour < sunset;
 
     if (isDay) {
-      // Daytime sun position
       const dayProgress = (effectiveHour - sunrise) / daylightHours;
-
-      // X position: Start from right edge (East) to left edge (West)
-      // 100% = right edge, 0% = left edge - true edge to edge
       const x = 100 - (dayProgress * 100);
-
-      // Y position: Use sine curve for natural arc centered in middle of screen
-      // The arc height depends on the season (maxAltitude)
-      const arcHeight = (maxAltitude / 90) * 40; // Map altitude to arc height (max 40% of screen)
+      const arcHeight = (maxAltitude / 90) * 40;
       const altitudeProgress = Math.sin(dayProgress * Math.PI);
-
-      // Y: 50% is center, arc goes from bottom-center to top-center and back
-      // At sunrise/sunset: y = 50% (center), at noon: y = 50% - arcHeight (higher)
-      const y = 50 - (altitudeProgress * arcHeight) + 10; // +10 to shift slightly down
-
-      // Current altitude for color calculation
+      const y = 50 - (altitudeProgress * arcHeight) + 10;
       const currentAltitude = altitudeProgress * maxAltitude;
-      const colors = getSunColor(currentAltitude);
-
-      // Sun appears larger near horizon
-      const scale = currentAltitude < 15 ? 1.2 : 1.0;
 
       return {
         x,
         y,
         isSun: true,
-        altitude: currentAltitude,
-        colors,
-        scale,
+        colors: getSunColor(currentAltitude),
+        scale: currentAltitude < 15 ? 1.2 : 1.0,
         isGoldenHour: currentAltitude < 15,
-        dayProgress,
-      };
-    } else {
-      // Nighttime moon position
-      let nightProgress: number;
-      if (effectiveHour >= sunset) {
-        nightProgress = (effectiveHour - sunset) / nightHours;
-      } else {
-        nightProgress = (effectiveHour + (24 - sunset)) / nightHours;
-      }
-
-      // Moon also goes East to West edge to edge, but lower arc
-      const x = 95 - (nightProgress * 90);
-      const arcHeight = 25; // Moon has gentler arc
-      // Moon arc centered but lower than sun
-      const y = 55 - (Math.sin(nightProgress * Math.PI) * arcHeight);
-
-      return {
-        x,
-        y,
-        isSun: false,
-        altitude: 20,
-        colors: null,
-        scale: 0.9,
-        isGoldenHour: false,
-        dayProgress: 0,
       };
     }
+
+    // Nighttime moon
+    const nightHours = 24 - daylightHours;
+    const nightProgress = effectiveHour >= sunset
+      ? (effectiveHour - sunset) / nightHours
+      : (effectiveHour + (24 - sunset)) / nightHours;
+
+    return {
+      x: 95 - (nightProgress * 90),
+      y: 55 - (Math.sin(nightProgress * Math.PI) * 25),
+      isSun: false,
+      colors: null,
+      scale: 0.9,
+      isGoldenHour: false,
+    };
   }, [effectiveHour, latitude, dayOfYear]);
 
-  // Early return AFTER all hooks
   if (!enabled) return null;
 
   return (
     <>
-      {/* Sun/Moon */}
+      {/* Celestial body container */}
       <div
         className="absolute pointer-events-none z-[401]"
         style={{
@@ -228,14 +223,14 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           top: `${celestialBody.y}%`,
           transform: `translate(-50%, -50%) scale(${celestialBody.scale})`,
           transition: 'left 5s linear, top 5s linear, transform 0.5s ease-out',
+          willChange: 'left, top',
         }}
       >
         {celestialBody.isSun && celestialBody.colors ? (
-          // Sun
           <div className="relative">
             {/* Outer glow */}
             <div
-              className="absolute rounded-full animate-pulse"
+              className="absolute rounded-full"
               style={{
                 width: celestialBody.isGoldenHour ? '100px' : '80px',
                 height: celestialBody.isGoldenHour ? '100px' : '80px',
@@ -243,27 +238,12 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
                 background: `radial-gradient(circle, ${celestialBody.colors.glow} 0%, transparent 70%)`,
+                animation: 'pulse 3s ease-in-out infinite',
               }}
             />
 
             {/* Rotating rays */}
-            <div className="absolute inset-0 animate-spin" style={{ animationDuration: '60s' }}>
-              {[...Array(12)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute"
-                  style={{
-                    width: '3px',
-                    height: celestialBody.isGoldenHour ? '30px' : '22px',
-                    left: '50%',
-                    top: '50%',
-                    background: `linear-gradient(to top, ${celestialBody.colors?.rays} 0%, transparent 100%)`,
-                    transform: `translate(-50%, -100%) rotate(${i * 30}deg)`,
-                    transformOrigin: 'center bottom',
-                  }}
-                />
-              ))}
-            </div>
+            <SunRays colors={celestialBody.colors} isGoldenHour={celestialBody.isGoldenHour} />
 
             {/* Sun body */}
             <div
@@ -272,11 +252,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
                 width: '44px',
                 height: '44px',
                 background: `radial-gradient(circle at 35% 35%, #FFFFFF 0%, ${celestialBody.colors.body} 40%, ${celestialBody.colors.body}cc 100%)`,
-                boxShadow: `
-                  0 0 30px ${celestialBody.colors.glow},
-                  0 0 60px ${celestialBody.colors.glow},
-                  inset 0 0 15px rgba(255,255,255,0.4)
-                `,
+                boxShadow: `0 0 30px ${celestialBody.colors.glow}, 0 0 60px ${celestialBody.colors.glow}`,
               }}
             />
 
@@ -297,11 +273,10 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             )}
           </div>
         ) : (
-          // Moon
           <div className="relative">
             {/* Moon glow */}
             <div
-              className="absolute rounded-full animate-pulse"
+              className="absolute rounded-full"
               style={{
                 width: '60px',
                 height: '60px',
@@ -309,7 +284,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
                 background: 'radial-gradient(circle, rgba(200,220,255,0.35) 0%, transparent 70%)',
-                animationDuration: '4s',
+                animation: 'pulse 4s ease-in-out infinite',
               }}
             />
 
@@ -320,19 +295,16 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
                 width: '32px',
                 height: '32px',
                 background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #F0F4FF 35%, #E2E8F0 65%, #CBD5E1 100%)',
-                boxShadow: '0 0 20px rgba(200,220,255,0.5), inset -4px -4px 10px rgba(100,120,150,0.2)',
+                boxShadow: '0 0 20px rgba(200,220,255,0.5)',
               }}
             >
-              {/* Craters */}
-              <div className="absolute rounded-full opacity-25" style={{ width: '7px', height: '7px', background: '#94A3B8', top: '6px', left: '6px' }} />
-              <div className="absolute rounded-full opacity-20" style={{ width: '5px', height: '5px', background: '#94A3B8', top: '16px', left: '14px' }} />
-              <div className="absolute rounded-full opacity-15" style={{ width: '4px', height: '4px', background: '#94A3B8', top: '10px', left: '20px' }} />
+              <MoonCraters />
             </div>
           </div>
         )}
       </div>
 
-      {/* Light beam from sun */}
+      {/* Light beam from sun - only render when visible */}
       {celestialBody.isSun && !isNightMode && celestialBody.colors && (
         <div
           className="absolute pointer-events-none z-[397]"
@@ -345,6 +317,7 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
             background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
             opacity: 0.3,
             transition: 'left 5s linear, top 5s linear',
+            willChange: 'left, top',
           }}
         />
       )}
@@ -363,4 +336,4 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
   );
 };
 
-export default SunArcAnimation;
+export default memo(SunArcAnimation);
