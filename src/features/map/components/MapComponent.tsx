@@ -52,6 +52,13 @@ const TILE_LAYERS = {
 };
 
 type TileLayerType = keyof typeof TILE_LAYERS;
+
+// Bounding box for the Balkan region
+const BALKAN_BOUNDS = L.latLngBounds(
+  [34, 13], // Southwest corner (Southern Greece, Western Croatia)
+  [49, 31] // Northeast corner (Northern Romania, Eastern Bulgaria)
+);
+
 interface MapComponentProps {
   properties: Property[];
   onMapMove: (bounds: L.LatLngBounds, center: L.LatLng) => void;
@@ -190,8 +197,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           scrollWheelZoom={true}
           className="w-full h-full"
           maxZoom={22}
-          minZoom={2}
+          minZoom={5}
           zoomControl={false}
+          maxBounds={BALKAN_BOUNDS}
+          maxBoundsViscosity={0.8}
           preferCanvas={true}
           updateWhenIdle={true}
           updateWhenZooming={false}
