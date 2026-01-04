@@ -211,21 +211,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                 🔥 {t('property:status.urgent').toUpperCase()}
               </div>
             )}
-
-            {/* 360° Tour Badge */}
-            {property.virtualTour360Url && (
-              <div
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1"
-                title="360° Virtual Tour Available"
-              >
-                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  <path d="M2 12h20" />
-                </svg>
-                <span>360°</span>
-              </div>
-            )}
           </div>
 
           {/* Favorite Button */}
@@ -246,10 +231,26 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         {/* Bottom info bar on image */}
         <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
           <div className="flex items-center justify-between gap-2">
-            {/* Property Type Badge */}
-            <span className="bg-white/95 backdrop-blur-sm text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md shadow-md">
-              {propertyTypeLabel}
-            </span>
+            {/* Property Type Badge + 360° indicator */}
+            <div className="flex items-center gap-1.5">
+              <span className="bg-white/95 backdrop-blur-sm text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md shadow-md">
+                {propertyTypeLabel}
+              </span>
+              {/* 360° Tour Badge - positioned next to property type for less interference */}
+              {property.virtualTour360Url && (
+                <div
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold px-1.5 py-1 rounded-md shadow-md flex items-center gap-0.5"
+                  title="360° Virtual Tour Available"
+                >
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    <path d="M2 12h20" />
+                  </svg>
+                  <span>360°</span>
+                </div>
+              )}
+            </div>
             {/* Price Badge */}
             <div className="flex flex-col items-end">
               {priceInfo.hasReduction && (
