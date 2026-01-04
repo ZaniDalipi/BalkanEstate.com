@@ -259,18 +259,18 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
   // Calculate scaled dimensions
-  const baseSize = 30;
+  const baseSize = 38;
   const scaledSize = Math.round(baseSize * zoomScale);
-  const fontSize = Math.max(6, Math.round(8 * zoomScale));
-  const circleRadius = Math.round((13 + (isHovered ? 3 : 0)) * zoomScale);
+  const fontSize = Math.max(7, Math.round(9 * zoomScale));
+  const circleRadius = Math.round((15 + (isHovered ? 3 : 0)) * zoomScale);
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
     <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
       <div class="${promotedInnerClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
-        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
-            <text x="15" y="16" font-family="Inter, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <circle cx="19" cy="19" r="${15 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
+            <text x="19" y="20" font-family="Inter, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
@@ -352,9 +352,9 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 45px; height: 36px;">
-      <div class="${promotedInnerClass}" style="width: 45px; height: 36px;">
-        <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 56px; height: 45px;">
+      <div class="${promotedInnerClass}" style="width: 56px; height: 45px;">
+        <svg width="56" height="45" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <path d="M35 56L25 44H45L35 56Z" fill="${pointerColor}" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
             <text x="35" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
@@ -368,9 +368,9 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [45, 36],
-    iconAnchor: [22.5, 36],
-    popupAnchor: [0, -36],
+    iconSize: [56, 45],
+    iconAnchor: [28, 45],
+    popupAnchor: [0, -45],
   });
 };
 
