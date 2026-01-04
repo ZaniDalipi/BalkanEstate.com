@@ -909,34 +909,55 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             const finalAddress = listingData.streetAddress.trim();
 
             // Calculate distances using Gemini AI (optional - won't block listing creation)
+            // Skip calculation if editing and address hasn't changed
             let distances = {
-                distanceToCenter: undefined,
-                distanceToSea: undefined,
-                distanceToSchool: undefined,
-                distanceToHospital: undefined,
+                distanceToCenter: undefined as number | undefined,
+                distanceToSea: undefined as number | undefined,
+                distanceToSchool: undefined as number | undefined,
+                distanceToHospital: undefined as number | undefined,
             };
 
-            try {
-                console.log('📍 Calculating property distances using Gemini AI...');
-                const calculatedDistances = await calculatePropertyDistances(
-                    finalAddress,
-                    selectedCity,
-                    selectedCountry,
-                    lat,
-                    lng
-                );
+            // Check if address has changed when editing
+            const addressChanged = !propertyToEdit ||
+                propertyToEdit.address !== finalAddress ||
+                propertyToEdit.city !== selectedCity ||
+                propertyToEdit.country !== selectedCountry ||
+                Math.abs((propertyToEdit.lat || 0) - lat) > 0.0001 ||
+                Math.abs((propertyToEdit.lng || 0) - lng) > 0.0001;
+
+            if (addressChanged) {
+                try {
+                    console.log('📍 Calculating property distances using Gemini AI...');
+                    const calculatedDistances = await calculatePropertyDistances(
+                        finalAddress,
+                        selectedCity,
+                        selectedCountry,
+                        lat,
+                        lng
+                    );
+                    distances = {
+                        distanceToCenter: calculatedDistances.distanceToCenter < 999 ? calculatedDistances.distanceToCenter : undefined,
+                        distanceToSea: calculatedDistances.distanceToSea < 999 ? calculatedDistances.distanceToSea : undefined,
+                        distanceToSchool: calculatedDistances.distanceToSchool < 999 ? calculatedDistances.distanceToSchool : undefined,
+                        distanceToHospital: calculatedDistances.distanceToHospital < 999 ? calculatedDistances.distanceToHospital : undefined,
+                    };
+                    console.log('✅ Distances calculated:', distances);
+                } catch (error) {
+                    console.warn('⚠️ Failed to calculate distances with Gemini AI. Listing will be created without distance information.');
+                    console.error('Distance calculation error details:', error);
+                    // Continue without distances - they will be undefined
+                    // This is intentional - we don't want to block listing creation if Gemini API fails
+                }
+            } else {
+                // Address hasn't changed, reuse existing distances
+                console.log('📍 Address unchanged - reusing existing distances');
                 distances = {
-                    distanceToCenter: calculatedDistances.distanceToCenter < 999 ? calculatedDistances.distanceToCenter : undefined,
-                    distanceToSea: calculatedDistances.distanceToSea < 999 ? calculatedDistances.distanceToSea : undefined,
-                    distanceToSchool: calculatedDistances.distanceToSchool < 999 ? calculatedDistances.distanceToSchool : undefined,
-                    distanceToHospital: calculatedDistances.distanceToHospital < 999 ? calculatedDistances.distanceToHospital : undefined,
+                    distanceToCenter: propertyToEdit.distanceToCenter,
+                    distanceToSea: propertyToEdit.distanceToSea,
+                    distanceToSchool: propertyToEdit.distanceToSchool,
+                    distanceToHospital: propertyToEdit.distanceToHospital,
                 };
-                console.log('✅ Distances calculated:', distances);
-            } catch (error) {
-                console.warn('⚠️ Failed to calculate distances with Gemini AI. Listing will be created without distance information.');
-                console.error('Distance calculation error details:', error);
-                // Continue without distances - they will be undefined
-                // This is intentional - we don't want to block listing creation if Gemini API fails
+                console.log('♻️ Reusing distances:', distances);
             }
 
             console.log('✅ FINAL COORDINATES BEING SAVED TO PROPERTY:', { lat, lng });

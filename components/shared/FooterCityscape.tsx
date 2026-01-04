@@ -255,7 +255,7 @@ const FooterCityscape: React.FC = () => {
             </div>
 
             {/* Styles */}
-            <style jsx>{`
+            <style>{`
                 @keyframes twinkle {
                     0%, 100% { opacity: 0.3; transform: scale(1); }
                     50% { opacity: 1; transform: scale(1.2); }
