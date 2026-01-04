@@ -152,6 +152,18 @@ if (typeof window !== 'undefined') {
 
 const ZOOM_THRESHOLD = 12;
 
+/**
+ * Calculate marker scale factor based on zoom level
+ * Markers get smaller when zoomed out to avoid clutter
+ */
+const getMarkerScaleForZoom = (zoom: number): number => {
+  if (zoom >= 12) return 1;      // Full size at zoom 12+
+  if (zoom >= 10) return 0.85;   // 85% at zoom 10-11
+  if (zoom >= 8) return 0.7;     // 70% at zoom 8-9
+  if (zoom >= 6) return 0.55;    // 55% at zoom 6-7
+  return 0.45;                    // 45% at zoom 5 and below
+};
+
 const PROPERTY_TYPE_COLORS: Record<
   NonNullable<Property['propertyType']> | 'other',
   string
@@ -197,10 +209,12 @@ const getPromotedMarkerInnerClass = (property: Property): string => {
 /**
  * Create simple circular marker for zoomed out view
  * Supports night mode with neon glow effects
+ * Scales based on zoom level to avoid clutter when zoomed out
  */
-const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false) => {
+const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 12) => {
   const price = formatMarkerPrice(property.price);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
+  const zoomScale = getMarkerScaleForZoom(zoom);
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
@@ -243,11 +257,17 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
+  // Calculate scaled dimensions
+  const baseSize = 30;
+  const scaledSize = Math.round(baseSize * zoomScale);
+  const fontSize = Math.max(6, Math.round(8 * zoomScale));
+  const circleRadius = Math.round((13 + (isHovered ? 3 : 0)) * zoomScale);
+
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 30px; height: 30px;">
-      <div class="${promotedInnerClass}" style="width: 30px; height: 30px;">
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
+      <div class="${promotedInnerClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
+        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
             <text x="15" y="16" font-family="Inter, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
@@ -260,9 +280,9 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    popupAnchor: [0, -15],
+    iconSize: [scaledSize, scaledSize],
+    iconAnchor: [scaledSize / 2, scaledSize / 2],
+    popupAnchor: [0, -scaledSize / 2],
   });
 };
 
@@ -359,7 +379,7 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
  */
 const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boolean = false, isNightMode: boolean = false): L.DivIcon => {
   if (zoom < ZOOM_THRESHOLD) {
-    return createSimpleMarkerIcon(property, isHovered, isNightMode);
+    return createSimpleMarkerIcon(property, isHovered, isNightMode, zoom);
   }
   return createDetailedMarkerIcon(property, isHovered, isNightMode);
 };
