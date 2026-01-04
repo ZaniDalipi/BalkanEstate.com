@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
 import { Property } from '@/types';
@@ -192,6 +192,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
 
+  // Use ref for onMapMove to prevent infinite loops when callback changes
+  const onMapMoveRef = useRef(onMapMove);
+  useEffect(() => {
+    onMapMoveRef.current = onMapMove;
+  });
+
   // Handle shadow time change from SunPositionControl
   const handleShadowTimeChange = useCallback((dateTime: Date) => {
     setShadowDateTime(dateTime);
@@ -214,8 +220,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const handleMapMoveWithCenter = useCallback((bounds: L.LatLngBounds, center: L.LatLng) => {
     setMapCenterLng(center.lng);
     setMapCenterLat(center.lat);
-    onMapMove(bounds, center);
-  }, [onMapMove]);
+    onMapMoveRef.current(bounds, center);
+  }, []);
 
   const validProperties = useMemo(() => {
     return properties.filter(
