@@ -423,29 +423,68 @@ const MapComponent: React.FC<MapComponentProps> = ({
     rectangle.setMap(null);
   }, [onDrawComplete]);
 
-  // Create marker icon
-  const createMarkerIcon = useCallback((property: Property, isHovered: boolean): google.maps.Icon | google.maps.Symbol => {
+  // Zoom threshold for switching marker styles
+  const ZOOM_THRESHOLD = 12;
+
+  // Create simple circular marker for zoomed out view (matching Leaflet: 30x30)
+  const createSimpleMarkerIcon = useCallback((property: Property, isHovered: boolean): google.maps.Icon => {
     const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
     const isPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
     const promotionColor = isPromoted ? PROMOTION_TIER_COLORS[property.promotionTier || 'featured'] : null;
-    const scale = isHovered ? 1.2 : 1;
     const price = formatMarkerPrice(property.price);
 
-    // Create SVG marker with house shape
+    const size = isHovered ? 36 : 30;
+    const radius = isHovered ? 16 : 13;
+    const strokeWidth = isPromoted ? 3 : 2;
+
     const svg = `
-      <svg width="${60 * scale}" height="${48 * scale}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M35 56L25 44H45L35 56Z" fill="#003A96"/>
-        <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${color}" stroke="${promotionColor || '#FFFFFF'}" stroke-width="${promotionColor ? 3 : 2}"/>
-        <text x="35" y="30" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+      <svg width="${size}" height="${size}" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="15" cy="15" r="${radius}" fill="${color}" stroke="${promotionColor || '#FFFFFF'}" stroke-width="${strokeWidth}"/>
+        <text x="15" y="16" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
       </svg>
     `;
 
     return {
       url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new google.maps.Size(60 * scale, 48 * scale),
-      anchor: new google.maps.Point(30 * scale, 48 * scale),
+      scaledSize: new google.maps.Size(size, size),
+      anchor: new google.maps.Point(size / 2, size / 2),
     };
   }, []);
+
+  // Create detailed house-shaped marker for zoomed in view (matching Leaflet: 45x36)
+  const createDetailedMarkerIcon = useCallback((property: Property, isHovered: boolean): google.maps.Icon => {
+    const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+    const isPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
+    const promotionColor = isPromoted ? PROMOTION_TIER_COLORS[property.promotionTier || 'featured'] : null;
+    const price = formatMarkerPrice(property.price);
+
+    const scale = isHovered ? 1.15 : 1;
+    const width = 45 * scale;
+    const height = 36 * scale;
+    const strokeWidth = isPromoted ? 3 : 2;
+
+    const svg = `
+      <svg width="${width}" height="${height}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M35 56L25 44H45L35 56Z" fill="#003A96"/>
+        <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${color}" stroke="${promotionColor || '#FFFFFF'}" stroke-width="${strokeWidth}"/>
+        <text x="35" y="30" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+      </svg>
+    `;
+
+    return {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(width, height),
+      anchor: new google.maps.Point(width / 2, height),
+    };
+  }, []);
+
+  // Create marker icon based on zoom level
+  const createMarkerIcon = useCallback((property: Property, isHovered: boolean): google.maps.Icon => {
+    if (currentZoom < ZOOM_THRESHOLD) {
+      return createSimpleMarkerIcon(property, isHovered);
+    }
+    return createDetailedMarkerIcon(property, isHovered);
+  }, [currentZoom, createSimpleMarkerIcon, createDetailedMarkerIcon]);
 
   if (loadError) {
     return (
