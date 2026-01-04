@@ -292,6 +292,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     libraries,
   });
 
+  // Debug: Log API key status and properties count
+  useEffect(() => {
+    console.log('[MapComponent] API Key loaded:', GOOGLE_MAPS_API_KEY ? 'Yes' : 'No (MISSING!)');
+    console.log('[MapComponent] Properties received:', properties.length);
+  }, [properties.length]);
+
   // Initial center
   const center = useMemo(() => {
     if (userLocation) {
@@ -302,9 +308,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   // Filter valid properties
   const validProperties = useMemo(() => {
-    return properties.filter(
+    const valid = properties.filter(
       (p) => p.lat != null && !isNaN(p.lat) && p.lng != null && !isNaN(p.lng)
     );
+    console.log('[MapComponent] Valid properties:', valid.length);
+    return valid;
   }, [properties]);
 
   // Limit properties for performance
