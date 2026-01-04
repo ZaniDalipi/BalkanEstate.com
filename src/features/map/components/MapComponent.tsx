@@ -17,6 +17,7 @@ import Buildings3DLayer from './Buildings3DLayer';
 import SunPositionControl from './SunPositionControl';
 import { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
+import PropertyAddressLabels from './PropertyAddressLabels';
 import {
   FlyToController,
   MapEvents,
@@ -59,6 +60,68 @@ const BALKAN_BOUNDS = L.latLngBounds(
   [34, 13], // Southwest corner (Southern Greece, Western Croatia)
   [49, 31] // Northeast corner (Northern Romania, Eastern Bulgaria)
 );
+
+// CSS for 3D perspective camera effect
+const inject3DPerspectiveStyles = () => {
+  const styleId = 'map-3d-perspective-styles';
+  if (document.getElementById(styleId)) return;
+
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+    /* 3D perspective container - creates isometric-like view */
+    .map-3d-perspective-container {
+      perspective: 1500px;
+      perspective-origin: 50% 25%;
+    }
+
+    /* Map transforms for 3D mode - subtle tilt for better building view */
+    .map-3d-active {
+      transform: rotateX(25deg) scale(1.08);
+      transform-origin: center 70%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Normal 2D mode */
+    .map-3d-inactive {
+      transform: rotateX(0deg) scale(1);
+      transform-origin: center center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Ensure controls stay upright in 3D mode */
+    .map-3d-active .leaflet-control-container {
+      transform: rotateX(-25deg);
+      transform-origin: center 30%;
+    }
+
+    /* Keep markers/popups properly oriented */
+    .map-3d-active .leaflet-marker-pane,
+    .map-3d-active .leaflet-popup-pane {
+      transform: rotateX(-25deg);
+      transform-origin: center 30%;
+    }
+
+    /* Smooth shadow for 3D depth effect */
+    .map-3d-active::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 5%;
+      right: 5%;
+      height: 40px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+// Initialize 3D perspective styles
+if (typeof window !== 'undefined') {
+  inject3DPerspectiveStyles();
+}
 
 interface MapComponentProps {
   properties: Property[];
@@ -177,12 +240,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   return (
     <HighlightedPropertiesProvider properties={propertiesInView}>
-      <div className="w-full h-full relative overflow-hidden">
+      <div className={`w-full h-full relative overflow-hidden ${show3DBuildings ? 'map-3d-perspective-container' : ''}`}>
         <MapContainer
           center={center}
           zoom={zoom}
           scrollWheelZoom={true}
-          className="w-full h-full"
+          className={`w-full h-full ${show3DBuildings ? 'map-3d-active' : 'map-3d-inactive'}`}
           maxZoom={22}
           minZoom={5}
           zoomControl={false}
@@ -222,6 +285,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <Buildings3DLayer
             enabled={show3DBuildings}
             dateTime={shadowDateTime}
+          />
+          {/* Property address/house number labels - visible at high zoom when tiles aren't detailed */}
+          <PropertyAddressLabels
+            properties={propertiesInView}
+            enabled={show3DBuildings}
+            minZoom={19}
           />
           {/* Famous landmarks and POIs */}
           <LandmarksLayer
