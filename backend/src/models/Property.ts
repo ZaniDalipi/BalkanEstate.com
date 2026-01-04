@@ -6,6 +6,14 @@ export interface IPropertyImage {
   tag: 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 }
 
+// Price interval for time-based pricing
+export interface IPriceInterval {
+  price: number;
+  startDate: Date;
+  endDate?: Date;
+  label?: string; // Optional label like "Summer Sale", "Holiday Special"
+}
+
 export interface IProperty extends Document {
   sellerId: mongoose.Types.ObjectId;
   createdByName: string; // Name of the user who created this listing
@@ -17,6 +25,10 @@ export interface IProperty extends Document {
   status: 'active' | 'pending' | 'sold' | 'draft';
   soldAt?: Date;
   price: number;
+  // Price discount fields
+  originalPrice?: number; // Original price before discount
+  priceReducedAt?: Date; // When price was reduced
+  priceIntervals?: IPriceInterval[]; // Time-based pricing intervals
   address: string;
   city: string;
   country: string;
@@ -132,6 +144,23 @@ const PropertySchema: Schema = new Schema(
       min: 0,
       index: true,
     },
+    // Price discount fields
+    originalPrice: {
+      type: Number,
+      min: 0,
+    },
+    priceReducedAt: {
+      type: Date,
+      index: true,
+    },
+    priceIntervals: [
+      {
+        price: { type: Number, required: true, min: 0 },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date },
+        label: { type: String },
+      },
+    ],
     address: {
       type: String,
       required: true,
@@ -371,5 +400,7 @@ PropertySchema.index({ isPromoted: 1, status: 1 });
 PropertySchema.index({ promotionTier: 1, isPromoted: 1, promotionEndDate: 1 });
 // Index for urgent properties
 PropertySchema.index({ hasUrgentBadge: 1, isPromoted: 1 });
+// Index for price-reduced properties
+PropertySchema.index({ priceReducedAt: 1, status: 1 });
 
 export default mongoose.model<IProperty>('Property', PropertySchema);

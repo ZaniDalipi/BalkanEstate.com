@@ -1,13 +1,14 @@
 // MapPropertyMarker
 // Property markers and popups for map display
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
 import { BuildingOfficeIcon } from '../../../constants';
+import { getPriceReductionInfo } from '../../../utils/priceUtils';
 
 // Inject CSS animations for map markers
 const injectMapMarkerStyles = () => {
@@ -415,6 +416,9 @@ const PropertyPopup: React.FC<{
   const promotionTier = property.promotionTier || 'standard';
   const tierConfig = POPUP_TIER_CONFIG[promotionTier] || POPUP_TIER_CONFIG.standard;
 
+  // Get price reduction info
+  const priceInfo = useMemo(() => getPriceReductionInfo(property), [property]);
+
   // For promoted properties, show up to 3 images; for regular, show all
   const images =
     property.images && property.images.length > 0
@@ -534,9 +538,23 @@ const PropertyPopup: React.FC<{
         <div className="p-3 bg-white">
           {/* Price with gradient */}
           <div className="flex items-center justify-between mb-2">
-            <span className="bg-gradient-to-r from-primary to-primary-dark text-white font-bold px-3 py-1 rounded-lg text-base shadow">
-              {formatPrice(property.price, property.country)}
-            </span>
+            <div className="flex flex-col">
+              {priceInfo.hasReduction && (
+                <span className="text-neutral-400 text-xs line-through">
+                  {formatPrice(priceInfo.originalPrice, property.country)}
+                </span>
+              )}
+              <span className={`font-bold px-3 py-1 rounded-lg text-base shadow text-white ${
+                priceInfo.hasReduction
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600'
+                  : 'bg-gradient-to-r from-primary to-primary-dark'
+              }`}>
+                {formatPrice(priceInfo.currentPrice, property.country)}
+                {priceInfo.hasReduction && (
+                  <span className="ml-1 text-xs font-bold">-{priceInfo.discountPercentage}%</span>
+                )}
+              </span>
+            </div>
             <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
               {property.propertyType}
             </span>
@@ -649,9 +667,19 @@ const PropertyPopup: React.FC<{
       {/* Price and property type */}
       <div className="mb-1.5">
         <div className="flex items-center justify-between">
-          <p className="font-bold text-base text-primary">
-            {formatPrice(property.price, property.country)}
-          </p>
+          <div className="flex flex-col">
+            {priceInfo.hasReduction && (
+              <span className="text-neutral-400 text-xs line-through">
+                {formatPrice(priceInfo.originalPrice, property.country)}
+              </span>
+            )}
+            <p className={`font-bold text-base ${priceInfo.hasReduction ? 'text-green-600' : 'text-primary'}`}>
+              {formatPrice(priceInfo.currentPrice, property.country)}
+              {priceInfo.hasReduction && (
+                <span className="ml-1 text-xs font-bold">-{priceInfo.discountPercentage}%</span>
+              )}
+            </p>
+          </div>
           <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
             {property.propertyType}
           </span>

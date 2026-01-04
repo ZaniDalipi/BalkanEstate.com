@@ -185,9 +185,19 @@
   "status": {
     "new": "Νέο",
     "reduced": "Μειωμένη Τιμή",
+    "priceReduced": "Μειωμένη Τιμή",
     "urgent": "Επείγον",
     "exclusive": "Αποκλειστικό",
     "underOffer": "Υπό Διαπραγμάτευση"
+  },
+  "priceDiscount": {
+    "originalPrice": "Αρχική Τιμή",
+    "currentPrice": "Τρέχουσα Τιμή",
+    "discount": "Έκπτωση",
+    "savings": "Εξοικονομείτε",
+    "reducedRecently": "Η τιμή μειώθηκε πρόσφατα",
+    "limitedTime": "Περιορισμένη Προσφορά",
+    "saleEnds": "Η έκπτωση λήγει"
   },
   "noResults": "Δεν βρέθηκαν ακίνητα",
   "tryDifferentFilters": "Δοκιμάστε να προσαρμόσετε τα φίλτρα ή τα κριτήρια αναζήτησης",

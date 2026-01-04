@@ -184,9 +184,19 @@
   "status": {
     "new": "Novo",
     "reduced": "Snižena Cena",
+    "priceReduced": "Snižena Cena",
     "urgent": "Hitno",
     "exclusive": "Ekskluzivno",
     "underOffer": "U Pregovorima"
+  },
+  "priceDiscount": {
+    "originalPrice": "Originalna Cena",
+    "currentPrice": "Trenutna Cena",
+    "discount": "Popust",
+    "savings": "Uštedite",
+    "reducedRecently": "Cena nedavno snižena",
+    "limitedTime": "Ograničena Ponuda",
+    "saleEnds": "Akcija se završava"
   },
   "noResults": "Nisu pronađene nekretnine",
   "tryDifferentFilters": "Pokušajte promeniti filtere ili kriterijume pretrage",

@@ -183,11 +183,21 @@
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
-    "new": "New",
-    "reduced": "Price Reduced",
-    "urgent": "Urgent",
-    "exclusive": "Exclusive",
-    "underOffer": "Under Offer"
+    "new": "Ново",
+    "reduced": "Намалена Цена",
+    "priceReduced": "Намалена Цена",
+    "urgent": "Итно",
+    "exclusive": "Ексклузивно",
+    "underOffer": "Во Преговори"
+  },
+  "priceDiscount": {
+    "originalPrice": "Оригинална Цена",
+    "currentPrice": "Тековна Цена",
+    "discount": "Попуст",
+    "savings": "Заштедете",
+    "reducedRecently": "Цената е намалена неодамна",
+    "limitedTime": "Ограничена Понуда",
+    "saleEnds": "Распродажбата завршува"
   },
   "noResults": "No properties found",
   "tryDifferentFilters": "Try adjusting your filters or search criteria",

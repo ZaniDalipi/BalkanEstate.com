@@ -1,10 +1,11 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
+import { getPriceReductionInfo, isPriceReducedRecently } from '@/utils/priceUtils';
 
 interface PropertyCardProps {
   property: Property;
@@ -21,6 +22,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const isInComparison = state.comparisonList.includes(property.id);
   const isNew = property.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isSold = property.status === 'sold';
+
+  // Calculate price reduction info
+  const priceInfo = useMemo(() => getPriceReductionInfo(property), [property]);
+  const isRecentlyReduced = useMemo(() => isPriceReducedRecently(property, 7), [property]);
 
   // Check if property has an active promotion
   const isActivelyPromoted = property.isPromoted &&
@@ -171,6 +176,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               </div>
             )}
 
+            {/* Price Reduced Badge */}
+            {!isSold && priceInfo.hasReduction && isRecentlyReduced && (
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+                {priceInfo.intervalLabel || t('property:status.priceReduced', 'PRICE REDUCED').toUpperCase()}
+              </div>
+            )}
+
             {/* Promotion Badges - Premium = Gold, Highlight = Light Blue, Featured = Pink */}
             {!isSold && isActivelyPromoted && promotionTier && (
               <div className={`text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 ${
@@ -236,9 +251,23 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               {propertyTypeLabel}
             </span>
             {/* Price Badge */}
-            <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-lg">
-              {formatPrice(property.price, property.country)}
-            </span>
+            <div className="flex flex-col items-end">
+              {priceInfo.hasReduction && (
+                <span className="text-white/80 text-[10px] line-through">
+                  {formatPrice(priceInfo.originalPrice, property.country)}
+                </span>
+              )}
+              <span className={`text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-lg ${
+                priceInfo.hasReduction
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600'
+                  : 'bg-gradient-to-r from-primary to-primary-dark'
+              }`}>
+                {formatPrice(priceInfo.currentPrice, property.country)}
+                {priceInfo.hasReduction && (
+                  <span className="ml-1 text-[10px] font-bold">-{priceInfo.discountPercentage}%</span>
+                )}
+              </span>
+            </div>
           </div>
         </div>
       </div>

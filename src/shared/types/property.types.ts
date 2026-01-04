@@ -27,6 +27,14 @@ export interface Seller {
   agencyId?: string;
 }
 
+// Price interval for time-based pricing
+export interface PriceInterval {
+  price: number;
+  startDate: number; // Unix timestamp
+  endDate?: number; // Unix timestamp, undefined means ongoing
+  label?: string; // Optional label like "Summer Sale", "Holiday Special"
+}
+
 export interface Property {
   id: string;
   title?: string;
@@ -34,6 +42,10 @@ export interface Property {
   status: PropertyStatus;
   soldAt?: number;
   price: number;
+  // Price discount fields
+  originalPrice?: number; // Original price before discount
+  priceReducedAt?: number; // Timestamp when price was reduced
+  priceIntervals?: PriceInterval[]; // Time-based pricing intervals
   address: string;
   city: string;
   country: string;
