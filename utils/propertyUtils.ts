@@ -71,6 +71,13 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const petsAllowedMatch = filters.petsAllowed !== null ? p.petsAllowed === filters.petsAllowed : true;
         const has360TourMatch = filters.has360Tour !== null ? p.hasVirtualTour360 === filters.has360Tour : true;
 
+        // Discount filter - property has discount if originalPrice exists and is higher than current price
+        const hasDiscountMatch = filters.hasDiscount !== null ?
+            (filters.hasDiscount === true
+                ? (p.originalPrice !== undefined && p.originalPrice > p.price)
+                : !(p.originalPrice !== undefined && p.originalPrice > p.price))
+            : true;
+
         // Floor number filters
         const minFloorNumberMatch = filters.minFloorNumber !== null ? (p.floorNumber !== undefined && p.floorNumber >= filters.minFloorNumber) : true;
         const maxFloorNumberMatch = filters.maxFloorNumber !== null ? (p.floorNumber !== undefined && p.floorNumber <= filters.maxFloorNumber) : true;
@@ -125,6 +132,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                hasPoolMatch &&
                petsAllowedMatch &&
                has360TourMatch &&
+               hasDiscountMatch &&
                minFloorNumberMatch &&
                maxFloorNumberMatch &&
                maxDistanceToCenterMatch &&

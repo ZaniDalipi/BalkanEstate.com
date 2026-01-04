@@ -123,6 +123,7 @@
     "pool": "Swimming Pool",
     "petsAllowed": "Pets Allowed",
     "has360Tour": "360° Виртуелна Тура",
+    "hasDiscount": "Намалена Цена",
     "placeholder": "Type amenity and press Enter (e.g., gym, pool)"
   },
   "distance": {

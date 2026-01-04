@@ -140,6 +140,8 @@ export interface Filters {
   maxDistanceToSchool: number | null;
   maxDistanceToHospital: number | null;
   amenities: string[];
+  // Price discount filter
+  hasDiscount: boolean | null;
 }
 
 export const initialFilters: Filters = {
@@ -177,4 +179,5 @@ export const initialFilters: Filters = {
   maxDistanceToSchool: null,
   maxDistanceToHospital: null,
   amenities: [],
+  hasDiscount: null,
 };
