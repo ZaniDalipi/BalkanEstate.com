@@ -8,7 +8,7 @@ import L from 'leaflet';
 import { Property } from '../../../types';
 import { formatPrice } from '../../../utils/currency';
 import { BuildingOfficeIcon } from '../../../constants';
-import { getPriceReductionInfo } from '../../../utils/priceUtils';
+import { getPriceReductionInfo } from '@/src/utils/priceUtils';
 
 // Inject CSS animations for map markers
 const injectMapMarkerStyles = () => {
