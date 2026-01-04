@@ -145,18 +145,6 @@ if (typeof window !== 'undefined') {
 
 const ZOOM_THRESHOLD = 12;
 
-/**
- * Calculate marker scale factor based on zoom level
- * Markers get smaller as zoom increases (inverse relationship)
- * At zoom 12: 1.0 scale, At zoom 22: 0.5 scale
- */
-const getMarkerScaleForZoom = (zoom: number): number => {
-  if (zoom <= 12) return 1.0;
-  if (zoom >= 22) return 0.5;
-  // Linear interpolation between zoom 12 (1.0) and zoom 22 (0.5)
-  return 1.0 - ((zoom - 12) / 10) * 0.5;
-};
-
 const PROPERTY_TYPE_COLORS: Record<
   NonNullable<Property['propertyType']> | 'other',
   string
@@ -201,18 +189,10 @@ const getPromotedMarkerInnerClass = (property: Property): string => {
 /**
  * Create simple circular marker for zoomed out view
  * Supports night mode with neon glow effects
- * Scales inversely with zoom level (smaller markers at higher zoom)
  */
-const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 10) => {
+const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false) => {
   const price = formatMarkerPrice(property.price);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
-
-  // Apply zoom-based scaling - markers get smaller as zoom increases
-  const zoomScale = getMarkerScaleForZoom(zoom);
-  const baseSize = 30;
-  const scaledSize = Math.round(baseSize * zoomScale);
-  // Keep font readable - minimum 7px, scales less aggressively
-  const fontSize = Math.max(7, Math.round(8 * Math.max(zoomScale, 0.75)));
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
@@ -255,17 +235,13 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
-  // Calculate scaled dimensions
-  const halfSize = scaledSize / 2;
-  const circleRadius = (scaledSize * 0.43) + (isHovered ? 2 : 0);
-
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
-      <div class="${promotedInnerClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
-        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 ${scaledSize} ${scaledSize}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <circle cx="${halfSize}" cy="${halfSize}" r="${circleRadius}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
-            <text x="${halfSize}" y="${halfSize + 1}" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 30px; height: 30px;">
+      <div class="${promotedInnerClass}" style="width: 30px; height: 30px;">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
+            <text x="15" y="16" font-family="Inter, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
@@ -276,9 +252,9 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [scaledSize, scaledSize],
-    iconAnchor: [halfSize, halfSize],
-    popupAnchor: [0, -halfSize],
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+    popupAnchor: [0, -15],
   });
 };
 
@@ -297,20 +273,10 @@ const lightenColor = (hex: string, percent: number): string => {
 /**
  * Create detailed house-shaped marker for zoomed in view
  * Supports night mode with neon glow effects
- * Scales inversely with zoom level (smaller markers at higher zoom)
  */
-const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 14) => {
+const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false) => {
   const price = formatMarkerPrice(property.price);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
-
-  // Apply zoom-based scaling - markers get smaller as zoom increases
-  const zoomScale = getMarkerScaleForZoom(zoom);
-  const baseWidth = 45;
-  const baseHeight = 36;
-  const scaledWidth = Math.round(baseWidth * zoomScale);
-  const scaledHeight = Math.round(baseHeight * zoomScale);
-  // Keep font readable - minimum 10px, scales less aggressively for detailed marker
-  const fontSize = Math.max(10, Math.round(14 * Math.max(zoomScale, 0.7)));
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
@@ -357,12 +323,12 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
-      <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
-        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 45px; height: 36px;">
+      <div class="${promotedInnerClass}" style="width: 45px; height: 36px;">
+        <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <path d="M35 56L25 44H45L35 56Z" fill="${pointerColor}" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
-            <text x="35" y="30" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+            <text x="35" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
@@ -373,22 +339,21 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [scaledWidth, scaledHeight],
-    iconAnchor: [scaledWidth / 2, scaledHeight],
-    popupAnchor: [0, -scaledHeight],
+    iconSize: [45, 36],
+    iconAnchor: [22.5, 36],
+    popupAnchor: [0, -36],
   });
 };
 
 /**
  * Create appropriate marker icon based on zoom level
  * Supports night mode with glowing neon effects
- * Markers scale inversely with zoom (smaller at higher zoom for less clutter)
  */
 const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boolean = false, isNightMode: boolean = false): L.DivIcon => {
   if (zoom < ZOOM_THRESHOLD) {
-    return createSimpleMarkerIcon(property, isHovered, isNightMode, zoom);
+    return createSimpleMarkerIcon(property, isHovered, isNightMode);
   }
-  return createDetailedMarkerIcon(property, isHovered, isNightMode, zoom);
+  return createDetailedMarkerIcon(property, isHovered, isNightMode);
 };
 
 // Tier badge configurations for popup
