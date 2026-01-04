@@ -252,7 +252,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.8}
           preferCanvas={true}
-          keepBuffer={2}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
