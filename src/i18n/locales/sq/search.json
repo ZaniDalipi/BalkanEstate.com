@@ -143,7 +143,11 @@
     "priceDesc": "Çmimi: I Lartë në të Ulët",
     "areaAsc": "Sipërfaqja: E Vogël në të Madhe",
     "areaDesc": "Sipërfaqja: E Madhe në të Vogël",
-    "bedsDesc": "Më Shumë Dhoma Gjumi"
+    "bedsDesc": "Më Shumë Dhoma Gjumi",
+    "bathsDesc": "Më Shumë Banjo",
+    "featured": "Të Veçantat Së Pari",
+    "priceReduced": "Çmimi i Ulur Kohët",
+    "pricePerSqm": "Çmimi për m²"
   },
   "results": {
     "showing": "Duke treguar {{count}} prona",

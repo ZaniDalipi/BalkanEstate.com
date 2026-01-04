@@ -143,7 +143,11 @@
     "priceDesc": "Cena: Visoka ka Niskoj",
     "areaAsc": "Površina: Mala ka Velikoj",
     "areaDesc": "Površina: Velika ka Maloj",
-    "bedsDesc": "Najviše Spavaćih Soba"
+    "bedsDesc": "Najviše Spavaćih Soba",
+    "bathsDesc": "Najviše Kupatila",
+    "featured": "Istaknuto Prvo",
+    "priceReduced": "Nedavno Sniženo",
+    "pricePerSqm": "Cena po m²"
   },
   "results": {
     "showing": "Prikazano {{count}} nekretnina",

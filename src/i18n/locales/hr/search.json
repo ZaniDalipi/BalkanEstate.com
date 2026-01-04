@@ -143,7 +143,11 @@
     "priceDesc": "Price: High to Low",
     "areaAsc": "Area: Small to Large",
     "areaDesc": "Area: Large to Small",
-    "bedsDesc": "Most Bedrooms"
+    "bedsDesc": "Najviše Spavaćih Soba",
+    "bathsDesc": "Najviše Kupaonica",
+    "featured": "Istaknuto Prvo",
+    "priceReduced": "Nedavno Sniženo",
+    "pricePerSqm": "Cijena po m²"
   },
   "results": {
     "showing": "Showing {{count}} properties",

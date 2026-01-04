@@ -143,7 +143,11 @@
     "priceDesc": "Preț: Mare la Mic",
     "areaAsc": "Suprafață: Mică la Mare",
     "areaDesc": "Suprafață: Mare la Mică",
-    "bedsDesc": "Cele Mai Multe Dormitoare"
+    "bedsDesc": "Cele Mai Multe Dormitoare",
+    "bathsDesc": "Cele Mai Multe Băi",
+    "featured": "Recomandate Întâi",
+    "priceReduced": "Preț Redus Recent",
+    "pricePerSqm": "Preț pe m²"
   },
   "results": {
     "showing": "Se afișează {{count}} proprietăți",

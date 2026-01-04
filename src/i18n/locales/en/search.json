@@ -144,7 +144,11 @@
     "priceDesc": "Price: High to Low",
     "areaAsc": "Area: Small to Large",
     "areaDesc": "Area: Large to Small",
-    "bedsDesc": "Most Bedrooms"
+    "bedsDesc": "Most Bedrooms",
+    "bathsDesc": "Most Bathrooms",
+    "featured": "Featured First",
+    "priceReduced": "Recently Reduced",
+    "pricePerSqm": "Price per m²"
   },
   "results": {
     "showing": "Showing {{count}} properties",

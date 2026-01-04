@@ -143,7 +143,11 @@
     "priceDesc": "Price: High to Low",
     "areaAsc": "Area: Small to Large",
     "areaDesc": "Area: Large to Small",
-    "bedsDesc": "Most Bedrooms"
+    "bedsDesc": "Најмногу Спални",
+    "bathsDesc": "Најмногу Бањи",
+    "featured": "Истакнати Прво",
+    "priceReduced": "Неодамна Намалено",
+    "pricePerSqm": "Цена по м²"
   },
   "results": {
     "showing": "Showing {{count}} properties",
