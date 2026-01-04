@@ -77,12 +77,23 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
             setMessages(prev => {
                 if (prev.some(m => m.id === message.id)) return prev;
 
-                if (message.senderId !== currentUserId) {
+                // Properly extract sender ID from message (handle both string and populated object)
+                const messageSenderId = typeof message.senderId === 'object' && message.senderId !== null
+                    ? (message.senderId as any)._id || (message.senderId as any).id
+                    : message.senderId;
+
+                // Only play notification if message is from someone else
+                if (String(messageSenderId) !== String(currentUserId)) {
                     playNotificationSound();
-                    const otherPerson = conversation.seller || property?.seller;
+                    // Determine who the "other person" is based on current user's role
+                    const isCurrentUserBuyer = String(conversation.buyer?.id || conversation.buyerId) === String(currentUserId);
+                    const otherPerson = isCurrentUserBuyer
+                        ? (conversation.seller || property?.seller)
+                        : (conversation.buyer || { name: 'User' });
+
                     if (otherPerson && property) {
                         notificationService.showNewMessageNotification(
-                            otherPerson.name || 'Seller',
+                            otherPerson.name || 'User',
                             message.text || '[Image]',
                             `${property.address}, ${property.city}`
                         );
@@ -277,15 +288,27 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 ) : (
                     <>
                         {messages.map(msg => {
-                            const isUser = msg.senderId === currentUserId || msg.senderId === 'user';
-                            const otherPerson = isUser ? (conversation.seller || property.seller) : (conversation.buyer || { name: 'Buyer', avatarUrl: null });
+                            // Determine if message is from current user by comparing sender ID
+                            // Handle both string IDs and populated sender objects
+                            const senderId = typeof msg.senderId === 'object' && msg.senderId !== null
+                                ? (msg.senderId as any)._id || (msg.senderId as any).id
+                                : msg.senderId;
+                            const isCurrentUserMessage = String(senderId) === String(currentUserId);
+
+                            // Get the other person in the conversation based on current user's role
+                            const isCurrentUserBuyer = String(conversation.buyer?.id || conversation.buyerId) === String(currentUserId);
+                            const otherPerson = isCurrentUserMessage
+                                ? null // Don't need avatar for own messages
+                                : (isCurrentUserBuyer
+                                    ? (conversation.seller || property?.seller)
+                                    : (conversation.buyer || { name: 'Buyer', avatarUrl: null }));
 
                             return (
                                 <div
                                     key={msg.id}
-                                    className={`flex items-end gap-1.5 sm:gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
+                                    className={`flex items-end gap-1.5 sm:gap-2 ${isCurrentUserMessage ? 'justify-end' : 'justify-start'}`}
                                 >
-                                    {!isUser && (
+                                    {!isCurrentUserMessage && otherPerson && (
                                         <div className="flex-shrink-0">
                                             {otherPerson.avatarUrl ? (
                                                 <img src={otherPerson.avatarUrl} alt={otherPerson.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover" />
@@ -294,7 +317,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                             )}
                                         </div>
                                     )}
-                                    <div className={`max-w-[75%] sm:max-w-md p-2.5 sm:p-3 rounded-2xl shadow-sm ${isUser
+                                    <div className={`max-w-[75%] sm:max-w-md p-2.5 sm:p-3 rounded-2xl shadow-sm ${isCurrentUserMessage
                                         ? 'bg-primary text-white rounded-br-lg'
                                         : 'bg-neutral-100 text-neutral-800 rounded-bl-lg'
                                     }`}>

@@ -1,9 +1,12 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import Conversation from '../models/Conversation';
 
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
+  // Track which conversations this socket has been authorized for
+  authorizedConversations?: Set<string>;
 }
 
 // Store active user connections (userId -> socketId mapping)
@@ -45,40 +48,95 @@ export const setupChatSocket = (io: Server) => {
     // Store user's socket connection
     userSockets.set(userId, socket.id);
 
-    // Join conversation rooms
-    socket.on('join-conversation', (conversationId: string) => {
-      socket.join(conversationId);
+    // Initialize authorized conversations set for this socket
+    socket.authorizedConversations = new Set();
 
-      // Track user in conversation room
-      if (!conversationRooms.has(conversationId)) {
-        conversationRooms.set(conversationId, new Set());
+    // Join conversation rooms - WITH AUTHORIZATION CHECK
+    socket.on('join-conversation', async (conversationId: string) => {
+      try {
+        // Check if already authorized for this conversation (cached)
+        if (socket.authorizedConversations?.has(conversationId)) {
+          socket.join(conversationId);
+          console.log(`👥 User ${userId} rejoined conversation ${conversationId} (cached auth)`);
+          return;
+        }
+
+        // Validate that this user is a participant in the conversation
+        const conversation = await Conversation.findById(conversationId).select('buyerId sellerId');
+
+        if (!conversation) {
+          console.warn(`⚠️ User ${userId} tried to join non-existent conversation ${conversationId}`);
+          socket.emit('error', { message: 'Conversation not found' });
+          return;
+        }
+
+        const isBuyer = String(conversation.buyerId) === userId;
+        const isSeller = String(conversation.sellerId) === userId;
+
+        if (!isBuyer && !isSeller) {
+          console.warn(`🚫 UNAUTHORIZED: User ${userId} tried to join conversation ${conversationId} (not a participant)`);
+          socket.emit('error', { message: 'Not authorized to join this conversation' });
+          return;
+        }
+
+        // User is authorized - cache this and join the room
+        socket.authorizedConversations?.add(conversationId);
+        socket.join(conversationId);
+
+        // Track user in conversation room
+        if (!conversationRooms.has(conversationId)) {
+          conversationRooms.set(conversationId, new Set());
+        }
+        conversationRooms.get(conversationId)?.add(userId);
+
+        console.log(`👥 User ${userId} joined conversation ${conversationId} (authorized as ${isBuyer ? 'buyer' : 'seller'})`);
+      } catch (error) {
+        console.error(`❌ Error joining conversation ${conversationId}:`, error);
+        socket.emit('error', { message: 'Error joining conversation' });
       }
-      conversationRooms.get(conversationId)?.add(userId);
-
-      console.log(`👥 User ${userId} joined conversation ${conversationId}`);
     });
 
     // Leave conversation room
     socket.on('leave-conversation', (conversationId: string) => {
       socket.leave(conversationId);
       conversationRooms.get(conversationId)?.delete(userId);
+      // Keep authorization cached in case they rejoin
 
       console.log(`👋 User ${userId} left conversation ${conversationId}`);
     });
 
-    // Handle new message
+    // Handle new message - only broadcast if sender is authorized
     socket.on('new-message', (data: { conversationId: string; message: any }) => {
+      // Verify the sender is authorized for this conversation
+      if (!socket.authorizedConversations?.has(data.conversationId)) {
+        console.warn(`🚫 UNAUTHORIZED: User ${userId} tried to send message to conversation ${data.conversationId}`);
+        socket.emit('error', { message: 'Not authorized to send messages in this conversation' });
+        return;
+      }
+
+      // Verify the message senderId matches the socket user
+      if (data.message.senderId && String(data.message.senderId) !== userId &&
+          String(data.message.senderId?._id) !== userId) {
+        console.warn(`🚫 SPOOFING ATTEMPT: User ${userId} tried to send message as ${data.message.senderId}`);
+        socket.emit('error', { message: 'Sender ID mismatch' });
+        return;
+      }
+
       // Broadcast to all users in the conversation room except sender
       socket.to(data.conversationId).emit('message-received', {
         conversationId: data.conversationId,
         message: data.message,
       });
 
-      console.log(`💬 Message sent in conversation ${data.conversationId}`);
+      console.log(`💬 Message sent in conversation ${data.conversationId} by ${userId}`);
     });
 
-    // Handle typing indicator
+    // Handle typing indicator - only if authorized
     socket.on('typing', (data: { conversationId: string; isTyping: boolean }) => {
+      if (!socket.authorizedConversations?.has(data.conversationId)) {
+        return; // Silently ignore if not authorized
+      }
+
       socket.to(data.conversationId).emit('user-typing', {
         conversationId: data.conversationId,
         userId,
@@ -86,8 +144,12 @@ export const setupChatSocket = (io: Server) => {
       });
     });
 
-    // Handle message read status
+    // Handle message read status - only if authorized
     socket.on('mark-read', (data: { conversationId: string; messageIds: string[] }) => {
+      if (!socket.authorizedConversations?.has(data.conversationId)) {
+        return; // Silently ignore if not authorized
+      }
+
       socket.to(data.conversationId).emit('messages-read', {
         conversationId: data.conversationId,
         messageIds: data.messageIds,
@@ -103,6 +165,9 @@ export const setupChatSocket = (io: Server) => {
       conversationRooms.forEach((users, conversationId) => {
         users.delete(userId);
       });
+
+      // Clear authorized conversations
+      socket.authorizedConversations?.clear();
 
       // Remove socket mapping
       userSockets.delete(userId);
