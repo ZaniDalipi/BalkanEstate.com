@@ -53,7 +53,7 @@ const TILE_LAYERS = {
   },
 };
 
-type TileLayerType = keyof typeof TILE_LAYERS;
+type TileLayerType = keyof typeof TILE_LAYERS | 'night';
 
 // Bounding box for the Balkan region
 const BALKAN_BOUNDS = L.latLngBounds(
@@ -252,8 +252,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.8}
           preferCanvas={true}
-          updateWhenIdle={true}
-          updateWhenZooming={false}
           keepBuffer={2}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
