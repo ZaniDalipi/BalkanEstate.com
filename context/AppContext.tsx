@@ -55,6 +55,7 @@ const initialState: AppState = {
   isEnterpriseModalOpen: false,
   // FIX: Initialize allMunicipalities in the initial state.
   allMunicipalities: MUNICIPALITY_DATA,
+  pendingRedirect: null,
 };
 
 
@@ -272,6 +273,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 } : s
             ),
         };
+    case 'SET_PENDING_REDIRECT':
+        return { ...state, pendingRedirect: action.payload };
     default:
       return state;
   }
@@ -350,6 +353,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Initialize proactive token refresh
     tokenService.initializeProactiveRefresh();
 
+    // Check if there's a pending redirect (e.g., from "I want to sell" flow)
+    if (state.pendingRedirect) {
+      const redirectTo = state.pendingRedirect;
+      dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
+    }
+
     // Check if there's a pending subscription and reopen the modal
     if (state.pendingSubscription) {
       setTimeout(() => {
@@ -363,7 +373,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return user;
-  }, [state.pendingSubscription, state.isFirstLoginOffer]);
+  }, [state.pendingSubscription, state.isFirstLoginOffer, state.pendingRedirect]);
 
   const signup = useCallback(async (
     email: string,
@@ -392,6 +402,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Initialize proactive token refresh
     tokenService.initializeProactiveRefresh();
 
+    // Check if there's a pending redirect (e.g., from "I want to sell" flow)
+    if (state.pendingRedirect) {
+      const redirectTo = state.pendingRedirect;
+      dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
+    }
+
     // Check if there's a pending subscription and reopen the modal
     if (state.pendingSubscription) {
       setTimeout(() => {
@@ -405,7 +422,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return user;
-  }, [state.pendingSubscription, state.isFirstLoginOffer]);
+  }, [state.pendingSubscription, state.isFirstLoginOffer, state.pendingRedirect]);
 
   const logout = useCallback(async () => {
     await api.logout();

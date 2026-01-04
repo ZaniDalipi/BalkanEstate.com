@@ -424,11 +424,19 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             return 0; // Keep original order for same score
         });
 
+        // Helper to convert date/string/number to timestamp
+        const toTimestamp = (value: any): number => {
+            if (!value) return 0;
+            if (typeof value === 'number') return value;
+            if (typeof value === 'string') return new Date(value).getTime();
+            if (value instanceof Date) return value.getTime();
+            return 0;
+        };
+
         // Helper to get property timestamp (prioritize lastRenewed over createdAt)
         const getPropertyTime = (p: Property) => {
-            // If lastRenewed exists and is more recent, use it; otherwise use createdAt
-            const renewed = p.lastRenewed || 0;
-            const created = p.createdAt || 0;
+            const renewed = toTimestamp(p.lastRenewed);
+            const created = toTimestamp(p.createdAt);
             return Math.max(renewed, created);
         };
 

@@ -127,7 +127,9 @@ const Onboarding: React.FC = () => {
   
   const handleSellChoice = () => {
     dispatch({ type: 'COMPLETE_ONBOARDING' });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+    // Set pending redirect so user goes to create-listing after auth
+    dispatch({ type: 'SET_PENDING_REDIRECT', payload: 'create-listing' });
+    // Open auth modal for signup/login
     dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
   };
 
