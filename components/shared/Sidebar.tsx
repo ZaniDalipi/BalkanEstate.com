@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     >
                         <LogoIcon className="w-7 h-7 text-primary flex-shrink-0" />
                         <h1 className="text-lg font-bold text-neutral-800 md:hidden group-hover:md:inline whitespace-nowrap">
-                            Balkan <span className="text-primary">Estate</span>
+                            Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
                         </h1>
                     </button>
                     <button onClick={onClose} className="md:hidden absolute right-3 top-4 text-neutral-700 hover:text-neutral-800">

@@ -1,5 +1,5 @@
-# Robots.txt for Balkan Estate
-# https://balkanestate.com
+# Robots.txt for BalkanEstateAI
+# https://balkanestateai.com
 
 User-agent: *
 Allow: /
@@ -21,7 +21,7 @@ Disallow: /payment/
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: https://balkanestate.com/sitemap.xml
+Sitemap: https://balkanestateai.com/sitemap.xml
 
 # Google specific
 User-agent: Googlebot
