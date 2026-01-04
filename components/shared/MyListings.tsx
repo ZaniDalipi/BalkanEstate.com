@@ -311,18 +311,28 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         }
 
         return [...filtered].sort((a, b) => {
+            // First sort by status (active first)
             const statusOrder = { active: 1, pending: 2, draft: 3, sold: 4 };
-            return statusOrder[a.status] - statusOrder[b.status];
+            const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+            if (statusDiff !== 0) return statusDiff;
+
+            // Within same status, sort by lastRenewed/createdAt (newest first)
+            const aTime = Math.max(a.lastRenewed || 0, a.createdAt || 0);
+            const bTime = Math.max(b.lastRenewed || 0, b.createdAt || 0);
+            return bTime - aTime;
         });
     }, [myProperties, statusFilter, roleFilter]);
 
     const handleRenew = async (id: string) => {
         try {
             const result = await api.renewProperty(id);
+            console.log('🔄 Renew result:', result);
 
             if (result.success) {
                 // Update local state with new lastRenewed timestamp (as number for consistency)
                 const newLastRenewedTimestamp = new Date(result.lastRenewed!).getTime();
+                console.log('✅ Property renewed! New timestamp:', newLastRenewedTimestamp, 'Property ID:', id);
+
                 setMyProperties(prev => prev.map(p =>
                     p.id === id ? { ...p, lastRenewed: newLastRenewedTimestamp } : p
                 ));
