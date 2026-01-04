@@ -321,18 +321,19 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             const result = await api.renewProperty(id);
 
             if (result.success) {
-                // Update local state with new lastRenewed timestamp
-                const newLastRenewed = new Date(result.lastRenewed!);
+                // Update local state with new lastRenewed timestamp (as number for consistency)
+                const newLastRenewedTimestamp = new Date(result.lastRenewed!).getTime();
                 setMyProperties(prev => prev.map(p =>
-                    p.id === id ? { ...p, lastRenewed: newLastRenewed } : p
+                    p.id === id ? { ...p, lastRenewed: newLastRenewedTimestamp } : p
                 ));
 
                 // Update renewal status
                 setRenewalStatuses(prev => ({
                     ...prev,
-                    [id]: calculateRenewalStatus(newLastRenewed),
+                    [id]: calculateRenewalStatus(new Date(newLastRenewedTimestamp)),
                 }));
 
+                // Dispatch to update global state - property will appear at top when sorted by newest
                 dispatch({ type: 'RENEW_PROPERTY', payload: id });
             }
         } catch (error: any) {

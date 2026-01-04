@@ -424,6 +424,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             return 0; // Keep original order for same score
         });
 
+        // Helper to get property timestamp (prioritize lastRenewed over createdAt)
+        const getPropertyTime = (p: Property) => {
+            // If lastRenewed exists and is more recent, use it; otherwise use createdAt
+            const renewed = p.lastRenewed || 0;
+            const created = p.createdAt || 0;
+            return Math.max(renewed, created);
+        };
+
         // Then apply user's sorting preference (maintaining promotion priority)
         switch (activeFilters.sortBy) {
             case 'price_asc': return promotionSorted.sort((a, b) => {
@@ -438,19 +446,60 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 if (scoreA !== scoreB) return scoreB - scoreA;
                 return b.price - a.price;
             });
+            case 'area_asc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return a.sqft - b.sqft;
+            });
+            case 'area_desc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return b.sqft - a.sqft;
+            });
             case 'beds_desc': return promotionSorted.sort((a, b) => {
                 const scoreA = getPromotionScore(a);
                 const scoreB = getPromotionScore(b);
                 if (scoreA !== scoreB) return scoreB - scoreA;
                 return b.beds - a.beds;
             });
-            case 'newest': return promotionSorted.sort((a, b) => {
+            case 'baths_desc': return promotionSorted.sort((a, b) => {
                 const scoreA = getPromotionScore(a);
                 const scoreB = getPromotionScore(b);
                 if (scoreA !== scoreB) return scoreB - scoreA;
-                return (Math.max(b.createdAt || 0, b.lastRenewed || 0)) - (Math.max(a.createdAt || 0, a.lastRenewed || 0));
+                return b.baths - a.baths;
             });
-            default: return promotionSorted;
+            case 'oldest': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return (a.createdAt || 0) - (b.createdAt || 0);
+            });
+            case 'featured': return promotionSorted.sort((a, b) => {
+                // Already sorted by promotion score, just maintain that order
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return getPropertyTime(b) - getPropertyTime(a);
+            });
+            case 'price_per_sqm': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                const pricePerSqmA = a.sqft > 0 ? a.price / a.sqft : Infinity;
+                const pricePerSqmB = b.sqft > 0 ? b.price / b.sqft : Infinity;
+                return pricePerSqmA - pricePerSqmB;
+            });
+            case 'newest':
+            default:
+                // Default to newest - prioritize lastRenewed for renewed listings
+                return promotionSorted.sort((a, b) => {
+                    const scoreA = getPromotionScore(a);
+                    const scoreB = getPromotionScore(b);
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                    return getPropertyTime(b) - getPropertyTime(a);
+                });
         }
     }, [properties, activeFilters]);
 
