@@ -848,6 +848,20 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             </div>
 
+                            {/* Mobile: Info banner about map-visible properties */}
+                            <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <MapPinIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                    <p className="text-xs text-blue-700">{t('search:mobileMapInfo', { defaultValue: 'Showing properties visible on map' })}</p>
+                                </div>
+                                <button
+                                    onClick={props.onResetFilters}
+                                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
+                                >
+                                    {t('search:filters.seeAll', { defaultValue: 'See All' })}
+                                </button>
+                            </div>
+
                             <div className="p-4 md:p-3">
                                 {isLoadingProperties ? (
                                     <div className="grid grid-cols-1 gap-4 md:gap-3">

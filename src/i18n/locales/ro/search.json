@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Nu se poate salva o căutare goală. Adăugați criterii sau deplasați-vă într-o zonă pe hartă.",
   "searchSaved": "Căutarea a fost salvată cu succes!",
   "couldNotSaveSearch": "Nu s-a putut salva căutarea. AI-ul poate fi ocupat.",
+  "mobileMapInfo": "Se afișează proprietăți vizibile pe hartă",
   "filters": {
     "title": "Filtre",
     "showFilters": "Afișează Filtrele",
@@ -22,6 +23,7 @@
     "apply": "Aplică Filtrele",
     "reset": "Resetează Filtrele",
     "resetFilters": "Resetează Filtrele",
+    "seeAll": "Vezi toate",
     "save": "Salvează Căutarea",
     "country": "Țară",
     "allCountries": "Toate Țările",

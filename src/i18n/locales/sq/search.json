@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Nuk mund të ruhet një kërkim bosh. Ju lutemi shtoni disa kritere ose lëvizni në një zonë në hartë.",
   "searchSaved": "Kërkimi u ruajt me sukses!",
   "couldNotSaveSearch": "Nuk mund të ruhet kërkimi. AI mund të jetë i zënë.",
+  "mobileMapInfo": "Duke shfaqur pronat e dukshme në hartë",
   "filters": {
     "title": "Filtrat",
     "showFilters": "Trego Filtrat",
@@ -22,6 +23,7 @@
     "apply": "Apliko Filtrat",
     "reset": "Rivendos Filtrat",
     "resetFilters": "Rivendos Filtrat",
+    "seeAll": "Shiko të gjitha",
     "save": "Ruaj Kërkimin",
     "country": "Shteti",
     "allCountries": "Të Gjitha Shtetet",
