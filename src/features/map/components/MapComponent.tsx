@@ -20,8 +20,8 @@ import {
 import { formatPrice } from '@/utils/currency';
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 
-// Google Maps API key - for production, use environment variable
-const GOOGLE_MAPS_API_KEY = import.meta.env.GOOGLE_MAPS_KEY || '';
+// Google Maps API key - must use VITE_ prefix for Vite to expose to client
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
 
 // Map libraries to load
 const libraries: ("drawing" | "geometry" | "places" | "visualization")[] = ['drawing', 'places'];
