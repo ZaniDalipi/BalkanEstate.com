@@ -40,16 +40,13 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value);
 
-        // Send typing indicator
         if (onTyping) {
             onTyping(true);
 
-            // Clear existing timeout
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
             }
 
-            // Stop typing indicator after 2 seconds of inactivity
             typingTimeoutRef.current = setTimeout(() => {
                 onTyping(false);
             }, 2000);
@@ -61,7 +58,6 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
         if ((text.trim() || imageFile) && !isSending) {
             setIsSending(true);
 
-            // Stop typing indicator when sending
             if (onTyping) {
                 onTyping(false);
             }
@@ -85,17 +81,21 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
         <div className="space-y-2">
             {imagePreview && (
                 <div className="relative inline-block">
-                    <img src={imagePreview} alt="Preview" className="max-w-xs max-h-32 rounded-lg border border-neutral-300" />
+                    <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="max-w-[120px] sm:max-w-xs max-h-24 sm:max-h-32 rounded-lg border border-neutral-300"
+                    />
                     <button
                         onClick={handleRemoveImage}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 bg-red-500 text-white rounded-full p-0.5 sm:p-1 hover:bg-red-600"
                         type="button"
                     >
-                        <XMarkIcon className="w-4 h-4" />
+                        <XMarkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>
                 </div>
             )}
-            <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <form onSubmit={handleSubmit} className="flex items-end gap-1.5 sm:gap-2">
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -107,9 +107,9 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={disabled || isSending}
-                    className="bg-neutral-200 text-neutral-700 rounded-full p-3.5 hover:bg-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed transition-colors flex-shrink-0 self-end"
+                    className="bg-neutral-200 text-neutral-700 rounded-full p-2.5 sm:p-3.5 hover:bg-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed transition-colors flex-shrink-0"
                 >
-                    <PhotoIcon className="h-5 w-5" />
+                    <PhotoIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
                 <textarea
                     value={text}
@@ -123,18 +123,18 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                     placeholder={t('inbox.typeMessage')}
                     disabled={disabled || isSending}
                     rows={1}
-                    className="block w-full text-base bg-white border border-neutral-300 rounded-full text-neutral-900 shadow-sm px-5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none disabled:bg-neutral-100 disabled:cursor-not-allowed"
-                    style={{ height: 'auto', minHeight: '50px' }}
+                    className="block w-full text-sm sm:text-base bg-white border border-neutral-300 rounded-full text-neutral-900 shadow-sm px-3 sm:px-5 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                    style={{ height: 'auto', minHeight: '40px' }}
                 />
                 <button
                     type="submit"
                     disabled={disabled || isSending || (!text.trim() && !imageFile)}
-                    className="bg-primary text-white rounded-full p-3.5 hover:bg-primary-dark disabled:bg-primary/50 disabled:cursor-not-allowed transition-colors flex-shrink-0 self-end"
+                    className="bg-primary text-white rounded-full p-2.5 sm:p-3.5 hover:bg-primary-dark disabled:bg-primary/50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
                 >
                     {isSending ? (
-                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                        <PaperAirplaneIcon className="h-5 w-5" />
+                        <PaperAirplaneIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     )}
                 </button>
             </form>
