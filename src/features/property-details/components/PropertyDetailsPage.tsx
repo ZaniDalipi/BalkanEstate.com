@@ -23,6 +23,7 @@ import {
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import Footer from '@/components/shared/Footer';
 
 /**
  * PropertyDetailsPage Component
@@ -589,6 +590,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           opacity: 0;
         }
       `}</style>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
