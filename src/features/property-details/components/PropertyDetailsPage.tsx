@@ -464,8 +464,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               />
             </div>
 
-            {/* Mobile Only: Quick Actions & Contact (shown early on mobile) */}
+            {/* Mobile Only: Property Info (description) shown early */}
             <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
+              <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
+            </div>
+
+            {/* Mobile Only: Quick Actions & Contact (shown after description on mobile) */}
+            <div className="lg:hidden animate-slide-up" style={{ animationDelay: '75ms' }}>
               <PropertyContact
                 property={property}
                 isCreatingConversation={isCreatingConversation}
@@ -517,8 +522,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               </div>
             )}
 
-            {/* Property Info */}
-            <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+            {/* Property Info (Desktop only - mobile version shown above) */}
+            <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
