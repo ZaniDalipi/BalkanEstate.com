@@ -84,6 +84,13 @@ const injectMapMarkerStyles = () => {
     /* Marker wrapper - stays in place, provides anchor point */
     .promoted-marker-wrapper {
       position: relative;
+      background: transparent !important;
+    }
+
+    /* Remove default Leaflet divIcon background */
+    .leaflet-div-icon {
+      background: transparent !important;
+      border: none !important;
     }
 
     /* Premium Premiere - Gold, glowing, bouncing with border pulse (TOP tier) */
