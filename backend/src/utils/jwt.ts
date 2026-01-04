@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
-// Access token: Short-lived (15 minutes)
+// Access token: Medium-lived (1 hour) - extended for better UX while maintaining security
 export const generateAccessToken = (userId: string): string => {
   const secret: string = process.env.JWT_SECRET || 'secret';
-  const expiresIn: any = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
+  const expiresIn: any = process.env.ACCESS_TOKEN_EXPIRES_IN || '1h';
   return jwt.sign({ id: userId, type: 'access' }, secret, { expiresIn });
 };
 
