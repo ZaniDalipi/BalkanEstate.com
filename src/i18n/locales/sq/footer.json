@@ -1,19 +1,38 @@
 {
-  "tagline": "Gjetja e pronave perfekte nëpër Ballkan me shërbim premium dhe teknologji moderne.",
+  "tagline": "Platforma juaj e patundshmërive me AI për Ballkanin. Gjeni pronën tuaj të ëndrrave në 10 vende me kërkim inteligjent dhe rekomandime të personalizuara.",
   "sections": {
     "forBuyers": "Për Blerësit",
     "forSellers": "Për Shitësit",
-    "contact": "Kontakti"
+    "contact": "Na Kontaktoni",
+    "countriesWeServe": "Vendet që Shërbejmë"
+  },
+  "ai": {
+    "poweredBy": "Mundësuar nga AI"
   },
   "links": {
     "searchProperties": "Kërko Prona",
+    "exploreCities": "Eksploro Qytetet",
     "savedProperties": "Prona të Ruajtura",
     "savedSearches": "Kërkime të Ruajtura",
     "findAgents": "Gjej Agjentë",
     "browseAgencies": "Shfleto Agjencitë",
     "listProperty": "Listo Pronën",
+    "analytics": "Analitika",
     "messages": "Mesazhet",
-    "myAccount": "Llogaria Ime"
+    "myAccount": "Llogaria Ime",
+    "howItWorks": "Si Funksionon"
+  },
+  "countries": {
+    "AL": "Shqipëria",
+    "BA": "Bosnja",
+    "BG": "Bullgaria",
+    "HR": "Kroacia",
+    "GR": "Greqia",
+    "XK": "Kosova",
+    "ME": "Mali i Zi",
+    "MK": "Maqedonia e V.",
+    "RO": "Rumania",
+    "RS": "Serbia"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",

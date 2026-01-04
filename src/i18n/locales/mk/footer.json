@@ -1,19 +1,38 @@
 {
-  "tagline": "Finding perfect properties across the Balkans with premium service and modern technology.",
+  "tagline": "Вашата AI платформа за недвижности на Балканот. Најдете го вашиот сон имот во 10 земји со интелигентно пребарување и персонализирани препораки.",
   "sections": {
-    "forBuyers": "For Buyers",
-    "forSellers": "For Sellers",
-    "contact": "Contact"
+    "forBuyers": "За Купувачи",
+    "forSellers": "За Продавачи",
+    "contact": "Контактирајте Не",
+    "countriesWeServe": "Земји кои ги Покриваме"
+  },
+  "ai": {
+    "poweredBy": "Овозможено од AI"
   },
   "links": {
-    "searchProperties": "Search Properties",
-    "savedProperties": "Saved Properties",
-    "savedSearches": "Saved Searches",
-    "findAgents": "Find Agents",
-    "browseAgencies": "Browse Agencies",
-    "listProperty": "List Property",
-    "messages": "Messages",
-    "myAccount": "My Account"
+    "searchProperties": "Барај Имоти",
+    "exploreCities": "Истражи Градови",
+    "savedProperties": "Зачувани Имоти",
+    "savedSearches": "Зачувани Барања",
+    "findAgents": "Најди Агенти",
+    "browseAgencies": "Прелистај Агенции",
+    "listProperty": "Објави Имот",
+    "analytics": "Аналитика",
+    "messages": "Пораки",
+    "myAccount": "Мој Профил",
+    "howItWorks": "Како Функционира"
+  },
+  "countries": {
+    "AL": "Албанија",
+    "BA": "Босна",
+    "BG": "Бугарија",
+    "HR": "Хрватска",
+    "GR": "Грција",
+    "XK": "Косово",
+    "ME": "Црна Гора",
+    "MK": "С. Македонија",
+    "RO": "Романија",
+    "RS": "Србија"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",

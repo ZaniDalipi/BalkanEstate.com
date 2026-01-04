@@ -1,19 +1,38 @@
 {
-  "tagline": "Finding perfect properties across the Balkans with premium service and modern technology.",
+  "tagline": "Your AI-powered real estate platform for the Balkans. Find your dream property across 10 countries with intelligent search and personalized recommendations.",
   "sections": {
     "forBuyers": "For Buyers",
     "forSellers": "For Sellers",
-    "contact": "Contact"
+    "contact": "Get In Touch",
+    "countriesWeServe": "Countries We Serve"
+  },
+  "ai": {
+    "poweredBy": "Powered by AI"
   },
   "links": {
     "searchProperties": "Search Properties",
+    "exploreCities": "Explore Cities",
     "savedProperties": "Saved Properties",
     "savedSearches": "Saved Searches",
     "findAgents": "Find Agents",
     "browseAgencies": "Browse Agencies",
     "listProperty": "List Property",
+    "analytics": "Analytics",
     "messages": "Messages",
-    "myAccount": "My Account"
+    "myAccount": "My Account",
+    "howItWorks": "How It Works"
+  },
+  "countries": {
+    "AL": "Albania",
+    "BA": "Bosnia",
+    "BG": "Bulgaria",
+    "HR": "Croatia",
+    "GR": "Greece",
+    "XK": "Kosovo",
+    "ME": "Montenegro",
+    "MK": "N. Macedonia",
+    "RO": "Romania",
+    "RS": "Serbia"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",

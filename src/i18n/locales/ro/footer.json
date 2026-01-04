@@ -1,19 +1,38 @@
 {
-  "tagline": "Găsim proprietăți perfecte în întreaga regiune a Balcanilor cu servicii premium și tehnologie modernă.",
+  "tagline": "Platforma ta AI pentru imobiliare în Balcani. Găsește-ți proprietatea visată în 10 țări cu căutare inteligentă și recomandări personalizate.",
   "sections": {
     "forBuyers": "Pentru Cumpărători",
     "forSellers": "Pentru Vânzători",
-    "contact": "Contact"
+    "contact": "Contactează-ne",
+    "countriesWeServe": "Țări pe care le Deservim"
+  },
+  "ai": {
+    "poweredBy": "Susținut de AI"
   },
   "links": {
     "searchProperties": "Caută Proprietăți",
+    "exploreCities": "Explorează Orașe",
     "savedProperties": "Proprietăți Salvate",
     "savedSearches": "Căutări Salvate",
     "findAgents": "Găsește Agenți",
     "browseAgencies": "Explorează Agenții",
     "listProperty": "Listează Proprietate",
+    "analytics": "Analiză",
     "messages": "Mesaje",
-    "myAccount": "Contul Meu"
+    "myAccount": "Contul Meu",
+    "howItWorks": "Cum Funcționează"
+  },
+  "countries": {
+    "AL": "Albania",
+    "BA": "Bosnia",
+    "BG": "Bulgaria",
+    "HR": "Croația",
+    "GR": "Grecia",
+    "XK": "Kosovo",
+    "ME": "Muntenegru",
+    "MK": "Macedonia N.",
+    "RO": "România",
+    "RS": "Serbia"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",

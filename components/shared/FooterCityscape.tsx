@@ -1,290 +1,321 @@
 import React from 'react';
 
+// Balkan country flags for the animation
+const balkanFlags = [
+    { code: 'AL', flag: '🇦🇱', name: 'Albania' },
+    { code: 'BA', flag: '🇧🇦', name: 'Bosnia' },
+    { code: 'BG', flag: '🇧🇬', name: 'Bulgaria' },
+    { code: 'HR', flag: '🇭🇷', name: 'Croatia' },
+    { code: 'GR', flag: '🇬🇷', name: 'Greece' },
+    { code: 'XK', flag: '🇽🇰', name: 'Kosovo' },
+    { code: 'ME', flag: '🇲🇪', name: 'Montenegro' },
+    { code: 'MK', flag: '🇲🇰', name: 'N. Macedonia' },
+    { code: 'RO', flag: '🇷🇴', name: 'Romania' },
+    { code: 'RS', flag: '🇷🇸', name: 'Serbia' },
+];
+
 const FooterCityscape: React.FC = () => {
     return (
-        <div className="relative w-full min-h-[100px] overflow-visible bg-gradient-to-b from-transparent to-primary-dark/50 pb-0">
-            {/* Sky background with better contrast */}
-            <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/90 to-indigo-600/60"></div>
+        <div className="relative w-full h-[140px] overflow-hidden">
+            {/* Gradient sky */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-indigo-950 to-transparent" />
 
-            {/* Stars in the background */}
+            {/* Animated stars */}
             <div className="absolute inset-0">
-                {[...Array(20)].map((_, i) => (
+                {[...Array(30)].map((_, i) => (
                     <div
                         key={`star-${i}`}
-                        className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+                        className="absolute rounded-full animate-twinkle"
                         style={{
+                            width: `${Math.random() * 2 + 1}px`,
+                            height: `${Math.random() * 2 + 1}px`,
+                            backgroundColor: i % 3 === 0 ? '#60A5FA' : '#FFFFFF',
                             left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 50}%`,
-                            animationDelay: `${Math.random() * 3}s`,
-                            opacity: Math.random() * 0.7 + 0.3
+                            top: `${Math.random() * 60}%`,
+                            animationDelay: `${Math.random() * 4}s`,
+                            animationDuration: `${2 + Math.random() * 3}s`,
                         }}
-                    ></div>
+                    />
                 ))}
             </div>
 
-            {/* Buildings Container */}
-            <div className="relative bottom-0 left-0 right-0 flex items-end justify-around pb-2" style={{ height: '70px' }}>
-                {/* Building 1 - Tall Apartment */}
-                <div className="relative" style={{ height: '48px', width: '35px' }}>
-                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-orange-400 to-orange-600 rounded-t-lg shadow-2xl">
-                        {/* Windows */}
+            {/* Floating flags carousel */}
+            <div className="absolute top-2 left-0 right-0 overflow-hidden h-10">
+                <div className="flags-scroll flex gap-8 items-center">
+                    {[...balkanFlags, ...balkanFlags, ...balkanFlags].map((country, i) => (
+                        <div
+                            key={`flag-${i}`}
+                            className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20 hover:bg-white/20 transition-colors flex-shrink-0"
+                        >
+                            <span className="text-lg">{country.flag}</span>
+                            <span className="text-[10px] font-medium text-white/80 hidden sm:inline">{country.code}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* AI Sparkles floating */}
+            <div className="absolute inset-0 pointer-events-none">
+                {[...Array(8)].map((_, i) => (
+                    <div
+                        key={`sparkle-${i}`}
+                        className="absolute animate-float-sparkle"
+                        style={{
+                            left: `${10 + i * 12}%`,
+                            top: `${20 + (i % 3) * 15}%`,
+                            animationDelay: `${i * 0.5}s`,
+                            animationDuration: `${4 + i * 0.5}s`,
+                        }}
+                    >
+                        <svg className="w-3 h-3 text-primary/60" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+                        </svg>
+                    </div>
+                ))}
+            </div>
+
+            {/* Landmark Buildings - Balkan inspired */}
+            <div className="absolute bottom-0 left-0 right-0 flex items-end justify-around px-2" style={{ height: '90px' }}>
+                {/* Albanian Tower (inspired by Tirana) */}
+                <div className="relative building-hover" style={{ height: '55px', width: '30px' }}>
+                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-red-500 to-red-700 rounded-t-sm shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇦🇱</div>
+                        {[...Array(4)].map((_, floor) => (
+                            <div key={floor} className="flex justify-around px-1 py-1">
+                                {[...Array(2)].map((_, w) => (
+                                    <div key={w} className="w-2.5 h-2 bg-yellow-200/80 rounded-sm animate-window" style={{ animationDelay: `${Math.random() * 3}s` }} />
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-3 bg-red-800 rounded-t-full" />
+                </div>
+
+                {/* Serbian Building (inspired by Belgrade) */}
+                <div className="relative building-hover" style={{ height: '65px', width: '35px' }}>
+                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-blue-500 to-blue-700 rounded-t shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇷🇸</div>
                         {[...Array(5)].map((_, floor) => (
-                            <div key={`b1-floor-${floor}`} className="flex justify-around px-2 py-1.5">
-                                {[...Array(2)].map((_, window) => (
-                                    <div
-                                        key={`b1-window-${floor}-${window}`}
-                                        className="w-3 h-3 bg-yellow-200 animate-window-light"
-                                        style={{
-                                            animationDelay: `${Math.random() * 5}s`,
-                                            opacity: Math.random() > 0.3 ? 1 : 0.3
-                                        }}
-                                    ></div>
+                            <div key={floor} className="flex justify-around px-1.5 py-1">
+                                {[...Array(2)].map((_, w) => (
+                                    <div key={w} className="w-3 h-2 bg-yellow-200/80 rounded-sm animate-window" style={{ animationDelay: `${Math.random() * 3}s` }} />
                                 ))}
                             </div>
                         ))}
                     </div>
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-red-500 rounded-t"></div>
+                    <div className="absolute -top-2 left-0 right-0 h-2 bg-white/30 rounded-t" />
                 </div>
 
-                {/* Building 2 - Medium House */}
-                <div className="relative" style={{ height: '32px', width: '32px' }}>
-                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-blue-400 to-blue-600 rounded-t-lg shadow-2xl">
-                        {/* Roof */}
-                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[35px] border-r-[35px] border-b-[25px] border-l-transparent border-r-transparent border-b-red-600"></div>
-                        {/* Windows */}
-                        {[...Array(3)].map((_, floor) => (
-                            <div key={`b2-floor-${floor}`} className="flex justify-around px-2 py-1.5">
-                                {[...Array(2)].map((_, window) => (
-                                    <div
-                                        key={`b2-window-${floor}-${window}`}
-                                        className="w-3 h-3 bg-yellow-200 animate-window-light"
-                                        style={{
-                                            animationDelay: `${Math.random() * 5}s`,
-                                            opacity: Math.random() > 0.3 ? 1 : 0.3
-                                        }}
-                                    ></div>
-                                ))}
-                            </div>
-                        ))}
-                        {/* Door */}
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4 h-6 bg-amber-800 rounded-t-sm"></div>
-                    </div>
-                </div>
-
-                {/* Building 3 - Tall Modern Apartment */}
-                <div className="relative" style={{ height: '52px', width: '42px' }}>
-                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-teal-400 to-teal-700 rounded-t-lg shadow-2xl">
-                        {/* Windows grid */}
-                        {[...Array(6)].map((_, floor) => (
-                            <div key={`b3-floor-${floor}`} className="flex justify-around px-2 py-1">
-                                {[...Array(3)].map((_, window) => (
-                                    <div
-                                        key={`b3-window-${floor}-${window}`}
-                                        className="w-2.5 h-3 bg-yellow-200 animate-window-light"
-                                        style={{
-                                            animationDelay: `${Math.random() * 5}s`,
-                                            opacity: Math.random() > 0.3 ? 1 : 0.3
-                                        }}
-                                    ></div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="absolute -top-1 left-0 right-0 h-1 bg-gray-700"></div>
-                </div>
-
-                {/* Building 4 - Small House */}
-                <div className="relative" style={{ height: '28px', width: '30px' }}>
-                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-purple-400 to-purple-600 rounded-t-lg shadow-2xl">
-                        {/* Roof */}
-                        <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[30px] border-r-[30px] border-b-[22px] border-l-transparent border-r-transparent border-b-orange-700"></div>
-                        {/* Windows */}
-                        <div className="flex justify-around px-2 py-2">
-                            {[...Array(2)].map((_, window) => (
-                                <div
-                                    key={`b4-window-${window}`}
-                                    className="w-3 h-3 bg-yellow-200 animate-window-light"
-                                    style={{
-                                        animationDelay: `${Math.random() * 5}s`,
-                                        opacity: Math.random() > 0.3 ? 1 : 0.3
-                                    }}
-                                ></div>
+                {/* Greek Temple Style */}
+                <div className="relative building-hover" style={{ height: '45px', width: '45px' }}>
+                    <div className="absolute bottom-0 w-full h-[35px] bg-gradient-to-b from-sky-100 to-sky-200 shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇬🇷</div>
+                        {/* Columns */}
+                        <div className="flex justify-around h-full pt-4 px-1">
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="w-2 h-full bg-gradient-to-b from-white to-sky-300 rounded-t" />
                             ))}
                         </div>
-                        {/* Door */}
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3 h-5 bg-amber-900 rounded-t-sm"></div>
+                    </div>
+                    {/* Temple roof */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[25px] border-r-[25px] border-b-[12px] border-l-transparent border-r-transparent border-b-sky-300" />
+                </div>
+
+                {/* Croatian Coastal House */}
+                <div className="relative building-hover" style={{ height: '40px', width: '32px' }}>
+                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-orange-300 to-orange-500 rounded-t shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇭🇷</div>
+                        <div className="flex justify-around px-1.5 py-2 pt-4">
+                            {[...Array(2)].map((_, w) => (
+                                <div key={w} className="w-3 h-4 bg-blue-400/80 rounded-t-full animate-window" style={{ animationDelay: `${Math.random() * 3}s` }} />
+                            ))}
+                        </div>
+                    </div>
+                    {/* Red tile roof */}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[20px] border-r-[20px] border-b-[16px] border-l-transparent border-r-transparent border-b-red-600" />
+                </div>
+
+                {/* Bulgarian Church Style */}
+                <div className="relative building-hover" style={{ height: '60px', width: '28px' }}>
+                    <div className="absolute bottom-0 w-full h-[45px] bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-t shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇧🇬</div>
+                        {[...Array(3)].map((_, floor) => (
+                            <div key={floor} className="flex justify-center px-1 py-1.5 pt-3">
+                                <div className="w-3 h-2.5 bg-yellow-200/80 rounded-t-full animate-window" style={{ animationDelay: `${Math.random() * 3}s` }} />
+                            </div>
+                        ))}
+                    </div>
+                    {/* Onion dome */}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                        <div className="w-4 h-5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full" />
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-2 bg-amber-300" />
                     </div>
                 </div>
 
-                {/* Building 5 - Medium Apartment */}
-                <div className="relative" style={{ height: '39px', width: '38px' }}>
-                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-pink-400 to-pink-600 rounded-t-lg shadow-2xl">
-                        {/* Windows */}
+                {/* Bosnian Ottoman Style */}
+                <div className="relative building-hover" style={{ height: '50px', width: '35px' }}>
+                    <div className="absolute bottom-0 w-full h-[40px] bg-gradient-to-b from-amber-100 to-amber-300 shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇧🇦</div>
+                        <div className="flex justify-around px-1 py-2 pt-4">
+                            {[...Array(2)].map((_, w) => (
+                                <div key={w} className="w-3 h-5 bg-amber-800/60 rounded-t-full animate-window" style={{ animationDelay: `${Math.random() * 3}s` }} />
+                            ))}
+                        </div>
+                    </div>
+                    {/* Minaret-inspired top */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-3 h-4 bg-gradient-to-b from-teal-400 to-teal-600 rounded-t-full" />
+                </div>
+
+                {/* Montenegrin Coastal */}
+                <div className="relative building-hover" style={{ height: '35px', width: '30px' }}>
+                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-stone-300 to-stone-500 rounded-t shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇲🇪</div>
+                        <div className="flex justify-around px-1.5 pt-4">
+                            {[...Array(2)].map((_, w) => (
+                                <div key={w} className="w-2.5 h-3 bg-sky-300/80 rounded-sm animate-window" style={{ animationDelay: `${Math.random() * 3}s` }} />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[18px] border-r-[18px] border-b-[12px] border-l-transparent border-r-transparent border-b-orange-700" />
+                </div>
+
+                {/* Romanian Castle Style */}
+                <div className="relative building-hover hidden sm:block" style={{ height: '70px', width: '40px' }}>
+                    <div className="absolute bottom-0 w-full h-[50px] bg-gradient-to-b from-purple-400 to-purple-700 shadow-lg">
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px]">🇷🇴</div>
                         {[...Array(4)].map((_, floor) => (
-                            <div key={`b5-floor-${floor}`} className="flex justify-around px-2 py-1.5">
-                                {[...Array(2)].map((_, window) => (
-                                    <div
-                                        key={`b5-window-${floor}-${window}`}
-                                        className="w-3 h-3 bg-yellow-200 animate-window-light"
-                                        style={{
-                                            animationDelay: `${Math.random() * 5}s`,
-                                            opacity: Math.random() > 0.3 ? 1 : 0.3
-                                        }}
-                                    ></div>
+                            <div key={floor} className="flex justify-around px-1.5 py-1 pt-3">
+                                {[...Array(2)].map((_, w) => (
+                                    <div key={w} className="w-2.5 h-2 bg-yellow-200/80 rounded-sm animate-window" style={{ animationDelay: `${Math.random() * 3}s` }} />
                                 ))}
                             </div>
                         ))}
                     </div>
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-gray-700 rounded-t"></div>
-                </div>
-
-                {/* Building 6 - Short House */}
-                <div className="relative" style={{ height: '25px', width: '28px' }}>
-                    <div className="absolute bottom-0 w-full h-full bg-gradient-to-b from-green-400 to-green-600 rounded-t-lg shadow-2xl">
-                        {/* Roof */}
-                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[28px] border-r-[28px] border-b-[20px] border-l-transparent border-r-transparent border-b-slate-700"></div>
-                        {/* Window */}
-                        <div className="flex justify-center pt-2">
-                            <div className="w-3 h-3 bg-yellow-200 animate-window-light" style={{ opacity: 0.9 }}></div>
-                        </div>
-                        {/* Door */}
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3 h-4 bg-amber-900 rounded-t-sm"></div>
+                    {/* Castle towers */}
+                    <div className="absolute -top-5 left-0 w-3 h-6 bg-purple-800 rounded-t">
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[5px] border-l-transparent border-r-transparent border-b-purple-900" />
+                    </div>
+                    <div className="absolute -top-5 right-0 w-3 h-6 bg-purple-800 rounded-t">
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[5px] border-l-transparent border-r-transparent border-b-purple-900" />
                     </div>
                 </div>
             </div>
 
-            {/* Walking People - Fixed to prevent jumping */}
-            <div className="absolute bottom-0 left-0 w-full pointer-events-none pb-2" style={{ height: '70px', zIndex: 10 }}>
-                {/* Person 1 - Walking right */}
-                <div className="person-walking person-walk-right absolute" style={{ bottom: '2px' }}>
-                    <svg width="18" height="24" viewBox="0 0 30 40" className="person-svg">
-                        <circle cx="15" cy="8" r="4" fill="#FFF" stroke="#000" strokeWidth="1" />
-                        <line x1="15" y1="12" x2="15" y2="24" stroke="#FFF" strokeWidth="3" strokeLinecap="round" />
-                        <g className="person-legs">
-                            <line x1="15" y1="24" x2="10" y2="36" stroke="#FFF" strokeWidth="3" strokeLinecap="round" className="leg-left" />
-                            <line x1="15" y1="24" x2="20" y2="36" stroke="#FFF" strokeWidth="3" strokeLinecap="round" className="leg-right" />
-                        </g>
-                        <g className="person-arms">
-                            <line x1="15" y1="16" x2="10" y2="22" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" className="arm-left" />
-                            <line x1="15" y1="16" x2="20" y2="22" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" className="arm-right" />
-                        </g>
-                    </svg>
+            {/* Walking People with flags */}
+            <div className="absolute bottom-2 left-0 w-full pointer-events-none" style={{ zIndex: 20 }}>
+                {/* Person 1 */}
+                <div className="person-walking person-walk-right absolute" style={{ bottom: '0' }}>
+                    <div className="relative">
+                        <svg width="16" height="22" viewBox="0 0 30 40" className="person-svg">
+                            <circle cx="15" cy="8" r="4" fill="#FFF" />
+                            <line x1="15" y1="12" x2="15" y2="24" stroke="#FFF" strokeWidth="3" strokeLinecap="round" />
+                            <g className="person-legs">
+                                <line x1="15" y1="24" x2="10" y2="36" stroke="#FFF" strokeWidth="3" strokeLinecap="round" className="leg-left" />
+                                <line x1="15" y1="24" x2="20" y2="36" stroke="#FFF" strokeWidth="3" strokeLinecap="round" className="leg-right" />
+                            </g>
+                        </svg>
+                        <span className="absolute -top-1 -right-2 text-[10px] animate-bounce" style={{ animationDuration: '2s' }}>🇦🇱</span>
+                    </div>
                 </div>
 
-                {/* Person 2 - Walking left */}
-                <div className="person-walking person-walk-left absolute" style={{ bottom: '2px' }}>
-                    <svg width="18" height="24" viewBox="0 0 30 40" className="person-svg">
-                        <circle cx="15" cy="8" r="4" fill="#FFD700" stroke="#000" strokeWidth="1" />
-                        <line x1="15" y1="12" x2="15" y2="24" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" />
-                        <g className="person-legs">
-                            <line x1="15" y1="24" x2="10" y2="36" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" className="leg-left" />
-                            <line x1="15" y1="24" x2="20" y2="36" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" className="leg-right" />
-                        </g>
-                        <g className="person-arms">
-                            <line x1="15" y1="16" x2="10" y2="22" stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round" className="arm-left" />
-                            <line x1="15" y1="16" x2="20" y2="22" stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round" className="arm-right" />
-                        </g>
-                    </svg>
+                {/* Person 2 */}
+                <div className="person-walking person-walk-left absolute" style={{ bottom: '0' }}>
+                    <div className="relative">
+                        <svg width="16" height="22" viewBox="0 0 30 40" className="person-svg">
+                            <circle cx="15" cy="8" r="4" fill="#FFD700" />
+                            <line x1="15" y1="12" x2="15" y2="24" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" />
+                            <g className="person-legs">
+                                <line x1="15" y1="24" x2="10" y2="36" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" className="leg-left" />
+                                <line x1="15" y1="24" x2="20" y2="36" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" className="leg-right" />
+                            </g>
+                        </svg>
+                        <span className="absolute -top-1 -right-2 text-[10px] animate-bounce" style={{ animationDuration: '2.2s' }}>🇷🇸</span>
+                    </div>
                 </div>
 
-                {/* Person 3 - Walking right (slower) */}
-                <div className="person-walking person-walk-right-slow absolute" style={{ bottom: '2px' }}>
-                    <svg width="18" height="24" viewBox="0 0 30 40" className="person-svg">
-                        <circle cx="15" cy="8" r="4" fill="#FF6B6B" stroke="#000" strokeWidth="1" />
-                        <line x1="15" y1="12" x2="15" y2="24" stroke="#FF6B6B" strokeWidth="3" strokeLinecap="round" />
-                        <g className="person-legs">
-                            <line x1="15" y1="24" x2="10" y2="36" stroke="#FF6B6B" strokeWidth="3" strokeLinecap="round" className="leg-left" />
-                            <line x1="15" y1="24" x2="20" y2="36" stroke="#FF6B6B" strokeWidth="3" strokeLinecap="round" className="leg-right" />
-                        </g>
-                        <g className="person-arms">
-                            <line x1="15" y1="16" x2="10" y2="22" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round" className="arm-left" />
-                            <line x1="15" y1="16" x2="20" y2="22" stroke="#FF6B6B" strokeWidth="2.5" strokeLinecap="round" className="arm-right" />
-                        </g>
-                    </svg>
+                {/* Person 3 */}
+                <div className="person-walking person-walk-right-slow absolute" style={{ bottom: '0' }}>
+                    <div className="relative">
+                        <svg width="16" height="22" viewBox="0 0 30 40" className="person-svg">
+                            <circle cx="15" cy="8" r="4" fill="#60A5FA" />
+                            <line x1="15" y1="12" x2="15" y2="24" stroke="#60A5FA" strokeWidth="3" strokeLinecap="round" />
+                            <g className="person-legs">
+                                <line x1="15" y1="24" x2="10" y2="36" stroke="#60A5FA" strokeWidth="3" strokeLinecap="round" className="leg-left" />
+                                <line x1="15" y1="24" x2="20" y2="36" stroke="#60A5FA" strokeWidth="3" strokeLinecap="round" className="leg-right" />
+                            </g>
+                        </svg>
+                        <span className="absolute -top-1 -right-2 text-[10px] animate-bounce" style={{ animationDuration: '1.8s' }}>🇬🇷</span>
+                    </div>
                 </div>
             </div>
 
-            {/* Ground/Street */}
-            <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600">
-                {/* Street lines */}
-                <div className="absolute top-1/2 left-0 right-0 h-px bg-yellow-300 opacity-50"></div>
+            {/* Ground with gradient */}
+            <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-yellow-400/30" />
             </div>
 
-            {/* Inline Styles for Animations */}
+            {/* Styles */}
             <style jsx>{`
                 @keyframes twinkle {
+                    0%, 100% { opacity: 0.3; transform: scale(1); }
+                    50% { opacity: 1; transform: scale(1.2); }
+                }
+
+                @keyframes float-sparkle {
+                    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+                    50% { transform: translateY(-10px) rotate(180deg); opacity: 0.8; }
+                }
+
+                @keyframes window-flicker {
                     0%, 100% { opacity: 0.3; }
                     50% { opacity: 1; }
                 }
 
-                @keyframes windowLight {
-                    0%, 100% { opacity: 0.3; }
-                    50% { opacity: 1; }
+                @keyframes scroll-flags {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-33.333%); }
                 }
 
                 @keyframes walkRight {
-                    0% { transform: translate3d(-50px, 0, 0); }
-                    100% { transform: translate3d(calc(100vw + 50px), 0, 0); }
+                    0% { transform: translateX(-50px); }
+                    100% { transform: translateX(calc(100vw + 50px)); }
                 }
 
                 @keyframes walkLeft {
-                    0% { transform: translate3d(calc(100vw + 50px), 0, 0); }
-                    100% { transform: translate3d(-50px, 0, 0); }
+                    0% { transform: translateX(calc(100vw + 50px)); }
+                    100% { transform: translateX(-50px); }
                 }
 
                 @keyframes walkRightSlow {
-                    0% { transform: translate3d(-50px, 0, 0); }
-                    100% { transform: translate3d(calc(100vw + 50px), 0, 0); }
+                    0% { transform: translateX(-100px); }
+                    100% { transform: translateX(calc(100vw + 100px)); }
                 }
 
-                @keyframes legWalkLeft {
-                    0%, 100% {
-                        transform: rotate(0deg);
-                    }
-                    25% {
-                        transform: rotate(-25deg);
-                    }
-                    75% {
-                        transform: rotate(25deg);
-                    }
-                }
-
-                @keyframes legWalkRight {
-                    0%, 100% {
-                        transform: rotate(0deg);
-                    }
-                    25% {
-                        transform: rotate(25deg);
-                    }
-                    75% {
-                        transform: rotate(-25deg);
-                    }
-                }
-
-                @keyframes armSwingLeft {
-                    0%, 100% {
-                        transform: rotate(0deg);
-                    }
-                    50% {
-                        transform: rotate(-20deg);
-                    }
-                }
-
-                @keyframes armSwingRight {
-                    0%, 100% {
-                        transform: rotate(0deg);
-                    }
-                    50% {
-                        transform: rotate(20deg);
-                    }
+                @keyframes legWalk {
+                    0%, 100% { transform: rotate(0deg); }
+                    25% { transform: rotate(-20deg); }
+                    75% { transform: rotate(20deg); }
                 }
 
                 .animate-twinkle {
                     animation: twinkle 3s ease-in-out infinite;
                 }
 
-                .animate-window-light {
-                    animation: windowLight 4s ease-in-out infinite;
+                .animate-float-sparkle {
+                    animation: float-sparkle 4s ease-in-out infinite;
+                }
+
+                .animate-window {
+                    animation: window-flicker 4s ease-in-out infinite;
+                }
+
+                .flags-scroll {
+                    animation: scroll-flags 30s linear infinite;
+                    width: fit-content;
+                }
+
+                .flags-scroll:hover {
+                    animation-play-state: paused;
                 }
 
                 .person-walking {
@@ -292,39 +323,36 @@ const FooterCityscape: React.FC = () => {
                 }
 
                 .person-walk-right {
-                    animation: walkRight 25s linear infinite;
+                    animation: walkRight 20s linear infinite;
                 }
 
                 .person-walk-left {
-                    animation: walkLeft 30s linear infinite;
+                    animation: walkLeft 25s linear infinite;
                 }
 
                 .person-walk-right-slow {
-                    animation: walkRightSlow 40s linear infinite;
+                    animation: walkRightSlow 35s linear infinite;
                 }
 
                 .person-svg {
-                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+                    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
                 }
 
-                .leg-left {
-                    animation: legWalkLeft 1s ease-in-out infinite;
+                .leg-left, .leg-right {
+                    animation: legWalk 0.8s ease-in-out infinite;
                     transform-origin: 15px 24px;
                 }
 
                 .leg-right {
-                    animation: legWalkRight 1s ease-in-out infinite;
-                    transform-origin: 15px 24px;
+                    animation-delay: 0.4s;
                 }
 
-                .arm-left {
-                    animation: armSwingLeft 1s ease-in-out infinite;
-                    transform-origin: 15px 16px;
+                .building-hover {
+                    transition: transform 0.3s ease;
                 }
 
-                .arm-right {
-                    animation: armSwingRight 1s ease-in-out infinite;
-                    transform-origin: 15px 16px;
+                .building-hover:hover {
+                    transform: translateY(-3px);
                 }
             `}</style>
         </div>

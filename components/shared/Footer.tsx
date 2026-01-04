@@ -103,7 +103,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                         {/* AI Badge */}
                         <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/30 rounded-full px-4 py-2">
                             <SparklesIcon className="w-4 h-4 text-primary animate-pulse" />
-                            <span className="text-sm font-medium text-slate-300">Powered by AI</span>
+                            <span className="text-sm font-medium text-slate-300">{t('footer:ai.poweredBy', 'Powered by AI')}</span>
                         </div>
 
                         {/* Social Media Links */}
@@ -200,7 +200,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                         <div>
                             <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                                 <GlobeAltIcon className="w-3.5 h-3.5" />
-                                Countries We Serve
+                                {t('footer:sections.countriesWeServe', 'Countries We Serve')}
                             </h4>
                             <div className="flex flex-wrap gap-2">
                                 {balkanCountries.map((country) => (
@@ -231,7 +231,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             onClick={() => handleNavigation('how-it-works')}
                             className="text-slate-500 hover:text-primary transition-colors"
                         >
-                            How It Works
+                            {t('footer:links.howItWorks', 'How It Works')}
                         </button>
                         <a href="#" className="text-slate-500 hover:text-primary transition-colors">{t('footer:legal.privacyPolicy', 'Privacy Policy')}</a>
                         <a href="#" className="text-slate-500 hover:text-primary transition-colors">{t('footer:legal.termsOfService', 'Terms of Service')}</a>
