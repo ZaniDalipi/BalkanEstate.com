@@ -543,15 +543,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
             gestureHandling: 'greedy',
           }}
         >
+          {/* Test marker to verify markers work */}
+          <Marker
+            position={{ lat: 41.5, lng: 21.5 }}
+            title="Test Marker - If you see this, markers work!"
+          />
+
           {/* Property Markers */}
-          {propertiesInView.map((property) => (
-            <Marker
-              key={property.id}
-              position={{ lat: property.lat, lng: property.lng }}
-              icon={createMarkerIcon(property, property.id === hoveredPropertyId)}
-              onClick={() => handleMarkerClick(property)}
-            />
-          ))}
+          {propertiesInView.length > 0 ? (
+            propertiesInView.map((property) => (
+              <Marker
+                key={property.id}
+                position={{ lat: property.lat, lng: property.lng }}
+                icon={createMarkerIcon(property, property.id === hoveredPropertyId)}
+                onClick={() => handleMarkerClick(property)}
+                title={`€${property.price}`}
+              />
+            ))
+          ) : (
+            // Debug: Show message if no properties
+            console.log('[MapComponent] No properties to display on map') as unknown as null
+          )}
 
           {/* Selected Property InfoWindow */}
           {selectedProperty && (
