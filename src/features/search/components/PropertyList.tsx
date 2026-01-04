@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -637,11 +637,15 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    
+
+    // Create stable keys for filters and properties to avoid infinite loops
+    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+    const propertiesKey = useMemo(() => properties.map(p => p.id).join(','), [properties]);
+
     useEffect(() => {
-      // Reset visible count when filters change
+      // Reset visible count when filters or properties actually change
       setVisibleCount(ITEMS_PER_PAGE);
-    }, [filters, properties]);
+    }, [filtersKey, propertiesKey]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
