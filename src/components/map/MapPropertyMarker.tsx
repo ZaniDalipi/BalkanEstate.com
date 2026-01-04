@@ -159,6 +159,7 @@ const PROPERTY_TYPE_COLORS: Record<
   house: '#0252CD',
   apartment: '#28a745',
   villa: '#6f42c1',
+  land: '#8B4513',    // Brown for land
   other: '#6c757d',
 };
 
@@ -533,25 +534,40 @@ const PropertyPopup: React.FC<{
             📍 {property.address}, {property.city}
           </p>
 
-          {/* Property stats - enhanced grid */}
-          <div className="grid grid-cols-4 gap-1.5 mb-2">
-            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-              <div className="font-bold text-sm text-primary">{property.beds}</div>
-              <div className="text-[9px] text-primary/70">{t('map.beds')}</div>
+          {/* Property stats - different layout for land vs residential */}
+          {property.propertyType === 'land' ? (
+            <div className="grid grid-cols-2 gap-1.5 mb-2">
+              <div className="bg-amber-50 rounded-lg py-2 px-2 text-center border border-amber-200">
+                <div className="font-bold text-lg text-amber-800">{property.sqft?.toLocaleString()}</div>
+                <div className="text-[10px] text-amber-600">{t('map.area', 'Area')} (m²)</div>
+              </div>
+              <div className="bg-primary/5 rounded-lg py-2 px-2 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">
+                  €{property.sqft > 0 ? (property.price / property.sqft).toFixed(1) : '—'}
+                </div>
+                <div className="text-[10px] text-primary/70">{t('map.pricePerSqm', 'per m²')}</div>
+              </div>
             </div>
-            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-              <div className="font-bold text-sm text-primary">{property.baths}</div>
-              <div className="text-[9px] text-primary/70">{t('map.baths')}</div>
+          ) : (
+            <div className="grid grid-cols-4 gap-1.5 mb-2">
+              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">{property.beds}</div>
+                <div className="text-[9px] text-primary/70">{t('map.beds')}</div>
+              </div>
+              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">{property.baths}</div>
+                <div className="text-[9px] text-primary/70">{t('map.baths')}</div>
+              </div>
+              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">{property.livingRooms}</div>
+                <div className="text-[9px] text-primary/70">{t('map.living')}</div>
+              </div>
+              <div className="bg-primary/10 rounded-lg py-1.5 px-1 text-center border border-primary/20">
+                <div className="font-bold text-sm text-primary">{property.sqft}</div>
+                <div className="text-[9px] text-primary/70">m²</div>
+              </div>
             </div>
-            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-              <div className="font-bold text-sm text-primary">{property.livingRooms}</div>
-              <div className="text-[9px] text-primary/70">{t('map.living')}</div>
-            </div>
-            <div className="bg-primary/10 rounded-lg py-1.5 px-1 text-center border border-primary/20">
-              <div className="font-bold text-sm text-primary">{property.sqft}</div>
-              <div className="text-[9px] text-primary/70">m²</div>
-            </div>
-          </div>
+          )}
 
           {/* View details button */}
           <button
@@ -627,40 +643,57 @@ const PropertyPopup: React.FC<{
         {property.address}, {property.city}
       </p>
 
-      {/* Essential information */}
-      <div className="grid grid-cols-3 gap-1.5 mb-2 text-center">
-        <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">{t('map.beds')}</div>
-          <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
+      {/* Essential information - different for land vs residential */}
+      {property.propertyType === 'land' ? (
+        <div className="grid grid-cols-2 gap-1.5 mb-2 text-center">
+          <div className="bg-amber-50 rounded py-2">
+            <div className="font-bold text-base text-amber-800">{property.sqft?.toLocaleString()}</div>
+            <div className="text-xs text-amber-600">{t('map.area', 'Area')} (m²)</div>
+          </div>
+          <div className="bg-neutral-50 rounded py-2">
+            <div className="font-bold text-sm text-neutral-700">
+              €{property.sqft > 0 ? (property.price / property.sqft).toFixed(1) : '—'}
+            </div>
+            <div className="text-xs text-neutral-500">{t('map.pricePerSqm', 'per m²')}</div>
+          </div>
         </div>
-        <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">{t('map.baths')}</div>
-          <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
-        </div>
-        <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">{t('map.area')}</div>
-          <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
-        </div>
-      </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 gap-1.5 mb-2 text-center">
+            <div className="bg-neutral-50 rounded py-1.5">
+              <div className="text-xs text-neutral-500">{t('map.beds')}</div>
+              <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
+            </div>
+            <div className="bg-neutral-50 rounded py-1.5">
+              <div className="text-xs text-neutral-500">{t('map.baths')}</div>
+              <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
+            </div>
+            <div className="bg-neutral-50 rounded py-1.5">
+              <div className="text-xs text-neutral-500">{t('map.area')}</div>
+              <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
+            </div>
+          </div>
 
-      {/* Additional features */}
-      <div className="flex flex-wrap gap-1 mb-1.5">
-        {property.livingRooms > 0 && (
-          <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
-            {property.livingRooms} {t('map.living')}
-          </span>
-        )}
-        {property.parking > 0 && (
-          <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
-            {property.parking} {t('map.parking')}
-          </span>
-        )}
-        {property.yearBuilt && (
-          <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">
-            {property.yearBuilt}
-          </span>
-        )}
-      </div>
+          {/* Additional features - only for residential */}
+          <div className="flex flex-wrap gap-1 mb-1.5">
+            {property.livingRooms > 0 && (
+              <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
+                {property.livingRooms} {t('map.living')}
+              </span>
+            )}
+            {property.parking > 0 && (
+              <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
+                {property.parking} {t('map.parking')}
+              </span>
+            )}
+            {property.yearBuilt && (
+              <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">
+                {property.yearBuilt}
+              </span>
+            )}
+          </div>
+        </>
+      )}
 
       {/* View details prompt */}
       <div className="text-center pt-1.5 border-t border-neutral-200">

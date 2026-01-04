@@ -4,7 +4,7 @@ import { UserRole } from './user.types';
 
 export type PropertyStatus = 'active' | 'pending' | 'sold' | 'draft';
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
-export type PropertyType = 'house' | 'apartment' | 'villa' | 'other';
+export type PropertyType = 'house' | 'apartment' | 'villa' | 'land' | 'other';
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
