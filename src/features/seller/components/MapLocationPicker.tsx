@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { searchLocation, reverseGeocode } from '@/services/osmService';
 import { NominatimResult } from '@/types';
+import { useAppContext } from '@/context/AppContext';
 
 // Fix for default markers in Leaflet with webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -28,6 +29,7 @@ interface MapLocationPickerProps {
 
 const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange }) => {
   const { t } = useTranslation(['search']);
+  const { dispatch } = useAppContext();
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -290,7 +292,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     if (city && cityLat && cityLng) {
       const distance = calculateDistance(cityLat, cityLng, newLat, newLng);
       if (distance > 30) {
-        alert(t('search:map.locationTooFar', { distance: distance.toFixed(1), city }));
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'warning',
+            title: t('search:map.locationTooFarTitle', 'Location Too Far'),
+            message: t('search:map.locationTooFar', { distance: distance.toFixed(1), city }),
+          },
+        });
         return;
       }
     }

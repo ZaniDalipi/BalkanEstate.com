@@ -56,6 +56,7 @@ const initialState: AppState = {
   // FIX: Initialize allMunicipalities in the initial state.
   allMunicipalities: MUNICIPALITY_DATA,
   pendingRedirect: null,
+  alertDialog: null,
 };
 
 
@@ -275,6 +276,18 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         };
     case 'SET_PENDING_REDIRECT':
         return { ...state, pendingRedirect: action.payload };
+    case 'SHOW_ALERT':
+        return {
+            ...state,
+            alertDialog: {
+                isOpen: true,
+                type: action.payload.type,
+                title: action.payload.title,
+                message: action.payload.message,
+            },
+        };
+    case 'HIDE_ALERT':
+        return { ...state, alertDialog: null };
     default:
       return state;
   }

@@ -110,7 +110,14 @@ const SavedSearchesPage: React.FC = () => {
       dispatch({ type: 'CLEAR_ALL_SAVED_SEARCHES' });
     } catch (error) {
       console.error('Failed to clear saved searches:', error);
-      alert('Failed to clear saved searches');
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'error',
+          title: t('common:error', 'Error'),
+          message: t('saved:searches.clearFailed', 'Failed to clear saved searches'),
+        },
+      });
     } finally {
       setIsClearing(false);
     }

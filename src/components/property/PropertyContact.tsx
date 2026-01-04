@@ -51,7 +51,14 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
       dispatch({ type: 'REMOVE_FROM_COMPARISON', payload: property.id });
     } else {
       if (state.comparisonList.length >= 4) {
-        alert(t('property:actions.compareLimit'));
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'warning',
+            title: t('property:actions.compareLimitTitle', 'Comparison Limit'),
+            message: t('property:actions.compareLimit'),
+          },
+        });
         return;
       }
       dispatch({ type: 'ADD_TO_COMPARISON', payload: property.id });

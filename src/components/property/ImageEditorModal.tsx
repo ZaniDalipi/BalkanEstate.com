@@ -198,14 +198,28 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
           setShowSuccessDialog(true);
         } catch (error) {
           console.error('Failed to send to agent:', error);
-          alert(t('imageEditor.failedToSend'));
+          dispatch({
+            type: 'SHOW_ALERT',
+            payload: {
+              type: 'error',
+              title: t('common:error'),
+              message: t('imageEditor.failedToSend'),
+            },
+          });
         } finally {
           setIsSending(false);
         }
       }, 'image/png');
     } catch (error) {
       console.error('Failed to send to agent:', error);
-      alert(t('imageEditor.failedToSend'));
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'error',
+          title: t('common:error'),
+          message: t('imageEditor.failedToSend'),
+        },
+      });
       setIsSending(false);
     }
   };

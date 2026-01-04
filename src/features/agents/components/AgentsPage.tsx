@@ -128,11 +128,25 @@ const AgentsPage: React.FC = () => {
         });
         setTimeout(() => setContactSubmitSuccess(false), 5000);
       } else {
-        alert(t('common:errors.submitFailed', 'Failed to submit request. Please try again.'));
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'error',
+            title: t('common:error', 'Error'),
+            message: t('common:errors.submitFailed', 'Failed to submit request. Please try again.'),
+          },
+        });
       }
     } catch (error) {
       console.error('Error submitting contact form:', error);
-      alert(t('common:errors.genericError', 'An error occurred. Please try again later.'));
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'error',
+          title: t('common:error', 'Error'),
+          message: t('common:errors.genericError', 'An error occurred. Please try again later.'),
+        },
+      });
     } finally {
       setIsSubmittingContact(false);
     }

@@ -966,7 +966,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 const formData = new FormData(e.currentTarget);
                                 const email = formData.get('email') as string;
                                 if (!email || !email.trim() || !email.includes('@')) {
-                                    alert('Please enter a valid email address');
+                                    dispatch({
+                                        type: 'SHOW_ALERT',
+                                        payload: {
+                                            type: 'warning',
+                                            title: 'Invalid Email',
+                                            message: 'Please enter a valid email address',
+                                        },
+                                    });
                                     return;
                                 }
                                 dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true, email: email.trim() } });
