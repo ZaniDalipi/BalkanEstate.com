@@ -158,10 +158,10 @@ const ZOOM_THRESHOLD = 12;
  */
 const getMarkerScaleForZoom = (zoom: number): number => {
   if (zoom >= 12) return 1;      // Full size at zoom 12+
-  if (zoom >= 10) return 0.85;   // 85% at zoom 10-11
-  if (zoom >= 8) return 0.7;     // 70% at zoom 8-9
-  if (zoom >= 6) return 0.55;    // 55% at zoom 6-7
-  return 0.45;                    // 45% at zoom 5 and below
+  if (zoom >= 10) return 0.9;    // 90% at zoom 10-11
+  if (zoom >= 8) return 0.75;    // 75% at zoom 8-9
+  if (zoom >= 6) return 0.65;    // 65% at zoom 6-7
+  return 0.55;                    // 55% at zoom 5 and below
 };
 
 const PROPERTY_TYPE_COLORS: Record<
