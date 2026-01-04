@@ -15,7 +15,7 @@ import { CadastreLayer } from './CadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
 import Buildings3DLayer from './Buildings3DLayer';
 import SunPositionControl from './SunPositionControl';
-import { type Season } from './SunArcAnimation';
+import SunArcAnimation, { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
 import PropertyAddressLabels from './PropertyAddressLabels';
 import {
@@ -300,6 +300,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
         </MapContainer>
+
+        {/* Sun/Moon arc animation - shows celestial body position when 3D buildings enabled */}
+        {show3DBuildings && (
+          <SunArcAnimation
+            hour={shadowDateTime.getHours() + shadowDateTime.getMinutes() / 60}
+            enabled={show3DBuildings}
+            isNightMode={false}
+            longitude={mapCenterLng}
+            latitude={mapCenterLat}
+            useRealTime={!isManualTimeControl}
+            season={selectedSeason}
+          />
+        )}
 
       {/* Desktop Controls - hidden on mobile via CSS as fallback */}
       {!isMobile && (
