@@ -5,10 +5,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { Property } from '../../../types';
-import { formatPrice } from '../../../utils/currency';
-import { BuildingOfficeIcon } from '../../../constants';
-import { getPriceReductionInfo } from '../../../utils/priceUtils';
+import { Property } from '@/types';
+import { formatPrice } from '@/utils/currency';
+import { BuildingOfficeIcon } from '@/constants';
+import { getPriceReductionInfo } from '@/utils/priceUtils';
 
 // Inject CSS animations for map markers
 const injectMapMarkerStyles = () => {
