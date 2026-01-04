@@ -31,6 +31,7 @@
     "express-rate-limit": "^8.2.1",
     "framer-motion": "^12.23.25",
     "generative-ai": "^0.1.4",
+    "google": "^2.1.0",
     "helmet": "^8.1.0",
     "heroku": "^8.7.1",
     "hpp": "^0.2.3",
@@ -41,6 +42,7 @@
     "leaflet.heat": "^0.2.0",
     "lucide-react": "^0.553.0",
     "mapbox-gl": "^3.17.0",
+    "maps": "^0.3.3",
     "ngrok": "^5.0.0-beta.2",
     "node-cron": "^4.2.1",
     "react": "^18.2.0",
@@ -51,6 +53,7 @@
     "react-map-gl": "^8.1.0",
     "sharp": "^0.34.5",
     "socket.io-client": "^4.8.1",
+    "tough-cookie": "^6.0.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
