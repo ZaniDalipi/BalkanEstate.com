@@ -2,10 +2,11 @@
  * Payment API Service
  *
  * Handles all payment-related API calls with support for multiple providers:
- * - Stripe for EU countries
- * - PaySera for non-EU Balkan countries
+ * - Stripe for EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
+ * - Paddle for non-EU Balkan countries (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
  *
  * The API automatically routes to the appropriate provider based on country.
+ * Paddle is a Merchant of Record (MoR) handling VAT/tax compliance.
  */
 
 import { apiRequest } from '@/shared/api/httpClient';
@@ -149,11 +150,11 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         countryName: info.countryName,
         provider: info.provider,
         providerInfo: {
-          name: info.provider === 'stripe' ? 'Stripe' : 'PaySera',
+          name: info.provider === 'stripe' ? 'Stripe' : 'Paddle',
           description: info.provider === 'stripe'
             ? 'Secure card payments'
-            : 'Bank transfers and cards',
-          fees: info.provider === 'stripe' ? '~2.9%' : '~2%',
+            : 'Secure payments with automatic VAT handling',
+          fees: info.provider === 'stripe' ? '~2.9%' : '~5%',
         },
         isEU: info.isEU,
         isSEPA: info.isSEPA,
@@ -186,11 +187,11 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       countries: countries.map(c => ({
         ...c,
         providerInfo: {
-          name: c.provider === 'stripe' ? 'Stripe' : 'PaySera',
+          name: c.provider === 'stripe' ? 'Stripe' : 'Paddle',
           description: c.provider === 'stripe'
             ? 'Secure card payments'
-            : 'Bank transfers and cards',
-          fees: c.provider === 'stripe' ? '~2.9%' : '~2%',
+            : 'Secure payments with automatic VAT handling',
+          fees: c.provider === 'stripe' ? '~2.9%' : '~5%',
         },
       })),
       stripeCountries: countries

@@ -2,11 +2,15 @@ import * as cron from 'node-cron';
 import AgencyFeaturedSubscription from '../models/AgencyFeaturedSubscription';
 import Agency from '../models/Agency';
 import User from '../models/User';
+import Subscription from '../models/Subscription';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
+import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
+let userSubscriptionTask: cron.ScheduledTask | null = null;
+let subscriptionReminderTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -82,11 +86,66 @@ export const startCronJobs = () => {
     }
   });
 
+  // Update expired user subscriptions - runs every 6 hours
+  userSubscriptionTask = cron.schedule('0 */6 * * *', async () => {
+    try {
+      console.log('🔄 Checking and updating expired user subscriptions...');
+      const count = await updateExpiredSubscriptions();
+      console.log(`✅ Processed ${count} expired user subscriptions`);
+    } catch (error) {
+      console.error('User subscription expiry cron error:', error);
+    }
+  });
+
+  // Send subscription renewal reminders - runs daily at 9 AM
+  subscriptionReminderTask = cron.schedule('0 9 * * *', async () => {
+    try {
+      console.log('📧 Sending subscription renewal reminders...');
+      const threeDaysFromNow = new Date();
+      threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+      threeDaysFromNow.setHours(23, 59, 59, 999);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Find subscriptions expiring in the next 3 days
+      const expiringSubscriptions = await Subscription.find({
+        status: 'active',
+        autoRenewing: false, // Only for those not auto-renewing
+        expirationDate: { $gte: today, $lte: threeDaysFromNow },
+      }).populate('userId');
+
+      let remindersSent = 0;
+      for (const sub of expiringSubscriptions) {
+        const user = sub.userId as any;
+        if (!user?.email) continue;
+
+        try {
+          await emailService.sendSubscriptionRenewalReminder(
+            user.email,
+            user.name || 'Customer',
+            sub.expirationDate,
+            sub.productId || 'subscription'
+          );
+          remindersSent++;
+        } catch (emailError) {
+          console.error(`Failed to send reminder to ${user.email}:`, emailError);
+        }
+      }
+
+      console.log(`✅ Sent ${remindersSent} subscription renewal reminders`);
+    } catch (error) {
+      console.error('Subscription reminder cron error:', error);
+    }
+  });
+
   console.log('🕐 Subscription cron jobs started');
 };
 
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
+  if (userSubscriptionTask) userSubscriptionTask.stop();
+  if (subscriptionReminderTask) subscriptionReminderTask.stop();
   console.log('🛑 Subscription cron jobs stopped');
 };

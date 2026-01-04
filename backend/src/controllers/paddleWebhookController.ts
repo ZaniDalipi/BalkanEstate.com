@@ -14,6 +14,10 @@ import { paddleService } from '../services/paddleService';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import User from '../models/User';
 import Product from '../models/Product';
+import Subscription from '../models/Subscription';
+import PaymentRecord from '../models/PaymentRecord';
+import SubscriptionEvent from '../models/SubscriptionEvent';
+import emailService from '../services/emailService';
 
 /**
  * Paddle webhook event types we handle
@@ -22,6 +26,11 @@ const PADDLE_EVENTS = {
   // Transaction events
   TRANSACTION_COMPLETED: 'transaction.completed',
   TRANSACTION_PAYMENT_FAILED: 'transaction.payment_failed',
+  TRANSACTION_REFUNDED: 'transaction.refunded',
+
+  // Adjustment events (for refunds and chargebacks)
+  ADJUSTMENT_CREATED: 'adjustment.created',
+  ADJUSTMENT_UPDATED: 'adjustment.updated',
 
   // Subscription events
   SUBSCRIPTION_CREATED: 'subscription.created',
@@ -101,6 +110,11 @@ export const handlePaddleWebhook = async (req: Request, res: Response): Promise<
         console.log(`❌ Paddle payment failed for transaction: ${event.data.id}`);
         break;
 
+      case PADDLE_EVENTS.TRANSACTION_REFUNDED:
+      case PADDLE_EVENTS.ADJUSTMENT_CREATED:
+        await handleRefund(event.data);
+        break;
+
       default:
         console.log(`ℹ️ Unhandled Paddle event: ${event.event_type}`);
     }
@@ -169,6 +183,19 @@ async function handleTransactionCompleted(data: any): Promise<void> {
       transactionId: data.id,
       purchaseToken: data.subscription_id || data.id,
     });
+
+    // Send payment confirmation email
+    try {
+      await emailService.sendPaymentConfirmation(user.email, user.name || 'Customer', {
+        planName: product.name || planName || 'Subscription',
+        amount,
+        currency: data.currency_code === 'EUR' ? '€' : (data.currency_code || 'EUR'),
+        expiresAt: result.subscription.expirationDate,
+        transactionId: data.id,
+      });
+    } catch (emailError) {
+      console.error('Failed to send payment confirmation email:', emailError);
+    }
 
     console.log(`✅ Paddle subscription activated for user ${user.email}`);
     console.log(`   Subscription ID: ${result.subscription._id}`);
@@ -250,11 +277,48 @@ async function handleSubscriptionCanceled(data: any): Promise<void> {
     const user = await User.findOne({ subscriptionExternalId: data.id });
 
     if (user) {
-      await User.findByIdAndUpdate(user._id, {
-        subscriptionStatus: 'canceled',
-        // Subscription still active until end of billing period
-        // Don't clear subscription data yet
-      });
+      // Update user
+      user.subscriptionStatus = 'canceled';
+      await user.save();
+
+      // Update subscription in our database
+      if (user.activeSubscriptionId) {
+        const subscription = await Subscription.findById(user.activeSubscriptionId);
+        if (subscription) {
+          subscription.status = 'pending_cancellation';
+          subscription.autoRenewing = false;
+          subscription.canceledAt = new Date();
+          if (data.current_billing_period?.ends_at) {
+            subscription.willCancelAt = new Date(data.current_billing_period.ends_at);
+          }
+          await subscription.save();
+
+          // Create event
+          await SubscriptionEvent.create({
+            subscriptionId: subscription._id,
+            userId: user._id,
+            eventType: 'subscription_canceled',
+            store: 'paddle',
+            metadata: {
+              paddleSubscriptionId: data.id,
+              canceledAt: new Date(),
+              willExpireAt: data.current_billing_period?.ends_at,
+            },
+          });
+        }
+      }
+
+      // Send cancellation email
+      try {
+        await emailService.sendSubscriptionCancelled(user.email, user.name || 'Customer', {
+          planName: user.subscriptionProductName || 'Subscription',
+          expiresAt: data.current_billing_period?.ends_at
+            ? new Date(data.current_billing_period.ends_at)
+            : user.subscriptionExpiresAt || new Date(),
+        });
+      } catch (emailError) {
+        console.error('Failed to send cancellation email:', emailError);
+      }
 
       console.log(`⚠️ Paddle subscription canceled for user ${user.email}`);
       console.log(`   Will remain active until: ${data.current_billing_period?.ends_at}`);
@@ -392,6 +456,100 @@ export const getPaddleConfig = async (req: Request, res: Response): Promise<void
     res.status(500).json({ message: 'Error getting Paddle config', error: error.message });
   }
 };
+
+/**
+ * Handle refund from Paddle (transaction.refunded or adjustment.created)
+ */
+async function handleRefund(data: any): Promise<void> {
+  try {
+    console.log(`💰 Processing Paddle refund/adjustment: ${data.id}`);
+
+    const transactionId = data.transaction_id || data.id;
+    const adjustmentType = data.action || 'refund';
+    const refundAmount = data.totals?.total
+      ? parseFloat(data.totals.total) / 100
+      : data.amount
+        ? parseFloat(data.amount) / 100
+        : 0;
+    const currency = data.currency_code || 'EUR';
+
+    // Try to find the payment record
+    const paymentRecord = await PaymentRecord.findOne({
+      storeTransactionId: transactionId,
+      store: 'paddle',
+    });
+
+    if (!paymentRecord) {
+      console.warn(`⚠️ Payment record not found for Paddle refund: ${transactionId}`);
+      return;
+    }
+
+    // Determine if full or partial refund
+    const isFullRefund = adjustmentType === 'full_refund' ||
+      (refundAmount >= paymentRecord.amount * 0.99); // 99% threshold for floating point
+
+    // Update payment record
+    paymentRecord.status = isFullRefund ? 'refunded' : 'partially_refunded';
+    paymentRecord.refunds = paymentRecord.refunds || [];
+    paymentRecord.refunds.push({
+      amount: refundAmount,
+      currency,
+      refundDate: new Date(),
+      refundId: data.id,
+      reason: data.reason || 'customer_request',
+    });
+    await paymentRecord.save();
+
+    // Find user
+    const user = await User.findById(paymentRecord.userId);
+    if (!user) {
+      console.error(`User not found for Paddle refund: ${paymentRecord.userId}`);
+      return;
+    }
+
+    // If full refund, update subscription
+    if (isFullRefund && paymentRecord.subscriptionId) {
+      const subscription = await Subscription.findById(paymentRecord.subscriptionId);
+      if (subscription) {
+        subscription.status = 'refunded';
+        subscription.canceledAt = new Date();
+        await subscription.save();
+
+        // Update user
+        user.isSubscribed = false;
+        user.subscriptionStatus = 'refunded';
+        await user.save();
+
+        // Create subscription event
+        await SubscriptionEvent.create({
+          subscriptionId: subscription._id,
+          userId: user._id,
+          eventType: 'subscription_refunded',
+          store: 'paddle',
+          hasFinancialImpact: true,
+          amount: refundAmount,
+          currency,
+        });
+      }
+    }
+
+    // Send email notification
+    try {
+      await emailService.sendRefundNotification(user.email, user.name || 'Customer', {
+        amount: refundAmount,
+        currency: currency === 'EUR' ? '€' : currency,
+        transactionId: data.id,
+        reason: data.reason,
+      });
+    } catch (emailError) {
+      console.error('Failed to send refund email:', emailError);
+    }
+
+    console.log(`✅ Paddle refund processed for user ${user.email}: ${currency} ${refundAmount}`);
+  } catch (error) {
+    console.error('❌ Error handling Paddle refund:', error);
+  }
+}
 
 export default {
   handlePaddleWebhook,

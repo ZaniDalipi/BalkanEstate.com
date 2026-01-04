@@ -29,7 +29,7 @@ const PaymentSuccess: React.FC = () => {
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
 
   useEffect(() => {
-    // Get parameters from URL - supports both Stripe and PaySera
+    // Get parameters from URL - supports both Stripe and Paddle
     const params = new URLSearchParams(window.location.search);
     const providerParam = params.get('provider') as PaymentProvider | null;
     const sid = params.get('session_id');
@@ -180,7 +180,7 @@ const PaymentSuccess: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Provider:</span>
                     <span className="font-medium text-neutral-800 capitalize">
-                      {paymentDetails.provider === 'stripe' ? 'Stripe' : 'PaySera'}
+                      {paymentDetails.provider === 'stripe' ? 'Stripe' : 'Paddle'}
                     </span>
                   </div>
                 )}

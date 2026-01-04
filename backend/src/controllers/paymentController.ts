@@ -4,8 +4,11 @@ import User from '../models/User';
 import Product from '../models/Product';
 import Subscription from '../models/Subscription';
 import DiscountCode from '../models/DiscountCode';
+import PaymentRecord from '../models/PaymentRecord';
+import SubscriptionEvent from '../models/SubscriptionEvent';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
+import emailService from '../services/emailService';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
@@ -453,6 +456,18 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
         break;
       }
 
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        await handleChargeRefunded(charge);
+        break;
+      }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object as Stripe.Dispute;
+        await handleDisputeCreated(dispute);
+        break;
+      }
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -861,3 +876,144 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     res.status(500).json({ message: 'Error applying free subscription', error: error.message });
   }
 };
+
+/**
+ * Handle refund from Stripe charge.refunded webhook
+ */
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  try {
+    console.log(`💰 Processing refund for charge: ${charge.id}`);
+
+    // Get refund details
+    const refundAmount = charge.amount_refunded / 100; // Convert from cents
+    const currency = charge.currency.toUpperCase();
+    const isFullRefund = charge.refunded;
+
+    // Try to find the payment record by transaction ID
+    const paymentRecord = await PaymentRecord.findOne({
+      storeTransactionId: charge.payment_intent || charge.id,
+      store: 'stripe',
+    });
+
+    if (!paymentRecord) {
+      console.warn(`⚠️ Payment record not found for charge: ${charge.id}`);
+      return;
+    }
+
+    // Update payment record with refund info
+    paymentRecord.status = isFullRefund ? 'refunded' : 'partially_refunded';
+    paymentRecord.refunds = paymentRecord.refunds || [];
+    paymentRecord.refunds.push({
+      amount: refundAmount,
+      currency,
+      refundDate: new Date(),
+      refundId: charge.id,
+      reason: 'customer_request',
+    });
+    await paymentRecord.save();
+
+    // Find user
+    const user = await User.findById(paymentRecord.userId);
+    if (!user) {
+      console.error(`User not found for refund: ${paymentRecord.userId}`);
+      return;
+    }
+
+    // If full refund, cancel the subscription
+    if (isFullRefund && paymentRecord.subscriptionId) {
+      const subscription = await Subscription.findById(paymentRecord.subscriptionId);
+      if (subscription) {
+        subscription.status = 'refunded';
+        subscription.canceledAt = new Date();
+        await subscription.save();
+
+        // Update user
+        user.isSubscribed = false;
+        user.subscriptionStatus = 'refunded';
+        await user.save();
+
+        // Create subscription event
+        await SubscriptionEvent.create({
+          subscriptionId: subscription._id,
+          userId: user._id,
+          eventType: 'subscription_refunded',
+          store: 'stripe',
+          hasFinancialImpact: true,
+          amount: refundAmount,
+          currency,
+        });
+      }
+    }
+
+    // Send refund notification email
+    await emailService.sendRefundNotification(user.email, user.name || 'Customer', {
+      amount: refundAmount,
+      currency: currency === 'EUR' ? '€' : currency,
+      transactionId: charge.id,
+    });
+
+    console.log(`✅ Refund processed for user ${user.email}: ${currency} ${refundAmount}`);
+  } catch (error) {
+    console.error('❌ Error handling refund:', error);
+  }
+}
+
+/**
+ * Handle dispute/chargeback from Stripe
+ */
+async function handleDisputeCreated(dispute: Stripe.Dispute) {
+  try {
+    console.log(`⚠️ Dispute/chargeback created: ${dispute.id}`);
+
+    const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id;
+    if (!chargeId) {
+      console.error('No charge ID in dispute');
+      return;
+    }
+
+    // Find the payment record
+    const paymentRecord = await PaymentRecord.findOne({
+      storeTransactionId: chargeId,
+      store: 'stripe',
+    });
+
+    if (!paymentRecord) {
+      console.warn(`⚠️ Payment record not found for dispute: ${chargeId}`);
+      return;
+    }
+
+    // Update payment record
+    paymentRecord.status = 'disputed';
+    await paymentRecord.save();
+
+    // Find user
+    const user = await User.findById(paymentRecord.userId);
+    if (!user) {
+      return;
+    }
+
+    // Log the dispute
+    console.log(`⚠️ Dispute created for user ${user.email}: ${dispute.reason}`);
+    console.log(`   Amount: ${(dispute.amount / 100).toFixed(2)} ${dispute.currency.toUpperCase()}`);
+    console.log(`   Status: ${dispute.status}`);
+
+    // Create subscription event for tracking
+    if (paymentRecord.subscriptionId) {
+      await SubscriptionEvent.create({
+        subscriptionId: paymentRecord.subscriptionId,
+        userId: user._id,
+        eventType: 'chargeback_initiated',
+        store: 'stripe',
+        hasFinancialImpact: true,
+        amount: dispute.amount / 100,
+        currency: dispute.currency.toUpperCase(),
+        metadata: {
+          disputeId: dispute.id,
+          reason: dispute.reason,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error handling dispute:', error);
+  }
+}

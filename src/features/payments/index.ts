@@ -2,3 +2,4 @@
 
 export * from './components';
 export * from './api/paymentApi';
+export * from './hooks/usePaddle';

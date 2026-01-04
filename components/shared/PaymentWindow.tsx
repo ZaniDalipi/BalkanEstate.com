@@ -8,6 +8,7 @@ import {
   ArrowTopRightOnSquareIcon,
 } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
+import { API_URL } from '../../src/shared/api/config';
 
 interface PaymentWindowProps {
   isOpen: boolean;
@@ -99,7 +100,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     setCodeValidation(null);
 
     try {
-      const response = await fetch('http://localhost:5001/api/discount-codes/validate', {
+      const response = await fetch(`${API_URL}/discount-codes/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -165,7 +166,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         console.log('🎁 Processing free subscription with discount code:', appliedDiscountCode);
 
         // Handle free subscription with 100% off coupon
-        const response = await fetch('http://localhost:5001/api/payments/apply-free-subscription', {
+        const response = await fetch(`${API_URL}/payments/apply-free-subscription`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -222,9 +223,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       console.log('💰 Processing paid subscription');
       console.log('Product ID:', finalProductId);
       console.log('Amount:', finalPrice);
+      console.log('Country:', userCountry);
 
-      // Create checkout session with backend
-      const response = await fetch('http://localhost:5001/api/payments/create-checkout-session', {
+      // Create unified payment session with backend (routes to Stripe or Paddle based on country)
+      const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -235,32 +237,35 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           planInterval,
           amount: finalPrice,
           productId: finalProductId,
-          discountCode: appliedDiscountCode || undefined,
+          countryCode: userCountry,
+          language: navigator.language?.split('-')[0] || 'en',
         }),
       });
 
       const data = await response.json();
-      console.log('Checkout session API response:', data);
+      console.log('Payment API response:', data);
 
       if (!response.ok) {
-        console.error('❌ Checkout session error:', data);
+        console.error('❌ Payment session error:', data);
         throw new Error(data.message || 'Failed to create payment session');
       }
 
-      // Redirect to Stripe Checkout page
-      if (data.url) {
-        console.log('✅ Redirecting to Stripe:', data.url);
+      // Redirect to payment checkout page (Stripe or Paddle based on country)
+      if (data.paymentUrl) {
+        console.log(`✅ Redirecting to ${data.provider}:`, data.paymentUrl);
 
-        // Store payment intent info for callback
+        // Store payment info for callback
         sessionStorage.setItem('pending_payment', JSON.stringify({
           sessionId: data.sessionId,
+          orderId: data.orderId,
+          provider: data.provider,
           planName,
           planInterval,
-          productId,
+          productId: finalProductId,
         }));
 
-        // Redirect to external payment page (Stripe)
-        window.location.href = data.url;
+        // Redirect to external payment page (Stripe or Paddle)
+        window.location.href = data.paymentUrl;
       } else {
         throw new Error('No payment URL received');
       }
@@ -465,7 +470,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   <span>PCI Compliant</span>
                 </div>
                 <span>•</span>
-                <span>Powered by Stripe</span>
+                <span>Secure Payment Partner</span>
               </div>
             </div>
           </div>

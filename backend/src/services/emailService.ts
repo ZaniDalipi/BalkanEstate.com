@@ -95,6 +95,150 @@ class EmailService {
       text: 'New message from ' + params.senderName,
     });
   }
+
+  /**
+   * Send subscription renewal reminder
+   */
+  async sendSubscriptionRenewalReminder(email: string, userName: string, expiryDate: Date, planName: string): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const html = `
+      <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #2563eb;">Subscription Expiring Soon</h1>
+          <p>Hi ${userName},</p>
+          <p>Your <strong>${planName}</strong> subscription will expire on <strong>${expiryDate.toLocaleDateString()}</strong>.</p>
+          <p>Don't lose access to your premium features! Renew your subscription to continue enjoying:</p>
+          <ul>
+            <li>Unlimited saved searches</li>
+            <li>Priority property notifications</li>
+            <li>Market insights and analytics</li>
+            <li>Ad-free experience</li>
+          </ul>
+          <p style="margin-top: 20px;">
+            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Renew Subscription</a>
+          </p>
+          <p style="color: #666; font-size: 12px; margin-top: 30px;">
+            If you have any questions, please contact our support team.
+          </p>
+        </body>
+      </html>
+    `;
+    await this.sendEmail({
+      to: email,
+      subject: `Your ${planName} subscription expires soon`,
+      html,
+      text: `Hi ${userName}, your ${planName} subscription expires on ${expiryDate.toLocaleDateString()}. Renew at ${frontendUrl}/account`,
+    });
+  }
+
+  /**
+   * Send payment confirmation email
+   */
+  async sendPaymentConfirmation(email: string, userName: string, details: {
+    planName: string;
+    amount: number;
+    currency: string;
+    expiresAt: Date;
+    transactionId?: string;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const html = `
+      <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #16a34a;">Payment Confirmed!</h1>
+          <p>Hi ${userName},</p>
+          <p>Thank you for your payment. Your subscription is now active.</p>
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Payment Details</h3>
+            <p><strong>Plan:</strong> ${details.planName}</p>
+            <p><strong>Amount:</strong> ${details.currency}${details.amount.toFixed(2)}</p>
+            <p><strong>Valid Until:</strong> ${details.expiresAt.toLocaleDateString()}</p>
+            ${details.transactionId ? `<p><strong>Transaction ID:</strong> ${details.transactionId}</p>` : ''}
+          </div>
+          <p>You now have access to all premium features. Enjoy!</p>
+          <p style="margin-top: 20px;">
+            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Go to My Account</a>
+          </p>
+        </body>
+      </html>
+    `;
+    await this.sendEmail({
+      to: email,
+      subject: `Payment confirmed - ${details.planName} subscription active`,
+      html,
+      text: `Payment confirmed! ${details.planName} subscription active until ${details.expiresAt.toLocaleDateString()}. Amount: ${details.currency}${details.amount.toFixed(2)}`,
+    });
+  }
+
+  /**
+   * Send subscription cancelled notification
+   */
+  async sendSubscriptionCancelled(email: string, userName: string, details: {
+    planName: string;
+    expiresAt: Date;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const html = `
+      <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #dc2626;">Subscription Cancelled</h1>
+          <p>Hi ${userName},</p>
+          <p>We're sorry to see you go. Your <strong>${details.planName}</strong> subscription has been cancelled.</p>
+          <p>You'll continue to have access to premium features until <strong>${details.expiresAt.toLocaleDateString()}</strong>.</p>
+          <p>Changed your mind? You can resubscribe anytime to regain access to:</p>
+          <ul>
+            <li>Unlimited saved searches</li>
+            <li>Priority property notifications</li>
+            <li>Market insights and analytics</li>
+            <li>Ad-free experience</li>
+          </ul>
+          <p style="margin-top: 20px;">
+            <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Resubscribe</a>
+          </p>
+        </body>
+      </html>
+    `;
+    await this.sendEmail({
+      to: email,
+      subject: `Subscription cancelled - access until ${details.expiresAt.toLocaleDateString()}`,
+      html,
+      text: `Your ${details.planName} subscription has been cancelled. Access continues until ${details.expiresAt.toLocaleDateString()}.`,
+    });
+  }
+
+  /**
+   * Send refund notification
+   */
+  async sendRefundNotification(email: string, userName: string, details: {
+    amount: number;
+    currency: string;
+    reason?: string;
+    transactionId?: string;
+  }): Promise<void> {
+    const html = `
+      <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #2563eb;">Refund Processed</h1>
+          <p>Hi ${userName},</p>
+          <p>Your refund has been processed.</p>
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Refund Details</h3>
+            <p><strong>Amount:</strong> ${details.currency}${details.amount.toFixed(2)}</p>
+            ${details.reason ? `<p><strong>Reason:</strong> ${details.reason}</p>` : ''}
+            ${details.transactionId ? `<p><strong>Transaction ID:</strong> ${details.transactionId}</p>` : ''}
+          </div>
+          <p>The refund should appear in your account within 5-10 business days, depending on your payment method.</p>
+          <p>If you have any questions, please contact our support team.</p>
+        </body>
+      </html>
+    `;
+    await this.sendEmail({
+      to: email,
+      subject: `Refund processed - ${details.currency}${details.amount.toFixed(2)}`,
+      html,
+      text: `Refund processed: ${details.currency}${details.amount.toFixed(2)}. Should appear in 5-10 business days.`,
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
