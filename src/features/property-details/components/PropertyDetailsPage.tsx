@@ -464,6 +464,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               />
             </div>
 
+            {/* Mobile Only: Quick Actions & Contact (shown early on mobile) */}
+            <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
+              <PropertyContact
+                property={property}
+                isCreatingConversation={isCreatingConversation}
+                onContactSeller={handleContactSeller}
+              />
+            </div>
+
             {/* 360 Virtual Tour */}
             {property.virtualTour360Url && (
               <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -547,8 +556,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             </div>
           </div>
 
-          {/* Right Column - Contact Sidebar */}
-          <div className="lg:col-span-1 animate-slide-up" style={{ animationDelay: '150ms' }}>
+          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
+          <div className="hidden lg:block lg:col-span-1 animate-slide-up" style={{ animationDelay: '150ms' }}>
             <PropertyContact
               property={property}
               isCreatingConversation={isCreatingConversation}

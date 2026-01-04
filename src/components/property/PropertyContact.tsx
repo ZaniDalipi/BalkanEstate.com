@@ -96,7 +96,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   };
 
   return (
-    <div className="sticky top-24 space-y-4">
+    <div className="lg:sticky lg:top-20 space-y-3 lg:space-y-4">
       {/* Quick Actions Card */}
       <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
         <h3 className="text-sm font-semibold text-neutral-600 mb-3 uppercase tracking-wide">{t('property:actions.quickActions')}</h3>
