@@ -211,7 +211,8 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const zoomScale = getMarkerScaleForZoom(zoom);
   const baseSize = 30;
   const scaledSize = Math.round(baseSize * zoomScale);
-  const fontSize = Math.max(6, Math.round(8 * zoomScale));
+  // Keep font readable - minimum 7px, scales less aggressively
+  const fontSize = Math.max(7, Math.round(8 * Math.max(zoomScale, 0.75)));
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
@@ -308,7 +309,8 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const baseHeight = 36;
   const scaledWidth = Math.round(baseWidth * zoomScale);
   const scaledHeight = Math.round(baseHeight * zoomScale);
-  const fontSize = Math.max(8, Math.round(14 * zoomScale));
+  // Keep font readable - minimum 10px, scales less aggressively for detailed marker
+  const fontSize = Math.max(10, Math.round(14 * Math.max(zoomScale, 0.7)));
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
