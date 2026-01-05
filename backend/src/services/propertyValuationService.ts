@@ -415,7 +415,7 @@ export async function createPropertyValuation(input: ValuationInput): Promise<IP
   ]);
 
   // Calculate base valuation
-  const { baseValue, avgPricePerSqm } = calculateBaseValuation(input.sqft, comparables, marketData);
+  const { baseValue } = calculateBaseValuation(input.sqft, comparables, marketData);
 
   // Calculate adjustments
   const adjustments = calculateAdjustments(input, baseValue);
@@ -476,7 +476,7 @@ export async function createPropertyValuation(input: ValuationInput): Promise<IP
 /**
  * Get valuation history for a user
  */
-export async function getUserValuations(userId: string, limit = 10): Promise<IPropertyValuation[]> {
+export async function getUserValuations(userId: string, limit = 10) {
   return PropertyValuation.find({ userId: new mongoose.Types.ObjectId(userId) })
     .sort({ createdAt: -1 })
     .limit(limit)
@@ -486,7 +486,7 @@ export async function getUserValuations(userId: string, limit = 10): Promise<IPr
 /**
  * Get a specific valuation by ID
  */
-export async function getValuationById(valuationId: string): Promise<IPropertyValuation | null> {
+export async function getValuationById(valuationId: string) {
   return PropertyValuation.findById(valuationId).lean();
 }
 
