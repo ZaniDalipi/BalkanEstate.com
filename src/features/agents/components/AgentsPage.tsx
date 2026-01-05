@@ -796,7 +796,7 @@ const AgentsPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => {
-                  dispatch({ type: 'SET_AUTH_MODAL', payload: { isOpen: true, mode: 'login' } });
+                  dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
                 }}
                 className="px-4 sm:px-6 py-2.5 sm:py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary-dark transition-colors text-sm sm:text-base"
               >
