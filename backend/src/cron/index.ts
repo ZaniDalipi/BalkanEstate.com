@@ -5,10 +5,7 @@ import User from '../models/User';
 import Subscription from '../models/Subscription';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
-<<<<<<< HEAD
-=======
 import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
->>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 
