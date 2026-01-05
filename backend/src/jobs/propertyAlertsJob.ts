@@ -7,11 +7,10 @@
  */
 
 import Property, { IProperty } from '../models/Property';
-import SavedSearch, { ISavedSearch, IFilters } from '../models/SavedSearch';
+import SavedSearch, { IFilters } from '../models/SavedSearch';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
-import User from '../models/User';
 import { sendPropertyAlert, sendPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
 
 /**
