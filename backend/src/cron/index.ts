@@ -5,10 +5,7 @@ import User from '../models/User';
 import Subscription from '../models/Subscription';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
-<<<<<<< HEAD
-=======
 import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
->>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 
@@ -149,10 +146,6 @@ export const startCronJobs = () => {
     }
   });
 
-<<<<<<< HEAD
-  console.log('🕐 Subscription cron jobs started');
-=======
->>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
   // Send weekly statistics to Pro members and agencies - runs every Monday at 9 AM UTC
   weeklyStatsTask = cron.schedule('0 9 * * 1', async () => {
     try {
@@ -214,11 +207,8 @@ export const startCronJobs = () => {
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
-<<<<<<< HEAD
-=======
   if (userSubscriptionTask) userSubscriptionTask.stop();
   if (subscriptionReminderTask) subscriptionReminderTask.stop();
->>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
   if (weeklyStatsTask) weeklyStatsTask.stop();
   if (instantAlertsTask) instantAlertsTask.stop();
   if (dailyAlertsTask) dailyAlertsTask.stop();
