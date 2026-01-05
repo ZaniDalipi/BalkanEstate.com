@@ -16,7 +16,7 @@ type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 const AgentsPage: React.FC = () => {
   const { t } = useTranslation(['agents', 'common']);
   const { state, dispatch } = useAppContext();
-  const { selectedAgentId, activeView } = state;
+  const { selectedAgentId } = state;
 
   // Universal search state - searches across name, city, country, specializations, languages, bio
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,11 +61,11 @@ const AgentsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (activeView === 'agents') {
-      fetchAgents();
-      fetchAgencies();
-    }
-  }, [activeView]);
+    // Fetch data on mount - no need to check activeView since this component
+    // is only rendered when activeView is 'agents'
+    fetchAgents();
+    fetchAgencies();
+  }, []);
 
   const fetchAgents = async (searchTerm?: string) => {
     try {
@@ -85,14 +85,15 @@ const AgentsPage: React.FC = () => {
 
   // Debounced search effect
   useEffect(() => {
+    // Skip the initial render (handled by the mount effect)
+    if (searchQuery === '') return;
+
     const timeoutId = setTimeout(() => {
-      if (activeView === 'agents') {
-        fetchAgents(searchQuery);
-      }
+      fetchAgents(searchQuery);
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, activeView]);
+  }, [searchQuery]);
 
   const fetchAgencies = async () => {
     try {
