@@ -1,0 +1,133 @@
+{
+  "page": {
+    "title": "What's My Property Worth?",
+    "subtitle": "Get an instant AI-powered estimate based on similar sales in your area"
+  },
+  "form": {
+    "location": "Property Location",
+    "locationPlaceholder": "Search for an address...",
+    "propertyType": "Property Type",
+    "size": "Size",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "condition": "Condition",
+    "yearBuilt": "Year Built",
+    "yearBuiltPlaceholder": "e.g. 2010",
+    "floorNumber": "Floor Number",
+    "totalFloors": "Total Floors",
+    "viewType": "View Type",
+    "furnishing": "Furnishing",
+    "amenities": "Amenities",
+    "showAdvanced": "Show More Options",
+    "hideAdvanced": "Hide Options",
+    "getValuation": "Get My Valuation",
+    "calculating": "Analyzing...",
+    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary."
+  },
+  "propertyTypes": {
+    "apartment": "Apartment",
+    "house": "House",
+    "villa": "Villa",
+    "land": "Land",
+    "other": "Other"
+  },
+  "conditions": {
+    "new": "New",
+    "excellent": "Excellent",
+    "good": "Good",
+    "fair": "Fair",
+    "needsRenovation": "Needs Renovation"
+  },
+  "views": {
+    "sea": "Sea",
+    "mountain": "Mountain",
+    "city": "City",
+    "park": "Park",
+    "garden": "Garden",
+    "street": "Street"
+  },
+  "furnishing": {
+    "furnished": "Furnished",
+    "semiFurnished": "Semi-Furnished",
+    "unfurnished": "Unfurnished"
+  },
+  "amenities": {
+    "balcony": "Balcony",
+    "garden": "Garden",
+    "elevator": "Elevator",
+    "parking": "Parking",
+    "pool": "Pool"
+  },
+  "result": {
+    "estimatedValue": "Estimated Value",
+    "confidence": "Confidence",
+    "pricePerSqm": "Price per m²",
+    "marketTrend": "Market Trend",
+    "demandScore": "Demand Score",
+    "avgDaysOnMarket": "Avg. Days on Market",
+    "days": "days",
+    "aiInsights": "AI Market Insights",
+    "valueBreakdown": "Value Breakdown",
+    "comparableProperties": "Similar Properties",
+    "propertySummary": "Property Summary",
+    "location": "Location",
+    "type": "Type",
+    "size": "Size",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "condition": "Condition",
+    "beds": "beds",
+    "baths": "baths",
+    "newValuation": "New Valuation",
+    "readyToSell": "Ready to Sell?",
+    "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
+    "listPropertyButton": "List My Property"
+  },
+  "breakdown": {
+    "baseValue": "Base Value (from comparables)",
+    "location": "Location Adjustment",
+    "condition": "Condition Adjustment",
+    "amenities": "Amenities Adjustment",
+    "age": "Age Adjustment",
+    "total": "Total Estimated Value"
+  },
+  "confidence": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "marketTrend": {
+    "rising": "Rising",
+    "stable": "Stable",
+    "declining": "Declining"
+  },
+  "features": {
+    "instant": {
+      "title": "Instant Results",
+      "description": "Get your property valuation in seconds, not days"
+    },
+    "ai": {
+      "title": "AI-Powered",
+      "description": "Advanced algorithms analyze market data and comparable sales"
+    },
+    "market": {
+      "title": "Market Insights",
+      "description": "Understand local trends and demand in your area"
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "step1": {
+      "title": "Enter Details",
+      "description": "Provide your property location and basic features"
+    },
+    "step2": {
+      "title": "AI Analysis",
+      "description": "Our AI compares with similar properties and market data"
+    },
+    "step3": {
+      "title": "Get Results",
+      "description": "Receive your valuation with detailed breakdown and insights"
+    }
+  }
+}
