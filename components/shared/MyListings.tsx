@@ -85,6 +85,9 @@ const ListingCard: React.FC<{
     // Check if can renew (24hr cooldown)
     const canRenew = renewalStatus?.canRenew ?? true;
 
+    // Check if property has valid map coordinates
+    const hasValidCoordinates = property.lat != null && !isNaN(property.lat) && property.lng != null && !isNaN(property.lng);
+
     return (
     <div className="bg-white p-4 rounded-xl border border-neutral-200 hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row gap-5">
         <button onClick={handleCardClick} className="block flex-shrink-0">
@@ -102,6 +105,14 @@ const ListingCard: React.FC<{
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                         <StatusBadge status={property.status} />
                         <RoleBadge role={property.createdAsRole} />
+                        {!hasValidCoordinates && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700" title="This property won't appear on the map. Edit to set location.">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                                </svg>
+                                No Map Location
+                            </span>
+                        )}
                     </div>
                     {property.title && (
                         <p className="font-bold text-lg sm:text-xl text-neutral-900 mt-1 line-clamp-1">{property.title}</p>

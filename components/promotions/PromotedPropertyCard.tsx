@@ -119,6 +119,9 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
   const isExpiringSoon = daysRemaining > 0 && daysRemaining <= 3;
   const isExpired = endDate <= now;
 
+  // Check if property has valid map coordinates
+  const hasValidCoordinates = property.lat != null && !isNaN(property.lat) && property.lng != null && !isNaN(property.lng);
+
   const borderClass = tier === 'premium'
     ? 'border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.25)]'
     : tier === 'highlight'
@@ -150,6 +153,16 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           >
             Complete Payment
           </button>
+        </div>
+      )}
+
+      {/* Missing Coordinates Warning Banner */}
+      {!hasValidCoordinates && (
+        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📍</span>
+            <span className="text-sm font-semibold">Not showing on map! Edit listing to set location.</span>
+          </div>
         </div>
       )}
 
