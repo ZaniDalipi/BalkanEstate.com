@@ -267,7 +267,7 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   // Calculate scaled dimensions
   const baseSize = 38;
   const scaledSize = Math.round(baseSize * zoomScale);
-  const fontSize = Math.max(7, Math.round(9 * zoomScale));
+  const fontSize = Math.max(9, Math.round(11 * zoomScale));
   const circleRadius = Math.round((15 + (isHovered ? 3 : 0)) * zoomScale);
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
@@ -276,7 +276,7 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
       <div class="${promotedInnerClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
         <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <circle cx="19" cy="19" r="${15 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
-            <text x="19" y="20" font-family="Inter, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+            <text x="19" y="20" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
@@ -362,7 +362,7 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const baseHeight = 45;
   const scaledWidth = Math.round(baseWidth * zoomScale);
   const scaledHeight = Math.round(baseHeight * zoomScale);
-  const fontSize = Math.max(10, Math.round(14 * zoomScale));
+  const fontSize = Math.max(12, Math.round(16 * zoomScale));
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
