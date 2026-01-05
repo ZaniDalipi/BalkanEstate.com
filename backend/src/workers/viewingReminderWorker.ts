@@ -1,5 +1,4 @@
 import Viewing from '../models/Viewing';
-import User from '../models/User';
 import emailService from '../services/emailService';
 import { getSocketInstance } from '../utils/socketInstance';
 
@@ -191,7 +190,6 @@ async function send24HourReminderEmail(viewing: ViewingWithPopulated): Promise<v
  * Send 1-hour reminder email to both agent and buyer
  */
 async function send1HourReminderEmail(viewing: ViewingWithPopulated): Promise<void> {
-  const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
   const property = viewing.propertyId;
   const agent = viewing.agentId;
   const buyer = viewing.buyerId;

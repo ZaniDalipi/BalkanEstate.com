@@ -1,6 +1,5 @@
-import mongoose from 'mongoose';
 import Viewing, { IViewing, ViewingStatus } from '../models/Viewing';
-import ViewingSchedule, { IViewingSchedule, IWorkingDay } from '../models/ViewingSchedule';
+import ViewingSchedule, { IViewingSchedule } from '../models/ViewingSchedule';
 import Property from '../models/Property';
 import User from '../models/User';
 import emailService from './emailService';
@@ -371,7 +370,7 @@ export async function bookViewing(params: BookViewingParams): Promise<IViewing> 
  * Reschedule a viewing
  */
 export async function rescheduleViewing(params: RescheduleParams): Promise<IViewing> {
-  const { viewingId, userId, newStartTime, reason } = params;
+  const { viewingId, userId, newStartTime } = params;
 
   const viewing = await Viewing.findById(viewingId).populate([
     { path: 'propertyId', select: 'title address city imageUrl' },
@@ -527,7 +526,7 @@ export async function completeViewing(
 
   // Emit socket event
   emitViewingEvent('viewing:completed', {
-    viewingId: viewing._id.toString(),
+    viewingId: (viewing._id as string).toString(),
     agentId,
     buyerId: viewing.buyerId.toString(),
   });
