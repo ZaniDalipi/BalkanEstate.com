@@ -155,14 +155,20 @@ const ZOOM_THRESHOLD = 12;
 
 /**
  * Calculate marker scale factor based on zoom level
- * Markers get smaller when zoomed out to avoid clutter
+ * Markers scale based on zoom level - smaller when zoomed in to avoid clutter
  */
 const getMarkerScaleForZoom = (zoom: number): number => {
-  if (zoom >= 12) return 1;      // Full size at zoom 12+
-  if (zoom >= 10) return 0.95;   // 95% at zoom 10-11
-  if (zoom >= 8) return 0.85;    // 85% at zoom 8-9
-  if (zoom >= 6) return 0.75;    // 75% at zoom 6-7
-  return 0.65;                    // 65% at zoom 5 and below
+  // When very zoomed in (street level), make markers smaller
+  if (zoom >= 18) return 0.6;    // 60% at zoom 18+
+  if (zoom >= 16) return 0.7;    // 70% at zoom 16-17
+  if (zoom >= 14) return 0.8;    // 80% at zoom 14-15
+  if (zoom >= 12) return 0.9;    // 90% at zoom 12-13
+  // Medium zoom levels - full size
+  if (zoom >= 10) return 1.0;    // 100% at zoom 10-11
+  // Zoomed out - slightly smaller
+  if (zoom >= 8) return 0.9;     // 90% at zoom 8-9
+  if (zoom >= 6) return 0.8;     // 80% at zoom 6-7
+  return 0.7;                     // 70% at zoom 5 and below
 };
 
 const PROPERTY_TYPE_COLORS: Record<
@@ -303,9 +309,10 @@ const lightenColor = (hex: string, percent: number): string => {
  * Create detailed house-shaped marker for zoomed in view
  * Supports night mode with neon glow effects
  */
-const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false) => {
+const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 12) => {
   const price = formatMarkerPrice(property.price);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
+  const zoomScale = getMarkerScaleForZoom(zoom);
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
@@ -350,14 +357,21 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
+  // Calculate scaled dimensions based on zoom
+  const baseWidth = 56;
+  const baseHeight = 45;
+  const scaledWidth = Math.round(baseWidth * zoomScale);
+  const scaledHeight = Math.round(baseHeight * zoomScale);
+  const fontSize = Math.max(10, Math.round(14 * zoomScale));
+
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 56px; height: 45px;">
-      <div class="${promotedInnerClass}" style="width: 56px; height: 45px;">
-        <svg width="56" height="45" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
+      <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
+        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <path d="M35 56L25 44H45L35 56Z" fill="${pointerColor}" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
-            <text x="35" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+            <text x="35" y="30" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
@@ -368,9 +382,9 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [56, 45],
-    iconAnchor: [28, 45],
-    popupAnchor: [0, -45],
+    iconSize: [scaledWidth, scaledHeight],
+    iconAnchor: [scaledWidth / 2, scaledHeight],
+    popupAnchor: [0, -scaledHeight],
   });
 };
 
@@ -382,7 +396,7 @@ const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boo
   if (zoom < ZOOM_THRESHOLD) {
     return createSimpleMarkerIcon(property, isHovered, isNightMode, zoom);
   }
-  return createDetailedMarkerIcon(property, isHovered, isNightMode);
+  return createDetailedMarkerIcon(property, isHovered, isNightMode, zoom);
 };
 
 // Tier badge configurations for popup

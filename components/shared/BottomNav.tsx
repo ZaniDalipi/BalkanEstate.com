@@ -1,12 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { AppView } from '../../types';
 import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '../../constants';
 
 const BottomNav: React.FC = () => {
     const { t } = useTranslation(['nav']);
     const { state, dispatch } = useAppContext();
+    const { getLocalizedPath } = useLocalizedNavigation();
     const { activeView, isAuthenticated, currentUser, conversations } = state;
 
     // Calculate total unread messages
@@ -24,7 +26,7 @@ const BottomNav: React.FC = () => {
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
             const route = view === 'search' ? '/' : `/${view}`;
-            window.history.pushState({}, '', route);
+            window.history.pushState({}, '', getLocalizedPath(route));
         }
     };
 
@@ -32,7 +34,7 @@ const BottomNav: React.FC = () => {
         if (isAuthenticated) {
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-            window.history.pushState({}, '', '/create-listing');
+            window.history.pushState({}, '', getLocalizedPath('/create-listing'));
         } else {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
         }

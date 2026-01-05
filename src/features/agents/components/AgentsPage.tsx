@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Agent, Agency } from '@/types';
 import { getAllAgents, getAgencies } from '@/services/apiService';
 import AgentCard from './AgentCard';
@@ -16,6 +17,7 @@ type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 const AgentsPage: React.FC = () => {
   const { t } = useTranslation(['agents', 'common']);
   const { state, dispatch } = useAppContext();
+  const { getLocalizedPath } = useLocalizedNavigation();
   const { selectedAgentId } = state;
 
   // Universal search state - searches across name, city, country, specializations, languages, bio
@@ -633,7 +635,7 @@ const AgentsPage: React.FC = () => {
                           dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
                           dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
                           const urlSlug = data.agency.slug || data.agency._id;
-                          window.history.pushState({}, '', `/agencies/${urlSlug}`);
+                          window.history.pushState({}, '', getLocalizedPath(`/agencies/${urlSlug}`));
                         }
                       } catch (error) {
                         console.error('Error fetching agency:', error);
