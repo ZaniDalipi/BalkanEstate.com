@@ -902,14 +902,9 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 
     // Update payment record with refund info
     paymentRecord.status = isFullRefund ? 'refunded' : 'partially_refunded';
-    paymentRecord.refunds = paymentRecord.refunds || [];
-    paymentRecord.refunds.push({
-      amount: refundAmount,
-      currency,
-      refundDate: new Date(),
-      refundId: charge.id,
-      reason: 'customer_request',
-    });
+    paymentRecord.refundAmount = refundAmount;
+    paymentRecord.refundDate = new Date();
+    paymentRecord.refundReason = 'customer_request';
     await paymentRecord.save();
 
     // Find user
@@ -925,11 +920,12 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
       if (subscription) {
         subscription.status = 'refunded';
         subscription.canceledAt = new Date();
+        subscription.refundedAt = new Date();
         await subscription.save();
 
-        // Update user
+        // Update user - use 'canceled' since 'refunded' is not a valid user status
         user.isSubscribed = false;
-        user.subscriptionStatus = 'refunded';
+        user.subscriptionStatus = 'canceled';
         await user.save();
 
         // Create subscription event

@@ -490,14 +490,9 @@ async function handleRefund(data: any): Promise<void> {
 
     // Update payment record
     paymentRecord.status = isFullRefund ? 'refunded' : 'partially_refunded';
-    paymentRecord.refunds = paymentRecord.refunds || [];
-    paymentRecord.refunds.push({
-      amount: refundAmount,
-      currency,
-      refundDate: new Date(),
-      refundId: data.id,
-      reason: data.reason || 'customer_request',
-    });
+    paymentRecord.refundAmount = refundAmount;
+    paymentRecord.refundDate = new Date();
+    paymentRecord.refundReason = data.reason || 'customer_request';
     await paymentRecord.save();
 
     // Find user
@@ -513,11 +508,12 @@ async function handleRefund(data: any): Promise<void> {
       if (subscription) {
         subscription.status = 'refunded';
         subscription.canceledAt = new Date();
+        subscription.refundedAt = new Date();
         await subscription.save();
 
-        // Update user
+        // Update user - use 'canceled' since 'refunded' is not a valid user status
         user.isSubscribed = false;
-        user.subscriptionStatus = 'refunded';
+        user.subscriptionStatus = 'canceled';
         await user.save();
 
         // Create subscription event
