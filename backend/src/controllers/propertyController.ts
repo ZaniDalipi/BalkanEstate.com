@@ -624,6 +624,21 @@ export const updateProperty = async (
 
     console.log(`📝 Updated property ${property._id} fields: ${updatedFields.join(', ') || 'none'}`);
 
+    // Track price reduction for display (originalPrice and priceReducedAt)
+    if (updateData.price !== undefined && updateData.price < previousPrice) {
+      // Price was reduced - set originalPrice if not already set, update priceReducedAt
+      if (!property.originalPrice || property.originalPrice < previousPrice) {
+        property.originalPrice = previousPrice;
+      }
+      property.priceReducedAt = new Date();
+      console.log(`📉 Price reduced: €${previousPrice} → €${property.price} (original: €${property.originalPrice})`);
+    } else if (updateData.price !== undefined && updateData.price > previousPrice) {
+      // Price was increased - clear the reduction tracking
+      property.originalPrice = undefined;
+      property.priceReducedAt = undefined;
+      console.log(`📈 Price increased: €${previousPrice} → €${property.price} (cleared reduction)`);
+    }
+
     await property.save();
 
     // Record price change for alerts if price was updated
