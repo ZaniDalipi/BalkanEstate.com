@@ -308,7 +308,7 @@ const TriStateCheckbox: React.FC<{
 const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> = ({ propertyToEdit }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
     const { state, dispatch, updateUser, createListing, updateListing } = useAppContext();
-    const { currentUser, properties, isPricingModalOpen, pendingProperty } = state;
+    const { currentUser, properties, isPricingModalOpen, pendingProperty, isAuthenticating, isLoadingUserData } = state;
     const { showError, showWarning, showSuccess, showInfo } = useAlert();
     const [mode, setMode] = useState<Mode>('ai');
     const [step, setStep] = useState<Step>('init');
@@ -1292,13 +1292,24 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 </div>
             </div>
 
-            {/* Role Selector - only show if user has multiple roles */}
-            {currentUser && !propertyToEdit && (
-                <RoleSelector
-                    currentUser={currentUser}
-                    selectedRole={selectedRole}
-                    onRoleSelect={setSelectedRole}
-                />
+            {/* Role Selector - only show when user data is fully loaded */}
+            {!propertyToEdit && (
+                isAuthenticating || isLoadingUserData ? (
+                    <div className="bg-white border-2 border-primary/20 rounded-lg p-6 mb-6 animate-pulse">
+                        <div className="h-6 bg-neutral-200 rounded w-1/3 mb-4"></div>
+                        <div className="h-4 bg-neutral-100 rounded w-2/3 mb-4"></div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="h-32 bg-neutral-100 rounded-lg"></div>
+                            <div className="h-32 bg-neutral-100 rounded-lg"></div>
+                        </div>
+                    </div>
+                ) : currentUser ? (
+                    <RoleSelector
+                        currentUser={currentUser}
+                        selectedRole={selectedRole}
+                        onRoleSelect={setSelectedRole}
+                    />
+                ) : null
             )}
 
             {mode === 'ai' && step === 'init' && (
