@@ -224,9 +224,33 @@ const MapComponent: React.FC<MapComponentProps> = ({
   }, []);
 
   const validProperties = useMemo(() => {
-    return properties.filter(
+    const valid = properties.filter(
       (p) => p.lat != null && !isNaN(p.lat) && p.lng != null && !isNaN(p.lng)
     );
+
+    // Debug: Log properties with missing or invalid coordinates, especially promoted ones
+    const invalidProperties = properties.filter(
+      (p) => p.lat == null || isNaN(p.lat) || p.lng == null || isNaN(p.lng)
+    );
+    if (invalidProperties.length > 0) {
+      console.warn(`🗺️ [MapComponent] ${invalidProperties.length} properties filtered out due to invalid coordinates:`);
+      invalidProperties.forEach((p) => {
+        console.warn(`  - ${p.id}: "${p.title || p.address}" (lat: ${p.lat}, lng: ${p.lng})${p.isPromoted ? ' [PROMOTED]' : ''}`);
+      });
+    }
+
+    // Debug: Log properties outside Balkan bounds
+    const outsideBounds = valid.filter(
+      (p) => p.lat < 34 || p.lat > 49 || p.lng < 13 || p.lng > 31
+    );
+    if (outsideBounds.length > 0) {
+      console.warn(`🗺️ [MapComponent] ${outsideBounds.length} properties outside Balkan bounds (34-49 lat, 13-31 lng):`);
+      outsideBounds.forEach((p) => {
+        console.warn(`  - ${p.id}: "${p.title || p.address}" (lat: ${p.lat}, lng: ${p.lng})${p.isPromoted ? ' [PROMOTED]' : ''}`);
+      });
+    }
+
+    return valid;
   }, [properties]);
 
   // Always show all valid properties on the map (up to 500 for performance)
