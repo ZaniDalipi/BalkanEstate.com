@@ -79,6 +79,7 @@ import credentialRoutes from './routes/credentialRoutes';
 import sitemapRoutes from './routes/sitemapRoutes';
 import viewStatsRoutes from './routes/viewStatsRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import viewingRoutes from './routes/viewingRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -89,6 +90,7 @@ import { scheduleExpirationWorker } from './workers/subscriptionExpirationWorker
 import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
+import { startViewingReminderWorker } from './workers/viewingReminderWorker';
 
 // Create Express app
 const app: Application = express();
@@ -163,6 +165,10 @@ console.log('✅ Trial management job started');
 // Start city market data update job (biweekly updates on 1st and 15th)
 startCityMarketDataUpdateJob();
 console.log('✅ City market data update job started (biweekly)');
+
+// Start viewing reminder worker (sends reminders 24h and 1h before viewings)
+startViewingReminderWorker();
+console.log('✅ Viewing reminder worker started');
 
 // ============================================================================
 // SECURITY MIDDLEWARE - Apply comprehensive security headers and CORS
@@ -245,6 +251,7 @@ app.use('/api/license', licenseRoutes); // Agent license verification
 app.use('/api/credentials', credentialRoutes); // Agent credentials management
 app.use('/api/view-stats', viewStatsRoutes); // View statistics tracking
 app.use('/api/notifications', notificationRoutes); // User notifications
+app.use('/api/viewings', viewingRoutes); // Property viewing scheduler
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

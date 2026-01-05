@@ -21,6 +21,7 @@ import {
   NeighborhoodInsights,
 } from '@/src/components/property';
 import { useTrackView } from '@/src/features/view-stats/hooks';
+import { PropertyViewingScheduler } from '@/src/features/viewings';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import Footer from '@/components/shared/Footer';
@@ -479,6 +480,26 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               />
             </div>
 
+            {/* Mobile Only: Viewing Scheduler */}
+            {property.status !== 'sold' && (
+              <div className="lg:hidden animate-slide-up" style={{ animationDelay: '85ms' }}>
+                <PropertyViewingScheduler
+                  property={{
+                    id: property.id,
+                    title: property.title,
+                    address: property.address,
+                    city: property.city,
+                    imageUrl: property.imageUrl,
+                    price: property.price,
+                    sellerId: property.sellerId,
+                  }}
+                  isOwner={isOwner}
+                  isAuthenticated={state.isAuthenticated}
+                  onRequestAuth={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
+                />
+              </div>
+            )}
+
             {/* 360 Virtual Tour */}
             {property.virtualTour360Url && (
               <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -563,12 +584,34 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           </div>
 
           {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
-          <div className="hidden lg:block lg:col-span-1 animate-slide-up" style={{ animationDelay: '150ms' }}>
-            <PropertyContact
-              property={property}
-              isCreatingConversation={isCreatingConversation}
-              onContactSeller={handleContactSeller}
-            />
+          <div className="hidden lg:block lg:col-span-1 space-y-6">
+            <div className="animate-slide-up" style={{ animationDelay: '150ms' }}>
+              <PropertyContact
+                property={property}
+                isCreatingConversation={isCreatingConversation}
+                onContactSeller={handleContactSeller}
+              />
+            </div>
+
+            {/* Desktop: Viewing Scheduler */}
+            {property.status !== 'sold' && (
+              <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
+                <PropertyViewingScheduler
+                  property={{
+                    id: property.id,
+                    title: property.title,
+                    address: property.address,
+                    city: property.city,
+                    imageUrl: property.imageUrl,
+                    price: property.price,
+                    sellerId: property.sellerId,
+                  }}
+                  isOwner={isOwner}
+                  isAuthenticated={state.isAuthenticated}
+                  onRequestAuth={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
+                />
+              </div>
+            )}
           </div>
         </div>
       </main>
