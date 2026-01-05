@@ -50,6 +50,7 @@ const ResetPasswordPage = lazy(() => import('./src/features/auth/components/Rese
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
 const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
 const ValuationPage = lazy(() => import('./src/features/valuation/components/ValuationPage'));
+const MortgageCalculatorPage = lazy(() => import('./src/features/calculators/components/MortgageCalculator'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -167,6 +168,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/analytics': 'analytics',
         '/how-it-works': 'how-it-works',
         '/valuation': 'valuation',
+        '/mortgage-calculator': 'mortgage-calculator',
       };
 
       const view = routeMap[path];
@@ -334,6 +336,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <HowItWorksPage />;
       case 'valuation':
         return <ValuationPage />;
+      case 'mortgage-calculator':
+        return <MortgageCalculatorPage />;
       case 'search':
       default:
         return <SearchPage onToggleSidebar={onToggleSidebar} />;

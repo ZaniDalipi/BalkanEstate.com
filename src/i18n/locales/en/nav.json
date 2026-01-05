@@ -34,6 +34,9 @@
   "menu": "Menu",
   "notifications": "Notifications",
   "help": "Help",
+  "extras": "Tools",
+  "valuation": "Property Valuation",
+  "mortgageCalculator": "Mortgage Calculator",
   "onboarding": {
     "question": "How can we help you today?",
     "lookingToBuy": "I'm looking to buy",
