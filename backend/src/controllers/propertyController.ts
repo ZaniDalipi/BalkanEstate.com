@@ -161,9 +161,15 @@ export const getProperties = async (
 
     // First, get all currently promoted properties matching the filter
     // Use $and to combine with existing filter (which may have its own $or)
+    // Handle cases where promotionEndDate might not exist or be null
+    const now = new Date();
     const promotedCondition = {
       isPromoted: true,
-      promotionEndDate: { $gt: new Date() }
+      $or: [
+        { promotionEndDate: { $gt: now } },          // Has valid future end date
+        { promotionEndDate: { $exists: false } },    // No end date set (perpetual)
+        { promotionEndDate: null }                   // Null end date (perpetual)
+      ]
     };
     const promotedFilter = {
       $and: [filter, promotedCondition]
@@ -180,11 +186,12 @@ export const getProperties = async (
 
     // Then get regular (non-promoted) properties with pagination
     // Use $and to combine with existing filter (which may have its own $or)
+    // Regular = not promoted OR promoted but expired
     const notPromotedCondition = {
       $or: [
-        { isPromoted: { $ne: true } },
-        { isPromoted: true, promotionEndDate: { $lte: new Date() } },
-        { promotionEndDate: { $exists: false } }
+        { isPromoted: { $ne: true } },                                    // Not promoted at all
+        { isPromoted: false },                                            // Explicitly not promoted
+        { isPromoted: true, promotionEndDate: { $lte: now, $ne: null } }  // Promoted but expired
       ]
     };
     const regularFilter = {
