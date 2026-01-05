@@ -393,7 +393,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             const originalLng = propertyToEdit.lng - lngOffset;
 
             setListingData({
-                title: propertyToEdit.address || '',
+                title: propertyToEdit.title || '',
                 streetAddress: propertyToEdit.address,
                 price: propertyToEdit.price,
                 bedrooms: propertyToEdit.beds,

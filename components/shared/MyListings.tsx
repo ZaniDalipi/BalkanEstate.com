@@ -73,8 +73,9 @@ const ListingCard: React.FC<{
 
     const handleEditClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: property });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+        // Navigate to edit listing URL
+        window.history.pushState({}, '', `/edit-listing/${property.id}`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
     };
 
     const isActionable = property.status === 'active' || property.status === 'pending';
@@ -524,7 +525,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 <button
                   onClick={() => {
                       dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+                      window.history.pushState({}, '', '/create-listing');
+                      window.dispatchEvent(new PopStateEvent('popstate'));
                   }}
                   className="w-full sm:w-auto px-5 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
                 >

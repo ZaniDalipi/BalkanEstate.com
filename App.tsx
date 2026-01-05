@@ -97,6 +97,26 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Edit listing route: /edit-listing/:id
+      const editListingMatch = path.match(/^\/edit-listing\/(.+)$/);
+      if (editListingMatch) {
+        const propertyId = decodeURIComponent(editListingMatch[1]);
+        // Find the property and set it for editing
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        fetch(`${API_URL}/properties/${propertyId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.property) {
+              dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: data.property });
+              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+            }
+          })
+          .catch(err => console.error('Error loading property for edit:', err));
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        return;
+      }
+
       // Agency detail route: /agencies/:slug
       const agencyMatch = path.match(/^\/agencies\/(.+)$/);
       if (agencyMatch) {
@@ -115,6 +135,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Create listing route (new listing, not edit)
+      if (path === '/create-listing') {
+        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+        return;
+      }
+
       // Main navigation routes
       const routeMap: { [key: string]: any } = {
         '/': 'search',
@@ -126,7 +155,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/account': 'account',
         '/agents': 'agents',
         '/agencies': 'agencies',
-        '/create-listing': 'create-listing',
         '/admin': 'admin',
         '/reset-password': 'reset-password',
         '/analytics': 'analytics',
