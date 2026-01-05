@@ -69,6 +69,7 @@ const ListingCard: React.FC<{
 
     const handleCardClick = () => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+        window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
     };
 
     const handleEditClick = (e: React.MouseEvent) => {

@@ -266,6 +266,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   const handlePopupClick = (propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+    window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
   };
 
   return (

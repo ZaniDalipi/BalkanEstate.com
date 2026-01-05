@@ -237,7 +237,10 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <button
-                        onClick={() => dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id })}
+                        onClick={() => {
+                            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+                            window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+                        }}
                         className="hidden sm:block px-3 py-1.5 text-xs sm:text-sm font-semibold bg-primary-light text-primary-dark rounded-full hover:bg-primary/20 transition-colors"
                     >
                         {t('inbox.viewProperty')}
