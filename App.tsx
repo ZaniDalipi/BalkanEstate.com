@@ -50,7 +50,7 @@ const ResetPasswordPage = lazy(() => import('./src/features/auth/components/Rese
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
 const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
 const ValuationPage = lazy(() => import('./src/features/valuation/components/ValuationPage'));
-const MortgageCalculatorPage = lazy(() => import('./src/features/calculators/components/MortgageCalculator'));
+const MortgageCalculatorPage = lazy(() => import('./src/features/calculators/components/MortgageCalculatorPage'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
