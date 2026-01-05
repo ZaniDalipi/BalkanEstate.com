@@ -371,8 +371,9 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                     </ul>
                     <button
                         onClick={() => handlePlanSelection('Pro Annual', proYearlyPrice, 'year', proYearlyDiscount, proYearlyProduct?.productId || 'seller_pro_yearly')}
-                        className="w-full mt-8 py-3.5 rounded-lg font-bold text-white bg-indigo-500 hover:bg-indigo-600 hover:shadow-xl hover:scale-[1.02] transition-all shadow-md text-base sm:text-lg"
+                        className="w-full mt-8 py-3.5 rounded-lg font-bold text-white bg-indigo-500 hover:bg-indigo-600 hover:shadow-xl hover:scale-[1.02] transition-all shadow-md text-base sm:text-lg relative"
                     >
+                        <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">Coming Soon</span>
                         {t('pricing:buttons.getProAnnual')} - €{isOffer ? discountedProYearly : proYearlyPrice}{t('pricing:billing.perYear')}
                     </button>
                 </div>
@@ -430,8 +431,9 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                     </div>
                      <button
                         onClick={() => handlePlanSelection('Pro Monthly', proMonthlyPrice, 'month', proMonthlyDiscount, proMonthlyProduct?.productId || 'seller_pro_monthly')}
-                        className="w-full mt-8 py-3.5 rounded-lg font-bold bg-white border-2 border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-primary hover:shadow-lg hover:scale-[1.02] transition-all shadow-sm text-base sm:text-lg"
+                        className="w-full mt-8 py-3.5 rounded-lg font-bold bg-white border-2 border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-primary hover:shadow-lg hover:scale-[1.02] transition-all shadow-sm text-base sm:text-lg relative"
                     >
+                        <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">Coming Soon</span>
                         {t('pricing:buttons.getProMonthly')} - €{isOffer ? discountedProMonthly : proMonthlyPrice}{t('pricing:billing.perMonth')}
                     </button>
                 </div>
@@ -487,8 +489,9 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                     </div>
                      <button
                         onClick={() => handlePlanSelection('Enterprise', enterprisePrice, 'year', enterpriseDiscount, enterpriseProduct?.productId || 'seller_enterprise_yearly')}
-                        className="w-full mt-8 py-3.5 rounded-lg font-bold bg-amber-500 text-white hover:bg-amber-600 hover:shadow-xl hover:scale-[1.02] transition-all shadow-md text-base sm:text-lg"
+                        className="w-full mt-8 py-3.5 rounded-lg font-bold bg-amber-500 text-white hover:bg-amber-600 hover:shadow-xl hover:scale-[1.02] transition-all shadow-md text-base sm:text-lg relative"
                     >
+                         <span className="absolute -top-2 -right-2 bg-white text-amber-600 text-xs font-bold px-2 py-0.5 rounded-full shadow">Coming Soon</span>
                          {t('pricing:buttons.getEnterprise')} - €{isOffer ? discountedEnterprise : enterprisePrice}{t('pricing:billing.perYear')}
                     </button>
                 </div>

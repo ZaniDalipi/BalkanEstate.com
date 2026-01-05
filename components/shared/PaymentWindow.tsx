@@ -3,12 +3,18 @@ import Modal from './Modal';
 import {
   CreditCardIcon,
   CheckCircleIcon,
-  XCircleIcon,
+  ClockIcon,
   LockClosedIcon,
   ArrowTopRightOnSquareIcon,
 } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
+
+// ============================================
+// COMING SOON FLAG - Set to false when ready to launch payments
+// ============================================
+const PAYMENTS_COMING_SOON = true;
+// ============================================
 
 interface PaymentWindowProps {
   isOpen: boolean;
@@ -279,6 +285,93 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
   if (!isOpen) return null;
 
+  // Coming Soon overlay
+  if (PAYMENTS_COMING_SOON) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="">
+        <div className="max-w-md mx-auto">
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center pb-4 border-b border-neutral-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <ClockIcon className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-neutral-800 mb-2">Coming Soon</h2>
+              <p className="text-sm text-neutral-500">Premium subscriptions launching soon!</p>
+            </div>
+
+            {/* Plan Summary */}
+            <div className="rounded-xl p-6 border bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-800">{planName}</h3>
+                  <p className="text-sm text-neutral-500 capitalize">Billed {planInterval}ly</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-neutral-400">€{planPrice.toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Coming Soon Message */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <CreditCardIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900 mb-1">Payment System Under Development</p>
+                  <p className="text-xs text-blue-700 leading-relaxed">
+                    We're working hard to bring you secure payment options. Premium subscriptions will be available soon with support for major credit cards and local payment methods.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Features Preview */}
+            <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+              <p className="text-sm font-semibold text-neutral-800 mb-3">What you'll get:</p>
+              <ul className="text-sm text-neutral-600 space-y-2">
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  Secure payment processing
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  Multiple payment methods
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  Instant subscription activation
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  Easy cancellation anytime
+                </li>
+              </ul>
+            </div>
+
+            {/* Notify Me Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            >
+              Got it, notify me when available!
+            </button>
+
+            {/* Close */}
+            <button
+              onClick={onClose}
+              className="w-full py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
+  // Original payment UI (will be shown when PAYMENTS_COMING_SOON = false)
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
       <div className="max-w-md mx-auto">
