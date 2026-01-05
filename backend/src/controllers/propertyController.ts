@@ -173,6 +173,11 @@ export const getProperties = async (
       .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
       .sort(userSort);
 
+    const promotedCount = promotedProperties.length;
+
+    // Add debug logging
+    console.log(`🔍 Found ${promotedCount} promoted properties`);
+
     // Then get regular (non-promoted) properties with pagination
     // Use $and to combine with existing filter (which may have its own $or)
     const notPromotedCondition = {
@@ -186,34 +191,54 @@ export const getProperties = async (
       $and: [filter, notPromotedCondition]
     };
 
-    // Calculate how many regular properties we need after promoted ones
-    const promotedCount = promotedProperties.length;
-    const regularNeeded = Math.max(0, limitNum - promotedCount);
-    const regularSkip = Math.max(0, skip - promotedCount);
+    // Calculate pagination for regular properties
+    // Promoted properties always appear first on page 1, then regular fill the rest
+    // On subsequent pages, we adjust skip to account for promoted properties already shown
+    let regularSkip = 0;
+    let regularLimit = limitNum;
+
+    if (pageNum === 1) {
+      // Page 1: Show all promoted + enough regular to fill the page
+      regularSkip = 0;
+      regularLimit = Math.max(0, limitNum - promotedCount);
+    } else {
+      // Page 2+: All promoted were on page 1, so skip them from count
+      // Adjust skip to account for promoted properties on page 1
+      const effectiveSkip = skip - promotedCount;
+      regularSkip = Math.max(0, effectiveSkip);
+      regularLimit = limitNum;
+    }
 
     let regularProperties = await Property.find(regularFilter)
       .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
       .sort({ status: -1, ...userSort }) // sold first, then user sort
       .skip(regularSkip)
-      .limit(regularNeeded + limitNum); // Fetch extra for buffer
+      .limit(regularLimit);
 
-    // Combine: promoted first (with rotation), then regular
+    // Combine: On page 1, promoted first (with rotation) + regular
+    // On page 2+, only regular properties
     const currentHour = new Date().getHours();
 
     // Apply rotation to promoted properties (changes their order hourly, but never hides them)
     promotedProperties = sortPropertiesWithHighlighting(promotedProperties, currentHour);
 
-    // Merge promoted + regular, ensuring all promoted always show
-    let properties = [...promotedProperties, ...regularProperties];
+    let properties: any[];
+    if (pageNum === 1) {
+      // Page 1: ALL promoted properties MUST show (never hidden, even if exceeds limit)
+      // Plus regular properties to fill remaining space
+      properties = [...promotedProperties, ...regularProperties];
+      // Note: We do NOT trim promoted properties - they always show
+      // If promoted count exceeds limit, that's fine - they're all shown
+    } else {
+      // Page 2+: Only regular properties (promoted already shown on page 1)
+      properties = regularProperties;
+    }
 
     // Log highlighting stats for monitoring
-    const stats = getHighlightingStats(properties);
+    const stats = getHighlightingStats(promotedProperties);
     if (stats.activePromotions > 0) {
       console.log(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
     }
-
-    // Trim to requested limit (promoted are always first, never cut)
-    properties = properties.slice(0, limitNum);
 
     // Enrich properties with agency logos for agent sellers
     const agencyIds = properties
