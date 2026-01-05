@@ -523,6 +523,279 @@ class EmailService {
       text: 'Your subscription is active! Renews: ' + details.endDate.toLocaleDateString(),
     });
   }
+
+  /**
+   * Send new property alert (single property)
+   */
+  async sendPropertyAlert(params: {
+    recipientEmail: string;
+    recipientName: string;
+    searchName: string;
+    property: {
+      id: string;
+      title: string;
+      address: string;
+      city: string;
+      price: number;
+      beds: number;
+      baths: number;
+      sqft: number;
+      imageUrl?: string;
+    };
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">🏠 New Property Match!</h1>
+      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">From your saved search: "${params.searchName}"</p>
+    </div>
+
+    <div style="padding: 24px;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+        Hi <strong>${params.recipientName}</strong>, a new property matches your search!
+      </p>
+
+      <!-- Property Card -->
+      <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
+        ${params.property.imageUrl ? `<img src="${params.property.imageUrl}" alt="${params.property.title}" style="width: 100%; height: 160px; object-fit: cover;">` : ''}
+        <div style="padding: 16px;">
+          <div style="font-weight: 700; color: #374151; font-size: 16px; margin-bottom: 4px;">${params.property.title}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">${params.property.address}, ${params.property.city}</div>
+          <div style="font-size: 24px; font-weight: 700; color: #059669; margin-bottom: 12px;">€${params.property.price.toLocaleString()}</div>
+          <div style="display: flex; gap: 16px; font-size: 13px; color: #6b7280;">
+            <span>🛏 ${params.property.beds} beds</span>
+            <span>🚿 ${params.property.baths} baths</span>
+            <span>📐 ${params.property.sqft.toLocaleString()} sqft</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <a href="${frontendUrl}/property/${params.property.id}"
+         style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
+        View Property →
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
+        You're receiving this because you have alerts enabled for "${params.searchName}"
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        © ${new Date().getFullYear()} Balkan Estate
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.recipientEmail,
+      subject: `🏠 New match: ${params.property.title} - €${params.property.price.toLocaleString()}`,
+      html,
+      text: `New property match for "${params.searchName}": ${params.property.title} in ${params.property.city} - €${params.property.price.toLocaleString()}`,
+    });
+  }
+
+  /**
+   * Send new listings digest (multiple properties)
+   */
+  async sendNewListingsDigest(params: {
+    recipientEmail: string;
+    recipientName: string;
+    searchName: string;
+    properties: Array<{
+      id: string;
+      title: string;
+      address: string;
+      city: string;
+      price: number;
+      beds: number;
+      baths: number;
+      sqft: number;
+      imageUrl?: string;
+    }>;
+    frequency: 'instant' | 'daily' | 'weekly';
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const frequencyLabel = params.frequency === 'daily' ? 'Daily' : params.frequency === 'weekly' ? 'Weekly' : '';
+
+    const propertyCards = params.properties.slice(0, 5).map(p => `
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 12px;">
+        <div style="display: flex;">
+          ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title}" style="width: 100px; height: 80px; object-fit: cover;">` : '<div style="width: 100px; height: 80px; background: #e5e7eb;"></div>'}
+          <div style="padding: 10px; flex: 1;">
+            <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 2px;">${p.title}</div>
+            <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">${p.city}</div>
+            <div style="font-size: 14px; font-weight: 700; color: #059669;">€${p.price.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">🏠 ${params.properties.length} New Properties!</h1>
+      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">${frequencyLabel} update for "${params.searchName}"</p>
+    </div>
+
+    <div style="padding: 24px;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+        Hi <strong>${params.recipientName}</strong>, we found ${params.properties.length} new properties matching your search!
+      </p>
+
+      <!-- Property Cards -->
+      ${propertyCards}
+
+      ${params.properties.length > 5 ? `<p style="color: #6b7280; font-size: 13px; text-align: center; margin: 12px 0;">+${params.properties.length - 5} more properties</p>` : ''}
+
+      <!-- CTA -->
+      <a href="${frontendUrl}/search"
+         style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
+        View All Properties →
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
+        You're receiving this because you have alerts enabled for "${params.searchName}"
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        © ${new Date().getFullYear()} Balkan Estate
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.recipientEmail,
+      subject: `🏠 ${params.properties.length} new properties match "${params.searchName}"`,
+      html,
+      text: `${params.properties.length} new properties match your saved search "${params.searchName}"`,
+    });
+  }
+
+  /**
+   * Send price drop alert
+   */
+  async sendPriceDropAlert(params: {
+    recipientEmail: string;
+    recipientName: string;
+    property: {
+      id: string;
+      title: string;
+      address: string;
+      city: string;
+      previousPrice: number;
+      newPrice: number;
+      percentageDrop: number;
+      beds: number;
+      baths: number;
+      sqft: number;
+      imageUrl?: string;
+    };
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const savings = params.property.previousPrice - params.property.newPrice;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">📉 Price Drop Alert!</h1>
+      <p style="color: #fecaca; margin: 8px 0 0 0; font-size: 14px;">Save €${savings.toLocaleString()} (${params.property.percentageDrop}% off)</p>
+    </div>
+
+    <div style="padding: 24px;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+        Hi <strong>${params.recipientName}</strong>, great news! A property you saved just dropped in price!
+      </p>
+
+      <!-- Property Card -->
+      <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
+        ${params.property.imageUrl ? `<img src="${params.property.imageUrl}" alt="${params.property.title}" style="width: 100%; height: 160px; object-fit: cover;">` : ''}
+        <div style="padding: 16px;">
+          <div style="font-weight: 700; color: #374151; font-size: 16px; margin-bottom: 4px;">${params.property.title}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">${params.property.address}, ${params.property.city}</div>
+
+          <!-- Price comparison -->
+          <div style="background: #fef2f2; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div>
+                <div style="font-size: 11px; color: #6b7280; text-transform: uppercase;">Was</div>
+                <div style="font-size: 16px; color: #9ca3af; text-decoration: line-through;">€${params.property.previousPrice.toLocaleString()}</div>
+              </div>
+              <div style="font-size: 20px; color: #ef4444;">→</div>
+              <div>
+                <div style="font-size: 11px; color: #059669; text-transform: uppercase;">Now</div>
+                <div style="font-size: 20px; font-weight: 700; color: #059669;">€${params.property.newPrice.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 16px; font-size: 13px; color: #6b7280;">
+            <span>🛏 ${params.property.beds} beds</span>
+            <span>🚿 ${params.property.baths} baths</span>
+            <span>📐 ${params.property.sqft.toLocaleString()} sqft</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <a href="${frontendUrl}/property/${params.property.id}"
+         style="display: block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
+        View Property & Save €${savings.toLocaleString()} →
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
+        You're receiving this because you saved this property
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        © ${new Date().getFullYear()} Balkan Estate
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.recipientEmail,
+      subject: `📉 Price dropped ${params.property.percentageDrop}%: ${params.property.title} now €${params.property.newPrice.toLocaleString()}`,
+      html,
+      text: `Price drop alert! ${params.property.title} dropped from €${params.property.previousPrice.toLocaleString()} to €${params.property.newPrice.toLocaleString()} (${params.property.percentageDrop}% off)`,
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -531,3 +804,6 @@ export const sendEmail = emailServiceInstance.sendEmail.bind(emailServiceInstanc
 export const sendNewMessageNotification = emailServiceInstance.sendNewMessageNotification.bind(emailServiceInstance);
 export const sendWeeklyStats = emailServiceInstance.sendWeeklyStats.bind(emailServiceInstance);
 export const sendAgencyWeeklyStats = emailServiceInstance.sendAgencyWeeklyStats.bind(emailServiceInstance);
+export const sendPropertyAlert = emailServiceInstance.sendPropertyAlert.bind(emailServiceInstance);
+export const sendNewListingsDigest = emailServiceInstance.sendNewListingsDigest.bind(emailServiceInstance);
+export const sendPriceDropAlert = emailServiceInstance.sendPriceDropAlert.bind(emailServiceInstance);

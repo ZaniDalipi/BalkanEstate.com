@@ -5,10 +5,15 @@ import User from '../models/User';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
+import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
 let weeklyStatsTask: cron.ScheduledTask | null = null;
+let instantAlertsTask: cron.ScheduledTask | null = null;
+let dailyAlertsTask: cron.ScheduledTask | null = null;
+let weeklyAlertsTask: cron.ScheduledTask | null = null;
+let priceDropAlertsTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -95,12 +100,60 @@ export const startCronJobs = () => {
     }
   });
 
-  console.log('🕐 All cron jobs started (subscription checks, weekly stats)');
+  // ===============================
+  // PROPERTY ALERTS
+  // ===============================
+
+  // Instant alerts - runs every 15 minutes
+  instantAlertsTask = cron.schedule('*/15 * * * *', async () => {
+    try {
+      await processNewListingAlerts('instant');
+    } catch (error) {
+      console.error('Instant alerts cron error:', error);
+    }
+  });
+
+  // Daily digest alerts - runs daily at 8 AM UTC
+  dailyAlertsTask = cron.schedule('0 8 * * *', async () => {
+    try {
+      console.log('📬 Processing daily property alerts...');
+      await processNewListingAlerts('daily');
+      console.log('✅ Daily alerts sent');
+    } catch (error) {
+      console.error('Daily alerts cron error:', error);
+    }
+  });
+
+  // Weekly digest alerts - runs every Sunday at 8 AM UTC
+  weeklyAlertsTask = cron.schedule('0 8 * * 0', async () => {
+    try {
+      console.log('📬 Processing weekly property alerts...');
+      await processNewListingAlerts('weekly');
+      console.log('✅ Weekly alerts sent');
+    } catch (error) {
+      console.error('Weekly alerts cron error:', error);
+    }
+  });
+
+  // Price drop alerts - runs every hour
+  priceDropAlertsTask = cron.schedule('30 * * * *', async () => {
+    try {
+      await processPriceDropAlerts();
+    } catch (error) {
+      console.error('Price drop alerts cron error:', error);
+    }
+  });
+
+  console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts)');
 };
 
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
   if (weeklyStatsTask) weeklyStatsTask.stop();
+  if (instantAlertsTask) instantAlertsTask.stop();
+  if (dailyAlertsTask) dailyAlertsTask.stop();
+  if (weeklyAlertsTask) weeklyAlertsTask.stop();
+  if (priceDropAlertsTask) priceDropAlertsTask.stop();
   console.log('🛑 All cron jobs stopped');
 };

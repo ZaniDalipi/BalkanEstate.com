@@ -3,6 +3,10 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IFavorite extends Document {
   userId: mongoose.Types.ObjectId;
   propertyId: mongoose.Types.ObjectId;
+  // Price alert settings
+  priceAlertEnabled: boolean;
+  priceAtSave: number; // Price when property was saved
+  lastAlertedPrice?: number; // Last price user was alerted about
   createdAt: Date;
 }
 
@@ -19,6 +23,18 @@ const FavoriteSchema: Schema = new Schema(
       ref: 'Property',
       required: true,
       index: true,
+    },
+    // Price alert settings
+    priceAlertEnabled: {
+      type: Boolean,
+      default: true, // Enable by default
+    },
+    priceAtSave: {
+      type: Number,
+      default: 0,
+    },
+    lastAlertedPrice: {
+      type: Number,
     },
   },
   {
