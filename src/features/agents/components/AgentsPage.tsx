@@ -227,6 +227,11 @@ const AgentsPage: React.FC = () => {
     return agents.find(a => a.agentId === selectedAgentId || a.id === selectedAgentId) || null;
   }, [selectedAgentId, agents]);
 
+  // Calculate total active listings from all agents
+  const totalActiveListings = useMemo(() => {
+    return agents.reduce((sum, agent) => sum + (agent.activeListings || 0), 0);
+  }, [agents]);
+
   const faqs = [
     {
       question: t('agents:faq.questions.findAgent.question'),
@@ -381,9 +386,9 @@ const AgentsPage: React.FC = () => {
         popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
         popularSearchesLabel={t('agents:search.popularSearches')}
         stats={[
-          { icon: 'users', count: agents.length, label: t('agents:stats.expertAgents', 'Expert Agents'), color: 'green' },
           { icon: 'building', count: agencies.length, label: t('agents:stats.professionalAgencies', 'Professional Agencies'), color: 'blue' },
-          { icon: 'home', count: 8, label: t('agents:stats.listedProperties', 'Listed Properties'), color: 'purple' }
+          { icon: 'users', count: agents.length, label: t('agents:stats.expertAgents', 'Expert Agents'), color: 'green' },
+          { icon: 'home', count: totalActiveListings, label: t('agents:stats.listedProperties', 'Listed Properties'), color: 'purple' }
         ]}
         mousePosition={mousePosition}
       />
