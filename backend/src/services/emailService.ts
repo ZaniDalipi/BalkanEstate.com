@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 interface EmailConfig {
   to: string;
@@ -6,6 +7,8 @@ interface EmailConfig {
   html: string;
   text?: string;
 }
+
+type EmailProvider = 'resend' | 'smtp' | 'none';
 
 // Weekly statistics data structure for sellers
 export interface WeeklyStatsData {
@@ -68,14 +71,20 @@ export interface NewMessageParams {
 }
 
 class EmailService {
-  private transporter: nodemailer.Transporter | null;
-  private isConfigured: boolean;
+  private transporter: nodemailer.Transporter | null = null;
+  private resend: Resend | null = null;
+  private provider: EmailProvider = 'none';
+  private fromEmail: string;
 
   constructor() {
-    // Check if SMTP credentials are configured
-    this.isConfigured = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+    this.fromEmail = process.env.EMAIL_FROM || process.env.SMTP_FROM || 'noreply@balkanestate.com';
 
-    if (this.isConfigured) {
+    // Priority: Resend > SMTP > None
+    if (process.env.RESEND_API_KEY) {
+      this.resend = new Resend(process.env.RESEND_API_KEY);
+      this.provider = 'resend';
+      console.log('✉️ Email service configured with Resend');
+    } else if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: parseInt(process.env.SMTP_PORT || '587'),
@@ -85,30 +94,44 @@ class EmailService {
           pass: process.env.SMTP_PASS,
         },
       });
-      console.log('✉️ Email service configured and ready');
+      this.provider = 'smtp';
+      console.log('✉️ Email service configured with SMTP');
     } else {
-      this.transporter = null;
-      console.warn('⚠️ Email service not configured - SMTP credentials missing. Emails will be skipped in development mode.');
+      console.warn('⚠️ Email service not configured. Set RESEND_API_KEY or SMTP credentials.');
+      console.warn('   Get a free Resend API key at: https://resend.com');
     }
   }
 
   async sendEmail(config: EmailConfig): Promise<void> {
-    // Skip email sending if not configured (development mode)
-    if (!this.isConfigured || !this.transporter) {
-      console.log('📧 [DEV MODE] Email skipped (no SMTP configured):');
+    // Skip email sending if not configured
+    if (this.provider === 'none') {
+      console.log('📧 [DEV MODE] Email skipped (no email provider configured):');
       console.log(`   To: ${config.to}`);
       console.log(`   Subject: ${config.subject}`);
-      return; // Don't throw error, just skip
+      return;
     }
 
     try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
-        to: config.to,
-        subject: config.subject,
-        html: config.html,
-        text: config.text || '',
-      });
+      if (this.provider === 'resend' && this.resend) {
+        const { error } = await this.resend.emails.send({
+          from: this.fromEmail,
+          to: config.to,
+          subject: config.subject,
+          html: config.html,
+          text: config.text,
+        });
+        if (error) {
+          throw new Error(error.message);
+        }
+      } else if (this.provider === 'smtp' && this.transporter) {
+        await this.transporter.sendMail({
+          from: this.fromEmail,
+          to: config.to,
+          subject: config.subject,
+          html: config.html,
+          text: config.text || '',
+        });
+      }
       console.log('✅ Email sent to ' + config.to + ': ' + config.subject);
     } catch (error) {
       console.error('❌ Email sending failed:', error);

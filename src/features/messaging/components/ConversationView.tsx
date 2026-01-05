@@ -74,30 +74,33 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
         socketService.joinConversation(conversation.id);
 
         const unsubscribeMessage = socketService.onMessage(conversation.id, (message: Message) => {
+            // Properly extract sender ID from message (handle both string and populated object)
+            const messageSenderId = typeof message.senderId === 'object' && message.senderId !== null
+                ? (message.senderId as any)._id || (message.senderId as any).id
+                : message.senderId;
+
+            // Skip messages from self - sender already gets message from API response
+            // This prevents duplicates when backend broadcasts to all users in room
+            if (String(messageSenderId) === String(currentUserId)) {
+                return;
+            }
+
             setMessages(prev => {
                 if (prev.some(m => m.id === message.id)) return prev;
 
-                // Properly extract sender ID from message (handle both string and populated object)
-                const messageSenderId = typeof message.senderId === 'object' && message.senderId !== null
-                    ? (message.senderId as any)._id || (message.senderId as any).id
-                    : message.senderId;
+                playNotificationSound();
+                // Determine who the "other person" is based on current user's role
+                const isCurrentUserBuyer = String(conversation.buyer?.id || conversation.buyerId) === String(currentUserId);
+                const otherPerson = isCurrentUserBuyer
+                    ? (conversation.seller || property?.seller)
+                    : (conversation.buyer || { name: 'User' });
 
-                // Only play notification if message is from someone else
-                if (String(messageSenderId) !== String(currentUserId)) {
-                    playNotificationSound();
-                    // Determine who the "other person" is based on current user's role
-                    const isCurrentUserBuyer = String(conversation.buyer?.id || conversation.buyerId) === String(currentUserId);
-                    const otherPerson = isCurrentUserBuyer
-                        ? (conversation.seller || property?.seller)
-                        : (conversation.buyer || { name: 'User' });
-
-                    if (otherPerson && property) {
-                        notificationService.showNewMessageNotification(
-                            otherPerson.name || 'User',
-                            message.text || '[Image]',
-                            `${property.address}, ${property.city}`
-                        );
-                    }
+                if (otherPerson && property) {
+                    notificationService.showNewMessageNotification(
+                        otherPerson.name || 'User',
+                        message.text || '[Image]',
+                        `${property.address}, ${property.city}`
+                    );
                 }
 
                 dispatch({ type: 'ADD_MESSAGE', payload: { conversationId: conversation.id, message } });
