@@ -146,10 +146,6 @@ export const startCronJobs = () => {
     }
   });
 
-<<<<<<< HEAD
-  console.log('🕐 Subscription cron jobs started');
-=======
->>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
   // Send weekly statistics to Pro members and agencies - runs every Monday at 9 AM UTC
   weeklyStatsTask = cron.schedule('0 9 * * 1', async () => {
     try {
@@ -211,11 +207,8 @@ export const startCronJobs = () => {
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
-<<<<<<< HEAD
-=======
   if (userSubscriptionTask) userSubscriptionTask.stop();
   if (subscriptionReminderTask) subscriptionReminderTask.stop();
->>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
   if (weeklyStatsTask) weeklyStatsTask.stop();
   if (instantAlertsTask) instantAlertsTask.stop();
   if (dailyAlertsTask) dailyAlertsTask.stop();

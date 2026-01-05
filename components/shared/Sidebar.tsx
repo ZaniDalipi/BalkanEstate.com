@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
@@ -34,6 +34,69 @@ const NavItem: React.FC<{
       </div>
       <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{label}</span>
     </button>
+  );
+};
+
+// Tools Section Component with expandable menu
+const ToolsSection: React.FC<{
+  activeView: AppView;
+  onNavClick: (view: AppView) => void;
+  onClose: () => void;
+}> = ({ activeView, onNavClick, onClose }) => {
+  const { t } = useTranslation(['nav']);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { getLocalizedPath } = useLocalizedNavigation();
+
+  const toolItems = [
+    { view: 'valuation' as AppView, label: t('nav:valuation'), icon: <CurrencyDollarIcon /> },
+    { view: 'mortgage-calculator' as AppView, label: t('nav:mortgageCalculator'), icon: <CalculatorIcon /> },
+  ];
+
+  const isToolActive = toolItems.some(item => item.view === activeView);
+
+  return (
+    <div className="mt-1">
+      {/* Tools Header - Expandable */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
+          isToolActive ? 'bg-primary-light text-primary-dark' : 'text-neutral-700 hover:bg-neutral-100'
+        }`}
+      >
+        <div className={`w-5 h-5 flex-shrink-0 ${isToolActive ? 'text-primary' : 'text-neutral-700'}`}>
+          <WrenchScrewdriverIcon />
+        </div>
+        <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm flex-1">{t('nav:extras')}</span>
+        <div className="md:hidden group-hover:md:block">
+          {isExpanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+        </div>
+      </button>
+
+      {/* Expandable Items */}
+      <div className={`overflow-hidden transition-all duration-200 ${isExpanded ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="pl-4 space-y-0.5 pt-0.5">
+          {toolItems.map(item => (
+            <button
+              key={item.view}
+              onClick={() => {
+                onNavClick(item.view);
+                onClose();
+              }}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-sm ${
+                activeView === item.view
+                  ? 'bg-primary-light text-primary-dark'
+                  : 'text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              <div className={`w-4 h-4 flex-shrink-0 ${activeView === item.view ? 'text-primary' : 'text-neutral-600'}`}>
+                {item.icon}
+              </div>
+              <span className="md:hidden group-hover:md:inline whitespace-nowrap">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -147,6 +210,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             badge={item.view === 'inbox' ? totalUnreadCount : undefined}
                         />
                     ))}
+
+                    {/* Tools Section */}
+                    <ToolsSection
+                        activeView={activeView}
+                        onNavClick={handleNavClick}
+                        onClose={onClose}
+                    />
+
                      <div className="px-1.5 pt-1.5 mt-1.5 border-t border-neutral-100 space-y-0.5">
                         <button
                             onClick={handleNewListingClick}

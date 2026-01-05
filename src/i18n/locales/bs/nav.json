@@ -32,8 +32,11 @@
   "analytics": "Analitika",
   "language": "Jezik",
   "menu": "Menu",
-  "notifications": "Notifications",
-  "help": "Help",
+  "notifications": "Obavještenja",
+  "help": "Pomoć",
+  "extras": "Alati",
+  "valuation": "Procjena Nekretnine",
+  "mortgageCalculator": "Kalkulator Kredita",
   "onboarding": {
     "question": "How can we help you today?",
     "lookingToBuy": "I'm looking to buy",

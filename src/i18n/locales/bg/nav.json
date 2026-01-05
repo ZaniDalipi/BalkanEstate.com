@@ -33,6 +33,9 @@
   "menu": "Меню",
   "notifications": "Известия",
   "help": "Помощ",
+  "extras": "Инструменти",
+  "valuation": "Оценка на Имот",
+  "mortgageCalculator": "Калкулатор за Ипотека",
   "onboarding": {
     "question": "Как можем да ви помогнем днес?",
     "lookingToBuy": "Търся да купя",
