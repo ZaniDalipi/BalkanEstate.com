@@ -5,11 +5,17 @@ import User from '../models/User';
 import Subscription from '../models/Subscription';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
+<<<<<<< HEAD
+=======
+import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
+>>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
+let userSubscriptionTask: cron.ScheduledTask | null = null;
+let subscriptionReminderTask: cron.ScheduledTask | null = null;
 let weeklyStatsTask: cron.ScheduledTask | null = null;
 let instantAlertsTask: cron.ScheduledTask | null = null;
 let dailyAlertsTask: cron.ScheduledTask | null = null;
@@ -24,7 +30,7 @@ export const startCronJobs = () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(23, 59, 59, 999);
-      
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -76,7 +82,7 @@ export const startCronJobs = () => {
       for (const sub of expired) {
         sub.status = 'expired';
         await sub.save();
-        
+
         const agency = await Agency.findById(sub.agencyId);
         if (agency?.isFeatured) {
           agency.isFeatured = false;
@@ -143,7 +149,10 @@ export const startCronJobs = () => {
     }
   });
 
+<<<<<<< HEAD
   console.log('🕐 Subscription cron jobs started');
+=======
+>>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
   // Send weekly statistics to Pro members and agencies - runs every Monday at 9 AM UTC
   weeklyStatsTask = cron.schedule('0 9 * * 1', async () => {
     try {
@@ -205,6 +214,11 @@ export const startCronJobs = () => {
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
+<<<<<<< HEAD
+=======
+  if (userSubscriptionTask) userSubscriptionTask.stop();
+  if (subscriptionReminderTask) subscriptionReminderTask.stop();
+>>>>>>> refs/remotes/origin/claude/ai-property-valuation-p93r5
   if (weeklyStatsTask) weeklyStatsTask.stop();
   if (instantAlertsTask) instantAlertsTask.stop();
   if (dailyAlertsTask) dailyAlertsTask.stop();
