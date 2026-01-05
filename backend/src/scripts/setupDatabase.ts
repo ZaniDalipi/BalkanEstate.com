@@ -40,7 +40,7 @@ import Notification from '../models/Notification';
 import PageView from '../models/PageView';
 import Promotion from '../models/Promotion';
 import PromotionCoupon from '../models/PromotionCoupon';
-import Discount from '../models/Discount';
+import DiscountCode from '../models/DiscountCode';
 import PaymentRecord from '../models/PaymentRecord';
 import SalesHistory from '../models/SalesHistory';
 import SubscriptionEvent from '../models/SubscriptionEvent';
@@ -69,7 +69,7 @@ const models = [
   { name: 'PageView', model: PageView },
   { name: 'Promotion', model: Promotion },
   { name: 'PromotionCoupon', model: PromotionCoupon },
-  { name: 'Discount', model: Discount },
+  { name: 'DiscountCode', model: DiscountCode },
   { name: 'PaymentRecord', model: PaymentRecord },
   { name: 'SalesHistory', model: SalesHistory },
   { name: 'SubscriptionEvent', model: SubscriptionEvent },
