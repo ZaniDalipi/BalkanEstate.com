@@ -379,19 +379,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             setMode('manual');
             setStep('form');
 
-            const hashString = `${propertyToEdit.address}`;
-            let hash = 0;
-            for (let i = 0; i < hashString.length; i++) {
-                const char = hashString.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash |= 0;
-            }
-            const latOffset = Math.sin(hash) * 0.005;
-            const lngOffset = Math.cos(hash) * 0.005;
-
-            const originalLat = propertyToEdit.lat - latOffset;
-            const originalLng = propertyToEdit.lng - lngOffset;
-
             setListingData({
                 title: propertyToEdit.title || '',
                 streetAddress: propertyToEdit.address,
@@ -415,8 +402,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     index,
                     tag: (typeof img === 'object' && img?.tag) || 'other'
                 })),
-                lat: originalLat,
-                lng: originalLng,
+                lat: propertyToEdit.lat,
+                lng: propertyToEdit.lng,
                 hasBalcony: propertyToEdit.hasBalcony,
                 hasGarden: propertyToEdit.hasGarden,
                 hasElevator: propertyToEdit.hasElevator,
