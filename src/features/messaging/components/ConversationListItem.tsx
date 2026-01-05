@@ -12,20 +12,26 @@ interface ConversationListItemProps {
 const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversation, isSelected, onSelect }) => {
     const { state, dispatch } = useAppContext();
     const [imageError, setImageError] = useState(false);
-    const property = state.properties.find(p => p.id === conversation.propertyId);
+    const property = conversation.property || state.properties.find(p => p.id === conversation.propertyId);
     const currentUserId = state.currentUser?.id;
 
     if (!property) {
         return null; // Or some fallback UI
     }
 
-    const lastMessage = conversation.messages && conversation.messages.length > 0
+    // Use lastMessage from conversation if messages array is empty
+    const lastMessage = (conversation.messages && conversation.messages.length > 0)
         ? conversation.messages[conversation.messages.length - 1]
-        : null;
+        : conversation.lastMessage || null;
 
     // Determine if current user is buyer or seller, and use appropriate unread count
-    const isBuyer = conversation.buyerId === currentUserId;
+    const isBuyer = String(conversation.buyerId) === String(currentUserId);
     const unreadCount = isBuyer ? conversation.buyerUnreadCount : conversation.sellerUnreadCount;
+
+    // Get the other person's name for displaying in message preview
+    const otherPersonName = isBuyer
+        ? (conversation.seller?.name || property?.seller?.name || 'Seller')
+        : (conversation.buyer?.name || 'Buyer');
 
     const handleClick = () => {
         onSelect();
@@ -72,7 +78,15 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                 <p className="text-xs text-neutral-500 truncate">{property.title ? `${property.address}, ` : ''}{property.city}, {property.country}</p>
                 {lastMessage && (
                     <p className={`text-xs mt-1 truncate ${unreadCount > 0 ? 'font-bold text-neutral-800' : 'text-neutral-600'}`}>
-                        {(lastMessage.senderId === currentUserId || lastMessage.senderId === 'user') && 'You: '}{lastMessage.text || 'Image'}
+                        {(() => {
+                            // Handle both string IDs and populated sender objects
+                            const senderId = typeof lastMessage.senderId === 'object' && lastMessage.senderId !== null
+                                ? (lastMessage.senderId as any)._id || (lastMessage.senderId as any).id
+                                : lastMessage.senderId;
+                            const isFromCurrentUser = String(senderId) === String(currentUserId);
+                            return isFromCurrentUser ? 'You: ' : `${otherPersonName}: `;
+                        })()}
+                        {lastMessage.text || 'Image'}
                     </p>
                 )}
             </div>

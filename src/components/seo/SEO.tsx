@@ -78,7 +78,7 @@ export const SEO: React.FC<SEOProps> = ({
 
       {/* Additional SEO Meta Tags */}
       <meta name="theme-color" content="#0252CD" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
 

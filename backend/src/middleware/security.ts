@@ -357,11 +357,12 @@ export const mongoSanitization = (req: Request, _res: Response, next: NextFuncti
  * Sanitizes user input to prevent XSS attacks
  */
 export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): void => {
-  // Fields that should NOT be sanitized (contain URLs or special content)
+  // Fields that should NOT be sanitized (contain URLs, special content, or user text)
   const skipFields = new Set([
     'password', 'currentPassword', 'newPassword',
     'url', 'imageUrl', 'previewUrl', 'floorplanUrl', 'tourUrl',
-    'virtualTour360Url', 'avatarUrl', 'publicId', 'images'
+    'virtualTour360Url', 'avatarUrl', 'publicId', 'images',
+    'text', 'message', 'description', 'title', 'name', 'content' // User-facing text fields - React handles XSS escaping
   ]);
 
   // Recursive function to sanitize strings

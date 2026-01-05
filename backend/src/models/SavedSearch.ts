@@ -45,6 +45,10 @@ export interface ISavedSearch extends Document {
   drawnBoundsJSON: string | null;
   lastAccessed: Date;
   seenPropertyIds: string[];
+  // Alert settings
+  alertsEnabled: boolean;
+  alertFrequency: 'instant' | 'daily' | 'weekly';
+  lastAlertSentAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,6 +80,19 @@ const SavedSearchSchema: Schema = new Schema(
     seenPropertyIds: {
       type: [String],
       default: [],
+    },
+    // Alert settings
+    alertsEnabled: {
+      type: Boolean,
+      default: true, // Enable by default for new saved searches
+    },
+    alertFrequency: {
+      type: String,
+      enum: ['instant', 'daily', 'weekly'],
+      default: 'instant',
+    },
+    lastAlertSentAt: {
+      type: Date,
     },
   },
   {

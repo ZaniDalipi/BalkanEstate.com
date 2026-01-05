@@ -363,7 +363,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       let statsData: UserStats | null = null;
 
       try {
-        const syncResponse = await fetch('/api/auth/sync-stats', {
+        const syncResponse = await fetch(`${API_URL}/auth/sync-stats`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -380,7 +380,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       }
 
       if (!statsData) {
-        const response = await fetch('/api/auth/my-stats', {
+        const response = await fetch(`${API_URL}/auth/my-stats`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -422,7 +422,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       setSyncing(true);
       const token = getAuthToken();
 
-      const syncResponse = await fetch('/api/auth/sync-stats', {
+      const syncResponse = await fetch(`${API_URL}/auth/sync-stats`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -457,7 +457,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
     try {
       setLoadingHistory(true);
       const token = getAuthToken();
-      const response = await fetch('/api/sales-history/my-sales?limit=50', {
+      const response = await fetch(`${API_URL}/sales-history/my-sales?limit=50`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

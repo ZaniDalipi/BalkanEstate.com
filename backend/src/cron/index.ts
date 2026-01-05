@@ -5,12 +5,25 @@ import User from '../models/User';
 import Subscription from '../models/Subscription';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
+<<<<<<< HEAD
 import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
 let userSubscriptionTask: cron.ScheduledTask | null = null;
 let subscriptionReminderTask: cron.ScheduledTask | null = null;
+=======
+import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
+import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
+
+let checkExpiringTask: cron.ScheduledTask | null = null;
+let updateExpiredTask: cron.ScheduledTask | null = null;
+let weeklyStatsTask: cron.ScheduledTask | null = null;
+let instantAlertsTask: cron.ScheduledTask | null = null;
+let dailyAlertsTask: cron.ScheduledTask | null = null;
+let weeklyAlertsTask: cron.ScheduledTask | null = null;
+let priceDropAlertsTask: cron.ScheduledTask | null = null;
+>>>>>>> claude/add-stats-component-m3F0T
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -86,6 +99,7 @@ export const startCronJobs = () => {
     }
   });
 
+<<<<<<< HEAD
   // Update expired user subscriptions - runs every 6 hours
   userSubscriptionTask = cron.schedule('0 */6 * * *', async () => {
     try {
@@ -140,12 +154,79 @@ export const startCronJobs = () => {
   });
 
   console.log('🕐 Subscription cron jobs started');
+=======
+  // Send weekly statistics to Pro members and agencies - runs every Monday at 9 AM UTC
+  weeklyStatsTask = cron.schedule('0 9 * * 1', async () => {
+    try {
+      console.log('📊 Starting weekly statistics email job...');
+      await runWeeklyStatsJobs();
+      console.log('✅ Weekly statistics emails sent');
+    } catch (error) {
+      console.error('Weekly stats cron error:', error);
+    }
+  });
+
+  // ===============================
+  // PROPERTY ALERTS
+  // ===============================
+
+  // Instant alerts - runs every 15 minutes
+  instantAlertsTask = cron.schedule('*/15 * * * *', async () => {
+    try {
+      await processNewListingAlerts('instant');
+    } catch (error) {
+      console.error('Instant alerts cron error:', error);
+    }
+  });
+
+  // Daily digest alerts - runs daily at 8 AM UTC
+  dailyAlertsTask = cron.schedule('0 8 * * *', async () => {
+    try {
+      console.log('📬 Processing daily property alerts...');
+      await processNewListingAlerts('daily');
+      console.log('✅ Daily alerts sent');
+    } catch (error) {
+      console.error('Daily alerts cron error:', error);
+    }
+  });
+
+  // Weekly digest alerts - runs every Sunday at 8 AM UTC
+  weeklyAlertsTask = cron.schedule('0 8 * * 0', async () => {
+    try {
+      console.log('📬 Processing weekly property alerts...');
+      await processNewListingAlerts('weekly');
+      console.log('✅ Weekly alerts sent');
+    } catch (error) {
+      console.error('Weekly alerts cron error:', error);
+    }
+  });
+
+  // Price drop alerts - runs every hour
+  priceDropAlertsTask = cron.schedule('30 * * * *', async () => {
+    try {
+      await processPriceDropAlerts();
+    } catch (error) {
+      console.error('Price drop alerts cron error:', error);
+    }
+  });
+
+  console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts)');
+>>>>>>> claude/add-stats-component-m3F0T
 };
 
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
+<<<<<<< HEAD
   if (userSubscriptionTask) userSubscriptionTask.stop();
   if (subscriptionReminderTask) subscriptionReminderTask.stop();
   console.log('🛑 Subscription cron jobs stopped');
+=======
+  if (weeklyStatsTask) weeklyStatsTask.stop();
+  if (instantAlertsTask) instantAlertsTask.stop();
+  if (dailyAlertsTask) dailyAlertsTask.stop();
+  if (weeklyAlertsTask) weeklyAlertsTask.stop();
+  if (priceDropAlertsTask) priceDropAlertsTask.stop();
+  console.log('🛑 All cron jobs stopped');
+>>>>>>> claude/add-stats-component-m3F0T
 };

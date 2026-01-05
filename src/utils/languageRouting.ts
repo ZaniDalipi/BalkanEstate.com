@@ -21,7 +21,10 @@ export function parseLanguageFromPath(pathname: string): { lang: LanguageCode | 
   if (match) {
     const lang = match[1] as LanguageCode;
     // Remove the language prefix from the path
-    let path = pathname.slice(match[0].length - 1) || '/';
+    // match[0] could be "/en/" or "/en" (end of string)
+    // We need to get everything after the language code
+    const langPrefixLength = 1 + lang.length; // "/" + "en" = 3
+    let path = pathname.slice(langPrefixLength) || '/';
     // Ensure path starts with /
     if (!path.startsWith('/')) {
       path = '/' + path;

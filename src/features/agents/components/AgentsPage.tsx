@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Agent, Agency } from '@/types';
 import { getAllAgents, getAgencies } from '@/services/apiService';
 import AgentCard from './AgentCard';
@@ -16,7 +17,8 @@ type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 const AgentsPage: React.FC = () => {
   const { t } = useTranslation(['agents', 'common']);
   const { state, dispatch } = useAppContext();
-  const { selectedAgentId, activeView } = state;
+  const { getLocalizedPath } = useLocalizedNavigation();
+  const { selectedAgentId } = state;
 
   // Universal search state - searches across name, city, country, specializations, languages, bio
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,11 +63,11 @@ const AgentsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (activeView === 'agents') {
-      fetchAgents();
-      fetchAgencies();
-    }
-  }, [activeView]);
+    // Fetch data on mount - no need to check activeView since this component
+    // is only rendered when activeView is 'agents'
+    fetchAgents();
+    fetchAgencies();
+  }, []);
 
   const fetchAgents = async (searchTerm?: string) => {
     try {
@@ -85,14 +87,15 @@ const AgentsPage: React.FC = () => {
 
   // Debounced search effect
   useEffect(() => {
+    // Skip the initial render (handled by the mount effect)
+    if (searchQuery === '') return;
+
     const timeoutId = setTimeout(() => {
-      if (activeView === 'agents') {
-        fetchAgents(searchQuery);
-      }
+      fetchAgents(searchQuery);
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, activeView]);
+  }, [searchQuery]);
 
   const fetchAgencies = async () => {
     try {
@@ -373,22 +376,22 @@ const AgentsPage: React.FC = () => {
 
       {/* Hero Section with Integrated Search */}
       <HeroSearchSection
-        badge={t('agents:hero.badge')}
-        title={t('agents:hero.title')}
-        titleHighlight={t('agents:hero.titleHighlight')}
-        subtitle={t('agents:hero.subtitle')}
-        searchTitle={t('agents:search.title')}
-        searchSubtitle={t('agents:search.subtitle', { count: agents.length })}
-        searchPlaceholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
+        badge={t('agents.badge')}
+        title={t('agents.title')}
+        titleHighlight={t('agents.titleHighlight')}
+        subtitle={t('agents.subtitle')}
+        searchTitle={t('agents.title')}
+        searchSubtitle={t('agents.subtitle', { count: agents.length })}
+        searchPlaceholder={t('agents.universalPlaceholder', 'Search by name, city, country, or specialty...')}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSearch={() => fetchAgents(searchQuery)}
         popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
-        popularSearchesLabel={t('agents:search.popularSearches')}
+        popularSearchesLabel={t('agents.popularSearches')}
         stats={[
-          { icon: 'building', count: agencies.length, label: t('agents:stats.professionalAgencies', 'Professional Agencies'), color: 'blue' },
-          { icon: 'users', count: agents.length, label: t('agents:stats.expertAgents', 'Expert Agents'), color: 'green' },
-          { icon: 'home', count: totalActiveListings, label: t('agents:stats.listedProperties', 'Listed Properties'), color: 'purple' }
+          { icon: 'building', count: agencies.length, label: t('agents.professionalAgencies', 'Professional Agencies'), color: 'blue' },
+          { icon: 'users', count: agents.length, label: t('agents.expertAgents', 'Expert Agents'), color: 'green' },
+          { icon: 'home', count: totalActiveListings, label: t('agents.listedProperties', 'Listed Properties'), color: 'purple' }
         ]}
         mousePosition={mousePosition}
       />
@@ -632,7 +635,7 @@ const AgentsPage: React.FC = () => {
                           dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
                           dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
                           const urlSlug = data.agency.slug || data.agency._id;
-                          window.history.pushState({}, '', `/agencies/${urlSlug}`);
+                          window.history.pushState({}, '', getLocalizedPath(`/agencies/${urlSlug}`));
                         }
                       } catch (error) {
                         console.error('Error fetching agency:', error);
