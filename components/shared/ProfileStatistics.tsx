@@ -457,7 +457,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
     try {
       setLoadingHistory(true);
       const token = getAuthToken();
-      const response = await fetch('/api/sales-history/my-sales?limit=50', {
+      const response = await fetch(`${API_URL}/sales-history/my-sales?limit=50`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
