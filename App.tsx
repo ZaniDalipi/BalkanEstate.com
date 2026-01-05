@@ -107,7 +107,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           .then(res => res.json())
           .then(data => {
             if (data.property) {
-              dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: data.property });
+              // Transform backend property to frontend format (backend uses _id, frontend uses id)
+              const property = {
+                ...data.property,
+                id: data.property._id || data.property.id,
+                sellerId: data.property.sellerId?._id || data.property.sellerId,
+              };
+              dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: property });
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
             }
           })
