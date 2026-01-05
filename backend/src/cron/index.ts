@@ -4,9 +4,11 @@ import Agency from '../models/Agency';
 import User from '../models/User';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
+import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
+let weeklyStatsTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -82,11 +84,23 @@ export const startCronJobs = () => {
     }
   });
 
-  console.log('🕐 Subscription cron jobs started');
+  // Send weekly statistics to Pro members and agencies - runs every Monday at 9 AM UTC
+  weeklyStatsTask = cron.schedule('0 9 * * 1', async () => {
+    try {
+      console.log('📊 Starting weekly statistics email job...');
+      await runWeeklyStatsJobs();
+      console.log('✅ Weekly statistics emails sent');
+    } catch (error) {
+      console.error('Weekly stats cron error:', error);
+    }
+  });
+
+  console.log('🕐 All cron jobs started (subscription checks, weekly stats)');
 };
 
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
-  console.log('🛑 Subscription cron jobs stopped');
+  if (weeklyStatsTask) weeklyStatsTask.stop();
+  console.log('🛑 All cron jobs stopped');
 };
