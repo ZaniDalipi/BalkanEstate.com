@@ -279,17 +279,20 @@ export const sendMessage = async (
 
       // Only send email if recipient has an email
       if (recipient && recipient.email && property) {
-        const messageText = text || '[Image message]';
-        const appUrl = process.env.APP_URL || 'http://localhost:5173';
+        const messageText = text || (imageUrl ? '[Image message]' : '[Message]');
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
         await sendNewMessageNotification({
           recipientEmail: recipient.email as string,
           recipientName: (recipient.name as string) || 'User',
           senderName: sender.name || 'A user',
+          senderAvatarUrl: sender.avatarUrl,
+          messagePreview: messageText.substring(0, 150) + (messageText.length > 150 ? '...' : ''),
+          propertyTitle: property.title || `${property.address}, ${property.city}`,
           propertyAddress: property.address as string,
           propertyCity: property.city as string,
-          messagePreview: messageText,
-          conversationUrl: `${appUrl}/inbox`,
+          propertyImageUrl: property.imageUrl || (property.images && property.images[0]?.url),
+          conversationUrl: `${frontendUrl}/inbox`,
         });
       }
     } catch (emailError) {

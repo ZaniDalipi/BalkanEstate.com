@@ -14,31 +14,6 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     const { dispatch } = useAppContext();
     const availableRoles = currentUser.availableRoles || [currentUser.role];
 
-    // Debug logging to diagnose subscription display issues
-    console.log('🔍 RoleSelector Debug:', {
-        userId: currentUser.id,
-        email: currentUser.email,
-        // Primary subscription flags
-        isSubscribed: currentUser.isSubscribed,
-        subscriptionPlan: currentUser.subscriptionPlan,
-        subscriptionExpiresAt: currentUser.subscriptionExpiresAt,
-        activeListingsLimit: currentUser.activeListingsLimit,
-        listingsCount: currentUser.listingsCount,
-        // NEW subscription system
-        hasNewSubscription: !!currentUser.subscription,
-        newTier: currentUser.subscription?.tier,
-        newLimit: currentUser.subscription?.listingsLimit,
-        newUsed: currentUser.subscription?.activeListingsCount,
-        newStatus: currentUser.subscription?.status,
-        // LEGACY subscription system
-        hasProSubscription: !!currentUser.proSubscription,
-        proIsActive: currentUser.proSubscription?.isActive,
-        proLimit: currentUser.proSubscription?.totalListingsLimit,
-        proUsed: currentUser.proSubscription?.activeListingsCount,
-        freeLimit: currentUser.freeSubscription?.listingsLimit,
-        freeUsed: currentUser.freeSubscription?.activeListingsCount,
-    });
-
     // Always show both agent and private_seller options
     const hasPrivateSeller = true; // Always show private seller option
     const hasAgent = true; // Always show agent option

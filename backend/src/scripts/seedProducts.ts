@@ -1,8 +1,14 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import path from 'path';
 import Product from '../models/Product';
 
-dotenv.config();
+// Load environment-specific config
+const env = process.env.NODE_ENV || 'development';
+const envFile = env === 'development' ? '.env' : `.env.${env}`;
+dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
+
+console.log(`🌍 Environment: ${env.toUpperCase()}`);
 
 const PRODUCTS = [
   // ============================================================================

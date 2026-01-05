@@ -382,6 +382,16 @@ export const createPromotionCheckout = async (
     });
   } catch (error: any) {
     console.error('Create promotion checkout error:', error);
+
+    // Check for Stripe configuration error
+    if (error.message?.includes('STRIPE_SECRET_KEY')) {
+      res.status(503).json({
+        message: 'Payment service not configured. Please contact support.',
+        code: 'STRIPE_NOT_CONFIGURED'
+      });
+      return;
+    }
+
     res.status(500).json({ message: 'Error creating checkout session', error: error.message });
   }
 };
