@@ -137,27 +137,18 @@ export const getProperties = async (
       ];
     }
 
-    // Build sort object
-    // Priority order: Premium > Highlight > Featured > Urgent > Standard, then sold properties, then apply user-selected sorting
-    let sort: any = {};
-
-    // First priority: Promoted properties (Premium > Highlight > Featured)
-    // We'll handle this with a custom sort after fetching
-
-    // Add status sorting (sold first among non-promoted)
-    sort.status = -1; // 'sold' > 'active' alphabetically (reversed)
-
-    // Then apply user's preferred sorting
+    // Build sort object for user's preferred secondary sorting
+    let userSort: any = {};
     if (sortBy === 'price-low') {
-      sort.price = 1;
+      userSort.price = 1;
     } else if (sortBy === 'price-high') {
-      sort.price = -1;
+      userSort.price = -1;
     } else if (sortBy === 'sqft-low') {
-      sort.sqft = 1;
+      userSort.sqft = 1;
     } else if (sortBy === 'sqft-high') {
-      sort.sqft = -1;
+      userSort.sqft = -1;
     } else {
-      sort.lastRenewed = -1; // Default: newest first
+      userSort.lastRenewed = -1; // Default: newest first
     }
 
     // Pagination
@@ -165,22 +156,55 @@ export const getProperties = async (
     const limitNum = Number(limit);
     const skip = (pageNum - 1) * limitNum;
 
-    // Execute query with seller population
-    // Fetch more than needed to allow for promoted property sorting
-    const fetchLimit = limitNum * 2; // Fetch 2x to ensure we have enough promoted properties
-    let properties = await Property.find(filter)
-      .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
-      .sort(sort)
-      .skip(skip)
-      .limit(fetchLimit);
+    // Fetch promoted and regular properties separately to ensure promoted are never hidden
+    // This guarantees all promoted properties appear regardless of their creation date
 
-    // Use centralized highlighting utility for sorting
-    // This handles:
-    // - Priority order: Premium > Highlight > Featured > Standard
-    // - Hourly rotation within same tier for fair exposure
-    // - Urgent badge bonus points
+    // First, get all currently promoted properties matching the filter
+    // Use $and to combine with existing filter (which may have its own $or)
+    const promotedCondition = {
+      isPromoted: true,
+      promotionEndDate: { $gt: new Date() }
+    };
+    const promotedFilter = {
+      $and: [filter, promotedCondition]
+    };
+
+    let promotedProperties = await Property.find(promotedFilter)
+      .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
+      .sort(userSort);
+
+    // Then get regular (non-promoted) properties with pagination
+    // Use $and to combine with existing filter (which may have its own $or)
+    const notPromotedCondition = {
+      $or: [
+        { isPromoted: { $ne: true } },
+        { isPromoted: true, promotionEndDate: { $lte: new Date() } },
+        { promotionEndDate: { $exists: false } }
+      ]
+    };
+    const regularFilter = {
+      $and: [filter, notPromotedCondition]
+    };
+
+    // Calculate how many regular properties we need after promoted ones
+    const promotedCount = promotedProperties.length;
+    const regularNeeded = Math.max(0, limitNum - promotedCount);
+    const regularSkip = Math.max(0, skip - promotedCount);
+
+    let regularProperties = await Property.find(regularFilter)
+      .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId')
+      .sort({ status: -1, ...userSort }) // sold first, then user sort
+      .skip(regularSkip)
+      .limit(regularNeeded + limitNum); // Fetch extra for buffer
+
+    // Combine: promoted first (with rotation), then regular
     const currentHour = new Date().getHours();
-    properties = sortPropertiesWithHighlighting(properties, currentHour);
+
+    // Apply rotation to promoted properties (changes their order hourly, but never hides them)
+    promotedProperties = sortPropertiesWithHighlighting(promotedProperties, currentHour);
+
+    // Merge promoted + regular, ensuring all promoted always show
+    let properties = [...promotedProperties, ...regularProperties];
 
     // Log highlighting stats for monitoring
     const stats = getHighlightingStats(properties);
@@ -188,7 +212,7 @@ export const getProperties = async (
       console.log(`📊 Highlighting stats: ${stats.premium} premium, ${stats.highlight} highlight, ${stats.featured} featured (rotation hour: ${currentHour})`);
     }
 
-    // Trim to requested limit after sorting
+    // Trim to requested limit (promoted are always first, never cut)
     properties = properties.slice(0, limitNum);
 
     // Enrich properties with agency logos for agent sellers
