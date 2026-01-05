@@ -44,6 +44,7 @@
     "react-helmet-async": "^2.0.5",
     "react-i18next": "^16.5.0",
     "react-leaflet": "^4.2.1",
+    "resend": "^6.6.0",
     "sharp": "^0.34.5",
     "socket.io-client": "^4.8.1",
     "zustand": "^5.0.8"

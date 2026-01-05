@@ -18,7 +18,6 @@ import { processNewListingAlerts, processPriceDropAlerts, recordPriceChange } fr
 import SavedSearch from '../src/models/SavedSearch';
 import Favorite from '../src/models/Favorite';
 import Property from '../src/models/Property';
-import User from '../src/models/User';
 import PriceHistory from '../src/models/PriceHistory';
 import PropertyAlert from '../src/models/PropertyAlert';
 

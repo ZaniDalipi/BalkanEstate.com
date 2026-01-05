@@ -376,22 +376,22 @@ const AgentsPage: React.FC = () => {
 
       {/* Hero Section with Integrated Search */}
       <HeroSearchSection
-        badge={t('agents:hero.badge')}
-        title={t('agents:hero.title')}
-        titleHighlight={t('agents:hero.titleHighlight')}
-        subtitle={t('agents:hero.subtitle')}
-        searchTitle={t('agents:search.title')}
-        searchSubtitle={t('agents:search.subtitle', { count: agents.length })}
-        searchPlaceholder={t('agents:search.universalPlaceholder', 'Search by name, city, country, or specialty...')}
+        badge={t('agents.badge')}
+        title={t('agents.title')}
+        titleHighlight={t('agents.titleHighlight')}
+        subtitle={t('agents.subtitle')}
+        searchTitle={t('agents.title')}
+        searchSubtitle={t('agents.subtitle', { count: agents.length })}
+        searchPlaceholder={t('agents.universalPlaceholder', 'Search by name, city, country, or specialty...')}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSearch={() => fetchAgents(searchQuery)}
         popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
-        popularSearchesLabel={t('agents:search.popularSearches')}
+        popularSearchesLabel={t('agents.popularSearches')}
         stats={[
-          { icon: 'building', count: agencies.length, label: t('agents:stats.professionalAgencies', 'Professional Agencies'), color: 'blue' },
-          { icon: 'users', count: agents.length, label: t('agents:stats.expertAgents', 'Expert Agents'), color: 'green' },
-          { icon: 'home', count: totalActiveListings, label: t('agents:stats.listedProperties', 'Listed Properties'), color: 'purple' }
+          { icon: 'building', count: agencies.length, label: t('agents.professionalAgencies', 'Professional Agencies'), color: 'blue' },
+          { icon: 'users', count: agents.length, label: t('agents.expertAgents', 'Expert Agents'), color: 'green' },
+          { icon: 'home', count: totalActiveListings, label: t('agents.listedProperties', 'Listed Properties'), color: 'purple' }
         ]}
         mousePosition={mousePosition}
       />
