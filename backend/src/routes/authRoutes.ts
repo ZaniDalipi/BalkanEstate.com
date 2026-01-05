@@ -219,6 +219,17 @@ router.post('/change-password', protect, changePassword);
 router.post('/set-active-role', protect, setActiveRole);
 router.post('/add-role', protect, addRole);
 
+// OAuth providers endpoint - returns which providers are available
+router.get('/oauth/providers', (req, res) => {
+  res.json({
+    providers: {
+      google: !!oauthStrategies.google,
+      facebook: !!oauthStrategies.facebook,
+      apple: !!oauthStrategies.apple,
+    }
+  });
+});
+
 // Google OAuth routes
 router.get(
   '/google',

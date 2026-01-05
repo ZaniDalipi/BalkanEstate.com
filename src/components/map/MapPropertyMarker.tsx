@@ -794,6 +794,10 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
   return (
     <>
       {properties.map((prop) => {
+        // Skip properties without valid coordinates
+        if (prop.lat == null || prop.lng == null || isNaN(prop.lat) || isNaN(prop.lng)) {
+          return null;
+        }
         const isPromoted = isPropertyPromoted(prop);
         return (
           <Marker

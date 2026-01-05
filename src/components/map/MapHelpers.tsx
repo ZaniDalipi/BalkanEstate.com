@@ -53,14 +53,24 @@ export const MapEvents: React.FC<{
   // Ensure bounds are set on initial mount - don't rely solely on 'load' event
   useEffect(() => {
     if (!hasInitialized.current && map) {
-      // Set initial bounds immediately
+      // Set initial bounds after map is fully ready
       const timer = setTimeout(() => {
-        if (map.getContainer()) {
-          map.invalidateSize();
-          onMove(map.getBounds(), map.getCenter());
-          hasInitialized.current = true;
+        try {
+          const container = map.getContainer();
+          if (container && container.offsetWidth > 0 && container.offsetHeight > 0) {
+            map.invalidateSize();
+            const bounds = map.getBounds();
+            const center = map.getCenter();
+            if (bounds && center) {
+              onMove(bounds, center);
+              hasInitialized.current = true;
+            }
+          }
+        } catch (e) {
+          // Map not ready yet, will be handled by load event
+          console.debug('Map initialization deferred:', e);
         }
-      }, 50);
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [map, onMove]);
@@ -125,19 +135,41 @@ export const MapEvents: React.FC<{
 
   useMapEvents({
     load: () => {
-      // Initial load - call onMove immediately to set up initial bounds
-      onMove(map.getBounds(), map.getCenter());
+      // Initial load - call onMove after ensuring map is ready
+      try {
+        const bounds = map.getBounds();
+        const center = map.getCenter();
+        if (bounds && center) {
+          onMove(bounds, center);
+        }
+      } catch (e) {
+        console.debug('Map load event - bounds not ready:', e);
+      }
 
       // Force map to invalidate size and re-render layers after a short delay
       // This ensures markers render properly on first load
       setTimeout(() => {
-        map.invalidateSize();
-        // Trigger a moveend event to ensure everything updates
-        map.fire('moveend');
+        try {
+          if (map.getContainer()) {
+            map.invalidateSize();
+            // Trigger a moveend event to ensure everything updates
+            map.fire('moveend');
+          }
+        } catch (e) {
+          console.debug('Map invalidateSize deferred:', e);
+        }
       }, 150);
     },
     moveend: () => {
-      onMove(map.getBounds(), map.getCenter());
+      try {
+        const bounds = map.getBounds();
+        const center = map.getCenter();
+        if (bounds && center) {
+          onMove(bounds, center);
+        }
+      } catch (e) {
+        console.debug('Map moveend - bounds not ready:', e);
+      }
     },
   });
 
