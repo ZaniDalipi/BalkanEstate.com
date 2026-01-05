@@ -5,25 +5,19 @@ import User from '../models/User';
 import Subscription from '../models/Subscription';
 import PromotionCoupon from '../models/PromotionCoupon';
 import emailService from '../services/emailService';
-<<<<<<< HEAD
 import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
-
-let checkExpiringTask: cron.ScheduledTask | null = null;
-let updateExpiredTask: cron.ScheduledTask | null = null;
-let userSubscriptionTask: cron.ScheduledTask | null = null;
-let subscriptionReminderTask: cron.ScheduledTask | null = null;
-=======
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
+let userSubscriptionTask: cron.ScheduledTask | null = null;
+let subscriptionReminderTask: cron.ScheduledTask | null = null;
 let weeklyStatsTask: cron.ScheduledTask | null = null;
 let instantAlertsTask: cron.ScheduledTask | null = null;
 let dailyAlertsTask: cron.ScheduledTask | null = null;
 let weeklyAlertsTask: cron.ScheduledTask | null = null;
 let priceDropAlertsTask: cron.ScheduledTask | null = null;
->>>>>>> claude/add-stats-component-m3F0T
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -33,7 +27,7 @@ export const startCronJobs = () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(23, 59, 59, 999);
-      
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -85,7 +79,7 @@ export const startCronJobs = () => {
       for (const sub of expired) {
         sub.status = 'expired';
         await sub.save();
-        
+
         const agency = await Agency.findById(sub.agencyId);
         if (agency?.isFeatured) {
           agency.isFeatured = false;
@@ -99,7 +93,6 @@ export const startCronJobs = () => {
     }
   });
 
-<<<<<<< HEAD
   // Update expired user subscriptions - runs every 6 hours
   userSubscriptionTask = cron.schedule('0 */6 * * *', async () => {
     try {
@@ -153,8 +146,6 @@ export const startCronJobs = () => {
     }
   });
 
-  console.log('🕐 Subscription cron jobs started');
-=======
   // Send weekly statistics to Pro members and agencies - runs every Monday at 9 AM UTC
   weeklyStatsTask = cron.schedule('0 9 * * 1', async () => {
     try {
@@ -211,22 +202,17 @@ export const startCronJobs = () => {
   });
 
   console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts)');
->>>>>>> claude/add-stats-component-m3F0T
 };
 
 export const stopCronJobs = () => {
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
-<<<<<<< HEAD
   if (userSubscriptionTask) userSubscriptionTask.stop();
   if (subscriptionReminderTask) subscriptionReminderTask.stop();
-  console.log('🛑 Subscription cron jobs stopped');
-=======
   if (weeklyStatsTask) weeklyStatsTask.stop();
   if (instantAlertsTask) instantAlertsTask.stop();
   if (dailyAlertsTask) dailyAlertsTask.stop();
   if (weeklyAlertsTask) weeklyAlertsTask.stop();
   if (priceDropAlertsTask) priceDropAlertsTask.stop();
   console.log('🛑 All cron jobs stopped');
->>>>>>> claude/add-stats-component-m3F0T
 };
