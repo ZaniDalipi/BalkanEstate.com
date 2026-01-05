@@ -77,14 +77,17 @@ class EmailService {
   private fromEmail: string;
 
   constructor() {
-    this.fromEmail = process.env.EMAIL_FROM || process.env.SMTP_FROM || 'noreply@balkanestate.com';
-
     // Priority: Resend > SMTP > None
     if (process.env.RESEND_API_KEY) {
       this.resend = new Resend(process.env.RESEND_API_KEY);
       this.provider = 'resend';
+      // Use onboarding@resend.dev for testing (required without verified domain)
+      // Once you verify your domain, set EMAIL_FROM to your own address
+      this.fromEmail = process.env.EMAIL_FROM || 'Balkan Estate <onboarding@resend.dev>';
       console.log('✉️ Email service configured with Resend');
+      console.log(`   From: ${this.fromEmail}`);
     } else if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      this.fromEmail = process.env.EMAIL_FROM || process.env.SMTP_FROM || 'noreply@balkanestate.com';
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: parseInt(process.env.SMTP_PORT || '587'),
@@ -97,6 +100,7 @@ class EmailService {
       this.provider = 'smtp';
       console.log('✉️ Email service configured with SMTP');
     } else {
+      this.fromEmail = 'noreply@balkanestate.com';
       console.warn('⚠️ Email service not configured. Set RESEND_API_KEY or SMTP credentials.');
       console.warn('   Get a free Resend API key at: https://resend.com');
     }
