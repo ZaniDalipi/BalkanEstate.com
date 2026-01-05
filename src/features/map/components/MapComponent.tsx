@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
 import { Property } from '@/types';
@@ -15,8 +15,9 @@ import { CadastreLayer } from './CadastreLayer';
 import HeatMapLayer from './HeatMapLayer';
 import Buildings3DLayer from './Buildings3DLayer';
 import SunPositionControl from './SunPositionControl';
-import { type Season } from './SunArcAnimation';
+import SunArcAnimation, { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
+import PropertyAddressLabels from './PropertyAddressLabels';
 import {
   FlyToController,
   MapEvents,
@@ -52,13 +53,75 @@ const TILE_LAYERS = {
   },
 };
 
-type TileLayerType = keyof typeof TILE_LAYERS;
+type TileLayerType = keyof typeof TILE_LAYERS | 'night';
 
 // Bounding box for the Balkan region
 const BALKAN_BOUNDS = L.latLngBounds(
   [34, 13], // Southwest corner (Southern Greece, Western Croatia)
   [49, 31] // Northeast corner (Northern Romania, Eastern Bulgaria)
 );
+
+// CSS for 3D perspective camera effect
+const inject3DPerspectiveStyles = () => {
+  const styleId = 'map-3d-perspective-styles';
+  if (document.getElementById(styleId)) return;
+
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+    /* 3D perspective container - creates isometric-like view */
+    .map-3d-perspective-container {
+      perspective: 1500px;
+      perspective-origin: 50% 25%;
+    }
+
+    /* Map transforms for 3D mode - subtle tilt for better building view */
+    .map-3d-active {
+      transform: rotateX(25deg) scale(1.08);
+      transform-origin: center 70%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Normal 2D mode */
+    .map-3d-inactive {
+      transform: rotateX(0deg) scale(1);
+      transform-origin: center center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Ensure controls stay upright in 3D mode */
+    .map-3d-active .leaflet-control-container {
+      transform: rotateX(-25deg);
+      transform-origin: center 30%;
+    }
+
+    /* Keep markers/popups properly oriented */
+    .map-3d-active .leaflet-marker-pane,
+    .map-3d-active .leaflet-popup-pane {
+      transform: rotateX(-25deg);
+      transform-origin: center 30%;
+    }
+
+    /* Smooth shadow for 3D depth effect */
+    .map-3d-active::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 5%;
+      right: 5%;
+      height: 40px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+// Initialize 3D perspective styles
+if (typeof window !== 'undefined') {
+  inject3DPerspectiveStyles();
+}
 
 interface MapComponentProps {
   properties: Property[];
@@ -129,6 +192,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
 
+  // Use ref for onMapMove to prevent infinite loops when callback changes
+  const onMapMoveRef = useRef(onMapMove);
+  useEffect(() => {
+    onMapMoveRef.current = onMapMove;
+  });
+
   // Handle shadow time change from SunPositionControl
   const handleShadowTimeChange = useCallback((dateTime: Date) => {
     setShadowDateTime(dateTime);
@@ -151,8 +220,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const handleMapMoveWithCenter = useCallback((bounds: L.LatLngBounds, center: L.LatLng) => {
     setMapCenterLng(center.lng);
     setMapCenterLat(center.lat);
-    onMapMove(bounds, center);
-  }, [onMapMove]);
+    onMapMoveRef.current(bounds, center);
+  }, []);
 
   const validProperties = useMemo(() => {
     return properties.filter(
@@ -177,21 +246,18 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   return (
     <HighlightedPropertiesProvider properties={propertiesInView}>
-      <div className="w-full h-full relative overflow-hidden">
+      <div className={`w-full h-full relative overflow-hidden ${show3DBuildings ? 'map-3d-perspective-container' : ''}`}>
         <MapContainer
           center={center}
           zoom={zoom}
           scrollWheelZoom={true}
-          className="w-full h-full"
+          className={`w-full h-full ${show3DBuildings ? 'map-3d-active' : 'map-3d-inactive'}`}
           maxZoom={22}
-          minZoom={5}
+          minZoom={6}
           zoomControl={false}
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.8}
           preferCanvas={true}
-          updateWhenIdle={true}
-          updateWhenZooming={false}
-          keepBuffer={2}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
@@ -223,6 +289,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
             enabled={show3DBuildings}
             dateTime={shadowDateTime}
           />
+          {/* Property address/house number labels - visible at high zoom when tiles aren't detailed */}
+          <PropertyAddressLabels
+            properties={propertiesInView}
+            enabled={show3DBuildings}
+            minZoom={19}
+          />
           {/* Famous landmarks and POIs */}
           <LandmarksLayer
             enabled={showLandmarks}
@@ -234,6 +306,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
         </MapContainer>
+
+        {/* Sun/Moon arc animation - shows celestial body position when 3D buildings enabled */}
+        {show3DBuildings && (
+          <SunArcAnimation
+            hour={shadowDateTime.getHours() + shadowDateTime.getMinutes() / 60}
+            enabled={show3DBuildings}
+            isNightMode={false}
+            longitude={mapCenterLng}
+            latitude={mapCenterLat}
+            useRealTime={!isManualTimeControl}
+            season={selectedSeason}
+          />
+        )}
 
       {/* Desktop Controls - hidden on mobile via CSS as fallback */}
       {!isMobile && (

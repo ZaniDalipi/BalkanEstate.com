@@ -24,11 +24,11 @@ interface OrganizationSchemaProps {
  * Helps with Google Knowledge Panel and brand visibility
  */
 export const OrganizationSchema: React.FC<OrganizationSchemaProps> = ({
-  name = 'Balkan Estate',
-  url = 'https://balkanestate.com',
-  logo = 'https://balkanestate.com/logo.png',
-  description = 'Balkan Estate is the leading real estate platform in the Balkans, connecting buyers with their dream properties across Serbia, Montenegro, Croatia, Bosnia, North Macedonia, and Albania.',
-  email = 'info@balkanestate.com',
+  name = 'BalkanEstateAI',
+  url = 'https://balkanestateai.com',
+  logo = 'https://balkanestateai.com/logo.png',
+  description = 'BalkanEstateAI is the leading AI-powered real estate platform in the Balkans, connecting buyers with their dream properties across Serbia, Montenegro, Croatia, Bosnia, North Macedonia, and Albania.',
+  email = 'info@balkanestateai.com',
   phone,
   address,
   socialProfiles = [],

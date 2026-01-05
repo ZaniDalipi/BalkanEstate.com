@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
-import { PhoneIcon, UserCircleIcon, HeartIcon, ShareIcon } from '../../../constants';
+import { PhoneIcon, UserCircleIcon, ShareIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
 import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
 import RentVsBuyCalculator from '@/src/features/calculators/components/RentVsBuyCalculator';
@@ -45,14 +45,20 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   const [showShareMenu, setShowShareMenu] = useState(false);
 
   const isInComparison = state.comparisonList.includes(property.id);
-  const isSaved = state.savedProperties?.includes(property.id) || false;
 
   const handleCompare = () => {
     if (isInComparison) {
       dispatch({ type: 'REMOVE_FROM_COMPARISON', payload: property.id });
     } else {
       if (state.comparisonList.length >= 4) {
-        alert(t('property:actions.compareLimit'));
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'warning',
+            title: t('property:actions.compareLimitTitle', 'Comparison Limit'),
+            message: t('property:actions.compareLimit'),
+          },
+        });
         return;
       }
       dispatch({ type: 'ADD_TO_COMPARISON', payload: property.id });
@@ -70,18 +76,6 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
     }
     // Start conversation with a visit request message
     onContactSeller();
-  };
-
-  const handleSaveProperty = () => {
-    if (!state.isAuthenticated) {
-      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
-      return;
-    }
-    if (isSaved) {
-      dispatch({ type: 'REMOVE_SAVED_PROPERTY', payload: property.id });
-    } else {
-      dispatch({ type: 'SAVE_PROPERTY', payload: property.id });
-    }
   };
 
   const handleShare = async () => {
@@ -109,11 +103,11 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   };
 
   return (
-    <div className="sticky top-24 space-y-4">
+    <div className="lg:sticky lg:top-20 space-y-3 lg:space-y-4">
       {/* Quick Actions Card */}
       <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
         <h3 className="text-sm font-semibold text-neutral-600 mb-3 uppercase tracking-wide">{t('property:actions.quickActions')}</h3>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {/* Compare Button */}
           <button
             onClick={handleCompare}
@@ -138,19 +132,6 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
             <span className="text-xs font-medium">{t('property:actions.print')}</span>
-          </button>
-
-          {/* Save Button */}
-          <button
-            onClick={handleSaveProperty}
-            className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 ${
-              isSaved
-                ? 'bg-red-50 border-red-200 text-red-500'
-                : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-red-50 hover:border-red-200 hover:text-red-500'
-            }`}
-          >
-            <HeartIcon className={`w-6 h-6 mb-1 ${isSaved ? 'fill-current' : ''}`} />
-            <span className="text-xs font-medium">{isSaved ? t('property:actions.saved') : t('property:actions.save')}</span>
           </button>
 
           {/* Share Button */}

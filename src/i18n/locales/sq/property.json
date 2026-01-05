@@ -184,9 +184,19 @@
   "status": {
     "new": "E re",
     "reduced": "Çmim i Ulur",
+    "priceReduced": "Çmim i Ulur",
     "urgent": "Urgjente",
     "exclusive": "Ekskluzive",
     "underOffer": "Në Negociata"
+  },
+  "priceDiscount": {
+    "originalPrice": "Çmimi Origjinal",
+    "currentPrice": "Çmimi Aktual",
+    "discount": "Zbritje",
+    "savings": "Kurseni",
+    "reducedRecently": "Çmimi u ul së fundmi",
+    "limitedTime": "Ofertë e Kufizuar",
+    "saleEnds": "Shitja përfundon"
   },
   "noResults": "Nuk u gjetën prona",
   "tryDifferentFilters": "Provoni të ndryshoni filtrat ose kriteret e kërkimit",

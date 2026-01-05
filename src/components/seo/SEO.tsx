@@ -34,10 +34,10 @@ interface SEOProps {
   };
 }
 
-const SITE_NAME = 'Balkan Estate';
-const DEFAULT_DESCRIPTION = 'Find your dream property in the Balkans. Browse houses, apartments, and villas for sale across Serbia, Montenegro, Croatia, and more. Your trusted real estate platform.';
+const SITE_NAME = 'BalkanEstateAI';
+const DEFAULT_DESCRIPTION = 'Find your dream property in the Balkans with AI. Browse houses, apartments, and villas for sale across Serbia, Montenegro, Croatia, and more. Your AI-powered real estate platform.';
 const DEFAULT_IMAGE = '/og-image.png';
-const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestate.com';
+const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
 
 export const SEO: React.FC<SEOProps> = ({
   title,

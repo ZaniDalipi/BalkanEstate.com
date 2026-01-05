@@ -24,6 +24,7 @@ import AuthPage from './src/features/auth/components/AuthModal';
 import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
+import AlertDialog from './components/shared/AlertDialog';
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -431,6 +432,17 @@ const MainLayout: React.FC = () => {
             />
           )}
         </Suspense>
+
+        {/* Global Alert Dialog */}
+        {state.alertDialog && (
+          <AlertDialog
+            isOpen={state.alertDialog.isOpen}
+            type={state.alertDialog.type}
+            title={state.alertDialog.title}
+            message={state.alertDialog.message}
+            onClose={() => dispatch({ type: 'HIDE_ALERT' })}
+          />
+        )}
     </div>
   );
 };
@@ -444,7 +456,7 @@ const FullScreenLoader: React.FC = () => (
 
 
 const AppWrapper: React.FC = () => {
-    const { state, checkAuthStatus, handleOAuthCallback } = useAppContext();
+    const { state, dispatch, checkAuthStatus, handleOAuthCallback } = useAppContext();
 
     useEffect(() => {
         // Check for OAuth callback parameters in URL
@@ -455,7 +467,14 @@ const AppWrapper: React.FC = () => {
 
         if (error) {
             console.error('OAuth error:', error);
-            alert(`Authentication failed: ${error}`);
+            dispatch({
+                type: 'SHOW_ALERT',
+                payload: {
+                    type: 'error',
+                    title: 'Authentication Failed',
+                    message: error,
+                },
+            });
             // Clean up URL
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
@@ -469,7 +488,14 @@ const AppWrapper: React.FC = () => {
                 window.history.replaceState({}, document.title, window.location.pathname);
             } catch (err) {
                 console.error('Error parsing OAuth callback data:', err);
-                alert('Authentication failed. Please try again.');
+                dispatch({
+                    type: 'SHOW_ALERT',
+                    payload: {
+                        type: 'error',
+                        title: 'Authentication Failed',
+                        message: 'Please try again.',
+                    },
+                });
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }

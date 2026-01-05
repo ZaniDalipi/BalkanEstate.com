@@ -174,16 +174,25 @@ const cleanupCache = () => {
   }
 };
 
+// Empty array constant to avoid creating new references
+const EMPTY_LANDMARKS: Landmark[] = [];
+
 const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   enabled,
   isNightMode,
   onLandmarkClick,
 }) => {
   const map = useMap();
-  const [landmarks, setLandmarks] = useState<Landmark[]>([]);
+  const [landmarks, setLandmarks] = useState<Landmark[]>(EMPTY_LANDMARKS);
   const markersRef = useRef<L.Marker[]>([]);
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastBoundsKeyRef = useRef<string | null>(null);
+  const onLandmarkClickRef = useRef(onLandmarkClick);
+
+  // Keep callback ref updated without causing re-renders
+  useEffect(() => {
+    onLandmarkClickRef.current = onLandmarkClick;
+  });
 
   // Build Overpass API query for landmarks - simplified for performance
   const buildOverpassQuery = useCallback((bounds: L.LatLngBounds): string => {
@@ -317,6 +326,11 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     }
   }, [buildOverpassQuery]);
 
+  // Clear landmarks safely without triggering infinite loops
+  const clearLandmarks = useCallback(() => {
+    setLandmarks(prev => prev.length === 0 ? prev : EMPTY_LANDMARKS);
+  }, []);
+
   // Fetch landmarks on map move (debounced with longer delay)
   useEffect(() => {
     if (!enabled) return;
@@ -329,7 +343,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
 
       // Only fetch at zoom level 14+ to reduce API calls
       if (map.getZoom() < MIN_ZOOM_FOR_FETCH) {
-        setLandmarks([]);
+        clearLandmarks();
         return;
       }
 
@@ -352,7 +366,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         clearTimeout(fetchTimeoutRef.current);
       }
     };
-  }, [enabled, map, fetchLandmarks]);
+  }, [enabled, map, fetchLandmarks, clearLandmarks]);
 
   // Create/update markers
   useEffect(() => {
@@ -391,9 +405,12 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
           className: isNightMode ? 'night-mode-popup' : '',
         });
 
-      if (onLandmarkClick) {
-        marker.on('click', () => onLandmarkClick(landmark));
-      }
+      // Use ref for callback to avoid re-renders when callback changes
+      marker.on('click', () => {
+        if (onLandmarkClickRef.current) {
+          onLandmarkClickRef.current(landmark);
+        }
+      });
 
       markersRef.current.push(marker);
     });
@@ -404,7 +421,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       });
       markersRef.current = [];
     };
-  }, [landmarks, enabled, isNightMode, map, onLandmarkClick]);
+  }, [landmarks, enabled, isNightMode, map]);
 
   // Cleanup on disable
   useEffect(() => {
@@ -413,9 +430,9 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         map.removeLayer(marker);
       });
       markersRef.current = [];
-      setLandmarks([]);
+      clearLandmarks();
     }
-  }, [enabled, map]);
+  }, [enabled, map, clearLandmarks]);
 
   return null;
 };

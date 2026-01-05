@@ -637,6 +637,14 @@ export interface AppState {
     isDiscountGameOpen: boolean;
     isEnterpriseModalOpen: boolean;
     allMunicipalities: Record<string, MunicipalityData[]>;
+    pendingRedirect: AppView | null; // View to redirect to after auth
+    // Alert dialog state
+    alertDialog: {
+        isOpen: boolean;
+        type: 'error' | 'warning' | 'success' | 'info';
+        title: string;
+        message: string;
+    } | null;
 }
 
 export type AppAction =
@@ -685,4 +693,7 @@ export type AppAction =
     | { type: 'SET_ACTIVE_DISCOUNT', payload: { proYearly: number; proMonthly: number; enterprise: number; } | null }
     | { type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: boolean }
     | { type: 'TOGGLE_DISCOUNT_GAME', payload: boolean }
-    | { type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId: string; seenPropertyIds?: string[] } };
+    | { type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId: string; seenPropertyIds?: string[] } }
+    | { type: 'SET_PENDING_REDIRECT', payload: AppView | null }
+    | { type: 'SHOW_ALERT', payload: { type: 'error' | 'warning' | 'success' | 'info'; title: string; message: string } }
+    | { type: 'HIDE_ALERT' };

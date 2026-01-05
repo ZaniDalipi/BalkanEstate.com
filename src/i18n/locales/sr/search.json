@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Ne možete sačuvati praznu pretragu. Molimo dodajte neke kriterijume ili se pomerite na oblast na mapi.",
   "searchSaved": "Pretraga uspešno sačuvana!",
   "couldNotSaveSearch": "Nije moguće sačuvati pretragu. AI može biti zauzet.",
+  "mobileMapInfo": "Приказују се непокретности видљиве на мапи",
   "filters": {
     "title": "Filteri",
     "showFilters": "Prikaži Filtere",
@@ -22,6 +23,7 @@
     "apply": "Primeni Filtere",
     "reset": "Resetuj Filtere",
     "resetFilters": "Resetuj Filtere",
+    "seeAll": "Види све",
     "save": "Sačuvaj Pretragu",
     "country": "Država",
     "allCountries": "Sve Države",
@@ -123,6 +125,7 @@
     "pool": "Bazen",
     "petsAllowed": "Dozvoljeni Kućni Ljubimci",
     "has360Tour": "360° Виртуелна Тура",
+    "hasDiscount": "Snižena Cena",
     "placeholder": "Ukucajte pogodnost i pritisnite Enter (npr., teretana, bazen)"
   },
   "distance": {
@@ -143,7 +146,11 @@
     "priceDesc": "Cena: Visoka ka Niskoj",
     "areaAsc": "Površina: Mala ka Velikoj",
     "areaDesc": "Površina: Velika ka Maloj",
-    "bedsDesc": "Najviše Spavaćih Soba"
+    "bedsDesc": "Najviše Spavaćih Soba",
+    "bathsDesc": "Najviše Kupatila",
+    "featured": "Istaknuto Prvo",
+    "priceReduced": "Nedavno Sniženo",
+    "pricePerSqm": "Cena po m²"
   },
   "results": {
     "showing": "Prikazano {{count}} nekretnina",

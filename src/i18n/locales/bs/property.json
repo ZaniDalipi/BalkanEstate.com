@@ -183,11 +183,21 @@
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
-    "new": "New",
-    "reduced": "Price Reduced",
-    "urgent": "Urgent",
-    "exclusive": "Exclusive",
-    "underOffer": "Under Offer"
+    "new": "Novo",
+    "reduced": "Snižena Cijena",
+    "priceReduced": "Snižena Cijena",
+    "urgent": "Hitno",
+    "exclusive": "Ekskluzivno",
+    "underOffer": "U Pregovorima"
+  },
+  "priceDiscount": {
+    "originalPrice": "Originalna Cijena",
+    "currentPrice": "Trenutna Cijena",
+    "discount": "Popust",
+    "savings": "Uštedite",
+    "reducedRecently": "Cijena nedavno snižena",
+    "limitedTime": "Ograničena Ponuda",
+    "saleEnds": "Akcija završava"
   },
   "noResults": "No properties found",
   "tryDifferentFilters": "Try adjusting your filters or search criteria",

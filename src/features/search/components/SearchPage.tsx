@@ -424,6 +424,22 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             return 0; // Keep original order for same score
         });
 
+        // Helper to convert date/string/number to timestamp
+        const toTimestamp = (value: any): number => {
+            if (!value) return 0;
+            if (typeof value === 'number') return value;
+            if (typeof value === 'string') return new Date(value).getTime();
+            if (value instanceof Date) return value.getTime();
+            return 0;
+        };
+
+        // Helper to get property timestamp (prioritize lastRenewed over createdAt)
+        const getPropertyTime = (p: Property) => {
+            const renewed = toTimestamp(p.lastRenewed);
+            const created = toTimestamp(p.createdAt);
+            return Math.max(renewed, created);
+        };
+
         // Then apply user's sorting preference (maintaining promotion priority)
         switch (activeFilters.sortBy) {
             case 'price_asc': return promotionSorted.sort((a, b) => {
@@ -438,19 +454,60 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 if (scoreA !== scoreB) return scoreB - scoreA;
                 return b.price - a.price;
             });
+            case 'area_asc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return a.sqft - b.sqft;
+            });
+            case 'area_desc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return b.sqft - a.sqft;
+            });
             case 'beds_desc': return promotionSorted.sort((a, b) => {
                 const scoreA = getPromotionScore(a);
                 const scoreB = getPromotionScore(b);
                 if (scoreA !== scoreB) return scoreB - scoreA;
                 return b.beds - a.beds;
             });
-            case 'newest': return promotionSorted.sort((a, b) => {
+            case 'baths_desc': return promotionSorted.sort((a, b) => {
                 const scoreA = getPromotionScore(a);
                 const scoreB = getPromotionScore(b);
                 if (scoreA !== scoreB) return scoreB - scoreA;
-                return (Math.max(b.createdAt || 0, b.lastRenewed || 0)) - (Math.max(a.createdAt || 0, a.lastRenewed || 0));
+                return b.baths - a.baths;
             });
-            default: return promotionSorted;
+            case 'oldest': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return (a.createdAt || 0) - (b.createdAt || 0);
+            });
+            case 'featured': return promotionSorted.sort((a, b) => {
+                // Already sorted by promotion score, just maintain that order
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return getPropertyTime(b) - getPropertyTime(a);
+            });
+            case 'price_per_sqm': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                const pricePerSqmA = a.sqft > 0 ? a.price / a.sqft : Infinity;
+                const pricePerSqmB = b.sqft > 0 ? b.price / b.sqft : Infinity;
+                return pricePerSqmA - pricePerSqmB;
+            });
+            case 'newest':
+            default:
+                // Default to newest - prioritize lastRenewed for renewed listings
+                return promotionSorted.sort((a, b) => {
+                    const scoreA = getPromotionScore(a);
+                    const scoreB = getPromotionScore(b);
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                    return getPropertyTime(b) - getPropertyTime(a);
+                });
         }
     }, [properties, activeFilters]);
 
@@ -909,7 +966,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 const formData = new FormData(e.currentTarget);
                                 const email = formData.get('email') as string;
                                 if (!email || !email.trim() || !email.includes('@')) {
-                                    alert('Please enter a valid email address');
+                                    dispatch({
+                                        type: 'SHOW_ALERT',
+                                        payload: {
+                                            type: 'warning',
+                                            title: 'Invalid Email',
+                                            message: 'Please enter a valid email address',
+                                        },
+                                    });
                                     return;
                                 }
                                 dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true, email: email.trim() } });

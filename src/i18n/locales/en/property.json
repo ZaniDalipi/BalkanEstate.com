@@ -185,9 +185,19 @@
   "status": {
     "new": "New",
     "reduced": "Price Reduced",
+    "priceReduced": "Price Reduced",
     "urgent": "Urgent",
     "exclusive": "Exclusive",
     "underOffer": "Under Offer"
+  },
+  "priceDiscount": {
+    "originalPrice": "Original Price",
+    "currentPrice": "Current Price",
+    "discount": "Discount",
+    "savings": "You save",
+    "reducedRecently": "Price reduced recently",
+    "limitedTime": "Limited Time Offer",
+    "saleEnds": "Sale ends"
   },
   "noResults": "No properties found",
   "tryDifferentFilters": "Try adjusting your filters or search criteria",

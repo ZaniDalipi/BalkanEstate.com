@@ -12,7 +12,14 @@ const EnterpriseCreationForm: React.FC<EnterpriseCreationFormProps> = ({ isOpen,
 
   const handleAgencyCreated = (agencyId: string) => {
     onClose();
-    alert('Congratulations! Your agency has been created successfully. You now have a dedicated agency page.');
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: {
+        type: 'success',
+        title: 'Congratulations!',
+        message: 'Your agency has been created successfully. You now have a dedicated agency page.',
+      },
+    });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
   };
 

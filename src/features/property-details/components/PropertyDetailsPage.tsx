@@ -23,6 +23,7 @@ import {
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import Footer from '@/components/shared/Footer';
 
 /**
  * PropertyDetailsPage Component
@@ -464,6 +465,20 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               />
             </div>
 
+            {/* Mobile Only: Property Info (description) shown early */}
+            <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
+              <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
+            </div>
+
+            {/* Mobile Only: Quick Actions & Contact (shown after description on mobile) */}
+            <div className="lg:hidden animate-slide-up" style={{ animationDelay: '75ms' }}>
+              <PropertyContact
+                property={property}
+                isCreatingConversation={isCreatingConversation}
+                onContactSeller={handleContactSeller}
+              />
+            </div>
+
             {/* 360 Virtual Tour */}
             {property.virtualTour360Url && (
               <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -508,8 +523,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               </div>
             )}
 
-            {/* Property Info */}
-            <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
+            {/* Property Info (Desktop only - mobile version shown above) */}
+            <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
@@ -547,8 +562,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             </div>
           </div>
 
-          {/* Right Column - Contact Sidebar */}
-          <div className="lg:col-span-1 animate-slide-up" style={{ animationDelay: '150ms' }}>
+          {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
+          <div className="hidden lg:block lg:col-span-1 animate-slide-up" style={{ animationDelay: '150ms' }}>
             <PropertyContact
               property={property}
               isCreatingConversation={isCreatingConversation}
@@ -575,6 +590,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           opacity: 0;
         }
       `}</style>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

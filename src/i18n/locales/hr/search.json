@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Cannot save an empty search. Please add some criteria or move to an area on the map.",
   "searchSaved": "Search saved successfully!",
   "couldNotSaveSearch": "Could not save search. AI might be busy.",
+  "mobileMapInfo": "Prikazuju se nekretnine vidljive na karti",
   "filters": {
     "title": "Filters",
     "showFilters": "Show Filters",
@@ -22,6 +23,7 @@
     "apply": "Apply Filters",
     "reset": "Reset Filters",
     "resetFilters": "Reset Filters",
+    "seeAll": "Vidi sve",
     "save": "Save Search",
     "country": "Country",
     "allCountries": "All Countries",
@@ -123,6 +125,7 @@
     "pool": "Swimming Pool",
     "petsAllowed": "Pets Allowed",
     "has360Tour": "360° Virtualna Tura",
+    "hasDiscount": "Snižena Cijena",
     "placeholder": "Type amenity and press Enter (e.g., gym, pool)"
   },
   "distance": {
@@ -143,7 +146,11 @@
     "priceDesc": "Price: High to Low",
     "areaAsc": "Area: Small to Large",
     "areaDesc": "Area: Large to Small",
-    "bedsDesc": "Most Bedrooms"
+    "bedsDesc": "Najviše Spavaćih Soba",
+    "bathsDesc": "Najviše Kupaonica",
+    "featured": "Istaknuto Prvo",
+    "priceReduced": "Nedavno Sniženo",
+    "pricePerSqm": "Cijena po m²"
   },
   "results": {
     "showing": "Showing {{count}} properties",

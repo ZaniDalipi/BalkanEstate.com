@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Nu se poate salva o căutare goală. Adăugați criterii sau deplasați-vă într-o zonă pe hartă.",
   "searchSaved": "Căutarea a fost salvată cu succes!",
   "couldNotSaveSearch": "Nu s-a putut salva căutarea. AI-ul poate fi ocupat.",
+  "mobileMapInfo": "Se afișează proprietăți vizibile pe hartă",
   "filters": {
     "title": "Filtre",
     "showFilters": "Afișează Filtrele",
@@ -22,6 +23,7 @@
     "apply": "Aplică Filtrele",
     "reset": "Resetează Filtrele",
     "resetFilters": "Resetează Filtrele",
+    "seeAll": "Vezi toate",
     "save": "Salvează Căutarea",
     "country": "Țară",
     "allCountries": "Toate Țările",
@@ -123,6 +125,7 @@
     "pool": "Piscină",
     "petsAllowed": "Animale Permise",
     "has360Tour": "Tur Virtual 360°",
+    "hasDiscount": "Preț Redus",
     "placeholder": "Tastați facilitatea și apăsați Enter (ex., sală, piscină)"
   },
   "distance": {
@@ -143,7 +146,11 @@
     "priceDesc": "Preț: Mare la Mic",
     "areaAsc": "Suprafață: Mică la Mare",
     "areaDesc": "Suprafață: Mare la Mică",
-    "bedsDesc": "Cele Mai Multe Dormitoare"
+    "bedsDesc": "Cele Mai Multe Dormitoare",
+    "bathsDesc": "Cele Mai Multe Băi",
+    "featured": "Recomandate Întâi",
+    "priceReduced": "Preț Redus Recent",
+    "pricePerSqm": "Preț pe m²"
   },
   "results": {
     "showing": "Se afișează {{count}} proprietăți",

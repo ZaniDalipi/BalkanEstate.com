@@ -1,9 +1,10 @@
-import React, { createContext, useReducer, useContext, Dispatch, useCallback } from 'react';
+import React, { createContext, useReducer, useContext, Dispatch, useCallback, useEffect } from 'react';
 import { User, Property, SavedSearch, Conversation, AppState, AppAction, Filters, Message, AuthModalView, initialFilters, SearchPageState } from '../types';
 import * as api from '../services/apiService';
 import { MUNICIPALITY_DATA } from '../services/propertyService';
 import { socketService } from '../services/socketService';
 import { notificationService } from '../services/notificationService';
+import { tokenService } from '../src/shared/api/tokenService';
 
 const initialSearchPageState: SearchPageState = {
     filters: initialFilters,
@@ -54,6 +55,8 @@ const initialState: AppState = {
   isEnterpriseModalOpen: false,
   // FIX: Initialize allMunicipalities in the initial state.
   allMunicipalities: MUNICIPALITY_DATA,
+  pendingRedirect: null,
+  alertDialog: null,
 };
 
 
@@ -271,6 +274,20 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 } : s
             ),
         };
+    case 'SET_PENDING_REDIRECT':
+        return { ...state, pendingRedirect: action.payload };
+    case 'SHOW_ALERT':
+        return {
+            ...state,
+            alertDialog: {
+                isOpen: true,
+                type: action.payload.type,
+                title: action.payload.title,
+                message: action.payload.message,
+            },
+        };
+    case 'HIDE_ALERT':
+        return { ...state, alertDialog: null };
     default:
       return state;
   }
@@ -324,6 +341,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (token) {
           socketService.connect(token, user.id);
         }
+
+        // Initialize proactive token refresh
+        tokenService.initializeProactiveRefresh();
     }
   }, []);
 
@@ -343,6 +363,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Initialize browser notifications
     notificationService.initialize();
 
+    // Initialize proactive token refresh
+    tokenService.initializeProactiveRefresh();
+
+    // Check if there's a pending redirect (e.g., from "I want to sell" flow)
+    if (state.pendingRedirect) {
+      const redirectTo = state.pendingRedirect;
+      dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
+    }
+
     // Check if there's a pending subscription and reopen the modal
     if (state.pendingSubscription) {
       setTimeout(() => {
@@ -356,7 +386,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return user;
-  }, [state.pendingSubscription, state.isFirstLoginOffer]);
+  }, [state.pendingSubscription, state.isFirstLoginOffer, state.pendingRedirect]);
 
   const signup = useCallback(async (
     email: string,
@@ -382,6 +412,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Initialize browser notifications
     notificationService.initialize();
 
+    // Initialize proactive token refresh
+    tokenService.initializeProactiveRefresh();
+
+    // Check if there's a pending redirect (e.g., from "I want to sell" flow)
+    if (state.pendingRedirect) {
+      const redirectTo = state.pendingRedirect;
+      dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
+    }
+
     // Check if there's a pending subscription and reopen the modal
     if (state.pendingSubscription) {
       setTimeout(() => {
@@ -395,7 +435,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return user;
-  }, [state.pendingSubscription, state.isFirstLoginOffer]);
+  }, [state.pendingSubscription, state.isFirstLoginOffer, state.pendingRedirect]);
 
   const logout = useCallback(async () => {
     await api.logout();
@@ -438,6 +478,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Connect to WebSocket for real-time chat
     socketService.connect(token, user.id);
+
+    // Initialize proactive token refresh
+    tokenService.initializeProactiveRefresh();
 
     try {
       const userData = await api.getMyData();
@@ -556,6 +599,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateSavedSearchAccessTime = useCallback(async (searchId: string, seenPropertyIds?: string[]) => {
     await api.updateSavedSearchAccessTime(searchId, seenPropertyIds);
     dispatch({ type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId, seenPropertyIds } });
+  }, []);
+
+  // Set up session expired callback for proactive token refresh
+  useEffect(() => {
+    tokenService.onSessionExpired(() => {
+      console.log('[AppContext] Session expired, logging out user');
+      // Disconnect from WebSocket
+      socketService.disconnect();
+      // Clear auth state
+      dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
+      // Show notification to user
+      notificationService.showNotification(
+        'Session Expired',
+        'Your session has expired. Please log in again.',
+        { tag: 'session-expired' }
+      );
+      // Open auth modal
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+    });
   }, []);
 
   // Listen for user updates from WebSocket (agency joins, profile changes, etc.)

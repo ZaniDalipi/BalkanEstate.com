@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Cannot save an empty search. Please add some criteria or move to an area on the map.",
   "searchSaved": "Search saved successfully!",
   "couldNotSaveSearch": "Could not save search. AI might be busy.",
+  "mobileMapInfo": "Showing properties visible on map",
   "filters": {
     "title": "Filters",
     "showFilters": "Show Filters",
@@ -22,6 +23,7 @@
     "apply": "Apply Filters",
     "reset": "Reset Filters",
     "resetFilters": "Reset Filters",
+    "seeAll": "See All",
     "save": "Save Search",
     "country": "Country",
     "allCountries": "All Countries",
@@ -124,6 +126,7 @@
     "pool": "Swimming Pool",
     "petsAllowed": "Pets Allowed",
     "has360Tour": "360° Virtual Tour",
+    "hasDiscount": "Price Reduced",
     "placeholder": "Type amenity and press Enter (e.g., gym, pool)"
   },
   "distance": {
@@ -144,7 +147,11 @@
     "priceDesc": "Price: High to Low",
     "areaAsc": "Area: Small to Large",
     "areaDesc": "Area: Large to Small",
-    "bedsDesc": "Most Bedrooms"
+    "bedsDesc": "Most Bedrooms",
+    "bathsDesc": "Most Bathrooms",
+    "featured": "Featured First",
+    "priceReduced": "Recently Reduced",
+    "pricePerSqm": "Price per m²"
   },
   "results": {
     "showing": "Showing {{count}} properties",

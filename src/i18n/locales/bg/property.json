@@ -184,9 +184,19 @@
   "status": {
     "new": "Ново",
     "reduced": "Намалена цена",
+    "priceReduced": "Намалена цена",
     "urgent": "Спешно",
     "exclusive": "Ексклузивно",
     "underOffer": "Предлага се"
+  },
+  "priceDiscount": {
+    "originalPrice": "Оригинална цена",
+    "currentPrice": "Текуща цена",
+    "discount": "Отстъпка",
+    "savings": "Спестявате",
+    "reducedRecently": "Цената е намалена наскоро",
+    "limitedTime": "Ограничена оферта",
+    "saleEnds": "Разпродажбата приключва"
   },
   "noResults": "Няма намерени имоти",
   "tryDifferentFilters": "Опитайте да коригирате вашите филтри или критерии за търсене",

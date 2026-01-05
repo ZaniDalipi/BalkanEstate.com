@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -483,6 +483,12 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 onChange={(value) => onFilterChange('has360Tour', value)}
                                 t={t}
                             />
+                            <ToggleSwitch
+                                label={t('search:amenities.hasDiscount')}
+                                value={filters.hasDiscount}
+                                onChange={(value) => onFilterChange('hasDiscount', value)}
+                                t={t}
+                            />
                         </div>
 
                         {/* Distance Filters */}
@@ -637,11 +643,15 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    
+
+    // Create stable keys for filters and properties to avoid infinite loops
+    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+    const propertiesKey = useMemo(() => properties.map(p => p.id).join(','), [properties]);
+
     useEffect(() => {
-      // Reset visible count when filters change
+      // Reset visible count when filters or properties actually change
       setVisibleCount(ITEMS_PER_PAGE);
-    }, [filters, properties]);
+    }, [filtersKey, propertiesKey]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -723,9 +733,15 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                 >
                                     <option value="newest">{t('search:sort.newest')}</option>
+                                    <option value="oldest">{t('search:sort.oldest')}</option>
                                     <option value="price_asc">{t('search:sort.priceAsc')}</option>
                                     <option value="price_desc">{t('search:sort.priceDesc')}</option>
+                                    <option value="area_desc">{t('search:sort.areaDesc')}</option>
+                                    <option value="area_asc">{t('search:sort.areaAsc')}</option>
                                     <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
+                                    <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
+                                    <option value="featured">{t('search:sort.featured')}</option>
+                                    <option value="price_per_sqm">{t('search:sort.pricePerSqm')}</option>
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                     <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -816,14 +832,34 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                     >
                                         <option value="newest">{t('search:sort.newest')}</option>
+                                        <option value="oldest">{t('search:sort.oldest')}</option>
                                         <option value="price_asc">{t('search:sort.priceAsc')}</option>
                                         <option value="price_desc">{t('search:sort.priceDesc')}</option>
+                                        <option value="area_desc">{t('search:sort.areaDesc')}</option>
+                                        <option value="area_asc">{t('search:sort.areaAsc')}</option>
                                         <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
+                                        <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
+                                        <option value="featured">{t('search:sort.featured')}</option>
+                                        <option value="price_per_sqm">{t('search:sort.pricePerSqm')}</option>
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                         <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Mobile: Info banner about map-visible properties */}
+                            <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <MapPinIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                    <p className="text-xs text-blue-700">{t('search:mobileMapInfo', { defaultValue: 'Showing properties visible on map' })}</p>
+                                </div>
+                                <button
+                                    onClick={props.onResetFilters}
+                                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
+                                >
+                                    {t('search:filters.seeAll', { defaultValue: 'See All' })}
+                                </button>
                             </div>
 
                             <div className="p-4 md:p-3">

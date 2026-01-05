@@ -310,29 +310,54 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             filtered = filtered.filter(p => p.status === statusFilter);
         }
 
+        // Helper to convert date/string/number to timestamp
+        const toTimestamp = (value: any): number => {
+            if (!value) return 0;
+            if (typeof value === 'number') return value;
+            if (typeof value === 'string') return new Date(value).getTime();
+            if (value instanceof Date) return value.getTime();
+            return 0;
+        };
+
         return [...filtered].sort((a, b) => {
+            // First sort by status (active first)
             const statusOrder = { active: 1, pending: 2, draft: 3, sold: 4 };
-            return statusOrder[a.status] - statusOrder[b.status];
+            const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+            if (statusDiff !== 0) return statusDiff;
+
+            // Within same status, sort by lastRenewed/createdAt (newest first)
+            const aRenewed = toTimestamp(a.lastRenewed);
+            const aCreated = toTimestamp(a.createdAt);
+            const bRenewed = toTimestamp(b.lastRenewed);
+            const bCreated = toTimestamp(b.createdAt);
+
+            const aTime = Math.max(aRenewed, aCreated);
+            const bTime = Math.max(bRenewed, bCreated);
+            return bTime - aTime;
         });
     }, [myProperties, statusFilter, roleFilter]);
 
     const handleRenew = async (id: string) => {
         try {
             const result = await api.renewProperty(id);
+            console.log('🔄 Renew result:', result);
 
             if (result.success) {
-                // Update local state with new lastRenewed timestamp
-                const newLastRenewed = new Date(result.lastRenewed!);
+                // Update local state with new lastRenewed timestamp (as number for consistency)
+                const newLastRenewedTimestamp = new Date(result.lastRenewed!).getTime();
+                console.log('✅ Property renewed! New timestamp:', newLastRenewedTimestamp, 'Property ID:', id);
+
                 setMyProperties(prev => prev.map(p =>
-                    p.id === id ? { ...p, lastRenewed: newLastRenewed } : p
+                    p.id === id ? { ...p, lastRenewed: newLastRenewedTimestamp } : p
                 ));
 
                 // Update renewal status
                 setRenewalStatuses(prev => ({
                     ...prev,
-                    [id]: calculateRenewalStatus(newLastRenewed),
+                    [id]: calculateRenewalStatus(new Date(newLastRenewedTimestamp)),
                 }));
 
+                // Dispatch to update global state - property will appear at top when sorted by newest
                 dispatch({ type: 'RENEW_PROPERTY', payload: id });
             }
         } catch (error: any) {

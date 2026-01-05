@@ -18,6 +18,7 @@ import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/s
 import { useTrackView } from '../src/features/view-stats/hooks';
 import { useConfirmation } from '../src/shared/hooks/useConfirmation';
 import { useNotification } from '../src/shared/hooks/useNotification';
+import Footer from './shared/Footer';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -1951,6 +1952,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

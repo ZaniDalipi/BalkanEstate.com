@@ -4,7 +4,7 @@ import { UserRole } from './user.types';
 
 export type PropertyStatus = 'active' | 'pending' | 'sold' | 'draft';
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
-export type PropertyType = 'house' | 'apartment' | 'villa' | 'other';
+export type PropertyType = 'house' | 'apartment' | 'villa' | 'land' | 'other';
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
@@ -27,6 +27,14 @@ export interface Seller {
   agencyId?: string;
 }
 
+// Price interval for time-based pricing
+export interface PriceInterval {
+  price: number;
+  startDate: number; // Unix timestamp
+  endDate?: number; // Unix timestamp, undefined means ongoing
+  label?: string; // Optional label like "Summer Sale", "Holiday Special"
+}
+
 export interface Property {
   id: string;
   title?: string;
@@ -34,6 +42,10 @@ export interface Property {
   status: PropertyStatus;
   soldAt?: number;
   price: number;
+  // Price discount fields
+  originalPrice?: number; // Original price before discount
+  priceReducedAt?: number; // Timestamp when price was reduced
+  priceIntervals?: PriceInterval[]; // Time-based pricing intervals
   address: string;
   city: string;
   country: string;
@@ -128,6 +140,8 @@ export interface Filters {
   maxDistanceToSchool: number | null;
   maxDistanceToHospital: number | null;
   amenities: string[];
+  // Price discount filter
+  hasDiscount: boolean | null;
 }
 
 export const initialFilters: Filters = {
@@ -165,4 +179,5 @@ export const initialFilters: Filters = {
   maxDistanceToSchool: null,
   maxDistanceToHospital: null,
   amenities: [],
+  hasDiscount: null,
 };

@@ -14,6 +14,7 @@
   "cannotSaveEmptySearch": "Nuk mund të ruhet një kërkim bosh. Ju lutemi shtoni disa kritere ose lëvizni në një zonë në hartë.",
   "searchSaved": "Kërkimi u ruajt me sukses!",
   "couldNotSaveSearch": "Nuk mund të ruhet kërkimi. AI mund të jetë i zënë.",
+  "mobileMapInfo": "Duke shfaqur pronat e dukshme në hartë",
   "filters": {
     "title": "Filtrat",
     "showFilters": "Trego Filtrat",
@@ -22,6 +23,7 @@
     "apply": "Apliko Filtrat",
     "reset": "Rivendos Filtrat",
     "resetFilters": "Rivendos Filtrat",
+    "seeAll": "Shiko të gjitha",
     "save": "Ruaj Kërkimin",
     "country": "Shteti",
     "allCountries": "Të Gjitha Shtetet",
@@ -123,6 +125,7 @@
     "pool": "Pishinë",
     "petsAllowed": "Kafshët Lejohen",
     "has360Tour": "Tur Virtual 360°",
+    "hasDiscount": "Çmim i Ulur",
     "placeholder": "Shkruaj komoditetin dhe shtyp Enter (p.sh., palestër, pishinë)"
   },
   "distance": {
@@ -143,7 +146,11 @@
     "priceDesc": "Çmimi: I Lartë në të Ulët",
     "areaAsc": "Sipërfaqja: E Vogël në të Madhe",
     "areaDesc": "Sipërfaqja: E Madhe në të Vogël",
-    "bedsDesc": "Më Shumë Dhoma Gjumi"
+    "bedsDesc": "Më Shumë Dhoma Gjumi",
+    "bathsDesc": "Më Shumë Banjo",
+    "featured": "Të Veçantat Së Pari",
+    "priceReduced": "Çmimi i Ulur Kohët",
+    "pricePerSqm": "Çmimi për m²"
   },
   "results": {
     "showing": "Duke treguar {{count}} prona",

@@ -185,9 +185,19 @@
   "status": {
     "new": "Nou",
     "reduced": "Preț Redus",
+    "priceReduced": "Preț Redus",
     "urgent": "Urgent",
     "exclusive": "Exclusiv",
     "underOffer": "În Negociere"
+  },
+  "priceDiscount": {
+    "originalPrice": "Preț Original",
+    "currentPrice": "Preț Actual",
+    "discount": "Reducere",
+    "savings": "Economisiți",
+    "reducedRecently": "Prețul a fost redus recent",
+    "limitedTime": "Ofertă Limitată",
+    "saleEnds": "Promoția se termină"
   },
   "noResults": "Nu s-au găsit proprietăți",
   "tryDifferentFilters": "Încercați să ajustați filtrele sau criteriile de căutare",

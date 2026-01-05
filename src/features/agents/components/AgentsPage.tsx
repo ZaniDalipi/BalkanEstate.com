@@ -128,11 +128,25 @@ const AgentsPage: React.FC = () => {
         });
         setTimeout(() => setContactSubmitSuccess(false), 5000);
       } else {
-        alert(t('common:errors.submitFailed', 'Failed to submit request. Please try again.'));
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'error',
+            title: t('common:error', 'Error'),
+            message: t('common:errors.submitFailed', 'Failed to submit request. Please try again.'),
+          },
+        });
       }
     } catch (error) {
       console.error('Error submitting contact form:', error);
-      alert(t('common:errors.genericError', 'An error occurred. Please try again later.'));
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'error',
+          title: t('common:error', 'Error'),
+          message: t('common:errors.genericError', 'An error occurred. Please try again later.'),
+        },
+      });
     } finally {
       setIsSubmittingContact(false);
     }
@@ -212,6 +226,11 @@ const AgentsPage: React.FC = () => {
     if (!selectedAgentId) return null;
     return agents.find(a => a.agentId === selectedAgentId || a.id === selectedAgentId) || null;
   }, [selectedAgentId, agents]);
+
+  // Calculate total active listings from all agents
+  const totalActiveListings = useMemo(() => {
+    return agents.reduce((sum, agent) => sum + (agent.activeListings || 0), 0);
+  }, [agents]);
 
   const faqs = [
     {
@@ -367,9 +386,9 @@ const AgentsPage: React.FC = () => {
         popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
         popularSearchesLabel={t('agents:search.popularSearches')}
         stats={[
-          { icon: 'users', count: agents.length, label: t('agents:stats.expertAgents', 'Expert Agents'), color: 'green' },
           { icon: 'building', count: agencies.length, label: t('agents:stats.professionalAgencies', 'Professional Agencies'), color: 'blue' },
-          { icon: 'home', count: 8, label: t('agents:stats.listedProperties', 'Listed Properties'), color: 'purple' }
+          { icon: 'users', count: agents.length, label: t('agents:stats.expertAgents', 'Expert Agents'), color: 'green' },
+          { icon: 'home', count: totalActiveListings, label: t('agents:stats.listedProperties', 'Listed Properties'), color: 'purple' }
         ]}
         mousePosition={mousePosition}
       />

@@ -1,13 +1,14 @@
 // MapPropertyMarker
 // Property markers and popups for map display
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { Property } from '../../../types';
-import { formatPrice } from '../../../utils/currency';
-import { BuildingOfficeIcon } from '../../../constants';
+import { Property } from '@/types';
+import { formatPrice } from '@/utils/currency';
+import { BuildingOfficeIcon } from '@/constants';
+import { getPriceReductionInfo } from '@/utils/priceUtils';
 
 // Inject CSS animations for map markers
 const injectMapMarkerStyles = () => {
@@ -84,6 +85,13 @@ const injectMapMarkerStyles = () => {
     /* Marker wrapper - stays in place, provides anchor point */
     .promoted-marker-wrapper {
       position: relative;
+      background: transparent !important;
+    }
+
+    /* Remove default Leaflet divIcon background */
+    .leaflet-div-icon {
+      background: transparent !important;
+      border: none !important;
     }
 
     /* Premium Premiere - Gold, glowing, bouncing with border pulse (TOP tier) */
@@ -145,6 +153,18 @@ if (typeof window !== 'undefined') {
 
 const ZOOM_THRESHOLD = 12;
 
+/**
+ * Calculate marker scale factor based on zoom level
+ * Markers get smaller when zoomed out to avoid clutter
+ */
+const getMarkerScaleForZoom = (zoom: number): number => {
+  if (zoom >= 12) return 1;      // Full size at zoom 12+
+  if (zoom >= 10) return 0.95;   // 95% at zoom 10-11
+  if (zoom >= 8) return 0.85;    // 85% at zoom 8-9
+  if (zoom >= 6) return 0.75;    // 75% at zoom 6-7
+  return 0.65;                    // 65% at zoom 5 and below
+};
+
 const PROPERTY_TYPE_COLORS: Record<
   NonNullable<Property['propertyType']> | 'other',
   string
@@ -152,6 +172,7 @@ const PROPERTY_TYPE_COLORS: Record<
   house: '#0252CD',
   apartment: '#28a745',
   villa: '#6f42c1',
+  land: '#8B4513',    // Brown for land
   other: '#6c757d',
 };
 
@@ -189,10 +210,12 @@ const getPromotedMarkerInnerClass = (property: Property): string => {
 /**
  * Create simple circular marker for zoomed out view
  * Supports night mode with neon glow effects
+ * Scales based on zoom level to avoid clutter when zoomed out
  */
-const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false) => {
+const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 12) => {
   const price = formatMarkerPrice(property.price);
   const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
+  const zoomScale = getMarkerScaleForZoom(zoom);
 
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
@@ -235,13 +258,19 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
+  // Calculate scaled dimensions
+  const baseSize = 38;
+  const scaledSize = Math.round(baseSize * zoomScale);
+  const fontSize = Math.max(7, Math.round(9 * zoomScale));
+  const circleRadius = Math.round((15 + (isHovered ? 3 : 0)) * zoomScale);
+
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 30px; height: 30px;">
-      <div class="${promotedInnerClass}" style="width: 30px; height: 30px;">
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <circle cx="15" cy="15" r="${13 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
-            <text x="15" y="16" font-family="Inter, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
+      <div class="${promotedInnerClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
+        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <circle cx="19" cy="19" r="${15 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
+            <text x="19" y="20" font-family="Inter, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
@@ -252,9 +281,9 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    popupAnchor: [0, -15],
+    iconSize: [scaledSize, scaledSize],
+    iconAnchor: [scaledSize / 2, scaledSize / 2],
+    popupAnchor: [0, -scaledSize / 2],
   });
 };
 
@@ -323,9 +352,9 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 45px; height: 36px;">
-      <div class="${promotedInnerClass}" style="width: 45px; height: 36px;">
-        <svg width="45" height="36" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: 56px; height: 45px;">
+      <div class="${promotedInnerClass}" style="width: 56px; height: 45px;">
+        <svg width="56" height="45" viewBox="0 0 70 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transform-origin: bottom center; transform: scale(${scale}); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <path d="M35 56L25 44H45L35 56Z" fill="${pointerColor}" />
             <path d="M65 24.5V44H5V24.5L35 5L65 24.5Z" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${strokeWidth}" />
             <text x="35" y="30" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
@@ -339,9 +368,9 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [45, 36],
-    iconAnchor: [22.5, 36],
-    popupAnchor: [0, -36],
+    iconSize: [56, 45],
+    iconAnchor: [28, 45],
+    popupAnchor: [0, -45],
   });
 };
 
@@ -351,7 +380,7 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
  */
 const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boolean = false, isNightMode: boolean = false): L.DivIcon => {
   if (zoom < ZOOM_THRESHOLD) {
-    return createSimpleMarkerIcon(property, isHovered, isNightMode);
+    return createSimpleMarkerIcon(property, isHovered, isNightMode, zoom);
   }
   return createDetailedMarkerIcon(property, isHovered, isNightMode);
 };
@@ -386,6 +415,9 @@ const PropertyPopup: React.FC<{
 
   const promotionTier = property.promotionTier || 'standard';
   const tierConfig = POPUP_TIER_CONFIG[promotionTier] || POPUP_TIER_CONFIG.standard;
+
+  // Get price reduction info
+  const priceInfo = useMemo(() => getPriceReductionInfo(property), [property]);
 
   // For promoted properties, show up to 3 images; for regular, show all
   const images =
@@ -506,9 +538,23 @@ const PropertyPopup: React.FC<{
         <div className="p-3 bg-white">
           {/* Price with gradient */}
           <div className="flex items-center justify-between mb-2">
-            <span className="bg-gradient-to-r from-primary to-primary-dark text-white font-bold px-3 py-1 rounded-lg text-base shadow">
-              {formatPrice(property.price, property.country)}
-            </span>
+            <div className="flex flex-col">
+              {priceInfo.hasReduction && (
+                <span className="text-neutral-400 text-xs line-through">
+                  {formatPrice(priceInfo.originalPrice, property.country)}
+                </span>
+              )}
+              <span className={`font-bold px-3 py-1 rounded-lg text-base shadow text-white ${
+                priceInfo.hasReduction
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600'
+                  : 'bg-gradient-to-r from-primary to-primary-dark'
+              }`}>
+                {formatPrice(priceInfo.currentPrice, property.country)}
+                {priceInfo.hasReduction && (
+                  <span className="ml-1 text-xs font-bold">-{priceInfo.discountPercentage}%</span>
+                )}
+              </span>
+            </div>
             <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
               {property.propertyType}
             </span>
@@ -526,25 +572,40 @@ const PropertyPopup: React.FC<{
             📍 {property.address}, {property.city}
           </p>
 
-          {/* Property stats - enhanced grid */}
-          <div className="grid grid-cols-4 gap-1.5 mb-2">
-            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-              <div className="font-bold text-sm text-primary">{property.beds}</div>
-              <div className="text-[9px] text-primary/70">{t('map.beds')}</div>
+          {/* Property stats - different layout for land vs residential */}
+          {property.propertyType === 'land' ? (
+            <div className="grid grid-cols-2 gap-1.5 mb-2">
+              <div className="bg-amber-50 rounded-lg py-2 px-2 text-center border border-amber-200">
+                <div className="font-bold text-lg text-amber-800">{property.sqft?.toLocaleString()}</div>
+                <div className="text-[10px] text-amber-600">{t('map.area', 'Area')} (m²)</div>
+              </div>
+              <div className="bg-primary/5 rounded-lg py-2 px-2 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">
+                  €{property.sqft > 0 ? (property.price / property.sqft).toFixed(1) : '—'}
+                </div>
+                <div className="text-[10px] text-primary/70">{t('map.pricePerSqm', 'per m²')}</div>
+              </div>
             </div>
-            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-              <div className="font-bold text-sm text-primary">{property.baths}</div>
-              <div className="text-[9px] text-primary/70">{t('map.baths')}</div>
+          ) : (
+            <div className="grid grid-cols-4 gap-1.5 mb-2">
+              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">{property.beds}</div>
+                <div className="text-[9px] text-primary/70">{t('map.beds')}</div>
+              </div>
+              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">{property.baths}</div>
+                <div className="text-[9px] text-primary/70">{t('map.baths')}</div>
+              </div>
+              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+                <div className="font-bold text-sm text-primary">{property.livingRooms}</div>
+                <div className="text-[9px] text-primary/70">{t('map.living')}</div>
+              </div>
+              <div className="bg-primary/10 rounded-lg py-1.5 px-1 text-center border border-primary/20">
+                <div className="font-bold text-sm text-primary">{property.sqft}</div>
+                <div className="text-[9px] text-primary/70">m²</div>
+              </div>
             </div>
-            <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-              <div className="font-bold text-sm text-primary">{property.livingRooms}</div>
-              <div className="text-[9px] text-primary/70">{t('map.living')}</div>
-            </div>
-            <div className="bg-primary/10 rounded-lg py-1.5 px-1 text-center border border-primary/20">
-              <div className="font-bold text-sm text-primary">{property.sqft}</div>
-              <div className="text-[9px] text-primary/70">m²</div>
-            </div>
-          </div>
+          )}
 
           {/* View details button */}
           <button
@@ -606,9 +667,19 @@ const PropertyPopup: React.FC<{
       {/* Price and property type */}
       <div className="mb-1.5">
         <div className="flex items-center justify-between">
-          <p className="font-bold text-base text-primary">
-            {formatPrice(property.price, property.country)}
-          </p>
+          <div className="flex flex-col">
+            {priceInfo.hasReduction && (
+              <span className="text-neutral-400 text-xs line-through">
+                {formatPrice(priceInfo.originalPrice, property.country)}
+              </span>
+            )}
+            <p className={`font-bold text-base ${priceInfo.hasReduction ? 'text-green-600' : 'text-primary'}`}>
+              {formatPrice(priceInfo.currentPrice, property.country)}
+              {priceInfo.hasReduction && (
+                <span className="ml-1 text-xs font-bold">-{priceInfo.discountPercentage}%</span>
+              )}
+            </p>
+          </div>
           <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
             {property.propertyType}
           </span>
@@ -620,40 +691,57 @@ const PropertyPopup: React.FC<{
         {property.address}, {property.city}
       </p>
 
-      {/* Essential information */}
-      <div className="grid grid-cols-3 gap-1.5 mb-2 text-center">
-        <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">{t('map.beds')}</div>
-          <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
+      {/* Essential information - different for land vs residential */}
+      {property.propertyType === 'land' ? (
+        <div className="grid grid-cols-2 gap-1.5 mb-2 text-center">
+          <div className="bg-amber-50 rounded py-2">
+            <div className="font-bold text-base text-amber-800">{property.sqft?.toLocaleString()}</div>
+            <div className="text-xs text-amber-600">{t('map.area', 'Area')} (m²)</div>
+          </div>
+          <div className="bg-neutral-50 rounded py-2">
+            <div className="font-bold text-sm text-neutral-700">
+              €{property.sqft > 0 ? (property.price / property.sqft).toFixed(1) : '—'}
+            </div>
+            <div className="text-xs text-neutral-500">{t('map.pricePerSqm', 'per m²')}</div>
+          </div>
         </div>
-        <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">{t('map.baths')}</div>
-          <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
-        </div>
-        <div className="bg-neutral-50 rounded py-1.5">
-          <div className="text-xs text-neutral-500">{t('map.area')}</div>
-          <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
-        </div>
-      </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 gap-1.5 mb-2 text-center">
+            <div className="bg-neutral-50 rounded py-1.5">
+              <div className="text-xs text-neutral-500">{t('map.beds')}</div>
+              <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
+            </div>
+            <div className="bg-neutral-50 rounded py-1.5">
+              <div className="text-xs text-neutral-500">{t('map.baths')}</div>
+              <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
+            </div>
+            <div className="bg-neutral-50 rounded py-1.5">
+              <div className="text-xs text-neutral-500">{t('map.area')}</div>
+              <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
+            </div>
+          </div>
 
-      {/* Additional features */}
-      <div className="flex flex-wrap gap-1 mb-1.5">
-        {property.livingRooms > 0 && (
-          <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
-            {property.livingRooms} {t('map.living')}
-          </span>
-        )}
-        {property.parking > 0 && (
-          <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
-            {property.parking} {t('map.parking')}
-          </span>
-        )}
-        {property.yearBuilt && (
-          <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">
-            {property.yearBuilt}
-          </span>
-        )}
-      </div>
+          {/* Additional features - only for residential */}
+          <div className="flex flex-wrap gap-1 mb-1.5">
+            {property.livingRooms > 0 && (
+              <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
+                {property.livingRooms} {t('map.living')}
+              </span>
+            )}
+            {property.parking > 0 && (
+              <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
+                {property.parking} {t('map.parking')}
+              </span>
+            )}
+            {property.yearBuilt && (
+              <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">
+                {property.yearBuilt}
+              </span>
+            )}
+          </div>
+        </>
+      )}
 
       {/* View details prompt */}
       <div className="text-center pt-1.5 border-t border-neutral-200">

@@ -218,13 +218,27 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
         if (onSubscribe) {
           onSubscribe();
         }
-        alert(t('pricing:success.agencyMessage'));
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'success',
+            title: t('pricing:success.title', 'Success!'),
+            message: t('pricing:success.agencyMessage'),
+          },
+        });
 
         // Redirect to agencies view
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
       } catch (err) {
         console.error('Failed to create agency:', err);
-        alert('Payment successful, but failed to create agency: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'error',
+            title: t('common:error', 'Error'),
+            message: 'Payment successful, but failed to create agency: ' + (err instanceof Error ? err.message : 'Unknown error'),
+          },
+        });
         onClose();
       }
     } else {
@@ -233,7 +247,14 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
       if (onSubscribe) {
         onSubscribe();
       }
-      alert(t('pricing:success.subscriptionActivated'));
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'success',
+          title: t('pricing:success.title', 'Success!'),
+          message: t('pricing:success.subscriptionActivated'),
+        },
+      });
     }
   };
 

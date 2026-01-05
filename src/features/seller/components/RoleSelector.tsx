@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '@/types';
+import { useAppContext } from '@/context/AppContext';
 
 interface RoleSelectorProps {
     currentUser: User;
@@ -10,6 +11,7 @@ interface RoleSelectorProps {
 
 const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, onRoleSelect }) => {
     const { t } = useTranslation(['seller']);
+    const { dispatch } = useAppContext();
     const availableRoles = currentUser.availableRoles || [currentUser.role];
 
     // Debug logging to diagnose subscription display issues
@@ -310,8 +312,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                     className="w-full px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-500 hover:to-orange-600 transition-all"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        // TODO: Open subscription modal
-                                        alert('Subscription modal will open here');
+                                        dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true } });
                                     }}
                                 >
                                     {t('seller:roleSelector.proRequired.button')}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Footer from './Footer';
 
 // Icons
 const BuildingIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -728,6 +729,9 @@ const HowItWorksPage: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

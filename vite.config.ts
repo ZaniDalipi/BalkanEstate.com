@@ -10,9 +10,21 @@ export default defineConfig(({ mode }) => {
     // Determine API target based on environment
     const apiTarget = env.VITE_API_URL || 'http://localhost:5001';
     const wsTarget = env.VITE_WS_URL || 'ws://localhost:5001';
+    const isProduction = mode === 'production';
 
-    console.log(`🚀 Starting Vite in ${mode} mode`);
-    console.log(`📡 API Target: ${apiTarget}`);
+    // Only log in development
+    if (mode === 'development') {
+      console.log(`🚀 Starting Vite in ${mode} mode`);
+      console.log(`📡 API Target: ${apiTarget}`);
+    }
+
+    // Security headers for development server
+    const securityHeaders = {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'SAMEORIGIN',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    };
 
     return {
       server: {
@@ -22,9 +34,11 @@ export default defineConfig(({ mode }) => {
           'localhost',
           '127.0.0.1',
           '.balkanestate.com',
+          '.balkanestateai.com',
           '.ngrok-free.dev',
           '.ngrok.io',
         ],
+        headers: securityHeaders,
         proxy: mode === 'development' ? {
           '/api': {
             target: apiTarget,
@@ -69,8 +83,11 @@ export default defineConfig(({ mode }) => {
       },
       build: {
         // Output directory based on environment
-        outDir: mode === 'production' ? 'dist' : `dist-${mode}`,
-        sourcemap: mode !== 'production',
+        outDir: isProduction ? 'dist' : `dist-${mode}`,
+        // No sourcemaps in production for security
+        sourcemap: !isProduction,
+        // Minify in production
+        minify: isProduction ? 'esbuild' : false,
         rollupOptions: {
           output: {
             manualChunks: {
@@ -80,11 +97,18 @@ export default defineConfig(({ mode }) => {
             },
           },
         },
+        // Security: Clear console logs in production build
+        target: 'es2020',
+      },
+      esbuild: {
+        // Drop console.log and debugger in production
+        drop: isProduction ? ['console', 'debugger'] : [],
       },
       // Preview server configuration (for testing builds locally)
       preview: {
         port: 3001,
         host: '0.0.0.0',
+        headers: securityHeaders,
       },
     };
 });

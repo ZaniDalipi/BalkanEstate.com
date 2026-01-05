@@ -139,8 +139,8 @@ const SunRays = memo(({ colors, isGoldenHour }: { colors: SunColorType; isGolden
         key={angle}
         className="absolute"
         style={{
-          width: '3px',
-          height: isGoldenHour ? '30px' : '22px',
+          width: '2px',
+          height: isGoldenHour ? '18px' : '14px',
           left: '50%',
           top: '50%',
           background: `linear-gradient(to top, ${colors.rays} 0%, transparent 100%)`,
@@ -284,73 +284,30 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
       >
         {celestialBody.isSun && celestialBody.colors ? (
           <div className="relative">
-            {/* Outer glow */}
-            <div
-              className="absolute rounded-full animate-pulse"
-              style={{
-                width: celestialBody.isGoldenHour ? '100px' : '80px',
-                height: celestialBody.isGoldenHour ? '100px' : '80px',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: `radial-gradient(circle, ${celestialBody.colors.glow} 0%, transparent 70%)`,
-              }}
-            />
-
-            {/* Rotating rays */}
+            {/* Rotating rays - smaller */}
             <SunRays colors={celestialBody.colors} isGoldenHour={celestialBody.isGoldenHour} />
 
-            {/* Sun body */}
+            {/* Sun body - reduced glow */}
             <div
               className="relative rounded-full"
               style={{
-                width: '44px',
-                height: '44px',
+                width: '36px',
+                height: '36px',
                 background: `radial-gradient(circle at 35% 35%, #FFFFFF 0%, ${celestialBody.colors.body} 40%, ${celestialBody.colors.body}cc 100%)`,
-                boxShadow: `0 0 30px ${celestialBody.colors.glow}, 0 0 60px ${celestialBody.colors.glow}`,
+                boxShadow: `0 0 12px ${celestialBody.colors.glow}`,
               }}
             />
-
-            {/* Lens flare during golden hour */}
-            {celestialBody.isGoldenHour && (
-              <div
-                className="absolute"
-                style={{
-                  width: '150px',
-                  height: '4px',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%) rotate(-20deg)',
-                  background: `linear-gradient(90deg, transparent 0%, ${celestialBody.colors.rays} 20%, transparent 40%, ${celestialBody.colors.rays} 60%, transparent 80%, ${celestialBody.colors.rays} 100%)`,
-                  opacity: 0.6,
-                }}
-              />
-            )}
           </div>
         ) : (
           <div className="relative">
-            {/* Moon glow */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                width: '60px',
-                height: '60px',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'radial-gradient(circle, rgba(200,220,255,0.35) 0%, transparent 70%)',
-                animation: 'pulse 4s ease-in-out infinite',
-              }}
-            />
-
-            {/* Moon body */}
+            {/* Moon body - reduced glow */}
             <div
               className="relative rounded-full"
               style={{
-                width: '32px',
-                height: '32px',
+                width: '28px',
+                height: '28px',
                 background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #F0F4FF 35%, #E2E8F0 65%, #CBD5E1 100%)',
-                boxShadow: '0 0 20px rgba(200,220,255,0.5)',
+                boxShadow: '0 0 8px rgba(200,220,255,0.4)',
               }}
             >
               <MoonCraters />
@@ -358,35 +315,6 @@ const SunArcAnimation: React.FC<SunArcAnimationProps> = ({
           </div>
         )}
       </div>
-
-      {/* Light beam from sun - only render when visible */}
-      {celestialBody.isSun && !isNightMode && celestialBody.colors && (
-        <div
-          className="absolute pointer-events-none z-[397]"
-          style={{
-            left: `${celestialBody.x}%`,
-            top: `${celestialBody.y}%`,
-            width: celestialBody.isGoldenHour ? '250px' : '150px',
-            height: '400px',
-            transform: 'translate(-50%, 0)',
-            background: `linear-gradient(to bottom, ${celestialBody.colors.glow} 0%, transparent 100%)`,
-            opacity: 0.3,
-            transition: 'left 1s ease-out, top 1s ease-out',
-            willChange: 'left, top',
-          }}
-        />
-      )}
-
-      {/* Horizon glow during golden hour */}
-      {celestialBody.isSun && celestialBody.isGoldenHour && !isNightMode && celestialBody.colors && (
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none z-[396]"
-          style={{
-            height: '25%',
-            background: `linear-gradient(to top, ${celestialBody.colors.glow.replace('0.', '0.2')} 0%, transparent 100%)`,
-          }}
-        />
-      )}
     </>
   );
 };
