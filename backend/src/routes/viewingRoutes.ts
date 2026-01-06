@@ -1,3 +1,6 @@
+/**
+ * Viewing Routes - Property viewing scheduler API endpoints
+ */
 import express from 'express';
 import {
   getSchedule,
