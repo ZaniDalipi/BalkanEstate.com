@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, FacebookIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
-import { User, UserRole, AuthModalView, Agency } from '@/types';
+import { User, UserRole, AuthModalView } from '@/types';
 import SocialLoginPopup from './SocialLoginPopup';
-import { fetchSellerProducts, Product } from '@/utils/api';
 
 type Method = 'email' | 'phone';
 type SocialProvider = 'google' | 'facebook' | 'apple';
@@ -164,12 +163,6 @@ const AuthPage: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [code, setCode] = useState('');
     const [name, setName] = useState('');
-    const [isAgent, setIsAgent] = useState(false);
-    const [selectedAgencyId, setSelectedAgencyId] = useState<string>('');
-    const [agencies, setAgencies] = useState<Agency[]>([]);
-    const [licenseNumber, setLicenseNumber] = useState('');
-    const [agencyInvitationCode, setAgencyInvitationCode] = useState('');
-    const [pricingProducts, setPricingProducts] = useState<Product[]>([]);
 
     // Password requirements state for real-time feedback
     const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
@@ -199,48 +192,6 @@ const AuthPage: React.FC = () => {
         };
         fetchProviders();
     }, []);
-
-    useEffect(() => {
-        // Fetch agencies when user selects "I'm an agent"
-        const fetchAgencies = async () => {
-            if (isAgent && state.authModalView === 'signup') {
-                try {
-                    const { getAgencies } = await import('@/services/apiService');
-                    const response = await getAgencies({});
-                    setAgencies(response.agencies || []);
-                } catch (error) {
-                    // Failed to fetch agencies - user can still sign up without one
-                }
-            }
-        };
-        fetchAgencies();
-    }, [isAgent, state.authModalView]);
-
-    // Fetch pricing products when agent checkbox is checked
-    useEffect(() => {
-        const loadProducts = async () => {
-            if (isAgent && pricingProducts.length === 0) {
-                try {
-                    const products = await fetchSellerProducts();
-                    setPricingProducts(products);
-                } catch (error) {
-                    // Failed to fetch products - will show fallback pricing
-                }
-            }
-        };
-        loadProducts();
-    }, [isAgent]);
-
-    // Get pricing from fetched products
-    const getProPricing = () => {
-        const monthly = pricingProducts.find(p => p.productId === 'seller_pro_monthly');
-        const yearly = pricingProducts.find(p => p.productId === 'seller_pro_yearly');
-        return {
-            monthlyPrice: monthly?.price || 9.99,
-            yearlyPrice: yearly?.price || 99.99,
-            currency: monthly?.currency || yearly?.currency || 'EUR',
-        };
-    };
 
     useEffect(() => {
         // Reset state when modal opens or view changes
@@ -303,24 +254,8 @@ const AuthPage: React.FC = () => {
             if (state.authModalView === 'login') {
                 await login(email, password);
             } else {
-                const signupData: any = {
-                    role: isAgent ? 'agent' : 'buyer',
-                };
-
-                // If signing up as agent, include license and optional agency code
-                if (isAgent) {
-                    if (!licenseNumber.trim()) {
-                        setError('License number is required for agents');
-                        setIsLoading(false);
-                        return;
-                    }
-                    signupData.licenseNumber = licenseNumber.trim();
-                    if (agencyInvitationCode.trim()) {
-                        signupData.agencyInvitationCode = agencyInvitationCode.trim().toUpperCase();
-                    }
-                }
-
-                await signup(email, password, signupData);
+                // All users register as buyers - they can upgrade to agent from profile settings
+                await signup(email, password, { role: 'buyer' });
             }
             handleClose();
         } catch (err) {
@@ -458,135 +393,30 @@ const AuthPage: React.FC = () => {
                                 </div>
                                 {state.authModalView === 'login' && <div className="text-right"><button type="button" onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPassword'})} className="text-sm font-semibold text-primary hover:underline">{t('auth:login.forgotPassword')}</button></div>}
                                 {state.authModalView === 'signup' && (
-                                    <>
-                                        <div className="relative">
-                                            <input
-                                                type={showConfirmPassword ? "text" : "password"}
-                                                id="confirmPassword"
-                                                value={confirmPassword}
-                                                onChange={e => setConfirmPassword(e.target.value)}
-                                                className={floatingInputClasses}
-                                                placeholder=" "
-                                                required
-                                            />
-                                            <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('auth:signup.confirmPassword')}</label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                                                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                                            >
-                                                {showConfirmPassword ? (
-                                                    <EyeSlashIcon className="w-5 h-5" />
-                                                ) : (
-                                                    <EyeIcon className="w-5 h-5" />
-                                                )}
-                                            </button>
-                                        </div>
-
-                                        {/* Agent checkbox */}
-                                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            <input
-                                                type="checkbox"
-                                                id="isAgent"
-                                                checked={isAgent}
-                                                onChange={(e) => setIsAgent(e.target.checked)}
-                                                className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
-                                            />
-                                            <label htmlFor="isAgent" className="text-sm font-medium text-gray-700">
-                                                I'm a real estate agent
-                                            </label>
-                                        </div>
-
-                                        {/* Pro subscription or Agency Coupon info for agents */}
-                                        {isAgent && (() => {
-                                            const pricing = getProPricing();
-                                            const formatPrice = (price: number) => {
-                                                return new Intl.NumberFormat('en-EU', {
-                                                    style: 'currency',
-                                                    currency: pricing.currency,
-                                                }).format(price);
-                                            };
-                                            return (
-                                                <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl">
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                                            <span className="text-white text-lg">⭐</span>
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <p className="text-sm font-bold text-amber-900">
-                                                                How to Become an Agent
-                                                            </p>
-                                                            <p className="text-xs text-amber-800 mt-1.5">
-                                                                To post listings as an agent, you need one of the following:
-                                                            </p>
-                                                            <div className="mt-3 space-y-2">
-                                                                <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
-                                                                    <span className="text-green-600 font-bold">1.</span>
-                                                                    <div>
-                                                                        <p className="text-xs font-semibold text-neutral-800">Pro Subscription</p>
-                                                                        <p className="text-xs text-neutral-600">
-                                                                            {formatPrice(pricing.monthlyPrice)}/month or {formatPrice(pricing.yearlyPrice)}/year - 25 listings + promotions
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center justify-center">
-                                                                    <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">OR</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
-                                                                    <span className="text-blue-600 font-bold">2.</span>
-                                                                    <div>
-                                                                        <p className="text-xs font-semibold text-neutral-800">Agency Coupon Code</p>
-                                                                        <p className="text-xs text-neutral-600">Enter a coupon from your agency below</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-xs text-amber-700 mt-3 italic">
-                                                                Complete registration first. You'll be prompted to subscribe or enter a coupon after.
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-
-                                        {/* License and agency code fields - shown only if isAgent is true */}
-                                        {isAgent && (
-                                            <>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        id="licenseNumber"
-                                                        value={licenseNumber}
-                                                        onChange={(e) => setLicenseNumber(e.target.value)}
-                                                        className={floatingInputClasses}
-                                                        placeholder=" "
-                                                        required
-                                                    />
-                                                    <label htmlFor="licenseNumber" className={floatingLabelClasses}>
-                                                        License Number
-                                                    </label>
-                                                </div>
-
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        id="agencyInvitationCode"
-                                                        value={agencyInvitationCode}
-                                                        onChange={(e) => setAgencyInvitationCode(e.target.value.toUpperCase())}
-                                                        className={floatingInputClasses}
-                                                        placeholder=" "
-                                                    />
-                                                    <label htmlFor="agencyInvitationCode" className={floatingLabelClasses}>
-                                                        Agency Invitation Code (Optional)
-                                                    </label>
-                                                    <p className="text-xs text-gray-500 mt-1 ml-1">
-                                                        Leave empty to register as an independent agent
-                                                    </p>
-                                                </div>
-                                            </>
-                                        )}
-                                    </>
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            id="confirmPassword"
+                                            value={confirmPassword}
+                                            onChange={e => setConfirmPassword(e.target.value)}
+                                            className={floatingInputClasses}
+                                            placeholder=" "
+                                            required
+                                        />
+                                        <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('auth:signup.confirmPassword')}</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showConfirmPassword ? (
+                                                <EyeSlashIcon className="w-5 h-5" />
+                                            ) : (
+                                                <EyeIcon className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                    </div>
                                 )}
                                 <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm text-base sm:text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? t('common:loading') : (state.authModalView === 'login' ? t('auth:login.submit') : t('auth:signup.submit'))}</button>
                             </form>
