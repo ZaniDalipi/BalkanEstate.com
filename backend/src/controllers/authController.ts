@@ -544,17 +544,17 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       expirationDate: { $gt: new Date() },
     }).sort({ expirationDate: -1 });
 
-    // PRIORITY 2: If no active, check for cancelled subscription that hasn't expired yet
+    // PRIORITY 2: If no active, check for pending_cancellation or cancelled subscription that hasn't expired yet
     if (!dbSubscription) {
       dbSubscription = await Subscription.findOne({
         userId: user._id,
-        status: 'canceled',
+        status: { $in: ['pending_cancellation', 'canceled'] },
         expirationDate: { $gt: new Date() },
       }).sort({ expirationDate: -1 });
 
       if (dbSubscription) {
         isCancelledButActive = true;
-        console.log(`⚠️ [getMe] Found cancelled-but-active subscription for ${user.email}, valid until ${dbSubscription.expirationDate}`);
+        console.log(`⚠️ [getMe] Found ${dbSubscription.status} subscription for ${user.email}, valid until ${dbSubscription.expirationDate}`);
       }
     }
 

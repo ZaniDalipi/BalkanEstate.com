@@ -73,9 +73,9 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
             const tier = sub.tier || 'free';
 
             // CRITICAL: Check if subscription is actually active
-            // Note: 'canceled' is valid because backend only returns it when subscription hasn't expired yet
+            // Note: 'canceled' and 'pending_cancellation' are valid because backend only returns them when subscription hasn't expired yet
             // The backend verifies expiration date - if canceled AND expired, it returns status='expired'
-            const validStatuses = ['active', 'trial', 'grace', 'canceled'];
+            const validStatuses = ['active', 'trial', 'grace', 'canceled', 'pending_cancellation'];
             const isActiveSubscription = validStatuses.includes(sub.status || '') && sub.status !== 'expired';
 
             // Determine if this is a Pro-level subscription
