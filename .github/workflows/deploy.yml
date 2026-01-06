@@ -68,16 +68,16 @@ jobs:
             backend/package-lock.json
 
   # =============================================================================
-  # Deploy to Staging
+  # Deploy Frontend to Cloudflare Pages (Preview/Staging)
   # =============================================================================
   deploy-staging:
-    name: Deploy to Staging
+    name: Deploy to Cloudflare Pages (Preview)
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
     environment:
       name: staging
-      url: https://staging.balkanestate.com
+      url: https://staging.balkanestateai.com
     steps:
       - name: Download frontend artifacts
         uses: actions/download-artifact@v4
@@ -85,62 +85,31 @@ jobs:
           name: frontend-dist
           path: dist/
 
-      - name: Download backend artifacts
-        uses: actions/download-artifact@v4
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          name: backend-dist
-          path: backend/
-
-      # Option 1: Deploy to Vercel (Frontend)
-      # - name: Deploy Frontend to Vercel
-      #   uses: amondnet/vercel-action@v25
-      #   with:
-      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-      #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-      #     working-directory: ./dist
-
-      # Option 2: Deploy to AWS S3 + CloudFront (Frontend)
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: eu-central-1
-      #
-      # - name: Deploy to S3
-      #   run: aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_STAGING }} --delete
-      #
-      # - name: Invalidate CloudFront cache
-      #   run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_STAGING }} --paths "/*"
-
-      # Option 3: Deploy to Railway/Render (Backend)
-      # - name: Deploy Backend to Railway
-      #   uses: bervProject/railway-deploy@main
-      #   with:
-      #     railway_token: ${{ secrets.RAILWAY_TOKEN }}
-      #     service: backend-staging
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=balkanestateai --branch=preview
 
       - name: Deployment Summary
         run: |
-          echo "🚀 Staging Deployment Complete"
+          echo "Staging Deployment Complete"
           echo "=============================="
-          echo "Frontend: https://staging.balkanestate.com"
-          echo "Backend API: https://api-staging.balkanestate.com"
-          echo ""
-          echo "Note: Configure your preferred deployment platform in this workflow."
+          echo "Frontend: https://preview.balkanestateai.pages.dev"
+          echo "Note: Backend should be deployed separately to Railway/Render"
 
   # =============================================================================
-  # Deploy to Production
+  # Deploy Frontend to Cloudflare Pages (Production)
   # =============================================================================
   deploy-production:
-    name: Deploy to Production
+    name: Deploy to Cloudflare Pages (Production)
     runs-on: ubuntu-latest
     needs: [build, deploy-staging]
     if: github.event.inputs.environment == 'production'
     environment:
       name: production
-      url: https://balkanestate.com
+      url: https://balkanestateai.com
     steps:
       - name: Download frontend artifacts
         uses: actions/download-artifact@v4
@@ -148,21 +117,19 @@ jobs:
           name: frontend-dist
           path: dist/
 
-      - name: Download backend artifacts
-        uses: actions/download-artifact@v4
+      - name: Deploy to Cloudflare Pages (Production)
+        uses: cloudflare/wrangler-action@v3
         with:
-          name: backend-dist
-          path: backend/
-
-      # Production deployment steps (same as staging but with production secrets)
-      # Uncomment and configure based on your hosting platform
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=balkanestateai --branch=main
 
       - name: Deployment Summary
         run: |
-          echo "🚀 Production Deployment Complete"
+          echo "Production Deployment Complete"
           echo "================================="
-          echo "Frontend: https://balkanestate.com"
-          echo "Backend API: https://api.balkanestate.com"
+          echo "Frontend: https://balkanestateai.com"
+          echo "Note: Backend should be deployed separately to Railway/Render"
 
   # =============================================================================
   # Notify on Deployment
