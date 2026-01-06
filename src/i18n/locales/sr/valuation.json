@@ -1,133 +1,144 @@
 {
   "page": {
-    "title": "What's My Property Worth?",
-    "subtitle": "Get an instant AI-powered estimate based on similar sales in your area"
+    "title": "Колико Вреди Моја Некретнина?",
+    "subtitle": "Добијте тренутну AI процену засновану на стварним тржишним подацима и упоредивим продајама у вашем подручју.",
+    "badge": "AI Технологија",
+    "trust1": "Бесплатно и Тренутно",
+    "trust2": "Без Регистрације",
+    "trust3": "Засновано на Стварним Подацима"
+  },
+  "stats": {
+    "valuations": "Процена",
+    "accuracy": "Тачност",
+    "countries": "Балканских Земаља"
   },
   "form": {
-    "location": "Property Location",
-    "locationPlaceholder": "Search for an address...",
-    "propertyType": "Property Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "yearBuilt": "Year Built",
-    "yearBuiltPlaceholder": "e.g. 2010",
-    "floorNumber": "Floor Number",
-    "totalFloors": "Total Floors",
-    "viewType": "View Type",
-    "furnishing": "Furnishing",
-    "amenities": "Amenities",
-    "showAdvanced": "Show More Options",
-    "hideAdvanced": "Hide Options",
-    "getValuation": "Get My Valuation",
-    "calculating": "Analyzing...",
-    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary."
+    "locationSection": "Локација",
+    "detailsSection": "Детаљи Некретнине",
+    "location": "Локација Некретнине",
+    "locationPlaceholder": "Претражите адресу...",
+    "propertyType": "Тип Некретнине",
+    "size": "Величина",
+    "bedrooms": "Спаваће Собе",
+    "bathrooms": "Купатила",
+    "condition": "Стање",
+    "yearBuilt": "Година Изградње",
+    "yearBuiltPlaceholder": "нпр. 2010",
+    "floorNumber": "Број Спрата",
+    "totalFloors": "Укупно Спратова",
+    "viewType": "Тип Погледа",
+    "furnishing": "Намештај",
+    "amenities": "Погодности",
+    "showAdvanced": "Прикажи Више Опција",
+    "hideAdvanced": "Сакриј Опције",
+    "getValuation": "Добиј Процену",
+    "calculating": "Анализирам...",
+    "disclaimer": "Ово је аутоматска процена само у информативне сврхе. Стварна тржишна вредност може варирати."
   },
   "propertyTypes": {
-    "apartment": "Apartment",
-    "house": "House",
-    "villa": "Villa",
-    "land": "Land",
-    "other": "Other"
+    "apartment": "Стан",
+    "house": "Кућа",
+    "villa": "Вила",
+    "land": "Земљиште",
+    "other": "Остало"
   },
   "conditions": {
-    "new": "New",
-    "excellent": "Excellent",
-    "good": "Good",
-    "fair": "Fair",
-    "needsRenovation": "Needs Renovation"
+    "new": "Ново",
+    "excellent": "Одлично",
+    "good": "Добро",
+    "fair": "Прихватљиво",
+    "needsRenovation": "Потребна Реновација"
   },
   "views": {
-    "sea": "Sea",
-    "mountain": "Mountain",
-    "city": "City",
-    "park": "Park",
-    "garden": "Garden",
-    "street": "Street"
+    "sea": "Море",
+    "mountain": "Планина",
+    "city": "Град",
+    "park": "Парк",
+    "garden": "Башта",
+    "street": "Улица"
   },
   "furnishing": {
-    "furnished": "Furnished",
-    "semiFurnished": "Semi-Furnished",
-    "unfurnished": "Unfurnished"
+    "furnished": "Намештено",
+    "semiFurnished": "Делимично Намештено",
+    "unfurnished": "Ненамештено"
   },
   "amenities": {
-    "balcony": "Balcony",
-    "garden": "Garden",
-    "elevator": "Elevator",
-    "parking": "Parking",
-    "pool": "Pool"
+    "balcony": "Балкон",
+    "garden": "Башта",
+    "elevator": "Лифт",
+    "parking": "Паркинг",
+    "pool": "Базен"
   },
   "result": {
-    "estimatedValue": "Estimated Value",
-    "confidence": "Confidence",
-    "pricePerSqm": "Price per m²",
-    "marketTrend": "Market Trend",
-    "demandScore": "Demand Score",
-    "avgDaysOnMarket": "Avg. Days on Market",
-    "days": "days",
-    "aiInsights": "AI Market Insights",
-    "valueBreakdown": "Value Breakdown",
-    "comparableProperties": "Similar Properties",
-    "propertySummary": "Property Summary",
-    "location": "Location",
-    "type": "Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "beds": "beds",
-    "baths": "baths",
-    "newValuation": "New Valuation",
-    "readyToSell": "Ready to Sell?",
-    "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
-    "listPropertyButton": "List My Property"
+    "estimatedValue": "Процењена Вредност",
+    "confidence": "Поузданост",
+    "pricePerSqm": "Цена по m²",
+    "marketTrend": "Тржишни Тренд",
+    "demandScore": "Оцена Потражње",
+    "avgDaysOnMarket": "Просечно Дана на Тржишту",
+    "days": "дана",
+    "aiInsights": "AI Тржишне Анализе",
+    "valueBreakdown": "Разлагање Вредности",
+    "comparableProperties": "Сличне Некретнине",
+    "propertySummary": "Резиме Некретнине",
+    "location": "Локација",
+    "type": "Тип",
+    "size": "Величина",
+    "bedrooms": "Спаваће Собе",
+    "bathrooms": "Купатила",
+    "condition": "Стање",
+    "beds": "соба",
+    "baths": "купатила",
+    "newValuation": "Нова Процена",
+    "readyToSell": "Спремни за Продају?",
+    "listPropertyCTA": "Објавите своју некретнину на BalkanEstate и доприте до хиљада купаца широм Балкана.",
+    "listPropertyButton": "Објави Некретнину"
   },
   "breakdown": {
-    "baseValue": "Base Value (from comparables)",
-    "location": "Location Adjustment",
-    "condition": "Condition Adjustment",
-    "amenities": "Amenities Adjustment",
-    "age": "Age Adjustment",
-    "total": "Total Estimated Value"
+    "baseValue": "Основна Вредност (из упоредивих)",
+    "location": "Корекција Локације",
+    "condition": "Корекција Стања",
+    "amenities": "Корекција Погодности",
+    "age": "Корекција Старости",
+    "total": "Укупна Процењена Вредност"
   },
   "confidence": {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low"
+    "high": "Висока",
+    "medium": "Средња",
+    "low": "Ниска"
   },
   "marketTrend": {
-    "rising": "Rising",
-    "stable": "Stable",
-    "declining": "Declining"
+    "rising": "У Порасту",
+    "stable": "Стабилан",
+    "declining": "У Паду"
   },
   "features": {
     "instant": {
-      "title": "Instant Results",
-      "description": "Get your property valuation in seconds, not days"
+      "title": "Тренутни Резултати",
+      "description": "Добијте процену некретнине за секунде, не дане"
     },
     "ai": {
-      "title": "AI-Powered",
-      "description": "Advanced algorithms analyze market data and comparable sales"
+      "title": "AI Технологија",
+      "description": "Напредни алгоритми анализирају тржишне податке и упоредиве продаје"
     },
     "market": {
-      "title": "Market Insights",
-      "description": "Understand local trends and demand in your area"
+      "title": "Тржишне Анализе",
+      "description": "Разумите локалне трендове и потражњу у вашем подручју"
     }
   },
   "howItWorks": {
-    "title": "How It Works",
+    "title": "Како Функционише",
     "step1": {
-      "title": "Enter Details",
-      "description": "Provide your property location and basic features"
+      "title": "Унесите Детаље",
+      "description": "Наведите локацију некретнине и основне карактеристике"
     },
     "step2": {
-      "title": "AI Analysis",
-      "description": "Our AI compares with similar properties and market data"
+      "title": "AI Анализа",
+      "description": "Наш AI упоређује са сличним некретнинама и тржишним подацима"
     },
     "step3": {
-      "title": "Get Results",
-      "description": "Receive your valuation with detailed breakdown and insights"
+      "title": "Добијте Резултате",
+      "description": "Примите процену са детаљним разлагањем и анализама"
     }
   }
 }

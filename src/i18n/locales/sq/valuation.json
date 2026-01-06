@@ -1,133 +1,144 @@
 {
   "page": {
-    "title": "What's My Property Worth?",
-    "subtitle": "Get an instant AI-powered estimate based on similar sales in your area"
+    "title": "Sa Vlen Prona Ime?",
+    "subtitle": "Merrni një vlerësim të menjëhershëm të bazuar në AI nga të dhënat reale të tregut dhe shitjet e krahasueshme në zonën tuaj.",
+    "badge": "Me AI",
+    "trust1": "Falas & E Menjëhershme",
+    "trust2": "Pa Nevojë për Llogari",
+    "trust3": "Bazuar në Të Dhëna Reale"
+  },
+  "stats": {
+    "valuations": "Vlerësime",
+    "accuracy": "Saktësi",
+    "countries": "Vende Ballkanike"
   },
   "form": {
-    "location": "Property Location",
-    "locationPlaceholder": "Search for an address...",
-    "propertyType": "Property Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "yearBuilt": "Year Built",
-    "yearBuiltPlaceholder": "e.g. 2010",
-    "floorNumber": "Floor Number",
-    "totalFloors": "Total Floors",
-    "viewType": "View Type",
-    "furnishing": "Furnishing",
-    "amenities": "Amenities",
-    "showAdvanced": "Show More Options",
-    "hideAdvanced": "Hide Options",
-    "getValuation": "Get My Valuation",
-    "calculating": "Analyzing...",
-    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary."
+    "locationSection": "Vendndodhja",
+    "detailsSection": "Detajet e Pronës",
+    "location": "Vendndodhja e Pronës",
+    "locationPlaceholder": "Kërko një adresë...",
+    "propertyType": "Lloji i Pronës",
+    "size": "Madhësia",
+    "bedrooms": "Dhoma Gjumi",
+    "bathrooms": "Banjo",
+    "condition": "Gjendja",
+    "yearBuilt": "Viti i Ndërtimit",
+    "yearBuiltPlaceholder": "p.sh. 2010",
+    "floorNumber": "Numri i Katit",
+    "totalFloors": "Katet Totale",
+    "viewType": "Lloji i Pamjes",
+    "furnishing": "Mobilimi",
+    "amenities": "Komoditetet",
+    "showAdvanced": "Shfaq Më Shumë Opsione",
+    "hideAdvanced": "Fshih Opsionet",
+    "getValuation": "Merr Vlerësimin Tim",
+    "calculating": "Duke Analizuar...",
+    "disclaimer": "Ky është një vlerësim automatik vetëm për qëllime informative. Vlera reale e tregut mund të ndryshojë."
   },
   "propertyTypes": {
-    "apartment": "Apartment",
-    "house": "House",
-    "villa": "Villa",
-    "land": "Land",
-    "other": "Other"
+    "apartment": "Apartament",
+    "house": "Shtëpi",
+    "villa": "Vilë",
+    "land": "Tokë",
+    "other": "Tjetër"
   },
   "conditions": {
-    "new": "New",
-    "excellent": "Excellent",
-    "good": "Good",
-    "fair": "Fair",
-    "needsRenovation": "Needs Renovation"
+    "new": "E Re",
+    "excellent": "E Shkëlqyer",
+    "good": "E Mirë",
+    "fair": "E Pranueshme",
+    "needsRenovation": "Ka Nevojë për Rinovim"
   },
   "views": {
-    "sea": "Sea",
-    "mountain": "Mountain",
-    "city": "City",
+    "sea": "Det",
+    "mountain": "Mal",
+    "city": "Qytet",
     "park": "Park",
-    "garden": "Garden",
-    "street": "Street"
+    "garden": "Kopsht",
+    "street": "Rrugë"
   },
   "furnishing": {
-    "furnished": "Furnished",
-    "semiFurnished": "Semi-Furnished",
-    "unfurnished": "Unfurnished"
+    "furnished": "E Mobiluar",
+    "semiFurnished": "Pjesërisht e Mobiluar",
+    "unfurnished": "Pa Mobilim"
   },
   "amenities": {
-    "balcony": "Balcony",
-    "garden": "Garden",
-    "elevator": "Elevator",
+    "balcony": "Ballkon",
+    "garden": "Kopsht",
+    "elevator": "Ashensor",
     "parking": "Parking",
-    "pool": "Pool"
+    "pool": "Pishinë"
   },
   "result": {
-    "estimatedValue": "Estimated Value",
-    "confidence": "Confidence",
-    "pricePerSqm": "Price per m²",
-    "marketTrend": "Market Trend",
-    "demandScore": "Demand Score",
-    "avgDaysOnMarket": "Avg. Days on Market",
-    "days": "days",
-    "aiInsights": "AI Market Insights",
-    "valueBreakdown": "Value Breakdown",
-    "comparableProperties": "Similar Properties",
-    "propertySummary": "Property Summary",
-    "location": "Location",
-    "type": "Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "beds": "beds",
-    "baths": "baths",
-    "newValuation": "New Valuation",
-    "readyToSell": "Ready to Sell?",
-    "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
-    "listPropertyButton": "List My Property"
+    "estimatedValue": "Vlera e Vlerësuar",
+    "confidence": "Besueshmëria",
+    "pricePerSqm": "Çmimi për m²",
+    "marketTrend": "Trendi i Tregut",
+    "demandScore": "Pikët e Kërkesës",
+    "avgDaysOnMarket": "Ditë Mesatare në Treg",
+    "days": "ditë",
+    "aiInsights": "Analiza AI e Tregut",
+    "valueBreakdown": "Ndarja e Vlerës",
+    "comparableProperties": "Prona të Ngjashme",
+    "propertySummary": "Përmbledhja e Pronës",
+    "location": "Vendndodhja",
+    "type": "Lloji",
+    "size": "Madhësia",
+    "bedrooms": "Dhoma Gjumi",
+    "bathrooms": "Banjo",
+    "condition": "Gjendja",
+    "beds": "dhoma",
+    "baths": "banjo",
+    "newValuation": "Vlerësim i Ri",
+    "readyToSell": "Gati për të Shitur?",
+    "listPropertyCTA": "Listoni pronën tuaj në BalkanEstate dhe arrini mijëra blerës në të gjithë Ballkanin.",
+    "listPropertyButton": "Listo Pronën Time"
   },
   "breakdown": {
-    "baseValue": "Base Value (from comparables)",
-    "location": "Location Adjustment",
-    "condition": "Condition Adjustment",
-    "amenities": "Amenities Adjustment",
-    "age": "Age Adjustment",
-    "total": "Total Estimated Value"
+    "baseValue": "Vlera Bazë (nga krahasueset)",
+    "location": "Rregullimi i Vendndodhjes",
+    "condition": "Rregullimi i Gjendjes",
+    "amenities": "Rregullimi i Komoditeteve",
+    "age": "Rregullimi i Moshës",
+    "total": "Vlera Totale e Vlerësuar"
   },
   "confidence": {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low"
+    "high": "E Lartë",
+    "medium": "Mesatare",
+    "low": "E Ulët"
   },
   "marketTrend": {
-    "rising": "Rising",
-    "stable": "Stable",
-    "declining": "Declining"
+    "rising": "Në Rritje",
+    "stable": "Stabile",
+    "declining": "Në Rënie"
   },
   "features": {
     "instant": {
-      "title": "Instant Results",
-      "description": "Get your property valuation in seconds, not days"
+      "title": "Rezultate të Menjëhershme",
+      "description": "Merrni vlerësimin e pronës tuaj në sekonda, jo ditë"
     },
     "ai": {
-      "title": "AI-Powered",
-      "description": "Advanced algorithms analyze market data and comparable sales"
+      "title": "Me Fuqi AI",
+      "description": "Algoritme të avancuara analizojnë të dhënat e tregut dhe shitjet e krahasueshme"
     },
     "market": {
-      "title": "Market Insights",
-      "description": "Understand local trends and demand in your area"
+      "title": "Analiza e Tregut",
+      "description": "Kuptoni trendet lokale dhe kërkesën në zonën tuaj"
     }
   },
   "howItWorks": {
-    "title": "How It Works",
+    "title": "Si Funksionon",
     "step1": {
-      "title": "Enter Details",
-      "description": "Provide your property location and basic features"
+      "title": "Vendos Detajet",
+      "description": "Jepni vendndodhjen e pronës dhe veçoritë bazë"
     },
     "step2": {
-      "title": "AI Analysis",
-      "description": "Our AI compares with similar properties and market data"
+      "title": "Analiza AI",
+      "description": "AI-ja jonë krahason me prona të ngjashme dhe të dhënat e tregut"
     },
     "step3": {
-      "title": "Get Results",
-      "description": "Receive your valuation with detailed breakdown and insights"
+      "title": "Merr Rezultatet",
+      "description": "Merrni vlerësimin tuaj me ndarje të detajuar dhe analiza"
     }
   }
 }

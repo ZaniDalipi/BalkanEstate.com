@@ -1,9 +1,20 @@
 {
   "page": {
     "title": "What's My Property Worth?",
-    "subtitle": "Get an instant AI-powered estimate based on similar sales in your area"
+    "subtitle": "Get an instant AI-powered estimate based on real market data and comparable sales in your area.",
+    "badge": "AI-Powered",
+    "trust1": "Free & Instant",
+    "trust2": "No Login Required",
+    "trust3": "Based on Real Data"
+  },
+  "stats": {
+    "valuations": "Valuations",
+    "accuracy": "Accuracy",
+    "countries": "Balkan Countries"
   },
   "form": {
+    "locationSection": "Location",
+    "detailsSection": "Property Details",
     "location": "Property Location",
     "locationPlaceholder": "Search for an address...",
     "propertyType": "Property Type",

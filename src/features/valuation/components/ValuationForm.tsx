@@ -89,7 +89,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
   const [baths, setBaths] = useState<number>(1);
   const [yearBuilt, setYearBuilt] = useState<number | undefined>();
   const [condition, setCondition] = useState<PropertyCondition | undefined>();
-  const [viewType, setViewType] = useState<ViewType | undefined>();
+  const [viewTypes, setViewTypes] = useState<ViewType[]>([]);
   const [furnishing, setFurnishing] = useState<Furnishing | undefined>();
   const [hasBalcony, setHasBalcony] = useState(false);
   const [hasGarden, setHasGarden] = useState(false);
@@ -189,7 +189,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
       baths,
       yearBuilt,
       condition,
-      viewType,
+      viewTypes: viewTypes.length > 0 ? viewTypes : undefined,
       furnishing,
       hasBalcony,
       hasGarden,
@@ -381,12 +381,16 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
             </label>
             <div className="relative">
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={sqft}
-                onChange={(e) => setSqft(Math.max(1, parseInt(e.target.value) || 0))}
-                min={1}
-                max={10000}
-                className="block w-full pr-12 py-3 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setSqft(val ? Math.max(1, parseInt(val)) : 0);
+                }}
+                placeholder="80"
+                className="block w-full pl-4 pr-12 py-3 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-500 font-medium bg-neutral-100 px-2 py-0.5 rounded">m²</span>
             </div>
@@ -551,19 +555,23 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
               </div>
             )}
 
-            {/* View Type */}
+            {/* View Type (Multi-select) */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-neutral-700">
-                {t('valuation:form.viewType')}
+                {t('valuation:form.viewType')} <span className="text-xs text-neutral-400 font-normal ml-1">(multi-select)</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {views.map((v) => (
                   <button
                     key={v.value}
                     type="button"
-                    onClick={() => setViewType(viewType === v.value ? undefined : v.value)}
+                    onClick={() => setViewTypes(
+                      viewTypes.includes(v.value)
+                        ? viewTypes.filter(vt => vt !== v.value)
+                        : [...viewTypes, v.value]
+                    )}
                     className={`px-4 py-2.5 text-sm font-medium rounded-full border-2 transition-all ${
-                      viewType === v.value
+                      viewTypes.includes(v.value)
                         ? 'bg-primary text-white border-primary shadow-md'
                         : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50'
                     }`}

@@ -43,7 +43,7 @@ export interface PropertyValuation {
   hasPool?: boolean;
   floorNumber?: number;
   totalFloors?: number;
-  viewType?: 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
+  viewTypes?: ('sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street')[];
   energyRating?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
   furnishing?: 'furnished' | 'semi-furnished' | 'unfurnished';
   estimatedValue: number;
@@ -81,7 +81,7 @@ export interface ValuationInput {
   hasPool?: boolean;
   floorNumber?: number;
   totalFloors?: number;
-  viewType?: 'sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street';
+  viewTypes?: ('sea' | 'mountain' | 'city' | 'park' | 'garden' | 'street')[];
   energyRating?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
   furnishing?: 'furnished' | 'semi-furnished' | 'unfurnished';
   language?: string;

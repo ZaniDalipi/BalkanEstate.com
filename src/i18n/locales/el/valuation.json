@@ -1,133 +1,144 @@
 {
   "page": {
-    "title": "What's My Property Worth?",
-    "subtitle": "Get an instant AI-powered estimate based on similar sales in your area"
+    "title": "Πόσο Αξίζει η Ιδιοκτησία μου;",
+    "subtitle": "Λάβετε άμεση εκτίμηση AI βασισμένη σε πραγματικά δεδομένα αγοράς και συγκρίσιμες πωλήσεις στην περιοχή σας.",
+    "badge": "Τεχνολογία AI",
+    "trust1": "Δωρεάν & Άμεσο",
+    "trust2": "Χωρίς Εγγραφή",
+    "trust3": "Βασισμένο σε Πραγματικά Δεδομένα"
+  },
+  "stats": {
+    "valuations": "Εκτιμήσεις",
+    "accuracy": "Ακρίβεια",
+    "countries": "Βαλκανικές Χώρες"
   },
   "form": {
-    "location": "Property Location",
-    "locationPlaceholder": "Search for an address...",
-    "propertyType": "Property Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "yearBuilt": "Year Built",
-    "yearBuiltPlaceholder": "e.g. 2010",
-    "floorNumber": "Floor Number",
-    "totalFloors": "Total Floors",
-    "viewType": "View Type",
-    "furnishing": "Furnishing",
-    "amenities": "Amenities",
-    "showAdvanced": "Show More Options",
-    "hideAdvanced": "Hide Options",
-    "getValuation": "Get My Valuation",
-    "calculating": "Analyzing...",
-    "disclaimer": "This is an automated estimate for informational purposes only. Actual market value may vary."
+    "locationSection": "Τοποθεσία",
+    "detailsSection": "Λεπτομέρειες Ακινήτου",
+    "location": "Τοποθεσία Ακινήτου",
+    "locationPlaceholder": "Αναζήτηση διεύθυνσης...",
+    "propertyType": "Τύπος Ακινήτου",
+    "size": "Μέγεθος",
+    "bedrooms": "Υπνοδωμάτια",
+    "bathrooms": "Μπάνια",
+    "condition": "Κατάσταση",
+    "yearBuilt": "Έτος Κατασκευής",
+    "yearBuiltPlaceholder": "π.χ. 2010",
+    "floorNumber": "Αριθμός Ορόφου",
+    "totalFloors": "Σύνολο Ορόφων",
+    "viewType": "Τύπος Θέας",
+    "furnishing": "Επίπλωση",
+    "amenities": "Παροχές",
+    "showAdvanced": "Εμφάνιση Περισσότερων Επιλογών",
+    "hideAdvanced": "Απόκρυψη Επιλογών",
+    "getValuation": "Λάβετε Εκτίμηση",
+    "calculating": "Αναλύω...",
+    "disclaimer": "Αυτή είναι αυτόματη εκτίμηση μόνο για ενημερωτικούς σκοπούς. Η πραγματική αξία αγοράς μπορεί να διαφέρει."
   },
   "propertyTypes": {
-    "apartment": "Apartment",
-    "house": "House",
-    "villa": "Villa",
-    "land": "Land",
-    "other": "Other"
+    "apartment": "Διαμέρισμα",
+    "house": "Σπίτι",
+    "villa": "Βίλα",
+    "land": "Οικόπεδο",
+    "other": "Άλλο"
   },
   "conditions": {
-    "new": "New",
-    "excellent": "Excellent",
-    "good": "Good",
-    "fair": "Fair",
-    "needsRenovation": "Needs Renovation"
+    "new": "Νέο",
+    "excellent": "Άριστο",
+    "good": "Καλό",
+    "fair": "Αποδεκτό",
+    "needsRenovation": "Χρειάζεται Ανακαίνιση"
   },
   "views": {
-    "sea": "Sea",
-    "mountain": "Mountain",
-    "city": "City",
-    "park": "Park",
-    "garden": "Garden",
-    "street": "Street"
+    "sea": "Θάλασσα",
+    "mountain": "Βουνό",
+    "city": "Πόλη",
+    "park": "Πάρκο",
+    "garden": "Κήπος",
+    "street": "Δρόμος"
   },
   "furnishing": {
-    "furnished": "Furnished",
-    "semiFurnished": "Semi-Furnished",
-    "unfurnished": "Unfurnished"
+    "furnished": "Επιπλωμένο",
+    "semiFurnished": "Ημιεπιπλωμένο",
+    "unfurnished": "Χωρίς Έπιπλα"
   },
   "amenities": {
-    "balcony": "Balcony",
-    "garden": "Garden",
-    "elevator": "Elevator",
-    "parking": "Parking",
-    "pool": "Pool"
+    "balcony": "Μπαλκόνι",
+    "garden": "Κήπος",
+    "elevator": "Ασανσέρ",
+    "parking": "Πάρκινγκ",
+    "pool": "Πισίνα"
   },
   "result": {
-    "estimatedValue": "Estimated Value",
-    "confidence": "Confidence",
-    "pricePerSqm": "Price per m²",
-    "marketTrend": "Market Trend",
-    "demandScore": "Demand Score",
-    "avgDaysOnMarket": "Avg. Days on Market",
-    "days": "days",
-    "aiInsights": "AI Market Insights",
-    "valueBreakdown": "Value Breakdown",
-    "comparableProperties": "Similar Properties",
-    "propertySummary": "Property Summary",
-    "location": "Location",
-    "type": "Type",
-    "size": "Size",
-    "bedrooms": "Bedrooms",
-    "bathrooms": "Bathrooms",
-    "condition": "Condition",
-    "beds": "beds",
-    "baths": "baths",
-    "newValuation": "New Valuation",
-    "readyToSell": "Ready to Sell?",
-    "listPropertyCTA": "List your property on BalkanEstate and reach thousands of buyers across the Balkans.",
-    "listPropertyButton": "List My Property"
+    "estimatedValue": "Εκτιμώμενη Αξία",
+    "confidence": "Εμπιστοσύνη",
+    "pricePerSqm": "Τιμή ανά m²",
+    "marketTrend": "Τάση Αγοράς",
+    "demandScore": "Βαθμολογία Ζήτησης",
+    "avgDaysOnMarket": "Μέσες Ημέρες στην Αγορά",
+    "days": "ημέρες",
+    "aiInsights": "AI Αναλύσεις Αγοράς",
+    "valueBreakdown": "Ανάλυση Αξίας",
+    "comparableProperties": "Παρόμοια Ακίνητα",
+    "propertySummary": "Σύνοψη Ακινήτου",
+    "location": "Τοποθεσία",
+    "type": "Τύπος",
+    "size": "Μέγεθος",
+    "bedrooms": "Υπνοδωμάτια",
+    "bathrooms": "Μπάνια",
+    "condition": "Κατάσταση",
+    "beds": "υπνοδωμάτια",
+    "baths": "μπάνια",
+    "newValuation": "Νέα Εκτίμηση",
+    "readyToSell": "Έτοιμοι να Πουλήσετε;",
+    "listPropertyCTA": "Δημοσιεύστε το ακίνητό σας στο BalkanEstate και προσεγγίστε χιλιάδες αγοραστές στα Βαλκάνια.",
+    "listPropertyButton": "Δημοσίευση Ακινήτου"
   },
   "breakdown": {
-    "baseValue": "Base Value (from comparables)",
-    "location": "Location Adjustment",
-    "condition": "Condition Adjustment",
-    "amenities": "Amenities Adjustment",
-    "age": "Age Adjustment",
-    "total": "Total Estimated Value"
+    "baseValue": "Βασική Αξία (από συγκρίσιμα)",
+    "location": "Προσαρμογή Τοποθεσίας",
+    "condition": "Προσαρμογή Κατάστασης",
+    "amenities": "Προσαρμογή Παροχών",
+    "age": "Προσαρμογή Ηλικίας",
+    "total": "Συνολική Εκτιμώμενη Αξία"
   },
   "confidence": {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low"
+    "high": "Υψηλή",
+    "medium": "Μεσαία",
+    "low": "Χαμηλή"
   },
   "marketTrend": {
-    "rising": "Rising",
-    "stable": "Stable",
-    "declining": "Declining"
+    "rising": "Ανοδική",
+    "stable": "Σταθερή",
+    "declining": "Πτωτική"
   },
   "features": {
     "instant": {
-      "title": "Instant Results",
-      "description": "Get your property valuation in seconds, not days"
+      "title": "Άμεσα Αποτελέσματα",
+      "description": "Λάβετε εκτίμηση ακινήτου σε δευτερόλεπτα, όχι ημέρες"
     },
     "ai": {
-      "title": "AI-Powered",
-      "description": "Advanced algorithms analyze market data and comparable sales"
+      "title": "Τεχνολογία AI",
+      "description": "Προηγμένοι αλγόριθμοι αναλύουν δεδομένα αγοράς και συγκρίσιμες πωλήσεις"
     },
     "market": {
-      "title": "Market Insights",
-      "description": "Understand local trends and demand in your area"
+      "title": "Αναλύσεις Αγοράς",
+      "description": "Κατανοήστε τις τοπικές τάσεις και τη ζήτηση στην περιοχή σας"
     }
   },
   "howItWorks": {
-    "title": "How It Works",
+    "title": "Πώς Λειτουργεί",
     "step1": {
-      "title": "Enter Details",
-      "description": "Provide your property location and basic features"
+      "title": "Εισάγετε Λεπτομέρειες",
+      "description": "Παρέχετε την τοποθεσία του ακινήτου και τα βασικά χαρακτηριστικά"
     },
     "step2": {
-      "title": "AI Analysis",
-      "description": "Our AI compares with similar properties and market data"
+      "title": "AI Ανάλυση",
+      "description": "Το AI μας συγκρίνει με παρόμοια ακίνητα και δεδομένα αγοράς"
     },
     "step3": {
-      "title": "Get Results",
-      "description": "Receive your valuation with detailed breakdown and insights"
+      "title": "Λάβετε Αποτελέσματα",
+      "description": "Λάβετε εκτίμηση με λεπτομερή ανάλυση και πληροφορίες"
     }
   }
 }
