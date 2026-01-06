@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import {
+    LISTING_LIMITS,
+    PROMOTION_CONFIGS,
     canPostAsRole,
-    getRemainingListings,
-    isSubscriptionActive,
 } from '@/shared/utils/subscriptionHelpers';
 
 interface RoleSelectorProps {
@@ -17,7 +17,6 @@ interface RoleSelectorProps {
 const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, onRoleSelect }) => {
     const { t } = useTranslation(['seller']);
     const { dispatch } = useAppContext();
-    const availableRoles = currentUser.availableRoles || [currentUser.role];
     const subscription = currentUser.subscription;
 
     // Determine which roles to show based on subscription
@@ -48,90 +47,92 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
         }
     };
 
+    /**
+     * Get subscription data for a role - Single Source of Truth
+     * Uses the new unified subscription system
+     */
     const getRoleSubscription = (role: UserRole) => {
-        // PRIORITY 1: Check if user has an active subscription (isSubscribed flag)
-        // This handles Enterprise, Coupon subscriptions, and all paid plans
-        if (currentUser.isSubscribed && currentUser.subscriptionExpiresAt) {
-            const expiresAt = new Date(currentUser.subscriptionExpiresAt);
-            const isActive = expiresAt > new Date();
+        // Get subscription data from the unified subscription field
+        const sub = currentUser.subscription;
 
-            if (isActive) {
-                // Get limits from subscription or activeListingsLimit
-                const limit = currentUser.activeListingsLimit || 100;
-                const used = currentUser.subscription?.activeListingsCount ||
-                             currentUser.proSubscription?.activeListingsCount ||
-                             currentUser.listingsCount || 0;
-                const roleCount = role === UserRole.AGENT
-                    ? (currentUser.subscription?.agentCount || currentUser.proSubscription?.agentCount || 0)
-                    : (currentUser.subscription?.privateSellerCount || currentUser.proSubscription?.privateSellerCount || 0);
-
-                // Determine plan name from subscriptionPlan or subscription.tier
-                const planName = currentUser.subscriptionPlan ||
-                                 currentUser.subscription?.tier ||
-                                 'pro';
-
-                return {
-                    plan: planName,
-                    limit,
-                    used,
-                    roleCount,
-                    isActive: true,
-                    isPro: true, // Subscribed users are always Pro or higher
-                    highlightCoupons: currentUser.subscription?.promotionCoupons?.available ||
-                                      currentUser.proSubscription?.promotionCoupons?.available || 0,
-                    usedCoupons: currentUser.subscription?.promotionCoupons?.used ||
-                                 currentUser.proSubscription?.promotionCoupons?.usedHighlightCoupons || 0,
-                };
-            }
-        }
-
-        // PRIORITY 2: Check NEW subscription system (single source of truth from database)
-        if (currentUser.subscription) {
-            const sub = currentUser.subscription;
+        if (sub) {
             const tier = sub.tier || 'free';
-            // Include all pro-level tiers: pro, agency_owner, agency_agent, enterprise, and any custom paid plans
-            const isPro = ['pro', 'agency_owner', 'agency_agent', 'enterprise', 'pro_monthly', 'pro_yearly'].includes(tier) ||
-                          (sub.status === 'active' && tier !== 'free' && tier !== 'buyer');
-            const roleCount = role === UserRole.AGENT ? (sub.agentCount || 0) : (sub.privateSellerCount || 0);
+
+            // Determine if this is a Pro-level subscription
+            const proTiers = ['pro', 'agency_owner', 'agency_agent'];
+            const isPro = proTiers.includes(tier) || (sub.status === 'active' && tier !== 'free' && tier !== 'buyer');
+
+            // Get the correct listing limit based on tier
+            const limit = sub.listingsLimit ?? LISTING_LIMITS[tier] ?? 3;
+
+            // Get counts
+            const used = sub.activeListingsCount || 0;
+            const roleCount = role === UserRole.AGENT
+                ? (sub.agentCount || 0)
+                : (sub.privateSellerCount || 0);
+
+            // Get promotion coupons
+            const promotionCoupons = sub.promotionCoupons || {};
+            const featuredCoupons = promotionCoupons.featured || 0;
+            const highlightedCoupons = promotionCoupons.highlighted || 0;
+            const totalCoupons = promotionCoupons.available ?? (featuredCoupons + highlightedCoupons);
+            const usedCoupons = promotionCoupons.used || 0;
 
             return {
-                plan: tier, // Use actual tier from database (free, pro, agency_owner, enterprise, etc.)
-                limit: sub.listingsLimit || 3, // Database value (3 for free, 25 for pro, 100 for enterprise)
-                used: sub.activeListingsCount || 0, // Total used (shared across roles)
-                roleCount, // Specific count for this role
-                isActive: sub.status === 'active',
+                plan: tier,
+                limit,
+                used,
+                roleCount,
+                isActive: sub.status === 'active' || sub.status === 'trial',
                 isPro,
-                highlightCoupons: sub.promotionCoupons?.available || 0,
-                usedCoupons: sub.promotionCoupons?.used || 0,
+                // Promotion coupon details
+                featuredCoupons,
+                highlightedCoupons,
+                totalCoupons,
+                usedCoupons,
+                featuredDuration: promotionCoupons.featuredDuration || (tier.includes('yearly') ? 14 : 7),
+                highlightedDuration: promotionCoupons.highlightedDuration || (tier.includes('yearly') ? 14 : 7),
             };
         }
 
-        // PRIORITY 3: Fall back to LEGACY Pro subscription
-        if (currentUser.proSubscription && currentUser.proSubscription.isActive) {
-            const sub = currentUser.proSubscription;
-            const roleCount = role === UserRole.AGENT ? (sub.agentCount || 0) : (sub.privateSellerCount || 0);
+        // Fallback to legacy proSubscription if exists
+        if (currentUser.proSubscription?.isActive) {
+            const legacySub = currentUser.proSubscription;
+            const roleCount = role === UserRole.AGENT
+                ? (legacySub.agentCount || 0)
+                : (legacySub.privateSellerCount || 0);
 
             return {
-                plan: sub.plan || 'pro',
-                limit: sub.totalListingsLimit || 20,
-                used: sub.activeListingsCount || 0,
+                plan: legacySub.plan || 'pro',
+                limit: legacySub.totalListingsLimit || 25,
+                used: legacySub.activeListingsCount || 0,
                 roleCount,
                 isActive: true,
                 isPro: true,
-                highlightCoupons: sub.promotionCoupons?.highlightCoupons || 0,
-                usedCoupons: sub.promotionCoupons?.usedHighlightCoupons || 0,
+                featuredCoupons: 1,
+                highlightedCoupons: 1,
+                totalCoupons: 2,
+                usedCoupons: legacySub.promotionCoupons?.usedHighlightCoupons || 0,
+                featuredDuration: 14,
+                highlightedDuration: 14,
             };
         }
 
-        // PRIORITY 4: Fall back to LEGACY free subscription
+        // Fallback to legacy free subscription
         const freeSub = currentUser.freeSubscription;
         return {
             plan: 'free',
             limit: freeSub?.listingsLimit || 3,
             used: freeSub?.activeListingsCount || 0,
-            roleCount: freeSub?.activeListingsCount || 0,
+            roleCount: 0,
             isActive: true,
             isPro: false,
+            featuredCoupons: 0,
+            highlightedCoupons: 0,
+            totalCoupons: 0,
+            usedCoupons: 0,
+            featuredDuration: 0,
+            highlightedDuration: 0,
         };
     };
 
@@ -219,11 +220,15 @@ interface RoleCardProps {
         limit: number;
         used: number;
         isActive: boolean;
-        isTrial?: boolean;
         isPro?: boolean;
         roleCount?: number;
-        highlightCoupons?: number;
+        // Promotion coupons
+        featuredCoupons?: number;
+        highlightedCoupons?: number;
+        totalCoupons?: number;
         usedCoupons?: number;
+        featuredDuration?: number;
+        highlightedDuration?: number;
     } | null;
     isSelected: boolean;
     onSelect: () => void;
@@ -350,17 +355,41 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                     </p>
                                 )}
 
-                                {/* Agent-specific promotion coupons */}
-                                {role === UserRole.AGENT && subscription.isPro && subscription.highlightCoupons !== undefined && (
-                                    <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded text-xs">
-                                        <p className="text-purple-800 font-medium">
-                                            {t('seller:roleSelector.highlightCoupons', { available: subscription.highlightCoupons - (subscription.usedCoupons || 0), total: subscription.highlightCoupons })}
+                                {/* Promotion coupons for Pro users */}
+                                {subscription.isPro && (subscription.featuredCoupons || subscription.highlightedCoupons) ? (
+                                    <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded text-xs space-y-1.5">
+                                        <p className="text-purple-800 font-semibold flex items-center gap-1">
+                                            <span>🎟️</span> Promotion Coupons
                                         </p>
-                                        <p className="text-purple-600 text-xs mt-0.5">
-                                            {t('seller:roleSelector.couponsDescription')}
-                                        </p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {subscription.featuredCoupons !== undefined && (
+                                                <div className="bg-white/60 p-1.5 rounded">
+                                                    <p className="text-purple-700 font-medium">
+                                                        ⭐ Featured: {subscription.featuredCoupons}
+                                                    </p>
+                                                    <p className="text-purple-500 text-[10px]">
+                                                        {subscription.featuredDuration} days each
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {subscription.highlightedCoupons !== undefined && (
+                                                <div className="bg-white/60 p-1.5 rounded">
+                                                    <p className="text-amber-700 font-medium">
+                                                        🔥 Highlighted: {subscription.highlightedCoupons}
+                                                    </p>
+                                                    <p className="text-amber-500 text-[10px]">
+                                                        {subscription.highlightedDuration} days each
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {subscription.usedCoupons ? (
+                                            <p className="text-purple-600 text-[10px]">
+                                                Used this month: {subscription.usedCoupons}
+                                            </p>
+                                        ) : null}
                                     </div>
-                                )}
+                                ) : null}
                             </div>
                         )
                     ) : (
