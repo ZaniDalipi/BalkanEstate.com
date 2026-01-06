@@ -10,6 +10,70 @@ interface ValuationFormProps {
   isLoading?: boolean;
 }
 
+// Property type icons
+const PropertyTypeIcon: React.FC<{ type: PropertyType; className?: string }> = ({ type, className = 'w-6 h-6' }) => {
+  const icons: Record<PropertyType, JSX.Element> = {
+    apartment: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+    house: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+    ),
+    villa: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+      </svg>
+    ),
+    land: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      </svg>
+    ),
+    other: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+  };
+  return icons[type] || icons.other;
+};
+
+// Amenity icons
+const AmenityIcon: React.FC<{ type: string; className?: string }> = ({ type, className = 'w-5 h-5' }) => {
+  const icons: Record<string, JSX.Element> = {
+    balcony: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 6v8a2 2 0 002 2h12a2 2 0 002-2V6M4 6l2-4h12l2 4M8 16v4m8-4v4M6 20h12" />
+      </svg>
+    ),
+    garden: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+    ),
+    elevator: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7l4-4 4 4M8 17l4 4 4-4M3 12h18" />
+      </svg>
+    ),
+    parking: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h4a4 4 0 110 8H8V7z M8 7v8" />
+      </svg>
+    ),
+    pool: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 15c2.483 0 4.345-1.5 5-2 .655.5 2.517 2 5 2s4.345-1.5 5-2c.655.5 2.517 2 5 2M3 19c2.483 0 4.345-1.5 5-2 .655.5 2.517 2 5 2s4.345-1.5 5-2c.655.5 2.517 2 5 2M12 3v8m-4-4l4 4 4-4" />
+      </svg>
+    ),
+  };
+  return icons[type] || <span />;
+};
+
 const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = false }) => {
   const { t, i18n } = useTranslation(['valuation', 'common']);
 
@@ -85,19 +149,15 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
     setShowResults(false);
     setSearchResults([]);
 
-    // Parse address components from display_name
     const parts = result.display_name.split(', ');
     if (parts.length >= 1) {
       setAddress(parts.slice(0, Math.min(3, parts.length)).join(', '));
     }
 
-    // Try to extract city and country from display_name
-    // The last part is usually the country, and the second-to-last might be the region or city
     if (parts.length >= 2) {
       setCountry(parts[parts.length - 1]);
     }
     if (parts.length >= 3) {
-      // Look for a city-like entry (usually 2-4 from the end)
       const potentialCity = parts.slice(-4, -1).find(p =>
         !p.match(/^\d/) && p.length > 2 && !p.includes('Region') && !p.includes('District')
       );
@@ -187,18 +247,32 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
     { value: 'unfurnished', label: t('valuation:furnishing.unfurnished') },
   ];
 
+  const amenities = [
+    { key: 'hasBalcony', value: hasBalcony, set: setHasBalcony, label: t('valuation:amenities.balcony'), icon: 'balcony' },
+    { key: 'hasGarden', value: hasGarden, set: setHasGarden, label: t('valuation:amenities.garden'), icon: 'garden' },
+    { key: 'hasElevator', value: hasElevator, set: setHasElevator, label: t('valuation:amenities.elevator'), icon: 'elevator' },
+    { key: 'hasParking', value: hasParking, set: setHasParking, label: t('valuation:amenities.parking'), icon: 'parking' },
+    { key: 'hasPool', value: hasPool, set: setHasPool, label: t('valuation:amenities.pool'), icon: 'pool' },
+  ];
+
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-      {/* Location Search */}
-      <div className="space-y-2">
-        <label className="block text-sm font-semibold text-neutral-700">
-          {t('valuation:form.location')} <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
+      {/* Section 1: Location */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-neutral-800">{t('valuation:form.locationSection', 'Location')}</h3>
+        </div>
+
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
           <input
@@ -207,11 +281,11 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
             onChange={handleSearchChange}
             onFocus={() => searchResults.length > 0 && setShowResults(true)}
             placeholder={t('valuation:form.locationPlaceholder')}
-            className="block w-full pl-10 pr-10 py-3 text-sm border-2 border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+            className="block w-full pl-12 pr-12 py-4 text-base border-2 border-neutral-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-neutral-50/50"
             autoComplete="off"
           />
           {isSearching && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
               <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           )}
@@ -223,14 +297,14 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="absolute z-50 w-full mt-2 bg-white border border-neutral-200 rounded-xl shadow-lg max-h-72 overflow-y-auto"
+                className="absolute z-50 w-full mt-2 bg-white border border-neutral-200 rounded-2xl shadow-xl max-h-72 overflow-y-auto"
               >
                 {searchResults.map((result) => (
                   <button
                     key={result.place_id}
                     type="button"
                     onClick={() => handleResultSelect(result)}
-                    className="w-full text-left px-4 py-3 hover:bg-primary/5 border-b border-neutral-100 last:border-b-0 transition-colors"
+                    className="w-full text-left px-4 py-3 hover:bg-primary/5 border-b border-neutral-100 last:border-b-0 transition-colors first:rounded-t-2xl last:rounded-b-2xl"
                   >
                     <div className="flex items-start gap-3">
                       <svg className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,100 +323,148 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
           </AnimatePresence>
         </div>
         {city && country && (
-          <p className="text-xs text-neutral-500 mt-1">
-            {city}, {country}
-          </p>
+          <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span className="font-medium">{city}, {country}</span>
+          </div>
         )}
       </div>
 
-      {/* Property Type */}
-      <div className="space-y-2">
-        <label className="block text-sm font-semibold text-neutral-700">
-          {t('valuation:form.propertyType')} <span className="text-red-500">*</span>
-        </label>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+      {/* Section 2: Property Type */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-neutral-800">{t('valuation:form.propertyType')}</h3>
+        </div>
+
+        <div className="grid grid-cols-5 gap-2">
           {propertyTypes.map((type) => (
             <button
               key={type.value}
               type="button"
               onClick={() => setPropertyType(type.value)}
-              className={`px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
                 propertyType === type.value
-                  ? 'bg-primary text-white border-primary shadow-md'
-                  : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary/50'
+                  ? 'bg-primary/10 border-primary text-primary shadow-md'
+                  : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50 hover:bg-neutral-50'
               }`}
             >
-              {type.label}
+              <PropertyTypeIcon type={type.value} className={`w-6 h-6 ${propertyType === type.value ? 'text-primary' : 'text-neutral-500'}`} />
+              <span className="text-xs font-semibold">{type.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Size and Rooms */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700">
-            {t('valuation:form.size')} <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <input
-              type="number"
-              value={sqft}
-              onChange={(e) => setSqft(Math.max(1, parseInt(e.target.value) || 0))}
-              min={1}
-              max={10000}
-              className="block w-full pr-12 py-3 text-sm border-2 border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 font-medium">m²</span>
+      {/* Section 3: Property Details */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+            <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-neutral-800">{t('valuation:form.detailsSection', 'Property Details')}</h3>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700">
-            {t('valuation:form.bedrooms')} <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={beds}
-            onChange={(e) => setBeds(parseInt(e.target.value))}
-            className="block w-full py-3 px-3 text-sm border-2 border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-          >
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-        </div>
+        <div className="grid grid-cols-3 gap-4">
+          {/* Size */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-neutral-700">
+              {t('valuation:form.size')} <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                value={sqft}
+                onChange={(e) => setSqft(Math.max(1, parseInt(e.target.value) || 0))}
+                min={1}
+                max={10000}
+                className="block w-full pr-12 py-3 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-500 font-medium bg-neutral-100 px-2 py-0.5 rounded">m²</span>
+            </div>
+          </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-neutral-700">
-            {t('valuation:form.bathrooms')} <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={baths}
-            onChange={(e) => setBaths(parseInt(e.target.value))}
-            className="block w-full py-3 px-3 text-sm border-2 border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-          >
-            {[0, 1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
+          {/* Bedrooms */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-neutral-700">
+              {t('valuation:form.bedrooms')}
+            </label>
+            <div className="flex items-center border-2 border-neutral-200 rounded-xl overflow-hidden bg-neutral-50/50">
+              <button
+                type="button"
+                onClick={() => setBeds(Math.max(0, beds - 1))}
+                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                </svg>
+              </button>
+              <span className="flex-1 text-center font-bold text-lg">{beds}</span>
+              <button
+                type="button"
+                onClick={() => setBeds(Math.min(10, beds + 1))}
+                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Bathrooms */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-neutral-700">
+              {t('valuation:form.bathrooms')}
+            </label>
+            <div className="flex items-center border-2 border-neutral-200 rounded-xl overflow-hidden bg-neutral-50/50">
+              <button
+                type="button"
+                onClick={() => setBaths(Math.max(0, baths - 1))}
+                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                </svg>
+              </button>
+              <span className="flex-1 text-center font-bold text-lg">{baths}</span>
+              <button
+                type="button"
+                onClick={() => setBaths(Math.min(10, baths + 1))}
+                className="px-3 py-3 text-neutral-600 hover:bg-neutral-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Condition */}
-      <div className="space-y-2">
+      {/* Section 4: Condition */}
+      <div className="space-y-3">
         <label className="block text-sm font-semibold text-neutral-700">
           {t('valuation:form.condition')}
         </label>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+        <div className="flex flex-wrap gap-2">
           {conditions.map((c) => (
             <button
               key={c.value}
               type="button"
               onClick={() => setCondition(condition === c.value ? undefined : c.value)}
-              className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-lg border-2 transition-all ${
+              className={`px-4 py-2.5 text-sm font-medium rounded-full border-2 transition-all ${
                 condition === c.value
                   ? 'bg-primary text-white border-primary shadow-md'
-                  : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary/50'
+                  : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50'
               }`}
             >
               {c.label}
@@ -355,16 +477,18 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
       <button
         type="button"
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+        className="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group"
       >
-        <svg
-          className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <div className={`w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
         {showAdvanced ? t('valuation:form.hideAdvanced') : t('valuation:form.showAdvanced')}
       </button>
 
@@ -389,7 +513,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                 min={1800}
                 max={new Date().getFullYear()}
                 placeholder={t('valuation:form.yearBuiltPlaceholder')}
-                className="block w-full py-3 px-4 text-sm border-2 border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                className="block w-full py-3 px-4 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
               />
             </div>
 
@@ -407,7 +531,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                     min={0}
                     max={100}
                     placeholder="e.g. 3"
-                    className="block w-full py-3 px-4 text-sm border-2 border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="block w-full py-3 px-4 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -421,7 +545,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                     min={1}
                     max={100}
                     placeholder="e.g. 10"
-                    className="block w-full py-3 px-4 text-sm border-2 border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="block w-full py-3 px-4 text-base border-2 border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-neutral-50/50"
                   />
                 </div>
               </div>
@@ -432,16 +556,16 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
               <label className="block text-sm font-semibold text-neutral-700">
                 {t('valuation:form.viewType')}
               </label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <div className="flex flex-wrap gap-2">
                 {views.map((v) => (
                   <button
                     key={v.value}
                     type="button"
                     onClick={() => setViewType(viewType === v.value ? undefined : v.value)}
-                    className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-lg border-2 transition-all ${
+                    className={`px-4 py-2.5 text-sm font-medium rounded-full border-2 transition-all ${
                       viewType === v.value
                         ? 'bg-primary text-white border-primary shadow-md'
-                        : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary/50'
+                        : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50'
                     }`}
                   >
                     {v.label}
@@ -461,10 +585,10 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                     key={f.value}
                     type="button"
                     onClick={() => setFurnishing(furnishing === f.value ? undefined : f.value)}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+                    className={`px-4 py-3 text-sm font-medium rounded-xl border-2 transition-all ${
                       furnishing === f.value
                         ? 'bg-primary text-white border-primary shadow-md'
-                        : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary/50'
+                        : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50'
                     }`}
                   >
                     {f.label}
@@ -474,29 +598,24 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
             </div>
 
             {/* Amenities */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="block text-sm font-semibold text-neutral-700">
                 {t('valuation:form.amenities')}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {[
-                  { key: 'hasBalcony', value: hasBalcony, set: setHasBalcony, label: t('valuation:amenities.balcony') },
-                  { key: 'hasGarden', value: hasGarden, set: setHasGarden, label: t('valuation:amenities.garden') },
-                  { key: 'hasElevator', value: hasElevator, set: setHasElevator, label: t('valuation:amenities.elevator') },
-                  { key: 'hasParking', value: hasParking, set: setHasParking, label: t('valuation:amenities.parking') },
-                  { key: 'hasPool', value: hasPool, set: setHasPool, label: t('valuation:amenities.pool') },
-                ].map((amenity) => (
+                {amenities.map((amenity) => (
                   <button
                     key={amenity.key}
                     type="button"
                     onClick={() => amenity.set(!amenity.value)}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+                    className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
                       amenity.value
-                        ? 'bg-primary text-white border-primary shadow-md'
-                        : 'bg-white text-neutral-700 border-neutral-300 hover:border-primary/50'
+                        ? 'bg-primary/10 border-primary text-primary shadow-md'
+                        : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50'
                     }`}
                   >
-                    {amenity.label}
+                    <AmenityIcon type={amenity.icon} className={`w-5 h-5 ${amenity.value ? 'text-primary' : 'text-neutral-500'}`} />
+                    <span className="text-xs font-semibold">{amenity.label}</span>
                   </button>
                 ))}
               </div>
@@ -509,25 +628,26 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
       <button
         type="submit"
         disabled={isLoading || !address || !city || !country || !sqft}
-        className="w-full py-4 px-6 bg-gradient-to-r from-primary to-primary/90 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:from-primary/95 hover:to-primary/85 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
+        className="w-full py-4 px-6 bg-gradient-to-r from-primary to-primary/90 text-white font-bold text-lg rounded-2xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:from-primary/95 hover:to-primary/85 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all flex items-center justify-center gap-3 relative overflow-hidden group"
       >
+        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
         {isLoading ? (
           <>
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            {t('valuation:form.calculating')}
+            <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
+            <span>{t('valuation:form.calculating')}</span>
           </>
         ) : (
           <>
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
-            {t('valuation:form.getValuation')}
+            <span>{t('valuation:form.getValuation')}</span>
           </>
         )}
       </button>
 
       {/* Disclaimer */}
-      <p className="text-center text-xs text-neutral-500">
+      <p className="text-center text-xs text-neutral-400">
         {t('valuation:form.disclaimer')}
       </p>
     </form>
