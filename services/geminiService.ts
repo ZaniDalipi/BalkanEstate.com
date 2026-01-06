@@ -2,7 +2,14 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Property, PropertyImageTag, ChatMessage, AiSearchQuery, Filters } from '../types';
 import type { LatLngBounds } from 'leaflet';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Only initialize if API key is available - prevents crash on missing key
+const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || '';
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
+// Helper to check if AI is available
+const isAiAvailable = (): boolean => {
+  return ai !== null && apiKey !== '';
+};
 
 // Retry configuration for handling 503 and other transient errors
 const MAX_RETRIES = 3;
@@ -84,6 +91,9 @@ export interface PropertyAnalysisResult {
 
 
 export const generateDescriptionFromImages = async (images: File[], language: string, propertyType: 'house' | 'apartment' | 'villa' | 'other'): Promise<PropertyAnalysisResult> => {
+    if (!isAiAvailable() || !ai) {
+        throw new Error('AI features are not available. Please configure the Gemini API key.');
+    }
     const imageParts = await Promise.all(images.map(fileToGenerativePart));
 
     const prompt = `You are a professional real estate analyst specializing in Balkan properties. Analyze the following images for a property that is a(n) "${propertyType}". Based on the images and knowing its type, provide a detailed, accurate analysis. The property is located in the Balkans. The description should be written in ${language} and be tailored specifically for a(n) "${propertyType}". Provide the following details in a JSON object:
@@ -229,6 +239,9 @@ export const calculatePropertyDistances = async (
     lat: number,
     lng: number
 ): Promise<DistanceCalculationResult> => {
+    if (!isAiAvailable() || !ai) {
+        throw new Error('AI features are not available. Please configure the Gemini API key.');
+    }
     const prompt = `You are a geographic analyst specializing in property locations. Analyze the following property location and provide estimated distances to key amenities:
 
 Property Address: ${address}
@@ -305,6 +318,9 @@ export interface AiChatResponse {
 }
 
 export const getAiChatResponse = async (history: ChatMessage[], properties: Property[]): Promise<AiChatResponse> => {
+    if (!isAiAvailable() || !ai) {
+        throw new Error('AI features are not available. Please configure the Gemini API key.');
+    }
     const simplifiedProperties = properties.map(p => ({
         id: p.id,
         price: p.price,
@@ -434,6 +450,10 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
 };
 
 export const generateSearchName = async (filters: Filters): Promise<string> => {
+    if (!isAiAvailable() || !ai) {
+        // Return a fallback name if AI is not available
+        return filters.query || 'Saved Search';
+    }
     const relevantFilters: Partial<Filters> = {};
     if (filters.query) relevantFilters.query = filters.query;
     if (filters.minPrice) relevantFilters.minPrice = filters.minPrice;
@@ -559,6 +579,11 @@ export const generateSearchNameFromCoords = async (lat: number, lng: number, bou
     }
 
     // Fallback to AI if reverse geocoding fails
+    if (!isAiAvailable() || !ai) {
+        // Return a generic name if AI is not available
+        return `Search at ${lat.toFixed(2)}, ${lng.toFixed(2)}`;
+    }
+
     const boundsInfo = bounds
         ? `\nThe area spans from (${bounds.getSouthWest().lat.toFixed(4)}, ${bounds.getSouthWest().lng.toFixed(4)}) to (${bounds.getNorthEast().lat.toFixed(4)}, ${bounds.getNorthEast().lng.toFixed(4)})`
         : '';
@@ -588,6 +613,9 @@ export const generateSearchNameFromCoords = async (lat: number, lng: number, bou
 };
 
 export const getNeighborhoodInsights = async (lat: number, lng: number, city: string, country: string): Promise<string> => {
+    if (!isAiAvailable() || !ai) {
+        return `Neighborhood information is not available. This property is located in ${city}, ${country}.`;
+    }
     const prompt = `
         You are a helpful local guide for the "Balkan Estate" real estate agency.
         A user is looking at a property located in ${city}, ${country} at coordinates (latitude: ${lat}, longitude: ${lng}).
