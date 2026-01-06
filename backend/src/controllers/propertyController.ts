@@ -330,8 +330,6 @@ export const createProperty = async (
 
       // Preserve the listing counts but downgrade to free tier
       const currentActiveCount = user.subscription.activeListingsCount || 0;
-      const currentPrivateCount = user.subscription.privateSellerCount || 0;
-      const currentAgentCount = user.subscription.agentCount || 0;
 
       user.subscription.tier = 'free';
       user.subscription.status = 'expired';
