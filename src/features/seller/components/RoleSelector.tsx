@@ -63,6 +63,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     /**
      * Get subscription data for a role - Single Source of Truth
      * Uses the new unified subscription system
+     * IMPORTANT: Always check subscription status - cancelled/expired = free tier
      */
     const getRoleSubscription = (role: UserRole) => {
         // Get subscription data from the unified subscription field
@@ -71,12 +72,22 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
         if (sub) {
             const tier = sub.tier || 'free';
 
-            // Determine if this is a Pro-level subscription
-            const proTiers = ['pro', 'agency_owner', 'agency_agent'];
-            const isPro = proTiers.includes(tier) || (sub.status === 'active' && tier !== 'free' && tier !== 'buyer');
+            // CRITICAL: Check if subscription is actually active
+            // Note: 'canceled' is valid because backend only returns it when subscription hasn't expired yet
+            // The backend verifies expiration date - if canceled AND expired, it returns status='expired'
+            const validStatuses = ['active', 'trial', 'grace', 'canceled'];
+            const isActiveSubscription = validStatuses.includes(sub.status || '') && sub.status !== 'expired';
 
-            // Get the correct listing limit based on tier
-            const limit = sub.listingsLimit ?? LISTING_LIMITS[tier] ?? 3;
+            // Determine if this is a Pro-level subscription
+            // ONLY if the subscription is actually active
+            const proTiers = ['pro', 'agency_owner', 'agency_agent'];
+            const isPro = isActiveSubscription && (proTiers.includes(tier) || (tier !== 'free' && tier !== 'buyer'));
+
+            // Get the correct listing limit based on subscription status
+            // If subscription is not active, fall back to free tier (3 listings)
+            const limit = isActiveSubscription
+                ? (sub.listingsLimit ?? LISTING_LIMITS[tier] ?? 3)
+                : 3; // Free tier limit
 
             // Get counts
             const used = sub.activeListingsCount || 0;
@@ -84,19 +95,19 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
                 ? (sub.agentCount || 0)
                 : (sub.privateSellerCount || 0);
 
-            // Get promotion coupons
-            const promotionCoupons = sub.promotionCoupons || {};
+            // Get promotion coupons - only if subscription is active
+            const promotionCoupons = isActiveSubscription ? (sub.promotionCoupons || {}) : {};
             const featuredCoupons = promotionCoupons.featured || 0;
             const highlightedCoupons = promotionCoupons.highlighted || 0;
             const totalCoupons = promotionCoupons.available ?? (featuredCoupons + highlightedCoupons);
             const usedCoupons = promotionCoupons.used || 0;
 
             return {
-                plan: tier,
+                plan: isActiveSubscription ? tier : 'free',
                 limit,
                 used,
                 roleCount,
-                isActive: sub.status === 'active' || sub.status === 'trial',
+                isActive: isActiveSubscription,
                 isPro,
                 // Promotion coupon details
                 featuredCoupons,

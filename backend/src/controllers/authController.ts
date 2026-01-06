@@ -533,24 +533,48 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     let promotionCoupons = { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() };
     let savedSearchesLimit = 1;
     let subscriptionExpiresAt: Date | undefined;
+    let subscriptionStatus: string = 'active';
+    let isCancelledButActive = false;
 
-    // PRIORITY 1: Check Subscriptions collection for active subscription (coupon-based, Stripe, etc.)
-    const activeSubscription = await Subscription.findOne({
+    // **CRITICAL: Check Subscriptions collection - this is the source of truth**
+    // PRIORITY 1: Check for active/trial subscriptions
+    let dbSubscription = await Subscription.findOne({
       userId: user._id,
-      status: { $in: ['active', 'trial'] },
+      status: { $in: ['active', 'trial', 'grace'] },
       expirationDate: { $gt: new Date() },
-    });
+    }).sort({ expirationDate: -1 });
 
-    if (activeSubscription) {
-      const productId = activeSubscription.productId;
+    // PRIORITY 2: If no active, check for cancelled subscription that hasn't expired yet
+    if (!dbSubscription) {
+      dbSubscription = await Subscription.findOne({
+        userId: user._id,
+        status: 'canceled',
+        expirationDate: { $gt: new Date() },
+      }).sort({ expirationDate: -1 });
+
+      if (dbSubscription) {
+        isCancelledButActive = true;
+        console.log(`⚠️ [getMe] Found cancelled-but-active subscription for ${user.email}, valid until ${dbSubscription.expirationDate}`);
+      }
+    }
+
+    if (dbSubscription) {
+      const productId = dbSubscription.productId;
+      subscriptionStatus = dbSubscription.status;
       // Check if it's a Pro subscription
       if (productId?.includes('pro') || productId === 'pro_monthly' || productId === 'pro_yearly') {
         tier = 'pro';
         listingsLimit = 25;
         promotionCoupons = { monthly: 3, available: 3, used: 0, rollover: 0, lastRefresh: new Date() };
         savedSearchesLimit = 10;
-        subscriptionExpiresAt = activeSubscription.expirationDate;
-        console.log(`🎫 [getMe] Found active subscription in Subscriptions collection for ${user.email}: ${productId}, expires: ${subscriptionExpiresAt}`);
+        subscriptionExpiresAt = dbSubscription.expirationDate;
+        console.log(`🎫 [getMe] Found ${isCancelledButActive ? 'cancelled-but-valid' : 'active'} subscription in DB for ${user.email}: ${productId}, expires: ${subscriptionExpiresAt}`);
+      }
+    } else {
+      // **NO VALID SUBSCRIPTION FOUND** - check if user.subscription thinks they have Pro and downgrade
+      if (user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+        console.log(`⚠️ [getMe] User ${user.email} has no valid subscription in DB but tier is ${user.subscription.tier}. Downgrading to free.`);
+        subscriptionStatus = 'expired';
       }
     }
 
@@ -585,10 +609,10 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
     if (!user.subscription) {
       // Initialize new subscription
-      console.log(`🔄 [getMe] Initializing subscription for ${user.email}: ${listingsLimit} listings, tier: ${tier}`);
+      console.log(`🔄 [getMe] Initializing subscription for ${user.email}: ${listingsLimit} listings, tier: ${tier}, status: ${subscriptionStatus}`);
       user.subscription = {
         tier,
-        status: 'active',
+        status: subscriptionStatus as 'active' | 'trial' | 'grace' | 'canceled' | 'expired' | 'pending_cancellation',
         listingsLimit,
         activeListingsCount,
         privateSellerCount,
@@ -606,12 +630,30 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       user.subscription.privateSellerCount = privateSellerCount;
       user.subscription.agentCount = agentCount;
 
-      // CRITICAL: If user should be Pro (from Subscriptions collection) but is showing as Free, fix it
+      // **CRITICAL: Always sync tier and status from database truth**
+      // If DB shows Pro (from active or cancelled-but-valid subscription), update to Pro
       if (tier === 'pro' && user.subscription.tier !== 'pro') {
         console.log(`🔧 [getMe] Upgrading ${user.email} from ${user.subscription.tier} to pro tier`);
         user.subscription.tier = 'pro';
         user.subscription.listingsLimit = 25;
         user.subscription.expiresAt = subscriptionExpiresAt;
+      }
+
+      // **AUTO-DOWNGRADE: If NO valid subscription in DB, downgrade to free**
+      if (subscriptionStatus === 'expired' && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+        console.log(`⬇️ [getMe] Downgrading ${user.email} from ${user.subscription.tier} to free tier (no valid subscription in DB)`);
+        user.subscription.tier = 'free';
+        user.subscription.status = 'expired';
+        user.subscription.listingsLimit = 3;
+        user.subscription.promotionCoupons = { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() };
+        user.subscription.savedSearchesLimit = 1;
+        user.subscription.expiresAt = undefined;
+      } else {
+        // Sync status from DB
+        user.subscription.status = subscriptionStatus as 'active' | 'trial' | 'grace' | 'canceled' | 'expired' | 'pending_cancellation';
+        if (subscriptionExpiresAt) {
+          user.subscription.expiresAt = subscriptionExpiresAt;
+        }
       }
 
       // Ensure listingsLimit is correct for Pro users
@@ -620,7 +662,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         user.subscription.listingsLimit = 25;
       }
 
-      console.log(`✅ [getMe] Subscription synced for ${user.email}: ${user.subscription.tier} tier, ${activeListingsCount}/${user.subscription.listingsLimit} listings used`);
+      console.log(`✅ [getMe] Subscription synced for ${user.email}: ${user.subscription.tier} tier (status: ${user.subscription.status}), ${activeListingsCount}/${user.subscription.listingsLimit} listings used`);
     }
 
     await user.save();

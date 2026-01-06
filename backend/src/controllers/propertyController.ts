@@ -301,26 +301,73 @@ export const createProperty = async (
       return;
     }
 
-    // **AUTO-SYNC: Check if user has active subscription in database but proSubscription not synced**
+    // **CRITICAL: Verify subscription status from database - this is the source of truth**
     const Subscription = (await import('../models/Subscription')).default;
-    const activeSubscription = await Subscription.findOne({
+
+    // First check for active/trial/grace subscriptions
+    let validSubscription = await Subscription.findOne({
       userId: user._id,
-      status: 'active',
+      status: { $in: ['active', 'trial', 'grace'] },
       expirationDate: { $gt: new Date() }
     }).sort({ expirationDate: -1 });
 
-    // If user has active subscription but proSubscription not set, sync it now
-    if (activeSubscription && (!user.proSubscription || !user.proSubscription.isActive)) {
+    // Also check for cancelled subscriptions that haven't expired yet (user can still use until expiration)
+    if (!validSubscription) {
+      validSubscription = await Subscription.findOne({
+        userId: user._id,
+        status: 'canceled',
+        expirationDate: { $gt: new Date() }
+      }).sort({ expirationDate: -1 });
+
+      if (validSubscription) {
+        console.log(`⚠️ User ${user.email} has cancelled subscription, valid until ${validSubscription.expirationDate}`);
+      }
+    }
+
+    // **AUTO-DOWNGRADE: If NO valid subscription in DB but user thinks they have Pro, downgrade to free**
+    if (!validSubscription && user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+      console.log(`⚠️ User ${user.email} has no active subscription in DB but tier is ${user.subscription.tier}. Downgrading to free.`);
+
+      // Preserve the listing counts but downgrade to free tier
+      const currentActiveCount = user.subscription.activeListingsCount || 0;
+      const currentPrivateCount = user.subscription.privateSellerCount || 0;
+      const currentAgentCount = user.subscription.agentCount || 0;
+
+      user.subscription.tier = 'free';
+      user.subscription.status = 'expired';
+      user.subscription.listingsLimit = 3; // Free tier limit
+      user.subscription.promotionCoupons = {
+        monthly: 0,
+        available: 0,
+        used: 0,
+        rollover: 0,
+        lastRefresh: new Date(),
+      };
+
+      // Also update legacy fields
+      user.isSubscribed = false;
+      user.subscriptionPlan = undefined;
+      user.subscriptionExpiresAt = undefined;
+      if (user.proSubscription) {
+        user.proSubscription.isActive = false;
+      }
+
+      await user.save();
+      console.log(`✅ User downgraded to free tier. Has ${currentActiveCount} listings (limit is now 3).`);
+    }
+
+    // If user has valid subscription but proSubscription not set, sync it now
+    if (validSubscription && (!user.proSubscription || !user.proSubscription.isActive)) {
       console.log(`🔄 Auto-syncing Pro subscription for user ${user.email}`);
 
       const Product = (await import('../models/Product')).default;
-      const product = await Product.findOne({ productId: activeSubscription.productId });
+      const product = await Product.findOne({ productId: validSubscription.productId });
 
       user.proSubscription = {
         isActive: true,
-        plan: activeSubscription.productId.includes('yearly') ? 'pro_yearly' : 'pro_monthly',
-        expiresAt: activeSubscription.expirationDate,
-        startedAt: activeSubscription.startDate,
+        plan: validSubscription.productId.includes('yearly') ? 'pro_yearly' : 'pro_monthly',
+        expiresAt: validSubscription.expirationDate,
+        startedAt: validSubscription.startDate,
         totalListingsLimit: product?.listingsLimit || 25, // 25 active listings
         activeListingsCount: user.proSubscription?.activeListingsCount || 0,
         privateSellerCount: user.proSubscription?.privateSellerCount || 0,
@@ -335,8 +382,8 @@ export const createProperty = async (
       };
 
       user.isSubscribed = true;
-      user.subscriptionPlan = activeSubscription.productId;
-      user.subscriptionExpiresAt = activeSubscription.expirationDate;
+      user.subscriptionPlan = validSubscription.productId;
+      user.subscriptionExpiresAt = validSubscription.expirationDate;
 
       await user.save();
       console.log(`✅ Pro subscription auto-synced! User now has 25 active listings.`);
