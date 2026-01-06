@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
@@ -167,6 +168,7 @@ interface AgencyTeamData {
 }
 
 const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId }) => {
+  const { t } = useTranslation('subscription');
   const { state, dispatch } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
@@ -615,9 +617,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   };
 
-  // Restore subscription (undo cancellation)
+  // Restore subscription (undo cancellation) - with confirmation
   const handleRestoreSubscription = async () => {
     if (!subscription) return;
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(t('management.validation.confirmRestore'));
+    if (!confirmed) return;
 
     try {
       setRestoring(true);
@@ -639,21 +645,30 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         if (token) await refreshUserContext(token);
         // Dispatch event for other components
         window.dispatchEvent(new Event('subscriptionUpdated'));
+        // Show success message
+        alert(t('management.validation.restoreSuccess'));
       } else {
         const data = await response.json();
-        setActionError(data.message || 'Failed to restore subscription');
+        setActionError(data.message || t('management.validation.restoreError'));
       }
     } catch (error) {
       console.error('Error restoring subscription:', error);
-      setActionError('An error occurred while restoring your subscription');
+      setActionError(t('management.validation.restoreError'));
     } finally {
       setRestoring(false);
     }
   };
 
-  // Toggle auto-renewal on/off
+  // Toggle auto-renewal on/off - with confirmation
   const handleToggleAutoRenewal = async () => {
     if (!subscription) return;
+
+    // Show confirmation dialog
+    const action = subscription.autoRenewing
+      ? t('management.validation.disableAutoRenewal')
+      : t('management.validation.enableAutoRenewal');
+    const confirmed = window.confirm(t('management.validation.confirmToggleAutoRenewal', { action }));
+    if (!confirmed) return;
 
     try {
       setTogglingAutoRenew(true);
@@ -682,13 +697,18 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         if (token) await refreshUserContext(token);
         // Dispatch event for other components
         window.dispatchEvent(new Event('subscriptionUpdated'));
+        // Show success message
+        const status = subscription.autoRenewing
+          ? t('management.validation.disabled')
+          : t('management.validation.enabled');
+        alert(t('management.validation.toggleAutoRenewalSuccess', { status }));
       } else {
         const data = await response.json();
-        setActionError(data.message || 'Failed to update auto-renewal');
+        setActionError(data.message || t('management.validation.toggleAutoRenewalError'));
       }
     } catch (error) {
       console.error('Error toggling auto-renewal:', error);
-      setActionError('An error occurred while updating auto-renewal');
+      setActionError(t('management.validation.toggleAutoRenewalError'));
     } finally {
       setTogglingAutoRenew(false);
     }
@@ -922,7 +942,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm">
         <h3 className="text-lg font-bold text-neutral-800 mb-4 flex items-center gap-2">
           <SparklesIcon className="w-5 h-5 text-primary" />
-          What's Included in Your {subscriptionDetails.currentPlan.name} Plan
+          {t('management.whatsIncluded.title', { plan: subscriptionDetails.currentPlan.name })}
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -933,10 +953,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {subscriptionDetails.currentPlan.listingLimit} Active Listings
+                {t('management.whatsIncluded.activeListings', { count: subscriptionDetails.currentPlan.listingLimit })}
               </p>
               <p className="text-sm text-neutral-500">
-                Create and manage up to {subscriptionDetails.currentPlan.listingLimit} property listings
+                {t('management.whatsIncluded.activeListingsDesc', { count: subscriptionDetails.currentPlan.listingLimit })}
               </p>
             </div>
           </div>
@@ -950,10 +970,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {subscriptionDetails.currentPlanKey === 'free' ? '1 Saved Search' : '10 Saved Searches'}
+                {t('management.whatsIncluded.savedSearches', { count: subscriptionDetails.currentPlanKey === 'free' ? 1 : 10 })}
               </p>
               <p className="text-sm text-neutral-500">
-                Save and get alerts for your property searches
+                {t('management.whatsIncluded.savedSearchesDesc')}
               </p>
             </div>
           </div>
@@ -965,12 +985,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1 ? '3 Promotion Coupons/Month' : 'No Promotion Coupons'}
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.promotionCoupons')
+                  : t('management.whatsIncluded.noPromotionCoupons')}
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.tier >= 1
-                  ? 'Boost your listings with featured placement'
-                  : 'Upgrade to Pro for promotion features'}
+                  ? t('management.whatsIncluded.promotionCouponsDesc')
+                  : t('management.whatsIncluded.upgradeForPromotion')}
               </p>
             </div>
           </div>
@@ -982,12 +1004,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1 ? 'Advanced Analytics' : 'Basic Analytics'}
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.advancedAnalytics')
+                  : t('management.whatsIncluded.basicAnalytics')}
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.tier >= 1
-                  ? 'Detailed insights on views, saves, and inquiries'
-                  : 'Basic view counts only'}
+                  ? t('management.whatsIncluded.advancedAnalyticsDesc')
+                  : t('management.whatsIncluded.basicAnalyticsDesc')}
               </p>
             </div>
           </div>
@@ -1001,12 +1025,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1 ? 'Priority Support' : 'Email Support'}
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.prioritySupport')
+                  : t('management.whatsIncluded.emailSupport')}
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.tier >= 1
-                  ? 'Fast response times and dedicated help'
-                  : 'Standard email support'}
+                  ? t('management.whatsIncluded.prioritySupportDesc')
+                  : t('management.whatsIncluded.emailSupportDesc')}
               </p>
             </div>
           </div>
@@ -1018,12 +1044,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1 ? 'Verified Pro Badge' : 'No Badge'}
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.verifiedBadge')
+                  : t('management.whatsIncluded.noBadge')}
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.tier >= 1
-                  ? 'Show buyers you\'re a trusted seller'
-                  : 'Upgrade to get the Pro badge'}
+                  ? t('management.whatsIncluded.verifiedBadgeDesc')
+                  : t('management.whatsIncluded.noBadgeDesc')}
               </p>
             </div>
           </div>
@@ -1034,15 +1062,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-primary-dark/10 rounded-xl border border-primary/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold text-neutral-800">Want more features?</p>
-                <p className="text-sm text-neutral-600">Upgrade to Pro for 25 listings, promotions, and more!</p>
+                <p className="font-semibold text-neutral-800">{t('management.whatsIncluded.wantMoreFeatures')}</p>
+                <p className="text-sm text-neutral-600">{t('management.whatsIncluded.upgradeToProDesc')}</p>
               </div>
               <button
                 onClick={() => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } })}
                 className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
               >
                 <SparklesIcon className="w-4 h-4" />
-                Upgrade Now
+                {t('management.upgradeNow')}
               </button>
             </div>
           </div>
