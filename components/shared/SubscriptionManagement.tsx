@@ -918,6 +918,137 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </div>
       </div>
 
+      {/* What's Included in Your Plan - Prominent Feature Breakdown */}
+      <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm">
+        <h3 className="text-lg font-bold text-neutral-800 mb-4 flex items-center gap-2">
+          <SparklesIcon className="w-5 h-5 text-primary" />
+          What's Included in Your {subscriptionDetails.currentPlan.name} Plan
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Listings */}
+          <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+              <HomeIcon className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-neutral-800">
+                {subscriptionDetails.currentPlan.listingLimit} Active Listings
+              </p>
+              <p className="text-sm text-neutral-500">
+                Create and manage up to {subscriptionDetails.currentPlan.listingLimit} property listings
+              </p>
+            </div>
+          </div>
+
+          {/* Saved Searches */}
+          <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
+            <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-neutral-800">
+                {subscriptionDetails.currentPlanKey === 'free' ? '1 Saved Search' : '10 Saved Searches'}
+              </p>
+              <p className="text-sm text-neutral-500">
+                Save and get alerts for your property searches
+              </p>
+            </div>
+          </div>
+
+          {/* Promotion Coupons - Pro only */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <GiftIconComponent className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-amber-600' : 'text-neutral-400'}`} />
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1 ? '3 Promotion Coupons/Month' : 'No Promotion Coupons'}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? 'Boost your listings with featured placement'
+                  : 'Upgrade to Pro for promotion features'}
+              </p>
+            </div>
+          </div>
+
+          {/* Analytics */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <ChartBarIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-green-600' : 'text-neutral-400'}`} />
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1 ? 'Advanced Analytics' : 'Basic Analytics'}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? 'Detailed insights on views, saves, and inquiries'
+                  : 'Basic view counts only'}
+              </p>
+            </div>
+          </div>
+
+          {/* Priority Support - Pro only */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1 ? 'Priority Support' : 'Email Support'}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? 'Fast response times and dedicated help'
+                  : 'Standard email support'}
+              </p>
+            </div>
+          </div>
+
+          {/* Verified Badge - Pro only */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <CheckCircleIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-cyan-600' : 'text-neutral-400'}`} />
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1 ? 'Verified Pro Badge' : 'No Badge'}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? 'Show buyers you\'re a trusted seller'
+                  : 'Upgrade to get the Pro badge'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Upgrade CTA for free users */}
+        {subscriptionDetails.currentPlan.tier === 0 && (
+          <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-primary-dark/10 rounded-xl border border-primary/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-neutral-800">Want more features?</p>
+                <p className="text-sm text-neutral-600">Upgrade to Pro for 25 listings, promotions, and more!</p>
+              </div>
+              <button
+                onClick={() => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } })}
+                className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+              >
+                <SparklesIcon className="w-4 h-4" />
+                Upgrade Now
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Team Members Section - Only show for agency owners */}
       {agencyTeamData && (
         <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
