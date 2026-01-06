@@ -200,12 +200,22 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
       return;
     }
 
-    // Find the most recent active subscription for this user
-    const subscription = await Subscription.findOne({
+    // Find the most recent active/valid subscription for this user
+    // Include pending_cancellation and canceled that haven't expired yet
+    let subscription = await Subscription.findOne({
       userId,
       status: { $in: ['active', 'trial', 'grace'] },
       expirationDate: { $gt: new Date() },
     }).sort({ createdAt: -1 });
+
+    // If no active subscription, check for pending_cancellation or canceled that hasn't expired
+    if (!subscription) {
+      subscription = await Subscription.findOne({
+        userId,
+        status: { $in: ['pending_cancellation', 'canceled'] },
+        expirationDate: { $gt: new Date() },
+      }).sort({ createdAt: -1 });
+    }
 
     if (!subscription) {
       // No active subscription found
@@ -229,6 +239,8 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
         price: subscription.price,
         currency: subscription.currency,
         isAcknowledged: subscription.isAcknowledged,
+        willCancelAt: subscription.willCancelAt,
+        canceledAt: subscription.canceledAt,
         createdAt: subscription.createdAt,
         updatedAt: subscription.updatedAt,
       },
