@@ -1,10 +1,6 @@
 import React from 'react';
 import Modal from './Modal';
-<<<<<<< HEAD
-import { WhackAnIconAnimation } from '@/src/features';
-=======
 import WhackAnIconAnimation from '@/features/seller/components/WhackAnIconAnimation';
->>>>>>> refs/remotes/origin/claude/cloudflare-deployment-setup-HoocB
 
 interface DiscountGameModalProps {
     isOpen: boolean;
