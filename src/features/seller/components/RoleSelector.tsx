@@ -19,11 +19,24 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     const { dispatch } = useAppContext();
     const subscription = currentUser.subscription;
 
-    // Determine which roles to show based on subscription
+    // Determine which roles to show based on user registration and subscription
     // Agency agents can ONLY post as agent (not as private seller)
     const isAgencyAgent = subscription?.tier === 'agency_agent';
     const hasPrivateSeller = !isAgencyAgent; // Hide private seller for agency agents
-    const hasAgent = true; // Always show agent option
+
+    // Only show agent option if user is registered as an agent
+    // User is an agent if they have:
+    // - 'agent' in their availableRoles, OR
+    // - role === 'agent', OR
+    // - agentId exists (registered through agent process)
+    const isRegisteredAgent =
+        currentUser.availableRoles?.includes('agent' as UserRole) ||
+        currentUser.role === 'agent' ||
+        currentUser.role === UserRole.AGENT ||
+        !!currentUser.agentId ||
+        !!currentUser.licenseNumber;
+
+    const hasAgent = isRegisteredAgent;
 
     const getRoleIcon = (role: UserRole) => {
         switch (role) {
@@ -181,7 +194,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
                 {t('seller:roleSelector.description')}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 ${hasAgent ? 'sm:grid-cols-2' : ''} gap-4`}>
                 {hasPrivateSeller && (
                     <RoleCard
                         role={UserRole.PRIVATE_SELLER}
@@ -207,6 +220,23 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
                     />
                 )}
             </div>
+
+            {/* Info message for non-agents */}
+            {!isRegisteredAgent && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                        <span className="text-blue-500 text-lg">💼</span>
+                        <div>
+                            <p className="text-sm font-medium text-blue-800">
+                                {t('seller:roleSelector.becomeAgent.title', 'Want to post as an agent?')}
+                            </p>
+                            <p className="text-xs text-blue-600 mt-0.5">
+                                {t('seller:roleSelector.becomeAgent.description', 'You can register as a real estate agent from your Profile Settings to unlock agent features and higher listing limits.')}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
