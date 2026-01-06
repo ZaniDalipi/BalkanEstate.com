@@ -470,22 +470,41 @@ const AuthPage: React.FC = () => {
                                             </label>
                                         </div>
 
-                                        {/* Pro subscription info for agents */}
+                                        {/* Pro subscription or Agency Coupon info for agents */}
                                         {isAgent && (
-                                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                                                <div className="flex items-start gap-2">
-                                                    <span className="text-amber-600 text-lg">⭐</span>
-                                                    <div>
-                                                        <p className="text-sm font-semibold text-amber-800">
-                                                            Pro Subscription Required
+                                            <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <span className="text-white text-lg">⭐</span>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-bold text-amber-900">
+                                                            How to Become an Agent
                                                         </p>
-                                                        <p className="text-xs text-amber-700 mt-1">
-                                                            Agents need a Pro subscription to post listings. After registration,
-                                                            you'll be able to choose a plan (€9.99/month or €99.99/year) to unlock
-                                                            25 active listings and promotion coupons.
+                                                        <p className="text-xs text-amber-800 mt-1.5">
+                                                            To post listings as an agent, you need one of the following:
                                                         </p>
-                                                        <p className="text-xs text-amber-600 mt-1 font-medium">
-                                                            You can complete registration now and subscribe later from your profile.
+                                                        <div className="mt-3 space-y-2">
+                                                            <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
+                                                                <span className="text-green-600 font-bold">1.</span>
+                                                                <div>
+                                                                    <p className="text-xs font-semibold text-neutral-800">Pro Subscription</p>
+                                                                    <p className="text-xs text-neutral-600">€9.99/month or €99.99/year - 25 listings + promotions</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center justify-center">
+                                                                <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">OR</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
+                                                                <span className="text-blue-600 font-bold">2.</span>
+                                                                <div>
+                                                                    <p className="text-xs font-semibold text-neutral-800">Agency Coupon Code</p>
+                                                                    <p className="text-xs text-neutral-600">Enter a coupon from your agency below</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-xs text-amber-700 mt-3 italic">
+                                                            Complete registration first. You'll be prompted to subscribe or enter a coupon after.
                                                         </p>
                                                     </div>
                                                 </div>
@@ -645,11 +664,11 @@ const AuthPage: React.FC = () => {
                     }}
                 />
             )}
-            <div className="fixed inset-0 z-[5000] flex justify-center items-center bg-black/50 p-4" onClick={handleClose}>
-                <div className="bg-white w-full h-full md:h-auto md:max-w-md md:rounded-2xl md:shadow-2xl flex flex-col relative overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={handleClose} className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-800 z-10" aria-label="Close authentication modal"><XMarkIcon className="w-6 h-6" /></button>
-                    <div className="p-6 sm:p-8 w-full max-w-md mx-auto mt-8 md:mt-0">
-                        <div className="flex justify-center items-center space-x-2 mb-4"><LogoIcon className="w-8 h-8 text-primary" /></div>
+            <div className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center bg-black/50 p-0 md:p-4 overflow-y-auto" onClick={handleClose}>
+                <div className="bg-white w-full min-h-screen md:min-h-0 md:h-auto md:max-w-md md:max-h-[90vh] md:rounded-2xl md:shadow-2xl flex flex-col relative md:my-4 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={handleClose} className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-800 z-10 bg-white/80 rounded-full p-1" aria-label="Close authentication modal"><XMarkIcon className="w-6 h-6" /></button>
+                    <div className="p-6 sm:p-8 w-full max-w-md mx-auto pb-8">
+                        <div className="flex justify-center items-center space-x-2 mb-4 pt-4 md:pt-0"><LogoIcon className="w-8 h-8 text-primary" /></div>
                         <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 text-center mb-4 sm:mb-6">
                             {state.authModalView === 'login' ? t('auth:login.subtitle') : t('auth:signup.subtitle')}
                         </h2>

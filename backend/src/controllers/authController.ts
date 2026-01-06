@@ -10,7 +10,6 @@ import cloudinary from '../config/cloudinary';
 import { Readable } from 'stream';
 import { validatePassword, passwordContainsUserInfo } from '../utils/passwordValidator';
 import { sendVerificationEmail } from '../services/emailVerificationService';
-import { startAgentTrial } from '../services/trialManagementService';
 import { generateTokenPair } from '../services/refreshTokenService';
 import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rateLimiter';
 
@@ -125,7 +124,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       }
     });
 
-    // If agent, create Agent record, add to agency, and start trial
+    // If agent, create Agent record and add to agency
+    // NOTE: Agents now require Pro subscription to post listings - no free trial
     if (role === 'agent' && licenseNumber) {
       // Use provided languages or default to English
       const agentLanguages = languages && languages.length > 0 ? languages : ['English'];
@@ -161,8 +161,34 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         }
       }
 
-      // Start 7-day trial period for agent
-      await startAgentTrial(user);
+      // Initialize dual-role system for agents (can also be private_seller)
+      user.availableRoles = ['agent', 'private_seller'];
+      user.activeRole = 'agent';
+      user.primaryRole = 'agent';
+
+      // Initialize subscription as free tier - agents need Pro subscription to post
+      // They can register as agent but won't be able to post listings until they subscribe
+      user.subscription = {
+        tier: 'free',
+        status: 'active',
+        listingsLimit: 0, // Agents without Pro subscription cannot post listings
+        activeListingsCount: 0,
+        privateSellerCount: 0,
+        agentCount: 0,
+        promotionCoupons: {
+          monthly: 0,
+          available: 0,
+          used: 0,
+        },
+      };
+
+      // Set flag to indicate Pro subscription is required
+      user.subscriptionStatus = 'pending'; // Indicates needs subscription
+      user.activeListingsLimit = 0; // Cannot post until subscribed
+
+      await user.save();
+
+      console.log(`✅ Agent ${user.email} registered. Pro subscription required to post listings.`);
     }
 
     // Send email verification
@@ -197,8 +223,11 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
         isEmailVerified: user.isEmailVerified,
-        trialActive: role === 'agent' ? user.isTrialActive() : false,
-        trialEndDate: role === 'agent' ? user.trialEndDate : undefined,
+        subscription: user.subscription,
+        availableRoles: user.availableRoles,
+        activeRole: user.activeRole,
+        // Agents without subscription need to subscribe to post
+        requiresSubscription: role === 'agent' && !user.isSubscribed,
         activeListingsLimit: user.getActiveListingsLimit(),
       },
     });
