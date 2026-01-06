@@ -537,9 +537,14 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     let isCancelledButActive = false;
 
     // **CRITICAL: Check Subscriptions collection - this is the source of truth**
+    // Handle both ObjectId and string userId formats for compatibility
+    const userIdVariants = [user._id, String(user._id)];
+
+    console.log(`🔍 [getMe] Looking for subscription for user ${user.email} (id: ${user._id})`);
+
     // PRIORITY 1: Check for active/trial subscriptions
     let dbSubscription = await Subscription.findOne({
-      userId: user._id,
+      userId: { $in: userIdVariants },
       status: { $in: ['active', 'trial', 'grace'] },
       expirationDate: { $gt: new Date() },
     }).sort({ expirationDate: -1 });
@@ -547,7 +552,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     // PRIORITY 2: If no active, check for pending_cancellation or cancelled subscription that hasn't expired yet
     if (!dbSubscription) {
       dbSubscription = await Subscription.findOne({
-        userId: user._id,
+        userId: { $in: userIdVariants },
         status: { $in: ['pending_cancellation', 'canceled'] },
         expirationDate: { $gt: new Date() },
       }).sort({ expirationDate: -1 });
@@ -555,6 +560,22 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       if (dbSubscription) {
         isCancelledButActive = true;
         console.log(`⚠️ [getMe] Found ${dbSubscription.status} subscription for ${user.email}, valid until ${dbSubscription.expirationDate}`);
+      }
+    }
+
+    // Debug: Log all subscriptions for this user if none found
+    if (!dbSubscription) {
+      const allUserSubs = await Subscription.find({
+        userId: { $in: userIdVariants },
+      }).sort({ createdAt: -1 }).limit(3);
+
+      if (allUserSubs.length > 0) {
+        console.log(`⚠️ [getMe] Found ${allUserSubs.length} subscription(s) for ${user.email}, but none match active criteria:`);
+        allUserSubs.forEach(sub => {
+          console.log(`   - ${sub.productId}: status=${sub.status}, expires=${sub.expirationDate}, now=${new Date()}, isExpired=${sub.expirationDate <= new Date()}`);
+        });
+      } else {
+        console.log(`❌ [getMe] No subscriptions found in DB for user ${user.email} (id: ${user._id})`);
       }
     }
 

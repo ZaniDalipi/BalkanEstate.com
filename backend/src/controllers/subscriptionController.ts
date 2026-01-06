@@ -200,10 +200,13 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
       return;
     }
 
+    // Handle both ObjectId and string userId formats for compatibility
+    const userIdVariants = [userId, String(userId)];
+
     // Find the most recent active/valid subscription for this user
     // Include pending_cancellation and canceled that haven't expired yet
     let subscription = await Subscription.findOne({
-      userId,
+      userId: { $in: userIdVariants },
       status: { $in: ['active', 'trial', 'grace'] },
       expirationDate: { $gt: new Date() },
     }).sort({ createdAt: -1 });
@@ -211,7 +214,7 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
     // If no active subscription, check for pending_cancellation or canceled that hasn't expired
     if (!subscription) {
       subscription = await Subscription.findOne({
-        userId,
+        userId: { $in: userIdVariants },
         status: { $in: ['pending_cancellation', 'canceled'] },
         expirationDate: { $gt: new Date() },
       }).sort({ createdAt: -1 });
