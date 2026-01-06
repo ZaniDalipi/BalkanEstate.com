@@ -512,6 +512,66 @@ export const fixPropertyCoordinates = async (req: Request, res: Response): Promi
   }
 };
 
+// @desc    Fix coordinates for a single property by ID
+// @route   POST /api/admin/fix-coordinates/:propertyId
+// @access  Private/Admin
+export const fixSinglePropertyCoordinates = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { propertyId } = req.params;
+
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    console.log(`📍 Geocoding single property: ${property.title || property.address} (${property.city}, ${property.country})`);
+    console.log(`   Current coordinates: lat=${property.lat}, lng=${property.lng}`);
+
+    const geocodeResult = await geocodeAddressWithRateLimit(
+      property.address,
+      property.city,
+      property.country
+    );
+
+    if (geocodeResult && geocodeResult.lat && geocodeResult.lng) {
+      property.lat = geocodeResult.lat;
+      property.lng = geocodeResult.lng;
+      await property.save();
+
+      console.log(`✅ Fixed: ${property.title || property.address} -> ${geocodeResult.lat}, ${geocodeResult.lng}`);
+
+      res.json({
+        message: 'Property coordinates fixed successfully',
+        property: {
+          id: String(property._id),
+          title: property.title || property.address,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+          lat: property.lat,
+          lng: property.lng,
+        },
+      });
+    } else {
+      console.log(`❌ Failed to geocode: ${property.title || property.address}`);
+      res.status(400).json({
+        message: 'Failed to geocode property address. The address may not be recognized.',
+        property: {
+          id: String(property._id),
+          title: property.title || property.address,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+        },
+      });
+    }
+  } catch (error: any) {
+    console.error('Fix single property coordinates error:', error);
+    res.status(500).json({ message: 'Error fixing property coordinates', error: error.message });
+  }
+};
+
 // @desc    Get properties with missing coordinates
 // @route   GET /api/admin/properties-missing-coords
 // @access  Private/Admin

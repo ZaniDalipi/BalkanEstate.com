@@ -14,6 +14,7 @@ import {
   deleteProperty,
   getSystemConfig,
   fixPropertyCoordinates,
+  fixSinglePropertyCoordinates,
   getPropertiesMissingCoords,
 } from '../controllers/adminController';
 import {
@@ -50,6 +51,7 @@ router.patch('/properties/:id', logAdminAction('UPDATE_PROPERTY'), updatePropert
 router.delete('/properties/:id', logAdminAction('DELETE_PROPERTY'), deleteProperty);
 router.get('/properties-missing-coords', logAdminAction('VIEW_MISSING_COORDS'), getPropertiesMissingCoords);
 router.post('/fix-coordinates', logAdminAction('FIX_COORDINATES'), fixPropertyCoordinates);
+router.post('/fix-coordinates/:propertyId', logAdminAction('FIX_SINGLE_COORDINATES'), fixSinglePropertyCoordinates);
 
 // ===== Discount Code Management =====
 router.get('/discount-codes', logAdminAction('VIEW_DISCOUNT_CODES'), getAllDiscountCodes);
