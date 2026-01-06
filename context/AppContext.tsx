@@ -581,7 +581,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [state.currentUser]);
 
   const updateListing = useCallback(async (property: Property) => {
+      console.log('📝 [updateListing] Updating property:', property.id, 'with coordinates:', property.lat, property.lng);
       const updatedProperty = await api.updateListing(property);
+      console.log('✅ [updateListing] Received updated property with coordinates:', updatedProperty.lat, updatedProperty.lng);
       dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
       return updatedProperty;
   }, []);
