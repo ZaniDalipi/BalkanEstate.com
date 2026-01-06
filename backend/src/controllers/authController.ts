@@ -18,18 +18,37 @@ import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rate
 // @access  Public
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, name, phone, role, licenseNumber, agencyInvitationCode, languages } = req.body;
+    const { email, password, confirmPassword, name, phone, role, licenseNumber, agencyInvitationCode, languages } = req.body;
+
+    // ============================================
+    // STEP 1: Validate ALL inputs BEFORE any database writes
+    // ============================================
 
     // Validate required fields
     if (!email || !password || !name) {
-      res.status(400).json({ message: 'Email, password, and name are required' });
+      res.status(400).json({
+        message: 'Email, password, and name are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      res.status(400).json({ message: 'Invalid email format' });
+      res.status(400).json({
+        message: 'Invalid email format',
+        code: 'INVALID_EMAIL_FORMAT'
+      });
+      return;
+    }
+
+    // Validate password confirmation if provided
+    if (confirmPassword && password !== confirmPassword) {
+      res.status(400).json({
+        message: 'Passwords do not match',
+        code: 'PASSWORD_MISMATCH'
+      });
       return;
     }
 
@@ -38,6 +57,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     if (!passwordValidation.isValid) {
       res.status(400).json({
         message: 'Password does not meet security requirements',
+        code: 'WEAK_PASSWORD',
         errors: passwordValidation.errors,
       });
       return;
@@ -48,57 +68,109 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     if (passwordContainsUserInfo(password, userInfo)) {
       res.status(400).json({
         message: 'Password should not contain your email or name',
+        code: 'PASSWORD_CONTAINS_USER_INFO'
       });
       return;
     }
 
     // Check if user already exists (case-insensitive)
     const userExists = await User.findOne({ email: email.toLowerCase() });
-
     if (userExists) {
-      res.status(400).json({ message: 'User already exists' });
+      res.status(400).json({
+        message: 'An account with this email already exists',
+        code: 'EMAIL_EXISTS'
+      });
       return;
     }
 
-    let agencyName = undefined;
-    let agencyId = undefined;
-    let generatedAgentId = undefined;
+    // ============================================
+    // STEP 2: Validate agent-specific fields BEFORE creating user
+    // ============================================
 
-    // If signing up as agent, validate and set up agent data
-    if (role === 'agent' && licenseNumber) {
-      // Validate license number format (adjust regex as needed)
-      const licenseRegex = /^[A-Z0-9-]+$/i;
-      if (!licenseRegex.test(licenseNumber)) {
-        res.status(400).json({ message: 'Invalid license number format' });
+    let agencyName: string | undefined = undefined;
+    let agencyId: mongoose.Types.ObjectId | undefined = undefined;
+    let generatedAgentId: string | undefined = undefined;
+    let verifiedAgency: any = null;
+
+    if (role === 'agent') {
+      // License number is required for agents
+      if (!licenseNumber) {
+        res.status(400).json({
+          message: 'License number is required for agent registration',
+          code: 'LICENSE_REQUIRED'
+        });
         return;
       }
 
-      let agency = null;
+      // Validate license number format
+      const licenseRegex = /^[A-Z0-9-]+$/i;
+      if (!licenseRegex.test(licenseNumber)) {
+        res.status(400).json({
+          message: 'Invalid license number format. Only letters, numbers, and hyphens are allowed.',
+          code: 'INVALID_LICENSE_FORMAT'
+        });
+        return;
+      }
+
+      // Validate license number length
+      if (licenseNumber.length < 5 || licenseNumber.length > 30) {
+        res.status(400).json({
+          message: 'License number must be between 5 and 30 characters',
+          code: 'INVALID_LICENSE_LENGTH'
+        });
+        return;
+      }
+
+      // Check if license number already exists in User collection
+      const existingUserWithLicense = await User.findOne({ licenseNumber: licenseNumber });
+      if (existingUserWithLicense) {
+        res.status(400).json({
+          message: 'This license number is already registered',
+          code: 'LICENSE_EXISTS'
+        });
+        return;
+      }
+
+      // Check if license number already exists in Agent collection
+      const existingAgentWithLicense = await Agent.findOne({ licenseNumber: licenseNumber });
+      if (existingAgentWithLicense) {
+        res.status(400).json({
+          message: 'This license number is already registered',
+          code: 'LICENSE_EXISTS'
+        });
+        return;
+      }
+
       agencyName = 'Independent Agent'; // Default for independent agents
 
       // If agency invitation code is provided, verify it
       if (agencyInvitationCode) {
-        agency = await Agency.findOne({ invitationCode: agencyInvitationCode.toUpperCase() });
+        verifiedAgency = await Agency.findOne({ invitationCode: agencyInvitationCode.toUpperCase() });
 
-        if (!agency) {
-          res.status(404).json({
-            message: 'Invalid agency invitation code. Please check the code and try again.'
+        if (!verifiedAgency) {
+          res.status(400).json({
+            message: 'Invalid agency invitation code. Please check the code and try again.',
+            code: 'INVALID_AGENCY_CODE'
           });
           return;
         }
 
-        agencyName = agency.name; // Use verified agency name
-        agencyId = agency._id as unknown as mongoose.Types.ObjectId;
+        agencyName = verifiedAgency.name;
+        agencyId = verifiedAgency._id as unknown as mongoose.Types.ObjectId;
       }
 
       // Generate agent ID
       generatedAgentId = `AG-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     }
 
+    // ============================================
+    // STEP 3: All validations passed - NOW create records
+    // ============================================
+
     // Determine listing limit based on role
     let activeListingsLimit = 3; // Default for buyers and private sellers
     if (role === 'agent') {
-      activeListingsLimit = 10; // Trial agents get 10 listings
+      activeListingsLimit = 0; // Agents need Pro subscription to post
     }
 
     // Create user with initialized stats
@@ -108,11 +180,11 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       name,
       phone,
       role: role || 'buyer',
-      licenseNumber: generatedAgentId ? licenseNumber : undefined,
+      licenseNumber: role === 'agent' ? licenseNumber : undefined,
       agencyName: agencyName,
       agencyId: agencyId,
       agentId: generatedAgentId,
-      isEmailVerified: false, // Require email verification
+      isEmailVerified: false,
       activeListingsLimit,
       stats: {
         totalViews: 0,
@@ -125,77 +197,80 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
 
     // If agent, create Agent record and add to agency
-    // NOTE: Agents now require Pro subscription to post listings - no free trial
     if (role === 'agent' && licenseNumber) {
-      // Use provided languages or default to English
-      const agentLanguages = languages && languages.length > 0 ? languages : ['English'];
+      try {
+        const agentLanguages = languages && languages.length > 0 ? languages : ['English'];
 
-      await Agent.create({
-        userId: user._id,
-        agencyName: agencyName!,
-        agencyId: agencyId || undefined,
-        agentId: generatedAgentId!,
-        licenseNumber,
-        licenseVerified: true,
-        licenseVerificationDate: new Date(),
-        languages: agentLanguages,
-        isActive: true,
-      });
+        await Agent.create({
+          userId: user._id,
+          agencyName: agencyName!,
+          agencyId: agencyId || undefined,
+          agentId: generatedAgentId!,
+          licenseNumber,
+          licenseVerified: true,
+          licenseVerificationDate: new Date(),
+          languages: agentLanguages,
+          isActive: true,
+        });
 
-      // Add agent to agency's agents array if agency was provided
-      if (agencyId) {
-        const agency = await Agency.findById(agencyId);
-        if (agency) {
+        // Add agent to agency's agents array if agency was provided
+        if (agencyId && verifiedAgency) {
           const userObjectId = user._id as unknown as mongoose.Types.ObjectId;
-          if (!agency.agents.some(agentId => agentId.toString() === userObjectId.toString())) {
-            agency.agents.push(userObjectId);
-            agency.totalAgents = agency.agents.length;
+          if (!verifiedAgency.agents.some((aid: any) => aid.toString() === userObjectId.toString())) {
+            verifiedAgency.agents.push(userObjectId);
+            verifiedAgency.totalAgents = verifiedAgency.agents.length;
 
-            // Auto-sync agent languages to agency (merge unique languages)
-            const existingLanguages = agency.languages || [];
+            const existingLanguages = verifiedAgency.languages || [];
             const mergedLanguages = [...new Set([...existingLanguages, ...agentLanguages])];
-            agency.languages = mergedLanguages;
+            verifiedAgency.languages = mergedLanguages;
 
-            await agency.save();
+            await verifiedAgency.save();
           }
         }
+
+        // Initialize dual-role system for agents
+        user.availableRoles = ['agent', 'private_seller'];
+        user.activeRole = 'agent';
+        user.primaryRole = 'agent';
+
+        // Initialize subscription as free tier - agents need Pro subscription to post
+        user.subscription = {
+          tier: 'free',
+          status: 'active',
+          listingsLimit: 0,
+          activeListingsCount: 0,
+          privateSellerCount: 0,
+          agentCount: 0,
+          promotionCoupons: {
+            monthly: 0,
+            available: 0,
+            used: 0,
+            rollover: 0,
+            lastRefresh: new Date(),
+          },
+          savedSearchesLimit: 1,
+          totalPaid: 0,
+        };
+
+        user.subscriptionStatus = 'active';
+        user.activeListingsLimit = 0;
+
+        await user.save();
+
+        console.log(`✅ Agent ${user.email} registered. Pro subscription required to post listings.`);
+      } catch (agentError: any) {
+        // If agent creation fails, delete the user to maintain consistency
+        await User.findByIdAndDelete(user._id);
+        console.error('Agent creation failed, rolled back user:', agentError);
+        res.status(500).json({
+          message: 'Failed to create agent profile. Please try again.',
+          code: 'AGENT_CREATION_FAILED'
+        });
+        return;
       }
-
-      // Initialize dual-role system for agents (can also be private_seller)
-      user.availableRoles = ['agent', 'private_seller'];
-      user.activeRole = 'agent';
-      user.primaryRole = 'agent';
-
-      // Initialize subscription as free tier - agents need Pro subscription to post
-      // They can register as agent but won't be able to post listings until they subscribe
-      user.subscription = {
-        tier: 'free',
-        status: 'active',
-        listingsLimit: 0, // Agents without Pro subscription cannot post listings
-        activeListingsCount: 0,
-        privateSellerCount: 0,
-        agentCount: 0,
-        promotionCoupons: {
-          monthly: 0,
-          available: 0,
-          used: 0,
-          rollover: 0,
-          lastRefresh: new Date(),
-        },
-        savedSearchesLimit: 1,
-        totalPaid: 0,
-      };
-
-      // Agent registered with free tier - needs Pro subscription to post
-      user.subscriptionStatus = 'active'; // Active free tier, needs upgrade
-      user.activeListingsLimit = 0; // Cannot post until subscribed
-
-      await user.save();
-
-      console.log(`✅ Agent ${user.email} registered. Pro subscription required to post listings.`);
     }
 
-    // Send email verification
+    // Send email verification (non-blocking)
     try {
       await sendVerificationEmail(user);
     } catch (emailError) {
@@ -203,7 +278,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       // Don't block signup if email fails
     }
 
-    // Generate token pair (access + refresh)
+    // Generate token pair
     const deviceInfo = {
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip || req.socket.remoteAddress,
@@ -230,14 +305,41 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         subscription: user.subscription,
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
-        // Agents without subscription need to subscribe to post
         requiresSubscription: role === 'agent' && !user.isSubscribed,
         activeListingsLimit: user.getActiveListingsLimit(),
       },
     });
   } catch (error: any) {
     console.error('Signup error:', error);
-    res.status(500).json({ message: 'Error creating user', error: error.message });
+
+    // Handle MongoDB duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0];
+      if (field === 'email') {
+        res.status(400).json({
+          message: 'An account with this email already exists',
+          code: 'EMAIL_EXISTS'
+        });
+        return;
+      }
+      if (field === 'licenseNumber') {
+        res.status(400).json({
+          message: 'This license number is already registered',
+          code: 'LICENSE_EXISTS'
+        });
+        return;
+      }
+      res.status(400).json({
+        message: 'A record with this information already exists',
+        code: 'DUPLICATE_ENTRY'
+      });
+      return;
+    }
+
+    res.status(500).json({
+      message: 'Error creating user. Please try again.',
+      code: 'SIGNUP_ERROR'
+    });
   }
 };
 
