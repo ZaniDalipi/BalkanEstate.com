@@ -470,6 +470,28 @@ const AuthPage: React.FC = () => {
                                             </label>
                                         </div>
 
+                                        {/* Pro subscription info for agents */}
+                                        {isAgent && (
+                                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                                <div className="flex items-start gap-2">
+                                                    <span className="text-amber-600 text-lg">⭐</span>
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-amber-800">
+                                                            Pro Subscription Required
+                                                        </p>
+                                                        <p className="text-xs text-amber-700 mt-1">
+                                                            Agents need a Pro subscription to post listings. After registration,
+                                                            you'll be able to choose a plan (€9.99/month or €99.99/year) to unlock
+                                                            25 active listings and promotion coupons.
+                                                        </p>
+                                                        <p className="text-xs text-amber-600 mt-1 font-medium">
+                                                            You can complete registration now and subscribe later from your profile.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* License and agency code fields - shown only if isAgent is true */}
                                         {isAgent && (
                                             <>

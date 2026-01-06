@@ -2,6 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '@/types';
 import { useAppContext } from '@/context/AppContext';
+import {
+    canPostAsRole,
+    getRemainingListings,
+    isSubscriptionActive,
+} from '@/shared/utils/subscriptionHelpers';
 
 interface RoleSelectorProps {
     currentUser: User;
@@ -13,9 +18,12 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
     const { t } = useTranslation(['seller']);
     const { dispatch } = useAppContext();
     const availableRoles = currentUser.availableRoles || [currentUser.role];
+    const subscription = currentUser.subscription;
 
-    // Always show both agent and private_seller options
-    const hasPrivateSeller = true; // Always show private seller option
+    // Determine which roles to show based on subscription
+    // Agency agents can ONLY post as agent (not as private seller)
+    const isAgencyAgent = subscription?.tier === 'agency_agent';
+    const hasPrivateSeller = !isAgencyAgent; // Hide private seller for agency agents
     const hasAgent = true; // Always show agent option
 
     const getRoleIcon = (role: UserRole) => {

@@ -36,18 +36,51 @@ export const createAgency = async (
       return;
     }
 
-    // Check if user has Enterprise subscription (skip in development mode)
+    // Check if user is already an agent with active Pro subscription
     const isDevelopment = process.env.NODE_ENV === 'development';
+    const isAgent = user.role === 'agent' || user.availableRoles?.includes('agent');
+    const hasProSubscription = user.subscription?.tier === 'pro' ||
+                               user.subscription?.status === 'active' ||
+                               user.proSubscription?.isActive ||
+                               user.isSubscribed;
 
-    if (!isDevelopment && user.subscriptionPlan !== 'enterprise') {
+    // RULE: Must be an agent first
+    if (!isDevelopment && !isAgent) {
       res.status(403).json({
-        message: 'Agency profiles are only available for Enterprise tier subscribers. Please upgrade your plan to create an agency.',
+        message: 'You must be an agent to create an agency. Please register as an agent first and subscribe to a Pro plan.',
+        code: 'AGENT_REQUIRED',
       });
       return;
     }
 
-    if (isDevelopment && user.subscriptionPlan !== 'enterprise') {
-      console.log('🔧 Development mode: Bypassing Enterprise subscription check for agency creation');
+    // RULE: Must have active Pro subscription to create agency
+    if (!isDevelopment && !hasProSubscription) {
+      res.status(403).json({
+        message: 'You need an active Pro subscription to create an agency. Please subscribe to a Pro plan first.',
+        code: 'PRO_SUBSCRIPTION_REQUIRED',
+      });
+      return;
+    }
+
+    // Check if user has Enterprise subscription (skip in development mode)
+    if (!isDevelopment && user.subscriptionPlan !== 'enterprise') {
+      res.status(403).json({
+        message: 'Agency profiles are only available for Enterprise tier subscribers. Please upgrade your plan to create an agency.',
+        code: 'ENTERPRISE_REQUIRED',
+      });
+      return;
+    }
+
+    if (isDevelopment) {
+      if (!isAgent) {
+        console.log('🔧 Development mode: Bypassing agent status check for agency creation');
+      }
+      if (!hasProSubscription) {
+        console.log('🔧 Development mode: Bypassing Pro subscription check for agency creation');
+      }
+      if (user.subscriptionPlan !== 'enterprise') {
+        console.log('🔧 Development mode: Bypassing Enterprise subscription check for agency creation');
+      }
     }
 
     // Check if agency already exists for this user
