@@ -1056,21 +1056,45 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             const errorMessage = err.message || "Failed to submit listing.";
 
             // Handle specific backend error codes with professional dialogs
-            if (errorCode === 'FREE_LISTING_LIMIT_REACHED') {
+            // Handle listing limit reached - show discount game option
+            if (errorCode === 'LISTING_LIMIT_REACHED' || errorCode === 'FREE_LISTING_LIMIT_REACHED') {
+                // Save the property data so user doesn't lose their work
+                const propertyToSave = {
+                    ...formData,
+                    images: imageUrls,
+                    createdAsRole: selectedRole,
+                };
+                dispatch({ type: 'SET_PENDING_PROPERTY', payload: propertyToSave });
+                setPendingPropertyData(propertyToSave as any);
+
+                // Show the discount game modal
                 showWarning(
-                    t('seller:errors.freeListingLimitReached'),
-                    t('seller:errors.freeListingLimitMessage'),
+                    t('seller:errors.freeListingLimitReached', 'Listing Limit Reached'),
+                    t('seller:errors.freeListingLimitMessage', 'You have reached your free tier limit. Play a game to win a discount on Pro subscription, or save your listing as a draft!'),
                     [
                         {
-                            label: t('seller:actions.subscribeToPro'),
+                            label: t('seller:actions.playForDiscount', 'Play for Discount'),
                             onClick: () => {
                                 dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: true });
                             },
                             variant: 'primary',
                         },
                         {
-                            label: t('common:actions.cancel'),
-                            onClick: () => {},
+                            label: t('seller:actions.saveDraft', 'Save as Draft'),
+                            onClick: () => {
+                                // Property is already saved in pendingProperty state
+                                showInfo(
+                                    t('seller:draft.savedTitle', 'Draft Saved'),
+                                    t('seller:draft.savedMessage', 'Your listing has been saved. You can continue editing it later from your account.'),
+                                    [
+                                        {
+                                            label: t('common:actions.ok', 'OK'),
+                                            onClick: () => {},
+                                            variant: 'primary',
+                                        },
+                                    ]
+                                );
+                            },
                             variant: 'secondary',
                         },
                     ]
