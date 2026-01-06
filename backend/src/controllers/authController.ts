@@ -179,7 +179,11 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
           monthly: 0,
           available: 0,
           used: 0,
+          rollover: 0,
+          lastRefresh: new Date(),
         },
+        savedSearchesLimit: 1,
+        totalPaid: 0,
       };
 
       // Set flag to indicate Pro subscription is required

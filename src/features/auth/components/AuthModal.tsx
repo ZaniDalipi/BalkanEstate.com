@@ -4,6 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, FacebookIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import { User, UserRole, AuthModalView, Agency } from '@/types';
 import SocialLoginPopup from './SocialLoginPopup';
+import { fetchSellerProducts, Product } from '@/utils/api';
 
 type Method = 'email' | 'phone';
 type SocialProvider = 'google' | 'facebook' | 'apple';
@@ -168,6 +169,7 @@ const AuthPage: React.FC = () => {
     const [agencies, setAgencies] = useState<Agency[]>([]);
     const [licenseNumber, setLicenseNumber] = useState('');
     const [agencyInvitationCode, setAgencyInvitationCode] = useState('');
+    const [pricingProducts, setPricingProducts] = useState<Product[]>([]);
 
     // Password requirements state for real-time feedback
     const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
@@ -213,6 +215,32 @@ const AuthPage: React.FC = () => {
         };
         fetchAgencies();
     }, [isAgent, state.authModalView]);
+
+    // Fetch pricing products when agent checkbox is checked
+    useEffect(() => {
+        const loadProducts = async () => {
+            if (isAgent && pricingProducts.length === 0) {
+                try {
+                    const products = await fetchSellerProducts();
+                    setPricingProducts(products);
+                } catch (error) {
+                    // Failed to fetch products - will show fallback pricing
+                }
+            }
+        };
+        loadProducts();
+    }, [isAgent]);
+
+    // Get pricing from fetched products
+    const getProPricing = () => {
+        const monthly = pricingProducts.find(p => p.productId === 'seller_pro_monthly');
+        const yearly = pricingProducts.find(p => p.productId === 'seller_pro_yearly');
+        return {
+            monthlyPrice: monthly?.price || 9.99,
+            yearlyPrice: yearly?.price || 99.99,
+            currency: monthly?.currency || yearly?.currency || 'EUR',
+        };
+    };
 
     useEffect(() => {
         // Reset state when modal opens or view changes
@@ -471,45 +499,56 @@ const AuthPage: React.FC = () => {
                                         </div>
 
                                         {/* Pro subscription or Agency Coupon info for agents */}
-                                        {isAgent && (
-                                            <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl">
-                                                <div className="flex items-start gap-3">
-                                                    <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                                        <span className="text-white text-lg">⭐</span>
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-bold text-amber-900">
-                                                            How to Become an Agent
-                                                        </p>
-                                                        <p className="text-xs text-amber-800 mt-1.5">
-                                                            To post listings as an agent, you need one of the following:
-                                                        </p>
-                                                        <div className="mt-3 space-y-2">
-                                                            <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
-                                                                <span className="text-green-600 font-bold">1.</span>
-                                                                <div>
-                                                                    <p className="text-xs font-semibold text-neutral-800">Pro Subscription</p>
-                                                                    <p className="text-xs text-neutral-600">€9.99/month or €99.99/year - 25 listings + promotions</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center justify-center">
-                                                                <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">OR</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
-                                                                <span className="text-blue-600 font-bold">2.</span>
-                                                                <div>
-                                                                    <p className="text-xs font-semibold text-neutral-800">Agency Coupon Code</p>
-                                                                    <p className="text-xs text-neutral-600">Enter a coupon from your agency below</p>
-                                                                </div>
-                                                            </div>
+                                        {isAgent && (() => {
+                                            const pricing = getProPricing();
+                                            const formatPrice = (price: number) => {
+                                                return new Intl.NumberFormat('en-EU', {
+                                                    style: 'currency',
+                                                    currency: pricing.currency,
+                                                }).format(price);
+                                            };
+                                            return (
+                                                <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-white text-lg">⭐</span>
                                                         </div>
-                                                        <p className="text-xs text-amber-700 mt-3 italic">
-                                                            Complete registration first. You'll be prompted to subscribe or enter a coupon after.
-                                                        </p>
+                                                        <div className="flex-1">
+                                                            <p className="text-sm font-bold text-amber-900">
+                                                                How to Become an Agent
+                                                            </p>
+                                                            <p className="text-xs text-amber-800 mt-1.5">
+                                                                To post listings as an agent, you need one of the following:
+                                                            </p>
+                                                            <div className="mt-3 space-y-2">
+                                                                <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
+                                                                    <span className="text-green-600 font-bold">1.</span>
+                                                                    <div>
+                                                                        <p className="text-xs font-semibold text-neutral-800">Pro Subscription</p>
+                                                                        <p className="text-xs text-neutral-600">
+                                                                            {formatPrice(pricing.monthlyPrice)}/month or {formatPrice(pricing.yearlyPrice)}/year - 25 listings + promotions
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center justify-center">
+                                                                    <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">OR</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 p-2 bg-white/60 rounded-lg">
+                                                                    <span className="text-blue-600 font-bold">2.</span>
+                                                                    <div>
+                                                                        <p className="text-xs font-semibold text-neutral-800">Agency Coupon Code</p>
+                                                                        <p className="text-xs text-neutral-600">Enter a coupon from your agency below</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-xs text-amber-700 mt-3 italic">
+                                                                Complete registration first. You'll be prompted to subscribe or enter a coupon after.
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            );
+                                        })()}
 
                                         {/* License and agency code fields - shown only if isAgent is true */}
                                         {isAgent && (
