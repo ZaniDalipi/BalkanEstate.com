@@ -563,6 +563,21 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   };
 
+  // Helper to refresh user data in context
+  const refreshUserContext = async (token: string) => {
+    try {
+      const meResponse = await fetch(`${API_URL}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (meResponse.ok) {
+        const data = await meResponse.json();
+        dispatch({ type: 'UPDATE_USER', payload: data.user });
+      }
+    } catch (error) {
+      console.error('Error refreshing user context:', error);
+    }
+  };
+
   // Cancel subscription
   const handleCancelSubscription = async () => {
     if (!subscription) return;
@@ -584,6 +599,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         setShowCancelModal(false);
         // Refresh subscription data
         fetchSubscription();
+        // CRITICAL: Also refresh user context so RoleSelector gets updated
+        if (token) await refreshUserContext(token);
         // Dispatch event for other components
         window.dispatchEvent(new Event('subscriptionUpdated'));
       } else {
@@ -618,6 +635,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       if (response.ok) {
         // Refresh subscription data
         fetchSubscription();
+        // CRITICAL: Also refresh user context so RoleSelector gets updated
+        if (token) await refreshUserContext(token);
         // Dispatch event for other components
         window.dispatchEvent(new Event('subscriptionUpdated'));
       } else {
@@ -659,6 +678,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       if (response.ok) {
         // Refresh subscription data
         fetchSubscription();
+        // CRITICAL: Also refresh user context so RoleSelector gets updated
+        if (token) await refreshUserContext(token);
         // Dispatch event for other components
         window.dispatchEvent(new Event('subscriptionUpdated'));
       } else {
