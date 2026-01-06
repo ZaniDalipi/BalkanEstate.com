@@ -20,24 +20,52 @@ export interface Testimonial {
   };
 }
 
+export type SubscriptionTier = 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer';
+export type SubscriptionStatus = 'active' | 'canceled' | 'expired' | 'trial';
+export type SubscriptionPlan = 'free' | 'pro_monthly' | 'pro_yearly' | 'enterprise_yearly';
+
+export interface PromotionCoupons {
+  monthly: number;           // Monthly allocation (0, 2, 15)
+  available: number;         // Currently available total
+  used: number;              // Used this month
+  featured: number;          // Featured coupons available
+  highlighted: number;       // Highlighted coupons available
+  featuredDuration: number;  // Days per featured coupon (7 or 14)
+  highlightedDuration: number; // Days per highlighted coupon (7 or 14)
+  lastRefresh?: Date | string;
+}
+
 export interface UserSubscription {
-  tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer';
-  status: 'active' | 'canceled' | 'expired' | 'trial';
+  tier: SubscriptionTier;
+  status: SubscriptionStatus;
+  plan: SubscriptionPlan;
+
+  // Listing management
   listingsLimit: number;
   activeListingsCount: number;
   privateSellerCount: number;
   agentCount: number;
-  promotionCoupons?: {
-    monthly: number;
-    available: number;
-    used: number;
-    rollover?: number;
-    lastRefresh?: Date | string;
-  };
+
+  // Promotion coupons
+  promotionCoupons: PromotionCoupons;
+
+  // Agency reference (for agency_agent tier)
+  agencyId?: string;
+
+  // Buyer-specific
   savedSearchesLimit?: number;
+
+  // Billing
   totalPaid?: number;
+  autoRenew?: boolean;
+
+  // Dates
   expiresAt?: Date | string;
   startedAt?: Date | string;
+
+  // Coupon source (for agency_agent)
+  couponCode?: string;
+  couponExpiresAt?: Date | string;
 }
 
 export interface ProSubscription {

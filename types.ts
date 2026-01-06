@@ -391,6 +391,7 @@ export interface Filters {
     hasPool: boolean | null;
     petsAllowed: boolean | null;
     has360Tour: boolean | null; // Filter for properties with 360 virtual tour
+    hasDiscount: boolean | null; // Filter for properties with price reduction
     minFloorNumber: number | null;
     maxFloorNumber: number | null;
     maxDistanceToCenter: number | null; // in km
@@ -430,6 +431,7 @@ export const initialFilters: Filters = {
     hasPool: null,
     petsAllowed: null,
     has360Tour: null,
+    hasDiscount: null,
     minFloorNumber: null,
     maxFloorNumber: null,
     maxDistanceToCenter: null,

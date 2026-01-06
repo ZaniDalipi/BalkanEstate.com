@@ -4,6 +4,7 @@ import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import Property from '../models/Property';
 import DiscountCode from '../models/DiscountCode';
+import { geocodeAddressWithRateLimit } from '../services/geocodingService';
 
 
 // @desc    Get admin dashboard statistics
@@ -425,5 +426,174 @@ export const getSystemConfig = async (req: Request, res: Response): Promise<void
   } catch (error: any) {
     console.error('Get system config error:', error);
     res.status(500).json({ message: 'Error fetching system config', error: error.message });
+  }
+};
+
+// @desc    Fix properties with missing or invalid coordinates
+// @route   POST /api/admin/fix-coordinates
+// @access  Private/Admin
+export const fixPropertyCoordinates = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Find all properties with missing or invalid coordinates
+    const propertiesWithMissingCoords = await Property.find({
+      $or: [
+        { lat: { $exists: false } },
+        { lng: { $exists: false } },
+        { lat: null },
+        { lng: null },
+        { lat: 0 },
+        { lng: 0 },
+      ],
+      status: 'active', // Only fix active properties
+    });
+
+    console.log(`🔧 Found ${propertiesWithMissingCoords.length} properties with missing coordinates`);
+
+    const results = {
+      total: propertiesWithMissingCoords.length,
+      fixed: 0,
+      failed: 0,
+      details: [] as { id: string; title: string; status: string; lat?: number; lng?: number }[],
+    };
+
+    for (const property of propertiesWithMissingCoords) {
+      try {
+        console.log(`📍 Geocoding property: ${property.title || property.address} (${property.city}, ${property.country})`);
+
+        const geocodeResult = await geocodeAddressWithRateLimit(
+          property.address,
+          property.city,
+          property.country
+        );
+
+        if (geocodeResult && geocodeResult.lat && geocodeResult.lng) {
+          property.lat = geocodeResult.lat;
+          property.lng = geocodeResult.lng;
+          await property.save();
+
+          results.fixed++;
+          results.details.push({
+            id: String(property._id),
+            title: property.title || property.address,
+            status: 'fixed',
+            lat: geocodeResult.lat,
+            lng: geocodeResult.lng,
+          });
+          console.log(`✅ Fixed: ${property.title || property.address} -> ${geocodeResult.lat}, ${geocodeResult.lng}`);
+        } else {
+          results.failed++;
+          results.details.push({
+            id: String(property._id),
+            title: property.title || property.address,
+            status: 'failed - no geocode result',
+          });
+          console.log(`❌ Failed to geocode: ${property.title || property.address}`);
+        }
+      } catch (error: any) {
+        results.failed++;
+        results.details.push({
+          id: String(property._id),
+          title: property.title || property.address,
+          status: `failed - ${error.message}`,
+        });
+        console.error(`❌ Error fixing property ${property._id}:`, error.message);
+      }
+    }
+
+    console.log(`🔧 Fix coordinates complete: ${results.fixed} fixed, ${results.failed} failed`);
+
+    res.json({
+      message: `Fixed ${results.fixed} of ${results.total} properties`,
+      results,
+    });
+  } catch (error: any) {
+    console.error('Fix coordinates error:', error);
+    res.status(500).json({ message: 'Error fixing property coordinates', error: error.message });
+  }
+};
+
+// @desc    Fix coordinates for a single property by ID
+// @route   POST /api/admin/fix-coordinates/:propertyId
+// @access  Private/Admin
+export const fixSinglePropertyCoordinates = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { propertyId } = req.params;
+
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    console.log(`📍 Geocoding single property: ${property.title || property.address} (${property.city}, ${property.country})`);
+    console.log(`   Current coordinates: lat=${property.lat}, lng=${property.lng}`);
+
+    const geocodeResult = await geocodeAddressWithRateLimit(
+      property.address,
+      property.city,
+      property.country
+    );
+
+    if (geocodeResult && geocodeResult.lat && geocodeResult.lng) {
+      property.lat = geocodeResult.lat;
+      property.lng = geocodeResult.lng;
+      await property.save();
+
+      console.log(`✅ Fixed: ${property.title || property.address} -> ${geocodeResult.lat}, ${geocodeResult.lng}`);
+
+      res.json({
+        message: 'Property coordinates fixed successfully',
+        property: {
+          id: String(property._id),
+          title: property.title || property.address,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+          lat: property.lat,
+          lng: property.lng,
+        },
+      });
+    } else {
+      console.log(`❌ Failed to geocode: ${property.title || property.address}`);
+      res.status(400).json({
+        message: 'Failed to geocode property address. The address may not be recognized.',
+        property: {
+          id: String(property._id),
+          title: property.title || property.address,
+          address: property.address,
+          city: property.city,
+          country: property.country,
+        },
+      });
+    }
+  } catch (error: any) {
+    console.error('Fix single property coordinates error:', error);
+    res.status(500).json({ message: 'Error fixing property coordinates', error: error.message });
+  }
+};
+
+// @desc    Get properties with missing coordinates
+// @route   GET /api/admin/properties-missing-coords
+// @access  Private/Admin
+export const getPropertiesMissingCoords = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const properties = await Property.find({
+      $or: [
+        { lat: { $exists: false } },
+        { lng: { $exists: false } },
+        { lat: null },
+        { lng: null },
+        { lat: 0 },
+        { lng: 0 },
+      ],
+    }).select('_id title address city country lat lng status createdAt');
+
+    res.json({
+      count: properties.length,
+      properties,
+    });
+  } catch (error: any) {
+    console.error('Get properties missing coords error:', error);
+    res.status(500).json({ message: 'Error fetching properties', error: error.message });
   }
 };

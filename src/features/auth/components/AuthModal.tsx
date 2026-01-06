@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, FacebookIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
-import { User, UserRole, AuthModalView, Agency } from '@/types';
+import { User, UserRole, AuthModalView } from '@/types';
 import SocialLoginPopup from './SocialLoginPopup';
 
 type Method = 'email' | 'phone';
@@ -163,11 +163,6 @@ const AuthPage: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [code, setCode] = useState('');
     const [name, setName] = useState('');
-    const [isAgent, setIsAgent] = useState(false);
-    const [selectedAgencyId, setSelectedAgencyId] = useState<string>('');
-    const [agencies, setAgencies] = useState<Agency[]>([]);
-    const [licenseNumber, setLicenseNumber] = useState('');
-    const [agencyInvitationCode, setAgencyInvitationCode] = useState('');
 
     // Password requirements state for real-time feedback
     const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
@@ -197,22 +192,6 @@ const AuthPage: React.FC = () => {
         };
         fetchProviders();
     }, []);
-
-    useEffect(() => {
-        // Fetch agencies when user selects "I'm an agent"
-        const fetchAgencies = async () => {
-            if (isAgent && state.authModalView === 'signup') {
-                try {
-                    const { getAgencies } = await import('@/services/apiService');
-                    const response = await getAgencies({});
-                    setAgencies(response.agencies || []);
-                } catch (error) {
-                    // Failed to fetch agencies - user can still sign up without one
-                }
-            }
-        };
-        fetchAgencies();
-    }, [isAgent, state.authModalView]);
 
     useEffect(() => {
         // Reset state when modal opens or view changes
@@ -275,24 +254,8 @@ const AuthPage: React.FC = () => {
             if (state.authModalView === 'login') {
                 await login(email, password);
             } else {
-                const signupData: any = {
-                    role: isAgent ? 'agent' : 'buyer',
-                };
-
-                // If signing up as agent, include license and optional agency code
-                if (isAgent) {
-                    if (!licenseNumber.trim()) {
-                        setError('License number is required for agents');
-                        setIsLoading(false);
-                        return;
-                    }
-                    signupData.licenseNumber = licenseNumber.trim();
-                    if (agencyInvitationCode.trim()) {
-                        signupData.agencyInvitationCode = agencyInvitationCode.trim().toUpperCase();
-                    }
-                }
-
-                await signup(email, password, signupData);
+                // All users register as buyers - they can upgrade to agent from profile settings
+                await signup(email, password, { role: 'buyer' });
             }
             handleClose();
         } catch (err) {
@@ -430,83 +393,30 @@ const AuthPage: React.FC = () => {
                                 </div>
                                 {state.authModalView === 'login' && <div className="text-right"><button type="button" onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPassword'})} className="text-sm font-semibold text-primary hover:underline">{t('auth:login.forgotPassword')}</button></div>}
                                 {state.authModalView === 'signup' && (
-                                    <>
-                                        <div className="relative">
-                                            <input
-                                                type={showConfirmPassword ? "text" : "password"}
-                                                id="confirmPassword"
-                                                value={confirmPassword}
-                                                onChange={e => setConfirmPassword(e.target.value)}
-                                                className={floatingInputClasses}
-                                                placeholder=" "
-                                                required
-                                            />
-                                            <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('auth:signup.confirmPassword')}</label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                                                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                                            >
-                                                {showConfirmPassword ? (
-                                                    <EyeSlashIcon className="w-5 h-5" />
-                                                ) : (
-                                                    <EyeIcon className="w-5 h-5" />
-                                                )}
-                                            </button>
-                                        </div>
-
-                                        {/* Agent checkbox */}
-                                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            <input
-                                                type="checkbox"
-                                                id="isAgent"
-                                                checked={isAgent}
-                                                onChange={(e) => setIsAgent(e.target.checked)}
-                                                className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
-                                            />
-                                            <label htmlFor="isAgent" className="text-sm font-medium text-gray-700">
-                                                I'm a real estate agent
-                                            </label>
-                                        </div>
-
-                                        {/* License and agency code fields - shown only if isAgent is true */}
-                                        {isAgent && (
-                                            <>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        id="licenseNumber"
-                                                        value={licenseNumber}
-                                                        onChange={(e) => setLicenseNumber(e.target.value)}
-                                                        className={floatingInputClasses}
-                                                        placeholder=" "
-                                                        required
-                                                    />
-                                                    <label htmlFor="licenseNumber" className={floatingLabelClasses}>
-                                                        License Number
-                                                    </label>
-                                                </div>
-
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        id="agencyInvitationCode"
-                                                        value={agencyInvitationCode}
-                                                        onChange={(e) => setAgencyInvitationCode(e.target.value.toUpperCase())}
-                                                        className={floatingInputClasses}
-                                                        placeholder=" "
-                                                    />
-                                                    <label htmlFor="agencyInvitationCode" className={floatingLabelClasses}>
-                                                        Agency Invitation Code (Optional)
-                                                    </label>
-                                                    <p className="text-xs text-gray-500 mt-1 ml-1">
-                                                        Leave empty to register as an independent agent
-                                                    </p>
-                                                </div>
-                                            </>
-                                        )}
-                                    </>
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            id="confirmPassword"
+                                            value={confirmPassword}
+                                            onChange={e => setConfirmPassword(e.target.value)}
+                                            className={floatingInputClasses}
+                                            placeholder=" "
+                                            required
+                                        />
+                                        <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('auth:signup.confirmPassword')}</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showConfirmPassword ? (
+                                                <EyeSlashIcon className="w-5 h-5" />
+                                            ) : (
+                                                <EyeIcon className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                    </div>
                                 )}
                                 <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm text-base sm:text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? t('common:loading') : (state.authModalView === 'login' ? t('auth:login.submit') : t('auth:signup.submit'))}</button>
                             </form>
@@ -623,11 +533,11 @@ const AuthPage: React.FC = () => {
                     }}
                 />
             )}
-            <div className="fixed inset-0 z-[5000] flex justify-center items-center bg-black/50 p-4" onClick={handleClose}>
-                <div className="bg-white w-full h-full md:h-auto md:max-w-md md:rounded-2xl md:shadow-2xl flex flex-col relative overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={handleClose} className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-800 z-10" aria-label="Close authentication modal"><XMarkIcon className="w-6 h-6" /></button>
-                    <div className="p-6 sm:p-8 w-full max-w-md mx-auto mt-8 md:mt-0">
-                        <div className="flex justify-center items-center space-x-2 mb-4"><LogoIcon className="w-8 h-8 text-primary" /></div>
+            <div className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center bg-black/50 p-0 md:p-4 overflow-y-auto" onClick={handleClose}>
+                <div className="bg-white w-full min-h-screen md:min-h-0 md:h-auto md:max-w-md md:max-h-[90vh] md:rounded-2xl md:shadow-2xl flex flex-col relative md:my-4 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={handleClose} className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-800 z-10 bg-white/80 rounded-full p-1" aria-label="Close authentication modal"><XMarkIcon className="w-6 h-6" /></button>
+                    <div className="p-6 sm:p-8 w-full max-w-md mx-auto pb-8">
+                        <div className="flex justify-center items-center space-x-2 mb-4 pt-4 md:pt-0"><LogoIcon className="w-8 h-8 text-primary" /></div>
                         <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 text-center mb-4 sm:mb-6">
                             {state.authModalView === 'login' ? t('auth:login.subtitle') : t('auth:signup.subtitle')}
                         </h2>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
@@ -167,6 +168,7 @@ interface AgencyTeamData {
 }
 
 const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId }) => {
+  const { t } = useTranslation('subscription');
   const { state, dispatch } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
@@ -176,6 +178,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [togglingAutoRenew, setTogglingAutoRenew] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -499,6 +502,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const getStatusLabel = (status?: string) => {
     switch (status) {
       case 'pending_cancellation': return 'CANCELLING';
+      case 'canceled': return 'CANCELLED';
+      case 'active': return 'ACTIVE';
+      case 'expired': return 'EXPIRED';
+      case 'trial': return 'TRIAL';
+      case 'grace': return 'GRACE PERIOD';
       default: return status?.toUpperCase() || 'FREE';
     }
   };
@@ -557,6 +565,21 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   };
 
+  // Helper to refresh user data in context
+  const refreshUserContext = async (token: string) => {
+    try {
+      const meResponse = await fetch(`${API_URL}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (meResponse.ok) {
+        const data = await meResponse.json();
+        dispatch({ type: 'UPDATE_USER', payload: data.user });
+      }
+    } catch (error) {
+      console.error('Error refreshing user context:', error);
+    }
+  };
+
   // Cancel subscription
   const handleCancelSubscription = async () => {
     if (!subscription) return;
@@ -578,6 +601,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         setShowCancelModal(false);
         // Refresh subscription data
         fetchSubscription();
+        // CRITICAL: Also refresh user context so RoleSelector gets updated
+        if (token) await refreshUserContext(token);
         // Dispatch event for other components
         window.dispatchEvent(new Event('subscriptionUpdated'));
       } else {
@@ -592,9 +617,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   };
 
-  // Restore subscription (undo cancellation)
+  // Restore subscription (undo cancellation) - with confirmation
   const handleRestoreSubscription = async () => {
     if (!subscription) return;
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(t('management.validation.confirmRestore'));
+    if (!confirmed) return;
 
     try {
       setRestoring(true);
@@ -612,22 +641,82 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       if (response.ok) {
         // Refresh subscription data
         fetchSubscription();
+        // CRITICAL: Also refresh user context so RoleSelector gets updated
+        if (token) await refreshUserContext(token);
         // Dispatch event for other components
         window.dispatchEvent(new Event('subscriptionUpdated'));
+        // Show success message
+        alert(t('management.validation.restoreSuccess'));
       } else {
         const data = await response.json();
-        setActionError(data.message || 'Failed to restore subscription');
+        setActionError(data.message || t('management.validation.restoreError'));
       }
     } catch (error) {
       console.error('Error restoring subscription:', error);
-      setActionError('An error occurred while restoring your subscription');
+      setActionError(t('management.validation.restoreError'));
     } finally {
       setRestoring(false);
     }
   };
 
-  // Check if subscription is pending cancellation
+  // Toggle auto-renewal on/off - with confirmation
+  const handleToggleAutoRenewal = async () => {
+    if (!subscription) return;
+
+    // Show confirmation dialog
+    const action = subscription.autoRenewing
+      ? t('management.validation.disableAutoRenewal')
+      : t('management.validation.enableAutoRenewal');
+    const confirmed = window.confirm(t('management.validation.confirmToggleAutoRenewal', { action }));
+    if (!confirmed) return;
+
+    try {
+      setTogglingAutoRenew(true);
+      setActionError(null);
+
+      const token = localStorage.getItem('balkan_estate_token');
+
+      // If auto-renewing is ON, we want to turn it OFF (cancel)
+      // If auto-renewing is OFF, we want to turn it ON (restore)
+      const endpoint = subscription.autoRenewing
+        ? `${API_URL}/subscriptions/${subscription._id}/cancel`
+        : `${API_URL}/subscriptions/${subscription._id}/restore`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Refresh subscription data
+        fetchSubscription();
+        // CRITICAL: Also refresh user context so RoleSelector gets updated
+        if (token) await refreshUserContext(token);
+        // Dispatch event for other components
+        window.dispatchEvent(new Event('subscriptionUpdated'));
+        // Show success message
+        const status = subscription.autoRenewing
+          ? t('management.validation.disabled')
+          : t('management.validation.enabled');
+        alert(t('management.validation.toggleAutoRenewalSuccess', { status }));
+      } else {
+        const data = await response.json();
+        setActionError(data.message || t('management.validation.toggleAutoRenewalError'));
+      }
+    } catch (error) {
+      console.error('Error toggling auto-renewal:', error);
+      setActionError(t('management.validation.toggleAutoRenewalError'));
+    } finally {
+      setTogglingAutoRenew(false);
+    }
+  };
+
+  // Check if subscription is pending cancellation or cancelled but not yet expired
   const isPendingCancellation = subscription?.status === 'pending_cancellation';
+  const isCancelledButActive = subscription?.status === 'canceled' && subscriptionDetails && !subscriptionDetails.isExpired;
 
   if (loading) {
     return (
@@ -643,7 +732,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     );
   }
 
-  if (!subscription || !subscriptionDetails) {
+  // Show "No Active Subscription" only if there's truly no subscription
+  // OR if the subscription is cancelled AND expired
+  const showNoSubscription = !subscription || !subscriptionDetails ||
+    (subscription?.status === 'canceled' && subscriptionDetails?.isExpired) ||
+    (subscription?.status === 'expired');
+
+  if (showNoSubscription && !isCancelledButActive) {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="relative overflow-hidden bg-gradient-to-br from-white via-primary-light/5 to-white rounded-2xl shadow-lg border border-neutral-200/50 p-8 md:p-12">
@@ -841,6 +936,145 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             style={{ width: `${Math.min(100, ((user.subscription?.activeListingsCount || user.listingsCount || 0) / subscriptionDetails.currentPlan.listingLimit) * 100)}%` }}
           />
         </div>
+      </div>
+
+      {/* What's Included in Your Plan - Prominent Feature Breakdown */}
+      <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm">
+        <h3 className="text-lg font-bold text-neutral-800 mb-4 flex items-center gap-2">
+          <SparklesIcon className="w-5 h-5 text-primary" />
+          {t('management.whatsIncluded.title', { plan: subscriptionDetails.currentPlan.name })}
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Listings */}
+          <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+              <HomeIcon className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-neutral-800">
+                {t('management.whatsIncluded.activeListings', { count: subscriptionDetails.currentPlan.listingLimit })}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {t('management.whatsIncluded.activeListingsDesc', { count: subscriptionDetails.currentPlan.listingLimit })}
+              </p>
+            </div>
+          </div>
+
+          {/* Saved Searches */}
+          <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
+            <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-neutral-800">
+                {t('management.whatsIncluded.savedSearches', { count: subscriptionDetails.currentPlanKey === 'free' ? 1 : 10 })}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {t('management.whatsIncluded.savedSearchesDesc')}
+              </p>
+            </div>
+          </div>
+
+          {/* Promotion Coupons - Pro only */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <GiftIconComponent className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-amber-600' : 'text-neutral-400'}`} />
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.promotionCoupons')
+                  : t('management.whatsIncluded.noPromotionCoupons')}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.promotionCouponsDesc')
+                  : t('management.whatsIncluded.upgradeForPromotion')}
+              </p>
+            </div>
+          </div>
+
+          {/* Analytics */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <ChartBarIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-green-600' : 'text-neutral-400'}`} />
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.advancedAnalytics')
+                  : t('management.whatsIncluded.basicAnalytics')}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.advancedAnalyticsDesc')
+                  : t('management.whatsIncluded.basicAnalyticsDesc')}
+              </p>
+            </div>
+          </div>
+
+          {/* Priority Support - Pro only */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.prioritySupport')
+                  : t('management.whatsIncluded.emailSupport')}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.prioritySupportDesc')
+                  : t('management.whatsIncluded.emailSupportDesc')}
+              </p>
+            </div>
+          </div>
+
+          {/* Verified Badge - Pro only */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <CheckCircleIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-cyan-600' : 'text-neutral-400'}`} />
+            </div>
+            <div>
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.verifiedBadge')
+                  : t('management.whatsIncluded.noBadge')}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {subscriptionDetails.currentPlan.tier >= 1
+                  ? t('management.whatsIncluded.verifiedBadgeDesc')
+                  : t('management.whatsIncluded.noBadgeDesc')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Upgrade CTA for free users */}
+        {subscriptionDetails.currentPlan.tier === 0 && (
+          <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-primary-dark/10 rounded-xl border border-primary/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-neutral-800">{t('management.whatsIncluded.wantMoreFeatures')}</p>
+                <p className="text-sm text-neutral-600">{t('management.whatsIncluded.upgradeToProDesc')}</p>
+              </div>
+              <button
+                onClick={() => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } })}
+                className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+              >
+                <SparklesIcon className="w-4 h-4" />
+                {t('management.upgradeNow')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Team Members Section - Only show for agency owners */}
@@ -1049,8 +1283,38 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </div>
       )}
 
+      {/* Cancelled Subscription Notice - still active until expiration */}
+      {isCancelledButActive && !isPendingCancellation && (
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-red-100 rounded-lg flex-shrink-0">
+              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-red-900">Subscription Cancelled</h4>
+              <p className="text-sm text-red-700 mt-1">
+                Your subscription has been cancelled but you still have access until{' '}
+                <span className="font-semibold">{formatDate(subscriptionDetails?.expirationDate || null)}</span>.
+                After this date, you'll be downgraded to the free plan.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } })}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                  Resubscribe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Subscription Settings */}
-      {!isPendingCancellation && subscriptionDetails.isActive && (
+      {!isPendingCancellation && !isCancelledButActive && subscriptionDetails.isActive && (
         <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
           <h3 className="text-lg font-bold text-neutral-800 mb-4 flex items-center gap-2">
             <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1068,19 +1332,41 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           )}
 
           <div className="space-y-4">
-            {/* Auto-Renew Status */}
+            {/* Auto-Renew Toggle */}
             <div className="flex items-center justify-between py-3 border-b border-neutral-100">
               <div>
                 <p className="font-medium text-neutral-800">Auto-Renewal</p>
                 <p className="text-sm text-neutral-500">
                   {subscriptionDetails.autoRenewing
                     ? `Your subscription will automatically renew on ${formatDate(subscriptionDetails.renewalDate)}`
-                    : 'Auto-renewal is disabled'}
+                    : `Your subscription will expire on ${formatDate(subscriptionDetails.expirationDate)}`}
                 </p>
               </div>
-              <span className={`px-3 py-1 text-sm font-medium rounded-full ${subscriptionDetails.autoRenewing ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'}`}>
-                {subscriptionDetails.autoRenewing ? 'On' : 'Off'}
-              </span>
+              <button
+                onClick={handleToggleAutoRenewal}
+                disabled={togglingAutoRenew}
+                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  subscriptionDetails.autoRenewing
+                    ? 'bg-green-500 focus:ring-green-500'
+                    : 'bg-neutral-300 focus:ring-neutral-400'
+                } ${togglingAutoRenew ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                role="switch"
+                aria-checked={subscriptionDetails.autoRenewing}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
+                    subscriptionDetails.autoRenewing ? 'translate-x-8' : 'translate-x-1'
+                  }`}
+                />
+                {togglingAutoRenew && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Payment Method Info */}
@@ -1270,27 +1556,32 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
             {/* Different content for coupon vs paid */}
             {subscriptionDetails?.isCoupon ? (
-              // Coupon subscription - just cancel
+              // Coupon/free trial subscription - continues until expiration
               <div className="bg-yellow-50 rounded-xl p-4 mb-6 border border-yellow-200">
-                <h4 className="text-sm font-semibold text-yellow-800 mb-2">Cancelling your free trial:</h4>
+                <h4 className="text-sm font-semibold text-yellow-800 mb-2">What happens when you cancel:</h4>
                 <ul className="space-y-2 text-sm text-yellow-700">
                   <li className="flex items-start gap-2">
-                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <span>Your free trial will end immediately</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <span>You'll revert to the free plan (3 listings max)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <span>Premium features will no longer be available</span>
+                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>Your free trial continues until <span className="font-semibold">{formatDate(subscriptionDetails?.expirationDate || null)}</span></span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>No charges - it was free!</span>
+                    <span>You'll keep all premium features until then</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>You won't be charged after the trial ends</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <span>After expiration, you'll revert to the free plan (3 listings max)</span>
                   </li>
                 </ul>
+                <div className="mt-3 pt-3 border-t border-yellow-200">
+                  <p className="text-xs text-yellow-600">
+                    <span className="font-semibold">Note:</span> If you don't cancel, you'll automatically be subscribed to the paid plan at the end of your trial and your payment method will be charged.
+                  </p>
+                </div>
               </div>
             ) : (
               // Paid subscription - offer refund
@@ -1395,7 +1686,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       Cancelling...
                     </>
                   ) : (
-                    subscriptionDetails?.isCoupon ? 'Yes, Cancel Free Trial' : 'Yes, Cancel'
+                    subscriptionDetails?.isCoupon ? 'Yes, Cancel Auto-Renewal' : 'Yes, Cancel'
                   )}
                 </button>
               )}
@@ -1406,7 +1697,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 }}
                 className="w-full py-2.5 rounded-lg font-semibold text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 transition-colors"
               >
-                Keep {subscriptionDetails?.isCoupon ? 'Free Trial' : 'Subscription'}
+                {subscriptionDetails?.isCoupon ? 'Keep Auto-Renewal' : 'Keep Subscription'}
               </button>
             </div>
           </div>

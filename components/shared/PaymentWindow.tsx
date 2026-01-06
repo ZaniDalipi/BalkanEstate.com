@@ -13,7 +13,7 @@ import { API_URL } from '../../src/shared/api/config';
 // ============================================
 // COMING SOON FLAG - Set to false when ready to launch payments
 // ============================================
-const PAYMENTS_COMING_SOON = true;
+const PAYMENTS_COMING_SOON = false;
 // ============================================
 
 interface PaymentWindowProps {

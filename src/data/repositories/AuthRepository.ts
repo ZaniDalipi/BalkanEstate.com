@@ -18,13 +18,14 @@ export class AuthRepository implements IAuthRepository {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await authApiClient.login(credentials.email, credentials.password);
 
-    // Store token
-    httpClient.setToken(response.token);
+    // Store token (support both old 'token' and new 'accessToken' format)
+    const token = response.accessToken || response.token;
+    httpClient.setToken(token);
 
     // Map user DTO to domain entity
     const user = UserMapper.toDomain(response.user);
 
-    return { user, token: response.token };
+    return { user, token };
   }
 
   async signup(data: SignupData): Promise<AuthResponse> {
@@ -36,13 +37,14 @@ export class AuthRepository implements IAuthRepository {
       role: data.role,
     });
 
-    // Store token
-    httpClient.setToken(response.token);
+    // Store token (support both old 'token' and new 'accessToken' format)
+    const token = response.accessToken || response.token;
+    httpClient.setToken(token);
 
     // Map user DTO to domain entity
     const user = UserMapper.toDomain(response.user);
 
-    return { user, token: response.token };
+    return { user, token };
   }
 
   async loginWithOAuth(credentials: OAuthCredentials): Promise<AuthResponse> {

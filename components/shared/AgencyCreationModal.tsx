@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../shared/Modal';
-import { BuildingOfficeIcon, CheckCircleIcon } from '../../constants';
+import { BuildingOfficeIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
+import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
+import { UserRole } from '../../types';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -26,6 +28,12 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+
+  // Check if user can create an agency (must be an agent with active Pro subscription)
+  const agencyEligibility = canCreateAgency(
+    state.currentUser?.subscription,
+    state.currentUser?.availableRoles
+  );
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -218,6 +226,48 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             }
           </p>
         </div>
+
+        {/* Show eligibility warning if user is not an agent */}
+        {!agencyEligibility.allowed && (
+          <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl">
+            <div className="flex items-start gap-3">
+              <ExclamationTriangleIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-amber-800 mb-1">
+                  {agencyEligibility.reason?.includes('agent')
+                    ? 'Agent Status Required'
+                    : 'Pro Subscription Required'}
+                </h4>
+                <p className="text-sm text-amber-700 mb-3">
+                  {agencyEligibility.reason}
+                </p>
+                {!state.currentUser?.availableRoles?.includes(UserRole.AGENT) ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true } });
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
+                  >
+                    Become an Agent First
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true } });
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
+                  >
+                    Upgrade to Pro
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
@@ -616,7 +666,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isCreating}
+              disabled={isCreating || !agencyEligibility.allowed}
               className="flex-1 py-3.5 px-6 bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 text-white rounded-xl font-bold hover:from-amber-600 hover:via-amber-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isCreating ? (

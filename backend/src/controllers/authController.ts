@@ -10,7 +10,6 @@ import cloudinary from '../config/cloudinary';
 import { Readable } from 'stream';
 import { validatePassword, passwordContainsUserInfo } from '../utils/passwordValidator';
 import { sendVerificationEmail } from '../services/emailVerificationService';
-import { startAgentTrial } from '../services/trialManagementService';
 import { generateTokenPair } from '../services/refreshTokenService';
 import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rateLimiter';
 
@@ -19,18 +18,37 @@ import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rate
 // @access  Public
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, name, phone, role, licenseNumber, agencyInvitationCode, languages } = req.body;
+    const { email, password, confirmPassword, name, phone, role, licenseNumber, agencyInvitationCode, languages } = req.body;
+
+    // ============================================
+    // STEP 1: Validate ALL inputs BEFORE any database writes
+    // ============================================
 
     // Validate required fields
     if (!email || !password || !name) {
-      res.status(400).json({ message: 'Email, password, and name are required' });
+      res.status(400).json({
+        message: 'Email, password, and name are required',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      res.status(400).json({ message: 'Invalid email format' });
+      res.status(400).json({
+        message: 'Invalid email format',
+        code: 'INVALID_EMAIL_FORMAT'
+      });
+      return;
+    }
+
+    // Validate password confirmation if provided
+    if (confirmPassword && password !== confirmPassword) {
+      res.status(400).json({
+        message: 'Passwords do not match',
+        code: 'PASSWORD_MISMATCH'
+      });
       return;
     }
 
@@ -39,6 +57,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     if (!passwordValidation.isValid) {
       res.status(400).json({
         message: 'Password does not meet security requirements',
+        code: 'WEAK_PASSWORD',
         errors: passwordValidation.errors,
       });
       return;
@@ -49,57 +68,109 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     if (passwordContainsUserInfo(password, userInfo)) {
       res.status(400).json({
         message: 'Password should not contain your email or name',
+        code: 'PASSWORD_CONTAINS_USER_INFO'
       });
       return;
     }
 
     // Check if user already exists (case-insensitive)
     const userExists = await User.findOne({ email: email.toLowerCase() });
-
     if (userExists) {
-      res.status(400).json({ message: 'User already exists' });
+      res.status(400).json({
+        message: 'An account with this email already exists',
+        code: 'EMAIL_EXISTS'
+      });
       return;
     }
 
-    let agencyName = undefined;
-    let agencyId = undefined;
-    let generatedAgentId = undefined;
+    // ============================================
+    // STEP 2: Validate agent-specific fields BEFORE creating user
+    // ============================================
 
-    // If signing up as agent, validate and set up agent data
-    if (role === 'agent' && licenseNumber) {
-      // Validate license number format (adjust regex as needed)
-      const licenseRegex = /^[A-Z0-9-]+$/i;
-      if (!licenseRegex.test(licenseNumber)) {
-        res.status(400).json({ message: 'Invalid license number format' });
+    let agencyName: string | undefined = undefined;
+    let agencyId: mongoose.Types.ObjectId | undefined = undefined;
+    let generatedAgentId: string | undefined = undefined;
+    let verifiedAgency: any = null;
+
+    if (role === 'agent') {
+      // License number is required for agents
+      if (!licenseNumber) {
+        res.status(400).json({
+          message: 'License number is required for agent registration',
+          code: 'LICENSE_REQUIRED'
+        });
         return;
       }
 
-      let agency = null;
+      // Validate license number format
+      const licenseRegex = /^[A-Z0-9-]+$/i;
+      if (!licenseRegex.test(licenseNumber)) {
+        res.status(400).json({
+          message: 'Invalid license number format. Only letters, numbers, and hyphens are allowed.',
+          code: 'INVALID_LICENSE_FORMAT'
+        });
+        return;
+      }
+
+      // Validate license number length
+      if (licenseNumber.length < 5 || licenseNumber.length > 30) {
+        res.status(400).json({
+          message: 'License number must be between 5 and 30 characters',
+          code: 'INVALID_LICENSE_LENGTH'
+        });
+        return;
+      }
+
+      // Check if license number already exists in User collection
+      const existingUserWithLicense = await User.findOne({ licenseNumber: licenseNumber });
+      if (existingUserWithLicense) {
+        res.status(400).json({
+          message: 'This license number is already registered',
+          code: 'LICENSE_EXISTS'
+        });
+        return;
+      }
+
+      // Check if license number already exists in Agent collection
+      const existingAgentWithLicense = await Agent.findOne({ licenseNumber: licenseNumber });
+      if (existingAgentWithLicense) {
+        res.status(400).json({
+          message: 'This license number is already registered',
+          code: 'LICENSE_EXISTS'
+        });
+        return;
+      }
+
       agencyName = 'Independent Agent'; // Default for independent agents
 
       // If agency invitation code is provided, verify it
       if (agencyInvitationCode) {
-        agency = await Agency.findOne({ invitationCode: agencyInvitationCode.toUpperCase() });
+        verifiedAgency = await Agency.findOne({ invitationCode: agencyInvitationCode.toUpperCase() });
 
-        if (!agency) {
-          res.status(404).json({
-            message: 'Invalid agency invitation code. Please check the code and try again.'
+        if (!verifiedAgency) {
+          res.status(400).json({
+            message: 'Invalid agency invitation code. Please check the code and try again.',
+            code: 'INVALID_AGENCY_CODE'
           });
           return;
         }
 
-        agencyName = agency.name; // Use verified agency name
-        agencyId = agency._id as unknown as mongoose.Types.ObjectId;
+        agencyName = verifiedAgency.name;
+        agencyId = verifiedAgency._id as unknown as mongoose.Types.ObjectId;
       }
 
       // Generate agent ID
       generatedAgentId = `AG-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     }
 
+    // ============================================
+    // STEP 3: All validations passed - NOW create records
+    // ============================================
+
     // Determine listing limit based on role
     let activeListingsLimit = 3; // Default for buyers and private sellers
     if (role === 'agent') {
-      activeListingsLimit = 10; // Trial agents get 10 listings
+      activeListingsLimit = 0; // Agents need Pro subscription to post
     }
 
     // Create user with initialized stats
@@ -109,11 +180,11 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       name,
       phone,
       role: role || 'buyer',
-      licenseNumber: generatedAgentId ? licenseNumber : undefined,
+      licenseNumber: role === 'agent' ? licenseNumber : undefined,
       agencyName: agencyName,
       agencyId: agencyId,
       agentId: generatedAgentId,
-      isEmailVerified: false, // Require email verification
+      isEmailVerified: false,
       activeListingsLimit,
       stats: {
         totalViews: 0,
@@ -125,47 +196,81 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       }
     });
 
-    // If agent, create Agent record, add to agency, and start trial
+    // If agent, create Agent record and add to agency
     if (role === 'agent' && licenseNumber) {
-      // Use provided languages or default to English
-      const agentLanguages = languages && languages.length > 0 ? languages : ['English'];
+      try {
+        const agentLanguages = languages && languages.length > 0 ? languages : ['English'];
 
-      await Agent.create({
-        userId: user._id,
-        agencyName: agencyName!,
-        agencyId: agencyId || undefined,
-        agentId: generatedAgentId!,
-        licenseNumber,
-        licenseVerified: true,
-        licenseVerificationDate: new Date(),
-        languages: agentLanguages,
-        isActive: true,
-      });
+        await Agent.create({
+          userId: user._id,
+          agencyName: agencyName!,
+          agencyId: agencyId || undefined,
+          agentId: generatedAgentId!,
+          licenseNumber,
+          licenseVerified: true,
+          licenseVerificationDate: new Date(),
+          languages: agentLanguages,
+          isActive: true,
+        });
 
-      // Add agent to agency's agents array if agency was provided
-      if (agencyId) {
-        const agency = await Agency.findById(agencyId);
-        if (agency) {
+        // Add agent to agency's agents array if agency was provided
+        if (agencyId && verifiedAgency) {
           const userObjectId = user._id as unknown as mongoose.Types.ObjectId;
-          if (!agency.agents.some(agentId => agentId.toString() === userObjectId.toString())) {
-            agency.agents.push(userObjectId);
-            agency.totalAgents = agency.agents.length;
+          if (!verifiedAgency.agents.some((aid: any) => aid.toString() === userObjectId.toString())) {
+            verifiedAgency.agents.push(userObjectId);
+            verifiedAgency.totalAgents = verifiedAgency.agents.length;
 
-            // Auto-sync agent languages to agency (merge unique languages)
-            const existingLanguages = agency.languages || [];
+            const existingLanguages = verifiedAgency.languages || [];
             const mergedLanguages = [...new Set([...existingLanguages, ...agentLanguages])];
-            agency.languages = mergedLanguages;
+            verifiedAgency.languages = mergedLanguages;
 
-            await agency.save();
+            await verifiedAgency.save();
           }
         }
-      }
 
-      // Start 7-day trial period for agent
-      await startAgentTrial(user);
+        // Initialize dual-role system for agents
+        user.availableRoles = ['agent', 'private_seller'];
+        user.activeRole = 'agent';
+        user.primaryRole = 'agent';
+
+        // Initialize subscription as free tier - agents need Pro subscription to post
+        user.subscription = {
+          tier: 'free',
+          status: 'active',
+          listingsLimit: 0,
+          activeListingsCount: 0,
+          privateSellerCount: 0,
+          agentCount: 0,
+          promotionCoupons: {
+            monthly: 0,
+            available: 0,
+            used: 0,
+            rollover: 0,
+            lastRefresh: new Date(),
+          },
+          savedSearchesLimit: 1,
+          totalPaid: 0,
+        };
+
+        user.subscriptionStatus = 'active';
+        user.activeListingsLimit = 0;
+
+        await user.save();
+
+        console.log(`✅ Agent ${user.email} registered. Pro subscription required to post listings.`);
+      } catch (agentError: any) {
+        // If agent creation fails, delete the user to maintain consistency
+        await User.findByIdAndDelete(user._id);
+        console.error('Agent creation failed, rolled back user:', agentError);
+        res.status(500).json({
+          message: 'Failed to create agent profile. Please try again.',
+          code: 'AGENT_CREATION_FAILED'
+        });
+        return;
+      }
     }
 
-    // Send email verification
+    // Send email verification (non-blocking)
     try {
       await sendVerificationEmail(user);
     } catch (emailError) {
@@ -173,7 +278,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       // Don't block signup if email fails
     }
 
-    // Generate token pair (access + refresh)
+    // Generate token pair
     const deviceInfo = {
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip || req.socket.remoteAddress,
@@ -197,14 +302,44 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
         isEmailVerified: user.isEmailVerified,
-        trialActive: role === 'agent' ? user.isTrialActive() : false,
-        trialEndDate: role === 'agent' ? user.trialEndDate : undefined,
+        subscription: user.subscription,
+        availableRoles: user.availableRoles,
+        activeRole: user.activeRole,
+        requiresSubscription: role === 'agent' && !user.isSubscribed,
         activeListingsLimit: user.getActiveListingsLimit(),
       },
     });
   } catch (error: any) {
     console.error('Signup error:', error);
-    res.status(500).json({ message: 'Error creating user', error: error.message });
+
+    // Handle MongoDB duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0];
+      if (field === 'email') {
+        res.status(400).json({
+          message: 'An account with this email already exists',
+          code: 'EMAIL_EXISTS'
+        });
+        return;
+      }
+      if (field === 'licenseNumber') {
+        res.status(400).json({
+          message: 'This license number is already registered',
+          code: 'LICENSE_EXISTS'
+        });
+        return;
+      }
+      res.status(400).json({
+        message: 'A record with this information already exists',
+        code: 'DUPLICATE_ENTRY'
+      });
+      return;
+    }
+
+    res.status(500).json({
+      message: 'Error creating user. Please try again.',
+      code: 'SIGNUP_ERROR'
+    });
   }
 };
 
@@ -398,24 +533,69 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     let promotionCoupons = { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() };
     let savedSearchesLimit = 1;
     let subscriptionExpiresAt: Date | undefined;
+    let subscriptionStatus: string = 'active';
+    let isCancelledButActive = false;
 
-    // PRIORITY 1: Check Subscriptions collection for active subscription (coupon-based, Stripe, etc.)
-    const activeSubscription = await Subscription.findOne({
-      userId: user._id,
-      status: { $in: ['active', 'trial'] },
+    // **CRITICAL: Check Subscriptions collection - this is the source of truth**
+    // Handle both ObjectId and string userId formats for compatibility
+    const userIdVariants = [user._id, String(user._id)];
+
+    console.log(`🔍 [getMe] Looking for subscription for user ${user.email} (id: ${user._id})`);
+
+    // PRIORITY 1: Check for active/trial subscriptions
+    let dbSubscription = await Subscription.findOne({
+      userId: { $in: userIdVariants },
+      status: { $in: ['active', 'trial', 'grace'] },
       expirationDate: { $gt: new Date() },
-    });
+    }).sort({ expirationDate: -1 });
 
-    if (activeSubscription) {
-      const productId = activeSubscription.productId;
+    // PRIORITY 2: If no active, check for pending_cancellation or cancelled subscription that hasn't expired yet
+    if (!dbSubscription) {
+      dbSubscription = await Subscription.findOne({
+        userId: { $in: userIdVariants },
+        status: { $in: ['pending_cancellation', 'canceled'] },
+        expirationDate: { $gt: new Date() },
+      }).sort({ expirationDate: -1 });
+
+      if (dbSubscription) {
+        isCancelledButActive = true;
+        console.log(`⚠️ [getMe] Found ${dbSubscription.status} subscription for ${user.email}, valid until ${dbSubscription.expirationDate}`);
+      }
+    }
+
+    // Debug: Log all subscriptions for this user if none found
+    if (!dbSubscription) {
+      const allUserSubs = await Subscription.find({
+        userId: { $in: userIdVariants },
+      }).sort({ createdAt: -1 }).limit(3);
+
+      if (allUserSubs.length > 0) {
+        console.log(`⚠️ [getMe] Found ${allUserSubs.length} subscription(s) for ${user.email}, but none match active criteria:`);
+        allUserSubs.forEach(sub => {
+          console.log(`   - ${sub.productId}: status=${sub.status}, expires=${sub.expirationDate}, now=${new Date()}, isExpired=${sub.expirationDate <= new Date()}`);
+        });
+      } else {
+        console.log(`❌ [getMe] No subscriptions found in DB for user ${user.email} (id: ${user._id})`);
+      }
+    }
+
+    if (dbSubscription) {
+      const productId = dbSubscription.productId;
+      subscriptionStatus = dbSubscription.status;
       // Check if it's a Pro subscription
       if (productId?.includes('pro') || productId === 'pro_monthly' || productId === 'pro_yearly') {
         tier = 'pro';
         listingsLimit = 25;
         promotionCoupons = { monthly: 3, available: 3, used: 0, rollover: 0, lastRefresh: new Date() };
         savedSearchesLimit = 10;
-        subscriptionExpiresAt = activeSubscription.expirationDate;
-        console.log(`🎫 [getMe] Found active subscription in Subscriptions collection for ${user.email}: ${productId}, expires: ${subscriptionExpiresAt}`);
+        subscriptionExpiresAt = dbSubscription.expirationDate;
+        console.log(`🎫 [getMe] Found ${isCancelledButActive ? 'cancelled-but-valid' : 'active'} subscription in DB for ${user.email}: ${productId}, expires: ${subscriptionExpiresAt}`);
+      }
+    } else {
+      // **NO VALID SUBSCRIPTION FOUND** - check if user.subscription thinks they have Pro and downgrade
+      if (user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+        console.log(`⚠️ [getMe] User ${user.email} has no valid subscription in DB but tier is ${user.subscription.tier}. Downgrading to free.`);
+        subscriptionStatus = 'expired';
       }
     }
 
@@ -450,10 +630,10 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
     if (!user.subscription) {
       // Initialize new subscription
-      console.log(`🔄 [getMe] Initializing subscription for ${user.email}: ${listingsLimit} listings, tier: ${tier}`);
+      console.log(`🔄 [getMe] Initializing subscription for ${user.email}: ${listingsLimit} listings, tier: ${tier}, status: ${subscriptionStatus}`);
       user.subscription = {
         tier,
-        status: 'active',
+        status: subscriptionStatus as 'active' | 'trial' | 'grace' | 'canceled' | 'expired' | 'pending_cancellation',
         listingsLimit,
         activeListingsCount,
         privateSellerCount,
@@ -471,12 +651,30 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       user.subscription.privateSellerCount = privateSellerCount;
       user.subscription.agentCount = agentCount;
 
-      // CRITICAL: If user should be Pro (from Subscriptions collection) but is showing as Free, fix it
+      // **CRITICAL: Always sync tier and status from database truth**
+      // If DB shows Pro (from active or cancelled-but-valid subscription), update to Pro
       if (tier === 'pro' && user.subscription.tier !== 'pro') {
         console.log(`🔧 [getMe] Upgrading ${user.email} from ${user.subscription.tier} to pro tier`);
         user.subscription.tier = 'pro';
         user.subscription.listingsLimit = 25;
         user.subscription.expiresAt = subscriptionExpiresAt;
+      }
+
+      // **AUTO-DOWNGRADE: If NO valid subscription in DB, downgrade to free**
+      if (subscriptionStatus === 'expired' && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
+        console.log(`⬇️ [getMe] Downgrading ${user.email} from ${user.subscription.tier} to free tier (no valid subscription in DB)`);
+        user.subscription.tier = 'free';
+        user.subscription.status = 'expired';
+        user.subscription.listingsLimit = 3;
+        user.subscription.promotionCoupons = { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() };
+        user.subscription.savedSearchesLimit = 1;
+        user.subscription.expiresAt = undefined;
+      } else {
+        // Sync status from DB
+        user.subscription.status = subscriptionStatus as 'active' | 'trial' | 'grace' | 'canceled' | 'expired' | 'pending_cancellation';
+        if (subscriptionExpiresAt) {
+          user.subscription.expiresAt = subscriptionExpiresAt;
+        }
       }
 
       // Ensure listingsLimit is correct for Pro users
@@ -485,7 +683,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         user.subscription.listingsLimit = 25;
       }
 
-      console.log(`✅ [getMe] Subscription synced for ${user.email}: ${user.subscription.tier} tier, ${activeListingsCount}/${user.subscription.listingsLimit} listings used`);
+      console.log(`✅ [getMe] Subscription synced for ${user.email}: ${user.subscription.tier} tier (status: ${user.subscription.status}), ${activeListingsCount}/${user.subscription.listingsLimit} listings used`);
     }
 
     await user.save();

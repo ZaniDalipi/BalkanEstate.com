@@ -109,7 +109,7 @@ export interface IUser extends Document {
   subscription: {
     // Core subscription info
     tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer';
-    status: 'active' | 'canceled' | 'expired' | 'trial';
+    status: 'active' | 'canceled' | 'expired' | 'trial' | 'grace' | 'pending_cancellation';
     startDate?: Date;
     expiresAt?: Date;
     stripeCustomerId?: string;
