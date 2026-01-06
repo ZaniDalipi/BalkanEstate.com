@@ -1,6 +1,6 @@
 import React from 'react';
 import Modal from './Modal';
-import WhackAnIconAnimation from '../SellerFlow/WhackAnIconAnimation';
+import { WhackAnIconAnimation } from '@/src/features';
 
 interface DiscountGameModalProps {
     isOpen: boolean;

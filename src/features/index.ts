@@ -26,7 +26,7 @@ export * from './calculators';
 // Discovery
 export * from './cities';
 export * from './analytics';
-export * from './view-stats';
+// export * from './view-stats';
 
 // Admin & System
 export * from './admin';

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { agentKeys } from '../api/agentKeys';
+import { agentKeys } from '@/features/agents/queries/agentKeys';
 import { getAgencyAgents } from '@/services/apiService';
 import { Agent } from '@/types';
 
