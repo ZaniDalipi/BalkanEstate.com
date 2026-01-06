@@ -186,8 +186,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         totalPaid: 0,
       };
 
-      // Set flag to indicate Pro subscription is required
-      user.subscriptionStatus = 'pending'; // Indicates needs subscription
+      // Agent registered with free tier - needs Pro subscription to post
+      user.subscriptionStatus = 'active'; // Active free tier, needs upgrade
       user.activeListingsLimit = 0; // Cannot post until subscribed
 
       await user.save();
