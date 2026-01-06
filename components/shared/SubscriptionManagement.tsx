@@ -176,6 +176,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [togglingAutoRenew, setTogglingAutoRenew] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -628,6 +629,47 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       setActionError('An error occurred while restoring your subscription');
     } finally {
       setRestoring(false);
+    }
+  };
+
+  // Toggle auto-renewal on/off
+  const handleToggleAutoRenewal = async () => {
+    if (!subscription) return;
+
+    try {
+      setTogglingAutoRenew(true);
+      setActionError(null);
+
+      const token = localStorage.getItem('balkan_estate_token');
+
+      // If auto-renewing is ON, we want to turn it OFF (cancel)
+      // If auto-renewing is OFF, we want to turn it ON (restore)
+      const endpoint = subscription.autoRenewing
+        ? `${API_URL}/subscriptions/${subscription._id}/cancel`
+        : `${API_URL}/subscriptions/${subscription._id}/restore`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Refresh subscription data
+        fetchSubscription();
+        // Dispatch event for other components
+        window.dispatchEvent(new Event('subscriptionUpdated'));
+      } else {
+        const data = await response.json();
+        setActionError(data.message || 'Failed to update auto-renewal');
+      }
+    } catch (error) {
+      console.error('Error toggling auto-renewal:', error);
+      setActionError('An error occurred while updating auto-renewal');
+    } finally {
+      setTogglingAutoRenew(false);
     }
   };
 
@@ -1110,19 +1152,41 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           )}
 
           <div className="space-y-4">
-            {/* Auto-Renew Status */}
+            {/* Auto-Renew Toggle */}
             <div className="flex items-center justify-between py-3 border-b border-neutral-100">
               <div>
                 <p className="font-medium text-neutral-800">Auto-Renewal</p>
                 <p className="text-sm text-neutral-500">
                   {subscriptionDetails.autoRenewing
                     ? `Your subscription will automatically renew on ${formatDate(subscriptionDetails.renewalDate)}`
-                    : 'Auto-renewal is disabled'}
+                    : `Your subscription will expire on ${formatDate(subscriptionDetails.expirationDate)}`}
                 </p>
               </div>
-              <span className={`px-3 py-1 text-sm font-medium rounded-full ${subscriptionDetails.autoRenewing ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'}`}>
-                {subscriptionDetails.autoRenewing ? 'On' : 'Off'}
-              </span>
+              <button
+                onClick={handleToggleAutoRenewal}
+                disabled={togglingAutoRenew}
+                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  subscriptionDetails.autoRenewing
+                    ? 'bg-green-500 focus:ring-green-500'
+                    : 'bg-neutral-300 focus:ring-neutral-400'
+                } ${togglingAutoRenew ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                role="switch"
+                aria-checked={subscriptionDetails.autoRenewing}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
+                    subscriptionDetails.autoRenewing ? 'translate-x-8' : 'translate-x-1'
+                  }`}
+                />
+                {togglingAutoRenew && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Payment Method Info */}
