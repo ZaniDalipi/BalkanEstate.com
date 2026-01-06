@@ -1312,27 +1312,32 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
             {/* Different content for coupon vs paid */}
             {subscriptionDetails?.isCoupon ? (
-              // Coupon subscription - just cancel
+              // Coupon/free trial subscription - continues until expiration
               <div className="bg-yellow-50 rounded-xl p-4 mb-6 border border-yellow-200">
-                <h4 className="text-sm font-semibold text-yellow-800 mb-2">Cancelling your free trial:</h4>
+                <h4 className="text-sm font-semibold text-yellow-800 mb-2">What happens when you cancel:</h4>
                 <ul className="space-y-2 text-sm text-yellow-700">
                   <li className="flex items-start gap-2">
-                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <span>Your free trial will end immediately</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <span>You'll revert to the free plan (3 listings max)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <span>Premium features will no longer be available</span>
+                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>Your free trial continues until <span className="font-semibold">{formatDate(subscriptionDetails?.expirationDate || null)}</span></span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>No charges - it was free!</span>
+                    <span>You'll keep all premium features until then</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircleIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>You won't be charged after the trial ends</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <XCircleIcon className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <span>After expiration, you'll revert to the free plan (3 listings max)</span>
                   </li>
                 </ul>
+                <div className="mt-3 pt-3 border-t border-yellow-200">
+                  <p className="text-xs text-yellow-600">
+                    <span className="font-semibold">Note:</span> If you don't cancel, you'll automatically be subscribed to the paid plan at the end of your trial and your payment method will be charged.
+                  </p>
+                </div>
               </div>
             ) : (
               // Paid subscription - offer refund
@@ -1437,7 +1442,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       Cancelling...
                     </>
                   ) : (
-                    subscriptionDetails?.isCoupon ? 'Yes, Cancel Free Trial' : 'Yes, Cancel'
+                    subscriptionDetails?.isCoupon ? 'Yes, Cancel Auto-Renewal' : 'Yes, Cancel'
                   )}
                 </button>
               )}
@@ -1448,7 +1453,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 }}
                 className="w-full py-2.5 rounded-lg font-semibold text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 transition-colors"
               >
-                Keep {subscriptionDetails?.isCoupon ? 'Free Trial' : 'Subscription'}
+                {subscriptionDetails?.isCoupon ? 'Keep Auto-Renewal' : 'Keep Subscription'}
               </button>
             </div>
           </div>
