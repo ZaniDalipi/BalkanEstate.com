@@ -71,6 +71,38 @@ export const getAgent = async (agentId: string): Promise<Agent> => {
   return transformBackendAgent(response.agent);
 };
 
+export interface AgentDetailsResponse {
+  agent: Agent;
+  properties: {
+    forSale: any[];
+    forRent: any[];
+    sold: any[];
+  };
+  stats: {
+    totalListings: number;
+    activeListings: number;
+    totalSales: number;
+    averageRating: number;
+  } | null;
+}
+
+export const getAgentDetails = async (agentId: string): Promise<AgentDetailsResponse> => {
+  const response = await apiRequest<{ agent: any }>(`/agents/${agentId}`);
+  const agent = transformBackendAgent(response.agent);
+
+  // Return with default empty properties/stats since backend only returns agent
+  return {
+    agent,
+    properties: { forSale: [], forRent: [], sold: [] },
+    stats: {
+      totalListings: agent.activeListings || 0,
+      activeListings: agent.activeListings || 0,
+      totalSales: agent.propertiesSold || 0,
+      averageRating: agent.rating || 0,
+    },
+  };
+};
+
 export const updateAgentProfile = async (agentData: Partial<Agent>): Promise<Agent> => {
   const response = await apiRequest<{ agent: any }>('/agents/profile', {
     method: 'PUT',
