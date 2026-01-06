@@ -92,7 +92,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               {[
                 { icon: FacebookIcon, href: 'https://facebook.com', label: 'Facebook' },
                 { icon: TwitterIcon, href: 'https://twitter.com', label: 'Twitter' },
-                { icon: WhatsappIcon, href: 'https://wa.me/383XXXXXXX', label: 'WhatsApp' },
+                { icon: WhatsappIcon, href: 'https://wa.me/38971967915', label: 'WhatsApp' },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
@@ -160,7 +160,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="tel:+383XXXXXXX"
+                  href="tel:+38971967915"
                   className="flex items-center gap-3 hover:translate-x-1 transition-all duration-200 group py-1"
                 >
                   <Phone className="w-4 h-4 text-purple-500 group-hover:text-purple-600 transition-colors flex-shrink-0" />
@@ -171,7 +171,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               </li>
               <li>
                 <a
-                  href="mailto:info@balkanestate.com"
+                  href="mailto:balkanstateai@gmail.com"
                   className="flex items-center gap-3 hover:translate-x-1 transition-all duration-200 group py-1"
                 >
                   <Mail className="w-4 h-4 text-purple-500 group-hover:text-purple-600 transition-colors flex-shrink-0" />
