@@ -1,0 +1,144 @@
+{
+  "page": {
+    "title": "Колко Струва Моят Имот?",
+    "subtitle": "Получете незабавна AI оценка, базирана на реални пазарни данни и сравними продажби във вашия район.",
+    "badge": "AI Технология",
+    "trust1": "Безплатно и Незабавно",
+    "trust2": "Без Регистрация",
+    "trust3": "Базирано на Реални Данни"
+  },
+  "stats": {
+    "valuations": "Оценки",
+    "accuracy": "Точност",
+    "countries": "Балкански Държави"
+  },
+  "form": {
+    "locationSection": "Местоположение",
+    "detailsSection": "Детайли на Имота",
+    "location": "Местоположение на Имота",
+    "locationPlaceholder": "Търсене на адрес...",
+    "propertyType": "Тип Имот",
+    "size": "Площ",
+    "bedrooms": "Спални",
+    "bathrooms": "Бани",
+    "condition": "Състояние",
+    "yearBuilt": "Година на Строеж",
+    "yearBuiltPlaceholder": "напр. 2010",
+    "floorNumber": "Номер на Етаж",
+    "totalFloors": "Общо Етажи",
+    "viewType": "Тип Изглед",
+    "furnishing": "Обзавеждане",
+    "amenities": "Удобства",
+    "showAdvanced": "Покажи Повече Опции",
+    "hideAdvanced": "Скрий Опции",
+    "getValuation": "Получи Оценка",
+    "calculating": "Анализирам...",
+    "disclaimer": "Това е автоматична оценка само за информационни цели. Реалната пазарна стойност може да варира."
+  },
+  "propertyTypes": {
+    "apartment": "Апартамент",
+    "house": "Къща",
+    "villa": "Вила",
+    "land": "Земя",
+    "other": "Друго"
+  },
+  "conditions": {
+    "new": "Ново",
+    "excellent": "Отлично",
+    "good": "Добро",
+    "fair": "Приемливо",
+    "needsRenovation": "Нужда от Ремонт"
+  },
+  "views": {
+    "sea": "Море",
+    "mountain": "Планина",
+    "city": "Град",
+    "park": "Парк",
+    "garden": "Градина",
+    "street": "Улица"
+  },
+  "furnishing": {
+    "furnished": "Обзаведено",
+    "semiFurnished": "Частично Обзаведено",
+    "unfurnished": "Необзаведено"
+  },
+  "amenities": {
+    "balcony": "Балкон",
+    "garden": "Градина",
+    "elevator": "Асансьор",
+    "parking": "Паркинг",
+    "pool": "Басейн"
+  },
+  "result": {
+    "estimatedValue": "Оценена Стойност",
+    "confidence": "Увереност",
+    "pricePerSqm": "Цена на m²",
+    "marketTrend": "Пазарен Тренд",
+    "demandScore": "Оценка на Търсенето",
+    "avgDaysOnMarket": "Средно Дни на Пазара",
+    "days": "дни",
+    "aiInsights": "AI Пазарни Анализи",
+    "valueBreakdown": "Разбивка на Стойността",
+    "comparableProperties": "Подобни Имоти",
+    "propertySummary": "Резюме на Имота",
+    "location": "Местоположение",
+    "type": "Тип",
+    "size": "Площ",
+    "bedrooms": "Спални",
+    "bathrooms": "Бани",
+    "condition": "Състояние",
+    "beds": "спални",
+    "baths": "бани",
+    "newValuation": "Нова Оценка",
+    "readyToSell": "Готови за Продажба?",
+    "listPropertyCTA": "Публикувайте имота си в BalkanEstate и достигнете до хиляди купувачи в Балканите.",
+    "listPropertyButton": "Публикувай Имот"
+  },
+  "breakdown": {
+    "baseValue": "Базова Стойност (от сравними)",
+    "location": "Корекция на Местоположение",
+    "condition": "Корекция на Състояние",
+    "amenities": "Корекция на Удобства",
+    "age": "Корекция на Възраст",
+    "total": "Обща Оценена Стойност"
+  },
+  "confidence": {
+    "high": "Висока",
+    "medium": "Средна",
+    "low": "Ниска"
+  },
+  "marketTrend": {
+    "rising": "Възходящ",
+    "stable": "Стабилен",
+    "declining": "Низходящ"
+  },
+  "features": {
+    "instant": {
+      "title": "Незабавни Резултати",
+      "description": "Получете оценка на имота за секунди, не дни"
+    },
+    "ai": {
+      "title": "AI Технология",
+      "description": "Напреднали алгоритми анализират пазарни данни и сравними продажби"
+    },
+    "market": {
+      "title": "Пазарни Анализи",
+      "description": "Разберете местните тенденции и търсенето във вашия район"
+    }
+  },
+  "howItWorks": {
+    "title": "Как Работи",
+    "step1": {
+      "title": "Въведете Детайли",
+      "description": "Посочете местоположението на имота и основни характеристики"
+    },
+    "step2": {
+      "title": "AI Анализ",
+      "description": "Нашият AI сравнява с подобни имоти и пазарни данни"
+    },
+    "step3": {
+      "title": "Получете Резултати",
+      "description": "Получете оценка с детайлна разбивка и анализи"
+    }
+  }
+}

@@ -34,6 +34,9 @@
   "menu": "Menuja",
   "notifications": "Njoftimet",
   "help": "Ndihmë",
+  "extras": "Mjete",
+  "valuation": "Vlerësim Prone",
+  "mortgageCalculator": "Kalkulatori i Kredisë",
   "onboarding": {
     "question": "Si mund t'ju ndihmojmë sot?",
     "lookingToBuy": "Dua të blej",

@@ -34,6 +34,9 @@
   "menu": "Μενού",
   "notifications": "Ειδοποιήσεις",
   "help": "Βοήθεια",
+  "extras": "Εργαλεία",
+  "valuation": "Αποτίμηση Ακινήτου",
+  "mortgageCalculator": "Υπολογιστής Δανείου",
   "onboarding": {
     "question": "Πώς μπορούμε να σας βοηθήσουμε σήμερα;",
     "lookingToBuy": "Θέλω να αγοράσω",

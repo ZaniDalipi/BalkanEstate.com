@@ -34,6 +34,9 @@
   "menu": "Meni",
   "notifications": "Obaveštenja",
   "help": "Pomoć",
+  "extras": "Alati",
+  "valuation": "Procena Nekretnine",
+  "mortgageCalculator": "Kalkulator Kredita",
   "onboarding": {
     "question": "Kako vam možemo pomoći danas?",
     "lookingToBuy": "Tražim da kupim",

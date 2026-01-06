@@ -32,8 +32,11 @@
   "analytics": "Аналитика",
   "language": "Јазик",
   "menu": "Menu",
-  "notifications": "Notifications",
-  "help": "Help",
+  "notifications": "Известувања",
+  "help": "Помош",
+  "extras": "Алатки",
+  "valuation": "Проценка на Имот",
+  "mortgageCalculator": "Калкулатор за Кредит",
   "onboarding": {
     "question": "How can we help you today?",
     "lookingToBuy": "I'm looking to buy",

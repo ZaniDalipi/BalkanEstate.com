@@ -1,0 +1,144 @@
+{
+  "page": {
+    "title": "Колико Вреди Моја Некретнина?",
+    "subtitle": "Добијте тренутну AI процену засновану на стварним тржишним подацима и упоредивим продајама у вашем подручју.",
+    "badge": "AI Технологија",
+    "trust1": "Бесплатно и Тренутно",
+    "trust2": "Без Регистрације",
+    "trust3": "Засновано на Стварним Подацима"
+  },
+  "stats": {
+    "valuations": "Процена",
+    "accuracy": "Тачност",
+    "countries": "Балканских Земаља"
+  },
+  "form": {
+    "locationSection": "Локација",
+    "detailsSection": "Детаљи Некретнине",
+    "location": "Локација Некретнине",
+    "locationPlaceholder": "Претражите адресу...",
+    "propertyType": "Тип Некретнине",
+    "size": "Величина",
+    "bedrooms": "Спаваће Собе",
+    "bathrooms": "Купатила",
+    "condition": "Стање",
+    "yearBuilt": "Година Изградње",
+    "yearBuiltPlaceholder": "нпр. 2010",
+    "floorNumber": "Број Спрата",
+    "totalFloors": "Укупно Спратова",
+    "viewType": "Тип Погледа",
+    "furnishing": "Намештај",
+    "amenities": "Погодности",
+    "showAdvanced": "Прикажи Више Опција",
+    "hideAdvanced": "Сакриј Опције",
+    "getValuation": "Добиј Процену",
+    "calculating": "Анализирам...",
+    "disclaimer": "Ово је аутоматска процена само у информативне сврхе. Стварна тржишна вредност може варирати."
+  },
+  "propertyTypes": {
+    "apartment": "Стан",
+    "house": "Кућа",
+    "villa": "Вила",
+    "land": "Земљиште",
+    "other": "Остало"
+  },
+  "conditions": {
+    "new": "Ново",
+    "excellent": "Одлично",
+    "good": "Добро",
+    "fair": "Прихватљиво",
+    "needsRenovation": "Потребна Реновација"
+  },
+  "views": {
+    "sea": "Море",
+    "mountain": "Планина",
+    "city": "Град",
+    "park": "Парк",
+    "garden": "Башта",
+    "street": "Улица"
+  },
+  "furnishing": {
+    "furnished": "Намештено",
+    "semiFurnished": "Делимично Намештено",
+    "unfurnished": "Ненамештено"
+  },
+  "amenities": {
+    "balcony": "Балкон",
+    "garden": "Башта",
+    "elevator": "Лифт",
+    "parking": "Паркинг",
+    "pool": "Базен"
+  },
+  "result": {
+    "estimatedValue": "Процењена Вредност",
+    "confidence": "Поузданост",
+    "pricePerSqm": "Цена по m²",
+    "marketTrend": "Тржишни Тренд",
+    "demandScore": "Оцена Потражње",
+    "avgDaysOnMarket": "Просечно Дана на Тржишту",
+    "days": "дана",
+    "aiInsights": "AI Тржишне Анализе",
+    "valueBreakdown": "Разлагање Вредности",
+    "comparableProperties": "Сличне Некретнине",
+    "propertySummary": "Резиме Некретнине",
+    "location": "Локација",
+    "type": "Тип",
+    "size": "Величина",
+    "bedrooms": "Спаваће Собе",
+    "bathrooms": "Купатила",
+    "condition": "Стање",
+    "beds": "соба",
+    "baths": "купатила",
+    "newValuation": "Нова Процена",
+    "readyToSell": "Спремни за Продају?",
+    "listPropertyCTA": "Објавите своју некретнину на BalkanEstate и доприте до хиљада купаца широм Балкана.",
+    "listPropertyButton": "Објави Некретнину"
+  },
+  "breakdown": {
+    "baseValue": "Основна Вредност (из упоредивих)",
+    "location": "Корекција Локације",
+    "condition": "Корекција Стања",
+    "amenities": "Корекција Погодности",
+    "age": "Корекција Старости",
+    "total": "Укупна Процењена Вредност"
+  },
+  "confidence": {
+    "high": "Висока",
+    "medium": "Средња",
+    "low": "Ниска"
+  },
+  "marketTrend": {
+    "rising": "У Порасту",
+    "stable": "Стабилан",
+    "declining": "У Паду"
+  },
+  "features": {
+    "instant": {
+      "title": "Тренутни Резултати",
+      "description": "Добијте процену некретнине за секунде, не дане"
+    },
+    "ai": {
+      "title": "AI Технологија",
+      "description": "Напредни алгоритми анализирају тржишне податке и упоредиве продаје"
+    },
+    "market": {
+      "title": "Тржишне Анализе",
+      "description": "Разумите локалне трендове и потражњу у вашем подручју"
+    }
+  },
+  "howItWorks": {
+    "title": "Како Функционише",
+    "step1": {
+      "title": "Унесите Детаље",
+      "description": "Наведите локацију некретнине и основне карактеристике"
+    },
+    "step2": {
+      "title": "AI Анализа",
+      "description": "Наш AI упоређује са сличним некретнинама и тржишним подацима"
+    },
+    "step3": {
+      "title": "Добијте Резултате",
+      "description": "Примите процену са детаљним разлагањем и анализама"
+    }
+  }
+}

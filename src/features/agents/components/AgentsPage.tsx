@@ -376,22 +376,22 @@ const AgentsPage: React.FC = () => {
 
       {/* Hero Section with Integrated Search */}
       <HeroSearchSection
-        badge={t('agents.badge')}
-        title={t('agents.title')}
-        titleHighlight={t('agents.titleHighlight')}
-        subtitle={t('agents.subtitle')}
-        searchTitle={t('agents.title')}
-        searchSubtitle={t('agents.subtitle', { count: agents.length })}
-        searchPlaceholder={t('agents.universalPlaceholder', 'Search by name, city, country, or specialty...')}
+        badge={t('hero.badge')}
+        title={t('hero.title')}
+        titleHighlight={t('hero.titleHighlight')}
+        subtitle={t('hero.subtitle')}
+        searchTitle={t('search.title')}
+        searchSubtitle={t('search.subtitle', { count: agents.length })}
+        searchPlaceholder={t('search.placeholders.name', 'Search by name, city, country, or specialty...')}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSearch={() => fetchAgents(searchQuery)}
         popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
-        popularSearchesLabel={t('agents.popularSearches')}
+        popularSearchesLabel={t('search.popularSearches')}
         stats={[
-          { icon: 'building', count: agencies.length, label: t('agents.professionalAgencies', 'Professional Agencies'), color: 'blue' },
-          { icon: 'users', count: agents.length, label: t('agents.expertAgents', 'Expert Agents'), color: 'green' },
-          { icon: 'home', count: totalActiveListings, label: t('agents.listedProperties', 'Listed Properties'), color: 'purple' }
+          { icon: 'building', count: agencies.length, label: t('stats.professionalAgencies', 'Professional Agencies'), color: 'blue' },
+          { icon: 'users', count: agents.length, label: t('stats.verifiedAgents', 'Expert Agents'), color: 'green' },
+          { icon: 'home', count: totalActiveListings, label: t('agencies.listedProperties', 'Listed Properties'), color: 'purple' }
         ]}
         mousePosition={mousePosition}
       />
@@ -796,7 +796,7 @@ const AgentsPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
                 onClick={() => {
-                  dispatch({ type: 'SET_AUTH_MODAL', payload: { isOpen: true, mode: 'login' } });
+                  dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
                 }}
                 className="px-4 sm:px-6 py-2.5 sm:py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary-dark transition-colors text-sm sm:text-base"
               >

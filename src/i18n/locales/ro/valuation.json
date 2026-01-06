@@ -1,0 +1,144 @@
+{
+  "page": {
+    "title": "Cât Valorează Proprietatea Mea?",
+    "subtitle": "Obțineți o estimare AI instantanee bazată pe date reale de piață și vânzări comparabile din zona dvs.",
+    "badge": "Tehnologie AI",
+    "trust1": "Gratuit și Instantaneu",
+    "trust2": "Fără Înregistrare",
+    "trust3": "Bazat pe Date Reale"
+  },
+  "stats": {
+    "valuations": "Evaluări",
+    "accuracy": "Precizie",
+    "countries": "Țări Balcanice"
+  },
+  "form": {
+    "locationSection": "Locație",
+    "detailsSection": "Detalii Proprietate",
+    "location": "Locația Proprietății",
+    "locationPlaceholder": "Căutați o adresă...",
+    "propertyType": "Tip Proprietate",
+    "size": "Suprafață",
+    "bedrooms": "Dormitoare",
+    "bathrooms": "Băi",
+    "condition": "Stare",
+    "yearBuilt": "Anul Construcției",
+    "yearBuiltPlaceholder": "ex. 2010",
+    "floorNumber": "Număr Etaj",
+    "totalFloors": "Total Etaje",
+    "viewType": "Tip Vedere",
+    "furnishing": "Mobilare",
+    "amenities": "Facilități",
+    "showAdvanced": "Afișează Mai Multe Opțiuni",
+    "hideAdvanced": "Ascunde Opțiuni",
+    "getValuation": "Obține Evaluarea",
+    "calculating": "Analizez...",
+    "disclaimer": "Aceasta este o estimare automată doar în scop informativ. Valoarea reală de piață poate varia."
+  },
+  "propertyTypes": {
+    "apartment": "Apartament",
+    "house": "Casă",
+    "villa": "Vilă",
+    "land": "Teren",
+    "other": "Altele"
+  },
+  "conditions": {
+    "new": "Nou",
+    "excellent": "Excelent",
+    "good": "Bun",
+    "fair": "Acceptabil",
+    "needsRenovation": "Necesită Renovare"
+  },
+  "views": {
+    "sea": "Mare",
+    "mountain": "Munte",
+    "city": "Oraș",
+    "park": "Parc",
+    "garden": "Grădină",
+    "street": "Stradă"
+  },
+  "furnishing": {
+    "furnished": "Mobilat",
+    "semiFurnished": "Parțial Mobilat",
+    "unfurnished": "Nemobilat"
+  },
+  "amenities": {
+    "balcony": "Balcon",
+    "garden": "Grădină",
+    "elevator": "Lift",
+    "parking": "Parcare",
+    "pool": "Piscină"
+  },
+  "result": {
+    "estimatedValue": "Valoare Estimată",
+    "confidence": "Încredere",
+    "pricePerSqm": "Preț pe m²",
+    "marketTrend": "Tendință Piață",
+    "demandScore": "Scor Cerere",
+    "avgDaysOnMarket": "Zile Medii pe Piață",
+    "days": "zile",
+    "aiInsights": "Analize AI de Piață",
+    "valueBreakdown": "Defalcarea Valorii",
+    "comparableProperties": "Proprietăți Similare",
+    "propertySummary": "Rezumatul Proprietății",
+    "location": "Locație",
+    "type": "Tip",
+    "size": "Suprafață",
+    "bedrooms": "Dormitoare",
+    "bathrooms": "Băi",
+    "condition": "Stare",
+    "beds": "dormitoare",
+    "baths": "băi",
+    "newValuation": "Evaluare Nouă",
+    "readyToSell": "Pregătit să Vindeți?",
+    "listPropertyCTA": "Publicați proprietatea pe BalkanEstate și ajungeți la mii de cumpărători din Balcani.",
+    "listPropertyButton": "Publică Proprietatea"
+  },
+  "breakdown": {
+    "baseValue": "Valoare de Bază (din comparabile)",
+    "location": "Ajustare Locație",
+    "condition": "Ajustare Stare",
+    "amenities": "Ajustare Facilități",
+    "age": "Ajustare Vechime",
+    "total": "Valoare Totală Estimată"
+  },
+  "confidence": {
+    "high": "Ridicată",
+    "medium": "Medie",
+    "low": "Scăzută"
+  },
+  "marketTrend": {
+    "rising": "În Creștere",
+    "stable": "Stabil",
+    "declining": "În Scădere"
+  },
+  "features": {
+    "instant": {
+      "title": "Rezultate Instantanee",
+      "description": "Obțineți evaluarea proprietății în secunde, nu zile"
+    },
+    "ai": {
+      "title": "Tehnologie AI",
+      "description": "Algoritmi avansați analizează datele de piață și vânzările comparabile"
+    },
+    "market": {
+      "title": "Analize de Piață",
+      "description": "Înțelegeți tendințele locale și cererea din zona dvs."
+    }
+  },
+  "howItWorks": {
+    "title": "Cum Funcționează",
+    "step1": {
+      "title": "Introduceți Detalii",
+      "description": "Furnizați locația proprietății și caracteristicile de bază"
+    },
+    "step2": {
+      "title": "Analiză AI",
+      "description": "AI-ul nostru compară cu proprietăți similare și date de piață"
+    },
+    "step3": {
+      "title": "Obțineți Rezultate",
+      "description": "Primiți evaluarea cu defalcare detaliată și analize"
+    }
+  }
+}

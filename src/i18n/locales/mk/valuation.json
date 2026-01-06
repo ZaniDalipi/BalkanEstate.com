@@ -1,0 +1,144 @@
+{
+  "page": {
+    "title": "Колку Вреди Мојот Имот?",
+    "subtitle": "Добијте моментална AI проценка заснована на реални пазарни податоци и споредливи продажби во вашето подрачје.",
+    "badge": "AI Технологија",
+    "trust1": "Бесплатно и Моментално",
+    "trust2": "Без Регистрација",
+    "trust3": "Засновано на Реални Податоци"
+  },
+  "stats": {
+    "valuations": "Проценки",
+    "accuracy": "Точност",
+    "countries": "Балкански Земји"
+  },
+  "form": {
+    "locationSection": "Локација",
+    "detailsSection": "Детали за Имотот",
+    "location": "Локација на Имотот",
+    "locationPlaceholder": "Пребарајте адреса...",
+    "propertyType": "Тип на Имот",
+    "size": "Големина",
+    "bedrooms": "Спални Соби",
+    "bathrooms": "Бањи",
+    "condition": "Состојба",
+    "yearBuilt": "Година на Изградба",
+    "yearBuiltPlaceholder": "пр. 2010",
+    "floorNumber": "Број на Кат",
+    "totalFloors": "Вкупно Катови",
+    "viewType": "Тип на Поглед",
+    "furnishing": "Мебел",
+    "amenities": "Погодности",
+    "showAdvanced": "Прикажи Повеќе Опции",
+    "hideAdvanced": "Скриј Опции",
+    "getValuation": "Добиј Проценка",
+    "calculating": "Анализирам...",
+    "disclaimer": "Ова е автоматска проценка само за информативни цели. Вистинската пазарна вредност може да варира."
+  },
+  "propertyTypes": {
+    "apartment": "Стан",
+    "house": "Куќа",
+    "villa": "Вила",
+    "land": "Земјиште",
+    "other": "Друго"
+  },
+  "conditions": {
+    "new": "Ново",
+    "excellent": "Одлично",
+    "good": "Добро",
+    "fair": "Прифатливо",
+    "needsRenovation": "Потребна Реновација"
+  },
+  "views": {
+    "sea": "Море",
+    "mountain": "Планина",
+    "city": "Град",
+    "park": "Парк",
+    "garden": "Градина",
+    "street": "Улица"
+  },
+  "furnishing": {
+    "furnished": "Наместено",
+    "semiFurnished": "Делумно Наместено",
+    "unfurnished": "Ненаместено"
+  },
+  "amenities": {
+    "balcony": "Балкон",
+    "garden": "Градина",
+    "elevator": "Лифт",
+    "parking": "Паркинг",
+    "pool": "Базен"
+  },
+  "result": {
+    "estimatedValue": "Проценета Вредност",
+    "confidence": "Доверба",
+    "pricePerSqm": "Цена по m²",
+    "marketTrend": "Пазарен Тренд",
+    "demandScore": "Оценка на Побарувачка",
+    "avgDaysOnMarket": "Просечно Денови на Пазар",
+    "days": "денови",
+    "aiInsights": "AI Пазарни Анализи",
+    "valueBreakdown": "Разложување на Вредноста",
+    "comparableProperties": "Слични Имоти",
+    "propertySummary": "Резиме на Имотот",
+    "location": "Локација",
+    "type": "Тип",
+    "size": "Големина",
+    "bedrooms": "Спални Соби",
+    "bathrooms": "Бањи",
+    "condition": "Состојба",
+    "beds": "соби",
+    "baths": "бањи",
+    "newValuation": "Нова Проценка",
+    "readyToSell": "Подготвени за Продажба?",
+    "listPropertyCTA": "Објавете го вашиот имот на BalkanEstate и допрете до илјадници купувачи низ Балканот.",
+    "listPropertyButton": "Објави Имот"
+  },
+  "breakdown": {
+    "baseValue": "Основна Вредност (од споредливи)",
+    "location": "Корекција на Локација",
+    "condition": "Корекција на Состојба",
+    "amenities": "Корекција на Погодности",
+    "age": "Корекција на Старост",
+    "total": "Вкупна Проценета Вредност"
+  },
+  "confidence": {
+    "high": "Висока",
+    "medium": "Средна",
+    "low": "Ниска"
+  },
+  "marketTrend": {
+    "rising": "Во Пораст",
+    "stable": "Стабилен",
+    "declining": "Во Пад"
+  },
+  "features": {
+    "instant": {
+      "title": "Моментални Резултати",
+      "description": "Добијте проценка на имотот за секунди, не денови"
+    },
+    "ai": {
+      "title": "AI Технологија",
+      "description": "Напредни алгоритми анализираат пазарни податоци и споредливи продажби"
+    },
+    "market": {
+      "title": "Пазарни Анализи",
+      "description": "Разберете локални трендови и побарувачка во вашето подрачје"
+    }
+  },
+  "howItWorks": {
+    "title": "Како Функционира",
+    "step1": {
+      "title": "Внесете Детали",
+      "description": "Наведете локација на имотот и основни карактеристики"
+    },
+    "step2": {
+      "title": "AI Анализа",
+      "description": "Нашиот AI споредува со слични имоти и пазарни податоци"
+    },
+    "step3": {
+      "title": "Добијте Резултати",
+      "description": "Примете проценка со детално разложување и анализи"
+    }
+  }
+}

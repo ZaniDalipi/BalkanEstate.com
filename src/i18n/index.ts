@@ -45,6 +45,7 @@ import enAgencies from './locales/en/agencies.json';
 import enAgencyDetails from './locales/en/agencyDetails.json';
 import enAgentProfile from './locales/en/agentProfile.json';
 import enNewListing from './locales/en/newListing.json';
+import enValuation from './locales/en/valuation.json';
 
 // Import translations - Albanian
 import sqCommon from './locales/sq/common.json';
@@ -72,6 +73,7 @@ import sqAgencyDetails from './locales/sq/agencyDetails.json';
 import sqAgentProfile from './locales/sq/agentProfile.json';
 import sqNewListing from './locales/sq/newListing.json';
 import sqAnalytics from './locales/sq/analytics.json';
+import sqValuation from './locales/sq/valuation.json';
 
 // Import translations - Serbian
 import srCommon from './locales/sr/common.json';
@@ -99,6 +101,7 @@ import srAgencyDetails from './locales/sr/agencyDetails.json';
 import srAgentProfile from './locales/sr/agentProfile.json';
 import srNewListing from './locales/sr/newListing.json';
 import srAnalytics from './locales/sr/analytics.json';
+import srValuation from './locales/sr/valuation.json';
 
 // Import translations - Bulgarian
 import bgCommon from './locales/bg/common.json';
@@ -126,6 +129,7 @@ import bgAgencyDetails from './locales/bg/agencyDetails.json';
 import bgAgentProfile from './locales/bg/agentProfile.json';
 import bgNewListing from './locales/bg/newListing.json';
 import bgAnalytics from './locales/bg/analytics.json';
+import bgValuation from './locales/bg/valuation.json';
 
 // Import translations - Croatian
 import hrCommon from './locales/hr/common.json';
@@ -153,6 +157,7 @@ import hrAgencyDetails from './locales/hr/agencyDetails.json';
 import hrAgentProfile from './locales/hr/agentProfile.json';
 import hrNewListing from './locales/hr/newListing.json';
 import hrAnalytics from './locales/hr/analytics.json';
+import hrValuation from './locales/hr/valuation.json';
 
 // Import translations - Bosnian
 import bsCommon from './locales/bs/common.json';
@@ -180,6 +185,7 @@ import bsAgencyDetails from './locales/bs/agencyDetails.json';
 import bsAgentProfile from './locales/bs/agentProfile.json';
 import bsNewListing from './locales/bs/newListing.json';
 import bsAnalytics from './locales/bs/analytics.json';
+import bsValuation from './locales/bs/valuation.json';
 
 // Import translations - Montenegrin
 import meCommon from './locales/me/common.json';
@@ -207,6 +213,7 @@ import meAgencyDetails from './locales/me/agencyDetails.json';
 import meAgentProfile from './locales/me/agentProfile.json';
 import meNewListing from './locales/me/newListing.json';
 import meAnalytics from './locales/me/analytics.json';
+import meValuation from './locales/me/valuation.json';
 
 // Import translations - Macedonian
 import mkCommon from './locales/mk/common.json';
@@ -234,6 +241,7 @@ import mkAgencyDetails from './locales/mk/agencyDetails.json';
 import mkAgentProfile from './locales/mk/agentProfile.json';
 import mkNewListing from './locales/mk/newListing.json';
 import mkAnalytics from './locales/mk/analytics.json';
+import mkValuation from './locales/mk/valuation.json';
 
 // Import translations - Romanian
 import roCommon from './locales/ro/common.json';
@@ -261,6 +269,7 @@ import roAgencyDetails from './locales/ro/agencyDetails.json';
 import roAgentProfile from './locales/ro/agentProfile.json';
 import roNewListing from './locales/ro/newListing.json';
 import roAnalytics from './locales/ro/analytics.json';
+import roValuation from './locales/ro/valuation.json';
 
 // Import translations - Greek
 import elCommon from './locales/el/common.json';
@@ -288,6 +297,7 @@ import elAgencyDetails from './locales/el/agencyDetails.json';
 import elAgentProfile from './locales/el/agentProfile.json';
 import elNewListing from './locales/el/newListing.json';
 import elAnalytics from './locales/el/analytics.json';
+import elValuation from './locales/el/valuation.json';
 
 // Language configuration
 export const languages = [
@@ -333,6 +343,7 @@ const resources = {
     agencyDetails: enAgencyDetails,
     agentProfile: enAgentProfile,
     newListing: enNewListing,
+    valuation: enValuation,
   },
   sq: {
     common: sqCommon,
@@ -360,6 +371,7 @@ const resources = {
     agentProfile: sqAgentProfile,
     newListing: sqNewListing,
     analytics: sqAnalytics,
+    valuation: sqValuation,
   },
   sr: {
     common: srCommon,
@@ -387,6 +399,7 @@ const resources = {
     agentProfile: srAgentProfile,
     newListing: srNewListing,
     analytics: srAnalytics,
+    valuation: srValuation,
   },
   bg: {
     common: bgCommon,
@@ -414,6 +427,7 @@ const resources = {
     agentProfile: bgAgentProfile,
     newListing: bgNewListing,
     analytics: bgAnalytics,
+    valuation: bgValuation,
   },
   hr: {
     common: hrCommon,
@@ -441,6 +455,7 @@ const resources = {
     agentProfile: hrAgentProfile,
     newListing: hrNewListing,
     analytics: hrAnalytics,
+    valuation: hrValuation,
   },
   bs: {
     common: bsCommon,
@@ -468,6 +483,7 @@ const resources = {
     agentProfile: bsAgentProfile,
     newListing: bsNewListing,
     analytics: bsAnalytics,
+    valuation: bsValuation,
   },
   me: {
     common: meCommon,
@@ -495,6 +511,7 @@ const resources = {
     agentProfile: meAgentProfile,
     newListing: meNewListing,
     analytics: meAnalytics,
+    valuation: meValuation,
   },
   mk: {
     common: mkCommon,
@@ -522,6 +539,7 @@ const resources = {
     agentProfile: mkAgentProfile,
     newListing: mkNewListing,
     analytics: mkAnalytics,
+    valuation: mkValuation,
   },
   ro: {
     common: roCommon,
@@ -549,6 +567,7 @@ const resources = {
     agentProfile: roAgentProfile,
     newListing: roNewListing,
     analytics: roAnalytics,
+    valuation: roValuation,
   },
   el: {
     common: elCommon,
@@ -576,6 +595,7 @@ const resources = {
     agentProfile: elAgentProfile,
     newListing: elNewListing,
     analytics: elAnalytics,
+    valuation: elValuation,
   }
 
 };
@@ -588,7 +608,7 @@ i18n
     resources,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities', 'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile', 'newListing'],
+    ns: ['common', 'nav', 'property', 'auth', 'search', 'messages', 'footer', 'newsletter', 'calculators', 'pricing', 'validation', 'admin', 'account', 'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities', 'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile', 'newListing', 'valuation'],
 
     interpolation: {
       escapeValue: false, // React already escapes
