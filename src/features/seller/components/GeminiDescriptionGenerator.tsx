@@ -402,8 +402,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                     index,
                     tag: (typeof img === 'object' && img?.tag) || 'other'
                 })),
-                lat: propertyToEdit.lat,
-                lng: propertyToEdit.lng,
+                lat: propertyToEdit.lat || 0,
+                lng: propertyToEdit.lng || 0,
                 hasBalcony: propertyToEdit.hasBalcony,
                 hasGarden: propertyToEdit.hasGarden,
                 hasElevator: propertyToEdit.hasElevator,

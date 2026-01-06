@@ -630,11 +630,18 @@ export const updateProperty = async (
     let updatedFields: string[] = [];
     fieldsToUpdate.forEach(field => {
       if (updateData[field] !== undefined) {
+        // Skip updating coordinates if they're 0 (invalid) - preserve existing valid coordinates
+        if ((field === 'lat' || field === 'lng') && updateData[field] === 0) {
+          console.log(`⚠️ Skipping ${field} update - value is 0, preserving existing: ${(property as any)[field]}`);
+          return;
+        }
         (property as any)[field] = updateData[field];
         updatedFields.push(field);
       }
     });
 
+    // Log coordinates status
+    console.log(`📍 Property coordinates after update: lat=${property.lat}, lng=${property.lng}`);
     console.log(`📝 Updated property ${property._id} fields: ${updatedFields.join(', ') || 'none'}`);
 
     // Track price reduction for display (originalPrice and priceReducedAt)
