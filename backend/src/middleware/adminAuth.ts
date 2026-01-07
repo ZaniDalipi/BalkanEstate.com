@@ -20,7 +20,7 @@ const getWhitelistedIPs = (): string[] => {
 };
 
 // Load allowed domains from environment variable (comma-separated)
-// Example: ADMIN_ALLOWED_DOMAINS=admin.balkanestate.com
+// Example: ADMIN_ALLOWED_DOMAINS=admin.balkanestateai.com
 const getAllowedDomains = (): string[] => {
   const envDomains = process.env.ADMIN_ALLOWED_DOMAINS;
   if (envDomains) {

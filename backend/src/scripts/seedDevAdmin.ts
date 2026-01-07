@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 console.log(`🌍 Environment: ${env.toUpperCase()}`);
 
 // Get credentials from environment variables
-const adminEmail = process.env.DEV_ADMIN_EMAIL || 'dev@balkanestate.com';
+const adminEmail = process.env.DEV_ADMIN_EMAIL || 'dev@balkanestateai.com';
 const adminPassword = process.env.DEV_ADMIN_PASSWORD;
 
 if (!adminPassword) {
