@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SavedSearch } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
-import { ChevronUpIcon, ChevronDownIcon, TrashIcon, PencilIcon, CheckCircleIcon, XMarkIcon, BellIcon, BellSlashIcon } from '@/constants';
+import { ChevronUpIcon, ChevronDownIcon, TrashIcon, PencilIcon, CheckCircleIcon, XMarkIcon, BellIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { filterProperties } from '@/utils/propertyUtils';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
@@ -11,6 +11,7 @@ import * as api from '@/services/apiService';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import { BellDotIcon } from 'lucide-react';
 
 interface SavedSearchAccordionProps {
   search: SavedSearch;
@@ -355,7 +356,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                   }`}
                   title={hasBuyerSubscription ? t('accordion.alertSettings', 'Alert settings') : t('accordion.upgradeForAlerts', 'Upgrade to enable alerts')}
                 >
-                  {alertsEnabled ? <BellIcon className="w-5 h-5" /> : <BellSlashIcon className="w-5 h-5" />}
+                  {alertsEnabled ? <BellIcon className="w-5 h-5" /> : <BellDotIcon className="w-5 h-5" />}
                 </button>
 
                 {/* Alert Settings Dropdown */}
