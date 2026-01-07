@@ -1153,7 +1153,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             <Popup>
                                                                 <div className="text-center min-w-[200px]">
                                                                     {agent.avatarUrl && (
-                                                                        <img src={agent.avatarUrl} alt={agent.name} className="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-gray-300" />
+                                                                        <img src={agent.avatarUrl} alt={agent.name} className="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-gray-300" referrerPolicy="no-referrer" />
                                                                     )}
                                                                     <p className="font-bold text-base mb-1">{agent.name}</p>
                                                                     <p className="text-sm text-gray-600 mb-3">{agent.city}, {agent.country}</p>
@@ -1184,7 +1184,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                     <div className={`absolute inset-0 bg-gradient-to-t from-indigo-950/85 via-indigo-900/40 to-transparent transition-opacity duration-300 flex items-end p-6 ${mapCardOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMapCardOpen(false)}>
                                                         <div className="w-full text-white text-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                                             {agent.avatarUrl && (
-                                                                <img src={agent.avatarUrl} alt={agent.name} className="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-4 border-indigo-300" />
+                                                                <img src={agent.avatarUrl} alt={agent.name} className="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-4 border-indigo-300" referrerPolicy="no-referrer" />
                                                             )}
                                                             <p className="font-bold text-lg">{agent.name}</p>
                                                             <p className="text-sm text-indigo-200 mb-3">{agent.city}, {agent.country}</p>
