@@ -249,6 +249,7 @@
       "house": "Shtëpi",
       "apartment": "Banesë",
       "villa": "Vilë",
+      "land": "Tokë",
       "other": "Tjetër"
     },
     "heatMapLegend": "Dendësia e Pronave",

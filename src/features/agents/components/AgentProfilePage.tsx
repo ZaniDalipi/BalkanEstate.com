@@ -634,11 +634,11 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
 
             {/* Hero Section - Clean white background */}
             <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-                    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+                <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-10">
+                    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 sm:gap-6 lg:gap-8">
                         {/* Agent Photo */}
                         <div className="relative flex-shrink-0">
-                            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden shadow-xl border-4 border-gray-100">
+                            <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl border-2 sm:border-4 border-gray-100">
                                 {agent.avatarUrl ? (
                                     <img
                                         src={agent.avatarUrl}
@@ -652,18 +652,18 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                 )}
                             </div>
                             {/* Verified Badge */}
-                            <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-2 rounded-full shadow-lg border-2 border-white">
-                                <CheckBadgeIcon className="w-5 h-5" />
+                            <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-green-500 text-white p-1.5 sm:p-2 rounded-full shadow-lg border-2 border-white">
+                                <CheckBadgeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                             </div>
                         </div>
 
                         {/* Agent Info */}
                         <div className="flex-1 text-center lg:text-left">
-                            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-3 mb-3">
-                                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">{agent.name}</h1>
+                            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">{agent.name}</h1>
                                 {stats.rating >= 4.5 && (
-                                    <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                        <FireIcon className="w-4 h-4" />
+                                    <span className="inline-flex items-center gap-1 sm:gap-1.5 bg-orange-100 text-orange-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold">
+                                        <FireIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                                         {t('profilePage.badges.topAgent')}
                                     </span>
                                 )}
@@ -673,118 +673,118 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             {isAgencyAgent && (
                                 <button
                                     onClick={handleAgencyClick}
-                                    className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-3 transition-colors"
+                                    className="inline-flex items-center gap-1.5 sm:gap-2 text-gray-600 hover:text-gray-900 mb-2 sm:mb-3 transition-colors text-sm sm:text-base"
                                 >
-                                    <BuildingOfficeIcon className="w-4 h-4" />
+                                    <BuildingOfficeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     <span className="font-medium">{agent.agencyName}</span>
-                                    <ChevronRightIcon className="w-3 h-3" />
+                                    <ChevronRightIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                 </button>
                             )}
 
                             {/* Location */}
                             {(agent.city || agent.country) && (
-                                <div className="flex items-center justify-center lg:justify-start gap-2 mb-6 text-gray-600">
-                                    <MapPinIcon className="w-5 h-5 text-gray-400" />
-                                    <span className="text-lg">{[agent.city, agent.country].filter(Boolean).join(', ')}</span>
+                                <div className="flex items-center justify-center lg:justify-start gap-1.5 sm:gap-2 mb-3 sm:mb-4 lg:mb-6 text-gray-600">
+                                    <MapPinIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                                    <span className="text-sm sm:text-base lg:text-lg">{[agent.city, agent.country].filter(Boolean).join(', ')}</span>
                                 </div>
                             )}
 
                             {/* Rating */}
-                            <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
-                                <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
+                                <div className="flex items-center gap-1.5 sm:gap-2">
                                     <div className="flex">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <StarIcon
                                                 key={star}
-                                                className={`w-5 h-5 ${star <= Math.round(stats.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`}
+                                                className={`w-4 h-4 sm:w-5 sm:h-5 ${star <= Math.round(stats.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`}
                                             />
                                         ))}
                                     </div>
-                                    <span className="text-xl font-bold text-gray-900">{stats.rating.toFixed(1)}</span>
-                                    <span className="text-gray-500">({stats.reviews} {t('profilePage.stats.reviews')})</span>
+                                    <span className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">{stats.rating.toFixed(1)}</span>
+                                    <span className="text-gray-500 text-xs sm:text-sm">({stats.reviews} {t('profilePage.stats.reviews')})</span>
                                 </div>
                             </div>
 
-                            {/* Quick Stats - Horizontal pills */}
-                            <div className="flex flex-wrap justify-center lg:justify-start gap-3">
-                                <div className="bg-blue-50 border border-blue-100 px-4 py-2.5 rounded-xl">
-                                    <span className="text-2xl font-bold text-blue-700">{stats.totalSales}</span>
-                                    <span className="text-blue-600/80 ml-2 text-sm font-medium">{t('profilePage.stats.propertiesSold')}</span>
+                            {/* Quick Stats - Horizontal pills - Compact on mobile */}
+                            <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3">
+                                <div className="bg-blue-50 border border-blue-100 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl">
+                                    <span className="text-lg sm:text-2xl font-bold text-blue-700">{stats.totalSales}</span>
+                                    <span className="text-blue-600/80 ml-1.5 sm:ml-2 text-xs sm:text-sm font-medium">{t('profilePage.stats.propertiesSold')}</span>
                                 </div>
-                                <div className="bg-green-50 border border-green-100 px-4 py-2.5 rounded-xl">
-                                    <span className="text-2xl font-bold text-green-700">{stats.yearsExperience}+</span>
-                                    <span className="text-green-600/80 ml-2 text-sm font-medium">{t('profilePage.stats.yearsExperience')}</span>
+                                <div className="bg-green-50 border border-green-100 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl">
+                                    <span className="text-lg sm:text-2xl font-bold text-green-700">{stats.yearsExperience}+</span>
+                                    <span className="text-green-600/80 ml-1.5 sm:ml-2 text-xs sm:text-sm font-medium">{t('profilePage.stats.yearsExperience')}</span>
                                 </div>
-                                <div className="bg-purple-50 border border-purple-100 px-4 py-2.5 rounded-xl">
-                                    <span className="text-2xl font-bold text-purple-700">{activeListings.length}</span>
-                                    <span className="text-purple-600/80 ml-2 text-sm font-medium">{t('profilePage.stats.activeListings')}</span>
+                                <div className="bg-purple-50 border border-purple-100 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl">
+                                    <span className="text-lg sm:text-2xl font-bold text-purple-700">{activeListings.length}</span>
+                                    <span className="text-purple-600/80 ml-1.5 sm:ml-2 text-xs sm:text-sm font-medium">{t('profilePage.stats.activeListings')}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Agency Card - Floating on desktop */}
                         {isAgencyAgent && agencyData && (
-                            <div className="w-full lg:w-auto lg:min-w-[320px]">
-                                <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div className="w-full lg:w-auto lg:min-w-[280px] xl:min-w-[320px]">
+                                <div className="bg-white rounded-xl sm:rounded-2xl border sm:border-2 border-gray-200 shadow-md sm:shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
                                     {/* Agency Header with Gradient */}
-                                    <div className={`${agencyGradient} p-6 text-white relative overflow-hidden`}>
+                                    <div className={`${agencyGradient} p-4 sm:p-6 text-white relative overflow-hidden`}>
                                         <div className="absolute inset-0 bg-black/10"></div>
                                         <div className="relative z-10">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                                            <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
+                                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                                                     {agencyData.logo ? (
                                                         <img
                                                             src={agencyData.logo}
                                                             alt={agencyData.name}
-                                                            className="w-12 h-12 object-cover rounded-lg"
+                                                            className="w-8 h-8 sm:w-12 sm:h-12 object-cover rounded-md sm:rounded-lg"
                                                         />
                                                     ) : (
-                                                        <BuildingOfficeIcon className="w-8 h-8 text-blue-600" />
+                                                        <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-medium text-white/80 mb-1">{t('profilePage.agencyCard.memberOf')}</p>
-                                                    <h3 className="text-lg font-bold text-white truncate">{agencyData.name}</h3>
+                                                    <p className="text-[10px] sm:text-xs font-medium text-white/80 mb-0.5 sm:mb-1">{t('profilePage.agencyCard.memberOf')}</p>
+                                                    <h3 className="text-sm sm:text-lg font-bold text-white truncate">{agencyData.name}</h3>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Agency Stats */}
-                                    <div className="p-5 bg-gradient-to-b from-gray-50 to-white">
-                                        <div className="grid grid-cols-2 gap-3 mb-4">
-                                            <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <UsersIcon className="w-4 h-4 text-blue-600" />
-                                                    <span className="text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.agents')}</span>
+                                    <div className="p-3 sm:p-5 bg-gradient-to-b from-gray-50 to-white">
+                                        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                                            <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
+                                                <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                                    <UsersIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
+                                                    <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.agents')}</span>
                                                 </div>
-                                                <p className="text-2xl font-bold text-gray-900">{agencyData.totalAgents || 0}</p>
+                                                <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalAgents || 0}</p>
                                             </div>
-                                            <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <HomeIcon className="w-4 h-4 text-green-600" />
-                                                    <span className="text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.properties')}</span>
+                                            <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
+                                                <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                                    <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
+                                                    <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.properties')}</span>
                                                 </div>
-                                                <p className="text-2xl font-bold text-gray-900">{agencyData.totalProperties || 0}</p>
+                                                <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalProperties || 0}</p>
                                             </div>
                                         </div>
 
                                         {/* Location */}
                                         {agencyData.city && (
-                                            <div className="flex items-center gap-2 mb-4 text-gray-600 bg-white rounded-lg p-3 border border-gray-200">
-                                                <MapPinIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />
-                                                <span className="text-sm truncate">{agencyData.city}, {agencyData.country}</span>
+                                            <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-gray-600 bg-white rounded-lg p-2 sm:p-3 border border-gray-200">
+                                                <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-500" />
+                                                <span className="text-xs sm:text-sm truncate">{agencyData.city}, {agencyData.country}</span>
                                             </div>
                                         )}
 
                                         {/* Visit Agency Button */}
                                         <button
                                             onClick={handleVisitAgency}
-                                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
+                                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2.5 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-xl transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 sm:gap-2 group text-sm sm:text-base"
                                         >
-                                            <BuildingOfficeIcon className="w-5 h-5" />
+                                            <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                                             <span>{t('profilePage.agencyCard.visitAgency')}</span>
-                                            <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                            <ChevronRightIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
                                         </button>
                                     </div>
                                 </div>
@@ -795,57 +795,57 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             </div>
 
             {/* Main Content Area */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
                 <div className="lg:flex lg:gap-8">
                     {/* Left Column - Main Content */}
                     <div className="lg:w-2/3">
                         {/* Tabs Navigation - Enhanced - Sticky on Mobile */}
-                        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 mb-6 sm:mb-8 overflow-hidden sticky top-0 md:top-16 z-30">
-                            <div className="flex border-b border-gray-200 overflow-x-auto">
+                        <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-sm border border-gray-200 mb-4 sm:mb-6 lg:mb-8 overflow-hidden sticky top-0 md:top-16 z-30">
+                            <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
                                 <button
                                     onClick={() => setActiveTab('overview')}
-                                    className={`flex-1 py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center font-semibold transition-colors min-w-[100px] ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                                    className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                                 >
-                                    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                                        <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        <span className="text-xs sm:text-sm md:text-base">{t('profilePage.tabs.overview')}</span>
+                                    <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
+                                        <UserIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                                        <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.overview')}</span>
                                     </div>
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('listings')}
-                                    className={`flex-1 py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center font-semibold transition-colors min-w-[100px] ${activeTab === 'listings' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                                    className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'listings' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                                 >
-                                    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                                        <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        <span className="text-xs sm:text-sm md:text-base">{t('profilePage.tabs.listings')} ({activeListings.length})</span>
+                                    <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
+                                        <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                                        <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.listings')} ({activeListings.length})</span>
                                     </div>
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('reviews')}
-                                    className={`flex-1 py-3 sm:py-4 md:py-5 px-3 sm:px-4 md:px-6 text-center font-semibold transition-colors min-w-[100px] ${activeTab === 'reviews' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+                                    className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'reviews' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                                 >
-                                    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                                        <StarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        <span className="text-xs sm:text-sm md:text-base">{t('profilePage.tabs.reviews')} ({stats.reviews})</span>
+                                    <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
+                                        <StarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                                        <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.reviews')} ({stats.reviews})</span>
                                     </div>
                                 </button>
                             </div>
 
                             {/* Tab Content */}
-                            <div className="p-8">
+                            <div className="p-4 sm:p-6 lg:p-8">
                                 {activeTab === 'overview' && (
-                                    <div className="space-y-8">
+                                    <div className="space-y-5 sm:space-y-6 lg:space-y-8">
                                         {/* About Section */}
                                         <div>
-                                            <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b border-gray-200">
+                                            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 lg:mb-6 pb-2 sm:pb-3 border-b border-gray-200">
                                                 {t('profilePage.about.title', { name: firstName })}
                                             </h2>
-                                            <div className="prose prose-lg text-gray-700 leading-relaxed">
+                                            <div className="prose prose-sm sm:prose-base lg:prose-lg text-gray-700 leading-relaxed">
                                                 {agent.bio || (
-                                                    <p className="text-lg">
+                                                    <p className="text-sm sm:text-base lg:text-lg">
                                                         {firstName} is a dedicated real estate professional with {stats.yearsExperience} years of experience
-                                                        in the industry{isAgencyAgent && ` as part of the ${agent.agencyName} team`}. 
-                                                        {firstName} specializes in helping clients achieve their real estate goals through 
+                                                        in the industry{isAgencyAgent && ` as part of the ${agent.agencyName} team`}.
+                                                        {firstName} specializes in helping clients achieve their real estate goals through
                                                         expert market knowledge and personalized service.
                                                     </p>
                                                 )}
