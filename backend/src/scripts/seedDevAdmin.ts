@@ -10,9 +10,25 @@ dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
 console.log(`🌍 Environment: ${env.toUpperCase()}`);
 
+// Get credentials from environment variables
+const adminEmail = process.env.DEV_ADMIN_EMAIL || 'dev@balkanestate.com';
+const adminPassword = process.env.DEV_ADMIN_PASSWORD;
+
+if (!adminPassword) {
+  console.error('❌ Error: DEV_ADMIN_PASSWORD environment variable is required');
+  console.error('   Usage: DEV_ADMIN_PASSWORD=yourpassword npm run seed:dev-admin');
+  console.error('   Or add DEV_ADMIN_PASSWORD to your .env file');
+  process.exit(1);
+}
+
+if (adminPassword.length < 6) {
+  console.error('❌ Error: Password must be at least 6 characters');
+  process.exit(1);
+}
+
 const DEV_ADMIN = {
-  email: 'dev@balkanestate.com',
-  password: 'pro',
+  email: adminEmail,
+  password: adminPassword,
   name: 'Dev Admin',
   role: 'admin' as const,
   availableRoles: ['buyer', 'private_seller', 'agent', 'admin'] as const,
@@ -69,7 +85,7 @@ async function seedDevAdmin() {
       // Update password
       user.password = DEV_ADMIN.password;
       await user.save();
-      console.log(`✅ Password updated to: pro`);
+      console.log(`✅ Password updated`);
     } else {
       // Create new admin user
       user = await User.create(DEV_ADMIN);
@@ -77,10 +93,10 @@ async function seedDevAdmin() {
     }
 
     console.log('\n═══════════════════════════════════════════');
-    console.log('       🔐 DEV ADMIN CREDENTIALS');
+    console.log('       🔐 DEV ADMIN READY');
     console.log('═══════════════════════════════════════════');
     console.log(`   Email:    ${DEV_ADMIN.email}`);
-    console.log(`   Password: ${DEV_ADMIN.password}`);
+    console.log(`   Password: (set via DEV_ADMIN_PASSWORD)`);
     console.log(`   Role:     ${user.role}`);
     console.log('═══════════════════════════════════════════');
     console.log('\n🌐 Admin panel: /admin');
