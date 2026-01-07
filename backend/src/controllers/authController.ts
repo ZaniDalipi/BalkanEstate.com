@@ -851,29 +851,20 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Generate token
+    // Generate tokens
     const token = generateToken(String(user._id));
 
-    // Redirect to frontend with token and user data
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const userData = encodeURIComponent(JSON.stringify({
-      id: String(user._id),
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-      avatarUrl: user.avatarUrl,
-      city: user.city,
-      country: user.country,
-      agencyName: user.agencyName,
-      agentId: user.agentId,
-      licenseNumber: user.licenseNumber,
-      isSubscribed: user.isSubscribed,
-      provider: user.provider,
-      isEmailVerified: user.isEmailVerified,
-    }));
+    // Generate refresh token for better security
+    const { generateRefreshToken, storeRefreshToken } = await import('../services/refreshTokenService');
+    const refreshToken = generateRefreshToken(String(user._id));
+    await storeRefreshToken(user, refreshToken, req);
 
-    res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${userData}`);
+    // SECURITY: Only pass tokens in URL, NOT user data
+    // User data will be fetched securely via /api/auth/me endpoint
+    // This prevents sensitive data from being logged in browser history,
+    // server logs, or leaked via Referer headers
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/auth/callback?token=${token}&refresh=${refreshToken}`);
   } catch (error: any) {
     console.error('OAuth callback error:', error);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';

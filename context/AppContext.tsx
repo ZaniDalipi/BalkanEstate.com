@@ -304,7 +304,7 @@ interface AppContextType {
     requestPasswordReset: (email: string) => Promise<void>;
     resetPassword: (token: string, newPassword: string) => Promise<User>;
     loginWithSocial: (provider: 'google' | 'apple') => void;
-    handleOAuthCallback: (token: string, user: User) => void;
+    handleOAuthCallback: (token: string, refreshToken?: string) => void;
     sendPhoneCode: (phone: string) => Promise<void>;
     verifyPhoneCode: (phone: string, code: string) => Promise<{ user: User | null, isNew: boolean }>;
     completePhoneSignup: (phone: string, name: string, email: string) => Promise<User>;
@@ -469,25 +469,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.loginWithSocial(provider);
   }, []);
 
-  const handleOAuthCallback = useCallback(async (token: string, user: User) => {
-    // Store token manually (since we're not going through the normal login flow)
+  const handleOAuthCallback = useCallback(async (token: string, refreshToken?: string) => {
+    // SECURITY: Store tokens securely, then fetch user data via API
+    // User data is NOT passed in URL to prevent logging in browser history/server logs
     localStorage.setItem('balkan_estate_token', token);
+    if (refreshToken) {
+      localStorage.setItem('balkan_estate_refresh_token', refreshToken);
+    }
 
-    dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
     dispatch({ type: 'USER_DATA_LOADING' });
 
-    // Connect to WebSocket for real-time chat
-    socketService.connect(token, user.id);
-
-    // Initialize proactive token refresh
-    tokenService.initializeProactiveRefresh();
-
     try {
-      const userData = await api.getMyData();
-      dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
+      // Fetch user profile securely via authenticated API call
+      const authResult = await api.checkAuth();
+      if (authResult.user) {
+        dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user: authResult.user } });
+
+        // Connect to WebSocket for real-time chat
+        socketService.connect(token, authResult.user.id);
+
+        // Initialize proactive token refresh
+        tokenService.initializeProactiveRefresh();
+
+        // Fetch additional user data
+        const userData = await api.getMyData();
+        dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
+      } else {
+        throw new Error('Failed to fetch user profile');
+      }
     } catch (error) {
       console.error('Error fetching user data after OAuth:', error);
-      // Still mark as successful even if user data fetch fails
+      // Clear tokens on failure
+      localStorage.removeItem('balkan_estate_token');
+      localStorage.removeItem('balkan_estate_refresh_token');
+      dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
       dispatch({ type: 'USER_DATA_SUCCESS', payload: { savedHomes: [], savedSearches: [], conversations: [] } });
     }
   }, []);
