@@ -2,6 +2,7 @@
 // Handles all authentication-related API calls
 
 import { httpClient } from './httpClient';
+import { API_URL } from '@/src/shared/api/config';
 
 export class AuthApiClient {
   async login(emailOrPhone: string, password: string): Promise<any> {
@@ -50,7 +51,6 @@ export class AuthApiClient {
   }
 
   getOAuthUrl(provider: 'google' | 'facebook' | 'apple'): string {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
     const baseUrl = API_URL.replace('/api', '');
     return `${baseUrl}/api/auth/${provider}`;
   }

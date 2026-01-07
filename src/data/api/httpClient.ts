@@ -1,7 +1,8 @@
 // Base HTTP Client
 // Handles all HTTP requests with authentication
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { API_URL } from '@/src/shared/api/config';
+
 const TOKEN_KEY = 'balkan_estate_token';
 
 export interface RequestConfig {
