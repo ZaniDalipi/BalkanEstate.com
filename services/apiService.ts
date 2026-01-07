@@ -378,7 +378,14 @@ export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; a
 };
 
 export const getOAuthUrl = (provider: 'google' | 'apple'): string => {
-  const baseUrl = API_URL.replace('/api', '');
+  // Ensure we have a valid absolute URL for OAuth redirects
+  let baseUrl = API_URL.replace('/api', '');
+
+  // If the URL doesn't start with http:// or https://, use production fallback
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = 'https://api.balkanestateai.com';
+  }
+
   return `${baseUrl}/api/auth/${provider}`;
 };
 
