@@ -111,7 +111,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             {[
                                 { icon: FacebookIcon, href: 'https://facebook.com/balkanestateai', label: 'Facebook', color: 'hover:bg-blue-600' },
                                 { icon: TwitterIcon, href: 'https://twitter.com/balkanestateai', label: 'Twitter', color: 'hover:bg-sky-500' },
-                                { icon: WhatsappIcon, href: 'https://wa.me/383XXXXXXX', label: 'WhatsApp', color: 'hover:bg-green-500' }
+                                { icon: WhatsappIcon, href: 'https://wa.me/38971967915', label: 'WhatsApp', color: 'hover:bg-green-500' }
                             ].map(({ icon: Icon, href, label, color }) => (
                                 <a
                                     key={label}
@@ -178,20 +178,20 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                         <ul className="space-y-3 mb-6">
                             <li>
                                 <a
-                                    href="mailto:info@balkanestateai.com"
+                                    href="mailto:contact@balkanestate.com"
                                     className="flex items-center gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
                                     <EnvelopeIcon className="w-4 h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors" />
-                                    <span className="text-sm">info@balkanestateai.com</span>
+                                    <span className="text-sm">contact@balkanestate.com</span>
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="tel:+38349123456"
+                                    href="tel:+38971967915"
                                     className="flex items-center gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
                                     <PhoneIcon className="w-4 h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors" />
-                                    <span className="text-sm">+383 49 123 456</span>
+                                    <span className="text-sm">+389 71 967 915</span>
                                 </a>
                             </li>
                         </ul>
