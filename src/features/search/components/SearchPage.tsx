@@ -1007,11 +1007,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     {isAuthenticated && currentUser && (
                                         <button onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })} className="flex-shrink-0 mr-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
                                             {currentUser.avatarUrl ? (
-<<<<<<< HEAD
-                                                <img src={currentUser.avatarUrl} alt="My Account" className="w-9 h-9 rounded-full object-cover"/>
-=======
                                                 <img src={currentUser.avatarUrl} alt="My Account" className="w-8 h-8 rounded-full object-cover" referrerPolicy="no-referrer" />
->>>>>>> main
                                             ) : (
                                                 <UserCircleIcon className="w-9 h-9 text-neutral-400"/>
                                             )}
