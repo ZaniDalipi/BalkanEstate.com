@@ -72,26 +72,32 @@ export function navigateWithLanguage(path: string, options?: { replace?: boolean
 
 /**
  * Change language and update URL
+ * Preserves query parameters when changing language
  */
 export function changeLanguageWithUrl(newLang: LanguageCode): void {
   const currentPath = window.location.pathname;
   const { path } = parseLanguageFromPath(currentPath);
+  // Preserve query parameters
+  const queryString = window.location.search;
 
   // Change i18n language
   i18n.changeLanguage(newLang);
   localStorage.setItem('balkanestate_language', newLang);
 
-  // Update URL with new language
-  const newPath = buildLocalizedPath(path, newLang);
+  // Update URL with new language, preserving query parameters
+  const newPath = buildLocalizedPath(path, newLang) + queryString;
   window.history.replaceState({}, '', newPath);
 }
 
 /**
  * Initialize language from URL on app load
  * Returns the detected language and clean path
+ * Preserves query parameters when redirecting to add language prefix
  */
 export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string } {
   const { lang, path } = parseLanguageFromPath(window.location.pathname);
+  // Preserve query parameters (e.g., ?token=xxx for password reset)
+  const queryString = window.location.search;
 
   if (lang && isLanguageSupported(lang)) {
     // URL has valid language prefix - use it
@@ -107,8 +113,8 @@ export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string 
     (storedLang && isLanguageSupported(storedLang) ? storedLang :
      isLanguageSupported(browserLang) ? browserLang : 'en') as LanguageCode;
 
-  // Redirect to language-prefixed URL
-  const newPath = buildLocalizedPath(path, detectedLang);
+  // Redirect to language-prefixed URL, preserving query parameters
+  const newPath = buildLocalizedPath(path, detectedLang) + queryString;
   window.history.replaceState({}, '', newPath);
 
   i18n.changeLanguage(detectedLang);
