@@ -8,7 +8,7 @@ import emailService from '../services/emailService';
 import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
-import { sendHotHourRecommendations, processSavedSearchAlerts, cleanupOldPatterns } from '../services/proBuyerEmailService';
+import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;

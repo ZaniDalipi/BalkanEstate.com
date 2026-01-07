@@ -47,6 +47,7 @@ const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingL
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
 const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
 const ResetPasswordPage = lazy(() => import('./src/features/auth/components/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./src/features/auth/components/VerifyEmailPage'));
 const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
 const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
 const ValuationPage = lazy(() => import('./src/features/valuation/components/ValuationPage'));
@@ -165,6 +166,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/agencies': 'agencies',
         '/admin': 'admin',
         '/reset-password': 'reset-password',
+        '/verify-email': 'verify-email',
         '/analytics': 'analytics',
         '/how-it-works': 'how-it-works',
         '/valuation': 'valuation',
@@ -330,6 +332,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <AdminDashboard />;
       case 'reset-password':
         return <ResetPasswordPage />;
+      case 'verify-email':
+        return <VerifyEmailPage />;
       case 'analytics':
         return <AnalyticsPage />;
       case 'how-it-works':

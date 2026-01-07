@@ -101,7 +101,7 @@ export const isHotHour = (userId: string): boolean => {
 export const findMatchingProperties = async (
   userId: string,
   limit: number = 5
-): Promise<typeof Property[]> => {
+): Promise<any[]> => {
   const pattern = userActivityPatterns.get(userId);
 
   // Also check saved searches
@@ -134,17 +134,29 @@ export const findMatchingProperties = async (
   // From saved searches
   for (const search of savedSearches) {
     const query: any = { status: 'active' };
+    const filters = search.filters as any;
 
-    if (search.filters) {
-      if (search.filters.city) query.city = { $regex: search.filters.city, $options: 'i' };
-      if (search.filters.country) query.country = { $regex: search.filters.country, $options: 'i' };
-      if (search.filters.propertyType) query.propertyType = search.filters.propertyType;
-      if (search.filters.minPrice || search.filters.maxPrice) {
-        query.price = {};
-        if (search.filters.minPrice) query.price.$gte = search.filters.minPrice;
-        if (search.filters.maxPrice) query.price.$lte = search.filters.maxPrice;
+    if (filters) {
+      // IFilters uses 'query' for text search and 'country' for country filter
+      if (filters.query) {
+        query.$or = [
+          { city: { $regex: filters.query, $options: 'i' } },
+          { country: { $regex: filters.query, $options: 'i' } },
+          { title: { $regex: filters.query, $options: 'i' } },
+        ];
       }
-      if (search.filters.beds) query.beds = { $gte: search.filters.beds };
+      if (filters.country && filters.country !== '') {
+        query.country = { $regex: filters.country, $options: 'i' };
+      }
+      if (filters.propertyType && filters.propertyType !== 'any') {
+        query.propertyType = filters.propertyType;
+      }
+      if (filters.minPrice || filters.maxPrice) {
+        query.price = {};
+        if (filters.minPrice) query.price.$gte = filters.minPrice;
+        if (filters.maxPrice) query.price.$lte = filters.maxPrice;
+      }
+      if (filters.beds) query.beds = { $gte: filters.beds };
     }
 
     queries.push(query);
@@ -216,7 +228,7 @@ export const sendHotHourRecommendations = async (): Promise<{
         searchName: 'Your Search Preferences',
         property: {
           id: String(topProperty._id),
-          title: topProperty.title,
+          title: topProperty.title || 'Property Listing',
           address: topProperty.address || '',
           city: topProperty.city,
           price: topProperty.price,
@@ -267,7 +279,7 @@ export const sendPriceDropAlerts = async (
         recipientName: user.name,
         property: {
           id: String(property._id),
-          title: property.title,
+          title: property.title || 'Property Listing',
           address: property.address || '',
           city: property.city,
           previousPrice,
@@ -280,7 +292,7 @@ export const sendPriceDropAlerts = async (
         },
       });
 
-      console.log(`[proBuyerEmailService] Sent price drop alert to ${user.email} for ${property.title}`);
+      console.log(`[proBuyerEmailService] Sent price drop alert to ${user.email} for ${property.title || 'a property'}`);
     } catch (error) {
       console.error(`[proBuyerEmailService] Error sending price drop alert to ${user.email}:`, error);
     }
@@ -314,19 +326,31 @@ export const processSavedSearchAlerts = async (): Promise<{
       // Build query from search filters
       const query: any = {
         status: 'active',
-        createdAt: { $gt: search.lastAlertSent || new Date(0) },
+        createdAt: { $gt: search.lastAlertSentAt || new Date(0) },
       };
 
-      if (search.filters) {
-        if (search.filters.city) query.city = { $regex: search.filters.city, $options: 'i' };
-        if (search.filters.country) query.country = { $regex: search.filters.country, $options: 'i' };
-        if (search.filters.propertyType) query.propertyType = search.filters.propertyType;
-        if (search.filters.minPrice || search.filters.maxPrice) {
-          query.price = {};
-          if (search.filters.minPrice) query.price.$gte = search.filters.minPrice;
-          if (search.filters.maxPrice) query.price.$lte = search.filters.maxPrice;
+      const filters = search.filters as any;
+      if (filters) {
+        // IFilters uses 'query' for text search and 'country' for country filter
+        if (filters.query) {
+          query.$or = [
+            { city: { $regex: filters.query, $options: 'i' } },
+            { country: { $regex: filters.query, $options: 'i' } },
+            { title: { $regex: filters.query, $options: 'i' } },
+          ];
         }
-        if (search.filters.beds) query.beds = { $gte: search.filters.beds };
+        if (filters.country && filters.country !== '') {
+          query.country = { $regex: filters.country, $options: 'i' };
+        }
+        if (filters.propertyType && filters.propertyType !== 'any') {
+          query.propertyType = filters.propertyType;
+        }
+        if (filters.minPrice || filters.maxPrice) {
+          query.price = {};
+          if (filters.minPrice) query.price.$gte = filters.minPrice;
+          if (filters.maxPrice) query.price.$lte = filters.maxPrice;
+        }
+        if (filters.beds) query.beds = { $gte: filters.beds };
       }
 
       // Find new matching properties
@@ -343,7 +367,7 @@ export const processSavedSearchAlerts = async (): Promise<{
 
       // Check alert frequency
       const now = new Date();
-      const lastAlert = search.lastAlertSent ? new Date(search.lastAlertSent) : new Date(0);
+      const lastAlert = search.lastAlertSentAt ? new Date(search.lastAlertSentAt) : new Date(0);
       const hoursSinceLastAlert = (now.getTime() - lastAlert.getTime()) / (1000 * 60 * 60);
 
       let shouldSend = false;
@@ -373,7 +397,7 @@ export const processSavedSearchAlerts = async (): Promise<{
           searchName: search.name,
           properties: newProperties.slice(0, 5).map((p) => ({
             id: String(p._id),
-            title: p.title,
+            title: p.title || 'Property Listing',
             address: p.address || '',
             city: p.city,
             price: p.price,
@@ -382,7 +406,7 @@ export const processSavedSearchAlerts = async (): Promise<{
             sqft: p.sqft || 0,
             imageUrl: p.imageUrl || '',
           })),
-          totalMatches: newProperties.length,
+          frequency: search.alertFrequency || 'daily',
         });
       } else {
         await sendPropertyAlert({
@@ -391,7 +415,7 @@ export const processSavedSearchAlerts = async (): Promise<{
           searchName: search.name,
           property: {
             id: String(newProperties[0]._id),
-            title: newProperties[0].title,
+            title: newProperties[0].title || 'Property Listing',
             address: newProperties[0].address || '',
             city: newProperties[0].city,
             price: newProperties[0].price,
@@ -405,7 +429,7 @@ export const processSavedSearchAlerts = async (): Promise<{
 
       // Update last alert sent time
       await SavedSearch.findByIdAndUpdate(search._id, {
-        lastAlertSent: now,
+        lastAlertSentAt: now,
       });
 
       stats.alertsSent++;
