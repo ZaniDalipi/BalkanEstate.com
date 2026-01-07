@@ -10,6 +10,14 @@ export const oauthStrategies = {
   apple: false,
 };
 
+// Helper function to get high-resolution Google profile picture
+const getGoogleAvatarUrl = (photoUrl: string | undefined): string | undefined => {
+  if (!photoUrl) return undefined;
+  // Google URLs end with =s96-c (96px) by default. Replace with larger size.
+  // Remove the size parameter to get the original, or set a larger size
+  return photoUrl.replace(/=s\d+-c$/, '=s400-c');
+};
+
 // Google OAuth Strategy
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   oauthStrategies.google = true;
@@ -29,7 +37,15 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             providerId: profile.id
           });
 
+          // Get high-resolution avatar URL
+          const avatarUrl = getGoogleAvatarUrl(profile.photos?.[0]?.value);
+
           if (user) {
+            // Update avatar if user doesn't have one or if it's a Google URL (refresh it)
+            if (avatarUrl && (!user.avatarUrl || user.avatarUrl.includes('googleusercontent.com'))) {
+              user.avatarUrl = avatarUrl;
+              await user.save();
+            }
             return done(null, user);
           }
 
@@ -40,8 +56,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             existingUser.provider = 'google';
             existingUser.providerId = profile.id;
             existingUser.isEmailVerified = true;
-            if (profile.photos?.[0]?.value && !existingUser.avatarUrl) {
-              existingUser.avatarUrl = profile.photos[0].value;
+            if (avatarUrl && !existingUser.avatarUrl) {
+              existingUser.avatarUrl = avatarUrl;
             }
             await existingUser.save();
             return done(null, existingUser);
@@ -54,7 +70,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             provider: 'google',
             providerId: profile.id,
             isEmailVerified: true,
-            avatarUrl: profile.photos?.[0]?.value,
+            avatarUrl: avatarUrl,
             role: 'buyer',
             stats: {
               totalViews: 0,
