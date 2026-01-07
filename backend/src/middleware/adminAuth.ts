@@ -1,24 +1,53 @@
 import { Request, Response, NextFunction } from 'express';
 import { IUser } from '../models/User';
 
-// Whitelist of allowed VPN IP addresses for admin access
-// TODO: Update these with your actual VPN IP addresses
-const ADMIN_WHITELIST_IPS = [
-  '127.0.0.1', // Localhost for development
-  '::1', // IPv6 localhost
-  '::ffff:127.0.0.1', // IPv6-mapped IPv4 localhost
-  // Add your VPN IP addresses here, for example:
-  '10.8.0.1',
-  '192.168.1.100',
-];
+// Load allowed IPs from environment variable (comma-separated)
+// Example: ADMIN_ALLOWED_IPS=1.2.3.4,5.6.7.8
+const getWhitelistedIPs = (): string[] => {
+  const defaultIPs = [
+    '127.0.0.1', // Localhost for development
+    '::1', // IPv6 localhost
+    '::ffff:127.0.0.1', // IPv6-mapped IPv4 localhost
+  ];
+
+  const envIPs = process.env.ADMIN_ALLOWED_IPS;
+  if (envIPs) {
+    const customIPs = envIPs.split(',').map(ip => ip.trim()).filter(ip => ip);
+    return [...defaultIPs, ...customIPs];
+  }
+
+  return defaultIPs;
+};
+
+// Load allowed domains from environment variable (comma-separated)
+// Example: ADMIN_ALLOWED_DOMAINS=admin.balkanestate.com
+const getAllowedDomains = (): string[] => {
+  const envDomains = process.env.ADMIN_ALLOWED_DOMAINS;
+  if (envDomains) {
+    return envDomains.split(',').map(d => d.trim().toLowerCase()).filter(d => d);
+  }
+  return [];
+};
+
+// Check if VPN/IP check should be skipped (for development)
+const isVPNCheckDisabled = (): boolean => {
+  return process.env.DISABLE_ADMIN_VPN_CHECK === 'true';
+};
 
 // Admin role check
 const ADMIN_ROLES = ['admin', 'super_admin'];
 
 /**
- * Middleware to check if request is from whitelisted VPN IP
+ * Middleware to check if request is from whitelisted VPN IP or allowed domain
  */
 export const checkVPNAccess = (req: Request, res: Response, next: NextFunction): void => {
+  // Skip VPN check if disabled (development only!)
+  if (isVPNCheckDisabled()) {
+    console.log('⚠️ VPN check disabled via DISABLE_ADMIN_VPN_CHECK');
+    next();
+    return;
+  }
+
   // Get client IP address
   const clientIP =
     req.ip ||
@@ -31,19 +60,34 @@ export const checkVPNAccess = (req: Request, res: Response, next: NextFunction):
   // Extract IP from potential IPv6-mapped IPv4 format
   const normalizedIP = String(clientIP).replace('::ffff:', '');
 
-  console.log(`🔐 Admin access attempt from IP: ${clientIP} (normalized: ${normalizedIP})`);
+  // Get request host/domain
+  const host = (req.headers.host || '').toLowerCase().split(':')[0];
+
+  console.log(`🔐 Admin access attempt from IP: ${clientIP} (normalized: ${normalizedIP}), host: ${host}`);
+
+  // Check if domain is allowed
+  const allowedDomains = getAllowedDomains();
+  const isDomainAllowed = allowedDomains.length > 0 && allowedDomains.includes(host);
+
+  if (isDomainAllowed) {
+    console.log(`✅ Domain verified: ${host}`);
+    next();
+    return;
+  }
 
   // Check if IP is whitelisted
-  const isWhitelisted = ADMIN_WHITELIST_IPS.some(allowedIP => {
+  const whitelistedIPs = getWhitelistedIPs();
+  const isIPWhitelisted = whitelistedIPs.some(allowedIP => {
     return clientIP === allowedIP || normalizedIP === allowedIP;
   });
 
-  if (!isWhitelisted) {
-    console.error(`❌ Unauthorized IP address: ${clientIP}`);
+  if (!isIPWhitelisted) {
+    console.error(`❌ Unauthorized access: IP=${clientIP}, host=${host}`);
     res.status(403).json({
-      message: 'Access denied. Admin panel requires VPN connection.',
-      error: 'IP_NOT_WHITELISTED',
-      hint: 'Please connect to the authorized VPN before accessing the admin panel.',
+      message: 'Access denied. Admin panel requires VPN connection or authorized domain.',
+      error: 'ACCESS_DENIED',
+      hint: 'Connect to authorized VPN or access via allowed domain.',
+      yourIP: normalizedIP,
     });
     return;
   }
@@ -121,21 +165,12 @@ export const logAdminAction = (action: string) => {
 };
 
 /**
- * Add IP to whitelist (temporary - for development)
- * In production, IPs should be managed via environment variables or database
+ * Get current whitelist config (for admin viewing/debugging)
  */
-export const addIPToWhitelist = (ip: string): boolean => {
-  if (!ADMIN_WHITELIST_IPS.includes(ip)) {
-    ADMIN_WHITELIST_IPS.push(ip);
-    console.log(`✅ Added IP to whitelist: ${ip}`);
-    return true;
-  }
-  return false;
-};
-
-/**
- * Get current whitelist (for admin viewing)
- */
-export const getWhitelist = (): string[] => {
-  return [...ADMIN_WHITELIST_IPS];
+export const getWhitelistConfig = (): { ips: string[]; domains: string[]; vpnCheckDisabled: boolean } => {
+  return {
+    ips: getWhitelistedIPs(),
+    domains: getAllowedDomains(),
+    vpnCheckDisabled: isVPNCheckDisabled(),
+  };
 };
