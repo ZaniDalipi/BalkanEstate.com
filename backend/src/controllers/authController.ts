@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import User from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
-import { generateToken } from '../utils/jwt';
+// generateToken moved to refreshTokenService - using generateTokenPair instead
 import { IUser } from '../models/User';
 import crypto from 'crypto';
 import cloudinary from '../config/cloudinary';
@@ -851,13 +851,15 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Generate tokens
-    const token = generateToken(String(user._id));
+    // Generate tokens using the refresh token service
+    const { generateTokenPair } = await import('../services/refreshTokenService');
+    const tokens = await generateTokenPair(user, {
+      userAgent: req.headers['user-agent'],
+      ipAddress: req.ip,
+    });
 
-    // Generate refresh token for better security
-    const { generateRefreshToken, storeRefreshToken } = await import('../services/refreshTokenService');
-    const refreshToken = generateRefreshToken(String(user._id));
-    await storeRefreshToken(user, refreshToken, req);
+    const token = tokens.accessToken;
+    const refreshToken = tokens.refreshToken;
 
     // SECURITY: Only pass tokens in URL, NOT user data
     // User data will be fetched securely via /api/auth/me endpoint
