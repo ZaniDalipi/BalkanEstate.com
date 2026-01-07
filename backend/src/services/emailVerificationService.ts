@@ -1,6 +1,9 @@
 import crypto from 'crypto';
 import User, { IUser } from '../models/User';
-import { sendEmail } from './emailService';
+import {
+  sendEmailVerification,
+  sendWelcomeEmail as sendWelcomeEmailService,
+} from './emailService';
 
 /**
  * Email Verification Service
@@ -38,96 +41,13 @@ export const sendVerificationEmail = async (user: IUser): Promise<void> => {
   await user.save();
 
   // Send email with unhashed token (user needs this)
+  // Using the new sendEmailVerification method which uses noreply@ address
   const verificationUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
-  const emailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 30px;
-          text-align: center;
-          border-radius: 10px 10px 0 0;
-        }
-        .header h1 {
-          color: white;
-          margin: 0;
-          font-size: 28px;
-        }
-        .content {
-          background: #f9f9f9;
-          padding: 30px;
-          border-radius: 0 0 10px 10px;
-        }
-        .button {
-          display: inline-block;
-          padding: 15px 30px;
-          background: #667eea;
-          color: white;
-          text-decoration: none;
-          border-radius: 5px;
-          margin: 20px 0;
-          font-weight: bold;
-        }
-        .footer {
-          text-align: center;
-          margin-top: 20px;
-          color: #666;
-          font-size: 12px;
-        }
-        .warning {
-          background: #fff3cd;
-          border-left: 4px solid #ffc107;
-          padding: 10px;
-          margin: 15px 0;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>🏠 Balkan Estate</h1>
-      </div>
-      <div class="content">
-        <h2>Welcome, ${user.name}!</h2>
-        <p>Thank you for signing up with Balkan Estate. To complete your registration and start using your account, please verify your email address.</p>
-
-        <div style="text-align: center;">
-          <a href="${verificationUrl}" class="button">Verify Email Address</a>
-        </div>
-
-        <p>Or copy and paste this link into your browser:</p>
-        <p style="word-break: break-all; background: white; padding: 10px; border-radius: 5px;">
-          ${verificationUrl}
-        </p>
-
-        <div class="warning">
-          <strong>⚠️ Important:</strong> This link will expire in ${TOKEN_EXPIRY_HOURS} hours. If you didn't create an account with Balkan Estate, please ignore this email.
-        </div>
-
-        <p>Need help? Contact us at support@balkanestate.com</p>
-      </div>
-      <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} Balkan Estate. All rights reserved.</p>
-        <p>This is an automated email. Please do not reply to this message.</p>
-      </div>
-    </body>
-    </html>
-  `;
-
-  await sendEmail({
-    to: user.email,
-    subject: 'Verify Your Email Address - Balkan Estate',
-    html: emailHtml,
+  await sendEmailVerification({
+    email: user.email,
+    userName: user.name,
+    verificationUrl,
   });
 };
 
@@ -226,110 +146,11 @@ export const requireEmailVerification = (user: IUser): boolean => {
 
 /**
  * Send welcome email after verification (optional)
+ * Uses support@ address since this is a welcome/promotional email
  */
 export const sendWelcomeEmail = async (user: IUser): Promise<void> => {
-  const emailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 30px;
-          text-align: center;
-          border-radius: 10px 10px 0 0;
-        }
-        .header h1 {
-          color: white;
-          margin: 0;
-          font-size: 28px;
-        }
-        .content {
-          background: #f9f9f9;
-          padding: 30px;
-          border-radius: 0 0 10px 10px;
-        }
-        .feature {
-          background: white;
-          padding: 15px;
-          margin: 10px 0;
-          border-radius: 5px;
-          border-left: 4px solid #667eea;
-        }
-        .button {
-          display: inline-block;
-          padding: 15px 30px;
-          background: #667eea;
-          color: white;
-          text-decoration: none;
-          border-radius: 5px;
-          margin: 20px 0;
-          font-weight: bold;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>🎉 Welcome to Balkan Estate!</h1>
-      </div>
-      <div class="content">
-        <h2>Hello ${user.name},</h2>
-        <p>Your email has been verified successfully! You now have full access to all Balkan Estate features.</p>
-
-        <h3>What you can do now:</h3>
-
-        <div class="feature">
-          <strong>🔍 Search Properties</strong><br>
-          Browse thousands of properties across the Balkans
-        </div>
-
-        <div class="feature">
-          <strong>💾 Save Favorites</strong><br>
-          Create collections of properties you love
-        </div>
-
-        <div class="feature">
-          <strong>💬 Contact Agents</strong><br>
-          Connect directly with property agents
-        </div>
-
-        ${user.role === 'agent' && user.isTrialActive() ? `
-        <div class="feature" style="border-left-color: #28a745;">
-          <strong>🎁 7-Day Agent Trial Active</strong><br>
-          You have full access to all agent features for 7 days. List up to 10 properties and showcase your expertise!
-        </div>
-        ` : ''}
-
-        ${user.role === 'private_seller' ? `
-        <div class="feature">
-          <strong>📝 List Your Property</strong><br>
-          You can list up to ${user.getActiveListingsLimit()} properties for free
-        </div>
-        ` : ''}
-
-        <div style="text-align: center;">
-          <a href="${FRONTEND_URL}" class="button">Start Exploring</a>
-        </div>
-
-        <p>If you have any questions, feel free to contact our support team.</p>
-
-        <p>Happy house hunting!<br>The Balkan Estate Team</p>
-      </div>
-    </body>
-    </html>
-  `;
-
-  await sendEmail({
-    to: user.email,
-    subject: 'Welcome to Balkan Estate! 🎉',
-    html: emailHtml,
+  await sendWelcomeEmailService({
+    email: user.email,
+    userName: user.name,
   });
 };

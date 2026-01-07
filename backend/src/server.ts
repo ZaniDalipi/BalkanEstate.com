@@ -80,6 +80,7 @@ import sitemapRoutes from './routes/sitemapRoutes';
 import viewStatsRoutes from './routes/viewStatsRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import propertyValuationRoutes from './routes/propertyValuationRoutes';
+import inquiryRoutes from './routes/inquiryRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -247,6 +248,7 @@ app.use('/api/credentials', credentialRoutes); // Agent credentials management
 app.use('/api/view-stats', viewStatsRoutes); // View statistics tracking
 app.use('/api/notifications', notificationRoutes); // User notifications
 app.use('/api/valuations', propertyValuationRoutes); // AI property valuation
+app.use('/api/inquiries', inquiryRoutes); // Buyer-to-agent inquiries (rate limited)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

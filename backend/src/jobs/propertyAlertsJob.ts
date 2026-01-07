@@ -13,7 +13,6 @@ import SavedSearch, { IFilters } from '../models/SavedSearch';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
-import User from '../models/User';
 import { sendPropertyAlert, sendPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
 
 // Subscription tiers that have access to property alerts

@@ -6,6 +6,7 @@ interface EmailConfig {
   subject: string;
   html: string;
   text?: string;
+  category?: 'noreply' | 'alerts' | 'support' | 'inquiries';
 }
 
 type EmailProvider = 'resend' | 'smtp' | 'none';
@@ -70,24 +71,43 @@ export interface NewMessageParams {
   conversationUrl: string;
 }
 
+// Email categories for different purposes
+export type EmailCategory = 'noreply' | 'alerts' | 'support' | 'inquiries';
+
+// Default "from" addresses for each category
+const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
+  noreply: 'Balkan Estate <noreply@balkanestateai.com>',
+  alerts: 'Balkan Estate Alerts <alerts@balkanestateai.com>',
+  support: 'Balkan Estate Support <support@balkanestateai.com>',
+  inquiries: 'Balkan Estate <inquiries@balkanestateai.com>',
+};
+
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
   private resend: Resend | null = null;
   private provider: EmailProvider = 'none';
-  private fromEmail: string;
+  private fromEmails: Record<EmailCategory, string>;
 
   constructor() {
+    // Initialize from addresses (can be overridden via env vars)
+    this.fromEmails = {
+      noreply: process.env.EMAIL_FROM_NOREPLY || DEFAULT_EMAIL_ADDRESSES.noreply,
+      alerts: process.env.EMAIL_FROM_ALERTS || DEFAULT_EMAIL_ADDRESSES.alerts,
+      support: process.env.EMAIL_FROM_SUPPORT || DEFAULT_EMAIL_ADDRESSES.support,
+      inquiries: process.env.EMAIL_FROM_INQUIRIES || DEFAULT_EMAIL_ADDRESSES.inquiries,
+    };
+
     // Priority: Resend > SMTP > None
     if (process.env.RESEND_API_KEY) {
       this.resend = new Resend(process.env.RESEND_API_KEY);
       this.provider = 'resend';
-      // Use onboarding@resend.dev for testing (required without verified domain)
-      // Once you verify your domain, set EMAIL_FROM to your own address
-      this.fromEmail = process.env.EMAIL_FROM || 'Balkan Estate <onboarding@resend.dev>';
       console.log('✉️ Email service configured with Resend');
-      console.log(`   From: ${this.fromEmail}`);
+      console.log('   Email addresses:');
+      console.log(`     noreply: ${this.fromEmails.noreply}`);
+      console.log(`     alerts: ${this.fromEmails.alerts}`);
+      console.log(`     support: ${this.fromEmails.support}`);
+      console.log(`     inquiries: ${this.fromEmails.inquiries}`);
     } else if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      this.fromEmail = process.env.EMAIL_FROM || process.env.SMTP_FROM || 'noreply@balkanestate.com';
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: parseInt(process.env.SMTP_PORT || '587'),
@@ -100,16 +120,26 @@ class EmailService {
       this.provider = 'smtp';
       console.log('✉️ Email service configured with SMTP');
     } else {
-      this.fromEmail = 'noreply@balkanestate.com';
       console.warn('⚠️ Email service not configured. Set RESEND_API_KEY or SMTP credentials.');
       console.warn('   Get a free Resend API key at: https://resend.com');
     }
   }
 
+  /**
+   * Get the appropriate "from" address for an email category
+   */
+  getFromAddress(category: EmailCategory = 'noreply'): string {
+    return this.fromEmails[category];
+  }
+
   async sendEmail(config: EmailConfig): Promise<void> {
+    // Get the appropriate "from" address based on category
+    const fromAddress = this.getFromAddress(config.category || 'noreply');
+
     // Skip email sending if not configured
     if (this.provider === 'none') {
       console.log('📧 [DEV MODE] Email skipped (no email provider configured):');
+      console.log(`   From: ${fromAddress}`);
       console.log(`   To: ${config.to}`);
       console.log(`   Subject: ${config.subject}`);
       return;
@@ -118,7 +148,7 @@ class EmailService {
     try {
       if (this.provider === 'resend' && this.resend) {
         const { error } = await this.resend.emails.send({
-          from: this.fromEmail,
+          from: fromAddress,
           to: config.to,
           subject: config.subject,
           html: config.html,
@@ -129,14 +159,14 @@ class EmailService {
         }
       } else if (this.provider === 'smtp' && this.transporter) {
         await this.transporter.sendMail({
-          from: this.fromEmail,
+          from: fromAddress,
           to: config.to,
           subject: config.subject,
           html: config.html,
           text: config.text || '',
         });
       }
-      console.log('✅ Email sent to ' + config.to + ': ' + config.subject);
+      console.log(`✅ Email sent (${config.category || 'noreply'}) to ${config.to}: ${config.subject}`);
     } catch (error) {
       console.error('❌ Email sending failed:', error);
       throw error;
@@ -294,6 +324,7 @@ class EmailService {
       subject: `📊 Your Weekly Stats: ${data.totalViews.toLocaleString()} views, ${data.totalInquiries} inquiries`,
       html,
       text: `Hi ${data.userName}, here's your weekly report for ${data.period}: ${data.totalViews} views, ${data.totalInquiries} inquiries, ${data.totalSaves} saves.`,
+      category: 'support',
     });
   }
 
@@ -419,6 +450,7 @@ class EmailService {
       subject: `🏢 ${data.agencyName} Weekly Report: ${data.profileViews} profile views, ${data.totalInquiries} inquiries`,
       html,
       text: `Hi ${data.agencyName}, here's your weekly agency report for ${data.period}: ${data.profileViews} profile views, ${data.totalInquiries} inquiries, ${data.totalAgents} agents.`,
+      category: 'support',
     });
   }
 
@@ -491,6 +523,7 @@ class EmailService {
       subject: `💬 New message from ${params.senderName}${params.propertyTitle ? ` about ${params.propertyTitle}` : ''}`,
       html,
       text: `New message from ${params.senderName}: "${params.messagePreview}"`,
+      category: 'inquiries',
     });
   }
 
@@ -604,6 +637,7 @@ class EmailService {
       subject: `🏠 New match: ${params.property.title} - €${params.property.price.toLocaleString()}`,
       html,
       text: `New property match for "${params.searchName}": ${params.property.title} in ${params.property.city} - €${params.property.price.toLocaleString()}`,
+      category: 'alerts',
     });
   }
 
@@ -693,6 +727,7 @@ class EmailService {
       subject: `🏠 ${params.properties.length} new properties match "${params.searchName}"`,
       html,
       text: `${params.properties.length} new properties match your saved search "${params.searchName}"`,
+      category: 'alerts',
     });
   }
 
@@ -794,6 +829,7 @@ class EmailService {
       subject: `📉 Price dropped ${params.property.percentageDrop}%: ${params.property.title} now €${params.property.newPrice.toLocaleString()}`,
       html,
       text: `Price drop alert! ${params.property.title} dropped from €${params.property.previousPrice.toLocaleString()} to €${params.property.newPrice.toLocaleString()} (${params.property.percentageDrop}% off)`,
+      category: 'alerts',
     });
   }
 
@@ -940,10 +976,378 @@ class EmailService {
       text: `Refund processed: ${details.currency}${details.amount.toFixed(2)}. Should appear in 5-10 business days.`,
     });
   }
+
+  /**
+   * Send agent inquiry - forwards buyer inquiries to agents
+   */
+  async sendAgentInquiry(params: {
+    agentEmail: string;
+    agentName: string;
+    buyerName: string;
+    buyerEmail: string;
+    buyerPhone?: string;
+    message: string;
+    propertyTitle?: string;
+    propertyId?: string;
+    location?: string;
+    inquiryType: 'property' | 'general' | 'area_search';
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
+    const inquiryTypeLabels: Record<string, string> = {
+      property: 'Property Inquiry',
+      general: 'General Inquiry',
+      area_search: 'Area Search Request',
+    };
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">📨 New ${inquiryTypeLabels[params.inquiryType]}</h1>
+    </div>
+
+    <div style="padding: 24px;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+        Hi <strong>${params.agentName}</strong>, you've received a new inquiry!
+      </p>
+
+      <!-- Buyer Info Card -->
+      <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">👤 From:</div>
+        <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${params.buyerName}</div>
+        <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">
+          📧 <a href="mailto:${params.buyerEmail}" style="color: #7c3aed;">${params.buyerEmail}</a>
+        </div>
+        ${params.buyerPhone ? `<div style="font-size: 14px; color: #6b7280; margin-top: 4px;">📱 ${params.buyerPhone}</div>` : ''}
+      </div>
+
+      ${params.propertyTitle ? `
+      <!-- Property Card -->
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">🏠 Property:</div>
+        <div style="font-size: 14px; color: #1f2937;">${params.propertyTitle}</div>
+        ${params.location ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">📍 ${params.location}</div>` : ''}
+        ${params.propertyId ? `<a href="${frontendUrl}/property/${params.propertyId}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: #7c3aed;">View Property →</a>` : ''}
+      </div>
+      ` : ''}
+
+      ${params.location && !params.propertyTitle ? `
+      <!-- Area Search Card -->
+      <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">📍 Area of Interest:</div>
+        <div style="font-size: 14px; color: #1f2937;">${params.location}</div>
+      </div>
+      ` : ''}
+
+      <!-- Message Card -->
+      <div style="background: #faf5ff; border-left: 4px solid #7c3aed; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">💬 Message:</div>
+        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.6; white-space: pre-wrap;">${params.message}</p>
+      </div>
+
+      <!-- Reply CTA -->
+      <a href="mailto:${params.buyerEmail}?subject=Re: ${params.propertyTitle ? `Inquiry about ${params.propertyTitle}` : 'Your Balkan Estate Inquiry'}"
+         style="display: block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
+        Reply to ${params.buyerName} →
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
+        This inquiry was sent through Balkan Estate
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        © ${new Date().getFullYear()} Balkan Estate
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.agentEmail,
+      subject: `📨 New inquiry from ${params.buyerName}${params.propertyTitle ? ` about ${params.propertyTitle}` : ''}`,
+      html,
+      text: `New inquiry from ${params.buyerName} (${params.buyerEmail}): ${params.message}`,
+      category: 'inquiries',
+    });
+  }
+
+  /**
+   * Send password reset email (uses noreply address)
+   */
+  async sendPasswordResetEmail(params: {
+    email: string;
+    userName: string;
+    resetUrl: string;
+  }): Promise<void> {
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">🔐 Password Reset Request</h1>
+    </div>
+
+    <div style="padding: 24px;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+        Hi <strong>${params.userName}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 16px 0;">
+        You requested to reset your password for your Balkan Estate account.
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Click the button below to reset your password:
+      </p>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${params.resetUrl}"
+           style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+          Reset Password
+        </a>
+      </div>
+
+      <p style="color: #6b7280; font-size: 12px; margin: 16px 0 8px 0;">
+        Or copy and paste this link into your browser:
+      </p>
+      <p style="word-break: break-all; color: #2563eb; font-size: 12px; background: #f3f4f6; padding: 12px; border-radius: 4px;">
+        ${params.resetUrl}
+      </p>
+
+      <!-- Warning -->
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 24px 0; border-radius: 4px;">
+        <p style="color: #92400e; font-size: 13px; margin: 0;">
+          <strong>⏰ This link will expire in 1 hour.</strong>
+        </p>
+      </div>
+
+      <p style="color: #6b7280; font-size: 13px; margin: 0;">
+        If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        This is an automated message from Balkan Estate. Please do not reply to this email.
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
+        © ${new Date().getFullYear()} Balkan Estate
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: '🔐 Password Reset Request - Balkan Estate',
+      html,
+      text: `Hi ${params.userName},\n\nYou requested to reset your password for your Balkan Estate account.\n\nClick the link below to reset your password:\n${params.resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this password reset, please ignore this email.`,
+      category: 'noreply',
+    });
+  }
+
+  /**
+   * Send email verification email (uses noreply address)
+   */
+  async sendEmailVerification(params: {
+    email: string;
+    userName: string;
+    verificationUrl: string;
+  }): Promise<void> {
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">✉️ Verify Your Email</h1>
+    </div>
+
+    <div style="padding: 24px;">
+      <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
+        Hi <strong>${params.userName}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 16px 0;">
+        Welcome to Balkan Estate! Please verify your email address to complete your registration.
+      </p>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${params.verificationUrl}"
+           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+          Verify Email Address
+        </a>
+      </div>
+
+      <p style="color: #6b7280; font-size: 12px; margin: 16px 0 8px 0;">
+        Or copy and paste this link into your browser:
+      </p>
+      <p style="word-break: break-all; color: #10b981; font-size: 12px; background: #f3f4f6; padding: 12px; border-radius: 4px;">
+        ${params.verificationUrl}
+      </p>
+
+      <!-- Warning -->
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 24px 0; border-radius: 4px;">
+        <p style="color: #92400e; font-size: 13px; margin: 0;">
+          <strong>⏰ This link will expire in 24 hours.</strong>
+        </p>
+      </div>
+
+      <p style="color: #6b7280; font-size: 13px; margin: 0;">
+        If you didn't create an account with Balkan Estate, please ignore this email.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        This is an automated message from Balkan Estate. Please do not reply to this email.
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
+        © ${new Date().getFullYear()} Balkan Estate
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: '✉️ Verify your email - Balkan Estate',
+      html,
+      text: `Hi ${params.userName},\n\nWelcome to Balkan Estate! Please verify your email address by clicking this link:\n${params.verificationUrl}\n\nThis link will expire in 24 hours.\n\nIf you didn't create an account, please ignore this email.`,
+      category: 'noreply',
+    });
+  }
+
+  /**
+   * Send welcome email after verification (uses support address)
+   */
+  async sendWelcomeEmail(params: {
+    email: string;
+    userName: string;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 32px 24px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">🎉 Welcome to Balkan Estate!</h1>
+    </div>
+
+    <div style="padding: 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
+        Hi <strong>${params.userName}</strong>,
+      </p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
+        Your email has been verified and your account is now fully active. You're ready to explore the best properties in the Balkans!
+      </p>
+
+      <!-- Features Grid -->
+      <div style="margin: 24px 0;">
+        <div style="display: table; width: 100%;">
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 12px; vertical-align: top;">
+              <div style="background: #f0f9ff; border-radius: 8px; padding: 16px; height: 100%;">
+                <div style="font-size: 24px; margin-bottom: 8px;">🔍</div>
+                <div style="font-weight: 600; color: #374151; font-size: 14px;">Search Properties</div>
+                <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Find your dream home with our advanced search</div>
+              </div>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 12px; vertical-align: top;">
+              <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; height: 100%;">
+                <div style="font-size: 24px; margin-bottom: 8px;">❤️</div>
+                <div style="font-weight: 600; color: #374151; font-size: 14px;">Save Favorites</div>
+                <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Keep track of properties you love</div>
+              </div>
+            </div>
+          </div>
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 12px; vertical-align: top;">
+              <div style="background: #fef3c7; border-radius: 8px; padding: 16px; height: 100%;">
+                <div style="font-size: 24px; margin-bottom: 8px;">🔔</div>
+                <div style="font-weight: 600; color: #374151; font-size: 14px;">Get Alerts</div>
+                <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Be notified of new matching properties</div>
+              </div>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 12px; vertical-align: top;">
+              <div style="background: #faf5ff; border-radius: 8px; padding: 16px; height: 100%;">
+                <div style="font-size: 24px; margin-bottom: 8px;">💬</div>
+                <div style="font-weight: 600; color: #374151; font-size: 14px;">Contact Agents</div>
+                <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Message agents directly through the platform</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${frontendUrl}"
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+          Start Exploring →
+        </a>
+      </div>
+
+      <p style="color: #6b7280; font-size: 13px; margin: 0; text-align: center;">
+        Questions? Reply to this email or contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD;">support@balkanestateai.com</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        © ${new Date().getFullYear()} Balkan Estate. All rights reserved.
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: '🎉 Welcome to Balkan Estate!',
+      html,
+      text: `Hi ${params.userName},\n\nWelcome to Balkan Estate! Your email has been verified and your account is now fully active.\n\nStart exploring properties at ${frontendUrl}\n\nQuestions? Contact us at support@balkanestateai.com`,
+      category: 'support',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
 export default emailServiceInstance;
+
+// Export bound methods
 export const sendEmail = emailServiceInstance.sendEmail.bind(emailServiceInstance);
 export const sendNewMessageNotification = emailServiceInstance.sendNewMessageNotification.bind(emailServiceInstance);
 export const sendWeeklyStats = emailServiceInstance.sendWeeklyStats.bind(emailServiceInstance);
@@ -951,3 +1355,8 @@ export const sendAgencyWeeklyStats = emailServiceInstance.sendAgencyWeeklyStats.
 export const sendPropertyAlert = emailServiceInstance.sendPropertyAlert.bind(emailServiceInstance);
 export const sendNewListingsDigest = emailServiceInstance.sendNewListingsDigest.bind(emailServiceInstance);
 export const sendPriceDropAlert = emailServiceInstance.sendPriceDropAlert.bind(emailServiceInstance);
+export const sendAgentInquiry = emailServiceInstance.sendAgentInquiry.bind(emailServiceInstance);
+export const sendPasswordResetEmail = emailServiceInstance.sendPasswordResetEmail.bind(emailServiceInstance);
+export const sendEmailVerification = emailServiceInstance.sendEmailVerification.bind(emailServiceInstance);
+export const sendWelcomeEmail = emailServiceInstance.sendWelcomeEmail.bind(emailServiceInstance);
+export const getFromAddress = emailServiceInstance.getFromAddress.bind(emailServiceInstance);
