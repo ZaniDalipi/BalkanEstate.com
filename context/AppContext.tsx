@@ -481,12 +481,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       // Fetch user profile securely via authenticated API call
-      const authResult = await api.checkAuth();
-      if (authResult.user) {
-        dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user: authResult.user } });
+      const user = await api.checkAuth();
+      if (user) {
+        dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
 
         // Connect to WebSocket for real-time chat
-        socketService.connect(token, authResult.user.id);
+        socketService.connect(token, user.id);
 
         // Initialize proactive token refresh
         tokenService.initializeProactiveRefresh();
