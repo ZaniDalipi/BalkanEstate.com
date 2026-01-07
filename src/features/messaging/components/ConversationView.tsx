@@ -317,7 +317,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                     {!isCurrentUserMessage && otherPerson && (
                                         <div className="flex-shrink-0">
                                             {otherPerson.avatarUrl ? (
-                                                <img src={otherPerson.avatarUrl} alt={otherPerson.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover" />
+                                                <img src={otherPerson.avatarUrl} alt={otherPerson.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover" referrerPolicy="no-referrer" />
                                             ) : (
                                                 <UserCircleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400" />
                                             )}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, FacebookIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
+import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import { User, UserRole, AuthModalView } from '@/types';
 import SocialLoginPopup from './SocialLoginPopup';
 
 type Method = 'email' | 'phone';
-type SocialProvider = 'google' | 'facebook' | 'apple';
+type SocialProvider = 'google' | 'apple';
 
 const EyeSlashIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -154,7 +154,7 @@ const AuthPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [infoMessage, setInfoMessage] = useState<string | null>(null);
     const [socialLoginProvider, setSocialLoginProvider] = useState<SocialProvider | null>(null);
-    const [availableProviders, setAvailableProviders] = useState<{ google: boolean; facebook: boolean; apple: boolean }>({ google: false, facebook: false, apple: false });
+    const [availableProviders, setAvailableProviders] = useState<{ google: boolean; apple: boolean }>({ google: false, apple: false });
 
     // Form fields state
     const [email, setEmail] = useState('');
@@ -456,12 +456,11 @@ const AuthPage: React.FC = () => {
                             </form>
                         )}
                         
-                        {(availableProviders.google || availableProviders.facebook || availableProviders.apple) && (
+                        {(availableProviders.google || availableProviders.apple) && (
                             <>
                                 <div className="my-4 sm:my-6 flex items-center"><div className="flex-grow border-t border-neutral-300"></div><span className="flex-shrink mx-4 text-neutral-500 font-medium text-sm">{t('auth:login.orContinueWith')}</span><div className="flex-grow border-t border-neutral-300"></div></div>
                                 <div className="space-y-3">
                                     {availableProviders.google && <SocialButton icon={<GoogleIcon/>} label={t('auth:login.google')} onClick={() => handleSocialLoginClick('google')} disabled={isLoading} />}
-                                    {availableProviders.facebook && <SocialButton icon={<FacebookIcon/>} label={t('auth:login.facebook')} onClick={() => handleSocialLoginClick('facebook')} disabled={isLoading} />}
                                     {availableProviders.apple && <SocialButton icon={<AppleIcon className="text-black"/>} label={t('auth:login.apple')} onClick={() => handleSocialLoginClick('apple')} disabled={isLoading} />}
                                 </div>
                             </>

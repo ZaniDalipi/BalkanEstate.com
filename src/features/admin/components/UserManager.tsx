@@ -299,7 +299,7 @@ const UserManager: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full mr-3" />
+                      <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full mr-3" referrerPolicy="no-referrer" />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center mr-3 font-semibold">
                         {user.name.charAt(0).toUpperCase()}

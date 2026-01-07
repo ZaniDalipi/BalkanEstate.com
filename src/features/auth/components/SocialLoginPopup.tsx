@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { GoogleIcon, FacebookIcon, AppleIcon, SpinnerIcon, XMarkIcon } from '@/constants';
+import { GoogleIcon, AppleIcon, SpinnerIcon, XMarkIcon } from '@/constants';
 
-type Provider = 'google' | 'facebook' | 'apple';
+type Provider = 'google' | 'apple';
 
 interface SocialLoginPopupProps {
     provider: Provider;
@@ -11,7 +11,6 @@ interface SocialLoginPopupProps {
 
 const providerDetails: Record<Provider, { name: string; icon: React.ReactNode }> = {
     google: { name: 'Google', icon: <GoogleIcon /> },
-    facebook: { name: 'Facebook', icon: <FacebookIcon /> },
     apple: { name: 'Apple', icon: <AppleIcon className="text-black" /> },
 };
 
