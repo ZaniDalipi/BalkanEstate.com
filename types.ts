@@ -262,8 +262,9 @@ export interface Property {
     sellerId: string;
     status: PropertyStatus;
     soldAt?: number;
-    title?: string; // Property listing title
     price: number;
+    originalPrice?: number; // Original price before any reduction
+    priceReducedAt?: number; // Timestamp when price was reduced
     address: string;
     city: string;
     country: string;

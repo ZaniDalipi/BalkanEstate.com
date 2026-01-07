@@ -270,7 +270,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 newFilters.country = countryParam;
             }
             if (propertyTypeParam) {
-                newFilters.propertyType = propertyTypeParam;
+                // Validate that propertyType is a valid option
+                const validPropertyTypes = ['any', 'house', 'apartment', 'villa', 'land', 'other'] as const;
+                if (validPropertyTypes.includes(propertyTypeParam as typeof validPropertyTypes[number])) {
+                    newFilters.propertyType = propertyTypeParam as typeof validPropertyTypes[number];
+                }
             }
 
             // Apply filters from URL
