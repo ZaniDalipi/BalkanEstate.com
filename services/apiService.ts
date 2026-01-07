@@ -23,14 +23,18 @@ import { Property, Seller, User, UserRole, SavedSearch, Message, Conversation, F
 // Get API URL from environment variables
 // Production detection: if running on balkanestateai.com, use production API
 const getApiUrl = (): string => {
-  // First check environment variable
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  const envUrl = import.meta.env.VITE_API_URL;
+
+  // Only use env variable if it's a valid absolute URL
+  if (envUrl && (envUrl.startsWith('http://') || envUrl.startsWith('https://'))) {
+    return envUrl;
   }
+
   // Production fallback based on hostname
   if (typeof window !== 'undefined' && window.location.hostname.includes('balkanestateai.com')) {
     return 'https://api.balkanestateai.com/api';
   }
+
   // Development fallback
   return 'http://localhost:5001/api';
 };
