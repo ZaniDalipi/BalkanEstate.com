@@ -8,6 +8,7 @@ import emailService from '../services/emailService';
 import { updateExpiredSubscriptions } from '../services/subscriptionPaymentService';
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
+import { sendHotHourRecommendations, processSavedSearchAlerts, cleanupOldPatterns } from '../services/proBuyerEmailService';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
@@ -18,6 +19,8 @@ let instantAlertsTask: cron.ScheduledTask | null = null;
 let dailyAlertsTask: cron.ScheduledTask | null = null;
 let weeklyAlertsTask: cron.ScheduledTask | null = null;
 let priceDropAlertsTask: cron.ScheduledTask | null = null;
+let proBuyerHotHoursTask: cron.ScheduledTask | null = null;
+let activityCleanupTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -201,7 +204,34 @@ export const startCronJobs = () => {
     }
   });
 
-  console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts)');
+  // ===============================
+  // PRO BUYER EMAILS
+  // ===============================
+
+  // Pro buyer hot hours recommendations - runs every hour
+  // Sends personalized property recommendations during user's most active hours
+  proBuyerHotHoursTask = cron.schedule('0 * * * *', async () => {
+    try {
+      console.log('🔥 Processing pro buyer hot hour recommendations...');
+      const stats = await sendHotHourRecommendations();
+      console.log(`✅ Hot hour emails: ${stats.sent} sent, ${stats.skipped} skipped, ${stats.errors} errors`);
+    } catch (error) {
+      console.error('Pro buyer hot hours cron error:', error);
+    }
+  });
+
+  // Cleanup old activity patterns - runs daily at midnight
+  activityCleanupTask = cron.schedule('0 0 * * *', async () => {
+    try {
+      console.log('🧹 Cleaning up old activity patterns...');
+      cleanupOldPatterns();
+      console.log('✅ Activity patterns cleanup complete');
+    } catch (error) {
+      console.error('Activity cleanup cron error:', error);
+    }
+  });
+
+  console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails)');
 };
 
 export const stopCronJobs = () => {
@@ -214,5 +244,7 @@ export const stopCronJobs = () => {
   if (dailyAlertsTask) dailyAlertsTask.stop();
   if (weeklyAlertsTask) weeklyAlertsTask.stop();
   if (priceDropAlertsTask) priceDropAlertsTask.stop();
+  if (proBuyerHotHoursTask) proBuyerHotHoursTask.stop();
+  if (activityCleanupTask) activityCleanupTask.stop();
   console.log('🛑 All cron jobs stopped');
 };

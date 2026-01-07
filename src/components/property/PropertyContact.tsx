@@ -8,6 +8,7 @@ import { PhoneIcon, UserCircleIcon, ShareIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
 import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
 import RentVsBuyCalculator from '@/src/features/calculators/components/RentVsBuyCalculator';
+import PropertyInquiryModal from '@/src/features/inquiries/components/PropertyInquiryModal';
 
 interface PropertyContactProps {
   property: Property;
@@ -43,8 +44,10 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
   const { t } = useTranslation(['property']);
   const { state, dispatch } = useAppContext();
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
 
   const isInComparison = state.comparisonList.includes(property.id);
+  const currentUser = state.currentUser || state.user;
 
   const handleCompare = () => {
     if (isInComparison) {
@@ -267,8 +270,31 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               ? t('property:actions.propertySold')
               : t('property:actions.messageSeller')}
           </button>
+
+          {/* Email Inquiry Button - For quick inquiries without account */}
+          {property.status !== 'sold' && (
+            <button
+              onClick={() => setShowInquiryModal(true)}
+              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border-2 border-green-500 text-green-600 rounded-xl shadow-sm text-sm font-semibold bg-white hover:bg-green-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              {t('property:actions.sendInquiry', 'Send Email Inquiry')}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Property Inquiry Modal */}
+      <PropertyInquiryModal
+        property={property}
+        isOpen={showInquiryModal}
+        onClose={() => setShowInquiryModal(false)}
+        defaultName={currentUser?.name || ''}
+        defaultEmail={currentUser?.email || ''}
+        defaultPhone={currentUser?.phone || ''}
+      />
 
       {/* Mortgage Calculator */}
       <MortgageCalculator propertyPrice={property.price} country={property.country} />

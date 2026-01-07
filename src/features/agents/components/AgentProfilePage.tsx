@@ -83,6 +83,7 @@ import { slugify } from '@/utils/slug';
 import { getAgencyAgents, getAllAgents } from '@/services/apiService';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { updateAgentProfile, toggleSavedAgent, checkSavedAgent } from '@/src/features/agents/api/agentApi';
+import AgentInquiryModal from '@/src/features/inquiries/components/AgentInquiryModal';
 
 
 interface AgentProfilePageProps {
@@ -125,6 +126,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const [loadingSimilarAgents, setLoadingSimilarAgents] = useState(false);
     const [showAppraisalModal, setShowAppraisalModal] = useState(false);
     const [showConsultationModal, setShowConsultationModal] = useState(false);
+    const [showInquiryModal, setShowInquiryModal] = useState(false);
     const [appraisalForm, setAppraisalForm] = useState({ address: '', propertyType: '', notes: '' });
     const [consultationForm, setConsultationForm] = useState({ date: '', time: '', topic: '', notes: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1462,7 +1464,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                             )}
                             
                             {agent.email && (
-                                <a 
+                                <a
                                     href={`mailto:${agent.email}`}
                                     className="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-4 rounded-xl mb-3 transition-colors"
                                 >
@@ -1473,7 +1475,33 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                     </div>
                                 </a>
                             )}
+
+                            {/* Send Inquiry Button */}
+                            <button
+                                onClick={() => setShowInquiryModal(true)}
+                                className="w-full flex items-center justify-center gap-3 bg-white text-blue-700 font-bold p-4 rounded-xl hover:bg-blue-50 transition-colors shadow-md"
+                            >
+                                <ChatBubbleBottomCenterTextIcon className="w-6 h-6" />
+                                <span>{t('profilePage.contact.sendInquiry', 'Send Inquiry')}</span>
+                            </button>
                         </div>
+
+                        {/* Agent Inquiry Modal */}
+                        <AgentInquiryModal
+                            agent={{
+                                id: agent.id,
+                                name: agent.name,
+                                avatarUrl: agent.avatarUrl,
+                                agencyName: agent.agencyName,
+                                city: agent.city,
+                                country: agent.country,
+                            }}
+                            isOpen={showInquiryModal}
+                            onClose={() => setShowInquiryModal(false)}
+                            defaultName={currentUser?.name || ''}
+                            defaultEmail={currentUser?.email || ''}
+                            defaultPhone={currentUser?.phone || ''}
+                        />
 
                         {/* Request Appraisal Card */}
                         <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-6">

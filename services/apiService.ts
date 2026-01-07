@@ -385,6 +385,79 @@ export const completePhoneSignup = async (phone: string, name: string, email: st
   throw new Error('Phone signup not yet implemented');
 };
 
+// Email Verification Functions
+export const verifyEmail = async (token: string): Promise<{ success: boolean; message: string; user?: User }> => {
+  const response = await apiRequest<{ success: boolean; message: string; user?: User; accessToken?: string; refreshToken?: string }>('/auth/verify-email', {
+    method: 'POST',
+    body: { token },
+  });
+
+  // If verification returns tokens, set them
+  if (response.accessToken) {
+    setToken(response.accessToken);
+  }
+  if (response.refreshToken) {
+    setRefreshToken(response.refreshToken);
+  }
+
+  return response;
+};
+
+export const resendVerificationEmail = async (email: string): Promise<{ success: boolean; message: string }> => {
+  const response = await apiRequest<{ success: boolean; message: string }>('/auth/resend-verification', {
+    method: 'POST',
+    body: { email },
+  });
+
+  return response;
+};
+
+// Inquiry Functions
+export interface InquiryParams {
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone?: string;
+  message: string;
+}
+
+export interface PropertyInquiryParams extends InquiryParams {
+  propertyId: string;
+}
+
+export interface AgentInquiryParams extends InquiryParams {
+  agentId: string;
+}
+
+export interface AreaSearchInquiryParams extends InquiryParams {
+  location: string;
+  propertyType?: string;
+  budget?: number;
+}
+
+export const sendPropertyInquiry = async (params: PropertyInquiryParams): Promise<{ message: string; recipient: string }> => {
+  const response = await apiRequest<{ message: string; recipient: string }>('/inquiries/property', {
+    method: 'POST',
+    body: params,
+  });
+  return response;
+};
+
+export const sendAgentInquiry = async (params: AgentInquiryParams): Promise<{ message: string; recipient: string }> => {
+  const response = await apiRequest<{ message: string; recipient: string }>('/inquiries/agent', {
+    method: 'POST',
+    body: params,
+  });
+  return response;
+};
+
+export const sendAreaSearchInquiry = async (params: AreaSearchInquiryParams): Promise<{ message: string; agentCount: number }> => {
+  const response = await apiRequest<{ message: string; agentCount: number }>('/inquiries/area-search', {
+    method: 'POST',
+    body: params,
+  });
+  return response;
+};
+
 export const updateUser = async (userData: Partial<User>): Promise<User> => {
   const response = await apiRequest<{ user: User }>('/auth/profile', {
     method: 'PUT',

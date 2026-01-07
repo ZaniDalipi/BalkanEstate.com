@@ -13,6 +13,7 @@ import {
 } from '../services/cloudinaryService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange } from '../jobs/propertyAlertsJob';
+import { trackUserActivity } from '../services/proBuyerEmailService';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -222,6 +223,20 @@ export const getProperties = async (
 
     // Get total count for pagination
     const total = await Property.countDocuments(filter);
+
+    // Track user activity for pro buyer email recommendations
+    // Only track if user is authenticated (req.user from auth middleware)
+    if (req.user) {
+      const userId = String((req.user as any)._id || (req.user as any).id);
+      trackUserActivity(userId, {
+        city: city as string,
+        country: country as string,
+        propertyType: propertyType as string,
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+        minBeds: beds ? Number(beds) : undefined,
+      });
+    }
 
     res.json({
       properties: enrichedProperties,
