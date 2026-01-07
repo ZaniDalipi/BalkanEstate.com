@@ -6,10 +6,11 @@ import {
   UsersIcon,
   HomeIcon,
   BuildingOfficeIcon,
-  SparklesIcon
+  SparklesIcon,
+  CurrencyEuroIcon
 } from '@/constants';
 
-type AdminView = 'dashboard' | 'discounts' | 'promotionCoupons' | 'users' | 'properties' | 'agencies';
+type AdminView = 'dashboard' | 'pricing' | 'discounts' | 'promotionCoupons' | 'users' | 'properties' | 'agencies';
 
 interface AdminNavProps {
   activeSection: AdminView;
@@ -21,6 +22,7 @@ const AdminNav: React.FC<AdminNavProps> = ({ activeSection, onSectionChange }) =
 
   const navItems: { id: AdminView; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: t('admin:sidebar.dashboard'), icon: <ChartBarIcon className="w-5 h-5" /> },
+    { id: 'pricing', label: t('admin:sidebar.pricing', 'Pricing & Plans'), icon: <CurrencyEuroIcon className="w-5 h-5" /> },
     { id: 'discounts', label: t('admin:sidebar.discountCodes'), icon: <TicketIcon className="w-5 h-5" /> },
     { id: 'promotionCoupons', label: t('admin:sidebar.promotionCoupons'), icon: <SparklesIcon className="w-5 h-5" /> },
     { id: 'users', label: t('admin:sidebar.usersAndAgents'), icon: <UsersIcon className="w-5 h-5" /> },
