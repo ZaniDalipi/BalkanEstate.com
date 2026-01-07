@@ -511,32 +511,40 @@ const AppWrapper: React.FC = () => {
         const refreshToken = urlParams.get('refresh');
         const error = urlParams.get('error');
 
-        // SECURITY: Immediately clean up URL to remove tokens from browser history
-        // This prevents tokens from being logged or leaked via Referer headers
-        if (token || refreshToken || error) {
-            window.history.replaceState({}, document.title, window.location.pathname);
+        // Check if this is a password reset page - don't treat token as OAuth token
+        const isResetPasswordPage = window.location.pathname.includes('reset-password');
+
+        // Only process as OAuth callback if NOT on reset-password page
+        // Password reset uses 'token' param for reset tokens, not OAuth tokens
+        if (!isResetPasswordPage) {
+            // SECURITY: Immediately clean up URL to remove OAuth tokens from browser history
+            // This prevents tokens from being logged or leaked via Referer headers
+            if (token || refreshToken || error) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            if (error) {
+                console.error('OAuth error:', error);
+                dispatch({
+                    type: 'SHOW_ALERT',
+                    payload: {
+                        type: 'error',
+                        title: 'Authentication Failed',
+                        message: 'Authentication failed. Please try again.',
+                    },
+                });
+                return;
+            }
+
+            if (token) {
+                // SECURITY: Only tokens are passed in URL, user data is fetched securely via API
+                handleOAuthCallback(token, refreshToken || undefined);
+                return;
+            }
         }
 
-        if (error) {
-            console.error('OAuth error:', error);
-            dispatch({
-                type: 'SHOW_ALERT',
-                payload: {
-                    type: 'error',
-                    title: 'Authentication Failed',
-                    message: 'Authentication failed. Please try again.',
-                },
-            });
-            return;
-        }
-
-        if (token) {
-            // SECURITY: Only tokens are passed in URL, user data is fetched securely via API
-            handleOAuthCallback(token, refreshToken || undefined);
-        } else {
-            // Normal auth check
-            checkAuthStatus();
-        }
+        // Normal auth check (for all pages including reset-password)
+        checkAuthStatus();
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
 
@@ -544,7 +552,11 @@ const AppWrapper: React.FC = () => {
         return <FullScreenLoader />;
     }
 
-    if (!state.onboardingComplete) {
+    // Allow password reset and email verification pages to bypass onboarding
+    const isAuthFlowPage = window.location.pathname.includes('reset-password') ||
+                           window.location.pathname.includes('verify-email');
+
+    if (!state.onboardingComplete && !isAuthFlowPage) {
         return (
             <>
                 <Onboarding />
