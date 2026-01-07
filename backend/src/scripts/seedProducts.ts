@@ -53,7 +53,7 @@ const PRODUCTS = [
     description: 'Professional selling tools with monthly flexibility. Great for active sellers.',
     type: 'subscription' as const,
     tier: 'pro' as const,
-    price: 12,
+    price: 25,
     currency: 'EUR',
     billingPeriod: 'monthly' as const,
     durationDays: 30,
@@ -90,10 +90,10 @@ const PRODUCTS = [
   {
     productId: 'pro_yearly',
     name: 'Pro Yearly',
-    description: 'Best deal for committed sellers - save €24/year (2 months free!)',
+    description: 'Best deal for committed sellers - save €100/year (4 months free!)',
     type: 'subscription' as const,
     tier: 'pro' as const,
-    price: 120,
+    price: 200,
     currency: 'EUR',
     billingPeriod: 'yearly' as const,
     durationDays: 365,
@@ -101,7 +101,7 @@ const PRODUCTS = [
       '25 active listings year-round',
       '3 promotion coupons per month (rollover up to 6)',
       'All Pro Monthly features',
-      'Save €24/year vs monthly',
+      'Save €100/year vs monthly',
       'Annual billing convenience',
       'Advanced analytics & insights',
       'Lead management dashboard',
@@ -110,7 +110,7 @@ const PRODUCTS = [
     ],
     targetRole: 'seller' as const,
     displayOrder: 3,
-    badge: 'SAVE 17%',
+    badge: 'SAVE 33%',
     badgeColor: 'amber',
     highlighted: false,
     cardStyle: {
@@ -238,8 +238,8 @@ async function seedProducts() {
     console.log(`📊 Total products: ${PRODUCTS.length}`);
     console.log('\n💰 Pricing Summary:');
     console.log('   Free: €0 (3 listings)');
-    console.log('   Pro Monthly: €12 (25 listings, 3 promo coupons)');
-    console.log('   Pro Yearly: €120 (25 listings, 3 promo coupons, save €24)');
+    console.log('   Pro Monthly: €25 (25 listings, 3 promo coupons)');
+    console.log('   Pro Yearly: €200 (25 listings, 3 promo coupons, save €100)');
     console.log('   Agency: €1000/year (5 agent coupons, 15 promo coupons)');
     console.log('   Buyer Pro: €3/month (unlimited searches & alerts)');
 
