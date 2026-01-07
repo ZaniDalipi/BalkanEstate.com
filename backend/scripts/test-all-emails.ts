@@ -90,11 +90,12 @@ async function sendTestEmails() {
         property: {
           id: 'test-property-123',
           title: 'Beautiful 3-Bedroom Apartment in City Center',
+          address: '123 Main Street',
           city: 'Skopje',
           price: 125000,
-          bedrooms: 3,
-          bathrooms: 2,
-          area: 95,
+          beds: 3,
+          baths: 2,
+          sqft: 95,
           imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600',
         },
       });
@@ -116,10 +117,14 @@ async function sendTestEmails() {
         property: {
           id: 'test-property-456',
           title: 'Luxury Villa with Pool',
+          address: '456 Lake Road',
           city: 'Ohrid',
           previousPrice: 350000,
           newPrice: 299000,
           percentageDrop: 15,
+          beds: 4,
+          baths: 3,
+          sqft: 250,
           imageUrl: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600',
         },
       });
@@ -191,12 +196,15 @@ async function sendTestEmails() {
         inquiriesChange: 8,
         totalSaves: 45,
         savesChange: -3,
-        topProperties: [
-          { title: 'Luxury Penthouse', views: 342, inquiries: 8 },
-          { title: 'City Center Apartment', views: 256, inquiries: 5 },
-          { title: 'Cozy Studio', views: 189, inquiries: 4 },
-        ],
-        dashboardUrl: 'https://balkanestateai.com/dashboard',
+        activeListings: 5,
+        propertiesSold: 2,
+        totalSalesValue: 275000,
+        topPerformingProperty: {
+          title: 'Luxury Penthouse',
+          address: '123 Main Street, Skopje',
+          views: 342,
+          inquiries: 8,
+        },
       });
       results.push({ type: 'Weekly Stats', success: true });
       console.log('   ✅ Sent!\n');
