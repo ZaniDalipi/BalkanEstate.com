@@ -851,12 +851,12 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Generate tokens using the refresh token service
-    const { generateTokenPair } = await import('../services/refreshTokenService');
-    const tokens = await generateTokenPair(user, {
+    // Generate tokens using the refresh token service (same as normal login)
+    const deviceInfo = {
       userAgent: req.headers['user-agent'],
-      ipAddress: req.ip,
-    });
+      ipAddress: req.ip || req.socket.remoteAddress,
+    };
+    const tokens = await generateTokenPair(user, deviceInfo);
 
     const token = tokens.accessToken;
     const refreshToken = tokens.refreshToken;
