@@ -1476,7 +1476,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     const { token } = req.body;
 
     if (!token) {
-      res.status(400).json({ message: 'Verification token is required' });
+      res.status(400).json({ success: false, message: 'Verification token is required' });
       return;
     }
 
@@ -1484,7 +1484,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     const result = await verifyEmailToken(token);
 
     if (!result.success) {
-      res.status(400).json({ message: result.message });
+      res.status(400).json({ success: false, message: result.message });
       return;
     }
 
@@ -1499,6 +1499,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     }
 
     res.json({
+      success: true,
       message: result.message,
       user: result.user ? {
         id: String(result.user._id),
@@ -1509,7 +1510,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     });
   } catch (error: any) {
     console.error('Email verification error:', error);
-    res.status(500).json({ message: 'Error verifying email', error: error.message });
+    res.status(500).json({ success: false, message: 'Error verifying email', error: error.message });
   }
 };
 
