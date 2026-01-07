@@ -43,10 +43,10 @@ const FilterButton: React.FC<{
 }> = ({ onClick, isActive, children }) => (
   <button
     onClick={onClick}
-    className={`px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 flex-grow text-center ${
+    className={`px-3 py-2 min-h-[44px] rounded-full text-sm font-semibold transition-all duration-300 flex-grow text-center ${
       isActive
         ? 'bg-primary text-white shadow'
-        : 'bg-neutral-200/70 text-neutral-700 hover:bg-neutral-300/70'
+        : 'bg-neutral-200/70 text-neutral-700 hover:bg-neutral-300/70 active:bg-neutral-400/70'
     }`}
   >
     {children}
@@ -86,12 +86,12 @@ const ToggleSwitch: React.FC<{
   onChange: (value: boolean | null) => void;
   t: (key: string) => string;
 }> = ({ label, value, onChange, t }) => (
-  <div className="flex items-center justify-between">
-    <label className="text-xs font-medium text-neutral-700">{label}</label>
+  <div className="flex items-center justify-between py-1">
+    <label className="text-sm font-medium text-neutral-700">{label}</label>
     <div className="flex items-center gap-1">
       <button
         onClick={() => onChange(false)}
-        className={`px-2 py-1 text-xs rounded transition-colors ${
+        className={`px-3 py-2 min-h-[40px] text-sm rounded-lg transition-colors active:scale-95 ${
           value === false ? 'bg-red-500 text-white' : 'bg-neutral-200 text-neutral-600'
         }`}
       >
@@ -99,7 +99,7 @@ const ToggleSwitch: React.FC<{
       </button>
       <button
         onClick={() => onChange(null)}
-        className={`px-2 py-1 text-xs rounded transition-colors ${
+        className={`px-3 py-2 min-h-[40px] text-sm rounded-lg transition-colors active:scale-95 ${
           value === null ? 'bg-neutral-400 text-white' : 'bg-neutral-200 text-neutral-600'
         }`}
       >
@@ -107,7 +107,7 @@ const ToggleSwitch: React.FC<{
       </button>
       <button
         onClick={() => onChange(true)}
-        className={`px-2 py-1 text-xs rounded transition-colors ${
+        className={`px-3 py-2 min-h-[40px] text-sm rounded-lg transition-colors active:scale-95 ${
           value === true ? 'bg-green-500 text-white' : 'bg-neutral-200 text-neutral-600'
         }`}
       >
@@ -128,7 +128,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
         onFilterChange(field, isNaN(num) ? null : num);
     };
 
-    const inputBaseClasses = "block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-neutral-400";
+    const inputBaseClasses = "block w-full text-sm bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-neutral-400";
 
     return (
          <div className="space-y-4">
@@ -679,7 +679,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
         };
     }, [visibleCount, properties.length, isLoadingMore]);
     
-    const inputBaseClasses = "block w-full text-xs bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors";
+    const inputBaseClasses = "block w-full text-sm bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors";
     
     // Desktop layout
     if (!isMobile) {

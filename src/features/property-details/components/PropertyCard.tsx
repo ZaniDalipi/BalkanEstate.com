@@ -134,11 +134,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       {/* Image Section */}
       <div className="relative overflow-hidden">
         {imageError ? (
-          <div className="w-full h-40 sm:h-44 md:h-48 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+          <div className="w-full h-36 sm:h-44 md:h-48 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
             <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
+          <div className="relative w-full h-36 sm:h-44 md:h-48 overflow-hidden">
             <img
               src={property.imageUrl}
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
@@ -216,13 +216,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Favorite Button */}
           <button
             onClick={handleFavoriteClick}
-            className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
+            className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full shadow-lg transition-all duration-300 active:scale-90 ${
               isFavorited
                 ? 'bg-red-500 text-white scale-110'
                 : 'bg-white/95 backdrop-blur-sm text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110'
             }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </button>
@@ -284,11 +284,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
         {/* Location - Clickable for navigation */}
         <div className="flex items-center gap-1.5 mb-3">
-          <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-          <div className="text-xs sm:text-sm text-neutral-600 truncate flex items-center gap-1">
+          <MapPinIcon className="w-4 h-4 text-primary flex-shrink-0" />
+          <div className="text-sm text-neutral-600 truncate flex items-center gap-1">
             <button
               onClick={(e) => handleLocationClick(e, 'city')}
-              className="hover:text-primary hover:underline transition-colors cursor-pointer"
+              className="hover:text-primary hover:underline transition-colors cursor-pointer py-0.5 active:text-primary-dark"
               title={`View all properties in ${property.city}`}
             >
               {property.city}
@@ -296,7 +296,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             <span>,</span>
             <button
               onClick={(e) => handleLocationClick(e, 'country')}
-              className="hover:text-primary hover:underline transition-colors cursor-pointer"
+              className="hover:text-primary hover:underline transition-colors cursor-pointer py-0.5 active:text-primary-dark"
               title={`View all properties in ${property.country}`}
             >
               {property.country}
@@ -305,22 +305,22 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         </div>
 
         {/* Property Stats - Grid layout for better fit */}
-        <div className="grid grid-cols-4 gap-1.5 mb-3">
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} ${t('property:features.bedrooms')}`}>
-            <BedIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-neutral-800">{property.beds}</span>
+        <div className="grid grid-cols-4 gap-2 mb-3">
+          <div className="flex flex-col items-center bg-neutral-100 py-2 px-1.5 rounded-lg min-h-[52px] justify-center" title={`${property.beds} ${t('property:features.bedrooms')}`}>
+            <BedIcon className="w-4 h-4 text-primary mb-0.5" />
+            <span className="font-bold text-sm text-neutral-800">{property.beds}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} ${t('property:features.bathrooms')}`}>
-            <BathIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-neutral-800">{property.baths}</span>
+          <div className="flex flex-col items-center bg-neutral-100 py-2 px-1.5 rounded-lg min-h-[52px] justify-center" title={`${property.baths} ${t('property:features.bathrooms')}`}>
+            <BathIcon className="w-4 h-4 text-primary mb-0.5" />
+            <span className="font-bold text-sm text-neutral-800">{property.baths}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
-            <LivingRoomIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-neutral-800">{property.livingRooms}</span>
+          <div className="flex flex-col items-center bg-neutral-100 py-2 px-1.5 rounded-lg min-h-[52px] justify-center" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
+            <LivingRoomIcon className="w-4 h-4 text-primary mb-0.5" />
+            <span className="font-bold text-sm text-neutral-800">{property.livingRooms}</span>
           </div>
-          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
-            <SqftIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-primary">{property.sqft}</span>
+          <div className="flex flex-col items-center bg-primary/10 py-2 px-1.5 rounded-lg border border-primary/20 min-h-[52px] justify-center" title={`${property.sqft} ${t('common:sqm')}`}>
+            <SqftIcon className="w-4 h-4 text-primary mb-0.5" />
+            <span className="font-bold text-sm text-primary">{property.sqft}</span>
           </div>
         </div>
 

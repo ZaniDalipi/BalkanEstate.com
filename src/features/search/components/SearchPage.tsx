@@ -38,7 +38,7 @@ const AiChatModal: React.FC<{
     onHistoryChange: (history: ChatMessage[]) => void;
 }> = ({ isOpen, onClose, ...aiSearchProps }) => (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" title="AI Property Search">
-        <div className="h-[70vh] flex flex-col">
+        <div className="h-[60vh] sm:h-[65vh] md:h-[70vh] max-h-[600px] flex flex-col">
             <AiSearch {...aiSearchProps} isMobile={true} />
         </div>
     </Modal>
@@ -89,10 +89,10 @@ const MobileFilters: React.FC<{
             />
         </div>
         {searchMode === 'manual' && (
-            <div className="flex-shrink-0 p-4 border-t border-neutral-200 bg-white flex items-center gap-2">
-                 <button onClick={onReset} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">Reset</button>
-                 <button onClick={onSave} disabled={isSaving} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">Save Search</button>
-                 <button onClick={onApply} className="flex-grow px-3 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark">Show Results</button>
+            <div className="flex-shrink-0 p-4 border-t border-neutral-200 bg-white flex items-center gap-2 pb-safe">
+                 <button onClick={onReset} className="px-4 py-3 min-h-[48px] border border-neutral-300 rounded-xl text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200">Reset</button>
+                 <button onClick={onSave} disabled={isSaving} className="px-4 py-3 min-h-[48px] border border-neutral-300 rounded-xl text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 disabled:opacity-50">Save</button>
+                 <button onClick={onApply} className="flex-grow px-4 py-3 min-h-[48px] bg-primary text-white font-bold rounded-xl shadow-md hover:bg-primary-dark active:scale-[0.98]">Show Results</button>
             </div>
         )}
     </div>
@@ -998,18 +998,18 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Mobile View Overlays --- */}
                 {isMobile && !isFiltersOpen && (
                     <>
-                        <div className="absolute top-0 left-0 right-0 z-20 p-2 pointer-events-none">
+                        <div className="absolute top-0 left-0 right-0 z-20 p-2 pt-safe pointer-events-none">
                             <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
-                                <div className="w-full bg-white/80 backdrop-blur-sm rounded-full shadow-lg p-1 flex items-center gap-1">
-                                    <button onClick={onToggleSidebar} className="p-2 flex-shrink-0"><Bars3Icon className="w-6 h-6 text-neutral-800"/></button>
+                                <div className="w-full bg-white/90 backdrop-blur-md rounded-full shadow-lg p-1.5 flex items-center gap-1">
+                                    <button onClick={onToggleSidebar} className="p-2.5 flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center active:bg-neutral-100 rounded-full"><Bars3Icon className="w-6 h-6 text-neutral-800"/></button>
                                     {renderSearchInput(true)}
-                                    <button onClick={() => updateSearchPageState({ isFiltersOpen: true })} className="p-2 flex-shrink-0 hover:bg-neutral-100 rounded-full"><AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/></button>
+                                    <button onClick={() => updateSearchPageState({ isFiltersOpen: true })} className="p-2.5 flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-neutral-100 active:bg-neutral-200 rounded-full"><AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/></button>
                                     {isAuthenticated && currentUser && (
-                                        <button onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })} className="flex-shrink-0 mr-1">
+                                        <button onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })} className="flex-shrink-0 mr-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
                                             {currentUser.avatarUrl ? (
-                                                <img src={currentUser.avatarUrl} alt="My Account" className="w-8 h-8 rounded-full object-cover"/>
+                                                <img src={currentUser.avatarUrl} alt="My Account" className="w-9 h-9 rounded-full object-cover"/>
                                             ) : (
-                                                <UserCircleIcon className="w-8 h-8 text-neutral-400"/>
+                                                <UserCircleIcon className="w-9 h-9 text-neutral-400"/>
                                             )}
                                         </button>
                                     )}
@@ -1017,14 +1017,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             </div>
                         </div>
                         
-                        <div className="absolute bottom-16 left-0 right-0 z-[1002] p-4 pointer-events-none">
-                            <div className="pointer-events-auto mx-auto w-fit bg-white/80 text-neutral-800 p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
-                                <button onClick={() => updateSearchPageState({ mobileView: 'list' })} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${mobileView === 'list' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
-                                    <Squares2x2Icon className="w-4 h-4" />
+                        <div className="absolute bottom-16 left-0 right-0 z-[1002] p-4 pointer-events-none pb-safe">
+                            <div className="pointer-events-auto mx-auto w-fit bg-white/90 text-neutral-800 p-1.5 rounded-full shadow-lg backdrop-blur-md flex items-center gap-1">
+                                <button onClick={() => updateSearchPageState({ mobileView: 'list' })} className={`flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-full text-sm font-bold transition-all active:scale-95 ${mobileView === 'list' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
+                                    <Squares2x2Icon className="w-5 h-5" />
                                     <span>List</span>
                                 </button>
-                                <button onClick={() => updateSearchPageState({ mobileView: 'map' })} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${mobileView === 'map' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
-                                    <MapIcon className="w-4 h-4" />
+                                <button onClick={() => updateSearchPageState({ mobileView: 'map' })} className={`flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-full text-sm font-bold transition-all active:scale-95 ${mobileView === 'map' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
+                                    <MapIcon className="w-5 h-5" />
                                     <span>Map</span>
                                 </button>
                             </div>

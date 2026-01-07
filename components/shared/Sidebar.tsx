@@ -18,10 +18,10 @@ const NavItem: React.FC<{
   return (
     <button
       onClick={() => onClick(view)}
-      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative ${
+      className={`flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative active:scale-[0.98] ${
         isActive
           ? 'bg-primary-light text-primary-dark'
-          : 'text-neutral-700 hover:bg-neutral-100'
+          : 'text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200'
       }`}
     >
       <div className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary' : 'text-neutral-700'} relative`}>
@@ -59,8 +59,8 @@ const ToolsSection: React.FC<{
       {/* Tools Header - Expandable */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
-          isToolActive ? 'bg-primary-light text-primary-dark' : 'text-neutral-700 hover:bg-neutral-100'
+        className={`flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start active:scale-[0.98] ${
+          isToolActive ? 'bg-primary-light text-primary-dark' : 'text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200'
         }`}
       >
         <div className={`w-5 h-5 flex-shrink-0 ${isToolActive ? 'text-primary' : 'text-neutral-700'}`}>
@@ -68,13 +68,13 @@ const ToolsSection: React.FC<{
         </div>
         <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm flex-1">{t('nav:extras')}</span>
         <div className="md:hidden group-hover:md:block">
-          {isExpanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+          {isExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
         </div>
       </button>
 
       {/* Expandable Items */}
-      <div className={`overflow-hidden transition-all duration-200 ${isExpanded ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="pl-4 space-y-0.5 pt-0.5">
+      <div className={`overflow-hidden transition-all duration-200 ${isExpanded ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="pl-4 space-y-1 pt-1">
           {toolItems.map(item => (
             <button
               key={item.view}
@@ -82,13 +82,13 @@ const ToolsSection: React.FC<{
                 onNavClick(item.view);
                 onClose();
               }}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-sm ${
+              className={`flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg font-medium transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-sm active:scale-[0.98] ${
                 activeView === item.view
                   ? 'bg-primary-light text-primary-dark'
-                  : 'text-neutral-600 hover:bg-neutral-100'
+                  : 'text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200'
               }`}
             >
-              <div className={`w-4 h-4 flex-shrink-0 ${activeView === item.view ? 'text-primary' : 'text-neutral-600'}`}>
+              <div className={`w-5 h-5 flex-shrink-0 ${activeView === item.view ? 'text-primary' : 'text-neutral-600'}`}>
                 {item.icon}
               </div>
               <span className="md:hidden group-hover:md:inline whitespace-nowrap">{item.label}</span>
@@ -202,19 +202,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             ></div>
 
             {/* Sidebar */}
-            <aside className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-all duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} md:w-20 md:translate-x-0 hover:md:w-64`}>
-                <div className="flex items-center p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
+            <aside className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-all duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-72 sm:w-64' : '-translate-x-full w-72 sm:w-64'} md:w-20 md:translate-x-0 hover:md:w-64`}>
+                <div className="flex items-center p-3 pt-safe h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
                     <button
                         onClick={() => handleNavClick('search')}
-                        className="flex items-center space-x-2"
+                        className="flex items-center space-x-2 min-h-[44px]"
                     >
-                        <LogoIcon className="w-7 h-7 text-primary flex-shrink-0" />
+                        <LogoIcon className="w-8 h-8 text-primary flex-shrink-0" />
                         <h1 className="text-lg font-bold text-neutral-800 md:hidden group-hover:md:inline whitespace-nowrap">
                             Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
                         </h1>
                     </button>
-                    <button onClick={onClose} className="md:hidden absolute right-3 top-4 text-neutral-700 hover:text-neutral-800">
-                        <XMarkIcon className="w-5 h-5"/>
+                    <button onClick={onClose} className="md:hidden absolute right-3 top-4 min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-700 hover:text-neutral-800 active:bg-neutral-100 rounded-full">
+                        <XMarkIcon className="w-6 h-6"/>
                     </button>
                 </div>
 
@@ -238,17 +238,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         onClose={onClose}
                     />
 
-                     <div className="px-1.5 pt-1.5 mt-1.5 border-t border-neutral-100 space-y-0.5">
+                     <div className="px-1.5 pt-1.5 mt-1.5 border-t border-neutral-100 space-y-1">
                         <button
                             onClick={handleNewListingClick}
-                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-white bg-secondary hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
+                            className="flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-white bg-secondary hover:bg-opacity-90 active:scale-[0.98] md:justify-center group-hover:md:justify-start"
                         >
                             <PencilIcon className="w-5 h-5 flex-shrink-0" />
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
                         </button>
                         <button
                             onClick={handleSubscriptionClick}
-                            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
+                            className={`flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200`}
                         >
                             <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`}><StarIconSolid /></div>
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
@@ -256,10 +256,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         {isAuthenticated && (
                             <button
                                 onClick={() => handleNavClick('analytics')}
-                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
+                                className={`flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start active:scale-[0.98] ${
                                     activeView === 'analytics'
                                         ? 'bg-primary-light text-primary-dark'
-                                        : 'text-neutral-700 hover:bg-neutral-100'
+                                        : 'text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200'
                                 }`}
                             >
                                 <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'analytics' ? 'text-primary' : 'text-neutral-700'}`}>
@@ -270,10 +270,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         )}
                         <button
                             onClick={() => handleNavClick('inbox')}
-                            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative ${
+                            className={`flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative active:scale-[0.98] ${
                                 activeView === 'inbox'
                                     ? 'bg-primary-light text-primary-dark'
-                                    : 'text-neutral-700 hover:bg-neutral-100'
+                                    : 'text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200'
                             }`}
                         >
                             <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'inbox' ? 'text-primary' : 'text-neutral-700'} relative`}>
@@ -289,33 +289,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </div>
                 </nav>
 
-                <div className="p-1.5 border-t border-neutral-200 flex-shrink-0 space-y-0.5">
+                <div className="p-1.5 pb-safe border-t border-neutral-200 flex-shrink-0 space-y-1">
                     {/* Language Switcher */}
                     <LanguageSwitcher variant="sidebar" />
 
                     {isAuthenticated && currentUser ? (
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                              <button
                                 onClick={() => handleNavClick('account')}
-                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start ${
+                                className={`flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start active:scale-[0.98] ${
                                     activeView === 'account'
                                     ? 'bg-primary-light text-primary-dark'
-                                    : 'text-neutral-700 hover:bg-neutral-100'
+                                    : 'text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200'
                                 }`}
                             >
-                                <div className="w-5 h-5 flex-shrink-0">
+                                <div className="w-6 h-6 flex-shrink-0">
                                 {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover"/> : <UserCircleIcon />}
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>
-                            <button onClick={handleLogout} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start">
+                            <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 active:bg-red-100 md:justify-center group-hover:md:justify-start active:scale-[0.98]">
                                 <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" />
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:logout')}</span>
                             </button>
                         </div>
                     ) : (
-                         <button onClick={() => { dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } }); onClose(); }} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start">
-                            <UserCircleIcon className="w-5 h-5 text-neutral-700 flex-shrink-0" />
+                         <button onClick={() => { dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } }); onClose(); }} className="flex items-center gap-3 px-3 py-3 min-h-[48px] rounded-xl font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 md:justify-center group-hover:md:justify-start active:scale-[0.98]">
+                            <UserCircleIcon className="w-6 h-6 text-neutral-700 flex-shrink-0" />
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
                         </button>
                     )}
