@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import User from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
-import { generateToken } from '../utils/jwt';
+// generateToken moved to refreshTokenService - using generateTokenPair instead
 import { IUser } from '../models/User';
 import crypto from 'crypto';
 import cloudinary from '../config/cloudinary';
@@ -851,29 +851,22 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Generate token
-    const token = generateToken(String(user._id));
+    // Generate tokens using the refresh token service (same as normal login)
+    const deviceInfo = {
+      userAgent: req.headers['user-agent'],
+      ipAddress: req.ip || req.socket.remoteAddress,
+    };
+    const tokens = await generateTokenPair(user, deviceInfo);
 
-    // Redirect to frontend with token and user data
+    const token = tokens.accessToken;
+    const refreshToken = tokens.refreshToken;
+
+    // SECURITY: Only pass tokens in URL, NOT user data
+    // User data will be fetched securely via /api/auth/me endpoint
+    // This prevents sensitive data from being logged in browser history,
+    // server logs, or leaked via Referer headers
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const userData = encodeURIComponent(JSON.stringify({
-      id: String(user._id),
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-      avatarUrl: user.avatarUrl,
-      city: user.city,
-      country: user.country,
-      agencyName: user.agencyName,
-      agentId: user.agentId,
-      licenseNumber: user.licenseNumber,
-      isSubscribed: user.isSubscribed,
-      provider: user.provider,
-      isEmailVerified: user.isEmailVerified,
-    }));
-
-    res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${userData}`);
+    res.redirect(`${frontendUrl}/auth/callback?token=${token}&refresh=${refreshToken}`);
   } catch (error: any) {
     console.error('OAuth callback error:', error);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -1476,7 +1469,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     const { token } = req.body;
 
     if (!token) {
-      res.status(400).json({ message: 'Verification token is required' });
+      res.status(400).json({ success: false, message: 'Verification token is required' });
       return;
     }
 
@@ -1484,7 +1477,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     const result = await verifyEmailToken(token);
 
     if (!result.success) {
-      res.status(400).json({ message: result.message });
+      res.status(400).json({ success: false, message: result.message });
       return;
     }
 
@@ -1499,6 +1492,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     }
 
     res.json({
+      success: true,
       message: result.message,
       user: result.user ? {
         id: String(result.user._id),
@@ -1509,7 +1503,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     });
   } catch (error: any) {
     console.error('Email verification error:', error);
-    res.status(500).json({ message: 'Error verifying email', error: error.message });
+    res.status(500).json({ success: false, message: 'Error verifying email', error: error.message });
   }
 };
 

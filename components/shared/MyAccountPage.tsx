@@ -943,6 +943,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                                 src={avatarPreview || formData.avatarUrl}
                                 alt="Avatar"
                                 className="w-24 h-24 rounded-full object-cover border-4 border-neutral-200"
+                                referrerPolicy="no-referrer"
                             />
                         ) : (
                             <UserCircleIcon className="w-24 h-24 text-neutral-300" />
@@ -1313,7 +1314,7 @@ const MyAccountPage: React.FC = () => {
                         <div className="bg-white p-4 rounded-xl shadow-md border border-neutral-200">
                              <div className="flex flex-col items-center text-center pb-4 mb-4 border-b">
                                 {state.currentUser.avatarUrl ? (
-                                    <img src={state.currentUser.avatarUrl} alt="avatar" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mb-3" />
+                                    <img src={state.currentUser.avatarUrl} alt="avatar" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mb-3" referrerPolicy="no-referrer" />
                                 ) : (
                                     <UserCircleIcon className="w-20 h-20 sm:w-24 sm:h-24 text-neutral-300 mb-3" />
                                 )}

@@ -508,8 +508,14 @@ const AppWrapper: React.FC = () => {
         // Check for OAuth callback parameters in URL
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
-        const userParam = urlParams.get('user');
+        const refreshToken = urlParams.get('refresh');
         const error = urlParams.get('error');
+
+        // SECURITY: Immediately clean up URL to remove tokens from browser history
+        // This prevents tokens from being logged or leaked via Referer headers
+        if (token || refreshToken || error) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         if (error) {
             console.error('OAuth error:', error);
@@ -518,38 +524,20 @@ const AppWrapper: React.FC = () => {
                 payload: {
                     type: 'error',
                     title: 'Authentication Failed',
-                    message: error,
+                    message: 'Authentication failed. Please try again.',
                 },
             });
-            // Clean up URL
-            window.history.replaceState({}, document.title, window.location.pathname);
             return;
         }
 
-        if (token && userParam) {
-            try {
-                const user = JSON.parse(decodeURIComponent(userParam));
-                handleOAuthCallback(token, user);
-                // Clean up URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (err) {
-                console.error('Error parsing OAuth callback data:', err);
-                dispatch({
-                    type: 'SHOW_ALERT',
-                    payload: {
-                        type: 'error',
-                        title: 'Authentication Failed',
-                        message: 'Please try again.',
-                    },
-                });
-                // Clean up URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+        if (token) {
+            // SECURITY: Only tokens are passed in URL, user data is fetched securely via API
+            handleOAuthCallback(token, refreshToken || undefined);
         } else {
             // Normal auth check
             checkAuthStatus();
         }
-    }, [checkAuthStatus, handleOAuthCallback]);
+    }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
 
     if (state.isAuthenticating) {

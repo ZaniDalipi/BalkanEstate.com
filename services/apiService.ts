@@ -21,7 +21,24 @@
 import { Property, Seller, User, UserRole, SavedSearch, Message, Conversation, Filters } from '../types';
 
 // Get API URL from environment variables
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Production detection: if running on balkanestateai.com, use production API
+const getApiUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+
+  // Only use env variable if it's a valid absolute URL
+  if (envUrl && (envUrl.startsWith('http://') || envUrl.startsWith('https://'))) {
+    return envUrl;
+  }
+
+  // Production fallback based on hostname
+  if (typeof window !== 'undefined' && window.location.hostname.includes('balkanestateai.com')) {
+    return 'https://api.balkanestateai.com/api';
+  }
+
+  // Development fallback
+  return 'http://localhost:5001/api';
+};
+const API_URL = getApiUrl();
 
 // --- TOKEN MANAGEMENT ---
 
@@ -349,23 +366,23 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   return response;
 };
 
-export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; facebook: boolean; apple: boolean }> => {
+export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; apple: boolean }> => {
   try {
-    const response = await apiRequest<{ providers: { google: boolean; facebook: boolean; apple: boolean } }>('/auth/oauth/providers');
+    const response = await apiRequest<{ providers: { google: boolean; apple: boolean } }>('/auth/oauth/providers');
     return response.providers;
   } catch (error) {
     console.error('Error fetching OAuth providers:', error);
     // Return all false if endpoint fails
-    return { google: false, facebook: false, apple: false };
+    return { google: false, apple: false };
   }
 };
 
-export const getOAuthUrl = (provider: 'google' | 'facebook' | 'apple'): string => {
+export const getOAuthUrl = (provider: 'google' | 'apple'): string => {
   const baseUrl = API_URL.replace('/api', '');
   return `${baseUrl}/api/auth/${provider}`;
 };
 
-export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void => {
+export const loginWithSocial = (provider: 'google' | 'apple'): void => {
   // Redirect to backend OAuth endpoint
   window.location.href = getOAuthUrl(provider);
 };
