@@ -21,7 +21,20 @@
 import { Property, Seller, User, UserRole, SavedSearch, Message, Conversation, Filters } from '../types';
 
 // Get API URL from environment variables
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Production detection: if running on balkanestateai.com, use production API
+const getApiUrl = (): string => {
+  // First check environment variable
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Production fallback based on hostname
+  if (typeof window !== 'undefined' && window.location.hostname.includes('balkanestateai.com')) {
+    return 'https://api.balkanestateai.com/api';
+  }
+  // Development fallback
+  return 'http://localhost:5001/api';
+};
+const API_URL = getApiUrl();
 
 // --- TOKEN MANAGEMENT ---
 
