@@ -302,6 +302,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
         isEmailVerified: user.isEmailVerified,
+        provider: user.provider,
         subscription: user.subscription,
         availableRoles: user.availableRoles,
         activeRole: user.activeRole,
@@ -490,6 +491,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
         isEmailVerified: user.isEmailVerified,
+        provider: user.provider,
         trialActive: user.role === 'agent' ? user.isTrialActive() : false,
         trialEndDate: user.role === 'agent' ? user.trialEndDate : undefined,
         trialExpiring: user.role === 'agent' ? user.isTrialExpiring() : false,
@@ -705,6 +707,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         agentId: user.agentId,
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
+        isEmailVerified: user.isEmailVerified,
+        provider: user.provider,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionExpiresAt: user.subscriptionExpiresAt,
         proSubscription: user.proSubscription,
@@ -1484,7 +1488,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     const result = await verifyEmailToken(token);
 
     if (!result.success) {
-      res.status(400).json({ message: result.message });
+      res.status(400).json({ success: false, message: result.message });
       return;
     }
 
@@ -1499,6 +1503,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     }
 
     res.json({
+      success: true,
       message: result.message,
       user: result.user ? {
         id: String(result.user._id),
@@ -1529,7 +1534,7 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
     const result = await resendEmail(email);
 
     // Always return success to prevent account enumeration
-    res.json({ message: result.message });
+    res.json({ success: result.success, message: result.message });
   } catch (error: any) {
     console.error('Resend verification error:', error);
     res.status(500).json({ message: 'Error resending verification email', error: error.message });

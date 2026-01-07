@@ -135,6 +135,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
     const handleNewListingClick = () => {
         if (isAuthenticated) {
+            // Check if email is verified (for local auth users)
+            const needsVerification = currentUser &&
+                !currentUser.isEmailVerified &&
+                currentUser.provider !== 'google' &&
+                currentUser.provider !== 'facebook' &&
+                currentUser.provider !== 'apple';
+
+            if (needsVerification) {
+                dispatch({
+                    type: 'SHOW_ALERT',
+                    payload: {
+                        type: 'warning',
+                        title: t('nav:verifyEmailRequired', 'Email Verification Required'),
+                        message: t('nav:verifyEmailMessage', 'Please verify your email address before creating a listing. Check your inbox for the verification link.'),
+                    },
+                });
+                onClose();
+                return;
+            }
+
             // Clear selected agency when creating new listing
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });

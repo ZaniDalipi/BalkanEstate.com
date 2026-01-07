@@ -31,6 +31,25 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
   const handleNewListingClick = useCallback(() => {
     if (isAuthenticated) {
+        // Check if email is verified (for local auth users)
+        const needsVerification = currentUser &&
+          !currentUser.isEmailVerified &&
+          currentUser.provider !== 'google' &&
+          currentUser.provider !== 'facebook' &&
+          currentUser.provider !== 'apple';
+
+        if (needsVerification) {
+          dispatch({
+            type: 'SHOW_ALERT',
+            payload: {
+              type: 'warning',
+              title: t('nav:verifyEmailRequired', 'Email Verification Required'),
+              message: t('nav:verifyEmailMessage', 'Please verify your email address before creating a listing. Check your inbox for the verification link.'),
+            },
+          });
+          return;
+        }
+
         // Clear any selected items before navigating
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
@@ -40,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     } else {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
     }
-  }, [isAuthenticated, dispatch, getLocalizedPath]);
+  }, [isAuthenticated, currentUser, dispatch, getLocalizedPath, t]);
 
   const handleSubscribeClick = useCallback(() => {
     dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });

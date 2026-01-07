@@ -25,6 +25,7 @@ import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
 import AlertDialog from './components/shared/AlertDialog';
+import EmailVerificationBanner from './src/features/auth/components/EmailVerificationBanner';
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -364,6 +365,15 @@ const MainLayout: React.FC = () => {
   const { state, dispatch, updateUser, createListing } = useAppContext();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showVerificationBanner, setShowVerificationBanner] = useState(true);
+
+  // Check if user needs email verification (local auth only, not OAuth)
+  const needsEmailVerification = state.isAuthenticated &&
+    state.currentUser &&
+    !state.currentUser.isEmailVerified &&
+    state.currentUser.provider !== 'google' &&
+    state.currentUser.provider !== 'facebook' &&
+    state.currentUser.provider !== 'apple';
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -431,6 +441,13 @@ const MainLayout: React.FC = () => {
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
         <div className={`relative transition-all duration-300 ease-in-out h-screen flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
+            {/* Email Verification Banner - shown for unverified users */}
+            {needsEmailVerification && showVerificationBanner && state.currentUser && (
+              <EmailVerificationBanner
+                email={state.currentUser.email}
+                onDismiss={() => setShowVerificationBanner(false)}
+              />
+            )}
             {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
             <main id="main-content" className={`flex flex-col flex-grow overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />

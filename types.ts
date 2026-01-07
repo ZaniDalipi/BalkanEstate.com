@@ -64,6 +64,8 @@ export interface User {
     avatarUrl?: string;
     phone: string;
     role: UserRole;
+    isEmailVerified?: boolean;
+    provider?: 'local' | 'google' | 'facebook' | 'apple';
     city?: string;
     country?: string;
     address?: string; // Street address for location search
