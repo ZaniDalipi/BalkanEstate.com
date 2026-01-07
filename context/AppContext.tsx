@@ -303,7 +303,7 @@ interface AppContextType {
     logoutAllDevices: () => Promise<void>;
     requestPasswordReset: (email: string) => Promise<void>;
     resetPassword: (token: string, newPassword: string) => Promise<User>;
-    loginWithSocial: (provider: 'google' | 'facebook' | 'apple') => void;
+    loginWithSocial: (provider: 'google' | 'apple') => void;
     handleOAuthCallback: (token: string, user: User) => void;
     sendPhoneCode: (phone: string) => Promise<void>;
     verifyPhoneCode: (phone: string, code: string) => Promise<{ user: User | null, isNew: boolean }>;
@@ -464,7 +464,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return user;
   }, []);
 
-  const loginWithSocial = useCallback((provider: 'google' | 'facebook' | 'apple') => {
+  const loginWithSocial = useCallback((provider: 'google' | 'apple') => {
     // Redirect to OAuth endpoint
     api.loginWithSocial(provider);
   }, []);

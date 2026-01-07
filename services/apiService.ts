@@ -349,23 +349,23 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   return response;
 };
 
-export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; facebook: boolean; apple: boolean }> => {
+export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; apple: boolean }> => {
   try {
-    const response = await apiRequest<{ providers: { google: boolean; facebook: boolean; apple: boolean } }>('/auth/oauth/providers');
+    const response = await apiRequest<{ providers: { google: boolean; apple: boolean } }>('/auth/oauth/providers');
     return response.providers;
   } catch (error) {
     console.error('Error fetching OAuth providers:', error);
     // Return all false if endpoint fails
-    return { google: false, facebook: false, apple: false };
+    return { google: false, apple: false };
   }
 };
 
-export const getOAuthUrl = (provider: 'google' | 'facebook' | 'apple'): string => {
+export const getOAuthUrl = (provider: 'google' | 'apple'): string => {
   const baseUrl = API_URL.replace('/api', '');
   return `${baseUrl}/api/auth/${provider}`;
 };
 
-export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void => {
+export const loginWithSocial = (provider: 'google' | 'apple'): void => {
   // Redirect to backend OAuth endpoint
   window.location.href = getOAuthUrl(provider);
 };
