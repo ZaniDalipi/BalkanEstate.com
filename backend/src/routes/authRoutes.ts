@@ -22,6 +22,11 @@ import {
   setActiveRole,
   addRole,
 } from '../controllers/authController';
+import {
+  sendPhoneCode,
+  verifyPhoneCode,
+  completePhoneSignup,
+} from '../controllers/phoneAuthController';
 import { getUserStats, getAllAgents, syncStats, syncAllSubscriptionCounters } from '../controllers/userController';
 import { protect } from '../middleware/auth';
 import passport, { oauthStrategies } from '../config/passport';
@@ -218,6 +223,11 @@ router.post('/change-password', protect, changePassword);
 // Role management routes
 router.post('/set-active-role', protect, setActiveRole);
 router.post('/add-role', protect, addRole);
+
+// Phone authentication routes
+router.post('/phone/send-code', loginRateLimiterIP, sendPhoneCode);
+router.post('/phone/verify-code', loginRateLimiterIP, verifyPhoneCode);
+router.post('/phone/complete-signup', signupRateLimiterIP, completePhoneSignup);
 
 // OAuth providers endpoint - returns which providers are available
 router.get('/oauth/providers', (req, res) => {

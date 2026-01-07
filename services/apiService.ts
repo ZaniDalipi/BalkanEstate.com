@@ -387,19 +387,58 @@ export const loginWithSocial = (provider: 'google' | 'apple'): void => {
   window.location.href = getOAuthUrl(provider);
 };
 
-export const sendPhoneCode = async (phone: string): Promise<void> => {
-  // TODO: Implement phone verification on backend
-  console.log(`Sending code to ${phone}`);
+export const sendPhoneCode = async (phone: string): Promise<{ expiresAt: Date }> => {
+  const response = await apiRequest<{ message: string; expiresAt: string }>(
+    '/auth/phone/send-code',
+    {
+      method: 'POST',
+      body: { phone },
+    }
+  );
+  return { expiresAt: new Date(response.expiresAt) };
 };
 
 export const verifyPhoneCode = async (phone: string, code: string): Promise<{ user: User | null; isNew: boolean }> => {
-  // TODO: Implement phone verification on backend
-  throw new Error('Phone verification not yet implemented');
+  const response = await apiRequest<{
+    isNew: boolean;
+    user?: User;
+    accessToken?: string;
+    refreshToken?: string;
+    phone?: string;
+  }>('/auth/phone/verify-code', {
+    method: 'POST',
+    body: { phone, code },
+  });
+
+  if (!response.isNew && response.accessToken) {
+    localStorage.setItem('balkan_estate_token', response.accessToken);
+    if (response.refreshToken) {
+      localStorage.setItem('balkan_estate_refresh_token', response.refreshToken);
+    }
+    return { user: response.user || null, isNew: false };
+  }
+
+  return { user: null, isNew: true };
 };
 
 export const completePhoneSignup = async (phone: string, name: string, email: string): Promise<User> => {
-  // TODO: Implement phone signup on backend
-  throw new Error('Phone signup not yet implemented');
+  const response = await apiRequest<{
+    user: User;
+    accessToken?: string;
+    refreshToken?: string;
+  }>('/auth/phone/complete-signup', {
+    method: 'POST',
+    body: { phone, name, email },
+  });
+
+  if (response.accessToken) {
+    localStorage.setItem('balkan_estate_token', response.accessToken);
+  }
+  if (response.refreshToken) {
+    localStorage.setItem('balkan_estate_refresh_token', response.refreshToken);
+  }
+
+  return response.user;
 };
 
 // Email Verification Functions

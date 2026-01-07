@@ -207,16 +207,41 @@ export const loginWithSocial = (provider: 'google' | 'facebook' | 'apple'): void
 
 // --- Phone Auth ---
 
-export const sendPhoneCode = async (phone: string): Promise<void> => {
-  console.log(`Sending code to ${phone}`);
-  // TODO: Implement phone verification on backend
+export const sendPhoneCode = async (phone: string): Promise<{ expiresAt: Date }> => {
+  const response = await apiRequest<{ message: string; expiresAt: string }>(
+    '/auth/phone/send-code',
+    {
+      method: 'POST',
+      body: { phone },
+    }
+  );
+  return { expiresAt: new Date(response.expiresAt) };
 };
 
 export const verifyPhoneCode = async (
   phone: string,
   code: string
 ): Promise<{ user: User | null; isNew: boolean }> => {
-  throw new Error('Phone verification not yet implemented');
+  const response = await apiRequest<{
+    isNew: boolean;
+    user?: User;
+    accessToken?: string;
+    refreshToken?: string;
+    phone?: string;
+  }>('/auth/phone/verify-code', {
+    method: 'POST',
+    body: { phone, code },
+  });
+
+  if (!response.isNew && response.accessToken) {
+    tokenService.setAccessToken(response.accessToken);
+    if (response.refreshToken) {
+      tokenService.setRefreshToken(response.refreshToken);
+    }
+    return { user: response.user || null, isNew: false };
+  }
+
+  return { user: null, isNew: true };
 };
 
 export const completePhoneSignup = async (
@@ -224,7 +249,23 @@ export const completePhoneSignup = async (
   name: string,
   email: string
 ): Promise<User> => {
-  throw new Error('Phone signup not yet implemented');
+  const response = await apiRequest<{
+    user: User;
+    accessToken?: string;
+    refreshToken?: string;
+  }>('/auth/phone/complete-signup', {
+    method: 'POST',
+    body: { phone, name, email },
+  });
+
+  if (response.accessToken) {
+    tokenService.setAccessToken(response.accessToken);
+  }
+  if (response.refreshToken) {
+    tokenService.setRefreshToken(response.refreshToken);
+  }
+
+  return response.user;
 };
 
 // --- Profile ---
