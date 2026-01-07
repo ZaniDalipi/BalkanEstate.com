@@ -22,7 +22,18 @@ class SocketService {
       this.currentUserId = userId;
     }
 
-    const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001';
+    // Get server URL from environment, with validation
+    let serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
+
+    // Validate that the URL has a proper protocol prefix
+    // If malformed or missing, use production fallback based on hostname
+    if (!serverUrl.startsWith('http://') && !serverUrl.startsWith('https://')) {
+      if (typeof window !== 'undefined' && window.location.hostname.includes('balkanestateai.com')) {
+        serverUrl = 'https://api.balkanestateai.com';
+      } else {
+        serverUrl = 'http://localhost:5001';
+      }
+    }
 
     console.log('🔌 Connecting to WebSocket server:', serverUrl);
 

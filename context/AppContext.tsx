@@ -484,6 +484,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const user = await api.checkAuth();
       if (user) {
         dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
+        // Mark auth check as complete so the app can proceed
+        dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: true, user } });
 
         // Connect to WebSocket for real-time chat
         socketService.connect(token, user.id);
@@ -503,6 +505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('balkan_estate_token');
       localStorage.removeItem('balkan_estate_refresh_token');
       dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
+      dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: false, user: null } });
       dispatch({ type: 'USER_DATA_SUCCESS', payload: { savedHomes: [], savedSearches: [], conversations: [] } });
     }
   }, []);
