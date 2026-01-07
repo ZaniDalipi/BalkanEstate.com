@@ -162,6 +162,63 @@ export const updateSavedSearch = async (
   }
 };
 
+// @desc    Update saved search alert settings
+// @route   PATCH /api/saved-searches/:id/alerts
+// @access  Private
+export const updateAlertSettings = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const savedSearch = await SavedSearch.findById(req.params.id);
+
+    if (!savedSearch) {
+      res.status(404).json({ message: 'Saved search not found' });
+      return;
+    }
+
+    // Check ownership
+    if (savedSearch.userId.toString() !== String((req.user as IUser)._id).toString()) {
+      res.status(403).json({ message: 'Not authorized to update this search' });
+      return;
+    }
+
+    const { alertsEnabled, alertFrequency } = req.body;
+
+    // Validate frequency
+    const validFrequencies = ['instant', 'daily', 'weekly'];
+    if (alertFrequency && !validFrequencies.includes(alertFrequency)) {
+      res.status(400).json({ message: 'Invalid alert frequency. Must be instant, daily, or weekly' });
+      return;
+    }
+
+    // Update alert settings
+    if (typeof alertsEnabled === 'boolean') {
+      savedSearch.alertsEnabled = alertsEnabled;
+    }
+    if (alertFrequency) {
+      savedSearch.alertFrequency = alertFrequency;
+    }
+
+    await savedSearch.save();
+
+    console.log(`[savedSearchController] Updated alerts for search ${savedSearch._id}: enabled=${savedSearch.alertsEnabled}, frequency=${savedSearch.alertFrequency}`);
+
+    res.json({
+      message: 'Alert settings updated successfully',
+      savedSearch,
+    });
+  } catch (error: any) {
+    console.error('Update alert settings error:', error);
+    res.status(500).json({ message: 'Error updating alert settings', error: error.message });
+  }
+};
+
 // @desc    Delete all saved searches for user
 // @route   DELETE /api/saved-searches/all
 // @access  Private

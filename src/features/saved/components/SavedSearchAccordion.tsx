@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SavedSearch } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
-import { ChevronUpIcon, ChevronDownIcon, TrashIcon, PencilIcon, CheckCircleIcon, XMarkIcon } from '@/constants';
+import { ChevronUpIcon, ChevronDownIcon, TrashIcon, PencilIcon, CheckCircleIcon, XMarkIcon, BellIcon, BellSlashIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { filterProperties } from '@/utils/propertyUtils';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
@@ -25,10 +25,58 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
   const [newName, setNewName] = useState(search.name);
   const [isUpdating, setIsUpdating] = useState(false);
   const [mapFlyTarget, setMapFlyTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
+  const [showAlertSettings, setShowAlertSettings] = useState(false);
+  const [alertsEnabled, setAlertsEnabled] = useState(search.alertsEnabled || false);
+  const [alertFrequency, setAlertFrequency] = useState<'instant' | 'daily' | 'weekly'>(search.alertFrequency || 'instant');
+  const [isUpdatingAlerts, setIsUpdatingAlerts] = useState(false);
+  const alertDropdownRef = useRef<HTMLDivElement>(null);
   const { state, dispatch, updateSavedSearchAccessTime } = useAppContext();
-  const { isLoadingProperties, allMunicipalities, properties } = state;
+  const { isLoadingProperties, allMunicipalities, properties, currentUser } = state;
   const { confirm } = useConfirmation();
-  const { error, warning } = useNotification();
+  const { error, warning, success } = useNotification();
+
+  // Check if user has buyer subscription for alerts
+  const hasBuyerSubscription = useMemo(() => {
+    if (!currentUser?.subscription) return false;
+    const { tier, status } = currentUser.subscription;
+    const eligibleTiers = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
+    const eligibleStatuses = ['active', 'trial', 'grace'];
+    return eligibleTiers.includes(tier) && eligibleStatuses.includes(status);
+  }, [currentUser]);
+
+  // Close alert dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (alertDropdownRef.current && !alertDropdownRef.current.contains(event.target as Node)) {
+        setShowAlertSettings(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Update alert settings
+  const handleUpdateAlerts = async (enabled: boolean, frequency: 'instant' | 'daily' | 'weekly') => {
+    setIsUpdatingAlerts(true);
+    try {
+      await api.updateSavedSearchAlerts(search.id, enabled, frequency);
+      setAlertsEnabled(enabled);
+      setAlertFrequency(frequency);
+      dispatch({
+        type: 'UPDATE_SAVED_SEARCH',
+        payload: { ...search, alertsEnabled: enabled, alertFrequency: frequency }
+      });
+      if (enabled) {
+        await success(t('accordion.alertsEnabled', 'Alerts enabled'), t('accordion.alertsEnabledDesc', 'You will receive {{frequency}} notifications', { frequency }));
+      }
+    } catch (err) {
+      console.error('Failed to update alert settings:', err);
+      await error(t('accordion.errorTitle', 'Error'), t('accordion.alertUpdateFailed', 'Failed to update alert settings'));
+    } finally {
+      setIsUpdatingAlerts(false);
+      setShowAlertSettings(false);
+    }
+  };
 
   // Helper function to decode HTML entities (backend encodes quotes as &quot;)
   const decodeHtmlEntities = (str: string): string => {
@@ -289,6 +337,72 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
             </>
           ) : (
             <>
+              {/* Alert Settings Button */}
+              <div className="relative" ref={alertDropdownRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!hasBuyerSubscription) {
+                      dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });
+                      return;
+                    }
+                    setShowAlertSettings(!showAlertSettings);
+                  }}
+                  className={`p-2 rounded-full transition-colors ${
+                    alertsEnabled
+                      ? 'text-green-600 bg-green-50 hover:bg-green-100'
+                      : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600'
+                  }`}
+                  title={hasBuyerSubscription ? t('accordion.alertSettings', 'Alert settings') : t('accordion.upgradeForAlerts', 'Upgrade to enable alerts')}
+                >
+                  {alertsEnabled ? <BellIcon className="w-5 h-5" /> : <BellSlashIcon className="w-5 h-5" />}
+                </button>
+
+                {/* Alert Settings Dropdown */}
+                {showAlertSettings && (
+                  <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-neutral-200 z-50 p-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium text-neutral-700">
+                        {t('accordion.emailAlerts', 'Email alerts')}
+                      </span>
+                      <button
+                        onClick={() => handleUpdateAlerts(!alertsEnabled, alertFrequency)}
+                        disabled={isUpdatingAlerts}
+                        className={`relative w-10 h-5 rounded-full transition-colors ${
+                          alertsEnabled ? 'bg-green-500' : 'bg-neutral-300'
+                        } ${isUpdatingAlerts ? 'opacity-50' : ''}`}
+                      >
+                        <span
+                          className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                            alertsEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {alertsEnabled && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-neutral-500 mb-2">{t('accordion.frequency', 'Frequency')}</p>
+                        {(['instant', 'daily', 'weekly'] as const).map((freq) => (
+                          <button
+                            key={freq}
+                            onClick={() => handleUpdateAlerts(true, freq)}
+                            disabled={isUpdatingAlerts}
+                            className={`w-full text-left px-3 py-1.5 rounded text-sm transition-colors ${
+                              alertFrequency === freq
+                                ? 'bg-primary text-white'
+                                : 'hover:bg-neutral-100 text-neutral-700'
+                            } ${isUpdatingAlerts ? 'opacity-50' : ''}`}
+                          >
+                            {t(`accordion.${freq}`, freq.charAt(0).toUpperCase() + freq.slice(1))}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={handleStartRename}
                 className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors"

@@ -663,6 +663,20 @@ export const updateSavedSearch = async (searchId: string, name: string): Promise
   return transformBackendSavedSearch(response.savedSearch);
 };
 
+export const updateSavedSearchAlerts = async (
+  searchId: string,
+  alertsEnabled: boolean,
+  alertFrequency: 'instant' | 'daily' | 'weekly'
+): Promise<SavedSearch> => {
+  const response = await apiRequest<{ savedSearch: any }>(`/saved-searches/${searchId}/alerts`, {
+    method: 'PATCH',
+    requiresAuth: true,
+    body: { alertsEnabled, alertFrequency },
+  });
+
+  return transformBackendSavedSearch(response.savedSearch);
+};
+
 export const deleteSavedSearch = async (searchId: string): Promise<void> => {
   await apiRequest(`/saved-searches/${searchId}`, {
     method: 'DELETE',

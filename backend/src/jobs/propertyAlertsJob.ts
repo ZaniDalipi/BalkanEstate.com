@@ -4,6 +4,8 @@
  * Handles two types of alerts:
  * 1. New Listing Alerts - When new properties match saved searches
  * 2. Price Drop Alerts - When saved/favorited properties have price reductions
+ *
+ * NOTE: Alerts are only sent to users with active subscriptions (buyer or pro tier)
  */
 
 import Property, { IProperty } from '../models/Property';
@@ -11,7 +13,12 @@ import SavedSearch, { IFilters } from '../models/SavedSearch';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
+import User from '../models/User';
 import { sendPropertyAlert, sendPriceDropAlert, sendNewListingsDigest } from '../services/emailService';
+
+// Subscription tiers that have access to property alerts
+const ALERT_ELIGIBLE_TIERS = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
+const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace'];
 
 /**
  * Check if a property matches saved search filters
@@ -121,12 +128,26 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
     const savedSearches = await SavedSearch.find({
       alertsEnabled: true,
       alertFrequency: frequency,
-    }).populate('userId', 'email name');
+    }).populate('userId', 'email name subscription');
 
     if (savedSearches.length === 0) {
       console.log('   No saved searches with alerts enabled');
       return;
     }
+
+    // Filter to only users with active subscriptions (buyer or pro tier)
+    const eligibleSearches = savedSearches.filter(search => {
+      const user = search.userId as any;
+      if (!user || !user.subscription) return false;
+
+      const { tier, status } = user.subscription;
+      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
+      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
+
+      return isEligibleTier && isActiveStatus;
+    });
+
+    console.log(`   ${savedSearches.length} saved searches, ${eligibleSearches.length} with eligible subscriptions`);
 
     // Determine time window based on frequency
     let since: Date;
@@ -153,10 +174,15 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
       return;
     }
 
-    console.log(`   Found ${newProperties.length} new properties, checking ${savedSearches.length} saved searches`);
+    if (eligibleSearches.length === 0) {
+      console.log('   No users with eligible subscriptions');
+      return;
+    }
 
-    // Process each saved search
-    for (const search of savedSearches) {
+    console.log(`   Found ${newProperties.length} new properties, checking ${eligibleSearches.length} eligible saved searches`);
+
+    // Process each saved search (only for users with active subscriptions)
+    for (const search of eligibleSearches) {
       const user = search.userId as any;
       if (!user || !user.email) continue;
 
@@ -272,16 +298,35 @@ export async function processPriceDropAlerts(): Promise<void> {
     // Get all favorites with price alerts enabled
     const favorites = await Favorite.find({
       priceAlertEnabled: true,
-    }).populate('userId', 'email name').populate('propertyId');
+    }).populate('userId', 'email name subscription').populate('propertyId');
 
     if (favorites.length === 0) {
       console.log('   No favorites with price alerts enabled');
       return;
     }
 
+    // Filter to only users with active subscriptions
+    const eligibleFavorites = favorites.filter(fav => {
+      const user = fav.userId as any;
+      if (!user || !user.subscription) return false;
+
+      const { tier, status } = user.subscription;
+      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
+      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
+
+      return isEligibleTier && isActiveStatus;
+    });
+
+    console.log(`   ${favorites.length} favorites with alerts, ${eligibleFavorites.length} with eligible subscriptions`);
+
+    if (eligibleFavorites.length === 0) {
+      console.log('   No users with eligible subscriptions');
+      return;
+    }
+
     let alertsSent = 0;
 
-    for (const favorite of favorites) {
+    for (const favorite of eligibleFavorites) {
       const user = favorite.userId as any;
       const property = favorite.propertyId as any;
 

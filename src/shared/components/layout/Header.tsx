@@ -2,6 +2,7 @@ import React, { useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, User, UserCircle } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import NotificationCenter from '../NotificationCenter';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -96,6 +97,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           >
             + {t('nav:newListing')}
           </button>
+          <NotificationCenter />
           <AuthButton floating />
         </nav>
       </header>
@@ -131,6 +133,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             >
               + {t('nav:newListing')}
             </button>
+            <NotificationCenter />
             <AuthButton />
           </nav>
         </div>
