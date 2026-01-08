@@ -2,14 +2,14 @@
  * Cloudinary configuration for frontend assets
  *
  * City images should be uploaded to Cloudinary in the folder structure:
- * balkan-estate/city-images/{country}/{city-name}
+ * balkan-estate/city-images/{country}/{city-name}/cover
  *
  * For example:
- * - Tirana, Albania → balkan-estate/city-images/albania/tirana
- * - Prishtina, Kosovo → balkan-estate/city-images/kosovo/prishtina
- * - Skopje, North Macedonia → balkan-estate/city-images/north-macedonia/skopje
+ * - Tirana, Albania → balkan-estate/city-images/albania/tirana/cover.jpg
+ * - Prishtina, Kosovo → balkan-estate/city-images/kosovo/prishtina/cover.jpg
+ * - Skopje, North Macedonia → balkan-estate/city-images/north-macedonia/skopje/cover.jpg
  *
- * Upload images with the exact names (lowercase, spaces replaced with hyphens)
+ * IMPORTANT: Name each image file "cover" (any extension: jpg, png, webp)
  */
 
 // Cloudinary cloud name
@@ -78,10 +78,11 @@ export const getCityImageUrl = (
     `f_${format}`,
   ].join(',');
 
-  // Build path: folder/country/city or folder/city
+  // Build path: folder/country/city/cover or folder/city/cover
+  // The image file should be named "cover" inside each city folder
   const path = normalizedCountry
-    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}`
-    : `${CITY_IMAGES_FOLDER}/${normalizedCity}`;
+    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}/cover`
+    : `${CITY_IMAGES_FOLDER}/${normalizedCity}/cover`;
 
   return `${CLOUDINARY_BASE_URL}/${transformations}/${path}`;
 };
@@ -97,8 +98,8 @@ export const getCityImagePlaceholder = (cityName: string, country?: string): str
   const normalizedCountry = country ? normalizeName(country) : null;
 
   const path = normalizedCountry
-    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}`
-    : `${CITY_IMAGES_FOLDER}/${normalizedCity}`;
+    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}/cover`
+    : `${CITY_IMAGES_FOLDER}/${normalizedCity}/cover`;
 
   return `${CLOUDINARY_BASE_URL}/w_50,h_38,c_fill,g_auto,q_10,e_blur:1000,f_auto/${path}`;
 };
