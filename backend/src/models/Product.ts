@@ -56,15 +56,26 @@ export interface IProduct extends Document {
   maxActiveSubscriptions?: number;
 
   // Seller/Agent Subscription Benefits
-  listingsLimit?: number; // Number of active listings (3 free, 20 pro, 20 per agency agent)
-  promotionCoupons?: number; // Monthly promotion coupons (0 free, 3 pro, 15 agency)
-  highlightCoupons?: number; // Legacy - kept for backwards compatibility
+  listingsLimit?: number; // Number of active listings (3 free, 20 pro, 500 agency)
+  promotionCoupons?: number; // Total monthly promotion coupons
+
+  // Promotion coupon breakdown
+  premiumCoupons?: number; // Premium premiere coupons per month
+  highlightedCoupons?: number; // Highlighted coupons per month
+  featuredCoupons?: number; // Featured coupons per month
 
   // Agency-specific Benefits
   agentCoupons?: number; // Number of agent coupons (5 for agency tier)
 
+  // AI & Insights Limits
+  aiMessagesLimit?: number; // AI chat messages limit per month (-1 = unlimited)
+  aiInsightsLimit?: number; // Generate insights limit per month (-1 = unlimited)
+  imageDescriptionLimit?: number; // Auto-generate image description limit (-1 = unlimited)
+
   // Buyer-specific Benefits
-  savedSearchesLimit?: number; // Saved searches limit (1 free, 10 pro, -1 unlimited for buyer)
+  savedSearchesLimit?: number; // Saved searches limit (3 free, -1 unlimited for pro/buyer)
+  earlyAccessListings?: boolean; // Early access to new listings
+  advancedMarketInsights?: boolean; // Advanced market insights feature
 
   createdAt: Date;
   updatedAt: Date;
@@ -205,15 +216,25 @@ const ProductSchema: Schema = new Schema(
     // Seller/Agent Subscription Benefits
     listingsLimit: {
       type: Number,
-      default: 3, // 3 for free, 20 for pro/agency
+      default: 3, // 3 for free, 20 for pro, 500 for agency
     },
     promotionCoupons: {
       type: Number,
-      default: 0, // 0 for free, 3 for pro, 15 for agency
+      default: 0, // Total: 0 for free, 3 for pro, 5 for agency
     },
-    highlightCoupons: {
+
+    // Promotion coupon breakdown
+    premiumCoupons: {
       type: Number,
-      default: 0, // Legacy - kept for backwards compatibility
+      default: 0, // Premium premiere coupons per month
+    },
+    highlightedCoupons: {
+      type: Number,
+      default: 0, // Highlighted coupons per month
+    },
+    featuredCoupons: {
+      type: Number,
+      default: 0, // Featured coupons per month
     },
 
     // Agency-specific Benefits
@@ -222,10 +243,32 @@ const ProductSchema: Schema = new Schema(
       default: 0, // 5 for agency tier
     },
 
+    // AI & Insights Limits
+    aiMessagesLimit: {
+      type: Number,
+      default: 3, // 3 for free, -1 (unlimited) for pro
+    },
+    aiInsightsLimit: {
+      type: Number,
+      default: 3, // 3 for free, 20 for pro, -1 (unlimited) for agency
+    },
+    imageDescriptionLimit: {
+      type: Number,
+      default: 0, // 0 for free, -1 (unlimited) for pro
+    },
+
     // Buyer-specific Benefits
     savedSearchesLimit: {
       type: Number,
-      default: 1, // 1 for free, 10 for pro, -1 (unlimited) for buyer tier
+      default: 3, // 3 for free, -1 (unlimited) for pro/buyer
+    },
+    earlyAccessListings: {
+      type: Boolean,
+      default: false, // Only for buyer pro
+    },
+    advancedMarketInsights: {
+      type: Boolean,
+      default: false, // Only for buyer pro
     },
   },
   {

@@ -23,10 +23,22 @@ interface Product {
   hasFreeTrial: boolean;
   trialPeriodDays?: number;
   gracePeriodDays: number;
+  // Limits
   listingsLimit: number;
   promotionCoupons: number;
+  premiumCoupons: number;
+  highlightedCoupons: number;
+  featuredCoupons: number;
   agentCoupons: number;
+  // AI Limits
+  aiMessagesLimit: number;
+  aiInsightsLimit: number;
+  imageDescriptionLimit: number;
+  // Buyer features
   savedSearchesLimit: number;
+  earlyAccessListings?: boolean;
+  advancedMarketInsights?: boolean;
+  // Stripe
   stripeProductId?: string;
   stripePriceId?: string;
 }
@@ -435,24 +447,15 @@ const PricingManager: React.FC = () => {
               {/* Limits */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="font-semibold text-green-900 mb-3">Limits & Quotas</h4>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Listings Limit</label>
                     <input
                       type="number"
                       value={editingProduct.listingsLimit}
                       onChange={(e) => setEditingProduct({ ...editingProduct, listingsLimit: parseInt(e.target.value) || 0 })}
-                      min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Promo Coupons/mo</label>
-                    <input
-                      type="number"
-                      value={editingProduct.promotionCoupons}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, promotionCoupons: parseInt(e.target.value) || 0 })}
-                      min="0"
+                      min="-1"
+                      placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                   </div>
@@ -477,6 +480,117 @@ const PricingManager: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                   </div>
+                </div>
+
+                {/* Promotion Coupon Breakdown */}
+                <h5 className="font-medium text-green-800 mb-2 text-sm">Promotion Coupons (per month)</h5>
+                <div className="grid grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Promos</label>
+                    <input
+                      type="number"
+                      value={editingProduct.promotionCoupons}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, promotionCoupons: parseInt(e.target.value) || 0 })}
+                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Premium</label>
+                    <input
+                      type="number"
+                      value={editingProduct.premiumCoupons || 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, premiumCoupons: parseInt(e.target.value) || 0 })}
+                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Highlighted</label>
+                    <input
+                      type="number"
+                      value={editingProduct.highlightedCoupons || 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, highlightedCoupons: parseInt(e.target.value) || 0 })}
+                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Featured</label>
+                    <input
+                      type="number"
+                      value={editingProduct.featuredCoupons || 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, featuredCoupons: parseInt(e.target.value) || 0 })}
+                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* AI & Insights Limits */}
+              <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                <h4 className="font-semibold text-cyan-900 mb-3">AI & Insights Limits</h4>
+                <p className="text-xs text-cyan-700 mb-3">Use -1 for unlimited</p>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">AI Messages/mo</label>
+                    <input
+                      type="number"
+                      value={editingProduct.aiMessagesLimit ?? 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, aiMessagesLimit: parseInt(e.target.value) || 0 })}
+                      min="-1"
+                      placeholder="-1 for unlimited"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Insights/mo</label>
+                    <input
+                      type="number"
+                      value={editingProduct.aiInsightsLimit ?? 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, aiInsightsLimit: parseInt(e.target.value) || 0 })}
+                      min="-1"
+                      placeholder="-1 for unlimited"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Image Desc/mo</label>
+                    <input
+                      type="number"
+                      value={editingProduct.imageDescriptionLimit ?? 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, imageDescriptionLimit: parseInt(e.target.value) || 0 })}
+                      min="-1"
+                      placeholder="-1 for unlimited"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Buyer Features */}
+              <div className="bg-sky-50 border border-sky-200 rounded-lg p-4">
+                <h4 className="font-semibold text-sky-900 mb-3">Buyer Features</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editingProduct.earlyAccessListings || false}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, earlyAccessListings: e.target.checked })}
+                      className="w-4 h-4 text-sky-600 rounded focus:ring-sky-500"
+                    />
+                    <span className="text-sm text-gray-700">Early Access to New Listings</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editingProduct.advancedMarketInsights || false}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, advancedMarketInsights: e.target.checked })}
+                      className="w-4 h-4 text-sky-600 rounded focus:ring-sky-500"
+                    />
+                    <span className="text-sm text-gray-700">Advanced Market Insights</span>
+                  </label>
                 </div>
               </div>
 
