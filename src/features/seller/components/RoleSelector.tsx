@@ -4,6 +4,7 @@ import { User, UserRole } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import {
     LISTING_LIMITS,
+    PLAN_LISTING_LIMITS,
     PROMOTION_CONFIGS,
     canPostAsRole,
 } from '@/shared/utils/subscriptionHelpers';
@@ -85,8 +86,10 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
             // Get the correct listing limit based on subscription status
             // If subscription is not active, fall back to free tier (3 listings)
+            // Priority: 1) PLAN_LISTING_LIMITS[productId] 2) sub.listingsLimit 3) LISTING_LIMITS[tier] 4) fallback to 3
+            const productId = sub.productId as keyof typeof PLAN_LISTING_LIMITS | undefined;
             const limit = isActiveSubscription
-                ? (sub.listingsLimit ?? LISTING_LIMITS[tier] ?? 3)
+                ? (productId && PLAN_LISTING_LIMITS[productId]) || sub.listingsLimit || LISTING_LIMITS[tier] || 3
                 : 3; // Free tier limit
 
             // Get counts

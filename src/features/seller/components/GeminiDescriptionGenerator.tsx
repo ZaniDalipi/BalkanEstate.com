@@ -15,6 +15,8 @@ import * as api from '@/services/apiService';
 import imageCompression from 'browser-image-compression';
 import PromotionSelector from '@/components/promotions/PromotionSelector';
 import RoleSelector from './RoleSelector';
+import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
+import { SubscriptionPlan } from '@/shared/types/user.types';
 
 type Step = 'init' | 'loading' | 'form' | 'floorplan' | 'payment' | 'success';
 type Mode = 'ai' | 'manual';
@@ -359,7 +361,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     const wasModalOpen = useRef(isPricingModalOpen);
     useEffect(() => {
         if (wasModalOpen.current && !isPricingModalOpen && pendingProperty) {
-            const listingsLimit = currentUser?.subscription?.listingsLimit || 3;
+            // Get listing limit from PLAN_LISTING_LIMITS (source of truth) with fallbacks
+            const productId = currentUser?.subscription?.productId as SubscriptionPlan | undefined;
+            const listingsLimit = (productId && PLAN_LISTING_LIMITS[productId]) || currentUser?.subscription?.listingsLimit || 3;
             const tierName = currentUser?.subscription?.tier === 'pro' ? 'Pro' : 'Free';
             showError(t('seller:errors.listingLimitReached'), t('seller:errors.listingLimitMessage', { tierName, limit: listingsLimit }));
             dispatch({ type: 'SET_PENDING_PROPERTY', payload: null });
@@ -1013,10 +1017,12 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 distanceToHospital: distances.distanceToHospital,
             };
 
-            // Check if user has reached their listing limit (from database subscription)
+            // Check if user has reached their listing limit (from PLAN_LISTING_LIMITS as source of truth)
             if (!propertyToEdit) {
                 const userListings = properties.filter(p => p.sellerId === currentUser.id);
-                const listingsLimit = currentUser.subscription?.listingsLimit || 3; // Default to 3 if not set
+                // Get listing limit from PLAN_LISTING_LIMITS (source of truth) with fallbacks
+                const productId = currentUser.subscription?.productId as SubscriptionPlan | undefined;
+                const listingsLimit = (productId && PLAN_LISTING_LIMITS[productId]) || currentUser.subscription?.listingsLimit || 3;
 
                 if (userListings.length >= listingsLimit) {
                     dispatch({ type: 'SET_PENDING_PROPERTY', payload: newProperty });

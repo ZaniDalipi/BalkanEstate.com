@@ -446,7 +446,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     const daysRemaining = Math.max(0, Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
     const currentPlanKey = subscription.productId || 'free';
-    const currentPlan = plans[currentPlanKey] || FREE_PLAN;
+    // Use LISTING_LIMITS as the source of truth for listing limits
+    // This ensures correct limits even if product isn't fetched from DB
+    const basePlan = plans[currentPlanKey] || FREE_PLAN;
+    const currentPlan = {
+      ...basePlan,
+      listingLimit: LISTING_LIMITS[currentPlanKey] ?? basePlan.listingLimit,
+    };
 
     // Calculate daily rate based on actual subscription price and days
     const actualPrice = subscription.price || currentPlan.price;
