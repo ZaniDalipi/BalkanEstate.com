@@ -7,6 +7,7 @@ import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -19,6 +20,18 @@ const CityRecommendations: React.FC = () => {
   // Handle image load error - fallback to gradient
   const handleImageError = (cityName: string) => {
     setFailedImages(prev => new Set(prev).add(cityName));
+  };
+
+  // Find city coordinates from BALKAN_LOCATIONS
+  const getCityCoordinates = (cityName: string, countryName: string): { lat: number; lng: number } | null => {
+    const country = BALKAN_LOCATIONS.find(c => c.name === countryName);
+    if (country) {
+      const city = country.cities.find(c => c.name.toLowerCase() === cityName.toLowerCase());
+      if (city) {
+        return { lat: city.lat, lng: city.lng };
+      }
+    }
+    return null;
   };
 
   useEffect(() => {
@@ -44,6 +57,9 @@ const CityRecommendations: React.FC = () => {
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
   const handleCityClick = (city: CityMarketData) => {
+    // Get city coordinates for map zoom
+    const coords = getCityCoordinates(city.city, city.country);
+
     // Set filters to search for properties in this city
     updateSearchPageState({
       filters: {
@@ -118,6 +134,12 @@ const CityRecommendations: React.FC = () => {
         maxDistanceToHospital: null,
         amenities: [],
       },
+      // Set map focus to city coordinates
+      focusMapOnProperty: coords ? {
+        lat: coords.lat,
+        lng: coords.lng,
+        address: `${city.city}, ${city.country}`,
+      } : null,
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
@@ -244,6 +266,30 @@ const CityRecommendations: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* AI-Powered Market Intelligence - Moved to top */}
+            {cities.length > 0 && (
+              <div className="p-4 bg-gradient-to-r from-primary/5 to-blue-50 rounded-xl border border-primary/20">
+                <div className="flex items-start gap-3">
+                  <SparklesIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-neutral-900 mb-1">{t('aiInsights.title')}</h4>
+                    <p className="text-sm text-neutral-600 mb-1">
+                      {t('aiInsights.description', { count: cities.length })}
+                    </p>
+                    <p className="text-xs text-neutral-500">
+                      {t('aiInsights.lastUpdated', {
+                        date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      })} • {t('aiInsights.dataSource')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
         {/* Country Filter */}
@@ -290,7 +336,7 @@ const CityRecommendations: React.FC = () => {
                 className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 text-left group"
               >
                 {/* City Image Header with Gradient Fade */}
-                <div className="relative h-36 overflow-hidden">
+                <div className="relative h-40 overflow-hidden">
                   {/* Background Image or Gradient Fallback */}
                   {hasImage ? (
                     <img
@@ -308,25 +354,37 @@ const CityRecommendations: React.FC = () => {
                   )}
 
                   {/* Gradient Overlay - Fades to white at bottom */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent" />
 
                   {/* Dark overlay for better text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-transparent" />
 
                   {/* City Name Overlay */}
-                  <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <MapPinIcon className="w-5 h-5 text-white drop-shadow-lg" />
-                        <h3 className="text-xl font-bold text-white drop-shadow-lg group-hover:text-primary transition-colors">
+                  <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                    <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <MapPinIcon className="w-5 h-5 text-white" />
+                        <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
                           {city.city}
                         </h3>
                       </div>
-                      <p className="text-sm text-white/90 drop-shadow-md">{city.country}</p>
+                      <p className="text-xs text-white/90 ml-7">{city.country}</p>
                     </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${getTrendColor(city.marketTrend)}`}>
+                    <div className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${getTrendColor(city.marketTrend)}`}>
                       {getTrendIcon(city.marketTrend)}
                       {getTrendLabel(city.marketTrend)}
+                    </div>
+                  </div>
+
+                  {/* Price Overlay at Bottom */}
+                  <div className="absolute bottom-2 left-3 right-3 flex items-end justify-between">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md">
+                      <p className="text-xs text-neutral-500">{t('cityCard.avgPricePerSqm')}</p>
+                      <p className="text-lg font-bold text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}/m²</p>
+                    </div>
+                    <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md text-right">
+                      <p className="text-xs text-neutral-500">{t('cityCard.medianPrice')}</p>
+                      <p className="text-base font-semibold text-primary">{formatPrice(city.medianPrice, city.countryCode)}</p>
                     </div>
                   </div>
                 </div>
@@ -346,19 +404,7 @@ const CityRecommendations: React.FC = () => {
                   </div>
 
                   {/* Key Metrics */}
-                  <div className="space-y-3 mb-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">{t('cityCard.avgPricePerSqm')}</span>
-                      <span className="text-base font-bold text-neutral-900">
-                        €{city.avgPricePerSqm.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">{t('cityCard.medianPrice')}</span>
-                      <span className="text-base font-semibold text-neutral-900">
-                        {formatPrice(city.medianPrice, city.countryCode)}
-                      </span>
-                    </div>
+                  <div className="space-y-2.5 mb-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-neutral-600">{t('cityCard.yoyGrowth')}</span>
                       <span className={`text-base font-semibold ${
@@ -432,30 +478,6 @@ const CityRecommendations: React.FC = () => {
             );
           })}
         </div>
-
-        {/* Data Freshness Note */}
-        {cities.length > 0 && (
-          <div className="mt-8 p-6 bg-white rounded-xl border border-neutral-200">
-            <div className="flex items-start gap-3">
-              <SparklesIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-neutral-900 mb-1">{t('aiInsights.title')}</h4>
-                <p className="text-sm text-neutral-600 mb-2">
-                  {t('aiInsights.description', { count: cities.length })}
-                </p>
-                <p className="text-xs text-neutral-500">
-                  {t('aiInsights.lastUpdated', {
-                    date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })
-                  })} • {t('aiInsights.dataSource')}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
         </div>
       </div>
 
