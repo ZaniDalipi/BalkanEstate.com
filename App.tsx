@@ -21,6 +21,7 @@ import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } 
 import Onboarding from './src/features/onboarding/components/Onboarding';
 import { SearchPage } from './src/features/search/components';
 import AuthPage from './src/features/auth/components/AuthModal';
+import EmailVerificationRequired from './src/features/auth/components/EmailVerificationRequired';
 import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
 import Footer from './components/shared/Footer';
@@ -552,9 +553,21 @@ const AppWrapper: React.FC = () => {
         return <FullScreenLoader />;
     }
 
-    // Allow password reset and email verification pages to bypass onboarding
+    // Allow password reset and email verification pages to bypass onboarding and verification check
     const isAuthFlowPage = window.location.pathname.includes('reset-password') ||
                            window.location.pathname.includes('verify-email');
+
+    // Check if user needs to verify their email
+    // Only applies to authenticated local users (not OAuth users like Google/Apple)
+    const needsEmailVerification = state.isAuthenticated &&
+                                   state.currentUser &&
+                                   state.currentUser.provider === 'local' &&
+                                   !state.currentUser.isEmailVerified &&
+                                   !isAuthFlowPage;
+
+    if (needsEmailVerification && state.currentUser) {
+        return <EmailVerificationRequired email={state.currentUser.email} />;
+    }
 
     if (!state.onboardingComplete && !isAuthFlowPage) {
         return (

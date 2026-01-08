@@ -75,6 +75,39 @@ export const restrictTo = (...roles: string[]) => {
 };
 
 /**
+ * Middleware to require email verification
+ * Must be used AFTER the protect middleware
+ * Returns 403 with EMAIL_NOT_VERIFIED code if user hasn't verified their email
+ */
+export const requireVerifiedEmail = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({ message: 'Not authorized', code: 'NO_USER' });
+    return;
+  }
+
+  // OAuth users (Google, Apple) are automatically verified
+  if (req.user.provider && req.user.provider !== 'local') {
+    next();
+    return;
+  }
+
+  // Check if email is verified
+  if (!req.user.isEmailVerified) {
+    res.status(403).json({
+      message: 'Please verify your email address to continue',
+      code: 'EMAIL_NOT_VERIFIED',
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
  * Optional authentication middleware
  * Attaches user to request if valid token is present, but doesn't block unauthenticated requests
  */
