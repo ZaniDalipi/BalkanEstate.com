@@ -52,6 +52,19 @@ interface ProductData {
     borderColor?: string;
     textColor?: string;
   };
+  // Limits from database
+  listingsLimit?: number;
+  promotionCoupons?: number;
+  premiumCoupons?: number;
+  highlightedCoupons?: number;
+  featuredCoupons?: number;
+  agentCoupons?: number;
+  savedSearchesLimit?: number;
+  aiMessagesLimit?: number;
+  aiInsightsLimit?: number;
+  imageDescriptionLimit?: number;
+  earlyAccessListings?: boolean;
+  advancedMarketInsights?: boolean;
 }
 
 // Plan structure for UI
@@ -68,6 +81,16 @@ interface Plan {
   badge?: string;
   badgeColor?: string;
   highlighted?: boolean;
+  // Additional limits from database
+  promotionCoupons: number;
+  premiumCoupons: number;
+  highlightedCoupons: number;
+  featuredCoupons: number;
+  savedSearchesLimit: number;
+  aiMessagesLimit: number;
+  aiInsightsLimit: number;
+  imageDescriptionLimit: number;
+  agentCoupons: number;
 }
 
 // Default free plan (not in products DB)
@@ -77,10 +100,20 @@ const FREE_PLAN: Plan = {
   price: 0,
   period: 'forever',
   periodMonths: 0,
-  features: ['3 active listings', 'Basic analytics', 'Email support', 'Mobile app access'],
-  listingLimit: 3,  // Correct limit for free tier
+  features: ['3 active listings', '3 saved searches', '3 AI messages/month', '3 property insights/month'],
+  listingLimit: 3,
   color: 'from-gray-400 to-gray-500',
   tier: 0,
+  // Free tier limits
+  promotionCoupons: 0,
+  premiumCoupons: 0,
+  highlightedCoupons: 0,
+  featuredCoupons: 0,
+  savedSearchesLimit: 3,
+  aiMessagesLimit: 3,
+  aiInsightsLimit: 3,
+  imageDescriptionLimit: 0,
+  agentCoupons: 0,
 };
 
 // Map billing period to months
@@ -90,21 +123,6 @@ const PERIOD_TO_MONTHS: Record<string, number> = {
   weekly: 0.25,
   quarterly: 3,
   one_time: 0,
-};
-
-// Map product IDs to listing limits (NEW MONETIZATION SYSTEM)
-// NOTE: These match the new product seeder values
-const LISTING_LIMITS: Record<string, number> = {
-  free: 3,
-  seller_pro_monthly: 25,  // Updated from 20 to 25
-  seller_pro_yearly: 25,   // Updated from 20 to 25
-  seller_enterprise_yearly: 100,
-  // New tiers (from new monetization system)
-  free_tier: 3,
-  pro_monthly: 25,
-  pro_yearly: 25,
-  agency_yearly: 0,  // Agency owners don't get listings, they distribute coupons
-  buyer_monthly: 0,  // Buyers don't create listings
 };
 
 // Map product IDs to gradient colors
@@ -233,7 +251,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   }, []);
 
-  // Convert product to plan structure
+  // Convert product to plan structure - reads ALL values from database
   const productToPlan = useCallback((product: ProductData): Plan => {
     return {
       id: product.productId,
@@ -242,12 +260,23 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       period: product.billingPeriod === 'yearly' ? 'year' : product.billingPeriod === 'monthly' ? 'month' : product.billingPeriod,
       periodMonths: PERIOD_TO_MONTHS[product.billingPeriod] || 1,
       features: product.features,
-      listingLimit: LISTING_LIMITS[product.productId] || 3,
+      // Read limits directly from product data (from database)
+      listingLimit: product.listingsLimit ?? 3,
       color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
       tier: PLAN_TIERS[product.productId] || 0,
       badge: product.badge,
       badgeColor: product.badgeColor,
       highlighted: product.highlighted,
+      // All limits from database
+      promotionCoupons: product.promotionCoupons ?? 0,
+      premiumCoupons: product.premiumCoupons ?? 0,
+      highlightedCoupons: product.highlightedCoupons ?? 0,
+      featuredCoupons: product.featuredCoupons ?? 0,
+      savedSearchesLimit: product.savedSearchesLimit ?? 3,
+      aiMessagesLimit: product.aiMessagesLimit ?? 3,
+      aiInsightsLimit: product.aiInsightsLimit ?? 3,
+      imageDescriptionLimit: product.imageDescriptionLimit ?? 0,
+      agentCoupons: product.agentCoupons ?? 0,
     };
   }, []);
 
@@ -946,22 +975,26 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Listings */}
+          {/* Listings - Dynamic from DB */}
           <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
             <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <HomeIcon className="w-5 h-5 text-blue-600" />
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {t('management.whatsIncluded.activeListings', { count: subscriptionDetails.currentPlan.listingLimit })}
+                {subscriptionDetails.currentPlan.listingLimit === -1
+                  ? 'Unlimited Listings'
+                  : `${subscriptionDetails.currentPlan.listingLimit} Active Listings`}
               </p>
               <p className="text-sm text-neutral-500">
-                {t('management.whatsIncluded.activeListingsDesc', { count: subscriptionDetails.currentPlan.listingLimit })}
+                {subscriptionDetails.currentPlan.period === 'year'
+                  ? `${subscriptionDetails.currentPlan.listingLimit} listings per year`
+                  : `Create and manage up to ${subscriptionDetails.currentPlan.listingLimit} property listings`}
               </p>
             </div>
           </div>
 
-          {/* Saved Searches */}
+          {/* Saved Searches - Dynamic from DB */}
           <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
             <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
               <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -970,88 +1003,98 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {t('management.whatsIncluded.savedSearches', { count: subscriptionDetails.currentPlanKey === 'free' ? 1 : 10 })}
+                {subscriptionDetails.currentPlan.savedSearchesLimit === -1
+                  ? 'Unlimited Saved Searches'
+                  : `${subscriptionDetails.currentPlan.savedSearchesLimit} Saved Searches`}
               </p>
               <p className="text-sm text-neutral-500">
-                {t('management.whatsIncluded.savedSearchesDesc')}
+                Save and get alerts for your property searches
               </p>
             </div>
           </div>
 
-          {/* Promotion Coupons - Pro only */}
-          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <GiftIconComponent className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-amber-600' : 'text-neutral-400'}`} />
+          {/* Promotion Coupons - Dynamic from DB with breakdown */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.promotionCoupons > 0 ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.promotionCoupons > 0 ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <GiftIconComponent className={`w-5 h-5 ${subscriptionDetails.currentPlan.promotionCoupons > 0 ? 'text-amber-600' : 'text-neutral-400'}`} />
             </div>
             <div>
-              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.promotionCoupons')
-                  : t('management.whatsIncluded.noPromotionCoupons')}
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.promotionCoupons > 0 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.promotionCoupons > 0
+                  ? `${subscriptionDetails.currentPlan.promotionCoupons} Promotion Coupons/Month`
+                  : 'No Promotion Coupons'}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.promotionCouponsDesc')
-                  : t('management.whatsIncluded.upgradeForPromotion')}
+                {subscriptionDetails.currentPlan.promotionCoupons > 0
+                  ? `${subscriptionDetails.currentPlan.highlightedCoupons} highlighted + ${subscriptionDetails.currentPlan.premiumCoupons} premium${subscriptionDetails.currentPlan.featuredCoupons > 0 ? ` + ${subscriptionDetails.currentPlan.featuredCoupons} featured` : ''}`
+                  : 'Upgrade to boost your listings'}
               </p>
             </div>
           </div>
 
-          {/* Analytics */}
-          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <ChartBarIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-green-600' : 'text-neutral-400'}`} />
+          {/* AI Insights - Dynamic from DB */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.aiInsightsLimit !== 0 ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.aiInsightsLimit !== 0 ? 'bg-green-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <ChartBarIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.aiInsightsLimit !== 0 ? 'text-green-600' : 'text-neutral-400'}`} />
             </div>
             <div>
-              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.advancedAnalytics')
-                  : t('management.whatsIncluded.basicAnalytics')}
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.aiInsightsLimit !== 0 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.aiInsightsLimit === -1
+                  ? 'Unlimited Property Insights'
+                  : subscriptionDetails.currentPlan.aiInsightsLimit > 0
+                    ? `${subscriptionDetails.currentPlan.aiInsightsLimit} Property Insights/Month`
+                    : 'No Property Insights'}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.advancedAnalyticsDesc')
-                  : t('management.whatsIncluded.basicAnalyticsDesc')}
+                {subscriptionDetails.currentPlan.aiInsightsLimit !== 0
+                  ? 'AI-powered property analysis and recommendations'
+                  : 'Upgrade for AI property analysis'}
               </p>
             </div>
           </div>
 
-          {/* Priority Support - Pro only */}
-          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+          {/* AI Chat - Dynamic from DB */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.aiMessagesLimit !== 0 ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.aiMessagesLimit !== 0 ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.aiMessagesLimit !== 0 ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
             <div>
-              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.prioritySupport')
-                  : t('management.whatsIncluded.emailSupport')}
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.aiMessagesLimit !== 0 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.aiMessagesLimit === -1
+                  ? 'Unlimited AI Chat'
+                  : subscriptionDetails.currentPlan.aiMessagesLimit > 0
+                    ? `${subscriptionDetails.currentPlan.aiMessagesLimit} AI Messages/Month`
+                    : 'No AI Chat'}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.prioritySupportDesc')
-                  : t('management.whatsIncluded.emailSupportDesc')}
+                {subscriptionDetails.currentPlan.aiMessagesLimit !== 0
+                  ? 'Chat with AI for property search assistance'
+                  : 'Upgrade for AI chat features'}
               </p>
             </div>
           </div>
 
-          {/* Verified Badge - Pro only */}
-          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <CheckCircleIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-cyan-600' : 'text-neutral-400'}`} />
+          {/* Image Descriptions - Dynamic from DB */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.imageDescriptionLimit !== 0 ? 'bg-cyan-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.imageDescriptionLimit !== 0 ? 'bg-cyan-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.imageDescriptionLimit !== 0 ? 'text-cyan-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
             </div>
             <div>
-              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.verifiedBadge')
-                  : t('management.whatsIncluded.noBadge')}
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.imageDescriptionLimit !== 0 ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.imageDescriptionLimit === -1
+                  ? 'Unlimited Auto Image Descriptions'
+                  : subscriptionDetails.currentPlan.imageDescriptionLimit > 0
+                    ? `${subscriptionDetails.currentPlan.imageDescriptionLimit} Auto Image Descriptions/Month`
+                    : 'No Auto Image Descriptions'}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.verifiedBadgeDesc')
-                  : t('management.whatsIncluded.noBadgeDesc')}
+                {subscriptionDetails.currentPlan.imageDescriptionLimit !== 0
+                  ? 'AI-generated descriptions for your property photos'
+                  : 'Upgrade for auto image descriptions'}
               </p>
             </div>
           </div>
