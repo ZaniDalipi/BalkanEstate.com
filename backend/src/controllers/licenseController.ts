@@ -27,10 +27,11 @@ export const uploadLicense = async (
       return;
     }
 
-    // Upload license document to Cloudinary (using avatar type for user-related documents)
+    // Upload license document to Cloudinary
+    // Path: balkan-estate/users/{userId}/documents/license/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId: String(currentUser._id),
-      type: 'avatar',
+      type: 'license',
       maxWidth: 2000,
       maxHeight: 2000,
     });

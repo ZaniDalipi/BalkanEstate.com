@@ -1,6 +1,61 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
+// =============================================================================
+// Security Utilities
+// =============================================================================
+
+/**
+ * Escape HTML special characters to prevent XSS attacks
+ */
+function escapeHtml(unsafe: string | undefined | null): string {
+  if (unsafe == null) return '';
+  return String(unsafe)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Validate email address format
+ */
+function isValidEmail(email: string): boolean {
+  // RFC 5322 compliant email regex
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  return emailRegex.test(email) && email.length <= 254;
+}
+
+/**
+ * Validate and sanitize URL - only allow http/https protocols
+ */
+function sanitizeUrl(url: string | undefined | null): string {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    // Only allow http and https protocols
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return '';
+    }
+    return url;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Sanitize URL for use in HTML attributes (escape special chars and validate protocol)
+ */
+function sanitizeUrlForHtml(url: string | undefined | null): string {
+  const sanitized = sanitizeUrl(url);
+  return escapeHtml(sanitized);
+}
+
+// =============================================================================
+// Types and Interfaces
+// =============================================================================
+
 interface EmailConfig {
   to: string;
   subject: string;
@@ -76,10 +131,10 @@ export type EmailCategory = 'noreply' | 'alerts' | 'support' | 'inquiries';
 
 // Default "from" addresses for each category
 const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
-  noreply: 'Balkan Estate <noreply@balkanestateai.com>',
-  alerts: 'Balkan Estate Alerts <alerts@balkanestateai.com>',
-  support: 'Balkan Estate Support <support@balkanestateai.com>',
-  inquiries: 'Balkan Estate <inquiries@balkanestateai.com>',
+  noreply: 'BalkanEstateᴬᴵ <noreply@balkanestateai.com>',
+  alerts: 'BalkanEstateᴬᴵ Alerts <alerts@balkanestateai.com>',
+  support: 'BalkanEstateᴬᴵ Support <support@balkanestateai.com>',
+  inquiries: 'BalkanEstateᴬᴵ <inquiries@balkanestateai.com>',
 };
 
 class EmailService {
@@ -133,6 +188,12 @@ class EmailService {
   }
 
   async sendEmail(config: EmailConfig): Promise<void> {
+    // Validate email address
+    if (!isValidEmail(config.to)) {
+      console.error(`❌ Invalid email address: ${config.to}`);
+      throw new Error('Invalid email address format');
+    }
+
     // Get the appropriate "from" address based on category
     const fromAddress = this.getFromAddress(config.category || 'noreply');
 
@@ -193,6 +254,12 @@ class EmailService {
    * Send weekly statistics email to Pro members
    */
   async sendWeeklyStats(data: WeeklyStatsData): Promise<void> {
+    // Sanitize user inputs
+    const safeUserName = escapeHtml(data.userName);
+    const safePeriod = escapeHtml(data.period);
+    const safeTopPropertyTitle = data.topPerformingProperty ? escapeHtml(data.topPerformingProperty.title) : '';
+    const safeTopPropertyAddress = data.topPerformingProperty ? escapeHtml(data.topPerformingProperty.address) : '';
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -205,13 +272,13 @@ class EmailService {
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 32px 24px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">📊 Your Weekly Report</h1>
-      <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${data.period}</p>
+      <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${safePeriod}</p>
     </div>
 
     <!-- Greeting -->
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
-        Hi <strong>${data.userName}</strong>,
+        Hi <strong>${safeUserName}</strong>,
       </p>
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
         Here's how your properties performed this week:
@@ -258,8 +325,8 @@ class EmailService {
           <span style="font-size: 18px; margin-right: 8px;">🏆</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${data.topPerformingProperty.title}</div>
-        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${data.topPerformingProperty.address}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
+        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${safeTopPropertyAddress}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
           <span style="font-size: 12px; color: #6b7280;">👁 ${data.topPerformingProperty.views} views</span>
           <span style="font-size: 12px; color: #6b7280;">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
@@ -309,10 +376,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 12px; margin: 0;">
-        You're receiving this email because you're a Pro member of Balkan Estate.
+        You're receiving this email because you're a Pro member of BalkanEstate<sup>AI</sup>.
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${new Date().getFullYear()} Balkan Estate. All rights reserved.
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.
       </p>
     </div>
   </div>
@@ -332,6 +399,12 @@ class EmailService {
    * Send weekly statistics email to agency owners
    */
   async sendAgencyWeeklyStats(data: AgencyWeeklyStatsData): Promise<void> {
+    // Sanitize user inputs
+    const safeAgencyName = escapeHtml(data.agencyName);
+    const safePeriod = escapeHtml(data.period);
+    const safeTopAgentName = data.topAgent ? escapeHtml(data.topAgent.name) : '';
+    const safeTopPropertyTitle = data.topProperty ? escapeHtml(data.topProperty.title) : '';
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -344,13 +417,13 @@ class EmailService {
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 32px 24px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">🏢 Agency Weekly Report</h1>
-      <p style="color: #ddd6fe; margin: 8px 0 0 0; font-size: 14px;">${data.period}</p>
+      <p style="color: #ddd6fe; margin: 8px 0 0 0; font-size: 14px;">${safePeriod}</p>
     </div>
 
     <!-- Greeting -->
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
-        Hi <strong>${data.agencyName}</strong>,
+        Hi <strong>${safeAgencyName}</strong>,
       </p>
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
         Here's how your agency performed this week:
@@ -403,7 +476,7 @@ class EmailService {
           <span style="font-size: 18px; margin-right: 8px;">⭐</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Agent</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${data.topAgent.name}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopAgentName}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
           <span style="font-size: 12px; color: #6b7280;">👁 ${data.topAgent.views} views</span>
           <span style="font-size: 12px; color: #6b7280;">💬 ${data.topAgent.inquiries} inquiries</span>
@@ -418,7 +491,7 @@ class EmailService {
           <span style="font-size: 18px; margin-right: 8px;">🏠</span>
           <span style="font-weight: 600; color: #166534;">Top Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${data.topProperty.title}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
         <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">👁 ${data.topProperty.views} views this week</div>
       </div>
       ` : ''}
@@ -435,10 +508,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 12px; margin: 0;">
-        You're receiving this email as an agency owner on Balkan Estate.
+        You're receiving this email as an agency owner on BalkanEstate<sup>AI</sup>.
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${new Date().getFullYear()} Balkan Estate. All rights reserved.
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.
       </p>
     </div>
   </div>
@@ -458,6 +531,17 @@ class EmailService {
    * Send enhanced new message notification with property details
    */
   async sendNewMessageNotification(params: NewMessageParams): Promise<void> {
+    // Sanitize all user inputs
+    const safeSenderName = escapeHtml(params.senderName);
+    const safeMessagePreview = escapeHtml(params.messagePreview);
+    const safePropertyTitle = escapeHtml(params.propertyTitle);
+    const safePropertyAddress = escapeHtml(params.propertyAddress);
+    const safePropertyCity = escapeHtml(params.propertyCity);
+    const safeSenderAvatarUrl = sanitizeUrlForHtml(params.senderAvatarUrl);
+    const safePropertyImageUrl = sanitizeUrlForHtml(params.propertyImageUrl);
+    const safeConversationUrl = sanitizeUrlForHtml(params.conversationUrl);
+    const senderInitial = params.senderName ? escapeHtml(params.senderName.charAt(0).toUpperCase()) : '?';
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -475,34 +559,34 @@ class EmailService {
     <div style="padding: 24px;">
       <!-- Sender Info -->
       <div style="display: flex; align-items: center; margin-bottom: 16px;">
-        ${params.senderAvatarUrl
-          ? `<img src="${params.senderAvatarUrl}" alt="${params.senderName}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px; object-fit: cover;">`
-          : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); margin-right: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 18px;">${params.senderName.charAt(0).toUpperCase()}</div>`
+        ${safeSenderAvatarUrl
+          ? `<img src="${safeSenderAvatarUrl}" alt="${safeSenderName}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px; object-fit: cover;">`
+          : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); margin-right: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 18px;">${senderInitial}</div>`
         }
         <div>
-          <div style="font-weight: 600; color: #374151; font-size: 16px;">${params.senderName}</div>
+          <div style="font-weight: 600; color: #374151; font-size: 16px;">${safeSenderName}</div>
           <div style="font-size: 12px; color: #6b7280;">sent you a message</div>
         </div>
       </div>
 
       <!-- Message Preview -->
       <div style="background: #f3f4f6; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.5;">"${params.messagePreview}"</p>
+        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.5;">"${safeMessagePreview}"</p>
       </div>
 
-      ${params.propertyTitle ? `
+      ${safePropertyTitle ? `
       <!-- Property Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
-        ${params.propertyImageUrl ? `<img src="${params.propertyImageUrl}" alt="${params.propertyTitle}" style="width: 100%; height: 120px; object-fit: cover;">` : ''}
+        ${safePropertyImageUrl ? `<img src="${safePropertyImageUrl}" alt="${safePropertyTitle}" style="width: 100%; height: 120px; object-fit: cover;">` : ''}
         <div style="padding: 12px;">
-          <div style="font-weight: 600; color: #374151; font-size: 14px;">${params.propertyTitle}</div>
-          <div style="font-size: 12px; color: #6b7280;">${params.propertyAddress}${params.propertyCity ? `, ${params.propertyCity}` : ''}</div>
+          <div style="font-weight: 600; color: #374151; font-size: 14px;">${safePropertyTitle}</div>
+          <div style="font-size: 12px; color: #6b7280;">${safePropertyAddress}${safePropertyCity ? `, ${safePropertyCity}` : ''}</div>
         </div>
       </div>
       ` : ''}
 
       <!-- CTA -->
-      <a href="${params.conversationUrl}"
+      <a href="${safeConversationUrl}"
          style="display: block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
         Reply to Message →
       </a>
@@ -511,7 +595,7 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
       </p>
     </div>
   </div>
@@ -528,32 +612,44 @@ class EmailService {
   }
 
   async sendWelcomeCoupon(email: string, agencyName: string, couponCode: string, expiryDate: Date): Promise<void> {
-    const html = '<html><body><h1>Welcome ' + agencyName + '!</h1><p>Use coupon <strong>' + couponCode + '</strong> for 1 week FREE featured listing.</p><p>Valid until: ' + expiryDate.toLocaleDateString() + '</p></body></html>';
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeCouponCode = escapeHtml(couponCode);
+    const expiryDateStr = expiryDate.toLocaleDateString();
+
+    const html = `<html><body><h1>Welcome ${safeAgencyName}!</h1><p>Use coupon <strong>${safeCouponCode}</strong> for 1 week FREE featured listing.</p><p>Valid until: ${expiryDateStr}</p></body></html>`;
     await this.sendEmail({
       to: email,
-      subject: agencyName + ' - Get 1 Week FREE Featured Listing!',
+      subject: `${agencyName} - Get 1 Week FREE Featured Listing!`,
       html,
-      text: 'Welcome! Use coupon ' + couponCode + ' for 1 week free. Valid until ' + expiryDate.toLocaleDateString(),
+      text: `Welcome! Use coupon ${couponCode} for 1 week free. Valid until ${expiryDateStr}`,
     });
   }
 
   async sendExpiryReminder(email: string, agencyName: string, expiryDate: Date, couponCode: string, discount: number): Promise<void> {
-    const html = '<html><body><h1>Your Featured Listing Expires Tomorrow!</h1><p>Hi ' + agencyName + ',</p><p>Your subscription expires on ' + expiryDate.toLocaleDateString() + '</p><p>Use coupon <strong>' + couponCode + '</strong> for ' + discount + '% off renewal!</p></body></html>';
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeCouponCode = escapeHtml(couponCode);
+    const expiryDateStr = expiryDate.toLocaleDateString();
+
+    const html = `<html><body><h1>Your Featured Listing Expires Tomorrow!</h1><p>Hi ${safeAgencyName},</p><p>Your subscription expires on ${expiryDateStr}</p><p>Use coupon <strong>${safeCouponCode}</strong> for ${discount}% off renewal!</p></body></html>`;
     await this.sendEmail({
       to: email,
-      subject: agencyName + ' - Expires Tomorrow! ' + discount + '% OFF',
+      subject: `${agencyName} - Expires Tomorrow! ${discount}% OFF`,
       html,
-      text: 'Your listing expires ' + expiryDate.toLocaleDateString() + '. Use ' + couponCode + ' for ' + discount + '% off!',
+      text: `Your listing expires ${expiryDateStr}. Use ${couponCode} for ${discount}% off!`,
     });
   }
 
-  async sendSubscriptionConfirmation(email: string, agencyName: string, details: any): Promise<void> {
-    const html = '<html><body><h1>Subscription Activated!</h1><p>Hi ' + agencyName + ',</p><p>Your featured listing is now active.</p><p>Plan: ' + details.interval + '</p><p>Price: €' + details.price + '</p><p>Renews: ' + details.endDate.toLocaleDateString() + '</p></body></html>';
+  async sendSubscriptionConfirmation(email: string, agencyName: string, details: { interval: string; price: number; endDate: Date }): Promise<void> {
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeInterval = escapeHtml(details.interval);
+    const renewsDate = details.endDate.toLocaleDateString();
+
+    const html = `<html><body><h1>Subscription Activated!</h1><p>Hi ${safeAgencyName},</p><p>Your featured listing is now active.</p><p>Plan: ${safeInterval}</p><p>Price: €${details.price}</p><p>Renews: ${renewsDate}</p></body></html>`;
     await this.sendEmail({
       to: email,
-      subject: agencyName + ' - Featured Listing Active!',
+      subject: `${agencyName} - Featured Listing Active!`,
       html,
-      text: 'Your subscription is active! Renews: ' + details.endDate.toLocaleDateString(),
+      text: `Your subscription is active! Renews: ${renewsDate}`,
     });
   }
 
@@ -577,6 +673,16 @@ class EmailService {
     };
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Sanitize all user inputs
+    const safeRecipientName = escapeHtml(params.recipientName);
+    const safeSearchName = escapeHtml(params.searchName);
+    const safeTitle = escapeHtml(params.property.title);
+    const safeAddress = escapeHtml(params.property.address);
+    const safeCity = escapeHtml(params.property.city);
+    const safePropertyId = encodeURIComponent(params.property.id);
+    const safeImageUrl = sanitizeUrlForHtml(params.property.imageUrl);
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -587,7 +693,7 @@ class EmailService {
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
-    New listing in ${params.property.city}! ${params.property.title} for €${params.property.price.toLocaleString()} - matches your "${params.searchName}" search.
+    New listing in ${safeCity}! ${safeTitle} for €${params.property.price.toLocaleString()} - matches your "${safeSearchName}" search.
   </div>
 
   <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
@@ -597,20 +703,20 @@ class EmailService {
         <span style="color: #ffffff; font-size: 12px; font-weight: 600;">✨ JUST LISTED</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">New Property Match!</h1>
-      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">From your search: "${params.searchName}"</p>
+      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">From your search: "${safeSearchName}"</p>
     </div>
 
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;">
-        Hey <strong>${params.recipientName}</strong>! We found something you might love:
+        Hey <strong>${safeRecipientName}</strong>! We found something you might love:
       </p>
 
       <!-- Property Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
-        ${params.property.imageUrl ? `<img src="${params.property.imageUrl}" alt="${params.property.title}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
+        ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
-          <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${params.property.title}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">📍 ${params.property.address}, ${params.property.city}</div>
+          <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safeTitle}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">📍 ${safeAddress}, ${safeCity}</div>
           <div style="font-size: 28px; font-weight: 700; color: #059669; margin-bottom: 14px;">€${params.property.price.toLocaleString()}</div>
           <div style="display: table; width: 100%; background: #f9fafb; border-radius: 8px; padding: 10px;">
             <div style="display: table-row;">
@@ -639,7 +745,7 @@ class EmailService {
       </div>
 
       <!-- CTA -->
-      <a href="${frontendUrl}/property/${params.property.id}"
+      <a href="${frontendUrl}/property/${safePropertyId}"
          style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
         View Property Details →
       </a>
@@ -653,10 +759,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        Alert from your saved search: "${params.searchName}"
+        Alert from your saved search: "${safeSearchName}"
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -667,7 +773,7 @@ class EmailService {
       to: params.recipientEmail,
       subject: `Just listed in ${params.property.city}: ${params.property.title} - €${params.property.price.toLocaleString()}`,
       html,
-      text: `Hey ${params.recipientName}!\n\nNew property match for "${params.searchName}"!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n€${params.property.price.toLocaleString()}\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nHot properties go fast! View details: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Hey ${params.recipientName}!\n\nNew property match for "${params.searchName}"!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n€${params.property.price.toLocaleString()}\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nHot properties go fast! View details: ${frontendUrl}/property/${safePropertyId}\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -695,18 +801,27 @@ class EmailService {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const frequencyLabel = params.frequency === 'daily' ? 'Daily' : params.frequency === 'weekly' ? 'Weekly' : '';
 
-    const propertyCards = params.properties.slice(0, 5).map(p => `
+    // Sanitize user inputs
+    const safeRecipientName = escapeHtml(params.recipientName);
+    const safeSearchName = escapeHtml(params.searchName);
+
+    const propertyCards = params.properties.slice(0, 5).map(p => {
+      const safeTitle = escapeHtml(p.title);
+      const safeCity = escapeHtml(p.city);
+      const safeImageUrl = sanitizeUrlForHtml(p.imageUrl);
+      return `
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 12px;">
         <div style="display: flex;">
-          ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title}" style="width: 100px; height: 80px; object-fit: cover;">` : '<div style="width: 100px; height: 80px; background: #e5e7eb;"></div>'}
+          ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100px; height: 80px; object-fit: cover;">` : '<div style="width: 100px; height: 80px; background: #e5e7eb;"></div>'}
           <div style="padding: 10px; flex: 1;">
-            <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 2px;">${p.title}</div>
-            <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">${p.city}</div>
+            <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 2px;">${safeTitle}</div>
+            <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">${safeCity}</div>
             <div style="font-size: 14px; font-weight: 700; color: #059669;">€${p.price.toLocaleString()}</div>
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     const html = `
 <!DOCTYPE html>
@@ -720,12 +835,12 @@ class EmailService {
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">🏠 ${params.properties.length} New Properties!</h1>
-      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">${frequencyLabel} update for "${params.searchName}"</p>
+      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">${frequencyLabel} update for "${safeSearchName}"</p>
     </div>
 
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
-        Hi <strong>${params.recipientName}</strong>, we found ${params.properties.length} new properties matching your search!
+        Hi <strong>${safeRecipientName}</strong>, we found ${params.properties.length} new properties matching your search!
       </p>
 
       <!-- Property Cards -->
@@ -743,10 +858,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        You're receiving this because you have alerts enabled for "${params.searchName}"
+        You're receiving this because you have alerts enabled for "${safeSearchName}"
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
       </p>
     </div>
   </div>
@@ -882,7 +997,7 @@ class EmailService {
         You saved this property and enabled price drop alerts
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -893,7 +1008,7 @@ class EmailService {
       to: params.recipientEmail,
       subject: `Price dropped ${params.property.percentageDrop}%! Save €${savings.toLocaleString()} on ${params.property.title}`,
       html,
-      text: `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${savings.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${savings.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
       category: 'alerts',
     });
   }
@@ -1059,6 +1174,16 @@ class EmailService {
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
+    // Sanitize all user inputs - critical for preventing XSS attacks
+    const safeAgentName = escapeHtml(params.agentName);
+    const safeBuyerName = escapeHtml(params.buyerName);
+    const safeBuyerEmail = escapeHtml(params.buyerEmail);
+    const safeBuyerPhone = escapeHtml(params.buyerPhone);
+    const safeMessage = escapeHtml(params.message);
+    const safePropertyTitle = escapeHtml(params.propertyTitle);
+    const safeLocation = escapeHtml(params.location);
+    const safePropertyId = params.propertyId ? encodeURIComponent(params.propertyId) : '';
+
     const inquiryTypeLabels: Record<string, string> = {
       property: 'Property Inquiry',
       general: 'General Inquiry',
@@ -1081,57 +1206,57 @@ class EmailService {
 
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
-        Hi <strong>${params.agentName}</strong>, you've received a new inquiry!
+        Hi <strong>${safeAgentName}</strong>, you've received a new inquiry!
       </p>
 
       <!-- Buyer Info Card -->
       <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">👤 From:</div>
-        <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${params.buyerName}</div>
+        <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${safeBuyerName}</div>
         <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">
-          📧 <a href="mailto:${params.buyerEmail}" style="color: #7c3aed;">${params.buyerEmail}</a>
+          📧 <a href="mailto:${safeBuyerEmail}" style="color: #7c3aed;">${safeBuyerEmail}</a>
         </div>
-        ${params.buyerPhone ? `<div style="font-size: 14px; color: #6b7280; margin-top: 4px;">📱 ${params.buyerPhone}</div>` : ''}
+        ${safeBuyerPhone ? `<div style="font-size: 14px; color: #6b7280; margin-top: 4px;">📱 ${safeBuyerPhone}</div>` : ''}
       </div>
 
-      ${params.propertyTitle ? `
+      ${safePropertyTitle ? `
       <!-- Property Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">🏠 Property:</div>
-        <div style="font-size: 14px; color: #1f2937;">${params.propertyTitle}</div>
-        ${params.location ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">📍 ${params.location}</div>` : ''}
-        ${params.propertyId ? `<a href="${frontendUrl}/property/${params.propertyId}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: #7c3aed;">View Property →</a>` : ''}
+        <div style="font-size: 14px; color: #1f2937;">${safePropertyTitle}</div>
+        ${safeLocation ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">📍 ${safeLocation}</div>` : ''}
+        ${safePropertyId ? `<a href="${frontendUrl}/property/${safePropertyId}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: #7c3aed;">View Property →</a>` : ''}
       </div>
       ` : ''}
 
-      ${params.location && !params.propertyTitle ? `
+      ${safeLocation && !safePropertyTitle ? `
       <!-- Area Search Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">📍 Area of Interest:</div>
-        <div style="font-size: 14px; color: #1f2937;">${params.location}</div>
+        <div style="font-size: 14px; color: #1f2937;">${safeLocation}</div>
       </div>
       ` : ''}
 
       <!-- Message Card -->
       <div style="background: #faf5ff; border-left: 4px solid #7c3aed; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">💬 Message:</div>
-        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.6; white-space: pre-wrap;">${params.message}</p>
+        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.6; white-space: pre-wrap;">${safeMessage}</p>
       </div>
 
       <!-- Reply CTA -->
-      <a href="mailto:${params.buyerEmail}?subject=Re: ${params.propertyTitle ? `Inquiry about ${params.propertyTitle}` : 'Your Balkan Estate Inquiry'}"
+      <a href="mailto:${safeBuyerEmail}?subject=Re: ${safePropertyTitle ? `Inquiry about ${safePropertyTitle}` : 'Your BalkanEstateᴬᴵ Inquiry'}"
          style="display: block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
-        Reply to ${params.buyerName} →
+        Reply to ${safeBuyerName} →
       </a>
     </div>
 
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        This inquiry was sent through Balkan Estate
+        This inquiry was sent through BalkanEstate<sup>AI</sup>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
       </p>
     </div>
   </div>
@@ -1155,6 +1280,10 @@ class EmailService {
     userName: string;
     resetUrl: string;
   }): Promise<void> {
+    // Sanitize user inputs
+    const safeUserName = escapeHtml(params.userName);
+    const safeResetUrl = sanitizeUrlForHtml(params.resetUrl);
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -1180,7 +1309,7 @@ class EmailService {
 
     <div style="padding: 32px 24px;">
       <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
-        Hey ${params.userName},
+        Hey ${safeUserName},
       </p>
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
         We received a request to reset your password. No worries—it happens to the best of us! Click the button below to create a new password:
@@ -1188,7 +1317,7 @@ class EmailService {
 
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${params.resetUrl}"
+        <a href="${safeResetUrl}"
            style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
           Reset My Password
         </a>
@@ -1214,7 +1343,7 @@ class EmailService {
         Button not working? Copy and paste this link:
       </p>
       <div style="word-break: break-all; color: #0252CD; font-size: 12px; background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px dashed #d1d5db;">
-        ${params.resetUrl}
+        ${safeResetUrl}
       </div>
 
       <!-- Tips -->
@@ -1234,7 +1363,7 @@ class EmailService {
         Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Your security is our priority
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Your security is our priority
       </p>
     </div>
   </div>
@@ -1243,9 +1372,9 @@ class EmailService {
 
     await this.sendEmail({
       to: params.email,
-      subject: 'Reset your Balkan Estate password',
+      subject: 'Reset your BalkanEstateᴬᴵ password',
       html,
-      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
       category: 'noreply',
     });
   }
@@ -1258,6 +1387,10 @@ class EmailService {
     userName: string;
     verificationUrl: string;
   }): Promise<void> {
+    // Sanitize user inputs
+    const safeUserName = escapeHtml(params.userName);
+    const safeVerificationUrl = sanitizeUrlForHtml(params.verificationUrl);
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -1283,22 +1416,22 @@ class EmailService {
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; line-height: 60px; font-size: 32px;">🏠</span>
       </div>
-      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to Balkan Estate!</h1>
+      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BalkanEstate<sup>AI</sup>!</h1>
       <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 15px;">Your journey to the perfect property starts here</p>
     </div>
 
     <div style="padding: 32px 24px;">
       <!-- Personalized greeting -->
       <p style="color: #1f2937; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">
-        Hey ${params.userName}! 👋
+        Hey ${safeUserName}! 👋
       </p>
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-        Thanks for joining Balkan Estate! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
+        Thanks for joining BalkanEstate<sup>AI</sup>! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
       </p>
 
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${params.verificationUrl}"
+        <a href="${safeVerificationUrl}"
            class="button"
            style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4); transition: transform 0.2s;">
           ✓ Verify My Email
@@ -1353,7 +1486,7 @@ class EmailService {
       </div>
 
       <p style="color: #9ca3af; font-size: 12px; margin: 0; text-align: center;">
-        Didn't sign up for Balkan Estate? No worries—just ignore this email.
+        Didn't sign up for BalkanEstate<sup>AI</sup>? No worries—just ignore this email.
       </p>
     </div>
 
@@ -1363,7 +1496,7 @@ class EmailService {
         Questions? We're here to help at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -1374,7 +1507,7 @@ class EmailService {
       to: params.email,
       subject: 'Verify your email to start exploring properties 🏠',
       html,
-      text: `Hey ${params.userName}!\n\nWelcome to Balkan Estate! We're excited to help you discover amazing properties across the Balkans.\n\nVerify your email to get started:\n${params.verificationUrl}\n\nOnce verified, you can:\n- Search thousands of properties\n- Save your favorite listings\n- Get alerts for new matches\n- Message agents directly\n\nThis link expires in 24 hours.\n\nQuestions? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Hey ${params.userName}!\n\nWelcome to BalkanEstateᴬᴵ! We're excited to help you discover amazing properties across the Balkans.\n\nVerify your email to get started:\n${params.verificationUrl}\n\nOnce verified, you can:\n- Search thousands of properties\n- Save your favorite listings\n- Get alerts for new matches\n- Message agents directly\n\nThis link expires in 24 hours.\n\nQuestions? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`,
       category: 'noreply',
     });
   }
@@ -1393,120 +1526,274 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--[if mso]>
+  <style type="text/css">
+    table { border-collapse: collapse; }
+    .button { padding: 16px 48px !important; }
+  </style>
+  <![endif]-->
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
-    You're all set! Start exploring thousands of properties across the Balkans.
+    Welcome to BalkanEstateᴬᴵ! Your gateway to properties across 8 Balkan countries. Search, save, compare, and connect with agents.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <!-- Celebration Header -->
-    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 48px 24px; text-align: center;">
-      <div style="margin-bottom: 16px;">
-        <span style="font-size: 48px;">🎉</span>
+  <div style="max-width: 640px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Professional Header -->
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #1e40af 50%, #0369a1 100%); padding: 48px 32px; text-align: center;">
+      <div style="margin-bottom: 20px;">
+        <div style="display: inline-block; background: rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 20px;">
+          <span style="font-size: 32px; vertical-align: middle;">🏠</span>
+          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;">BalkanEstate<sup>AI</sup></span>
+        </div>
       </div>
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">You're In, ${params.userName}!</h1>
-      <p style="color: #bfdbfe; margin: 12px 0 0 0; font-size: 16px;">Your account is verified and ready to go</p>
+      <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome, ${params.userName}!</h1>
+      <p style="color: #bfdbfe; margin: 12px 0 0 0; font-size: 16px;">Your account is verified and ready to explore</p>
     </div>
 
-    <div style="padding: 32px 24px;">
-      <!-- Personal welcome -->
-      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-        Welcome aboard! You now have full access to Balkan Estate—the smartest way to find properties across Croatia, Slovenia, Montenegro, Serbia, Albania, Kosovo, North Macedonia, and Bosnia.
+    <!-- Main Content -->
+    <div style="padding: 40px 32px;">
+
+      <!-- Introduction -->
+      <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
+        Thank you for joining <strong>BalkanEstate<sup>AI</sup></strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
       </p>
 
-      <!-- Quick Start Guide -->
-      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin: 24px 0;">
-        <p style="color: #92400e; font-weight: 700; font-size: 15px; margin: 0 0 16px 0;">🚀 Quick Start Guide</p>
+      <!-- Countries Coverage -->
+      <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        <p style="color: #1e40af; font-weight: 600; font-size: 14px; margin: 0 0 12px 0;">🌍 Properties across 8 Balkan countries</p>
+        <p style="color: #374151; font-size: 13px; margin: 0; line-height: 1.6;">
+          Croatia · Slovenia · Serbia · Montenegro · Bosnia · Albania · Kosovo · North Macedonia
+        </p>
+      </div>
 
-        <div style="margin-bottom: 16px;">
-          <div style="display: table; width: 100%;">
-            <div style="display: table-cell; width: 32px; vertical-align: top;">
-              <div style="width: 24px; height: 24px; background: #0252CD; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">1</div>
-            </div>
-            <div style="display: table-cell; vertical-align: top;">
-              <p style="color: #374151; font-size: 14px; margin: 0;"><strong>Set up your search</strong> — Tell us what you're looking for (location, budget, property type)</p>
-            </div>
+      <!-- For Buyers Section -->
+      <div style="margin: 32px 0;">
+        <div style="display: table; width: 100%; margin-bottom: 16px;">
+          <div style="display: table-cell; vertical-align: middle;">
+            <h2 style="color: #1f2937; font-size: 18px; margin: 0; font-weight: 700;">🏡 For Property Seekers</h2>
           </div>
         </div>
 
-        <div style="margin-bottom: 16px;">
-          <div style="display: table; width: 100%;">
-            <div style="display: table-cell; width: 32px; vertical-align: top;">
-              <div style="width: 24px; height: 24px; background: #0252CD; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">2</div>
-            </div>
-            <div style="display: table-cell; vertical-align: top;">
-              <p style="color: #374151; font-size: 14px; margin: 0;"><strong>Save your favorites</strong> — Click the heart icon on properties you love</p>
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <!-- Feature 1 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #eff6ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🔍</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Advanced Property Search</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Filter by location, price, property type, bedrooms, amenities, and more</div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div>
-          <div style="display: table; width: 100%;">
-            <div style="display: table-cell; width: 32px; vertical-align: top;">
-              <div style="width: 24px; height: 24px; background: #0252CD; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">3</div>
+          <!-- Feature 2 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #fef2f2; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">❤️</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Save & Compare Properties</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Bookmark favorites and compare up to 5 properties side-by-side</div>
+              </div>
             </div>
-            <div style="display: table-cell; vertical-align: top;">
-              <p style="color: #374151; font-size: 14px; margin: 0;"><strong>Enable alerts</strong> — Get notified instantly when matching properties are listed</p>
+          </div>
+          <!-- Feature 3 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🔔</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Smart Alerts & Notifications</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Get instant alerts for new listings and price drops on saved properties</div>
+              </div>
+            </div>
+          </div>
+          <!-- Feature 4 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">💬</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Direct Messaging</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Chat directly with agents and sellers — no phone calls needed</div>
+              </div>
+            </div>
+          </div>
+          <!-- Feature 5 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #fef3c7; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">📊</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Property Valuation Tool</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Get AI-powered estimates to understand fair market prices</div>
+              </div>
+            </div>
+          </div>
+          <!-- Feature 6 -->
+          <div style="padding: 16px 20px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #ecfdf5; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🏦</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Mortgage Calculator</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Calculate monthly payments and plan your budget with ease</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Features Grid -->
-      <p style="color: #374151; font-weight: 600; font-size: 15px; margin: 0 0 16px 0;">What you can do now:</p>
-      <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
-        <div style="display: table-row;">
-          <div style="display: table-cell; width: 50%; background: #f0f9ff; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">🔍</div>
-            <div style="font-weight: 600; color: #0369a1; font-size: 14px;">Smart Search</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Filter by location, price, size & more</div>
-          </div>
-          <div style="display: table-cell; width: 50%; background: #fef2f2; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">❤️</div>
-            <div style="font-weight: 600; color: #dc2626; font-size: 14px;">Save & Compare</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Build your shortlist of top picks</div>
+      <!-- For Sellers Section -->
+      <div style="margin: 32px 0;">
+        <div style="display: table; width: 100%; margin-bottom: 16px;">
+          <div style="display: table-cell; vertical-align: middle;">
+            <h2 style="color: #1f2937; font-size: 18px; margin: 0; font-weight: 700;">📈 For Property Sellers & Agents</h2>
           </div>
         </div>
-        <div style="display: table-row;">
-          <div style="display: table-cell; width: 50%; background: #f0fdf4; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">🔔</div>
-            <div style="font-weight: 600; color: #16a34a; font-size: 14px;">Instant Alerts</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Never miss a new listing</div>
+
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <!-- Seller Feature 1 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">✨</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">List Properties for Free</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Create beautiful listings with photos, virtual tours, and detailed descriptions</div>
+              </div>
+            </div>
           </div>
-          <div style="display: table-cell; width: 50%; background: #faf5ff; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">💬</div>
-            <div style="font-weight: 600; color: #7c3aed; font-size: 14px;">Direct Messaging</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Chat with agents in real-time</div>
+          <!-- Seller Feature 2 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #fef3c7; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🚀</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Promote Your Listings</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Boost visibility with featured placements and premium badges</div>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Feature 3 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #eff6ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">📉</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Performance Analytics</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Track views, inquiries, saves, and engagement metrics in real-time</div>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Feature 4 -->
+          <div style="padding: 16px 20px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🏢</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Agency Dashboard</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Manage team members, track performance, and grow your agency</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- CTA Button -->
-      <div style="text-align: center; margin: 32px 0;">
+      <!-- Quick Links -->
+      <div style="margin: 32px 0;">
+        <p style="color: #374151; font-weight: 600; font-size: 15px; margin: 0 0 16px 0;">Quick Links to Get Started:</p>
+        <div style="display: table; width: 100%;">
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/search" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">🔍 Search Properties</span>
+              </a>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/agents" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">👥 Find Agents</span>
+              </a>
+            </div>
+          </div>
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/valuation" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">📊 Property Valuation</span>
+              </a>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/mortgage-calculator" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">🏦 Mortgage Calculator</span>
+              </a>
+            </div>
+          </div>
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/explore-cities" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">🏙️ Explore Cities</span>
+              </a>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/account/profile" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">⚙️ Account Settings</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary CTA -->
+      <div style="text-align: center; margin: 40px 0 32px 0;">
         <a href="${frontendUrl}/search"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
-          Start Searching Now →
+           class="button"
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 18px 56px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
+          Start Exploring Properties →
         </a>
       </div>
 
-      <!-- Pro tip -->
-      <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin: 24px 0;">
-        <p style="color: #374151; font-size: 13px; margin: 0;">
-          <strong>💡 Pro tip:</strong> Complete your profile to get personalized property recommendations based on your preferences!
+      <!-- Pro Tip -->
+      <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 10px; padding: 16px 20px; margin: 24px 0;">
+        <p style="color: #166534; font-size: 14px; margin: 0; line-height: 1.5;">
+          <strong>💡 Pro Tip:</strong> Complete your profile and save your first search to receive personalized property recommendations and instant alerts when new matches are listed!
         </p>
       </div>
+
     </div>
 
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
-        Need help? Just reply to this email or visit our <a href="${frontendUrl}/help" style="color: #0252CD; text-decoration: none;">Help Center</a>
+    <div style="background: #1f2937; padding: 32px; text-align: center;">
+      <div style="margin-bottom: 20px;">
+        <span style="color: #ffffff; font-size: 18px; font-weight: 600;">🏠 BalkanEstate<sup>AI</sup></span>
+      </div>
+      <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">
+        The premier real estate platform for the Balkans
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
-      </p>
+      <div style="margin: 20px 0;">
+        <a href="${frontendUrl}/how-it-works" style="color: #60a5fa; text-decoration: none; font-size: 13px; margin: 0 12px;">How It Works</a>
+        <span style="color: #4b5563;">·</span>
+        <a href="${frontendUrl}/agencies" style="color: #60a5fa; text-decoration: none; font-size: 13px; margin: 0 12px;">Browse Agencies</a>
+        <span style="color: #4b5563;">·</span>
+        <a href="mailto:support@balkanestateai.com" style="color: #60a5fa; text-decoration: none; font-size: 13px; margin: 0 12px;">Contact Support</a>
+      </div>
+      <div style="border-top: 1px solid #374151; padding-top: 20px; margin-top: 20px;">
+        <p style="color: #6b7280; font-size: 11px; margin: 0;">
+          © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.<br>
+          You're receiving this email because you created an account at balkanestateai.com
+        </p>
+      </div>
     </div>
   </div>
 </body>
@@ -1514,9 +1801,44 @@ class EmailService {
 
     await this.sendEmail({
       to: params.email,
-      subject: "You're in! Start exploring properties now 🏠",
+      subject: "Welcome to BalkanEstateᴬᴵ — Your Account is Ready!",
       html,
-      text: `Welcome aboard, ${params.userName}!\n\nYou now have full access to Balkan Estate—the smartest way to find properties across the Balkans.\n\nQuick Start Guide:\n1. Set up your search — Tell us what you're looking for\n2. Save your favorites — Click the heart icon on properties you love\n3. Enable alerts — Get notified instantly when matching properties are listed\n\nStart exploring: ${frontendUrl}/search\n\nPro tip: Complete your profile to get personalized property recommendations!\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Welcome to BalkanEstateᴬᴵ, ${params.userName}!
+
+Your account is verified and ready to explore.
+
+Thank you for joining BalkanEstateᴬᴵ — the premier real estate platform connecting buyers, sellers, and agents across the Balkans.
+
+🌍 Properties across 8 Balkan countries:
+Croatia, Slovenia, Serbia, Montenegro, Bosnia, Albania, Kosovo, North Macedonia
+
+FOR PROPERTY SEEKERS:
+• Advanced Property Search — Filter by location, price, property type, bedrooms, amenities
+• Save & Compare Properties — Bookmark favorites and compare up to 5 properties side-by-side
+• Smart Alerts — Get instant alerts for new listings and price drops
+• Direct Messaging — Chat directly with agents and sellers
+• Property Valuation Tool — Get AI-powered estimates for fair market prices
+• Mortgage Calculator — Calculate monthly payments and plan your budget
+
+FOR SELLERS & AGENTS:
+• List Properties for Free — Create beautiful listings with photos and descriptions
+• Promote Your Listings — Boost visibility with featured placements
+• Performance Analytics — Track views, inquiries, and engagement in real-time
+• Agency Dashboard — Manage team members and grow your agency
+
+QUICK LINKS:
+• Search Properties: ${frontendUrl}/search
+• Find Agents: ${frontendUrl}/agents
+• Property Valuation: ${frontendUrl}/valuation
+• Mortgage Calculator: ${frontendUrl}/mortgage-calculator
+• Explore Cities: ${frontendUrl}/explore-cities
+• Account Settings: ${frontendUrl}/account/profile
+
+Pro Tip: Complete your profile and save your first search to receive personalized property recommendations!
+
+Questions? Contact us at support@balkanestateai.com
+
+© ${new Date().getFullYear()} BalkanEstateᴬᴵ. All rights reserved.`,
       category: 'support',
     });
   }
