@@ -7,6 +7,7 @@ import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -19,6 +20,18 @@ const CityRecommendations: React.FC = () => {
   // Handle image load error - fallback to gradient
   const handleImageError = (cityName: string) => {
     setFailedImages(prev => new Set(prev).add(cityName));
+  };
+
+  // Find city coordinates from BALKAN_LOCATIONS
+  const getCityCoordinates = (cityName: string, countryName: string): { lat: number; lng: number } | null => {
+    const country = BALKAN_LOCATIONS.find(c => c.name === countryName);
+    if (country) {
+      const city = country.cities.find(c => c.name.toLowerCase() === cityName.toLowerCase());
+      if (city) {
+        return { lat: city.lat, lng: city.lng };
+      }
+    }
+    return null;
   };
 
   useEffect(() => {
@@ -44,6 +57,9 @@ const CityRecommendations: React.FC = () => {
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
   const handleCityClick = (city: CityMarketData) => {
+    // Get city coordinates for map zoom
+    const coords = getCityCoordinates(city.city, city.country);
+
     // Set filters to search for properties in this city
     updateSearchPageState({
       filters: {
@@ -118,6 +134,12 @@ const CityRecommendations: React.FC = () => {
         maxDistanceToHospital: null,
         amenities: [],
       },
+      // Set map focus to city coordinates
+      focusMapOnProperty: coords ? {
+        lat: coords.lat,
+        lng: coords.lng,
+        address: `${city.city}, ${city.country}`,
+      } : null,
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
