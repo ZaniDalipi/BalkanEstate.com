@@ -76,10 +76,10 @@ export type EmailCategory = 'noreply' | 'alerts' | 'support' | 'inquiries';
 
 // Default "from" addresses for each category
 const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
-  noreply: 'Balkan Estate <noreply@balkanestateai.com>',
-  alerts: 'Balkan Estate Alerts <alerts@balkanestateai.com>',
-  support: 'Balkan Estate Support <support@balkanestateai.com>',
-  inquiries: 'Balkan Estate <inquiries@balkanestateai.com>',
+  noreply: 'BalkanEstateᴬᴵ <noreply@balkanestateai.com>',
+  alerts: 'BalkanEstateᴬᴵ Alerts <alerts@balkanestateai.com>',
+  support: 'BalkanEstateᴬᴵ Support <support@balkanestateai.com>',
+  inquiries: 'BalkanEstateᴬᴵ <inquiries@balkanestateai.com>',
 };
 
 class EmailService {
@@ -309,10 +309,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 12px; margin: 0;">
-        You're receiving this email because you're a Pro member of Balkan Estate.
+        You're receiving this email because you're a Pro member of BalkanEstate<sup>AI</sup>.
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${new Date().getFullYear()} Balkan Estate. All rights reserved.
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.
       </p>
     </div>
   </div>
@@ -435,10 +435,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 12px; margin: 0;">
-        You're receiving this email as an agency owner on Balkan Estate.
+        You're receiving this email as an agency owner on BalkanEstate<sup>AI</sup>.
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${new Date().getFullYear()} Balkan Estate. All rights reserved.
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.
       </p>
     </div>
   </div>
@@ -511,7 +511,7 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
       </p>
     </div>
   </div>
@@ -656,7 +656,7 @@ class EmailService {
         Alert from your saved search: "${params.searchName}"
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -667,7 +667,7 @@ class EmailService {
       to: params.recipientEmail,
       subject: `Just listed in ${params.property.city}: ${params.property.title} - €${params.property.price.toLocaleString()}`,
       html,
-      text: `Hey ${params.recipientName}!\n\nNew property match for "${params.searchName}"!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n€${params.property.price.toLocaleString()}\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nHot properties go fast! View details: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Hey ${params.recipientName}!\n\nNew property match for "${params.searchName}"!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n€${params.property.price.toLocaleString()}\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nHot properties go fast! View details: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
       category: 'alerts',
     });
   }
@@ -746,7 +746,7 @@ class EmailService {
         You're receiving this because you have alerts enabled for "${params.searchName}"
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
       </p>
     </div>
   </div>
@@ -882,7 +882,7 @@ class EmailService {
         You saved this property and enabled price drop alerts
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -893,7 +893,7 @@ class EmailService {
       to: params.recipientEmail,
       subject: `Price dropped ${params.property.percentageDrop}%! Save €${savings.toLocaleString()} on ${params.property.title}`,
       html,
-      text: `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${savings.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Great news, ${params.recipientName}!\n\nA property you saved just dropped in price!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n\nWas: €${params.property.previousPrice.toLocaleString()}\nNow: €${params.property.newPrice.toLocaleString()}\nYou save: €${savings.toLocaleString()} (${params.property.percentageDrop}% off)\n\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nPrice drops attract buyers fast. Don't miss this opportunity!\n\nView property: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
       category: 'alerts',
     });
   }
@@ -1119,7 +1119,7 @@ class EmailService {
       </div>
 
       <!-- Reply CTA -->
-      <a href="mailto:${params.buyerEmail}?subject=Re: ${params.propertyTitle ? `Inquiry about ${params.propertyTitle}` : 'Your Balkan Estate Inquiry'}"
+      <a href="mailto:${params.buyerEmail}?subject=Re: ${params.propertyTitle ? `Inquiry about ${params.propertyTitle}` : 'Your BalkanEstateᴬᴵ Inquiry'}"
          style="display: block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
         Reply to ${params.buyerName} →
       </a>
@@ -1128,10 +1128,10 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        This inquiry was sent through Balkan Estate
+        This inquiry was sent through BalkanEstate<sup>AI</sup>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
       </p>
     </div>
   </div>
@@ -1234,7 +1234,7 @@ class EmailService {
         Need help? Contact us at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Your security is our priority
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Your security is our priority
       </p>
     </div>
   </div>
@@ -1243,9 +1243,9 @@ class EmailService {
 
     await this.sendEmail({
       to: params.email,
-      subject: 'Reset your Balkan Estate password',
+      subject: 'Reset your BalkanEstateᴬᴵ password',
       html,
-      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Hey ${params.userName},\n\nWe received a request to reset your password. No worries—it happens to the best of us!\n\nReset your password here:\n${params.resetUrl}\n\nThis link expires in 1 hour.\n\nPassword tips:\n- Use at least 8 characters\n- Mix uppercase, lowercase, and numbers\n- Avoid using common words or personal info\n\nIf you didn't request this reset, you can safely ignore this email.\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
       category: 'noreply',
     });
   }
@@ -1283,7 +1283,7 @@ class EmailService {
       <div style="margin-bottom: 16px;">
         <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; line-height: 60px; font-size: 32px;">🏠</span>
       </div>
-      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to Balkan Estate!</h1>
+      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Welcome to BalkanEstate<sup>AI</sup>!</h1>
       <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 15px;">Your journey to the perfect property starts here</p>
     </div>
 
@@ -1293,7 +1293,7 @@ class EmailService {
         Hey ${params.userName}! 👋
       </p>
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-        Thanks for joining Balkan Estate! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
+        Thanks for joining BalkanEstate<sup>AI</sup>! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
       </p>
 
       <!-- CTA Button -->
@@ -1353,7 +1353,7 @@ class EmailService {
       </div>
 
       <p style="color: #9ca3af; font-size: 12px; margin: 0; text-align: center;">
-        Didn't sign up for Balkan Estate? No worries—just ignore this email.
+        Didn't sign up for BalkanEstate<sup>AI</sup>? No worries—just ignore this email.
       </p>
     </div>
 
@@ -1363,7 +1363,7 @@ class EmailService {
         Questions? We're here to help at <a href="mailto:support@balkanestateai.com" style="color: #0252CD; text-decoration: none;">support@balkanestateai.com</a>
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
+        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
       </p>
     </div>
   </div>
@@ -1374,7 +1374,7 @@ class EmailService {
       to: params.email,
       subject: 'Verify your email to start exploring properties 🏠',
       html,
-      text: `Hey ${params.userName}!\n\nWelcome to Balkan Estate! We're excited to help you discover amazing properties across the Balkans.\n\nVerify your email to get started:\n${params.verificationUrl}\n\nOnce verified, you can:\n- Search thousands of properties\n- Save your favorite listings\n- Get alerts for new matches\n- Message agents directly\n\nThis link expires in 24 hours.\n\nQuestions? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Hey ${params.userName}!\n\nWelcome to BalkanEstateᴬᴵ! We're excited to help you discover amazing properties across the Balkans.\n\nVerify your email to get started:\n${params.verificationUrl}\n\nOnce verified, you can:\n- Search thousands of properties\n- Save your favorite listings\n- Get alerts for new matches\n- Message agents directly\n\nThis link expires in 24 hours.\n\nQuestions? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`,
       category: 'noreply',
     });
   }
@@ -1403,7 +1403,7 @@ class EmailService {
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
-    Welcome to Balkan Estate! Your gateway to properties across 8 Balkan countries. Search, save, compare, and connect with agents.
+    Welcome to BalkanEstateᴬᴵ! Your gateway to properties across 8 Balkan countries. Search, save, compare, and connect with agents.
   </div>
 
   <div style="max-width: 640px; margin: 0 auto; background-color: #ffffff;">
@@ -1412,7 +1412,7 @@ class EmailService {
       <div style="margin-bottom: 20px;">
         <div style="display: inline-block; background: rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 20px;">
           <span style="font-size: 32px; vertical-align: middle;">🏠</span>
-          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;">Balkan Estate</span>
+          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;">BalkanEstate<sup>AI</sup></span>
         </div>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome, ${params.userName}!</h1>
@@ -1424,7 +1424,7 @@ class EmailService {
 
       <!-- Introduction -->
       <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
-        Thank you for joining <strong>Balkan Estate</strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
+        Thank you for joining <strong>BalkanEstate<sup>AI</sup></strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
       </p>
 
       <!-- Countries Coverage -->
@@ -1643,7 +1643,7 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #1f2937; padding: 32px; text-align: center;">
       <div style="margin-bottom: 20px;">
-        <span style="color: #ffffff; font-size: 18px; font-weight: 600;">🏠 Balkan Estate</span>
+        <span style="color: #ffffff; font-size: 18px; font-weight: 600;">🏠 BalkanEstate<sup>AI</sup></span>
       </div>
       <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">
         The premier real estate platform for the Balkans
@@ -1657,7 +1657,7 @@ class EmailService {
       </div>
       <div style="border-top: 1px solid #374151; padding-top: 20px; margin-top: 20px;">
         <p style="color: #6b7280; font-size: 11px; margin: 0;">
-          © ${new Date().getFullYear()} Balkan Estate. All rights reserved.<br>
+          © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.<br>
           You're receiving this email because you created an account at balkanestateai.com
         </p>
       </div>
@@ -1668,13 +1668,13 @@ class EmailService {
 
     await this.sendEmail({
       to: params.email,
-      subject: "Welcome to Balkan Estate — Your Account is Ready!",
+      subject: "Welcome to BalkanEstateᴬᴵ — Your Account is Ready!",
       html,
-      text: `Welcome to Balkan Estate, ${params.userName}!
+      text: `Welcome to BalkanEstateᴬᴵ, ${params.userName}!
 
 Your account is verified and ready to explore.
 
-Thank you for joining Balkan Estate — the premier real estate platform connecting buyers, sellers, and agents across the Balkans.
+Thank you for joining BalkanEstateᴬᴵ — the premier real estate platform connecting buyers, sellers, and agents across the Balkans.
 
 🌍 Properties across 8 Balkan countries:
 Croatia, Slovenia, Serbia, Montenegro, Bosnia, Albania, Kosovo, North Macedonia
@@ -1705,7 +1705,7 @@ Pro Tip: Complete your profile and save your first search to receive personalize
 
 Questions? Contact us at support@balkanestateai.com
 
-© ${new Date().getFullYear()} Balkan Estate. All rights reserved.`,
+© ${new Date().getFullYear()} BalkanEstateᴬᴵ. All rights reserved.`,
       category: 'support',
     });
   }
