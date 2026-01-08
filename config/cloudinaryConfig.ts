@@ -1,15 +1,18 @@
 /**
  * Cloudinary configuration for frontend assets
  *
- * City images should be uploaded to Cloudinary in the folder structure:
- * balkan-estate/city-images/{country}/{city-name}/cover
+ * City images should have Public IDs in this format:
+ * city-{country}-{city}
  *
  * For example:
- * - Tirana, Albania → balkan-estate/city-images/albania/tirana/cover.jpg
- * - Prishtina, Kosovo → balkan-estate/city-images/kosovo/prishtina/cover.jpg
- * - Skopje, North Macedonia → balkan-estate/city-images/north-macedonia/skopje/cover.jpg
+ * - Durres, Albania → Public ID: "city-albania-durres"
+ * - Prishtina, Kosovo → Public ID: "city-kosovo-prishtina"
+ * - Skopje, North Macedonia → Public ID: "city-north-macedonia-skopje"
  *
- * IMPORTANT: Name each image file "cover" (any extension: jpg, png, webp)
+ * To set this in Cloudinary:
+ * 1. Click on the image
+ * 2. Click "..." menu → Rename
+ * 3. Set Public ID to: city-{country}-{city}
  */
 
 // Cloudinary cloud name
@@ -17,9 +20,6 @@ export const CLOUDINARY_CLOUD_NAME = 'dh8tbq8wy';
 
 // Base URL for Cloudinary images
 export const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
-// Folder path for city images in Cloudinary
-export const CITY_IMAGES_FOLDER = 'balkan-estate/city-images';
 
 /**
  * Normalizes a name for use in Cloudinary URLs
@@ -66,7 +66,7 @@ export const getCityImageUrl = (
   } = options;
 
   const normalizedCity = normalizeName(cityName);
-  const normalizedCountry = country ? normalizeName(country) : null;
+  const normalizedCountry = country ? normalizeName(country) : 'unknown';
 
   // Build transformation string
   const transformations = [
@@ -78,13 +78,10 @@ export const getCityImageUrl = (
     `f_${format}`,
   ].join(',');
 
-  // Build path: folder/country/city/cover or folder/city/cover
-  // The image file should be named "cover" inside each city folder
-  const path = normalizedCountry
-    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}/cover`
-    : `${CITY_IMAGES_FOLDER}/${normalizedCity}/cover`;
+  // Public ID format: city-{country}-{city}
+  const publicId = `city-${normalizedCountry}-${normalizedCity}`;
 
-  return `${CLOUDINARY_BASE_URL}/${transformations}/${path}`;
+  return `${CLOUDINARY_BASE_URL}/${transformations}/${publicId}`;
 };
 
 /**
@@ -95,13 +92,11 @@ export const getCityImageUrl = (
  */
 export const getCityImagePlaceholder = (cityName: string, country?: string): string => {
   const normalizedCity = normalizeName(cityName);
-  const normalizedCountry = country ? normalizeName(country) : null;
+  const normalizedCountry = country ? normalizeName(country) : 'unknown';
 
-  const path = normalizedCountry
-    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}/cover`
-    : `${CITY_IMAGES_FOLDER}/${normalizedCity}/cover`;
+  const publicId = `city-${normalizedCountry}-${normalizedCity}`;
 
-  return `${CLOUDINARY_BASE_URL}/w_50,h_38,c_fill,g_auto,q_10,e_blur:1000,f_auto/${path}`;
+  return `${CLOUDINARY_BASE_URL}/w_50,h_38,c_fill,g_auto,q_10,e_blur:1000,f_auto/${publicId}`;
 };
 
 /**
