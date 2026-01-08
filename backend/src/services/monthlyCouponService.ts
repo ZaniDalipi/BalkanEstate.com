@@ -75,7 +75,7 @@ export async function refreshProUserCoupons(): Promise<{ refreshed: number; emai
         try {
           await sendMonthlyCouponEmail({
             email: user.email,
-            userName: user.firstName || user.email.split('@')[0],
+            userName: user.name || user.email.split('@')[0],
             planName: 'Pro',
             totalCoupons: monthlyAmount + rollover,
             newCoupons: monthlyAmount,
@@ -151,7 +151,7 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
         try {
           await sendMonthlyCouponEmail({
             email: owner.email,
-            userName: owner.firstName || owner.email.split('@')[0],
+            userName: owner.name || owner.email.split('@')[0],
             planName: 'Enterprise',
             totalCoupons: monthlyAmount,
             newCoupons: monthlyAmount,
@@ -179,7 +179,7 @@ export async function refreshAgencyCoupons(): Promise<{ refreshed: number; email
           try {
             await sendMonthlyCouponEmail({
               email: agent.email,
-              userName: agent.firstName || agent.email.split('@')[0],
+              userName: agent.name || agent.email.split('@')[0],
               planName: 'Enterprise (Agency Member)',
               totalCoupons: monthlyAmount,
               newCoupons: monthlyAmount,
