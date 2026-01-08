@@ -290,7 +290,7 @@ const CityRecommendations: React.FC = () => {
                 className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 text-left group"
               >
                 {/* City Image Header with Gradient Fade */}
-                <div className="relative h-36 overflow-hidden">
+                <div className="relative h-40 overflow-hidden">
                   {/* Background Image or Gradient Fallback */}
                   {hasImage ? (
                     <img
@@ -308,25 +308,37 @@ const CityRecommendations: React.FC = () => {
                   )}
 
                   {/* Gradient Overlay - Fades to white at bottom */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent" />
 
                   {/* Dark overlay for better text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-transparent" />
 
                   {/* City Name Overlay */}
-                  <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <MapPinIcon className="w-5 h-5 text-white drop-shadow-lg" />
-                        <h3 className="text-xl font-bold text-white drop-shadow-lg group-hover:text-primary transition-colors">
+                  <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                    <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <MapPinIcon className="w-5 h-5 text-white" />
+                        <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
                           {city.city}
                         </h3>
                       </div>
-                      <p className="text-sm text-white/90 drop-shadow-md">{city.country}</p>
+                      <p className="text-xs text-white/90 ml-7">{city.country}</p>
                     </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${getTrendColor(city.marketTrend)}`}>
+                    <div className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${getTrendColor(city.marketTrend)}`}>
                       {getTrendIcon(city.marketTrend)}
                       {getTrendLabel(city.marketTrend)}
+                    </div>
+                  </div>
+
+                  {/* Price Overlay at Bottom */}
+                  <div className="absolute bottom-2 left-3 right-3 flex items-end justify-between">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md">
+                      <p className="text-xs text-neutral-500">{t('cityCard.avgPricePerSqm')}</p>
+                      <p className="text-lg font-bold text-neutral-900">€{city.avgPricePerSqm.toLocaleString()}/m²</p>
+                    </div>
+                    <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md text-right">
+                      <p className="text-xs text-neutral-500">{t('cityCard.medianPrice')}</p>
+                      <p className="text-base font-semibold text-primary">{formatPrice(city.medianPrice, city.countryCode)}</p>
                     </div>
                   </div>
                 </div>
@@ -346,19 +358,7 @@ const CityRecommendations: React.FC = () => {
                   </div>
 
                   {/* Key Metrics */}
-                  <div className="space-y-3 mb-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">{t('cityCard.avgPricePerSqm')}</span>
-                      <span className="text-base font-bold text-neutral-900">
-                        €{city.avgPricePerSqm.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">{t('cityCard.medianPrice')}</span>
-                      <span className="text-base font-semibold text-neutral-900">
-                        {formatPrice(city.medianPrice, city.countryCode)}
-                      </span>
-                    </div>
+                  <div className="space-y-2.5 mb-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-neutral-600">{t('cityCard.yoyGrowth')}</span>
                       <span className={`text-base font-semibold ${
