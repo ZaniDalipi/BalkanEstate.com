@@ -1,6 +1,61 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
+// =============================================================================
+// Security Utilities
+// =============================================================================
+
+/**
+ * Escape HTML special characters to prevent XSS attacks
+ */
+function escapeHtml(unsafe: string | undefined | null): string {
+  if (unsafe == null) return '';
+  return String(unsafe)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Validate email address format
+ */
+function isValidEmail(email: string): boolean {
+  // RFC 5322 compliant email regex
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  return emailRegex.test(email) && email.length <= 254;
+}
+
+/**
+ * Validate and sanitize URL - only allow http/https protocols
+ */
+function sanitizeUrl(url: string | undefined | null): string {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    // Only allow http and https protocols
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return '';
+    }
+    return url;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Sanitize URL for use in HTML attributes (escape special chars and validate protocol)
+ */
+function sanitizeUrlForHtml(url: string | undefined | null): string {
+  const sanitized = sanitizeUrl(url);
+  return escapeHtml(sanitized);
+}
+
+// =============================================================================
+// Types and Interfaces
+// =============================================================================
+
 interface EmailConfig {
   to: string;
   subject: string;
@@ -133,6 +188,12 @@ class EmailService {
   }
 
   async sendEmail(config: EmailConfig): Promise<void> {
+    // Validate email address
+    if (!isValidEmail(config.to)) {
+      console.error(`❌ Invalid email address: ${config.to}`);
+      throw new Error('Invalid email address format');
+    }
+
     // Get the appropriate "from" address based on category
     const fromAddress = this.getFromAddress(config.category || 'noreply');
 
@@ -193,6 +254,12 @@ class EmailService {
    * Send weekly statistics email to Pro members
    */
   async sendWeeklyStats(data: WeeklyStatsData): Promise<void> {
+    // Sanitize user inputs
+    const safeUserName = escapeHtml(data.userName);
+    const safePeriod = escapeHtml(data.period);
+    const safeTopPropertyTitle = data.topPerformingProperty ? escapeHtml(data.topPerformingProperty.title) : '';
+    const safeTopPropertyAddress = data.topPerformingProperty ? escapeHtml(data.topPerformingProperty.address) : '';
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -205,13 +272,13 @@ class EmailService {
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 32px 24px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">📊 Your Weekly Report</h1>
-      <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${data.period}</p>
+      <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${safePeriod}</p>
     </div>
 
     <!-- Greeting -->
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
-        Hi <strong>${data.userName}</strong>,
+        Hi <strong>${safeUserName}</strong>,
       </p>
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
         Here's how your properties performed this week:
@@ -258,8 +325,8 @@ class EmailService {
           <span style="font-size: 18px; margin-right: 8px;">🏆</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${data.topPerformingProperty.title}</div>
-        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${data.topPerformingProperty.address}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
+        <div style="color: #6b7280; font-size: 12px; margin-top: 2px;">${safeTopPropertyAddress}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
           <span style="font-size: 12px; color: #6b7280;">👁 ${data.topPerformingProperty.views} views</span>
           <span style="font-size: 12px; color: #6b7280;">💬 ${data.topPerformingProperty.inquiries} inquiries</span>
@@ -332,6 +399,12 @@ class EmailService {
    * Send weekly statistics email to agency owners
    */
   async sendAgencyWeeklyStats(data: AgencyWeeklyStatsData): Promise<void> {
+    // Sanitize user inputs
+    const safeAgencyName = escapeHtml(data.agencyName);
+    const safePeriod = escapeHtml(data.period);
+    const safeTopAgentName = data.topAgent ? escapeHtml(data.topAgent.name) : '';
+    const safeTopPropertyTitle = data.topProperty ? escapeHtml(data.topProperty.title) : '';
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -344,13 +417,13 @@ class EmailService {
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 32px 24px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">🏢 Agency Weekly Report</h1>
-      <p style="color: #ddd6fe; margin: 8px 0 0 0; font-size: 14px;">${data.period}</p>
+      <p style="color: #ddd6fe; margin: 8px 0 0 0; font-size: 14px;">${safePeriod}</p>
     </div>
 
     <!-- Greeting -->
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
-        Hi <strong>${data.agencyName}</strong>,
+        Hi <strong>${safeAgencyName}</strong>,
       </p>
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
         Here's how your agency performed this week:
@@ -403,7 +476,7 @@ class EmailService {
           <span style="font-size: 18px; margin-right: 8px;">⭐</span>
           <span style="font-weight: 600; color: #92400e;">Top Performing Agent</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${data.topAgent.name}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopAgentName}</div>
         <div style="display: flex; gap: 16px; margin-top: 8px;">
           <span style="font-size: 12px; color: #6b7280;">👁 ${data.topAgent.views} views</span>
           <span style="font-size: 12px; color: #6b7280;">💬 ${data.topAgent.inquiries} inquiries</span>
@@ -418,7 +491,7 @@ class EmailService {
           <span style="font-size: 18px; margin-right: 8px;">🏠</span>
           <span style="font-weight: 600; color: #166534;">Top Property</span>
         </div>
-        <div style="color: #374151; font-weight: 600; font-size: 14px;">${data.topProperty.title}</div>
+        <div style="color: #374151; font-weight: 600; font-size: 14px;">${safeTopPropertyTitle}</div>
         <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">👁 ${data.topProperty.views} views this week</div>
       </div>
       ` : ''}
@@ -458,6 +531,17 @@ class EmailService {
    * Send enhanced new message notification with property details
    */
   async sendNewMessageNotification(params: NewMessageParams): Promise<void> {
+    // Sanitize all user inputs
+    const safeSenderName = escapeHtml(params.senderName);
+    const safeMessagePreview = escapeHtml(params.messagePreview);
+    const safePropertyTitle = escapeHtml(params.propertyTitle);
+    const safePropertyAddress = escapeHtml(params.propertyAddress);
+    const safePropertyCity = escapeHtml(params.propertyCity);
+    const safeSenderAvatarUrl = sanitizeUrlForHtml(params.senderAvatarUrl);
+    const safePropertyImageUrl = sanitizeUrlForHtml(params.propertyImageUrl);
+    const safeConversationUrl = sanitizeUrlForHtml(params.conversationUrl);
+    const senderInitial = params.senderName ? escapeHtml(params.senderName.charAt(0).toUpperCase()) : '?';
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -475,34 +559,34 @@ class EmailService {
     <div style="padding: 24px;">
       <!-- Sender Info -->
       <div style="display: flex; align-items: center; margin-bottom: 16px;">
-        ${params.senderAvatarUrl
-          ? `<img src="${params.senderAvatarUrl}" alt="${params.senderName}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px; object-fit: cover;">`
-          : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); margin-right: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 18px;">${params.senderName.charAt(0).toUpperCase()}</div>`
+        ${safeSenderAvatarUrl
+          ? `<img src="${safeSenderAvatarUrl}" alt="${safeSenderName}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px; object-fit: cover;">`
+          : `<div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); margin-right: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 18px;">${senderInitial}</div>`
         }
         <div>
-          <div style="font-weight: 600; color: #374151; font-size: 16px;">${params.senderName}</div>
+          <div style="font-weight: 600; color: #374151; font-size: 16px;">${safeSenderName}</div>
           <div style="font-size: 12px; color: #6b7280;">sent you a message</div>
         </div>
       </div>
 
       <!-- Message Preview -->
       <div style="background: #f3f4f6; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.5;">"${params.messagePreview}"</p>
+        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.5;">"${safeMessagePreview}"</p>
       </div>
 
-      ${params.propertyTitle ? `
+      ${safePropertyTitle ? `
       <!-- Property Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
-        ${params.propertyImageUrl ? `<img src="${params.propertyImageUrl}" alt="${params.propertyTitle}" style="width: 100%; height: 120px; object-fit: cover;">` : ''}
+        ${safePropertyImageUrl ? `<img src="${safePropertyImageUrl}" alt="${safePropertyTitle}" style="width: 100%; height: 120px; object-fit: cover;">` : ''}
         <div style="padding: 12px;">
-          <div style="font-weight: 600; color: #374151; font-size: 14px;">${params.propertyTitle}</div>
-          <div style="font-size: 12px; color: #6b7280;">${params.propertyAddress}${params.propertyCity ? `, ${params.propertyCity}` : ''}</div>
+          <div style="font-weight: 600; color: #374151; font-size: 14px;">${safePropertyTitle}</div>
+          <div style="font-size: 12px; color: #6b7280;">${safePropertyAddress}${safePropertyCity ? `, ${safePropertyCity}` : ''}</div>
         </div>
       </div>
       ` : ''}
 
       <!-- CTA -->
-      <a href="${params.conversationUrl}"
+      <a href="${safeConversationUrl}"
          style="display: block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
         Reply to Message →
       </a>
@@ -528,32 +612,44 @@ class EmailService {
   }
 
   async sendWelcomeCoupon(email: string, agencyName: string, couponCode: string, expiryDate: Date): Promise<void> {
-    const html = '<html><body><h1>Welcome ' + agencyName + '!</h1><p>Use coupon <strong>' + couponCode + '</strong> for 1 week FREE featured listing.</p><p>Valid until: ' + expiryDate.toLocaleDateString() + '</p></body></html>';
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeCouponCode = escapeHtml(couponCode);
+    const expiryDateStr = expiryDate.toLocaleDateString();
+
+    const html = `<html><body><h1>Welcome ${safeAgencyName}!</h1><p>Use coupon <strong>${safeCouponCode}</strong> for 1 week FREE featured listing.</p><p>Valid until: ${expiryDateStr}</p></body></html>`;
     await this.sendEmail({
       to: email,
-      subject: agencyName + ' - Get 1 Week FREE Featured Listing!',
+      subject: `${agencyName} - Get 1 Week FREE Featured Listing!`,
       html,
-      text: 'Welcome! Use coupon ' + couponCode + ' for 1 week free. Valid until ' + expiryDate.toLocaleDateString(),
+      text: `Welcome! Use coupon ${couponCode} for 1 week free. Valid until ${expiryDateStr}`,
     });
   }
 
   async sendExpiryReminder(email: string, agencyName: string, expiryDate: Date, couponCode: string, discount: number): Promise<void> {
-    const html = '<html><body><h1>Your Featured Listing Expires Tomorrow!</h1><p>Hi ' + agencyName + ',</p><p>Your subscription expires on ' + expiryDate.toLocaleDateString() + '</p><p>Use coupon <strong>' + couponCode + '</strong> for ' + discount + '% off renewal!</p></body></html>';
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeCouponCode = escapeHtml(couponCode);
+    const expiryDateStr = expiryDate.toLocaleDateString();
+
+    const html = `<html><body><h1>Your Featured Listing Expires Tomorrow!</h1><p>Hi ${safeAgencyName},</p><p>Your subscription expires on ${expiryDateStr}</p><p>Use coupon <strong>${safeCouponCode}</strong> for ${discount}% off renewal!</p></body></html>`;
     await this.sendEmail({
       to: email,
-      subject: agencyName + ' - Expires Tomorrow! ' + discount + '% OFF',
+      subject: `${agencyName} - Expires Tomorrow! ${discount}% OFF`,
       html,
-      text: 'Your listing expires ' + expiryDate.toLocaleDateString() + '. Use ' + couponCode + ' for ' + discount + '% off!',
+      text: `Your listing expires ${expiryDateStr}. Use ${couponCode} for ${discount}% off!`,
     });
   }
 
-  async sendSubscriptionConfirmation(email: string, agencyName: string, details: any): Promise<void> {
-    const html = '<html><body><h1>Subscription Activated!</h1><p>Hi ' + agencyName + ',</p><p>Your featured listing is now active.</p><p>Plan: ' + details.interval + '</p><p>Price: €' + details.price + '</p><p>Renews: ' + details.endDate.toLocaleDateString() + '</p></body></html>';
+  async sendSubscriptionConfirmation(email: string, agencyName: string, details: { interval: string; price: number; endDate: Date }): Promise<void> {
+    const safeAgencyName = escapeHtml(agencyName);
+    const safeInterval = escapeHtml(details.interval);
+    const renewsDate = details.endDate.toLocaleDateString();
+
+    const html = `<html><body><h1>Subscription Activated!</h1><p>Hi ${safeAgencyName},</p><p>Your featured listing is now active.</p><p>Plan: ${safeInterval}</p><p>Price: €${details.price}</p><p>Renews: ${renewsDate}</p></body></html>`;
     await this.sendEmail({
       to: email,
-      subject: agencyName + ' - Featured Listing Active!',
+      subject: `${agencyName} - Featured Listing Active!`,
       html,
-      text: 'Your subscription is active! Renews: ' + details.endDate.toLocaleDateString(),
+      text: `Your subscription is active! Renews: ${renewsDate}`,
     });
   }
 
@@ -577,6 +673,16 @@ class EmailService {
     };
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    // Sanitize all user inputs
+    const safeRecipientName = escapeHtml(params.recipientName);
+    const safeSearchName = escapeHtml(params.searchName);
+    const safeTitle = escapeHtml(params.property.title);
+    const safeAddress = escapeHtml(params.property.address);
+    const safeCity = escapeHtml(params.property.city);
+    const safePropertyId = encodeURIComponent(params.property.id);
+    const safeImageUrl = sanitizeUrlForHtml(params.property.imageUrl);
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -587,7 +693,7 @@ class EmailService {
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
-    New listing in ${params.property.city}! ${params.property.title} for €${params.property.price.toLocaleString()} - matches your "${params.searchName}" search.
+    New listing in ${safeCity}! ${safeTitle} for €${params.property.price.toLocaleString()} - matches your "${safeSearchName}" search.
   </div>
 
   <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
@@ -597,20 +703,20 @@ class EmailService {
         <span style="color: #ffffff; font-size: 12px; font-weight: 600;">✨ JUST LISTED</span>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">New Property Match!</h1>
-      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">From your search: "${params.searchName}"</p>
+      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">From your search: "${safeSearchName}"</p>
     </div>
 
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 15px; margin: 0 0 20px 0;">
-        Hey <strong>${params.recipientName}</strong>! We found something you might love:
+        Hey <strong>${safeRecipientName}</strong>! We found something you might love:
       </p>
 
       <!-- Property Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
-        ${params.property.imageUrl ? `<img src="${params.property.imageUrl}" alt="${params.property.title}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
+        ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover;">` : '<div style="width: 100%; height: 120px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;"><span style="font-size: 48px;">🏠</span></div>'}
         <div style="padding: 16px;">
-          <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${params.property.title}</div>
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">📍 ${params.property.address}, ${params.property.city}</div>
+          <div style="font-weight: 700; color: #1f2937; font-size: 17px; margin-bottom: 6px;">${safeTitle}</div>
+          <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">📍 ${safeAddress}, ${safeCity}</div>
           <div style="font-size: 28px; font-weight: 700; color: #059669; margin-bottom: 14px;">€${params.property.price.toLocaleString()}</div>
           <div style="display: table; width: 100%; background: #f9fafb; border-radius: 8px; padding: 10px;">
             <div style="display: table-row;">
@@ -639,7 +745,7 @@ class EmailService {
       </div>
 
       <!-- CTA -->
-      <a href="${frontendUrl}/property/${params.property.id}"
+      <a href="${frontendUrl}/property/${safePropertyId}"
          style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
         View Property Details →
       </a>
@@ -653,7 +759,7 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        Alert from your saved search: "${params.searchName}"
+        Alert from your saved search: "${safeSearchName}"
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
         © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
@@ -667,7 +773,7 @@ class EmailService {
       to: params.recipientEmail,
       subject: `Just listed in ${params.property.city}: ${params.property.title} - €${params.property.price.toLocaleString()}`,
       html,
-      text: `Hey ${params.recipientName}!\n\nNew property match for "${params.searchName}"!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n€${params.property.price.toLocaleString()}\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nHot properties go fast! View details: ${frontendUrl}/property/${params.property.id}\n\n© ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>`,
+      text: `Hey ${params.recipientName}!\n\nNew property match for "${params.searchName}"!\n\n${params.property.title}\n${params.property.address}, ${params.property.city}\n€${params.property.price.toLocaleString()}\n${params.property.beds} beds · ${params.property.baths} baths · ${params.property.sqft.toLocaleString()} sqft\n\nHot properties go fast! View details: ${frontendUrl}/property/${safePropertyId}\n\n© ${new Date().getFullYear()} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
@@ -695,18 +801,27 @@ class EmailService {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const frequencyLabel = params.frequency === 'daily' ? 'Daily' : params.frequency === 'weekly' ? 'Weekly' : '';
 
-    const propertyCards = params.properties.slice(0, 5).map(p => `
+    // Sanitize user inputs
+    const safeRecipientName = escapeHtml(params.recipientName);
+    const safeSearchName = escapeHtml(params.searchName);
+
+    const propertyCards = params.properties.slice(0, 5).map(p => {
+      const safeTitle = escapeHtml(p.title);
+      const safeCity = escapeHtml(p.city);
+      const safeImageUrl = sanitizeUrlForHtml(p.imageUrl);
+      return `
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 12px;">
         <div style="display: flex;">
-          ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title}" style="width: 100px; height: 80px; object-fit: cover;">` : '<div style="width: 100px; height: 80px; background: #e5e7eb;"></div>'}
+          ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100px; height: 80px; object-fit: cover;">` : '<div style="width: 100px; height: 80px; background: #e5e7eb;"></div>'}
           <div style="padding: 10px; flex: 1;">
-            <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 2px;">${p.title}</div>
-            <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">${p.city}</div>
+            <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 2px;">${safeTitle}</div>
+            <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">${safeCity}</div>
             <div style="font-size: 14px; font-weight: 700; color: #059669;">€${p.price.toLocaleString()}</div>
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     const html = `
 <!DOCTYPE html>
@@ -720,12 +835,12 @@ class EmailService {
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 600;">🏠 ${params.properties.length} New Properties!</h1>
-      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">${frequencyLabel} update for "${params.searchName}"</p>
+      <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 13px;">${frequencyLabel} update for "${safeSearchName}"</p>
     </div>
 
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
-        Hi <strong>${params.recipientName}</strong>, we found ${params.properties.length} new properties matching your search!
+        Hi <strong>${safeRecipientName}</strong>, we found ${params.properties.length} new properties matching your search!
       </p>
 
       <!-- Property Cards -->
@@ -743,7 +858,7 @@ class EmailService {
     <!-- Footer -->
     <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
       <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        You're receiving this because you have alerts enabled for "${params.searchName}"
+        You're receiving this because you have alerts enabled for "${safeSearchName}"
       </p>
       <p style="color: #9ca3af; font-size: 11px; margin: 0;">
         © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
@@ -1059,6 +1174,16 @@ class EmailService {
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
+    // Sanitize all user inputs - critical for preventing XSS attacks
+    const safeAgentName = escapeHtml(params.agentName);
+    const safeBuyerName = escapeHtml(params.buyerName);
+    const safeBuyerEmail = escapeHtml(params.buyerEmail);
+    const safeBuyerPhone = escapeHtml(params.buyerPhone);
+    const safeMessage = escapeHtml(params.message);
+    const safePropertyTitle = escapeHtml(params.propertyTitle);
+    const safeLocation = escapeHtml(params.location);
+    const safePropertyId = params.propertyId ? encodeURIComponent(params.propertyId) : '';
+
     const inquiryTypeLabels: Record<string, string> = {
       property: 'Property Inquiry',
       general: 'General Inquiry',
@@ -1081,47 +1206,47 @@ class EmailService {
 
     <div style="padding: 24px;">
       <p style="color: #374151; font-size: 14px; margin: 0 0 16px 0;">
-        Hi <strong>${params.agentName}</strong>, you've received a new inquiry!
+        Hi <strong>${safeAgentName}</strong>, you've received a new inquiry!
       </p>
 
       <!-- Buyer Info Card -->
       <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">👤 From:</div>
-        <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${params.buyerName}</div>
+        <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${safeBuyerName}</div>
         <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">
-          📧 <a href="mailto:${params.buyerEmail}" style="color: #7c3aed;">${params.buyerEmail}</a>
+          📧 <a href="mailto:${safeBuyerEmail}" style="color: #7c3aed;">${safeBuyerEmail}</a>
         </div>
-        ${params.buyerPhone ? `<div style="font-size: 14px; color: #6b7280; margin-top: 4px;">📱 ${params.buyerPhone}</div>` : ''}
+        ${safeBuyerPhone ? `<div style="font-size: 14px; color: #6b7280; margin-top: 4px;">📱 ${safeBuyerPhone}</div>` : ''}
       </div>
 
-      ${params.propertyTitle ? `
+      ${safePropertyTitle ? `
       <!-- Property Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">🏠 Property:</div>
-        <div style="font-size: 14px; color: #1f2937;">${params.propertyTitle}</div>
-        ${params.location ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">📍 ${params.location}</div>` : ''}
-        ${params.propertyId ? `<a href="${frontendUrl}/property/${params.propertyId}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: #7c3aed;">View Property →</a>` : ''}
+        <div style="font-size: 14px; color: #1f2937;">${safePropertyTitle}</div>
+        ${safeLocation ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">📍 ${safeLocation}</div>` : ''}
+        ${safePropertyId ? `<a href="${frontendUrl}/property/${safePropertyId}" style="display: inline-block; margin-top: 8px; font-size: 12px; color: #7c3aed;">View Property →</a>` : ''}
       </div>
       ` : ''}
 
-      ${params.location && !params.propertyTitle ? `
+      ${safeLocation && !safePropertyTitle ? `
       <!-- Area Search Card -->
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">📍 Area of Interest:</div>
-        <div style="font-size: 14px; color: #1f2937;">${params.location}</div>
+        <div style="font-size: 14px; color: #1f2937;">${safeLocation}</div>
       </div>
       ` : ''}
 
       <!-- Message Card -->
       <div style="background: #faf5ff; border-left: 4px solid #7c3aed; padding: 16px; margin-bottom: 16px;">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">💬 Message:</div>
-        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.6; white-space: pre-wrap;">${params.message}</p>
+        <p style="color: #374151; font-size: 14px; margin: 0; line-height: 1.6; white-space: pre-wrap;">${safeMessage}</p>
       </div>
 
       <!-- Reply CTA -->
-      <a href="mailto:${params.buyerEmail}?subject=Re: ${params.propertyTitle ? `Inquiry about ${params.propertyTitle}` : 'Your BalkanEstateᴬᴵ Inquiry'}"
+      <a href="mailto:${safeBuyerEmail}?subject=Re: ${safePropertyTitle ? `Inquiry about ${safePropertyTitle}` : 'Your BalkanEstateᴬᴵ Inquiry'}"
          style="display: block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
-        Reply to ${params.buyerName} →
+        Reply to ${safeBuyerName} →
       </a>
     </div>
 
@@ -1155,6 +1280,10 @@ class EmailService {
     userName: string;
     resetUrl: string;
   }): Promise<void> {
+    // Sanitize user inputs
+    const safeUserName = escapeHtml(params.userName);
+    const safeResetUrl = sanitizeUrlForHtml(params.resetUrl);
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -1180,7 +1309,7 @@ class EmailService {
 
     <div style="padding: 32px 24px;">
       <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
-        Hey ${params.userName},
+        Hey ${safeUserName},
       </p>
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
         We received a request to reset your password. No worries—it happens to the best of us! Click the button below to create a new password:
@@ -1188,7 +1317,7 @@ class EmailService {
 
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${params.resetUrl}"
+        <a href="${safeResetUrl}"
            style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
           Reset My Password
         </a>
@@ -1214,7 +1343,7 @@ class EmailService {
         Button not working? Copy and paste this link:
       </p>
       <div style="word-break: break-all; color: #0252CD; font-size: 12px; background: #f3f4f6; padding: 12px; border-radius: 8px; border: 1px dashed #d1d5db;">
-        ${params.resetUrl}
+        ${safeResetUrl}
       </div>
 
       <!-- Tips -->
@@ -1258,6 +1387,10 @@ class EmailService {
     userName: string;
     verificationUrl: string;
   }): Promise<void> {
+    // Sanitize user inputs
+    const safeUserName = escapeHtml(params.userName);
+    const safeVerificationUrl = sanitizeUrlForHtml(params.verificationUrl);
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -1290,7 +1423,7 @@ class EmailService {
     <div style="padding: 32px 24px;">
       <!-- Personalized greeting -->
       <p style="color: #1f2937; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">
-        Hey ${params.userName}! 👋
+        Hey ${safeUserName}! 👋
       </p>
       <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
         Thanks for joining BalkanEstate<sup>AI</sup>! We're excited to help you discover amazing properties across the Balkans. Just one quick step to get started:
@@ -1298,7 +1431,7 @@ class EmailService {
 
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${params.verificationUrl}"
+        <a href="${safeVerificationUrl}"
            class="button"
            style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4); transition: transform 0.2s;">
           ✓ Verify My Email
