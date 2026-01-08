@@ -43,6 +43,32 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     }
   }, [isOpen, activeTab]);
 
+  // Update URL when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const currentLang = window.location.pathname.split('/')[1] || 'en';
+      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+      const subscribePath = `/${lang}/subscribe`;
+
+      if (!window.location.pathname.includes('/subscribe') && !window.location.pathname.includes('/pricing')) {
+        window.history.pushState({ modal: 'subscribe' }, '', subscribePath);
+      }
+    }
+  }, [isOpen]);
+
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isOpen && !window.location.pathname.includes('/subscribe')) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isOpen, onClose]);
+
   const handleViewSellerPlans = () => {
     onClose();
     // A small delay to ensure the first modal has time to start closing animation

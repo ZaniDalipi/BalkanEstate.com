@@ -48,6 +48,34 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
     }
   }, [isOpen]);
 
+  // Update URL when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      // Get current language from URL
+      const currentLang = window.location.pathname.split('/')[1] || 'en';
+      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+      const pricingPath = `/${lang}/pricing`;
+
+      // Only update if not already on pricing route
+      if (!window.location.pathname.includes('/pricing')) {
+        window.history.pushState({ modal: 'pricing' }, '', pricingPath);
+      }
+    }
+  }, [isOpen]);
+
+  // Handle browser back button when modal is open
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isOpen && !window.location.pathname.includes('/pricing')) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     if (isOpen) {
       setShowConfirmation(false); // Reset confirmation on open
