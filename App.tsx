@@ -512,12 +512,14 @@ const AppWrapper: React.FC = () => {
         const refreshToken = urlParams.get('refresh');
         const error = urlParams.get('error');
 
-        // Check if this is a password reset page - don't treat token as OAuth token
-        const isResetPasswordPage = window.location.pathname.includes('reset-password');
+        // Check if this is a page that uses 'token' param for non-OAuth purposes
+        // - reset-password: uses token for password reset
+        // - verify-email: uses token for email verification
+        const isTokenUsedPage = window.location.pathname.includes('reset-password') ||
+                                window.location.pathname.includes('verify-email');
 
-        // Only process as OAuth callback if NOT on reset-password page
-        // Password reset uses 'token' param for reset tokens, not OAuth tokens
-        if (!isResetPasswordPage) {
+        // Only process as OAuth callback if NOT on a page that uses token for other purposes
+        if (!isTokenUsedPage) {
             // SECURITY: Immediately clean up URL to remove OAuth tokens from browser history
             // This prevents tokens from being logged or leaked via Referer headers
             if (token || refreshToken || error) {
@@ -544,7 +546,7 @@ const AppWrapper: React.FC = () => {
             }
         }
 
-        // Normal auth check (for all pages including reset-password)
+        // Normal auth check (for all pages including reset-password and verify-email)
         checkAuthStatus();
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
