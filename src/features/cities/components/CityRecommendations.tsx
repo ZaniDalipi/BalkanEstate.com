@@ -6,13 +6,20 @@ import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, C
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
+import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
   const [cities, setCities] = useState<CityMarketData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState<string>('all');
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const { dispatch, updateSearchPageState } = useAppContext();
+
+  // Handle image load error - fallback to gradient
+  const handleImageError = (cityName: string) => {
+    setFailedImages(prev => new Set(prev).add(cityName));
+  };
 
   useEffect(() => {
     loadCities();
@@ -271,125 +278,159 @@ const CityRecommendations: React.FC = () => {
 
         {/* City Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCities.map((city) => (
-            <button
-              key={city._id}
-              onClick={() => handleCityClick(city)}
-              className="bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-xl hover:border-primary transition-all duration-300 text-left group"
-            >
-              {/* City Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <MapPinIcon className="w-5 h-5 text-primary" />
-                    <h3 className="text-xl font-bold text-neutral-900 group-hover:text-primary transition-colors">
-                      {city.city}
-                    </h3>
+          {filteredCities.map((city) => {
+            const hasImage = !failedImages.has(city.city);
+            const imageUrl = getCityImageUrl(city.city, { width: 800, height: 400, quality: 'auto:good' });
+            const fallbackGradient = getCityFallbackGradient(city.city);
+
+            return (
+              <button
+                key={city._id}
+                onClick={() => handleCityClick(city)}
+                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 text-left group"
+              >
+                {/* City Image Header with Gradient Fade */}
+                <div className="relative h-36 overflow-hidden">
+                  {/* Background Image or Gradient Fallback */}
+                  {hasImage ? (
+                    <img
+                      src={imageUrl}
+                      alt={city.city}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      onError={() => handleImageError(city.city)}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div
+                      className="absolute inset-0"
+                      style={{ background: fallbackGradient }}
+                    />
+                  )}
+
+                  {/* Gradient Overlay - Fades to white at bottom */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
+
+                  {/* Dark overlay for better text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+
+                  {/* City Name Overlay */}
+                  <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPinIcon className="w-5 h-5 text-white drop-shadow-lg" />
+                        <h3 className="text-xl font-bold text-white drop-shadow-lg group-hover:text-primary transition-colors">
+                          {city.city}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-white/90 drop-shadow-md">{city.country}</p>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg ${getTrendColor(city.marketTrend)}`}>
+                      {getTrendIcon(city.marketTrend)}
+                      {getTrendLabel(city.marketTrend)}
+                    </div>
                   </div>
-                  <p className="text-sm text-neutral-500">{city.country}</p>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${getTrendColor(city.marketTrend)}`}>
-                  {getTrendIcon(city.marketTrend)}
-                  {getTrendLabel(city.marketTrend)}
-                </div>
-              </div>
 
-              {/* Score Badges */}
-              <div className="flex gap-2 mb-4">
-                <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                  <FireIcon className="w-4 h-4" />
-                  {t('cityCard.demand')}: {city.demandScore}/100
-                </div>
-                <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                  <StarIcon className="w-4 h-4" />
-                  {t('cityCard.investment')}: {city.investmentScore}/100
-                </div>
-              </div>
+                {/* Card Content */}
+                <div className="p-5">
+                  {/* Score Badges */}
+                  <div className="flex gap-2 mb-4">
+                    <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                      <FireIcon className="w-4 h-4" />
+                      {t('cityCard.demand')}: {city.demandScore}/100
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                      <StarIcon className="w-4 h-4" />
+                      {t('cityCard.investment')}: {city.investmentScore}/100
+                    </div>
+                  </div>
 
-              {/* Key Metrics */}
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">{t('cityCard.avgPricePerSqm')}</span>
-                  <span className="text-base font-bold text-neutral-900">
-                    €{city.avgPricePerSqm.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">{t('cityCard.medianPrice')}</span>
-                  <span className="text-base font-semibold text-neutral-900">
-                    {formatPrice(city.medianPrice, city.countryCode)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">{t('cityCard.yoyGrowth')}</span>
-                  <span className={`text-base font-semibold ${
-                    city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
-                  }`}>
-                    {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">{t('cityCard.rentalYield')}</span>
-                  <span className="text-base font-semibold text-primary">
-                    {city.rentalYield}%
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">{t('cityCard.daysOnMarket')}</span>
-                  <span className="text-base font-semibold text-neutral-700">
-                    {city.averageDaysOnMarket} {t('cityCard.days')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Top Neighborhoods */}
-              {city.topNeighborhoods && city.topNeighborhoods.length > 0 && (
-                <div className="border-t border-neutral-100 pt-3 mb-3">
-                  <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
-                    <BuildingOfficeIcon className="w-3.5 h-3.5" />
-                    {t('sections.topNeighborhoods')}
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {city.topNeighborhoods.slice(0, 3).map((neighborhood, idx) => (
-                      <span key={idx} className="inline-block bg-primary/5 text-primary text-xs px-2 py-1 rounded-md font-medium">
-                        {neighborhood}
+                  {/* Key Metrics */}
+                  <div className="space-y-3 mb-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-neutral-600">{t('cityCard.avgPricePerSqm')}</span>
+                      <span className="text-base font-bold text-neutral-900">
+                        €{city.avgPricePerSqm.toLocaleString()}
                       </span>
-                    ))}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-neutral-600">{t('cityCard.medianPrice')}</span>
+                      <span className="text-base font-semibold text-neutral-900">
+                        {formatPrice(city.medianPrice, city.countryCode)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-neutral-600">{t('cityCard.yoyGrowth')}</span>
+                      <span className={`text-base font-semibold ${
+                        city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
+                      }`}>
+                        {city.priceGrowthYoY > 0 ? '+' : ''}{city.priceGrowthYoY}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-neutral-600">{t('cityCard.rentalYield')}</span>
+                      <span className="text-base font-semibold text-primary">
+                        {city.rentalYield}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-neutral-600">{t('cityCard.daysOnMarket')}</span>
+                      <span className="text-base font-semibold text-neutral-700">
+                        {city.averageDaysOnMarket} {t('cityCard.days')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Top Neighborhoods */}
+                  {city.topNeighborhoods && city.topNeighborhoods.length > 0 && (
+                    <div className="border-t border-neutral-100 pt-3 mb-3">
+                      <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
+                        <BuildingOfficeIcon className="w-3.5 h-3.5" />
+                        {t('sections.topNeighborhoods')}
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {city.topNeighborhoods.slice(0, 3).map((neighborhood, idx) => (
+                          <span key={idx} className="inline-block bg-primary/5 text-primary text-xs px-2 py-1 rounded-md font-medium">
+                            {neighborhood}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Highlights */}
+                  {city.highlights && city.highlights.length > 0 && (
+                    <div className="border-t border-neutral-100 pt-3">
+                      <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
+                        <SparklesIcon className="w-3.5 h-3.5" />
+                        {t('sections.marketInsights')}
+                      </h4>
+                      <ul className="space-y-1.5">
+                        {city.highlights.slice(0, 3).map((highlight, idx) => (
+                          <li key={idx} className="text-xs text-neutral-700 flex items-start gap-2">
+                            <span className="text-primary mt-0.5 font-bold">•</span>
+                            <span className="flex-1">{highlight}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Stats Footer */}
+                  <div className="border-t border-neutral-100 pt-3 mt-3 flex items-center justify-between text-xs text-neutral-500">
+                    <div className="flex items-center gap-1">
+                      <HomeIcon className="w-4 h-4" />
+                      <span>{city.listingsCount} {t('footer.listings')}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
+                    </div>
                   </div>
                 </div>
-              )}
-
-              {/* Highlights */}
-              {city.highlights && city.highlights.length > 0 && (
-                <div className="border-t border-neutral-100 pt-3">
-                  <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
-                    <SparklesIcon className="w-3.5 h-3.5" />
-                    {t('sections.marketInsights')}
-                  </h4>
-                  <ul className="space-y-1.5">
-                    {city.highlights.slice(0, 3).map((highlight, idx) => (
-                      <li key={idx} className="text-xs text-neutral-700 flex items-start gap-2">
-                        <span className="text-primary mt-0.5 font-bold">•</span>
-                        <span className="flex-1">{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Stats Footer */}
-              <div className="border-t border-neutral-100 pt-3 mt-3 flex items-center justify-between text-xs text-neutral-500">
-                <div className="flex items-center gap-1">
-                  <HomeIcon className="w-4 h-4" />
-                  <span>{city.listingsCount} {t('footer.listings')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <CalendarIcon className="w-4 h-4" />
-                  <span>{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
 
         {/* Data Freshness Note */}
