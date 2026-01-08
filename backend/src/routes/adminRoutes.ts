@@ -16,6 +16,12 @@ import {
   fixPropertyCoordinates,
   fixSinglePropertyCoordinates,
   getPropertiesMissingCoords,
+  getAllInquiries,
+  getInquiryById,
+  updateInquiry,
+  deleteInquiry,
+  bulkUpdateInquiryStatus,
+  getInquiryStats,
 } from '../controllers/adminController';
 import {
   getAllDiscountCodes,
@@ -59,5 +65,13 @@ router.post('/discount-codes', logAdminAction('CREATE_DISCOUNT_CODE'), createDis
 router.post('/discount-codes/generate', logAdminAction('GENERATE_DISCOUNT_CODES'), generateDiscountCodes);
 router.patch('/discount-codes/:id/deactivate', logAdminAction('DEACTIVATE_DISCOUNT_CODE'), deactivateDiscountCode);
 router.delete('/discount-codes/:id', logAdminAction('DELETE_DISCOUNT_CODE'), deleteDiscountCode);
+
+// ===== Inquiry Management =====
+router.get('/inquiries/stats', logAdminAction('VIEW_INQUIRY_STATS'), getInquiryStats);
+router.get('/inquiries', logAdminAction('VIEW_INQUIRIES'), getAllInquiries);
+router.get('/inquiries/:id', logAdminAction('VIEW_INQUIRY'), getInquiryById);
+router.patch('/inquiries/bulk-status', logAdminAction('BULK_UPDATE_INQUIRIES'), bulkUpdateInquiryStatus);
+router.patch('/inquiries/:id', logAdminAction('UPDATE_INQUIRY'), updateInquiry);
+router.delete('/inquiries/:id', logAdminAction('DELETE_INQUIRY'), deleteInquiry);
 
 export default router;

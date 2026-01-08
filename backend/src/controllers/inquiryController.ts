@@ -3,6 +3,7 @@ import { sendAgentInquiry } from '../services/emailService';
 import User from '../models/User';
 import Agent from '../models/Agent';
 import Property from '../models/Property';
+import Inquiry from '../models/Inquiry';
 
 /**
  * @desc    Send inquiry to agent about a property
@@ -62,6 +63,22 @@ export const sendPropertyInquiry = async (
       .filter(Boolean)
       .join(', ');
 
+    // Save the inquiry to database
+    const inquiry = await Inquiry.create({
+      type: 'property',
+      status: 'new',
+      buyerName,
+      buyerEmail,
+      buyerPhone,
+      recipientId: seller._id,
+      recipientName: agentName,
+      recipientEmail: agentEmail,
+      propertyId: property._id,
+      propertyTitle: property.title,
+      message,
+      location,
+    });
+
     // Send the inquiry email
     await sendAgentInquiry({
       agentEmail,
@@ -76,11 +93,12 @@ export const sendPropertyInquiry = async (
       inquiryType: 'property',
     });
 
-    console.log(`[inquiryController] Property inquiry sent: ${buyerEmail} -> ${agentEmail} about ${property.title}`);
+    console.log(`[inquiryController] Property inquiry sent and saved: ${buyerEmail} -> ${agentEmail} about ${property.title} (ID: ${inquiry._id})`);
 
     res.json({
       message: 'Your inquiry has been sent successfully',
       recipient: agentName,
+      inquiryId: inquiry._id,
     });
   } catch (error: any) {
     console.error('Send property inquiry error:', error);
@@ -130,6 +148,19 @@ export const sendAgentGeneralInquiry = async (
       return;
     }
 
+    // Save the inquiry to database
+    const inquiry = await Inquiry.create({
+      type: 'agent',
+      status: 'new',
+      buyerName,
+      buyerEmail,
+      buyerPhone,
+      recipientId: agent._id,
+      recipientName: agent.name,
+      recipientEmail: agent.email,
+      message,
+    });
+
     // Send the inquiry email
     await sendAgentInquiry({
       agentEmail: agent.email,
@@ -141,11 +172,12 @@ export const sendAgentGeneralInquiry = async (
       inquiryType: 'general',
     });
 
-    console.log(`[inquiryController] General inquiry sent: ${buyerEmail} -> ${agent.email}`);
+    console.log(`[inquiryController] General inquiry sent and saved: ${buyerEmail} -> ${agent.email} (ID: ${inquiry._id})`);
 
     res.json({
       message: 'Your inquiry has been sent successfully',
       recipient: agent.name,
+      inquiryId: inquiry._id,
     });
   } catch (error: any) {
     console.error('Send agent inquiry error:', error);
@@ -197,13 +229,13 @@ export const sendAreaSearchInquiry = async (
 
     // Get unique agents from properties
     const agentEmails = new Set<string>();
-    const agents: Array<{ email: string; name: string }> = [];
+    const agents: Array<{ id: string; email: string; name: string }> = [];
 
     for (const property of properties) {
       const seller = property.sellerId as any;
       if (seller && seller.role === 'agent' && !agentEmails.has(seller.email)) {
         agentEmails.add(seller.email);
-        agents.push({ email: seller.email, name: seller.name });
+        agents.push({ id: seller._id, email: seller.email, name: seller.name });
       }
     }
 
@@ -224,8 +256,29 @@ export const sendAreaSearchInquiry = async (
 
     // Send inquiry to up to 5 agents in the area
     const targetAgents = agents.slice(0, 5);
-    const sendPromises = targetAgents.map(agent =>
-      sendAgentInquiry({
+
+    // Save inquiries to database and send emails
+    const inquiryIds: string[] = [];
+    const sendPromises = targetAgents.map(async (agent) => {
+      // Save inquiry for each agent
+      const inquiry = await Inquiry.create({
+        type: 'area_search',
+        status: 'new',
+        buyerName,
+        buyerEmail,
+        buyerPhone,
+        recipientId: agent.id,
+        recipientName: agent.name,
+        recipientEmail: agent.email,
+        message: enhancedMessage,
+        location,
+        propertyType,
+        budget,
+      });
+      inquiryIds.push(String(inquiry._id));
+
+      // Send email
+      return sendAgentInquiry({
         agentEmail: agent.email,
         agentName: agent.name,
         buyerName,
@@ -234,16 +287,17 @@ export const sendAreaSearchInquiry = async (
         message: enhancedMessage,
         location,
         inquiryType: 'area_search',
-      })
-    );
+      });
+    });
 
     await Promise.all(sendPromises);
 
-    console.log(`[inquiryController] Area search inquiry sent to ${targetAgents.length} agents for location: ${location}`);
+    console.log(`[inquiryController] Area search inquiry sent and saved to ${targetAgents.length} agents for location: ${location} (IDs: ${inquiryIds.join(', ')})`);
 
     res.json({
       message: `Your inquiry has been sent to ${targetAgents.length} agent(s) in ${location}`,
       agentCount: targetAgents.length,
+      inquiryIds,
     });
   } catch (error: any) {
     console.error('Send area search inquiry error:', error);

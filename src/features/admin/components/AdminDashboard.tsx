@@ -9,8 +9,9 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import PropertyManager from './PropertyManager';
 import AgencyManager from './AgencyManager';
 import PricingManager from './PricingManager';
+import InquiryManager from './InquiryManager';
 
-type AdminView = 'dashboard' | 'pricing' | 'discounts' | 'promotionCoupons' | 'users' | 'properties' | 'agencies';
+type AdminView = 'dashboard' | 'pricing' | 'discounts' | 'promotionCoupons' | 'users' | 'properties' | 'agencies' | 'inquiries';
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -123,6 +124,8 @@ const AdminDashboard: React.FC = () => {
     switch (activeSection) {
       case 'dashboard':
         return <AnalyticsDashboard />;
+      case 'inquiries':
+        return <InquiryManager />;
       case 'pricing':
         return <PricingManager />;
       case 'discounts':
