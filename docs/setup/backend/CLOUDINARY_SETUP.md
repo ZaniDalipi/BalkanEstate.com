@@ -1,5 +1,42 @@
 # Cloudinary Setup Guide
 
+## Folder Structure
+
+All uploads are organized in a clean, hierarchical folder structure for easy navigation:
+
+```
+balkan-estate/
+├── users/
+│   └── {userId}/
+│       ├── avatar/                    # User profile photos
+│       ├── documents/
+│       │   ├── license/               # Agent license documents
+│       │   └── credentials/           # Agent credential documents
+│       └── listings/
+│           ├── temp/                  # Uploads before property creation
+│           └── {propertyId}/
+│               ├── photos/            # Property listing photos
+│               └── floorplans/        # Property floor plans
+└── agencies/
+    └── {agencyId}/
+        ├── logo/                      # Agency logo
+        └── cover/                     # Agency cover image
+```
+
+### Upload Types
+
+| Type | Path | Description |
+|------|------|-------------|
+| `avatar` | `users/{userId}/avatar/` | User profile pictures |
+| `property` | `users/{userId}/listings/{propertyId}/photos/` | Property listing photos |
+| `floorplan` | `users/{userId}/listings/{propertyId}/floorplans/` | Property floor plans |
+| `license` | `users/{userId}/documents/license/` | Agent license documents |
+| `credential` | `users/{userId}/documents/credentials/` | Agent credentials |
+| `agency-logo` | `agencies/{agencyId}/logo/` | Agency logos |
+| `agency-cover` | `agencies/{agencyId}/cover/` | Agency cover images |
+
+---
+
 ## Quick Setup (5 minutes)
 
 ### Step 1: Create a Free Cloudinary Account

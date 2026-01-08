@@ -5,8 +5,7 @@ import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import Property from '../models/Property';
 import { geocodeAgency } from '../services/geocodingService';
-import cloudinary from '../config/cloudinary';
-import { Readable } from 'stream';
+import { uploadImage, deleteImage } from '../services/cloudinaryService';
 
 // Helper function to generate unique Agent ID
 function generateAgentId(): string {
@@ -797,60 +796,49 @@ export const uploadAgencyLogo = async (
       return;
     }
 
-    // Check ownership
-    if (agency.ownerId.toString() !== String((req.user as IUser)._id)) {
+    const userId = String((req.user as IUser)._id);
+
+    // Check ownership or admin status
+    const isOwner = agency.ownerId.toString() === userId;
+    const isAdmin = agency.admins && agency.admins.some(adminId => adminId.toString() === userId);
+
+    if (!isOwner && !isAdmin) {
       res.status(403).json({ message: 'Not authorized to update this agency' });
       return;
     }
 
     console.log('Uploading logo for agency:', agency._id);
 
-    // Upload to Cloudinary
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'balkan-estate/agencies/logos',
-        transformation: [
-          { width: 400, height: 400, crop: 'fill', gravity: 'center' },
-          { quality: 'auto', fetch_format: 'auto' }
-        ]
-      },
-      async (error, result) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          if (!res.headersSent) {
-            res.status(500).json({ message: 'Error uploading logo', error: error.message });
-          }
-          return;
-        }
-
-        if (result) {
-          try {
-            // Update agency with new logo URL
-            agency.logo = result.secure_url;
-            await agency.save();
-
-            console.log('Logo uploaded successfully:', result.secure_url);
-
-            if (!res.headersSent) {
-              res.json({ logo: result.secure_url, agency });
-            }
-          } catch (saveError: any) {
-            console.error('Error saving agency:', saveError);
-            if (!res.headersSent) {
-              res.status(500).json({ message: 'Error saving logo URL', error: saveError.message });
-            }
-          }
-        }
+    // Delete old logo if exists
+    if (agency.logoPublicId) {
+      try {
+        await deleteImage(agency.logoPublicId);
+      } catch (deleteError) {
+        console.log('Could not delete old logo:', deleteError);
       }
-    );
+    }
 
-    const bufferStream = Readable.from(req.file.buffer);
-    bufferStream.pipe(uploadStream);
+    // Upload logo using centralized cloudinaryService
+    // Path: balkan-estate/agencies/{agencyId}/logo/
+    const uploadResult = await uploadImage(req.file.buffer, {
+      userId,
+      agencyId: String(agency._id),
+      type: 'agency-logo',
+      maxWidth: 400,
+      maxHeight: 400,
+    });
+
+    // Update agency with new logo URL and publicId
+    agency.logo = uploadResult.url;
+    agency.logoPublicId = uploadResult.publicId;
+    await agency.save();
+
+    console.log('✅ Logo uploaded successfully:', uploadResult.url);
+
+    res.json({ logo: uploadResult.url, agency });
   } catch (error: any) {
     console.error('Upload agency logo error:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ message: 'Error uploading logo', error: error.message });
-    }
+    res.status(500).json({ message: 'Error uploading logo', error: error.message });
   }
 };
 
@@ -886,60 +874,49 @@ export const uploadAgencyCover = async (
       return;
     }
 
-    // Check ownership
-    if (agency.ownerId.toString() !== String((req.user as IUser)._id)) {
+    const userId = String((req.user as IUser)._id);
+
+    // Check ownership or admin status
+    const isOwner = agency.ownerId.toString() === userId;
+    const isAdmin = agency.admins && agency.admins.some(adminId => adminId.toString() === userId);
+
+    if (!isOwner && !isAdmin) {
       res.status(403).json({ message: 'Not authorized to update this agency' });
       return;
     }
 
     console.log('Uploading cover for agency:', agency._id);
 
-    // Upload to Cloudinary
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'balkan-estate/agencies/covers',
-        transformation: [
-          { width: 1200, height: 400, crop: 'fill', gravity: 'center' },
-          { quality: 'auto', fetch_format: 'auto' }
-        ]
-      },
-      async (error, result) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          if (!res.headersSent) {
-            res.status(500).json({ message: 'Error uploading cover image', error: error.message });
-          }
-          return;
-        }
-
-        if (result) {
-          try {
-            // Update agency with new cover URL
-            agency.coverImage = result.secure_url;
-            await agency.save();
-
-            console.log('Cover uploaded successfully:', result.secure_url);
-
-            if (!res.headersSent) {
-              res.json({ coverImage: result.secure_url, agency });
-            }
-          } catch (saveError: any) {
-            console.error('Error saving agency:', saveError);
-            if (!res.headersSent) {
-              res.status(500).json({ message: 'Error saving cover URL', error: saveError.message });
-            }
-          }
-        }
+    // Delete old cover if exists
+    if (agency.coverImagePublicId) {
+      try {
+        await deleteImage(agency.coverImagePublicId);
+      } catch (deleteError) {
+        console.log('Could not delete old cover:', deleteError);
       }
-    );
+    }
 
-    const bufferStream = Readable.from(req.file.buffer);
-    bufferStream.pipe(uploadStream);
+    // Upload cover using centralized cloudinaryService
+    // Path: balkan-estate/agencies/{agencyId}/cover/
+    const uploadResult = await uploadImage(req.file.buffer, {
+      userId,
+      agencyId: String(agency._id),
+      type: 'agency-cover',
+      maxWidth: 1920,
+      maxHeight: 600,
+    });
+
+    // Update agency with new cover URL and publicId
+    agency.coverImage = uploadResult.url;
+    agency.coverImagePublicId = uploadResult.publicId;
+    await agency.save();
+
+    console.log('✅ Cover uploaded successfully:', uploadResult.url);
+
+    res.json({ coverImage: uploadResult.url, agency });
   } catch (error: any) {
     console.error('Upload agency cover error:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ message: 'Error uploading cover image', error: error.message });
-    }
+    res.status(500).json({ message: 'Error uploading cover image', error: error.message });
   }
 };
 
