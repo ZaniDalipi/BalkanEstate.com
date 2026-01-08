@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import AdminNav from './AdminNav';
+import AdminLayout from './AdminLayout';
+import type { AdminView } from './AdminLayout';
 import DiscountCodeManager from './DiscountCodeManager';
 import PromotionCouponManager from './PromotionCouponManager';
 import UserManager from './UserManager';
@@ -10,8 +11,8 @@ import PropertyManager from './PropertyManager';
 import AgencyManager from './AgencyManager';
 import PricingManager from './PricingManager';
 import InquiryManager from './InquiryManager';
-
-type AdminView = 'dashboard' | 'pricing' | 'discounts' | 'promotionCoupons' | 'users' | 'properties' | 'agencies' | 'inquiries';
+import SystemSettings from './SystemSettings';
+import ActivityLog from './ActivityLog';
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -68,13 +69,18 @@ const AdminDashboard: React.FC = () => {
   // Redirect to home if not authenticated
   if (!state.isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">{t('admin:errors.accessDenied')}</h2>
-          <p className="text-gray-600">{t('admin:errors.pleaseLogin')}</p>
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:errors.accessDenied')}</h2>
+          <p className="text-gray-600 mb-6">{t('admin:errors.pleaseLogin')}</p>
           <button
             onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
           >
             {t('admin:errors.goHome')}
           </button>
@@ -86,20 +92,30 @@ const AdminDashboard: React.FC = () => {
   // Show error if not authorized
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">{t('admin:errors.accessDenied')}</h2>
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:errors.accessDenied')}</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           {error.includes('VPN') && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-yellow-800">
-                {t('admin:errors.vpnRequired', { defaultValue: 'The admin panel requires VPN connection for security. Please connect to the authorized VPN and refresh.' })}
-              </p>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-left">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p className="text-sm text-yellow-800">
+                  {t('admin:errors.vpnRequired', { defaultValue: 'The admin panel requires VPN connection for security. Please connect to the authorized VPN and refresh.' })}
+                </p>
+              </div>
             </div>
           )}
           <button
             onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
           >
             {t('admin:errors.goHome')}
           </button>
@@ -111,10 +127,11 @@ const AdminDashboard: React.FC = () => {
   // Show loading state while checking authorization
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">{t('admin:table.loading')}</p>
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">{t('admin:table.loading')}</p>
+          <p className="mt-1 text-gray-400 text-sm">Verifying admin access...</p>
         </div>
       </div>
     );
@@ -126,6 +143,8 @@ const AdminDashboard: React.FC = () => {
         return <AnalyticsDashboard />;
       case 'inquiries':
         return <InquiryManager />;
+      case 'activity':
+        return <ActivityLog />;
       case 'pricing':
         return <PricingManager />;
       case 'discounts':
@@ -138,46 +157,20 @@ const AdminDashboard: React.FC = () => {
         return <PropertyManager />;
       case 'agencies':
         return <AgencyManager />;
+      case 'settings':
+        return <SystemSettings />;
       default:
-        return null;
+        return <AnalyticsDashboard />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
-                className="text-gray-600 hover:text-gray-900 font-medium"
-              >
-                ← {t('admin:sidebar.backToSite')}
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">{t('admin:dashboard.title')}</h1>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>{t('admin:errors.adminRequired', { defaultValue: 'Admin Access' })}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-6">
-          {/* Sidebar Navigation */}
-          <AdminNav activeSection={activeSection} onSectionChange={setActiveSection} />
-
-          {/* Main Content */}
-          <div className="flex-1">
-            {renderContent()}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AdminLayout
+      activeSection={activeSection}
+      onSectionChange={setActiveSection}
+    >
+      {renderContent()}
+    </AdminLayout>
   );
 };
 
