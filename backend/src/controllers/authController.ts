@@ -6,8 +6,7 @@ import Agency from '../models/Agency';
 // generateToken moved to refreshTokenService - using generateTokenPair instead
 import { IUser } from '../models/User';
 import crypto from 'crypto';
-import cloudinary from '../config/cloudinary';
-import { Readable } from 'stream';
+import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { validatePassword, passwordContainsUserInfo } from '../utils/passwordValidator';
 import { sendVerificationEmail } from '../services/emailVerificationService';
 import { generateTokenPair } from '../services/refreshTokenService';
@@ -1316,11 +1315,6 @@ export const uploadAvatar = async (
                                    process.env.CLOUDINARY_API_KEY &&
                                    process.env.CLOUDINARY_API_SECRET;
 
-    console.log('=== Cloudinary Configuration Check ===');
-    console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? `Set (${process.env.CLOUDINARY_CLOUD_NAME})` : 'NOT SET');
-    console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'Set (hidden)' : 'NOT SET');
-    console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'Set (hidden)' : 'NOT SET');
-
     if (!cloudinaryConfigured) {
       console.error('❌ Cloudinary is not fully configured');
       res.status(500).json({
@@ -1349,84 +1343,51 @@ export const uploadAvatar = async (
     // Delete old avatar from Cloudinary if exists
     if (user.avatarPublicId) {
       try {
-        await cloudinary.uploader.destroy(user.avatarPublicId);
+        await deleteImage(user.avatarPublicId);
       } catch (deleteError) {
         console.log('Could not delete old avatar:', deleteError);
         // Continue with upload even if deletion fails
       }
     }
 
-    // Upload to Cloudinary with better organization
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        // Organized folder structure: balkan-estate/avatars/users/{userId}
-        folder: `balkan-estate/avatars/users/${userId}`,
-        transformation: [
-          { width: 200, height: 200, crop: 'fill', gravity: 'face' },
-          { quality: 'auto:good', fetch_format: 'auto' } // Cost-optimized
-        ],
-        // Add context for better organization
-        context: {
-          type: 'user_avatar',
-          user_id: userId,
-        },
-      },
-      async (error, result) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          if (!res.headersSent) {
-            res.status(500).json({ message: 'Error uploading avatar', error: error.message });
-          }
-          return;
-        }
+    // Upload avatar using centralized cloudinaryService
+    // Path: balkan-estate/users/{userId}/avatar/
+    const uploadResult = await uploadImage(req.file.buffer, {
+      userId,
+      type: 'avatar',
+      maxWidth: 400,  // Avatars don't need to be large
+      maxHeight: 400,
+    });
 
-        if (result) {
-          try {
-            // Update user with new avatar URL and publicId
-            user.avatarUrl = result.secure_url;
-            user.avatarPublicId = result.public_id;
-            await user.save();
+    // Update user with new avatar URL and publicId
+    user.avatarUrl = uploadResult.url;
+    user.avatarPublicId = uploadResult.publicId;
+    await user.save();
 
-            console.log('Avatar uploaded successfully:', result.secure_url);
+    console.log('✅ Avatar uploaded successfully:', uploadResult.url);
 
-            if (!res.headersSent) {
-              res.json({
-                avatarUrl: result.secure_url,
-                user: {
-                  id: String(user._id),
-                  email: user.email,
-                  name: user.name,
-                  phone: user.phone,
-                  role: user.role,
-                  avatarUrl: user.avatarUrl,
-                  city: user.city,
-                  country: user.country,
-                  agencyName: user.agencyName,
-                  agencyId: user.agencyId,
-                  agentId: user.agentId,
-                  licenseNumber: user.licenseNumber,
-                  licenseVerified: user.licenseVerified,
-                  isSubscribed: user.isSubscribed,
-                }
-              });
-            }
-          } catch (saveError: any) {
-            console.error('Error saving user:', saveError);
-            if (!res.headersSent) {
-              res.status(500).json({ message: 'Error saving avatar URL', error: saveError.message });
-            }
-          }
-        }
+    res.json({
+      avatarUrl: uploadResult.url,
+      user: {
+        id: String(user._id),
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+        city: user.city,
+        country: user.country,
+        agencyName: user.agencyName,
+        agencyId: user.agencyId,
+        agentId: user.agentId,
+        licenseNumber: user.licenseNumber,
+        licenseVerified: user.licenseVerified,
+        isSubscribed: user.isSubscribed,
       }
-    );
-
-    const bufferStream = Readable.from(req.file.buffer);
-    bufferStream.pipe(uploadStream);
+    });
   } catch (error: any) {
     console.error('Upload avatar error:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ message: 'Error uploading avatar', error: error.message });
-    }
+    res.status(500).json({ message: 'Error uploading avatar', error: error.message });
   }
 };
 

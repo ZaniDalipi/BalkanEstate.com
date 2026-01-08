@@ -78,13 +78,14 @@ export const addCredential = async (req: Request, res: Response): Promise<void> 
     }
 
     // Upload document if provided
+    // Path: balkan-estate/users/{userId}/documents/credentials/
     let documentUrl: string | undefined;
     let documentPublicId: string | undefined;
 
     if (req.file) {
       const uploadResult = await uploadImage(req.file.buffer, {
         userId: String(currentUser._id),
-        type: 'avatar', // Using avatar type for credentials documents
+        type: 'credential',
         maxWidth: 2000,
         maxHeight: 2000,
       });
@@ -177,6 +178,7 @@ export const updateCredential = async (req: Request, res: Response): Promise<voi
     if (isPublic !== undefined) agent.credentials[credentialIndex].isPublic = isPublic;
 
     // Handle document upload if new file provided
+    // Path: balkan-estate/users/{userId}/documents/credentials/
     if (req.file) {
       // Delete old document if exists
       if (agent.credentials[credentialIndex].documentPublicId) {
@@ -185,7 +187,7 @@ export const updateCredential = async (req: Request, res: Response): Promise<voi
 
       const uploadResult = await uploadImage(req.file.buffer, {
         userId: String(currentUser._id),
-        type: 'avatar',
+        type: 'credential',
         maxWidth: 2000,
         maxHeight: 2000,
       });

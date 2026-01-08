@@ -22,18 +22,105 @@ export interface CloudinaryUploadResult {
   bytes: number;
 }
 
+/**
+ * Upload types for organized Cloudinary storage
+ *
+ * Folder structure:
+ * balkan-estate/
+ * ├── users/
+ * │   └── {userId}/
+ * │       ├── avatar/
+ * │       ├── documents/
+ * │       │   ├── license/
+ * │       │   └── credentials/
+ * │       └── listings/
+ * │           ├── temp/
+ * │           └── {propertyId}/
+ * │               ├── photos/
+ * │               └── floorplans/
+ * └── agencies/
+ *     └── {agencyId}/
+ *         ├── logo/
+ *         └── cover/
+ */
+type UploadType =
+  | 'property'      // User listing photos
+  | 'floorplan'     // User listing floorplans
+  | 'avatar'        // User profile avatar
+  | 'license'       // Agent license document
+  | 'credential'    // Agent credential document
+  | 'agency-logo'   // Agency logo
+  | 'agency-cover'; // Agency cover image
+
 interface UploadOptions {
   userId: string;
   propertyId?: string;
-  type: 'property' | 'avatar' | 'agency-logo' | 'agency-cover' | 'floorplan';
+  agencyId?: string;
+  credentialId?: string;
+  type: UploadType;
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
 }
 
 /**
+ * Build organized folder path based on upload type
+ *
+ * Structure:
+ * - Users: balkan-estate/users/{userId}/{subfolder}
+ * - Agencies: balkan-estate/agencies/{agencyId}/{subfolder}
+ */
+const buildFolderPath = (options: UploadOptions): string => {
+  const { userId, propertyId, agencyId, credentialId, type } = options;
+  const ROOT = 'balkan-estate';
+
+  switch (type) {
+    case 'property':
+      // balkan-estate/users/{userId}/listings/{propertyId}/photos or /temp
+      if (propertyId) {
+        return `${ROOT}/users/${userId}/listings/${propertyId}/photos`;
+      }
+      return `${ROOT}/users/${userId}/listings/temp`;
+
+    case 'floorplan':
+      // balkan-estate/users/{userId}/listings/{propertyId}/floorplans
+      if (propertyId) {
+        return `${ROOT}/users/${userId}/listings/${propertyId}/floorplans`;
+      }
+      return `${ROOT}/users/${userId}/listings/temp/floorplans`;
+
+    case 'avatar':
+      // balkan-estate/users/{userId}/avatar
+      return `${ROOT}/users/${userId}/avatar`;
+
+    case 'license':
+      // balkan-estate/users/{userId}/documents/license
+      return `${ROOT}/users/${userId}/documents/license`;
+
+    case 'credential':
+      // balkan-estate/users/{userId}/documents/credentials/{credentialId}
+      if (credentialId) {
+        return `${ROOT}/users/${userId}/documents/credentials/${credentialId}`;
+      }
+      return `${ROOT}/users/${userId}/documents/credentials`;
+
+    case 'agency-logo':
+      // balkan-estate/agencies/{agencyId}/logo
+      return `${ROOT}/agencies/${agencyId || userId}/logo`;
+
+    case 'agency-cover':
+      // balkan-estate/agencies/{agencyId}/cover
+      return `${ROOT}/agencies/${agencyId || userId}/cover`;
+
+    default:
+      return `${ROOT}/misc/${userId}`;
+  }
+};
+
+/**
  * Upload image to Cloudinary with optimization
- * Folder structure: balkan-estate/{type}/user-{userId}/property-{propertyId}
+ *
+ * Organized folder structure - see buildFolderPath() for details
  */
 export const uploadImage = async (
   fileBuffer: Buffer,
@@ -84,24 +171,8 @@ export const uploadImage = async (
 
     const compressedBuffer = processedBuffer;
 
-    // Step 2: Build organized folder path
-    let folder = `balkan-estate/${type}`;
-
-    if (type === 'property' || type === 'floorplan') {
-      // For properties: balkan-estate/properties/user-{userId}/listing-{propertyId}
-      if (propertyId) {
-        folder = `${folder}/user-${userId}/listing-${propertyId}`;
-      } else {
-        // If no propertyId yet (creating new listing), use user folder
-        folder = `${folder}/user-${userId}/temp`;
-      }
-    } else if (type === 'avatar') {
-      // For avatars: balkan-estate/avatars/user-{userId}
-      folder = `${folder}/user-${userId}`;
-    } else if (type === 'agency-logo' || type === 'agency-cover') {
-      // For agencies: balkan-estate/agencies/user-{userId}
-      folder = `balkan-estate/agencies/user-${userId}`;
-    }
+    // Step 2: Build organized folder path using centralized function
+    const folder = buildFolderPath(options);
 
     // Step 3: Upload to Cloudinary with optimizations
     const result = await new Promise<any>((resolve, reject) => {
@@ -257,21 +328,26 @@ export const deleteFolder = async (folderPath: string): Promise<void> => {
 /**
  * Move images from temp folder to property-specific folder
  * Use this when creating a new property - move temp images to the final location
+ *
+ * Old temp path: balkan-estate/users/{userId}/listings/temp/
+ * New path: balkan-estate/users/{userId}/listings/{propertyId}/photos/
  */
 export const moveImagesToProperty = async (
   publicIds: string[],
   userId: string,
-  propertyId: string
+  propertyId: string,
+  isFloorplan: boolean = false
 ): Promise<string[]> => {
   const newPublicIds: string[] = [];
+  const subfolder = isFloorplan ? 'floorplans' : 'photos';
 
   for (const publicId of publicIds) {
     try {
       // Extract filename from old public_id
       const filename = publicId.split('/').pop();
 
-      // New path with property ID
-      const newPublicId = `balkan-estate/properties/user-${userId}/listing-${propertyId}/${filename}`;
+      // New path with property ID using the new folder structure
+      const newPublicId = `balkan-estate/users/${userId}/listings/${propertyId}/${subfolder}/${filename}`;
 
       // Rename/move the resource
       const result = await cloudinary.uploader.rename(publicId, newPublicId, {
@@ -315,3 +391,54 @@ export const getOptimizedUrl = (
     secure: true,
   });
 };
+
+/**
+ * Delete all images for a specific listing
+ * Path: balkan-estate/users/{userId}/listings/{propertyId}/
+ */
+export const deleteListingImages = async (
+  userId: string,
+  propertyId: string
+): Promise<void> => {
+  const folderPath = `balkan-estate/users/${userId}/listings/${propertyId}`;
+  await deleteFolder(folderPath);
+};
+
+/**
+ * Delete user's avatar
+ * Path: balkan-estate/users/{userId}/avatar/
+ */
+export const deleteUserAvatar = async (userId: string): Promise<void> => {
+  const folderPath = `balkan-estate/users/${userId}/avatar`;
+  await deleteFolder(folderPath);
+};
+
+/**
+ * Delete all images for a user (used when deleting user account)
+ * Path: balkan-estate/users/{userId}/
+ */
+export const deleteAllUserImages = async (userId: string): Promise<void> => {
+  const folderPath = `balkan-estate/users/${userId}`;
+  await deleteFolder(folderPath);
+};
+
+/**
+ * Delete all images for an agency
+ * Path: balkan-estate/agencies/{agencyId}/
+ */
+export const deleteAgencyImages = async (agencyId: string): Promise<void> => {
+  const folderPath = `balkan-estate/agencies/${agencyId}`;
+  await deleteFolder(folderPath);
+};
+
+/**
+ * Clean up orphaned temp images for a user
+ * Path: balkan-estate/users/{userId}/listings/temp/
+ */
+export const cleanupTempImages = async (userId: string): Promise<void> => {
+  const folderPath = `balkan-estate/users/${userId}/listings/temp`;
+  await deleteFolder(folderPath);
+};
+
+// Export types for use in other modules
+export type { UploadType };
