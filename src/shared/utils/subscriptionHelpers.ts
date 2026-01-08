@@ -19,22 +19,36 @@ import {
 
 /**
  * Listing limits by subscription tier
+ * Note: pro_monthly gets 20/month, pro_yearly gets 250/year
+ * For 'pro' tier, we use the yearly limit as the default
  */
 export const LISTING_LIMITS: Record<SubscriptionTier, number> = {
   free: 3,
-  pro: 25,
-  agency_owner: 25, // Personal limit, plus 100 for agency pool
+  pro: 250, // Pro yearly gets 250 listings/year (pro_monthly handled separately at 20/month)
+  agency_owner: 500, // Enterprise: 500 listings
   agency_agent: 25,
   buyer: 0,
 };
 
 /**
+ * Listing limits by subscription plan (more specific)
+ */
+export const PLAN_LISTING_LIMITS: Record<SubscriptionPlan, number> = {
+  free: 3,
+  pro_monthly: 20, // 20 listings per month
+  pro_yearly: 250, // 250 listings per year
+  enterprise_yearly: 500, // 500 listings for enterprise
+};
+
+/**
  * Agency pool listing limit (shared among all agents)
  */
-export const AGENCY_POOL_LISTINGS = 100;
+export const AGENCY_POOL_LISTINGS = 500;
 
 /**
  * Promotion coupon configurations by plan
+ * Pro: 3 coupons/month (2 highlighted + 1 premium)
+ * Enterprise: 5 coupons/month (2 premium premier + 2 highlighted + 1 featured)
  */
 export const PROMOTION_CONFIGS: Record<
   SubscriptionPlan,
@@ -42,37 +56,47 @@ export const PROMOTION_CONFIGS: Record<
     monthly: number;
     featured: number;
     highlighted: number;
+    premium: number; // Premium placement coupons
     featuredDuration: number;
     highlightedDuration: number;
+    premiumDuration: number;
   }
 > = {
   free: {
     monthly: 0,
     featured: 0,
     highlighted: 0,
+    premium: 0,
     featuredDuration: 0,
     highlightedDuration: 0,
+    premiumDuration: 0,
   },
   pro_monthly: {
-    monthly: 2,
-    featured: 1,
-    highlighted: 1,
+    monthly: 3,
+    featured: 0,
+    highlighted: 2,
+    premium: 1, // 1 premium placement
     featuredDuration: 7,
     highlightedDuration: 7,
+    premiumDuration: 7,
   },
   pro_yearly: {
-    monthly: 2,
-    featured: 1,
-    highlighted: 1,
+    monthly: 3,
+    featured: 0,
+    highlighted: 2,
+    premium: 1, // 1 premium placement
     featuredDuration: 14,
     highlightedDuration: 14,
+    premiumDuration: 14,
   },
   enterprise_yearly: {
-    monthly: 15, // Shared pool for agency
-    featured: 8,
-    highlighted: 7,
+    monthly: 5, // 5 coupons total for agency
+    featured: 1, // 1 featured
+    highlighted: 2, // 2 highlighted
+    premium: 2, // 2 premium premier
     featuredDuration: 14,
     highlightedDuration: 14,
+    premiumDuration: 14,
   },
 };
 
@@ -82,7 +106,8 @@ export const PROMOTION_CONFIGS: Record<
 export const AGENCY_PROMOTIONS = {
   agentRecruitmentCoupons: 5, // One-time coupons to recruit agents
   agencyPagePromotions: 5, // Monthly promotions for agency visibility
-  promotionCouponPool: 15, // Monthly shared promotion coupons
+  promotionCouponPool: 5, // Monthly shared promotion coupons (2 premium premier, 2 highlighted, 1 featured)
+  maxTeamMembers: 5, // 5 team members included
 };
 
 /**
@@ -90,9 +115,47 @@ export const AGENCY_PROMOTIONS = {
  */
 export const SUBSCRIPTION_PRICING: Record<SubscriptionPlan, number> = {
   free: 0,
-  pro_monthly: 9.99,
-  pro_yearly: 99.99,
-  enterprise_yearly: 999,
+  pro_monthly: 25,
+  pro_yearly: 200,
+  enterprise_yearly: 1000,
+};
+
+/**
+ * Feature limits by subscription plan
+ */
+export const FEATURE_LIMITS: Record<
+  SubscriptionPlan,
+  {
+    savedSearches: number; // -1 = unlimited
+    aiMessages: number; // -1 = unlimited (but rate limited)
+    generateInsights: number; // -1 = unlimited
+    autoGenerateImageDesc: number; // -1 = unlimited
+  }
+> = {
+  free: {
+    savedSearches: 3,
+    aiMessages: 3,
+    generateInsights: 3,
+    autoGenerateImageDesc: 3,
+  },
+  pro_monthly: {
+    savedSearches: -1, // unlimited
+    aiMessages: -1, // unlimited (rate limited to prevent spam)
+    generateInsights: 20, // 20 per month
+    autoGenerateImageDesc: -1, // unlimited
+  },
+  pro_yearly: {
+    savedSearches: -1, // unlimited
+    aiMessages: -1, // unlimited (rate limited to prevent spam)
+    generateInsights: 20, // 20 per month
+    autoGenerateImageDesc: -1, // unlimited
+  },
+  enterprise_yearly: {
+    savedSearches: -1, // unlimited
+    aiMessages: -1, // unlimited (rate limited to prevent spam)
+    generateInsights: -1, // unlimited for all agents
+    autoGenerateImageDesc: -1, // unlimited
+  },
 };
 
 // ============================================================================
@@ -110,8 +173,10 @@ export function getDefaultPromotionCoupons(plan: SubscriptionPlan): PromotionCou
     used: 0,
     featured: config.featured,
     highlighted: config.highlighted,
+    premium: config.premium,
     featuredDuration: config.featuredDuration,
     highlightedDuration: config.highlightedDuration,
+    premiumDuration: config.premiumDuration,
     lastRefresh: new Date().toISOString(),
   };
 }
@@ -144,7 +209,7 @@ export function getDefaultProSubscription(
     tier: 'pro',
     status: 'active',
     plan,
-    listingsLimit: LISTING_LIMITS.pro,
+    listingsLimit: PLAN_LISTING_LIMITS[plan], // Use plan-specific limit (20 for monthly, 250 for yearly)
     activeListingsCount: 0,
     privateSellerCount: 0,
     agentCount: 0,
@@ -197,7 +262,7 @@ export function getDefaultAgencyOwnerSubscription(expiresAt: Date): UserSubscrip
     tier: 'agency_owner',
     status: 'active',
     plan: 'enterprise_yearly',
-    listingsLimit: LISTING_LIMITS.agency_owner,
+    listingsLimit: PLAN_LISTING_LIMITS.enterprise_yearly, // 500 listings for enterprise
     activeListingsCount: 0,
     privateSellerCount: 0,
     agentCount: 0,
@@ -536,8 +601,10 @@ export function getRefreshedCoupons(
     used: 0,
     featured: config.featured,
     highlighted: config.highlighted,
+    premium: config.premium,
     featuredDuration: config.featuredDuration,
     highlightedDuration: config.highlightedDuration,
+    premiumDuration: config.premiumDuration,
     lastRefresh: new Date().toISOString(),
   };
 }
@@ -559,21 +626,23 @@ export function getUpgradeOptions(
       plan: 'pro_monthly',
       price: SUBSCRIPTION_PRICING.pro_monthly,
       benefits: [
-        '25 active listings (vs 3)',
-        '2 promotion coupons per month',
-        'Post as agent or private seller',
-        'Enhanced analytics',
+        '20 active listings per month (vs 3)',
+        '3 promotion coupons per month (2 highlighted + 1 premium)',
+        '20 insights per month',
+        'Unlimited AI chat & saved searches',
+        'Unlimited auto-generate image descriptions',
       ],
     });
     options.push({
       plan: 'pro_yearly',
       price: SUBSCRIPTION_PRICING.pro_yearly,
       benefits: [
-        '25 active listings (vs 3)',
-        '2 promotion coupons per month',
+        '250 active listings per year (vs 3)',
+        '3 promotion coupons per month (2 highlighted + 1 premium)',
         '14-day promotions (vs 7-day)',
-        'Post as agent or private seller',
-        'Save 17% vs monthly',
+        '20 insights per month',
+        'Unlimited AI chat & saved searches',
+        'Save over 30% vs monthly',
       ],
     });
   }
@@ -584,11 +653,11 @@ export function getUpgradeOptions(
       price: SUBSCRIPTION_PRICING.enterprise_yearly,
       benefits: [
         'Create and manage your agency',
-        '100 listing pool for agents',
-        '15 promotion coupons per month',
-        '5 agent recruitment coupons',
-        'Agency statistics dashboard',
-        'Priority support',
+        '500 listings for your agency',
+        '5 team members included',
+        '5 promotion coupons per month (2 premier + 2 highlighted + 1 featured)',
+        'Unlimited insights for all agents',
+        'Priority support & dedicated account manager',
       ],
     });
   }

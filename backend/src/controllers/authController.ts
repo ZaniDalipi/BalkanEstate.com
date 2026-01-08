@@ -586,11 +586,25 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       // Check if it's a Pro subscription
       if (productId?.includes('pro') || productId === 'pro_monthly' || productId === 'pro_yearly') {
         tier = 'pro';
-        listingsLimit = 25;
+        // Use plan-specific listing limits: pro_monthly = 20, pro_yearly = 250
+        if (productId === 'pro_monthly' || productId === 'seller_pro_monthly') {
+          listingsLimit = 20; // 20 listings per month
+        } else if (productId === 'pro_yearly' || productId === 'seller_pro_yearly') {
+          listingsLimit = 250; // 250 listings per year
+        } else {
+          listingsLimit = 250; // Default to yearly for other pro plans
+        }
         promotionCoupons = { monthly: 3, available: 3, used: 0, rollover: 0, lastRefresh: new Date() };
-        savedSearchesLimit = 10;
+        savedSearchesLimit = -1; // Unlimited for Pro
         subscriptionExpiresAt = dbSubscription.expirationDate;
-        console.log(`🎫 [getMe] Found ${isCancelledButActive ? 'cancelled-but-valid' : 'active'} subscription in DB for ${user.email}: ${productId}, expires: ${subscriptionExpiresAt}`);
+        console.log(`🎫 [getMe] Found ${isCancelledButActive ? 'cancelled-but-valid' : 'active'} subscription in DB for ${user.email}: ${productId}, limit: ${listingsLimit}, expires: ${subscriptionExpiresAt}`);
+      } else if (productId?.includes('enterprise') || productId?.includes('agency')) {
+        tier = 'agency_owner';
+        listingsLimit = 500; // 500 listings for enterprise
+        promotionCoupons = { monthly: 5, available: 5, used: 0, rollover: 0, lastRefresh: new Date() };
+        savedSearchesLimit = -1; // Unlimited for Enterprise
+        subscriptionExpiresAt = dbSubscription.expirationDate;
+        console.log(`🎫 [getMe] Found enterprise subscription in DB for ${user.email}: ${productId}, limit: ${listingsLimit}, expires: ${subscriptionExpiresAt}`);
       }
     } else {
       // **NO VALID SUBSCRIPTION FOUND** - check if user.subscription thinks they have Pro and downgrade
@@ -603,7 +617,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     // PRIORITY 2: Sync from proSubscription (legacy system) - only if not already Pro from Subscriptions
     if (tier === 'free' && user.proSubscription?.isActive) {
       tier = 'pro';
-      listingsLimit = user.proSubscription.totalListingsLimit || 25;
+      // Legacy proSubscription - default to yearly limits (250)
+      listingsLimit = user.proSubscription.totalListingsLimit || 250;
       if (user.proSubscription.promotionCoupons) {
         promotionCoupons = {
           monthly: user.proSubscription.promotionCoupons.monthly || 3,
@@ -613,7 +628,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           lastRefresh: new Date(),
         };
       }
-      savedSearchesLimit = 10;
+      savedSearchesLimit = -1; // Unlimited for Pro
       subscriptionExpiresAt = user.proSubscription.expiresAt;
     }
 
@@ -657,7 +672,12 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       if (tier === 'pro' && user.subscription.tier !== 'pro') {
         console.log(`🔧 [getMe] Upgrading ${user.email} from ${user.subscription.tier} to pro tier`);
         user.subscription.tier = 'pro';
-        user.subscription.listingsLimit = 25;
+        user.subscription.listingsLimit = listingsLimit; // Use plan-specific limit (20 or 250)
+        user.subscription.expiresAt = subscriptionExpiresAt;
+      } else if (tier === 'agency_owner' && user.subscription.tier !== 'agency_owner') {
+        console.log(`🔧 [getMe] Upgrading ${user.email} from ${user.subscription.tier} to agency_owner tier`);
+        user.subscription.tier = 'agency_owner';
+        user.subscription.listingsLimit = 500; // Enterprise gets 500 listings
         user.subscription.expiresAt = subscriptionExpiresAt;
       }
 
@@ -678,10 +698,10 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         }
       }
 
-      // Ensure listingsLimit is correct for Pro users
-      if (user.subscription.tier === 'pro' && user.subscription.listingsLimit !== 25) {
-        console.log(`🔧 [getMe] Fixed listingsLimit for ${user.email}: ${user.subscription.listingsLimit} -> 25`);
-        user.subscription.listingsLimit = 25;
+      // Sync listingsLimit for Pro users based on their actual plan
+      if (user.subscription.tier === 'pro' && listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit) {
+        console.log(`🔧 [getMe] Syncing listingsLimit for ${user.email}: ${user.subscription.listingsLimit} -> ${listingsLimit}`);
+        user.subscription.listingsLimit = listingsLimit;
       }
 
       console.log(`✅ [getMe] Subscription synced for ${user.email}: ${user.subscription.tier} tier (status: ${user.subscription.status}), ${activeListingsCount}/${user.subscription.listingsLimit} listings used`);

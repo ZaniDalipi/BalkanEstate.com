@@ -77,7 +77,7 @@ const FREE_PLAN: Plan = {
   price: 0,
   period: 'forever',
   periodMonths: 0,
-  features: ['3 active listings', 'Basic analytics', 'Email support', 'Mobile app access'],
+  features: ['3 active listings', '3 saved searches', '3 AI messages', '3 generate insights', 'Basic property details'],
   listingLimit: 3,  // Correct limit for free tier
   color: 'from-gray-400 to-gray-500',
   tier: 0,
@@ -96,14 +96,14 @@ const PERIOD_TO_MONTHS: Record<string, number> = {
 // NOTE: These match the new product seeder values
 const LISTING_LIMITS: Record<string, number> = {
   free: 3,
-  seller_pro_monthly: 25,  // Updated from 20 to 25
-  seller_pro_yearly: 25,   // Updated from 20 to 25
-  seller_enterprise_yearly: 100,
+  seller_pro_monthly: 20,  // 20 listings per month
+  seller_pro_yearly: 250,  // 250 listings per year
+  seller_enterprise_yearly: 500, // 500 listings for enterprise
   // New tiers (from new monetization system)
   free_tier: 3,
-  pro_monthly: 25,
-  pro_yearly: 25,
-  agency_yearly: 0,  // Agency owners don't get listings, they distribute coupons
+  pro_monthly: 20,  // 20 listings per month
+  pro_yearly: 250,  // 250 listings per year
+  agency_yearly: 500,  // 500 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
 };
 
@@ -758,7 +758,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto pt-4">
-              {['Priority Support', 'Advanced Analytics', '25 Listings', 'Premium Placement'].map((benefit, idx) => (
+              {['250 Listings/Year', '3 Promo Coupons/Month', 'Unlimited AI Chat', '20 Insights/Month'].map((benefit, idx) => (
                 <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
                   <CheckCircleIcon className="w-5 h-5 text-primary flex-shrink-0" />
                   <span className="text-sm text-neutral-700">{benefit}</span>
@@ -953,10 +953,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {t('management.whatsIncluded.activeListings', { count: subscriptionDetails.currentPlan.listingLimit })}
+                {subscriptionDetails.currentPlan.listingLimit} Active Listings
               </p>
               <p className="text-sm text-neutral-500">
-                {t('management.whatsIncluded.activeListingsDesc', { count: subscriptionDetails.currentPlan.listingLimit })}
+                {subscriptionDetails.currentPlanKey.includes('yearly') ? 'Per year' : subscriptionDetails.currentPlanKey.includes('monthly') ? 'Per month' : 'Total available'}
               </p>
             </div>
           </div>

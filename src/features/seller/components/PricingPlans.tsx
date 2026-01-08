@@ -338,7 +338,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                 <div className="relative p-6 sm:p-8 rounded-2xl border-2 border-green-400 bg-gradient-to-br from-green-50 to-cyan-50 shadow-lg lg:-translate-y-4 flex flex-col h-full">
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2">
                         <span className="inline-block bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                            {isOffer && proYearlyDiscount > 0 ? t('pricing:discount.off', { percent: proYearlyDiscount }) : t('pricing:plans.proYearly.badge')}
+                            {isOffer && proYearlyDiscount > 0 ? t('pricing:discount.off', { percent: proYearlyDiscount }) : 'MOST POPULAR'}
                         </span>
                     </div>
                     <div className="text-center pt-4">
@@ -362,11 +362,11 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     </div>
                     <ul className="mt-8 space-y-4 text-neutral-700 font-medium flex-grow text-sm sm:text-base">
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.activeListings', { count: 15 })}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.promotedListings', { count: 2, days: 15 })}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.premiumPlacement')}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.analytics')}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.leadManagement')}</li>
+                        <li className="flex items-center"><TickIcon /> 250 listings per year</li>
+                        <li className="flex items-center"><TickIcon /> 3 promo coupons/month (2 highlighted + 1 premium)</li>
+                        <li className="flex items-center"><TickIcon /> 20 insights per month</li>
+                        <li className="flex items-center"><TickIcon /> Unlimited AI chat & saved searches</li>
+                        <li className="flex items-center"><TickIcon /> Unlimited auto-generate descriptions</li>
                         <li className="flex items-center"><TickIcon /> {t('pricing:features.prioritySupport')}</li>
                     </ul>
                     <button
@@ -409,24 +409,24 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                     </div>
                     <div className="mt-8 space-y-3 flex-grow flex flex-col">
                         <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.activeListings', { count: 15 })}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.perfectForActive')}</p>
+                            <p className="font-semibold text-neutral-800 text-sm">20 listings per month</p>
+                            <p className="text-neutral-600 text-sm">Perfect for active sellers</p>
                         </div>
                         <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.promotedListings', { count: 2, days: 15 })}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.featuredBoost')}</p>
+                            <p className="font-semibold text-neutral-800 text-sm">3 promo coupons/month</p>
+                            <p className="text-neutral-600 text-sm">2 highlighted + 1 premium placement</p>
                         </div>
                         <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.analytics')}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.analyticsDesc')}</p>
+                            <p className="font-semibold text-neutral-800 text-sm">20 insights per month</p>
+                            <p className="text-neutral-600 text-sm">Advanced analytics & market insights</p>
                         </div>
                         <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.prioritySupport')}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.prioritySupportDesc')}</p>
+                            <p className="font-semibold text-neutral-800 text-sm">Unlimited AI features</p>
+                            <p className="text-neutral-600 text-sm">AI chat, saved searches, auto-generate descriptions</p>
                         </div>
                          <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.mobileApp')}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.mobileAppDesc')}</p>
+                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.prioritySupport')}</p>
+                            <p className="text-neutral-600 text-sm">{t('pricing:features.prioritySupportDesc')}</p>
                         </div>
                     </div>
                      <button
@@ -471,20 +471,20 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                     </div>
                     <div className="mt-8 space-y-4 flex-grow">
                         <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.dedicatedAgencyPage')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.dedicatedAgencyPageDesc')}</p>
+                            <p className="font-bold text-base sm:text-lg">500 listings (expandable)</p>
+                            <p className="text-neutral-300 text-sm">For your entire agency team</p>
                         </div>
                          <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.displayAgents')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.displayAgentsDesc')}</p>
+                            <p className="font-bold text-base sm:text-lg">5 team members included</p>
+                            <p className="text-neutral-300 text-sm">Agent registration codes for your team</p>
                         </div>
                          <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.featuredAds')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.featuredAdsDesc')}</p>
+                            <p className="font-bold text-base sm:text-lg">5 promo coupons/month</p>
+                            <p className="text-neutral-300 text-sm">2 premier + 2 highlighted + 1 featured</p>
                         </div>
                          <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.fullContact')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.fullContactDesc')}</p>
+                            <p className="font-bold text-base sm:text-lg">Unlimited everything</p>
+                            <p className="text-neutral-300 text-sm">AI, insights, searches - for all agents</p>
                         </div>
                     </div>
                      <button

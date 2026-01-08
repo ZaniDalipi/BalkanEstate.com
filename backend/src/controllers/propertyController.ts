@@ -376,12 +376,16 @@ export const createProperty = async (
       const Product = (await import('../models/Product')).default;
       const product = await Product.findOne({ productId: validSubscription.productId });
 
+      // Determine the correct listing limit based on product or plan type
+      const isYearlyPlan = validSubscription.productId.includes('yearly');
+      const defaultListingLimit = isYearlyPlan ? 250 : 20; // 250 for yearly, 20 for monthly
+
       user.proSubscription = {
         isActive: true,
-        plan: validSubscription.productId.includes('yearly') ? 'pro_yearly' : 'pro_monthly',
+        plan: isYearlyPlan ? 'pro_yearly' : 'pro_monthly',
         expiresAt: validSubscription.expirationDate,
         startedAt: validSubscription.startDate,
-        totalListingsLimit: product?.listingsLimit || 25, // 25 active listings
+        totalListingsLimit: product?.listingsLimit || defaultListingLimit,
         activeListingsCount: user.proSubscription?.activeListingsCount || 0,
         privateSellerCount: user.proSubscription?.privateSellerCount || 0,
         agentCount: user.proSubscription?.agentCount || 0,
@@ -399,7 +403,7 @@ export const createProperty = async (
       user.subscriptionExpiresAt = validSubscription.expirationDate;
 
       await user.save();
-      console.log(`✅ Pro subscription auto-synced! User now has 25 active listings.`);
+      console.log(`✅ Pro subscription auto-synced! User now has ${product?.listingsLimit || defaultListingLimit} active listings.`);
     }
 
     // Initialize subscription object if doesn't exist (for existing users migration)
@@ -413,7 +417,8 @@ export const createProperty = async (
       // Sync from proSubscription (legacy system)
       if (user.proSubscription?.isActive) {
         tier = 'pro';
-        listingsLimit = user.proSubscription.totalListingsLimit || 25;
+        // Default to yearly limit (250) for legacy subscriptions
+        listingsLimit = user.proSubscription.totalListingsLimit || 250;
         if (user.proSubscription.promotionCoupons) {
           promotionCoupons = {
             monthly: user.proSubscription.promotionCoupons.monthly || 3,
@@ -423,7 +428,7 @@ export const createProperty = async (
             lastRefresh: new Date(),
           };
         }
-        savedSearchesLimit = 10;
+        savedSearchesLimit = -1; // Unlimited for Pro
         console.log(`🔄 Migrating Pro subscription: ${listingsLimit} listings, tier: ${tier}`);
       }
 
@@ -815,7 +820,8 @@ export const deleteProperty = async (
           // Sync from proSubscription if exists
           if (user.proSubscription?.isActive) {
             tier = 'pro';
-            listingsLimit = user.proSubscription.totalListingsLimit || 25;
+            // Default to yearly limit (250) for legacy subscriptions
+            listingsLimit = user.proSubscription.totalListingsLimit || 250;
           }
 
           // Count existing properties (excluding the one being deleted)
@@ -839,7 +845,7 @@ export const deleteProperty = async (
               rollover: 0,
               lastRefresh: new Date(),
             },
-            savedSearchesLimit: tier === 'pro' ? 10 : 1,
+            savedSearchesLimit: tier === 'pro' ? -1 : 1, // Unlimited for Pro
             totalPaid: 0,
             startDate: user.proSubscription?.startedAt || new Date(),
             expiresAt: user.proSubscription?.expiresAt,

@@ -26,10 +26,11 @@ const PRODUCTS = [
     durationDays: 30,
     features: [
       '3 active listings',
+      '3 saved searches',
+      '3 AI chat messages',
+      '3 generate insights',
       'Basic property details',
       'Photo gallery (up to 10 images)',
-      'Contact form',
-      'Search visibility',
     ],
     targetRole: 'seller' as const,
     displayOrder: 1,
@@ -41,7 +42,9 @@ const PRODUCTS = [
     listingsLimit: 3,
     promotionCoupons: 0,
     agentCoupons: 0,
-    savedSearchesLimit: 1,
+    savedSearchesLimit: 3,
+    aiMessagesLimit: 3,
+    generateInsightsLimit: 3,
   },
 
   // ============================================================================
@@ -58,15 +61,15 @@ const PRODUCTS = [
     billingPeriod: 'monthly' as const,
     durationDays: 30,
     features: [
-      '25 active listings (8x more than Free!)',
-      '3 promotion coupons per month (€90 value)',
+      '20 listings per month',
+      '3 promotion coupons/month (2 highlighted + 1 premium)',
+      '20 insights per month',
+      'Unlimited AI chat (no spam)',
+      'Unlimited saved searches',
+      'Unlimited auto-generate image description',
       'Advanced analytics & insights',
       'Lead management dashboard',
-      'Priority listing placement',
-      'Featured badge on listings',
-      'Email & SMS notifications',
       'Priority support',
-      'No watermarks on images',
     ],
     targetRole: 'seller' as const,
     displayOrder: 2,
@@ -82,15 +85,17 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 3,
-    listingsLimit: 25,
-    promotionCoupons: 3,
+    listingsLimit: 20, // 20 listings per month
+    promotionCoupons: 3, // 2 highlighted + 1 premium
     agentCoupons: 0,
-    savedSearchesLimit: 10,
+    savedSearchesLimit: -1, // unlimited
+    aiMessagesLimit: -1, // unlimited (rate limited)
+    generateInsightsLimit: 20,
   },
   {
     productId: 'pro_yearly',
     name: 'Pro Yearly',
-    description: 'Best deal for committed sellers - save €100/year (4 months free!)',
+    description: 'Best deal for committed sellers - 250 listings per year!',
     type: 'subscription' as const,
     tier: 'pro' as const,
     price: 200,
@@ -98,19 +103,19 @@ const PRODUCTS = [
     billingPeriod: 'yearly' as const,
     durationDays: 365,
     features: [
-      '25 active listings year-round',
-      '3 promotion coupons per month (rollover up to 6)',
+      '250 listings per year',
+      '3 promotion coupons/month (2 highlighted + 1 premium)',
+      '20 insights per month',
+      'Unlimited AI chat (no spam)',
+      'Unlimited saved searches',
+      'Unlimited auto-generate image description',
       'All Pro Monthly features',
-      'Save €100/year vs monthly',
-      'Annual billing convenience',
-      'Advanced analytics & insights',
-      'Lead management dashboard',
-      'Priority listing placement',
+      'Save vs monthly billing',
       'Priority support',
     ],
     targetRole: 'seller' as const,
     displayOrder: 3,
-    badge: 'SAVE 33%',
+    badge: 'MOST POPULAR',
     badgeColor: 'amber',
     highlighted: false,
     cardStyle: {
@@ -121,19 +126,104 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 3,
-    listingsLimit: 25,
-    promotionCoupons: 3,
+    listingsLimit: 250, // 250 listings per year
+    promotionCoupons: 3, // 2 highlighted + 1 premium per month
     agentCoupons: 0,
-    savedSearchesLimit: 10,
+    savedSearchesLimit: -1, // unlimited
+    aiMessagesLimit: -1, // unlimited (rate limited)
+    generateInsightsLimit: 20,
   },
 
   // ============================================================================
-  // AGENCY TIER - For real estate agencies (€1000/year)
+  // SELLER PRO TIER - Aliases for backward compatibility (same as pro_monthly/pro_yearly)
   // ============================================================================
   {
-    productId: 'agency_yearly',
-    name: 'Agency',
-    description: 'Complete agency solution - equip your team with Pro subscriptions and shared promotion pool.',
+    productId: 'seller_pro_monthly',
+    name: 'Pro Monthly',
+    description: 'Professional selling tools with monthly flexibility. Great for active sellers.',
+    type: 'subscription' as const,
+    tier: 'pro' as const,
+    price: 25,
+    currency: 'EUR',
+    billingPeriod: 'monthly' as const,
+    durationDays: 30,
+    features: [
+      '20 listings per month',
+      '3 promotion coupons/month (2 highlighted + 1 premium)',
+      '20 insights per month',
+      'Unlimited AI chat (no spam)',
+      'Unlimited saved searches',
+      'Unlimited auto-generate image description',
+      'Advanced analytics & insights',
+      'Lead management dashboard',
+      'Priority support',
+    ],
+    targetRole: 'seller' as const,
+    displayOrder: 2,
+    badge: 'BEST VALUE',
+    badgeColor: 'green',
+    highlighted: true,
+    cardStyle: {
+      backgroundColor: 'from-green-50 to-emerald-50',
+      borderColor: 'border-green-500',
+      textColor: 'text-gray-900',
+    },
+    isActive: true,
+    isVisible: true,
+    hasFreeTrial: false,
+    gracePeriodDays: 3,
+    listingsLimit: 20,
+    promotionCoupons: 3,
+    agentCoupons: 0,
+    savedSearchesLimit: -1,
+    aiMessagesLimit: -1,
+    generateInsightsLimit: 20,
+  },
+  {
+    productId: 'seller_pro_yearly',
+    name: 'Pro Yearly',
+    description: 'Best deal for committed sellers - 250 listings per year!',
+    type: 'subscription' as const,
+    tier: 'pro' as const,
+    price: 200,
+    currency: 'EUR',
+    billingPeriod: 'yearly' as const,
+    durationDays: 365,
+    features: [
+      '250 listings per year',
+      '3 promotion coupons/month (2 highlighted + 1 premium)',
+      '20 insights per month',
+      'Unlimited AI chat (no spam)',
+      'Unlimited saved searches',
+      'Unlimited auto-generate image description',
+      'All Pro Monthly features',
+      'Save vs monthly billing',
+      'Priority support',
+    ],
+    targetRole: 'seller' as const,
+    displayOrder: 3,
+    badge: 'MOST POPULAR',
+    badgeColor: 'amber',
+    highlighted: false,
+    cardStyle: {
+      backgroundColor: 'from-amber-50 to-yellow-50',
+      borderColor: 'border-amber-500',
+    },
+    isActive: true,
+    isVisible: true,
+    hasFreeTrial: false,
+    gracePeriodDays: 3,
+    listingsLimit: 250,
+    promotionCoupons: 3,
+    agentCoupons: 0,
+    savedSearchesLimit: -1,
+    aiMessagesLimit: -1,
+    generateInsightsLimit: 20,
+  },
+  {
+    productId: 'seller_enterprise_yearly',
+    name: 'Enterprise',
+    description: 'Complete agency solution - 500 listings, 5 team members, and shared promotion pool.',
     type: 'subscription' as const,
     tier: 'agency' as const,
     price: 1000,
@@ -141,15 +231,16 @@ const PRODUCTS = [
     billingPeriod: 'yearly' as const,
     durationDays: 365,
     features: [
-      '5 yearly Pro agent coupons (€600 value)',
-      '100 total listings (5 agents × 20 each)',
-      '15 promotion coupons per month (agency-wide pool)',
-      'Agency branding page with logo & cover',
-      'Team dashboard & analytics',
-      'Agent performance tracking',
+      '500 listings (expandable)',
+      '5 team members included',
+      'Agency branding page',
+      '5 promotion coupons/month (2 premier + 2 highlighted + 1 featured)',
+      'Agent registration codes',
+      'Unlimited saved searches',
+      'Unlimited AI usage (no spam)',
+      'Unlimited generate insights for all agents',
       'Dedicated account manager',
-      'White-label options',
-      'Save €217/month vs 5 individual Pro accounts',
+      'Team dashboard & analytics',
     ],
     targetRole: 'agent' as const,
     displayOrder: 4,
@@ -165,10 +256,59 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 7,
-    listingsLimit: 0, // Agency owners don't get listings - they distribute coupons
-    promotionCoupons: 15,
+    listingsLimit: 500,
+    promotionCoupons: 5,
     agentCoupons: 5,
-    savedSearchesLimit: 0,
+    savedSearchesLimit: -1,
+    aiMessagesLimit: -1,
+    generateInsightsLimit: -1,
+  },
+
+  // ============================================================================
+  // ENTERPRISE TIER - For real estate agencies (€1000/year)
+  // ============================================================================
+  {
+    productId: 'agency_yearly',
+    name: 'Enterprise',
+    description: 'Complete agency solution - 500 listings, 5 team members, and shared promotion pool.',
+    type: 'subscription' as const,
+    tier: 'agency' as const,
+    price: 1000,
+    currency: 'EUR',
+    billingPeriod: 'yearly' as const,
+    durationDays: 365,
+    features: [
+      '500 listings (expandable)',
+      '5 team members included',
+      'Agency branding page',
+      '5 promotion coupons/month (2 premier + 2 highlighted + 1 featured)',
+      'Agent registration codes',
+      'Unlimited saved searches',
+      'Unlimited AI usage (no spam)',
+      'Unlimited generate insights for all agents',
+      'Dedicated account manager',
+      'Team dashboard & analytics',
+    ],
+    targetRole: 'agent' as const,
+    displayOrder: 4,
+    badge: 'BEST FOR TEAMS',
+    badgeColor: 'red',
+    highlighted: true,
+    cardStyle: {
+      backgroundColor: 'from-slate-900 to-gray-800',
+      borderColor: 'border-amber-400',
+      textColor: 'text-white',
+    },
+    isActive: true,
+    isVisible: true,
+    hasFreeTrial: false,
+    gracePeriodDays: 7,
+    listingsLimit: 500, // 500 listings for enterprise
+    promotionCoupons: 5, // 2 premier + 2 highlighted + 1 featured
+    agentCoupons: 5, // 5 team member registration codes
+    savedSearchesLimit: -1, // unlimited
+    aiMessagesLimit: -1, // unlimited (rate limited)
+    generateInsightsLimit: -1, // unlimited for all agents
   },
 
   // ============================================================================
@@ -185,12 +325,11 @@ const PRODUCTS = [
     billingPeriod: 'monthly' as const,
     durationDays: 30,
     features: [
+      'Instant email & SMS notifications',
       'Unlimited saved searches',
-      'Instant email & SMS alerts',
-      'Priority viewing access',
+      'Early access to new listings',
+      'Advanced market insights',
       'Price drop notifications',
-      'New listing alerts (before public)',
-      'Market insights & trends',
       'Investment calculator',
       'Mortgage pre-qualification',
       'Ad-free browsing',
@@ -198,7 +337,7 @@ const PRODUCTS = [
     ],
     targetRole: 'buyer' as const,
     displayOrder: 5,
-    badge: 'MOST POPULAR',
+    badge: 'FOR BUYERS',
     badgeColor: 'blue',
     highlighted: false,
     cardStyle: {
@@ -213,7 +352,9 @@ const PRODUCTS = [
     listingsLimit: 0, // Buyers don't create listings
     promotionCoupons: 0,
     agentCoupons: 0,
-    savedSearchesLimit: -1, // -1 = unlimited
+    savedSearchesLimit: -1, // unlimited
+    aiMessagesLimit: -1, // unlimited (rate limited)
+    generateInsightsLimit: -1, // unlimited
   },
 ];
 
@@ -237,11 +378,11 @@ async function seedProducts() {
     console.log('\n🎉 Successfully seeded all products!');
     console.log(`📊 Total products: ${PRODUCTS.length}`);
     console.log('\n💰 Pricing Summary:');
-    console.log('   Free: €0 (3 listings)');
-    console.log('   Pro Monthly: €25 (25 listings, 3 promo coupons)');
-    console.log('   Pro Yearly: €200 (25 listings, 3 promo coupons, save €100)');
-    console.log('   Agency: €1000/year (5 agent coupons, 15 promo coupons)');
-    console.log('   Buyer Pro: €3/month (unlimited searches & alerts)');
+    console.log('   Free: €0 (3 listings, 3 saved searches, 3 AI messages, 3 insights)');
+    console.log('   Pro Monthly: €25 (20 listings/mo, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
+    console.log('   Pro Yearly: €200 (250 listings/year, 3 promo coupons/mo, 20 insights/mo, unlimited AI & searches)');
+    console.log('   Enterprise: €1000/year (500 listings, 5 team members, 5 promo coupons, unlimited everything)');
+    console.log('   Buyer Pro: €3/month (unlimited searches, instant alerts, early access, market insights)');
 
   } catch (error) {
     console.error('❌ Error seeding products:', error);

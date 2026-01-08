@@ -25,13 +25,15 @@ export type SubscriptionStatus = 'active' | 'canceled' | 'expired' | 'trial';
 export type SubscriptionPlan = 'free' | 'pro_monthly' | 'pro_yearly' | 'enterprise_yearly';
 
 export interface PromotionCoupons {
-  monthly: number;           // Monthly allocation (0, 2, 15)
+  monthly: number;           // Monthly allocation (0, 3, 5)
   available: number;         // Currently available total
   used: number;              // Used this month
   featured: number;          // Featured coupons available
   highlighted: number;       // Highlighted coupons available
+  premium: number;           // Premium placement coupons available
   featuredDuration: number;  // Days per featured coupon (7 or 14)
   highlightedDuration: number; // Days per highlighted coupon (7 or 14)
+  premiumDuration: number;   // Days per premium coupon (7 or 14)
   lastRefresh?: Date | string;
 }
 

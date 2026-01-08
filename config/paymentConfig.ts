@@ -401,7 +401,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
   buyer_pro_monthly: {
     id: 'buyer_pro_monthly',
     name: 'Buyer Pro Monthly',
-    price: 1.50,
+    price: 3, // €3/month for Buyer Pro
     currency: 'EUR',
     interval: 'month',
     // Add your Stripe Price ID here when created
@@ -410,7 +410,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
   pro_monthly: {
     id: 'pro_monthly',
     name: 'Pro Monthly',
-    price: 25,
+    price: 25, // €25/month - 20 listings/month
     currency: 'EUR',
     interval: 'month',
     stripePriceId: process.env.STRIPE_PRICE_PRO_MONTHLY,
@@ -418,7 +418,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
   pro_yearly: {
     id: 'pro_yearly',
     name: 'Pro Annual',
-    price: 200,
+    price: 200, // €200/year - 250 listings/year
     currency: 'EUR',
     interval: 'year',
     stripePriceId: process.env.STRIPE_PRICE_PRO_YEARLY,
@@ -426,7 +426,7 @@ export const PAYMENT_PLANS: Record<string, PaymentPlan> = {
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 1000,
+    price: 1000, // €1000/year - 500 listings, 5 team members
     currency: 'EUR',
     interval: 'year',
     stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE,
