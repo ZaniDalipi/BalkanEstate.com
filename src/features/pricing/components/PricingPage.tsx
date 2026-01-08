@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
 import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon, CheckIcon, ArrowLeftIcon } from '@/constants';
-import { buildLocalizedPath } from '@/utils/languageRouting';
+
+// Helper to build localized path
+const buildLocalizedPath = (path: string): string => {
+  const currentLang = window.location.pathname.split('/')[1] || 'en';
+  const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+  const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+  return `/${lang}${path === '/' ? '' : path}`;
+};
 
 interface Product {
   id: string;
