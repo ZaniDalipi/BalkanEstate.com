@@ -18,6 +18,12 @@ import {
 } from '@/constants';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
+interface PropertyImage {
+  url: string;
+  publicId?: string;
+  tag?: string;
+}
+
 interface Property {
   _id: string;
   title: string;
@@ -40,7 +46,8 @@ interface Property {
   description?: string;
   isPromoted?: boolean;
   views?: number;
-  images?: string[];
+  imageUrl?: string;
+  images?: PropertyImage[];
   sellerId: {
     _id: string;
     name: string;
@@ -50,6 +57,40 @@ interface Property {
   createdAt: string;
   updatedAt: string;
 }
+
+// Helper function to get the best available image URL
+const getPropertyImage = (property: Property): string | null => {
+  // First try the main imageUrl
+  if (property.imageUrl) {
+    return property.imageUrl;
+  }
+  // Then try the first image from the images array
+  if (property.images && property.images.length > 0 && property.images[0]?.url) {
+    return property.images[0].url;
+  }
+  return null;
+};
+
+// Helper to get all image URLs
+const getAllPropertyImages = (property: Property): string[] => {
+  const allImages: string[] = [];
+
+  // Add main image first
+  if (property.imageUrl) {
+    allImages.push(property.imageUrl);
+  }
+
+  // Add images from the array
+  if (property.images && property.images.length > 0) {
+    property.images.forEach(img => {
+      if (img?.url && !allImages.includes(img.url)) {
+        allImages.push(img.url);
+      }
+    });
+  }
+
+  return allImages;
+};
 
 const PropertyManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -467,9 +508,9 @@ const PropertyManager: React.FC = () => {
                 <tr key={property._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      {property.images && property.images.length > 0 ? (
+                      {getPropertyImage(property) ? (
                         <img
-                          src={property.images[0]}
+                          src={getPropertyImage(property)!}
                           alt={property.title}
                           className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                         />
@@ -649,12 +690,12 @@ const PropertyManager: React.FC = () => {
 
             <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-80px)]">
               {/* Images Gallery */}
-              {viewingProperty.images && viewingProperty.images.length > 0 && (
+              {getAllPropertyImages(viewingProperty).length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {viewingProperty.images.slice(0, 8).map((img, idx) => (
+                  {getAllPropertyImages(viewingProperty).slice(0, 8).map((imgUrl, idx) => (
                     <img
                       key={idx}
-                      src={img}
+                      src={imgUrl}
                       alt={`${viewingProperty.title} ${idx + 1}`}
                       className="w-full h-32 object-cover rounded-xl"
                     />
