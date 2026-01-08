@@ -12,8 +12,8 @@
  * Upload images with the exact city name (lowercase, spaces replaced with hyphens)
  */
 
-// Cloudinary cloud name - update this with your actual cloud name
-export const CLOUDINARY_CLOUD_NAME = 'balkanestate';
+// Cloudinary cloud name
+export const CLOUDINARY_CLOUD_NAME = 'dh8tbq8wy';
 
 // Base URL for Cloudinary images
 export const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload`;
