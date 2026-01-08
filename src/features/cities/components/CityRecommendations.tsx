@@ -244,6 +244,30 @@ const CityRecommendations: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* AI-Powered Market Intelligence - Moved to top */}
+            {cities.length > 0 && (
+              <div className="p-4 bg-gradient-to-r from-primary/5 to-blue-50 rounded-xl border border-primary/20">
+                <div className="flex items-start gap-3">
+                  <SparklesIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-neutral-900 mb-1">{t('aiInsights.title')}</h4>
+                    <p className="text-sm text-neutral-600 mb-1">
+                      {t('aiInsights.description', { count: cities.length })}
+                    </p>
+                    <p className="text-xs text-neutral-500">
+                      {t('aiInsights.lastUpdated', {
+                        date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      })} • {t('aiInsights.dataSource')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
         {/* Country Filter */}
@@ -432,30 +456,6 @@ const CityRecommendations: React.FC = () => {
             );
           })}
         </div>
-
-        {/* Data Freshness Note */}
-        {cities.length > 0 && (
-          <div className="mt-8 p-6 bg-white rounded-xl border border-neutral-200">
-            <div className="flex items-start gap-3">
-              <SparklesIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-neutral-900 mb-1">{t('aiInsights.title')}</h4>
-                <p className="text-sm text-neutral-600 mb-2">
-                  {t('aiInsights.description', { count: cities.length })}
-                </p>
-                <p className="text-xs text-neutral-500">
-                  {t('aiInsights.lastUpdated', {
-                    date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })
-                  })} • {t('aiInsights.dataSource')}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
         </div>
       </div>
 
