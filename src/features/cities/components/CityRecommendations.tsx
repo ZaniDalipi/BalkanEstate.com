@@ -280,7 +280,7 @@ const CityRecommendations: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCities.map((city) => {
             const hasImage = !failedImages.has(city.city);
-            const imageUrl = getCityImageUrl(city.city, { width: 800, height: 400, quality: 'auto:good' });
+            const imageUrl = getCityImageUrl(city.city, { country: city.country, width: 800, height: 400, quality: 'auto:good' });
             const fallbackGradient = getCityFallbackGradient(city.city);
 
             return (

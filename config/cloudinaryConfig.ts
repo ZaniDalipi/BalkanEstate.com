@@ -1,15 +1,15 @@
 /**
  * Cloudinary configuration for frontend assets
  *
- * City images should be uploaded to Cloudinary in the folder:
- * balkan-estate/city-images/{city-name-normalized}
+ * City images should be uploaded to Cloudinary in the folder structure:
+ * balkan-estate/city-images/{country}/{city-name}
  *
  * For example:
- * - Tirana → balkan-estate/city-images/tirana
- * - Pristina → balkan-estate/city-images/pristina
- * - Skopje → balkan-estate/city-images/skopje
+ * - Tirana, Albania → balkan-estate/city-images/albania/tirana
+ * - Prishtina, Kosovo → balkan-estate/city-images/kosovo/prishtina
+ * - Skopje, North Macedonia → balkan-estate/city-images/north-macedonia/skopje
  *
- * Upload images with the exact city name (lowercase, spaces replaced with hyphens)
+ * Upload images with the exact names (lowercase, spaces replaced with hyphens)
  */
 
 // Cloudinary cloud name
@@ -22,27 +22,31 @@ export const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOU
 export const CITY_IMAGES_FOLDER = 'balkan-estate/city-images';
 
 /**
- * Normalizes a city name for use in Cloudinary URLs
- * @param cityName - The city name (e.g., "Tirana", "Novi Sad")
- * @returns Normalized city name (e.g., "tirana", "novi-sad")
+ * Normalizes a name for use in Cloudinary URLs
+ * @param name - The name (e.g., "Tirana", "Novi Sad", "North Macedonia")
+ * @returns Normalized name (e.g., "tirana", "novi-sad", "north-macedonia")
  */
-export const normalizeCityName = (cityName: string): string => {
-  return cityName
+export const normalizeName = (name: string): string => {
+  return name
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/[^a-z0-9-]/g, ''); // Remove special characters
 };
 
+// Alias for backward compatibility
+export const normalizeCityName = normalizeName;
+
 /**
  * Generates a Cloudinary URL for a city image with optimizations
  * @param cityName - The city name
- * @param options - Optional transformation options
+ * @param options - Optional transformation options including country
  * @returns The full Cloudinary URL for the city image
  */
 export const getCityImageUrl = (
   cityName: string,
   options: {
+    country?: string;
     width?: number;
     height?: number;
     quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best' | number;
@@ -52,6 +56,7 @@ export const getCityImageUrl = (
   } = {}
 ): string => {
   const {
+    country,
     width = 800,
     height = 600,
     quality = 'auto',
@@ -60,7 +65,8 @@ export const getCityImageUrl = (
     gravity = 'auto',
   } = options;
 
-  const normalizedName = normalizeCityName(cityName);
+  const normalizedCity = normalizeName(cityName);
+  const normalizedCountry = country ? normalizeName(country) : null;
 
   // Build transformation string
   const transformations = [
@@ -72,18 +78,29 @@ export const getCityImageUrl = (
     `f_${format}`,
   ].join(',');
 
-  return `${CLOUDINARY_BASE_URL}/${transformations}/${CITY_IMAGES_FOLDER}/${normalizedName}`;
+  // Build path: folder/country/city or folder/city
+  const path = normalizedCountry
+    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}`
+    : `${CITY_IMAGES_FOLDER}/${normalizedCity}`;
+
+  return `${CLOUDINARY_BASE_URL}/${transformations}/${path}`;
 };
 
 /**
  * Generates a low-quality placeholder URL for blur-up effect
  * @param cityName - The city name
+ * @param country - The country name (optional)
  * @returns The placeholder URL with blur effect
  */
-export const getCityImagePlaceholder = (cityName: string): string => {
-  const normalizedName = normalizeCityName(cityName);
+export const getCityImagePlaceholder = (cityName: string, country?: string): string => {
+  const normalizedCity = normalizeName(cityName);
+  const normalizedCountry = country ? normalizeName(country) : null;
 
-  return `${CLOUDINARY_BASE_URL}/w_50,h_38,c_fill,g_auto,q_10,e_blur:1000,f_auto/${CITY_IMAGES_FOLDER}/${normalizedName}`;
+  const path = normalizedCountry
+    ? `${CITY_IMAGES_FOLDER}/${normalizedCountry}/${normalizedCity}`
+    : `${CITY_IMAGES_FOLDER}/${normalizedCity}`;
+
+  return `${CLOUDINARY_BASE_URL}/w_50,h_38,c_fill,g_auto,q_10,e_blur:1000,f_auto/${path}`;
 };
 
 /**
