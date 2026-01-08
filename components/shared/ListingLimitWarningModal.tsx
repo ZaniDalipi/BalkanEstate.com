@@ -20,9 +20,17 @@ interface ListingLimitWarningModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    tierName?: string; // e.g., "Free", "Pro Monthly", "Pro Yearly"
+    listingLimit?: number; // The actual limit for this tier
 }
 
-const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({ isOpen, onClose, onConfirm }) => {
+const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    tierName = 'Free',
+    listingLimit = 3,
+}) => {
     const { t } = useTranslation(['modals']);
 
     return (
@@ -41,9 +49,9 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({ isO
                     {t('listingLimit.title', 'Listing Limit Reached')}
                 </h3>
 
-                {/* Message */}
+                {/* Message - Dynamic based on tier */}
                 <p className="text-neutral-600 mb-4">
-                    {t('listingLimit.message', "You've reached your free tier limit of 3 active listings.")}
+                    {t('listingLimit.messageDynamic', `You've reached your ${tierName} tier limit of ${listingLimit} active listings.`, { tierName, limit: listingLimit })}
                 </p>
 
                 {/* Draft saved notice */}

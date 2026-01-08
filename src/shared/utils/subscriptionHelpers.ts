@@ -136,7 +136,7 @@ export const FEATURE_LIMITS: Record<
     savedSearches: 3,
     aiMessages: 3,
     generateInsights: 3,
-    autoGenerateImageDesc: 3,
+    autoGenerateImageDesc: 0, // No auto image descriptions for free tier
   },
   pro_monthly: {
     savedSearches: -1, // unlimited

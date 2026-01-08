@@ -208,7 +208,8 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
           throw new Error('Please log in to create an agency');
         }
 
-        const response = await fetch('http://localhost:5001/api/agencies', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_URL}/agencies`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -228,7 +229,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
 
         // Refresh user data to get updated role and agency info
         try {
-          const userResponse = await fetch('http://localhost:5001/api/auth/me', {
+          const userResponse = await fetch(`${API_URL}/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -516,22 +517,32 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     </div>
                     <div className="mt-8 space-y-4 flex-grow">
-                        <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">500 listings (expandable)</p>
-                            <p className="text-neutral-300 text-sm">For your entire agency team</p>
-                        </div>
-                         <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">5 team members included</p>
-                            <p className="text-neutral-300 text-sm">Agent registration codes for your team</p>
-                        </div>
-                         <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">5 promo coupons/month</p>
-                            <p className="text-neutral-300 text-sm">2 premier + 2 highlighted + 1 featured</p>
-                        </div>
-                         <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">Unlimited everything</p>
-                            <p className="text-neutral-300 text-sm">AI, insights, searches - for all agents</p>
-                        </div>
+                        {enterpriseProduct?.features && enterpriseProduct.features.length > 0 ? (
+                            enterpriseProduct.features.map((feature, index) => (
+                                <div key={index} className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">{feature}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">500 listings (expandable)</p>
+                                    <p className="text-neutral-300 text-sm">For your entire agency team</p>
+                                </div>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">5 team members included</p>
+                                    <p className="text-neutral-300 text-sm">Agent registration codes for your team</p>
+                                </div>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">5 promo coupons/month</p>
+                                    <p className="text-neutral-300 text-sm">2 premier + 2 highlighted + 1 featured</p>
+                                </div>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">Unlimited everything</p>
+                                    <p className="text-neutral-300 text-sm">AI, insights, searches - for all agents</p>
+                                </div>
+                            </>
+                        )}
                     </div>
                      <button
                         onClick={() => handlePlanSelection('Enterprise', enterprisePrice, 'year', enterpriseDiscount, enterpriseProduct?.productId || 'seller_enterprise_yearly')}
