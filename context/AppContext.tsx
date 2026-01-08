@@ -376,14 +376,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
     }
 
-    // Check if there's a pending subscription and reopen the modal
+    // Check if there's a pending subscription and navigate to pricing
     if (state.pendingSubscription) {
       setTimeout(() => {
         const pendingSub = state.pendingSubscription;
         if (pendingSub.modalType === 'buyer') {
           dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });
         } else {
-          dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: state.isFirstLoginOffer } });
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
         }
       }, 500);
     }
@@ -425,14 +425,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
     }
 
-    // Check if there's a pending subscription and reopen the modal
+    // Check if there's a pending subscription and navigate to pricing
     if (state.pendingSubscription) {
       setTimeout(() => {
         const pendingSub = state.pendingSubscription;
         if (pendingSub.modalType === 'buyer') {
           dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });
         } else {
-          dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: state.isFirstLoginOffer } });
+          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
         }
       }, 500);
     }

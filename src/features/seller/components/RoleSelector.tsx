@@ -341,7 +341,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                     className="w-full px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-500 hover:to-orange-600 transition-all"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true } });
+                                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
                                     }}
                                 >
                                     {t('seller:roleSelector.proRequired.button')}

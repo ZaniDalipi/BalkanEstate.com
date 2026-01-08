@@ -31,7 +31,6 @@ import AlertDialog from './components/shared/AlertDialog';
 // All these components use default exports
 const CityRecommendations = lazy(() => import('./src/features/cities/components/CityRecommendations'));
 const CreateListingPage = lazy(() => import('./src/features/seller/components/SellerDashboard'));
-const PricingPlans = lazy(() => import('./src/features/seller/components/PricingPlans'));
 const SavedSearchesPage = lazy(() => import('./src/features/saved/components/SavedSearchesPage'));
 const SavedPropertiesPage = lazy(() => import('./src/features/saved/components/SavedHomesPage'));
 const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPage'));
@@ -394,7 +393,7 @@ const MainLayout: React.FC = () => {
   const showHeader = !(isMobile && (isSearchPage || !!state.selectedProperty));
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   
-  const anyNonAuthModalOpen = state.isPricingModalOpen || state.isSubscriptionModalOpen || state.isListingLimitWarningOpen || state.isDiscountGameOpen;
+  const anyNonAuthModalOpen = state.isSubscriptionModalOpen || state.isListingLimitWarningOpen || state.isDiscountGameOpen;
   
   const isOverlayVisible = 
     state.isAuthModalOpen || 
@@ -402,33 +401,9 @@ const MainLayout: React.FC = () => {
     (isMobile && isSidebarOpen);
 
 
-  const handleSubscribe = async () => {
-    try {
-        await updateUser({ isSubscribed: true });
-        
-        // If a property was pending, create it now
-        if (state.pendingProperty) {
-            await createListing(state.pendingProperty);
-            dispatch({ type: 'SET_PENDING_PROPERTY', payload: null });
-            // Optionally, show a success toast here
-        }
-    } catch (error) {
-        console.error("Subscription update failed:", error);
-        // Optionally show an error toast
-    } finally {
-        dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: false } });
-        dispatch({ type: 'SET_ACTIVE_DISCOUNT', payload: null });
-    }
-  };
-
-  const handlePricingClose = () => {
-    // If a property was pending and the user closes the modal, we clear it.
-    // The component that initiated this will show an error message.
-    if (state.pendingProperty) {
-        dispatch({ type: 'SET_PENDING_PROPERTY', payload: null });
-    }
-    dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: false } });
-    dispatch({ type: 'SET_ACTIVE_DISCOUNT', payload: null });
+  const navigateToPricing = () => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    window.history.pushState({}, '', buildLocalizedPath('/pricing'));
   };
   
   const handleWarningConfirm = () => {
@@ -439,7 +414,7 @@ const MainLayout: React.FC = () => {
   const handleGameComplete = (discounts: { proYearly: number; proMonthly: number; enterprise: number; }) => {
     dispatch({ type: 'SET_ACTIVE_DISCOUNT', payload: discounts });
     dispatch({ type: 'TOGGLE_DISCOUNT_GAME', payload: false });
-    dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: true } });
+    navigateToPricing();
   };
 
   return (
@@ -469,15 +444,6 @@ const MainLayout: React.FC = () => {
             <DiscountGameModal
                 isOpen={state.isDiscountGameOpen}
                 onGameComplete={handleGameComplete}
-            />
-          )}
-          {state.isPricingModalOpen && (
-            <PricingPlans
-                isOpen={state.isPricingModalOpen}
-                onClose={handlePricingClose}
-                onSubscribe={handleSubscribe}
-                isOffer={state.isFirstLoginOffer}
-                isAgencyMode={state.isAgencyCreationMode}
             />
           )}
           {state.isSubscriptionModalOpen && (

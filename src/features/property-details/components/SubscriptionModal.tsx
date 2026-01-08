@@ -73,7 +73,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     onClose();
     // A small delay to ensure the first modal has time to start closing animation
     setTimeout(() => {
-        dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
     }, 150);
   };
 
