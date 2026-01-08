@@ -131,7 +131,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
             return {
                 plan: legacySub.plan || 'pro',
-                limit: legacySub.totalListingsLimit || 25,
+                limit: legacySub.totalListingsLimit || 250, // Pro yearly default
                 used: legacySub.activeListingsCount || 0,
                 roleCount,
                 isActive: true,

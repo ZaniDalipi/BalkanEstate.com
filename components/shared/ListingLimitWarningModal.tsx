@@ -62,7 +62,7 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({ isO
                         {t('listingLimit.discountOffer', 'Win up to 50% OFF!')}
                     </p>
                     <p className="text-sm text-amber-700">
-                        {t('listingLimit.gameDescription', 'Play a quick game to win a discount on your Pro subscription. Get 25 listings + promotions!')}
+                        {t('listingLimit.gameDescription', 'Play a quick game to win a discount on your Pro subscription. Get up to 250 listings + promotions!')}
                     </p>
                 </div>
 

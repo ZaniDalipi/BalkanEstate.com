@@ -131,7 +131,7 @@ export interface User {
     subscription?: {
         tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer';
         status: 'active' | 'canceled' | 'expired' | 'trial';
-        listingsLimit: number; // 3 for free, 25 for pro/agency
+        listingsLimit: number; // 3 for free, 20 for pro_monthly, 250 for pro_yearly, 500 for enterprise
         activeListingsCount: number;
         privateSellerCount: number;
         agentCount: number;

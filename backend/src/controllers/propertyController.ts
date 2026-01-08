@@ -521,7 +521,7 @@ export const createProperty = async (
 
     if (currentCount >= limit) {
       res.status(403).json({
-        message: `You have reached your ${tier} tier limit of ${limit} active listings. ${tier === 'free' ? 'Upgrade to Pro for 25 active listings!' : 'Please delete some listings to create new ones.'}`,
+        message: `You have reached your ${tier} tier limit of ${limit} active listings. ${tier === 'free' ? 'Upgrade to Pro for up to 250 active listings!' : 'Please delete some listings to create new ones.'}`,
         code: 'LISTING_LIMIT_REACHED',
         tier,
         limit,

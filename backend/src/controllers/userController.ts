@@ -198,7 +198,7 @@ export const syncAllSubscriptionCounters = async (req: Request, res: Response): 
 
         if (user.proSubscription?.isActive) {
           tier = 'pro';
-          listingsLimit = user.proSubscription.totalListingsLimit || 25;
+          listingsLimit = user.proSubscription.totalListingsLimit || 250; // Pro yearly default
         }
 
         // Count existing properties for this user
