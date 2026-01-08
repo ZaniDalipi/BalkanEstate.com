@@ -161,100 +161,6 @@ const PLAN_TIERS: Record<string, number> = {
   agency_yearly: 3,
 };
 
-// Feature limits by product ID (source of truth)
-// -1 = unlimited
-const FEATURE_LIMITS: Record<string, {
-  savedSearches: number;
-  aiMessages: number;
-  aiInsights: number;
-  imageDescription: number;
-  promotionCoupons: number;
-  highlightedCoupons: number;
-  premiumCoupons: number;
-  featuredCoupons: number;
-}> = {
-  free: {
-    savedSearches: 3,
-    aiMessages: 3,
-    aiInsights: 3,
-    imageDescription: 0,
-    promotionCoupons: 0,
-    highlightedCoupons: 0,
-    premiumCoupons: 0,
-    featuredCoupons: 0,
-  },
-  pro_monthly: {
-    savedSearches: -1, // unlimited
-    aiMessages: -1, // unlimited
-    aiInsights: 20,
-    imageDescription: -1, // unlimited
-    promotionCoupons: 3,
-    highlightedCoupons: 2,
-    premiumCoupons: 1,
-    featuredCoupons: 0,
-  },
-  pro_yearly: {
-    savedSearches: -1, // unlimited
-    aiMessages: -1, // unlimited
-    aiInsights: 20,
-    imageDescription: -1, // unlimited
-    promotionCoupons: 3,
-    highlightedCoupons: 2,
-    premiumCoupons: 1,
-    featuredCoupons: 0,
-  },
-  seller_pro_monthly: {
-    savedSearches: -1,
-    aiMessages: -1,
-    aiInsights: 20,
-    imageDescription: -1,
-    promotionCoupons: 3,
-    highlightedCoupons: 2,
-    premiumCoupons: 1,
-    featuredCoupons: 0,
-  },
-  seller_pro_yearly: {
-    savedSearches: -1,
-    aiMessages: -1,
-    aiInsights: 20,
-    imageDescription: -1,
-    promotionCoupons: 3,
-    highlightedCoupons: 2,
-    premiumCoupons: 1,
-    featuredCoupons: 0,
-  },
-  enterprise_yearly: {
-    savedSearches: -1,
-    aiMessages: -1,
-    aiInsights: -1, // unlimited
-    imageDescription: -1,
-    promotionCoupons: 5,
-    highlightedCoupons: 2,
-    premiumCoupons: 2,
-    featuredCoupons: 1,
-  },
-  seller_enterprise_yearly: {
-    savedSearches: -1,
-    aiMessages: -1,
-    aiInsights: -1,
-    imageDescription: -1,
-    promotionCoupons: 5,
-    highlightedCoupons: 2,
-    premiumCoupons: 2,
-    featuredCoupons: 1,
-  },
-  agency_yearly: {
-    savedSearches: -1,
-    aiMessages: -1,
-    aiInsights: -1,
-    imageDescription: -1,
-    promotionCoupons: 5,
-    highlightedCoupons: 2,
-    premiumCoupons: 2,
-    featuredCoupons: 1,
-  },
-};
-
 // Gift/Coupon icon component
 const GiftIconComponent: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -365,11 +271,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   }, []);
 
-  // Convert product to plan structure - uses FEATURE_LIMITS as source of truth
+  // Convert product to plan structure - reads from database (single source of truth)
   const productToPlan = useCallback((product: ProductData): Plan => {
-    // Get feature limits from our source of truth, fallback to free tier
-    const limits = FEATURE_LIMITS[product.productId] || FEATURE_LIMITS.free;
-
     return {
       id: product.productId,
       name: product.name,
@@ -377,22 +280,22 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       period: product.billingPeriod === 'yearly' ? 'year' : product.billingPeriod === 'monthly' ? 'month' : product.billingPeriod,
       periodMonths: PERIOD_TO_MONTHS[product.billingPeriod] || 1,
       features: product.features,
-      // Use LISTING_LIMITS as source of truth for listing limit
-      listingLimit: LISTING_LIMITS[product.productId] ?? product.listingsLimit ?? 3,
+      // All values come from database
+      listingLimit: product.listingsLimit ?? 3,
       color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
       tier: PLAN_TIERS[product.productId] || 0,
       badge: product.badge,
       badgeColor: product.badgeColor,
       highlighted: product.highlighted,
-      // Use FEATURE_LIMITS as source of truth for all feature limits
-      promotionCoupons: limits.promotionCoupons,
-      premiumCoupons: limits.premiumCoupons,
-      highlightedCoupons: limits.highlightedCoupons,
-      featuredCoupons: limits.featuredCoupons,
-      savedSearchesLimit: limits.savedSearches,
-      aiMessagesLimit: limits.aiMessages,
-      aiInsightsLimit: limits.aiInsights,
-      imageDescriptionLimit: limits.imageDescription,
+      // All limits from database
+      promotionCoupons: product.promotionCoupons ?? 0,
+      premiumCoupons: product.premiumCoupons ?? 0,
+      highlightedCoupons: product.highlightedCoupons ?? 0,
+      featuredCoupons: product.featuredCoupons ?? 0,
+      savedSearchesLimit: product.savedSearchesLimit ?? 3,
+      aiMessagesLimit: product.aiMessagesLimit ?? 3,
+      aiInsightsLimit: product.aiInsightsLimit ?? 3,
+      imageDescriptionLimit: product.imageDescriptionLimit ?? 0,
       agentCoupons: product.agentCoupons ?? 0,
     };
   }, []);

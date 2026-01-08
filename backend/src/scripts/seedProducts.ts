@@ -48,7 +48,8 @@ const PRODUCTS = [
     agentCoupons: 0,
     savedSearchesLimit: 3,
     aiMessagesLimit: 3,
-    generateInsightsLimit: 3,
+    aiInsightsLimit: 3,
+    imageDescriptionLimit: 0, // No auto image descriptions for free
   },
 
   // ============================================================================
@@ -91,10 +92,14 @@ const PRODUCTS = [
     gracePeriodDays: 3,
     listingsLimit: 20, // 20 listings per month
     promotionCoupons: 3, // 2 highlighted + 1 premium
+    premiumCoupons: 1, // 1 premium placement
+    highlightedCoupons: 2, // 2 highlighted
+    featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: -1, // unlimited
     aiMessagesLimit: -1, // unlimited (rate limited)
-    generateInsightsLimit: 20,
+    aiInsightsLimit: 20, // 20 insights per month
+    imageDescriptionLimit: -1, // unlimited
   },
 
   // ============================================================================
@@ -136,10 +141,14 @@ const PRODUCTS = [
     gracePeriodDays: 3,
     listingsLimit: 250, // 250 listings per year
     promotionCoupons: 3, // 2 highlighted + 1 premium per month
+    premiumCoupons: 1, // 1 premium placement
+    highlightedCoupons: 2, // 2 highlighted
+    featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: -1, // unlimited
     aiMessagesLimit: -1, // unlimited (rate limited)
-    generateInsightsLimit: 20,
+    aiInsightsLimit: 20, // 20 insights per month
+    imageDescriptionLimit: -1, // unlimited
   },
 
   // ============================================================================
@@ -182,10 +191,14 @@ const PRODUCTS = [
     gracePeriodDays: 3,
     listingsLimit: 20,
     promotionCoupons: 3,
+    premiumCoupons: 1,
+    highlightedCoupons: 2,
+    featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: -1,
     aiMessagesLimit: -1,
-    generateInsightsLimit: 20,
+    aiInsightsLimit: 20,
+    imageDescriptionLimit: -1,
   },
   {
     productId: 'seller_pro_yearly',
@@ -223,10 +236,14 @@ const PRODUCTS = [
     gracePeriodDays: 3,
     listingsLimit: 250,
     promotionCoupons: 3,
+    premiumCoupons: 1,
+    highlightedCoupons: 2,
+    featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: -1,
     aiMessagesLimit: -1,
-    generateInsightsLimit: 20,
+    aiInsightsLimit: 20,
+    imageDescriptionLimit: -1,
   },
   {
     productId: 'seller_enterprise_yearly',
@@ -265,11 +282,15 @@ const PRODUCTS = [
     hasFreeTrial: false,
     gracePeriodDays: 7,
     listingsLimit: 500,
-    promotionCoupons: 5,
+    promotionCoupons: 5, // 2 premier + 2 highlighted + 1 featured
+    premiumCoupons: 2, // 2 premium premier
+    highlightedCoupons: 2, // 2 highlighted
+    featuredCoupons: 1, // 1 featured
     agentCoupons: 5,
     savedSearchesLimit: -1,
     aiMessagesLimit: -1,
-    generateInsightsLimit: -1,
+    aiInsightsLimit: -1, // unlimited
+    imageDescriptionLimit: -1, // unlimited
   },
 
   // ============================================================================
@@ -313,10 +334,14 @@ const PRODUCTS = [
     gracePeriodDays: 7,
     listingsLimit: 500, // 500 listings for enterprise
     promotionCoupons: 5, // 2 premier + 2 highlighted + 1 featured
+    premiumCoupons: 2, // 2 premium premier
+    highlightedCoupons: 2, // 2 highlighted
+    featuredCoupons: 1, // 1 featured
     agentCoupons: 5, // 5 team member registration codes
     savedSearchesLimit: -1, // unlimited
     aiMessagesLimit: -1, // unlimited (rate limited)
-    generateInsightsLimit: -1, // unlimited for all agents
+    aiInsightsLimit: -1, // unlimited for all agents
+    imageDescriptionLimit: -1, // unlimited
   },
 
   // ============================================================================
