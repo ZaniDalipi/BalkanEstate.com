@@ -22,7 +22,10 @@ export type AppView =
   | 'agencyDetail'
   | 'admin'
   | 'analytics'
-  | 'reset-password';
+  | 'reset-password'
+  | 'valuation'
+  | 'mortgage-calculator'
+  | 'pricing';
 
 export type AuthModalView =
   | 'login'

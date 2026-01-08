@@ -26,7 +26,7 @@ export type PropertyStatus = 'active' | 'pending' | 'sold' | 'draft';
 
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 
-export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'valuation' | 'mortgage-calculator';
+export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'valuation' | 'mortgage-calculator' | 'pricing';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
 

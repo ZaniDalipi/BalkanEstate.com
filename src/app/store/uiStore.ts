@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
-export type AppView = 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin';
+export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'valuation' | 'mortgage-calculator' | 'pricing';
 
 interface UIState {
   // Modal states
