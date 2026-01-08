@@ -128,12 +128,12 @@ const PRODUCTS = [
   },
 
   // ============================================================================
-  // AGENCY TIER - For real estate agencies (€1000/year)
+  // AGENCY/ENTERPRISE TIER - For real estate agencies (€1000/year)
   // ============================================================================
   {
     productId: 'agency_yearly',
-    name: 'Agency',
-    description: 'Complete agency solution - equip your team with Pro subscriptions and shared promotion pool.',
+    name: 'Enterprise',
+    description: 'Scale your agency with a branded page, team management & homepage visibility.',
     type: 'subscription' as const,
     tier: 'agency' as const,
     price: 1000,
@@ -141,20 +141,36 @@ const PRODUCTS = [
     billingPeriod: 'yearly' as const,
     durationDays: 365,
     features: [
+      // Core Agency Features
+      'Dedicated Agency Page with custom branding',
+      'Display all agents & their properties',
+      'Featured in homepage rotating carousel',
+      'Up to 10 team members',
+
+      // Listings & Promotions
+      'Unlimited property listings',
+      '15 promotion coupons per month (agency pool)',
       '5 yearly Pro agent coupons (€600 value)',
-      '100 total listings (5 agents × 20 each)',
-      '15 promotion coupons per month (agency-wide pool)',
-      'Agency branding page with logo & cover',
+
+      // Management Tools
+      'Lead management system',
       'Team dashboard & analytics',
       'Agent performance tracking',
+
+      // Premium Support
       'Dedicated account manager',
-      'White-label options',
-      'Save €217/month vs 5 individual Pro accounts',
+      'Priority support (24h response)',
+      'API access for integrations',
+
+      // Visibility & Branding
+      'Full contact info display',
+      'Custom agency logo & cover',
+      'White-label email templates',
     ],
     targetRole: 'agent' as const,
     displayOrder: 4,
     badge: 'BEST FOR TEAMS',
-    badgeColor: 'red',
+    badgeColor: 'purple',
     highlighted: true,
     cardStyle: {
       backgroundColor: 'from-slate-900 to-gray-800',
@@ -165,10 +181,10 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 7,
-    listingsLimit: 0, // Agency owners don't get listings - they distribute coupons
+    listingsLimit: -1, // -1 = unlimited for agency
     promotionCoupons: 15,
     agentCoupons: 5,
-    savedSearchesLimit: 0,
+    savedSearchesLimit: -1, // Unlimited
   },
 
   // ============================================================================
@@ -240,7 +256,7 @@ async function seedProducts() {
     console.log('   Free: €0 (3 listings)');
     console.log('   Pro Monthly: €25 (25 listings, 3 promo coupons)');
     console.log('   Pro Yearly: €200 (25 listings, 3 promo coupons, save €100)');
-    console.log('   Agency: €1000/year (5 agent coupons, 15 promo coupons)');
+    console.log('   Enterprise: €1000/year (unlimited listings, 10 team members, agency page)');
     console.log('   Buyer Pro: €3/month (unlimited searches & alerts)');
 
   } catch (error) {
