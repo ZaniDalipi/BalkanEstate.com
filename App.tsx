@@ -154,6 +154,17 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Account sub-routes: /account/:tab
+      const accountMatch = path.match(/^\/account(?:\/(.+))?$/);
+      if (accountMatch) {
+        const tab = accountMatch[1] || 'listings'; // Default to listings
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ACCOUNT_TAB', payload: tab });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+        return;
+      }
+
       // Main navigation routes
       const routeMap: { [key: string]: any } = {
         '/': 'search',
@@ -162,7 +173,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/saved-searches': 'saved-searches',
         '/saved-properties': 'saved-properties',
         '/inbox': 'inbox',
-        '/account': 'account',
         '/agents': 'agents',
         '/agencies': 'agencies',
         '/admin': 'admin',

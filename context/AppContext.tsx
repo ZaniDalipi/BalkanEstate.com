@@ -57,6 +57,7 @@ const initialState: AppState = {
   allMunicipalities: MUNICIPALITY_DATA,
   pendingRedirect: null,
   alertDialog: null,
+  accountTab: 'listings',
 };
 
 
@@ -288,6 +289,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         };
     case 'HIDE_ALERT':
         return { ...state, alertDialog: null };
+    case 'SET_ACCOUNT_TAB':
+        return { ...state, accountTab: action.payload };
     default:
       return state;
   }

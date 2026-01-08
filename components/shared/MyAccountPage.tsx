@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import MyListings from './MyListings';
@@ -16,6 +16,7 @@ import MapLocationPicker from '../../src/features/seller/components/MapLocationP
 import { SEO } from '../../src/components/seo';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
+import { buildLocalizedPath } from '../../src/utils/languageRouting';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -28,24 +29,59 @@ const BALKAN_LANGUAGES = [
 
 type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions';
 
+// Map URL slugs to account tabs
+const tabRouteMap: Record<string, AccountTab> = {
+    'listings': 'listings',
+    'my-listings': 'listings',
+    'promotions': 'promotions',
+    'my-promotions': 'promotions',
+    'performance': 'performance',
+    'stats': 'performance',
+    'statistics': 'performance',
+    'subscription': 'subscription',
+    'profile': 'profile',
+    'settings': 'profile',
+    'profile-settings': 'profile',
+    'security': 'security',
+};
+
+// Map account tabs to URL slugs
+const tabToRouteMap: Record<AccountTab, string> = {
+    'listings': 'listings',
+    'promotions': 'promotions',
+    'performance': 'performance',
+    'subscription': 'subscription',
+    'profile': 'profile',
+    'security': 'security',
+};
+
 const TabButton: React.FC<{
     label: string;
     icon: React.ReactNode;
     isActive: boolean;
     onClick: () => void;
-}> = ({ label, icon, isActive, onClick }) => (
-    <button
-        onClick={onClick}
-        className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left ${
-            isActive
-                ? 'bg-primary-light text-primary-dark'
-                : 'text-neutral-600 hover:bg-neutral-100'
-        }`}
-    >
-        {icon}
-        <span>{label}</span>
-    </button>
-);
+    tabKey: AccountTab;
+}> = ({ label, icon, isActive, onClick, tabKey }) => {
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        onClick();
+    };
+
+    return (
+        <a
+            href={buildLocalizedPath(`/account/${tabToRouteMap[tabKey]}`)}
+            onClick={handleClick}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left ${
+                isActive
+                    ? 'bg-primary-light text-primary-dark'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+            }`}
+        >
+            {icon}
+            <span>{label}</span>
+        </a>
+    );
+};
 
 const RoleSelector: React.FC<{
     selectedRole: UserRole;
@@ -1225,8 +1261,18 @@ const MyAccountPage: React.FC = () => {
     const { t } = useTranslation(['account']);
     const { state, dispatch, logout, logoutAllDevices } = useAppContext();
     const { success } = useNotification();
-    const [activeTab, setActiveTab] = useState<AccountTab>('listings');
     const [performanceRefreshKey, setPerformanceRefreshKey] = useState(0);
+
+    // Get active tab from state (set by URL routing)
+    const urlTab = state.accountTab || 'listings';
+    const activeTab: AccountTab = tabRouteMap[urlTab] || 'listings';
+
+    // Function to change tab and update URL
+    const setActiveTab = useCallback((tab: AccountTab) => {
+        const newPath = buildLocalizedPath(`/account/${tabToRouteMap[tab]}`);
+        window.history.pushState({}, '', newPath);
+        dispatch({ type: 'SET_ACCOUNT_TAB', payload: tab });
+    }, [dispatch]);
 
     if (!state.currentUser) {
         return (
@@ -1238,11 +1284,12 @@ const MyAccountPage: React.FC = () => {
 
     const isSellerProfile = state.currentUser.role === UserRole.AGENT || state.currentUser.role === UserRole.PRIVATE_SELLER;
 
+    // Redirect non-sellers to profile if they're on a seller-only tab
     useEffect(() => {
         if (!isSellerProfile && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions')) {
             setActiveTab('profile');
         }
-    }, [isSellerProfile, activeTab]);
+    }, [isSellerProfile, activeTab, setActiveTab]);
 
     useEffect(() => {
         if (activeTab === 'performance') {
@@ -1343,14 +1390,14 @@ const MyAccountPage: React.FC = () => {
                             <nav className="space-y-2">
                                 {isSellerProfile && (
                                     <>
-                                        <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} />
-                                        <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} />
-                                        <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} />
-                                        <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} />
+                                        <TabButton label={t('account:tabs.myListings')} icon={<BuildingOfficeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
+                                        <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
+                                        <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
+                                        <TabButton label={t('account:tabs.subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
                                     </>
                                 )}
-                                <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
-                                <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} />
+                                <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
+                                <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
                                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 mt-4">
                                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />
                                     <span>{t('account:logout')}</span>

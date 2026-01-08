@@ -654,6 +654,8 @@ export interface AppState {
         title: string;
         message: string;
     } | null;
+    // Account page active tab
+    accountTab: string;
 }
 
 export type AppAction =
@@ -705,4 +707,6 @@ export type AppAction =
     | { type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId: string; seenPropertyIds?: string[] } }
     | { type: 'SET_PENDING_REDIRECT', payload: AppView | null }
     | { type: 'SHOW_ALERT', payload: { type: 'error' | 'warning' | 'success' | 'info'; title: string; message: string } }
-    | { type: 'HIDE_ALERT' };
+    | { type: 'HIDE_ALERT' }
+    | { type: 'SET_ACCOUNT_TAB', payload: string }
+    | { type: 'CLEAR_ALL_SAVED_SEARCHES' };
