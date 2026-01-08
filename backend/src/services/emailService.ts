@@ -1842,6 +1842,157 @@ Questions? Contact us at support@balkanestateai.com
       category: 'support',
     });
   }
+
+  /**
+   * Send monthly coupon notification email
+   */
+  async sendMonthlyCouponEmail(params: {
+    email: string;
+    userName: string;
+    planName: string;
+    totalCoupons: number;
+    newCoupons: number;
+    rolledOver: number;
+    breakdown: {
+      highlighted: number;
+      premium: number;
+      featured: number;
+    };
+    isAgency?: boolean;
+    agencyName?: string;
+    isAgentNotification?: boolean;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
+    // Sanitize user inputs
+    const safeUserName = escapeHtml(params.userName);
+    const safePlanName = escapeHtml(params.planName);
+    const safeAgencyName = escapeHtml(params.agencyName);
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const currentMonth = monthNames[new Date().getMonth()];
+    const currentYear = new Date().getFullYear();
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Your ${currentMonth} promotion coupons are ready! ${params.totalCoupons} coupons available.
+  </div>
+
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 32px 24px; text-align: center;">
+      <div style="margin-bottom: 12px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 60px; font-size: 28px;">🎟️</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">${currentMonth} Coupons Ready!</h1>
+      <p style="color: #fef3c7; margin: 8px 0 0 0; font-size: 14px;">Your monthly promotion coupons have arrived</p>
+    </div>
+
+    <div style="padding: 28px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+        Hey ${safeUserName}! 👋
+      </p>
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        ${params.isAgentNotification
+          ? `Great news! Your agency <strong>${safeAgencyName}</strong> has received fresh promotion coupons for ${currentMonth}. These are shared across your team.`
+          : `Your <strong>${safePlanName}</strong> subscription includes fresh promotion coupons for ${currentMonth}. Time to boost your listings!`
+        }
+      </p>
+
+      <!-- Coupon Summary Card -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 48px; font-weight: 700; color: #92400e;">${params.totalCoupons}</div>
+          <div style="font-size: 14px; color: #78350f; font-weight: 600;">Total Coupons Available</div>
+        </div>
+
+        ${params.rolledOver > 0 ? `
+        <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div style="display: table; width: 100%;">
+            <div style="display: table-cell; text-align: center; width: 50%; border-right: 1px solid #f59e0b;">
+              <div style="font-size: 20px; font-weight: 700; color: #92400e;">+${params.newCoupons}</div>
+              <div style="font-size: 11px; color: #78350f;">New This Month</div>
+            </div>
+            <div style="display: table-cell; text-align: center; width: 50%;">
+              <div style="font-size: 20px; font-weight: 700; color: #92400e;">+${params.rolledOver}</div>
+              <div style="font-size: 11px; color: #78350f;">Rolled Over</div>
+            </div>
+          </div>
+        </div>
+        ` : ''}
+
+        <!-- Coupon Breakdown -->
+        <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 12px; color: #78350f; font-weight: 600; margin-bottom: 8px; text-align: center;">Coupon Breakdown:</div>
+          <div style="display: table; width: 100%;">
+            <div style="display: table-cell; text-align: center; ${params.breakdown.highlighted > 0 ? '' : 'opacity: 0.5;'}">
+              <div style="font-size: 18px; font-weight: 700; color: #059669;">${params.breakdown.highlighted}</div>
+              <div style="font-size: 10px; color: #78350f;">Highlighted</div>
+            </div>
+            <div style="display: table-cell; text-align: center; ${params.breakdown.premium > 0 ? '' : 'opacity: 0.5;'}">
+              <div style="font-size: 18px; font-weight: 700; color: #7c3aed;">${params.breakdown.premium}</div>
+              <div style="font-size: 10px; color: #78350f;">Premium</div>
+            </div>
+            ${params.breakdown.featured > 0 ? `
+            <div style="display: table-cell; text-align: center;">
+              <div style="font-size: 18px; font-weight: 700; color: #dc2626;">${params.breakdown.featured}</div>
+              <div style="font-size: 10px; color: #78350f;">Featured</div>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Box -->
+      <div style="background: #eff6ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
+        <p style="color: #1e40af; font-size: 13px; margin: 0; line-height: 1.5;">
+          <strong>💡 Pro Tip:</strong> Use your promotion coupons to boost listings that aren't getting enough views.
+          Promoted listings get up to <strong>5x more visibility</strong>!
+        </p>
+      </div>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${frontendUrl}/promotions"
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);">
+          Use My Coupons →
+        </a>
+      </div>
+
+      <p style="text-align: center; margin: 0;">
+        <a href="${frontendUrl}/my-listings" style="color: #6b7280; font-size: 13px; text-decoration: none;">View my listings →</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
+        ${params.isAgency ? `${safeAgencyName} · Enterprise Plan` : `${safePlanName} Subscription`}
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `🎟️ Your ${currentMonth} Promotion Coupons Are Ready! (${params.totalCoupons} available)`,
+      html,
+      text: `Hey ${params.userName}!\n\nYour ${currentMonth} promotion coupons are ready!\n\nTotal Coupons: ${params.totalCoupons}\n- New this month: ${params.newCoupons}\n- Rolled over: ${params.rolledOver}\n\nBreakdown:\n- Highlighted: ${params.breakdown.highlighted}\n- Premium: ${params.breakdown.premium}\n- Featured: ${params.breakdown.featured}\n\nUse your coupons to boost your listings and get up to 5x more visibility!\n\nUse your coupons: ${frontendUrl}/promotions\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'alerts',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -1860,3 +2011,4 @@ export const sendPasswordResetEmail = emailServiceInstance.sendPasswordResetEmai
 export const sendEmailVerification = emailServiceInstance.sendEmailVerification.bind(emailServiceInstance);
 export const sendWelcomeEmail = emailServiceInstance.sendWelcomeEmail.bind(emailServiceInstance);
 export const getFromAddress = emailServiceInstance.getFromAddress.bind(emailServiceInstance);
+export const sendMonthlyCouponEmail = emailServiceInstance.sendMonthlyCouponEmail.bind(emailServiceInstance);

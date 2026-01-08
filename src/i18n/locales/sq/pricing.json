@@ -1,7 +1,16 @@
 {
-  "title": "Zgjidhni Planin Tuaj të Shitjes",
-  "subtitle": "Vendosni pronën tuaj përpara mijëra blerësve potencialë",
-  "loading": "Duke ngarkuar planet...",
+  "pageTitle": "Planet e Çmimeve",
+  "title": "Zgjidhni Planin Tuaj",
+  "subtitle": "Vendosni pronën tuaj përpara mijëra blerësve potencialë me opsionet tona fleksibël të çmimeve.",
+  "loading": "Duke ngarkuar planet e çmimeve...",
+  "noPlans": "Nuk ka plane çmimesh të disponueshme për momentin.",
+  "tabs": {
+    "forSellers": "Për Shitës",
+    "forBuyers": "Për Blerës"
+  },
+  "error": {
+    "loadFailed": "Dështoi ngarkimi i planeve të çmimeve"
+  },
   "limitedOffer": "Oferta e Kufizuar Përfundon Në:",
   "offerTitle": "Urime! Keni Hapur Zbritje Ekskluzive!",
   "offerSubtitle": "Shijoni këtë ofertë një herë në planet tona të shitjes si falënderim.",
@@ -66,6 +75,7 @@
     "yearly": "Vjetor",
     "perMonth": "/muaj",
     "perYear": "/vit",
+    "perWeek": "/javë",
     "billedAnnually": "Faturohet vjetërisht",
     "billedMonthly": "Faturohet mujorisht",
     "youSave": "Ju kurseni €{{amount}}!"
@@ -74,9 +84,12 @@
     "off": "{{percent}}% ZBRITJE"
   },
   "benefits": {
-    "moneyBack": "Garanci kthimi parash 30-ditore",
-    "moreViews": "{{multiplier}}x më shumë shikime se shpalljet falas",
-    "instantActivation": "Aktivizim i menjëhershëm",
+    "moneyBack": "Garanci 30-Ditore Kthimi",
+    "moneyBackDesc": "Rimbursim i plotë nëse nuk jeni të kënaqur",
+    "moreViews": "3x Më Shumë Shikime",
+    "moreViewsDesc": "Shpalljet premium marrin më shumë ekspozim",
+    "instantActivation": "Aktivizim i Menjëhershëm",
+    "instantActivationDesc": "Filloni të shisni menjëherë",
     "cancelAnytime": "Anulo në çdo kohë"
   },
   "enterprise": {

@@ -91,6 +91,7 @@ import { scheduleExpirationWorker } from './workers/subscriptionExpirationWorker
 import { startPromotionRefreshWorker } from './workers/promotionRefreshWorker';
 import { startTrialManagementJob } from './jobs/trialManagementJob';
 import { startCityMarketDataUpdateJob } from './jobs/updateCityMarketData';
+import { startMonthlyCouponJob } from './jobs/monthlyCouponJob';
 
 // Create Express app
 const app: Application = express();
@@ -165,6 +166,10 @@ console.log('✅ Trial management job started');
 // Start city market data update job (biweekly updates on 1st and 15th)
 startCityMarketDataUpdateJob();
 console.log('✅ City market data update job started (biweekly)');
+
+// Start monthly coupon refresh job (1st of each month)
+startMonthlyCouponJob();
+console.log('✅ Monthly coupon refresh job started (1st of each month)');
 
 // ============================================================================
 // SECURITY MIDDLEWARE - Apply comprehensive security headers and CORS

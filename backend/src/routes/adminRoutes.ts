@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { protect } from '../middleware/auth';
 import { checkAdminRole, logAdminAction } from '../middleware/adminAuth';
 import {
@@ -16,6 +16,12 @@ import {
   fixPropertyCoordinates,
   fixSinglePropertyCoordinates,
   getPropertiesMissingCoords,
+  getAllInquiries,
+  getInquiryById,
+  updateInquiry,
+  deleteInquiry,
+  bulkUpdateInquiryStatus,
+  getInquiryStats,
 } from '../controllers/adminController';
 import {
   getAllDiscountCodes,
@@ -24,6 +30,11 @@ import {
   deactivateDiscountCode,
   deleteDiscountCode,
 } from '../controllers/discountCodeController';
+import {
+  sendTestMonthlyCouponEmail,
+  sendTestAgencyCouponEmail,
+  runMonthlyCouponRefreshManually,
+} from '../jobs/monthlyCouponJob';
 
 const router = express.Router();
 
@@ -59,5 +70,61 @@ router.post('/discount-codes', logAdminAction('CREATE_DISCOUNT_CODE'), createDis
 router.post('/discount-codes/generate', logAdminAction('GENERATE_DISCOUNT_CODES'), generateDiscountCodes);
 router.patch('/discount-codes/:id/deactivate', logAdminAction('DEACTIVATE_DISCOUNT_CODE'), deactivateDiscountCode);
 router.delete('/discount-codes/:id', logAdminAction('DELETE_DISCOUNT_CODE'), deleteDiscountCode);
+
+// ===== Inquiry Management =====
+router.get('/inquiries/stats', logAdminAction('VIEW_INQUIRY_STATS'), getInquiryStats);
+router.get('/inquiries', logAdminAction('VIEW_INQUIRIES'), getAllInquiries);
+router.get('/inquiries/:id', logAdminAction('VIEW_INQUIRY'), getInquiryById);
+router.patch('/inquiries/bulk-status', logAdminAction('BULK_UPDATE_INQUIRIES'), bulkUpdateInquiryStatus);
+router.patch('/inquiries/:id', logAdminAction('UPDATE_INQUIRY'), updateInquiry);
+router.delete('/inquiries/:id', logAdminAction('DELETE_INQUIRY'), deleteInquiry);
+
+// ===== Test Email Endpoints =====
+// Send test monthly coupon email (Pro user)
+router.post('/test-emails/monthly-coupon', logAdminAction('TEST_EMAIL_MONTHLY_COUPON'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, userName } = req.body;
+
+    if (!email) {
+      res.status(400).json({ message: 'Email is required' });
+      return;
+    }
+
+    await sendTestMonthlyCouponEmail(email, userName || 'Test User');
+    res.json({ success: true, message: `Test monthly coupon email sent to ${email}` });
+  } catch (error) {
+    console.error('Error sending test email:', error);
+    res.status(500).json({ message: 'Failed to send test email', error: String(error) });
+  }
+});
+
+// Send test agency coupon email
+router.post('/test-emails/agency-coupon', logAdminAction('TEST_EMAIL_AGENCY_COUPON'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, userName, agencyName } = req.body;
+
+    if (!email) {
+      res.status(400).json({ message: 'Email is required' });
+      return;
+    }
+
+    await sendTestAgencyCouponEmail(email, userName || 'Test User', agencyName || 'Test Agency');
+    res.json({ success: true, message: `Test agency coupon email sent to ${email}` });
+  } catch (error) {
+    console.error('Error sending test email:', error);
+    res.status(500).json({ message: 'Failed to send test email', error: String(error) });
+  }
+});
+
+// Run monthly coupon refresh manually (for testing)
+router.post('/test-emails/run-monthly-refresh', logAdminAction('RUN_MONTHLY_COUPON_REFRESH'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    await runMonthlyCouponRefreshManually();
+    res.json({ success: true, message: 'Monthly coupon refresh completed' });
+  } catch (error) {
+    console.error('Error running monthly refresh:', error);
+    res.status(500).json({ message: 'Failed to run monthly refresh', error: String(error) });
+  }
+});
 
 export default router;

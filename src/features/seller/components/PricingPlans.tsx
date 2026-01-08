@@ -48,6 +48,34 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
     }
   }, [isOpen]);
 
+  // Update URL when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      // Get current language from URL
+      const currentLang = window.location.pathname.split('/')[1] || 'en';
+      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+      const pricingPath = `/${lang}/pricing`;
+
+      // Only update if not already on pricing route
+      if (!window.location.pathname.includes('/pricing')) {
+        window.history.pushState({ modal: 'pricing' }, '', pricingPath);
+      }
+    }
+  }, [isOpen]);
+
+  // Handle browser back button when modal is open
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isOpen && !window.location.pathname.includes('/pricing')) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     if (isOpen) {
       setShowConfirmation(false); // Reset confirmation on open
@@ -342,7 +370,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </span>
                     </div>
                     <div className="text-center pt-4">
-                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('pricing:plans.proYearly.name')}</h3>
+                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{proYearlyProduct?.name || t('pricing:plans.proYearly.name')}</h3>
                         <div className="mt-2 h-20 flex flex-col items-center justify-center">
                             {isOffer && proYearlyDiscount > 0 ? (
                                 <>
@@ -362,12 +390,20 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     </div>
                     <ul className="mt-8 space-y-4 text-neutral-700 font-medium flex-grow text-sm sm:text-base">
-                        <li className="flex items-center"><TickIcon /> 250 listings per year</li>
-                        <li className="flex items-center"><TickIcon /> 3 promo coupons/month (2 highlighted + 1 premium)</li>
-                        <li className="flex items-center"><TickIcon /> 20 insights per month</li>
-                        <li className="flex items-center"><TickIcon /> Unlimited AI chat & saved searches</li>
-                        <li className="flex items-center"><TickIcon /> Unlimited auto-generate descriptions</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.prioritySupport')}</li>
+                        {proYearlyProduct?.features && proYearlyProduct.features.length > 0 ? (
+                            proYearlyProduct.features.map((feature, index) => (
+                                <li key={index} className="flex items-center"><TickIcon /> {feature}</li>
+                            ))
+                        ) : (
+                            <>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.activeListings', { count: 15 })}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.promotedListings', { count: 2, days: 15 })}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.premiumPlacement')}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.analytics')}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.leadManagement')}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.prioritySupport')}</li>
+                            </>
+                        )}
                     </ul>
                     <button
                         onClick={() => handlePlanSelection('Pro Annual', proYearlyPrice, 'year', proYearlyDiscount, proYearlyProduct?.productId || 'seller_pro_yearly')}
@@ -388,7 +424,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     )}
                      <div className="text-center pt-4">
-                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('pricing:plans.proMonthly.name')}</h3>
+                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{proMonthlyProduct?.name || t('pricing:plans.proMonthly.name')}</h3>
                         <div className="mt-2 h-20 flex flex-col items-center justify-center">
                             {isOffer && proMonthlyDiscount > 0 ? (
                                 <>
@@ -408,26 +444,36 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     </div>
                     <div className="mt-8 space-y-3 flex-grow flex flex-col">
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">20 listings per month</p>
-                            <p className="text-neutral-600 text-sm">Perfect for active sellers</p>
-                        </div>
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">3 promo coupons/month</p>
-                            <p className="text-neutral-600 text-sm">2 highlighted + 1 premium placement</p>
-                        </div>
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">20 insights per month</p>
-                            <p className="text-neutral-600 text-sm">Advanced analytics & market insights</p>
-                        </div>
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">Unlimited AI features</p>
-                            <p className="text-neutral-600 text-sm">AI chat, saved searches, auto-generate descriptions</p>
-                        </div>
-                         <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.prioritySupport')}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.prioritySupportDesc')}</p>
-                        </div>
+                        {proMonthlyProduct?.features && proMonthlyProduct.features.length > 0 ? (
+                            proMonthlyProduct.features.map((feature, index) => (
+                                <div key={index} className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{feature}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.activeListings', { count: 15 })}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.perfectForActive')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.promotedListings', { count: 2, days: 15 })}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.featuredBoost')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.analytics')}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.analyticsDesc')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.prioritySupport')}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.prioritySupportDesc')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.mobileApp')}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.mobileAppDesc')}</p>
+                                </div>
+                            </>
+                        )}
                     </div>
                      <button
                         onClick={() => handlePlanSelection('Pro Monthly', proMonthlyPrice, 'month', proMonthlyDiscount, proMonthlyProduct?.productId || 'seller_pro_monthly')}
@@ -449,7 +495,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                      <div className="text-center pt-4">
                         <div className="flex justify-center items-center gap-2">
                            <BuildingOfficeIcon className="w-8 h-8 text-amber-400" />
-                           <h3 className="text-xl sm:text-2xl font-bold">{t('pricing:plans.enterprise.name')}</h3>
+                           <h3 className="text-xl sm:text-2xl font-bold">{enterpriseProduct?.name || t('pricing:plans.enterprise.name')}</h3>
                         </div>
                         <div className="mt-2 h-20 flex flex-col items-center justify-center">
                             {isOffer && enterpriseDiscount > 0 ? (

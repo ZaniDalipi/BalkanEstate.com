@@ -57,7 +57,7 @@ const AnalyticsPage: React.FC = () => {
   };
 
   const openPricingModal = () =>
-    dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true } });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
   const openAuthModal = () =>
     dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
 

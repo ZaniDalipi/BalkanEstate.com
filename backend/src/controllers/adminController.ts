@@ -4,6 +4,7 @@ import Agent from '../models/Agent';
 import Agency from '../models/Agency';
 import Property from '../models/Property';
 import DiscountCode from '../models/DiscountCode';
+import Inquiry from '../models/Inquiry';
 import { geocodeAddressWithRateLimit } from '../services/geocodingService';
 
 
@@ -20,6 +21,8 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       activeDiscountCodes,
       todayUsers,
       todayProperties,
+      totalInquiries,
+      newInquiries,
     ] = await Promise.all([
       User.countDocuments(),
       Agent.countDocuments({ isActive: true }),
@@ -32,6 +35,8 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       Property.countDocuments({
         createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
       }),
+      Inquiry.countDocuments(),
+      Inquiry.countDocuments({ status: 'new' }),
     ]);
 
     // User role breakdown
@@ -57,6 +62,8 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
         subscribedUsers,
         todayUsers,
         todayProperties,
+        totalInquiries,
+        newInquiries,
       },
       usersByRole: usersByRole.reduce((acc: any, item: any) => {
         acc[item._id] = item.count;
@@ -595,5 +602,285 @@ export const getPropertiesMissingCoords = async (req: Request, res: Response): P
   } catch (error: any) {
     console.error('Get properties missing coords error:', error);
     res.status(500).json({ message: 'Error fetching properties', error: error.message });
+  }
+};
+
+// ===== Inquiry Management =====
+
+// @desc    Get all inquiries with filters
+// @route   GET /api/admin/inquiries
+// @access  Private/Admin
+export const getAllInquiries = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      type,
+      status,
+      search,
+      page = 1,
+      limit = 50,
+      sortBy = 'createdAt',
+      order = 'desc'
+    } = req.query;
+
+    const query: any = {};
+    if (type && type !== 'all') query.type = type;
+    if (status && status !== 'all') query.status = status;
+    if (search) {
+      query.$or = [
+        { buyerName: { $regex: search, $options: 'i' } },
+        { buyerEmail: { $regex: search, $options: 'i' } },
+        { recipientName: { $regex: search, $options: 'i' } },
+        { propertyTitle: { $regex: search, $options: 'i' } },
+        { message: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const sortOrder = order === 'asc' ? 1 : -1;
+
+    const inquiries = await Inquiry.find(query)
+      .populate('recipientId', 'name email role avatarUrl')
+      .populate('propertyId', 'title images price city country')
+      .sort({ [String(sortBy)]: sortOrder })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean();
+
+    const total = await Inquiry.countDocuments(query);
+
+    // Get status counts for filtering
+    const statusCounts = await Inquiry.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+
+    const typeCounts = await Inquiry.aggregate([
+      { $group: { _id: '$type', count: { $sum: 1 } } },
+    ]);
+
+    res.json({
+      inquiries,
+      pagination: {
+        currentPage: Number(page),
+        totalPages: Math.ceil(total / Number(limit)),
+        totalItems: total,
+        itemsPerPage: Number(limit),
+      },
+      counts: {
+        byStatus: statusCounts.reduce((acc: any, item: any) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {}),
+        byType: typeCounts.reduce((acc: any, item: any) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {}),
+      },
+    });
+  } catch (error: any) {
+    console.error('Get all inquiries error:', error);
+    res.status(500).json({ message: 'Error fetching inquiries', error: error.message });
+  }
+};
+
+// @desc    Get single inquiry details
+// @route   GET /api/admin/inquiries/:id
+// @access  Private/Admin
+export const getInquiryById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const inquiry = await Inquiry.findById(id)
+      .populate('recipientId', 'name email role avatarUrl phone')
+      .populate('propertyId', 'title images price city country address')
+      .populate('buyerId', 'name email avatarUrl');
+
+    if (!inquiry) {
+      res.status(404).json({ message: 'Inquiry not found' });
+      return;
+    }
+
+    res.json({ inquiry });
+  } catch (error: any) {
+    console.error('Get inquiry by id error:', error);
+    res.status(500).json({ message: 'Error fetching inquiry', error: error.message });
+  }
+};
+
+// @desc    Update inquiry status or add admin notes
+// @route   PATCH /api/admin/inquiries/:id
+// @access  Private/Admin
+export const updateInquiry = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+
+    const updates: any = {};
+    if (status) {
+      updates.status = status;
+      if (status === 'read' && !updates.readAt) {
+        updates.readAt = new Date();
+      }
+      if (status === 'replied' && !updates.repliedAt) {
+        updates.repliedAt = new Date();
+      }
+    }
+    if (adminNotes !== undefined) {
+      updates.adminNotes = adminNotes;
+    }
+
+    const inquiry = await Inquiry.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    })
+      .populate('recipientId', 'name email role avatarUrl')
+      .populate('propertyId', 'title images price city country');
+
+    if (!inquiry) {
+      res.status(404).json({ message: 'Inquiry not found' });
+      return;
+    }
+
+    res.json({
+      message: 'Inquiry updated successfully',
+      inquiry,
+    });
+  } catch (error: any) {
+    console.error('Update inquiry error:', error);
+    res.status(500).json({ message: 'Error updating inquiry', error: error.message });
+  }
+};
+
+// @desc    Delete inquiry
+// @route   DELETE /api/admin/inquiries/:id
+// @access  Private/Admin
+export const deleteInquiry = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const inquiry = await Inquiry.findByIdAndDelete(id);
+    if (!inquiry) {
+      res.status(404).json({ message: 'Inquiry not found' });
+      return;
+    }
+
+    res.json({ message: 'Inquiry deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete inquiry error:', error);
+    res.status(500).json({ message: 'Error deleting inquiry', error: error.message });
+  }
+};
+
+// @desc    Bulk update inquiry status
+// @route   PATCH /api/admin/inquiries/bulk-status
+// @access  Private/Admin
+export const bulkUpdateInquiryStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { inquiryIds, status } = req.body;
+
+    if (!inquiryIds || !Array.isArray(inquiryIds) || inquiryIds.length === 0) {
+      res.status(400).json({ message: 'Inquiry IDs array is required' });
+      return;
+    }
+
+    if (!status || !['new', 'read', 'replied', 'archived'].includes(status)) {
+      res.status(400).json({ message: 'Valid status is required' });
+      return;
+    }
+
+    const updates: any = { status };
+    if (status === 'read') updates.readAt = new Date();
+    if (status === 'replied') updates.repliedAt = new Date();
+
+    const result = await Inquiry.updateMany(
+      { _id: { $in: inquiryIds } },
+      updates
+    );
+
+    res.json({
+      message: `${result.modifiedCount} inquiries updated to ${status}`,
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error: any) {
+    console.error('Bulk update inquiry status error:', error);
+    res.status(500).json({ message: 'Error updating inquiries', error: error.message });
+  }
+};
+
+// @desc    Get inquiry statistics
+// @route   GET /api/admin/inquiries/stats
+// @access  Private/Admin
+export const getInquiryStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const [
+      totalInquiries,
+      newInquiries,
+      todayInquiries,
+      weekInquiries,
+    ] = await Promise.all([
+      Inquiry.countDocuments(),
+      Inquiry.countDocuments({ status: 'new' }),
+      Inquiry.countDocuments({
+        createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+      }),
+      Inquiry.countDocuments({
+        createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      }),
+    ]);
+
+    // Get counts by type
+    const byType = await Inquiry.aggregate([
+      { $group: { _id: '$type', count: { $sum: 1 } } },
+    ]);
+
+    // Get counts by status
+    const byStatus = await Inquiry.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+
+    // Get top agents by inquiries received
+    const topAgents = await Inquiry.aggregate([
+      { $group: { _id: '$recipientId', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'agent',
+        },
+      },
+      { $unwind: '$agent' },
+      {
+        $project: {
+          _id: 1,
+          count: 1,
+          name: '$agent.name',
+          email: '$agent.email',
+          avatarUrl: '$agent.avatarUrl',
+        },
+      },
+    ]);
+
+    res.json({
+      overview: {
+        totalInquiries,
+        newInquiries,
+        todayInquiries,
+        weekInquiries,
+      },
+      byType: byType.reduce((acc: any, item: any) => {
+        acc[item._id] = item.count;
+        return acc;
+      }, {}),
+      byStatus: byStatus.reduce((acc: any, item: any) => {
+        acc[item._id] = item.count;
+        return acc;
+      }, {}),
+      topAgents,
+    });
+  } catch (error: any) {
+    console.error('Get inquiry stats error:', error);
+    res.status(500).json({ message: 'Error fetching inquiry stats', error: error.message });
   }
 };

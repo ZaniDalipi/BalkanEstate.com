@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon } from '@/constants';
+import {
+  MagnifyingGlassIcon,
+  PencilIcon,
+  TrashIcon,
+  XMarkIcon,
+  CheckIcon,
+  XCircleIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  ShieldCheckIcon,
+  EyeIcon,
+} from '@/constants';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 
 interface User {
@@ -23,6 +34,12 @@ interface User {
   licenseVerified?: boolean;
   isEnterpriseTier?: boolean;
   createdAt: string;
+  lastLogin?: string;
+  stats?: {
+    totalViews?: number;
+    totalInquiries?: number;
+    activeListings?: number;
+  };
 }
 
 const UserManager: React.FC = () => {
@@ -37,6 +54,7 @@ const UserManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterSubscription, setFilterSubscription] = useState<'all' | 'subscribed' | 'free'>('all');
+  const [filterVerification, setFilterVerification] = useState<'all' | 'verified' | 'unverified'>('all');
 
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -58,6 +76,10 @@ const UserManager: React.FC = () => {
     isEnterpriseTier: false,
   });
 
+  // Detail modal
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -65,7 +87,7 @@ const UserManager: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, filterRole, filterSubscription, searchQuery]);
+  }, [currentPage, filterRole, filterSubscription, filterVerification, searchQuery]);
 
   const fetchUsers = async () => {
     try {
@@ -96,6 +118,13 @@ const UserManager: React.FC = () => {
         filteredUsers = filteredUsers.filter((u: User) => u.isSubscribed);
       } else if (filterSubscription === 'free') {
         filteredUsers = filteredUsers.filter((u: User) => !u.isSubscribed);
+      }
+
+      // Apply verification filter on frontend
+      if (filterVerification === 'verified') {
+        filteredUsers = filteredUsers.filter((u: User) => u.isEmailVerified);
+      } else if (filterVerification === 'unverified') {
+        filteredUsers = filteredUsers.filter((u: User) => !u.isEmailVerified);
       }
 
       setUsers(filteredUsers);
@@ -130,6 +159,11 @@ const UserManager: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
+  const handleViewUser = (user: User) => {
+    setViewingUser(user);
+    setIsDetailModalOpen(true);
+  };
+
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
@@ -154,6 +188,54 @@ const UserManager: React.FC = () => {
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError('Failed to update user');
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
+  // Quick action: Toggle email verification
+  const handleToggleEmailVerification = async (userId: string, currentStatus: boolean) => {
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      const response = await fetch(`http://localhost:5001/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isEmailVerified: !currentStatus }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update user');
+
+      await fetchUsers();
+      setSuccessMessage(`Email ${!currentStatus ? 'verified' : 'unverified'} successfully`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to update verification status');
+      setTimeout(() => setError(null), 5000);
+    }
+  };
+
+  // Quick action: Toggle license verification (for agents)
+  const handleToggleLicenseVerification = async (userId: string, currentStatus: boolean) => {
+    try {
+      const token = localStorage.getItem('balkan_estate_token');
+      const response = await fetch(`http://localhost:5001/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ licenseVerified: !currentStatus }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update user');
+
+      await fetchUsers();
+      setSuccessMessage(`License ${!currentStatus ? 'verified' : 'unverified'} successfully`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to update license status');
       setTimeout(() => setError(null), 5000);
     }
   };
@@ -231,7 +313,7 @@ const UserManager: React.FC = () => {
         </div>
 
         {/* Search and Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -248,7 +330,7 @@ const UserManager: React.FC = () => {
             onChange={(e) => setFilterRole(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">{t('admin:filters.all')}</option>
+            <option value="all">All Roles</option>
             <option value="buyer">{t('admin:users.roles.buyer')}</option>
             <option value="private_seller">{t('admin:users.roles.seller')}</option>
             <option value="agent">{t('admin:users.roles.agent')}</option>
@@ -256,13 +338,23 @@ const UserManager: React.FC = () => {
           </select>
 
           <select
+            value={filterVerification}
+            onChange={(e) => setFilterVerification(e.target.value as any)}
+            className="px-4 py-2 border border-gray-300 rounded-lg"
+          >
+            <option value="all">All Verification</option>
+            <option value="verified">Email Verified</option>
+            <option value="unverified">Email Not Verified</option>
+          </select>
+
+          <select
             value={filterSubscription}
             onChange={(e) => setFilterSubscription(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">{t('admin:filters.all')}</option>
-            <option value="subscribed">{t('admin:filters.active')}</option>
-            <option value="free">{t('admin:filters.inactive')}</option>
+            <option value="all">All Subscription</option>
+            <option value="subscribed">Subscribed</option>
+            <option value="free">Free</option>
           </select>
         </div>
       </div>
@@ -284,19 +376,19 @@ const UserManager: React.FC = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subscription</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verification</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subscription</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={user._id} className={`hover:bg-gray-50 ${!user.isEmailVerified ? 'bg-yellow-50' : ''}`}>
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full mr-3" referrerPolicy="no-referrer" />
@@ -307,56 +399,102 @@ const UserManager: React.FC = () => {
                     )}
                     <div>
                       <div className="font-medium text-gray-900">{user.name}</div>
-                      {user.licenseVerified && (
-                        <span className="text-xs text-green-600">✓ Verified</span>
+                      {user.agencyName && (
+                        <div className="text-xs text-gray-500">{user.agencyName}</div>
                       )}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">{user.email}</div>
+                <td className="px-4 py-4">
+                  <div className="flex items-center gap-1 text-sm text-gray-900">
+                    <EnvelopeIcon className="w-4 h-4 text-gray-400" />
+                    {user.email}
+                  </div>
                   {user.phone && (
-                    <div className="text-xs text-gray-500">{user.phone}</div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                      <PhoneIcon className="w-3 h-3 text-gray-400" />
+                      {user.phone}
+                    </div>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(user.role)}`}>
                     {user.role.replace('_', ' ')}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4">
+                  <div className="space-y-1">
+                    {/* Email verification toggle */}
+                    <button
+                      onClick={() => handleToggleEmailVerification(user._id, user.isEmailVerified || false)}
+                      className={`flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${
+                        user.isEmailVerified
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                          : 'bg-red-100 text-red-800 hover:bg-red-200'
+                      }`}
+                      title={`Click to ${user.isEmailVerified ? 'unverify' : 'verify'} email`}
+                    >
+                      {user.isEmailVerified ? (
+                        <CheckIcon className="w-3 h-3" />
+                      ) : (
+                        <XCircleIcon className="w-3 h-3" />
+                      )}
+                      Email {user.isEmailVerified ? 'Verified' : 'Not Verified'}
+                    </button>
+
+                    {/* License verification for agents */}
+                    {user.role === 'agent' && (
+                      <button
+                        onClick={() => handleToggleLicenseVerification(user._id, user.licenseVerified || false)}
+                        className={`flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${
+                          user.licenseVerified
+                            ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                            : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                        }`}
+                        title={`Click to ${user.licenseVerified ? 'unverify' : 'verify'} license`}
+                      >
+                        <ShieldCheckIcon className="w-3 h-3" />
+                        License {user.licenseVerified ? 'Verified' : 'Pending'}
+                      </button>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
                   {user.isSubscribed ? (
                     <div>
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                        {user.subscriptionType || 'Active'}
+                        {user.subscriptionPlan || user.subscriptionType || 'Active'}
                       </span>
+                      {user.subscriptionStatus && (
+                        <div className="text-xs text-gray-500 mt-1 capitalize">{user.subscriptionStatus}</div>
+                      )}
                     </div>
                   ) : (
                     <span className="text-gray-500 text-sm">Free</span>
                   )}
                 </td>
-                <td className="px-6 py-4">
-                  {user.agencyName ? (
-                    <div className="text-sm text-gray-900">{user.agencyName}</div>
-                  ) : (
-                    <span className="text-gray-400 text-sm">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                   {formatDate(user.createdAt)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex gap-2">
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleViewUser(user)}
+                      className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+                      title="View details"
+                    >
+                      <EyeIcon className="w-5 h-5" />
+                    </button>
                     <button
                       onClick={() => handleEditUser(user)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded"
                       title="Edit user"
                     >
                       <PencilIcon className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDeleteUser(user._id, user.name)}
-                      className="text-red-600 hover:text-red-900"
+                      className="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded"
                       title="Delete user"
                     >
                       <TrashIcon className="w-5 h-5" />
@@ -396,6 +534,170 @@ const UserManager: React.FC = () => {
             >
               Next
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {isDetailModalOpen && viewingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+              <h3 className="text-xl font-bold">User Details</h3>
+              <button onClick={() => setIsDetailModalOpen(false)}>
+                <XMarkIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              {/* User Header */}
+              <div className="flex items-center gap-4">
+                {viewingUser.avatarUrl ? (
+                  <img src={viewingUser.avatarUrl} alt={viewingUser.name} className="w-20 h-20 rounded-full" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
+                    {viewingUser.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <h4 className="text-xl font-bold text-gray-900">{viewingUser.name}</h4>
+                  <p className="text-gray-600">{viewingUser.email}</p>
+                  <span className={`inline-block mt-1 px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(viewingUser.role)}`}>
+                    {viewingUser.role.replace('_', ' ')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h5 className="font-semibold text-gray-700 mb-3">Contact Information</h5>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500">Email</label>
+                    <p className="font-medium">{viewingUser.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Phone</label>
+                    <p className="font-medium">{viewingUser.phone || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">City</label>
+                    <p className="font-medium">{viewingUser.city || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Country</label>
+                    <p className="font-medium">{viewingUser.country || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verification Status */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h5 className="font-semibold text-gray-700 mb-3">Verification Status</h5>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    {viewingUser.isEmailVerified ? (
+                      <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                        <CheckIcon className="w-3 h-3" /> Email Verified
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                        <XCircleIcon className="w-3 h-3" /> Email Not Verified
+                      </span>
+                    )}
+                  </div>
+                  {viewingUser.role === 'agent' && (
+                    <div className="flex items-center gap-2">
+                      {viewingUser.licenseVerified ? (
+                        <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                          <ShieldCheckIcon className="w-3 h-3" /> License Verified
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
+                          <ShieldCheckIcon className="w-3 h-3" /> License Pending
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {viewingUser.role === 'agent' && viewingUser.licenseNumber && (
+                  <div className="mt-3">
+                    <label className="text-xs text-gray-500">License Number</label>
+                    <p className="font-medium">{viewingUser.licenseNumber}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Subscription Info */}
+              <div className="bg-green-50 rounded-lg p-4">
+                <h5 className="font-semibold text-gray-700 mb-3">Subscription</h5>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500">Status</label>
+                    <p className="font-medium">
+                      {viewingUser.isSubscribed ? (
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                          {viewingUser.subscriptionPlan || 'Active'}
+                        </span>
+                      ) : (
+                        <span className="text-gray-500">Free</span>
+                      )}
+                    </p>
+                  </div>
+                  {viewingUser.subscriptionStatus && (
+                    <div>
+                      <label className="text-xs text-gray-500">Subscription Status</label>
+                      <p className="font-medium capitalize">{viewingUser.subscriptionStatus}</p>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-xs text-gray-500">Enterprise Tier</label>
+                    <p className="font-medium">{viewingUser.isEnterpriseTier ? 'Yes' : 'No'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agency Info */}
+              {viewingUser.agencyName && (
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <h5 className="font-semibold text-gray-700 mb-3">Agency</h5>
+                  <p className="font-medium">{viewingUser.agencyName}</p>
+                </div>
+              )}
+
+              {/* Dates */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <label className="text-xs text-gray-500">Joined</label>
+                  <p>{formatDate(viewingUser.createdAt)}</p>
+                </div>
+                {viewingUser.lastLogin && (
+                  <div>
+                    <label className="text-xs text-gray-500">Last Login</label>
+                    <p>{formatDate(viewingUser.lastLogin)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-6 border-t border-gray-200 flex gap-3 flex-shrink-0">
+              <button
+                onClick={() => {
+                  setIsDetailModalOpen(false);
+                  handleEditUser(viewingUser);
+                }}
+                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                Edit User
+              </button>
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

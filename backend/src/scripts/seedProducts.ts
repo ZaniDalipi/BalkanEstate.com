@@ -12,12 +12,12 @@ console.log(`🌍 Environment: ${env.toUpperCase()}`);
 
 const PRODUCTS = [
   // ============================================================================
-  // FREE TIER (baseline for both sellers and agents with verified license)
+  // FREE TIER - Basic access with limited AI features
   // ============================================================================
   {
     productId: 'free_tier',
     name: 'Free',
-    description: 'Get started with basic listing features. Perfect for occasional sellers or agents testing the platform.',
+    description: 'Get started with basic listing features and limited AI tools.',
     type: 'subscription' as const,
     tier: 'free' as const,
     price: 0,
@@ -39,8 +39,12 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 0,
+    // Limits
     listingsLimit: 3,
     promotionCoupons: 0,
+    premiumCoupons: 0,
+    highlightedCoupons: 0,
+    featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: 3,
     aiMessagesLimit: 3,
@@ -48,12 +52,12 @@ const PRODUCTS = [
   },
 
   // ============================================================================
-  // PRO TIER - For individual sellers/agents
+  // PRO MONTHLY - Professional tools with AI features
   // ============================================================================
   {
     productId: 'pro_monthly',
     name: 'Pro Monthly',
-    description: 'Professional selling tools with monthly flexibility. Great for active sellers.',
+    description: 'Professional selling tools with AI-powered features and monthly flexibility.',
     type: 'subscription' as const,
     tier: 'pro' as const,
     price: 25,
@@ -92,6 +96,10 @@ const PRODUCTS = [
     aiMessagesLimit: -1, // unlimited (rate limited)
     generateInsightsLimit: 20,
   },
+
+  // ============================================================================
+  // PRO YEARLY - Best value with annual commitment
+  // ============================================================================
   {
     productId: 'pro_yearly',
     name: 'Pro Yearly',
@@ -245,7 +253,7 @@ const PRODUCTS = [
     targetRole: 'agent' as const,
     displayOrder: 4,
     badge: 'BEST FOR TEAMS',
-    badgeColor: 'red',
+    badgeColor: 'purple',
     highlighted: true,
     cardStyle: {
       backgroundColor: 'from-slate-900 to-gray-800',
@@ -312,12 +320,12 @@ const PRODUCTS = [
   },
 
   // ============================================================================
-  // BUYER TIER - For property buyers (€3/month)
+  // BUYER PRO - For property buyers (€3/month)
   // ============================================================================
   {
     productId: 'buyer_monthly',
     name: 'Buyer Pro',
-    description: 'Never miss your dream property - get instant alerts and market insights.',
+    description: 'Never miss your dream property with instant alerts and market insights.',
     type: 'subscription' as const,
     tier: 'buyer' as const,
     price: 3,
@@ -333,7 +341,6 @@ const PRODUCTS = [
       'Investment calculator',
       'Mortgage pre-qualification',
       'Ad-free browsing',
-      'Compare up to 10 properties',
     ],
     targetRole: 'buyer' as const,
     displayOrder: 5,
@@ -349,8 +356,12 @@ const PRODUCTS = [
     hasFreeTrial: true,
     trialPeriodDays: 7,
     gracePeriodDays: 3,
+    // Limits
     listingsLimit: 0, // Buyers don't create listings
     promotionCoupons: 0,
+    premiumCoupons: 0,
+    highlightedCoupons: 0,
+    featuredCoupons: 0,
     agentCoupons: 0,
     savedSearchesLimit: -1, // unlimited
     aiMessagesLimit: -1, // unlimited (rate limited)

@@ -1,7 +1,16 @@
 {
-  "title": "Izaberite Vaš Plan Prodaje",
-  "subtitle": "Postavite vašu nekretninu pred hiljade potencijalnih kupaca",
-  "loading": "Učitavanje planova...",
+  "pageTitle": "Cenovni Planovi",
+  "title": "Izaberite Vaš Plan",
+  "subtitle": "Postavite vašu nekretninu pred hiljade potencijalnih kupaca sa našim fleksibilnim opcijama cena.",
+  "loading": "Učitavanje cenovnih planova...",
+  "noPlans": "Nema dostupnih cenovnih planova trenutno.",
+  "tabs": {
+    "forSellers": "Za Prodavce",
+    "forBuyers": "Za Kupce"
+  },
+  "error": {
+    "loadFailed": "Učitavanje cenovnih planova nije uspelo"
+  },
   "limitedOffer": "Ograničena Ponuda Ističe Za:",
   "offerTitle": "Čestitamo! Otključali Ste Ekskluzivne Popuste!",
   "offerSubtitle": "Uživajte u ovoj jednokratnoj ponudi na naše planove prodaje kao znak zahvalnosti.",
@@ -66,6 +75,7 @@
     "yearly": "Godišnje",
     "perMonth": "/mesečno",
     "perYear": "/godišnje",
+    "perWeek": "/nedeljno",
     "billedAnnually": "Naplaćuje se godišnje",
     "billedMonthly": "Naplaćuje se mesečno",
     "youSave": "Uštedite €{{amount}}!"
@@ -74,9 +84,12 @@
     "off": "{{percent}}% POPUST"
   },
   "benefits": {
-    "moneyBack": "30-dnevna garancija povrata novca",
-    "moreViews": "{{multiplier}}x više pregleda od besplatnih oglasa",
-    "instantActivation": "Trenutna aktivacija",
+    "moneyBack": "30-Dnevna Garancija Povrata",
+    "moneyBackDesc": "Pun povrat novca ako niste zadovoljni",
+    "moreViews": "3x Više Pregleda",
+    "moreViewsDesc": "Premium oglasi dobijaju više izloženosti",
+    "instantActivation": "Trenutna Aktivacija",
+    "instantActivationDesc": "Počnite da prodajete odmah",
     "cancelAnytime": "Otkažite bilo kada"
   },
   "enterprise": {
