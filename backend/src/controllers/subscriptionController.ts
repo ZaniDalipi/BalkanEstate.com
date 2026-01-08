@@ -121,7 +121,7 @@ export const createSubscription = async (req: Request, res: Response): Promise<v
         monthly: product.promotionCoupons || 3,
         available: product.promotionCoupons || 3,
         used: 0,
-        highlightCoupons: product.highlightCoupons || 2, // All Pro users get 2 coupons
+        highlightCoupons: product.highlightedCoupons || 2, // All Pro users get 2 coupons
         usedHighlightCoupons: 0,
       },
     };
@@ -713,7 +713,7 @@ export const syncProSubscription = async (req: Request, res: Response): Promise<
           monthly: product?.promotionCoupons || 3,
           available: user.proSubscription?.promotionCoupons?.available || (product?.promotionCoupons || 3),
           used: user.proSubscription?.promotionCoupons?.used || 0,
-          highlightCoupons: product?.highlightCoupons || 2, // All Pro users get 2 coupons
+          highlightCoupons: product?.highlightedCoupons || 2, // All Pro users get 2 coupons
           usedHighlightCoupons: user.proSubscription?.promotionCoupons?.usedHighlightCoupons || 0,
         },
       };

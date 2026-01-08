@@ -389,7 +389,7 @@ export const createProperty = async (
           monthly: product?.promotionCoupons || 3,
           available: user.proSubscription?.promotionCoupons?.available || (product?.promotionCoupons || 3),
           used: user.proSubscription?.promotionCoupons?.used || 0,
-          highlightCoupons: product?.highlightCoupons || 2,
+          highlightCoupons: product?.highlightedCoupons || 2,
           usedHighlightCoupons: user.proSubscription?.promotionCoupons?.usedHighlightCoupons || 0,
         },
       };
