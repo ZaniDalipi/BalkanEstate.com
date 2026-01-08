@@ -1,7 +1,16 @@
 {
-  "title": "Choose Your Selling Plan",
-  "subtitle": "Get your property in front of thousands of potential buyers",
-  "loading": "Loading plans...",
+  "pageTitle": "Ценовни Планови",
+  "title": "Изберете Ваш План",
+  "subtitle": "Поставете го вашиот имот пред илјадници потенцијални купувачи со нашите флексибилни опции за цени.",
+  "loading": "Вчитување на ценовни планови...",
+  "noPlans": "Нема достапни ценовни планови во моментов.",
+  "tabs": {
+    "forSellers": "За Продавачи",
+    "forBuyers": "За Купувачи"
+  },
+  "error": {
+    "loadFailed": "Неуспешно вчитување на ценовните планови"
+  },
   "limitedOffer": "Limited Time Offer Ends In:",
   "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
   "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
@@ -62,22 +71,26 @@
     "currentPlan": "Current Plan"
   },
   "billing": {
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "perMonth": "/month",
-    "perYear": "/year",
-    "billedAnnually": "Billed annually",
-    "billedMonthly": "Billed monthly",
-    "youSave": "You save €{{amount}}!"
+    "monthly": "Месечно",
+    "yearly": "Годишно",
+    "perMonth": "/месец",
+    "perYear": "/година",
+    "perWeek": "/недела",
+    "billedAnnually": "Наплата годишно",
+    "billedMonthly": "Наплата месечно",
+    "youSave": "Заштедувате €{{amount}}!"
   },
   "discount": {
     "off": "{{percent}}% OFF"
   },
   "benefits": {
-    "moneyBack": "30-day money-back guarantee",
-    "moreViews": "{{multiplier}}x more views than free listings",
-    "instantActivation": "Instant activation",
-    "cancelAnytime": "Cancel anytime"
+    "moneyBack": "30-Дневна Гаранција за Враќање",
+    "moneyBackDesc": "Целосен поврат ако не сте задоволни",
+    "moreViews": "3x Повеќе Прегледи",
+    "moreViewsDesc": "Премиум огласите добиваат поголема изложеност",
+    "instantActivation": "Моментална Активација",
+    "instantActivationDesc": "Започнете со продажба веднаш",
+    "cancelAnytime": "Откажете во секое време"
   },
   "enterprise": {
     "required": "Enterprise Plan Required",

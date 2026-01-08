@@ -35,7 +35,7 @@ interface Product {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const PricingPage: React.FC = () => {
-  const { t } = useTranslation(['pricing']);
+  const { t } = useTranslation(['pricing', 'common']);
   const { state, dispatch } = useAppContext();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,13 +61,13 @@ const PricingPage: React.FC = () => {
         setProducts(data.products || []);
       } catch (err) {
         console.error('Error fetching products:', err);
-        setError('Failed to load pricing plans');
+        setError(t('pricing:error.loadFailed', 'Failed to load pricing plans'));
       } finally {
         setLoading(false);
       }
     };
     fetchProducts();
-  }, [activeTab]);
+  }, [activeTab, t]);
 
   const handleBack = () => {
     window.history.pushState({}, '', buildLocalizedPath('/'));
@@ -76,7 +76,6 @@ const PricingPage: React.FC = () => {
 
   const handlePlanSelection = (product: Product) => {
     if (!state.isAuthenticated || !state.currentUser) {
-      // Save pending subscription and redirect to login
       dispatch({
         type: 'SET_PENDING_SUBSCRIPTION',
         payload: {
@@ -100,7 +99,6 @@ const PricingPage: React.FC = () => {
       productId: product.productId,
     });
 
-    // Enterprise plan needs agency creation first
     if (product.productId.includes('enterprise') && !state.pendingAgencyData) {
       dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
     } else {
@@ -115,8 +113,8 @@ const PricingPage: React.FC = () => {
       type: 'SHOW_ALERT',
       payload: {
         type: 'success',
-        title: 'Success!',
-        message: 'Your subscription has been activated.',
+        title: t('pricing:success.title', 'Success!'),
+        message: t('pricing:success.subscriptionActivated', 'Your subscription has been activated.'),
       },
     });
   };
@@ -136,9 +134,13 @@ const PricingPage: React.FC = () => {
     }
   };
 
-  const formatPrice = (price: number, billingPeriod?: string) => {
-    const period = billingPeriod === 'yearly' ? '/year' : billingPeriod === 'monthly' ? '/month' : '';
-    return `€${price}${period}`;
+  const getBillingLabel = (billingPeriod?: string) => {
+    switch (billingPeriod) {
+      case 'yearly': return t('pricing:billing.perYear', '/year');
+      case 'monthly': return t('pricing:billing.perMonth', '/month');
+      case 'weekly': return t('pricing:billing.perWeek', '/week');
+      default: return '';
+    }
   };
 
   const getUserRole = (): 'buyer' | 'private_seller' | 'agent' => {
@@ -146,101 +148,146 @@ const PricingPage: React.FC = () => {
     return state.currentUser.role === 'agent' ? 'agent' : 'private_seller';
   };
 
+  // Separate enterprise from other products for layout
+  const enterpriseProduct = products.find(p => p.productId.includes('enterprise'));
+  const otherProducts = products.filter(p => !p.productId.includes('enterprise')).sort((a, b) => a.displayOrder - b.displayOrder);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-safe">
+      {/* Header - Mobile optimized */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={handleBack}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-1.5 sm:gap-2 text-gray-600 hover:text-gray-900 transition-colors p-1 -ml-1"
             >
               <ArrowLeftIcon className="w-5 h-5" />
-              <span className="font-medium">Back</span>
+              <span className="font-medium text-sm sm:text-base">{t('common:back', 'Back')}</span>
             </button>
-            <h1 className="text-xl font-bold text-gray-900">Pricing Plans</h1>
-            <div className="w-20" /> {/* Spacer for centering */}
+            <h1 className="text-base sm:text-xl font-bold text-gray-900">{t('pricing:pageTitle', 'Pricing Plans')}</h1>
+            <div className="w-16 sm:w-20" />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Title */}
-        <div className="text-center mb-10">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-            Choose Your Plan
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-12">
+        {/* Title - Responsive */}
+        <div className="text-center mb-6 sm:mb-10">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
+            {t('pricing:title', 'Choose Your Plan')}
           </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Get your property in front of thousands of potential buyers with our flexible pricing options.
+          <p className="mt-2 sm:mt-4 text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+            {t('pricing:subtitle', 'Get your property in front of thousands of potential buyers with our flexible pricing options.')}
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex justify-center mb-10">
-          <div className="bg-gray-100 p-1 rounded-full inline-flex">
+        {/* Tab Switcher - Mobile friendly */}
+        <div className="flex justify-center mb-6 sm:mb-10">
+          <div className="bg-gray-100 p-1 rounded-full inline-flex w-full max-w-xs sm:w-auto">
             <button
               onClick={() => setActiveTab('seller')}
-              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+              className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-sm font-semibold transition-all ${
                 activeTab === 'seller'
                   ? 'bg-white text-primary shadow-md'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              For Sellers
+              {t('pricing:tabs.forSellers', 'For Sellers')}
             </button>
             <button
               onClick={() => setActiveTab('buyer')}
-              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+              className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-sm font-semibold transition-all ${
                 activeTab === 'buyer'
                   ? 'bg-white text-primary shadow-md'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              For Buyers
+              {t('pricing:tabs.forBuyers', 'For Buyers')}
             </button>
           </div>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-16 sm:py-20">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading pricing plans...</p>
+              <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-gray-600 text-sm sm:text-base">{t('pricing:loading', 'Loading pricing plans...')}</p>
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="text-center py-20">
+          <div className="text-center py-16 sm:py-20">
             <p className="text-red-600">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
             >
-              Try Again
+              {t('common:tryAgain', 'Try Again')}
             </button>
           </div>
         )}
 
-        {/* Products Grid */}
-        {!loading && !error && (
-          <div className={`grid grid-cols-1 ${products.length > 2 ? 'md:grid-cols-3' : 'md:grid-cols-2 max-w-4xl mx-auto'} gap-8`}>
-            {products.sort((a, b) => a.displayOrder - b.displayOrder).map((product) => (
+        {/* Products Grid - Mobile first layout */}
+        {!loading && !error && products.length > 0 && (
+          <div className="space-y-6 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
+            {/* Enterprise Card - Full width on mobile, first position */}
+            {enterpriseProduct && (
+              <div className="relative rounded-2xl p-5 sm:p-6 lg:p-8 flex flex-col bg-gray-800 text-white order-first sm:order-none">
+                {enterpriseProduct.badge && (
+                  <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2">
+                    <span className={`inline-block ${getBadgeColor(enterpriseProduct.badgeColor)} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md`}>
+                      {enterpriseProduct.badge}
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-center pt-2 sm:pt-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <BuildingOfficeIcon className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400" />
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold">{enterpriseProduct.name}</h3>
+                  </div>
+                  {enterpriseProduct.description && (
+                    <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-300">{enterpriseProduct.description}</p>
+                  )}
+                  <div className="mt-3 sm:mt-4">
+                    <span className="text-3xl sm:text-4xl font-extrabold">€{enterpriseProduct.price}</span>
+                    <span className="text-base sm:text-lg text-gray-300">{getBillingLabel(enterpriseProduct.billingPeriod)}</span>
+                  </div>
+                </div>
+
+                <ul className="mt-5 sm:mt-8 space-y-3 sm:space-y-4 flex-grow">
+                  {enterpriseProduct.features?.map((feature, index) => (
+                    <li key={index} className="flex items-start gap-2.5 sm:gap-3">
+                      <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 text-green-400" />
+                      <span className="text-xs sm:text-sm text-gray-200">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => handlePlanSelection(enterpriseProduct)}
+                  className="w-full mt-5 sm:mt-8 py-3 sm:py-3.5 rounded-lg font-bold bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+                >
+                  {t('pricing:buttons.getStarted', 'Get Started')} - €{enterpriseProduct.price}{getBillingLabel(enterpriseProduct.billingPeriod)}
+                </button>
+              </div>
+            )}
+
+            {/* Other Products */}
+            {otherProducts.map((product) => (
               <div
                 key={product.id}
-                className={`relative rounded-2xl p-6 sm:p-8 flex flex-col ${
+                className={`relative rounded-2xl p-5 sm:p-6 lg:p-8 flex flex-col ${
                   product.highlighted
-                    ? 'bg-gradient-to-br from-green-50 to-cyan-50 border-2 border-green-400 shadow-lg transform md:-translate-y-2'
-                    : product.productId.includes('enterprise')
-                    ? 'bg-gray-800 text-white'
+                    ? 'bg-gradient-to-br from-green-50 to-cyan-50 border-2 border-green-400 shadow-lg sm:-translate-y-2'
                     : 'bg-white border border-gray-200 shadow-md'
                 }`}
               >
-                {/* Badge */}
                 {product.badge && (
                   <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2">
                     <span className={`inline-block ${getBadgeColor(product.badgeColor)} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md`}>
@@ -249,76 +296,35 @@ const PricingPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Product Info */}
-                <div className="text-center pt-4">
-                  <div className="flex items-center justify-center gap-2">
-                    {product.productId.includes('enterprise') && (
-                      <BuildingOfficeIcon className="w-7 h-7 text-amber-400" />
-                    )}
-                    <h3 className="text-xl sm:text-2xl font-bold">{product.name}</h3>
-                  </div>
+                <div className="text-center pt-2 sm:pt-4">
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{product.name}</h3>
                   {product.description && (
-                    <p className={`mt-2 text-sm ${product.productId.includes('enterprise') ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {product.description}
-                    </p>
+                    <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-600">{product.description}</p>
                   )}
-                  <div className="mt-4">
-                    <span className={`text-4xl font-extrabold ${product.productId.includes('enterprise') ? 'text-white' : 'text-gray-900'}`}>
-                      €{product.price}
-                    </span>
-                    <span className={`text-lg ${product.productId.includes('enterprise') ? 'text-gray-300' : 'text-gray-600'}`}>
-                      /{product.billingPeriod === 'yearly' ? 'year' : product.billingPeriod === 'monthly' ? 'month' : product.billingPeriod}
-                    </span>
+                  <div className="mt-3 sm:mt-4">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">€{product.price}</span>
+                    <span className="text-base sm:text-lg text-gray-600">{getBillingLabel(product.billingPeriod)}</span>
                   </div>
                 </div>
 
-                {/* Features */}
-                <ul className="mt-8 space-y-4 flex-grow">
-                  {product.features && product.features.length > 0 ? (
-                    product.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <CheckIcon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                          product.productId.includes('enterprise') ? 'text-green-400' : 'text-green-500'
-                        }`} />
-                        <span className={`text-sm ${product.productId.includes('enterprise') ? 'text-gray-200' : 'text-gray-700'}`}>
-                          {feature}
-                        </span>
-                      </li>
-                    ))
-                  ) : (
-                    <>
-                      {product.listingsLimit && product.listingsLimit > 0 && (
-                        <li className="flex items-start gap-3">
-                          <CheckIcon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${product.productId.includes('enterprise') ? 'text-green-400' : 'text-green-500'}`} />
-                          <span className={`text-sm ${product.productId.includes('enterprise') ? 'text-gray-200' : 'text-gray-700'}`}>
-                            Up to {product.listingsLimit} active listings
-                          </span>
-                        </li>
-                      )}
-                      {product.promotionCoupons && product.promotionCoupons > 0 && (
-                        <li className="flex items-start gap-3">
-                          <CheckIcon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${product.productId.includes('enterprise') ? 'text-green-400' : 'text-green-500'}`} />
-                          <span className={`text-sm ${product.productId.includes('enterprise') ? 'text-gray-200' : 'text-gray-700'}`}>
-                            {product.promotionCoupons} promotion coupons/month
-                          </span>
-                        </li>
-                      )}
-                    </>
-                  )}
+                <ul className="mt-5 sm:mt-8 space-y-3 sm:space-y-4 flex-grow">
+                  {product.features?.map((feature, index) => (
+                    <li key={index} className="flex items-start gap-2.5 sm:gap-3">
+                      <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 text-green-500" />
+                      <span className="text-xs sm:text-sm text-gray-700">{feature}</span>
+                    </li>
+                  ))}
                 </ul>
 
-                {/* CTA Button */}
                 <button
                   onClick={() => handlePlanSelection(product)}
-                  className={`w-full mt-8 py-3.5 rounded-lg font-bold transition-all ${
+                  className={`w-full mt-5 sm:mt-8 py-3 sm:py-3.5 rounded-lg font-bold transition-all text-sm sm:text-base ${
                     product.highlighted
                       ? 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-md hover:shadow-xl'
-                      : product.productId.includes('enterprise')
-                      ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-xl'
                       : 'bg-white border-2 border-gray-300 text-gray-700 hover:border-primary hover:shadow-lg'
                   }`}
                 >
-                  Get Started - {formatPrice(product.price, product.billingPeriod)}
+                  {t('pricing:buttons.getStarted', 'Get Started')} - €{product.price}{getBillingLabel(product.billingPeriod)}
                 </button>
               </div>
             ))}
@@ -327,28 +333,28 @@ const PricingPage: React.FC = () => {
 
         {/* No Products Message */}
         {!loading && !error && products.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-gray-600">No pricing plans available at the moment.</p>
+          <div className="text-center py-16 sm:py-20">
+            <p className="text-gray-600">{t('pricing:noPlans', 'No pricing plans available at the moment.')}</p>
           </div>
         )}
 
-        {/* Benefits Section */}
-        <div className="mt-16 pt-10 border-t border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        {/* Benefits Section - Mobile optimized */}
+        <div className="mt-10 sm:mt-16 pt-8 sm:pt-10 border-t border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-center">
             <div className="flex flex-col items-center">
-              <CurrencyDollarIcon className="w-10 h-10 text-green-500 mb-3" />
-              <h4 className="font-semibold text-gray-900">30-Day Money Back</h4>
-              <p className="text-sm text-gray-600 mt-1">Full refund if not satisfied</p>
+              <CurrencyDollarIcon className="w-8 h-8 sm:w-10 sm:h-10 text-green-500 mb-2 sm:mb-3" />
+              <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{t('pricing:benefits.moneyBack', '30-Day Money Back')}</h4>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">{t('pricing:benefits.moneyBackDesc', 'Full refund if not satisfied')}</p>
             </div>
             <div className="flex flex-col items-center">
-              <ChartBarIcon className="w-10 h-10 text-blue-500 mb-3" />
-              <h4 className="font-semibold text-gray-900">3x More Views</h4>
-              <p className="text-sm text-gray-600 mt-1">Premium listings get more exposure</p>
+              <ChartBarIcon className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 mb-2 sm:mb-3" />
+              <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{t('pricing:benefits.moreViews', '3x More Views')}</h4>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">{t('pricing:benefits.moreViewsDesc', 'Premium listings get more exposure')}</p>
             </div>
             <div className="flex flex-col items-center">
-              <BoltIcon className="w-10 h-10 text-yellow-500 mb-3" />
-              <h4 className="font-semibold text-gray-900">Instant Activation</h4>
-              <p className="text-sm text-gray-600 mt-1">Start selling immediately</p>
+              <BoltIcon className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-500 mb-2 sm:mb-3" />
+              <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{t('pricing:benefits.instantActivation', 'Instant Activation')}</h4>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">{t('pricing:benefits.instantActivationDesc', 'Start selling immediately')}</p>
             </div>
           </div>
         </div>
