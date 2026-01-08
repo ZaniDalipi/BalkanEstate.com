@@ -2,6 +2,8 @@ import React from 'react';
 import Modal from './Modal';
 import WhackAnIconAnimation from '@/features/seller/components/WhackAnIconAnimation';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 interface DiscountGameModalProps {
     isOpen: boolean;
     onGameComplete: (discounts: { proYearly: number; proMonthly: number; enterprise: number; }) => void;
@@ -27,7 +29,7 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, onGameCom
                 // Use the highest discount as the code value
                 const maxDiscount = Math.max(discounts.proYearly, discounts.proMonthly, discounts.enterprise);
 
-                await fetch('http://localhost:5001/api/discount-codes', {
+                await fetch(`${API_URL}/discount-codes`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

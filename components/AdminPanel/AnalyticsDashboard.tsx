@@ -8,6 +8,8 @@ import {
   ChartBarIcon
 } from '../../constants';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 interface AdminStats {
   overview: {
     totalUsers: number;
@@ -34,7 +36,7 @@ const AnalyticsDashboard: React.FC = () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('http://localhost:5001/api/admin/stats', {
+      const response = await fetch(`${API_URL}/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
