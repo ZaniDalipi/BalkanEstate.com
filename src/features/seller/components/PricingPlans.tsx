@@ -366,11 +366,11 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                 <div className="relative p-6 sm:p-8 rounded-2xl border-2 border-green-400 bg-gradient-to-br from-green-50 to-cyan-50 shadow-lg lg:-translate-y-4 flex flex-col h-full">
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2">
                         <span className="inline-block bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                            {isOffer && proYearlyDiscount > 0 ? t('pricing:discount.off', { percent: proYearlyDiscount }) : t('pricing:plans.proYearly.badge')}
+                            {isOffer && proYearlyDiscount > 0 ? t('pricing:discount.off', { percent: proYearlyDiscount }) : (proYearlyProduct?.badge || t('pricing:plans.proYearly.badge'))}
                         </span>
                     </div>
                     <div className="text-center pt-4">
-                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('pricing:plans.proYearly.name')}</h3>
+                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{proYearlyProduct?.name || t('pricing:plans.proYearly.name')}</h3>
                         <div className="mt-2 h-20 flex flex-col items-center justify-center">
                             {isOffer && proYearlyDiscount > 0 ? (
                                 <>
@@ -390,12 +390,20 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     </div>
                     <ul className="mt-8 space-y-4 text-neutral-700 font-medium flex-grow text-sm sm:text-base">
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.activeListings', { count: 15 })}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.promotedListings', { count: 2, days: 15 })}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.premiumPlacement')}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.analytics')}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.leadManagement')}</li>
-                        <li className="flex items-center"><TickIcon /> {t('pricing:features.prioritySupport')}</li>
+                        {proYearlyProduct?.features && proYearlyProduct.features.length > 0 ? (
+                            proYearlyProduct.features.map((feature, index) => (
+                                <li key={index} className="flex items-center"><TickIcon /> {feature}</li>
+                            ))
+                        ) : (
+                            <>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.activeListings', { count: 15 })}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.promotedListings', { count: 2, days: 15 })}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.premiumPlacement')}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.analytics')}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.leadManagement')}</li>
+                                <li className="flex items-center"><TickIcon /> {t('pricing:features.prioritySupport')}</li>
+                            </>
+                        )}
                     </ul>
                     <button
                         onClick={() => handlePlanSelection('Pro Annual', proYearlyPrice, 'year', proYearlyDiscount, proYearlyProduct?.productId || 'seller_pro_yearly')}
@@ -416,7 +424,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     )}
                      <div className="text-center pt-4">
-                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('pricing:plans.proMonthly.name')}</h3>
+                        <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{proMonthlyProduct?.name || t('pricing:plans.proMonthly.name')}</h3>
                         <div className="mt-2 h-20 flex flex-col items-center justify-center">
                             {isOffer && proMonthlyDiscount > 0 ? (
                                 <>
@@ -436,26 +444,36 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     </div>
                     <div className="mt-8 space-y-3 flex-grow flex flex-col">
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.activeListings', { count: 15 })}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.perfectForActive')}</p>
-                        </div>
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.promotedListings', { count: 2, days: 15 })}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.featuredBoost')}</p>
-                        </div>
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.analytics')}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.analyticsDesc')}</p>
-                        </div>
-                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.prioritySupport')}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.prioritySupportDesc')}</p>
-                        </div>
-                         <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                            <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.mobileApp')}</p>
-                            <p className="text-neutral-600 text-sm">{t('pricing:features.mobileAppDesc')}</p>
-                        </div>
+                        {proMonthlyProduct?.features && proMonthlyProduct.features.length > 0 ? (
+                            proMonthlyProduct.features.map((feature, index) => (
+                                <div key={index} className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{feature}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.activeListings', { count: 15 })}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.perfectForActive')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.promotedListings', { count: 2, days: 15 })}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.featuredBoost')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.analytics')}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.analyticsDesc')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.prioritySupport')}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.prioritySupportDesc')}</p>
+                                </div>
+                                <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                                    <p className="font-semibold text-neutral-800 text-sm">{t('pricing:features.mobileApp')}</p>
+                                    <p className="text-neutral-600 text-sm">{t('pricing:features.mobileAppDesc')}</p>
+                                </div>
+                            </>
+                        )}
                     </div>
                      <button
                         onClick={() => handlePlanSelection('Pro Monthly', proMonthlyPrice, 'month', proMonthlyDiscount, proMonthlyProduct?.productId || 'seller_pro_monthly')}
@@ -477,7 +495,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                      <div className="text-center pt-4">
                         <div className="flex justify-center items-center gap-2">
                            <BuildingOfficeIcon className="w-8 h-8 text-amber-400" />
-                           <h3 className="text-xl sm:text-2xl font-bold">{t('pricing:plans.enterprise.name')}</h3>
+                           <h3 className="text-xl sm:text-2xl font-bold">{enterpriseProduct?.name || t('pricing:plans.enterprise.name')}</h3>
                         </div>
                         <div className="mt-2 h-20 flex flex-col items-center justify-center">
                             {isOffer && enterpriseDiscount > 0 ? (
@@ -498,22 +516,32 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
                         </div>
                     </div>
                     <div className="mt-8 space-y-4 flex-grow">
-                        <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.dedicatedAgencyPage')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.dedicatedAgencyPageDesc')}</p>
-                        </div>
-                         <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.displayAgents')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.displayAgentsDesc')}</p>
-                        </div>
-                         <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.featuredAds')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.featuredAdsDesc')}</p>
-                        </div>
-                         <div className="bg-neutral-700/50 p-4 rounded-lg">
-                            <p className="font-bold text-base sm:text-lg">{t('pricing:features.fullContact')}</p>
-                            <p className="text-neutral-300 text-sm">{t('pricing:features.fullContactDesc')}</p>
-                        </div>
+                        {enterpriseProduct?.features && enterpriseProduct.features.length > 0 ? (
+                            enterpriseProduct.features.map((feature, index) => (
+                                <div key={index} className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">{feature}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">{t('pricing:features.dedicatedAgencyPage')}</p>
+                                    <p className="text-neutral-300 text-sm">{t('pricing:features.dedicatedAgencyPageDesc')}</p>
+                                </div>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">{t('pricing:features.displayAgents')}</p>
+                                    <p className="text-neutral-300 text-sm">{t('pricing:features.displayAgentsDesc')}</p>
+                                </div>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">{t('pricing:features.featuredAds')}</p>
+                                    <p className="text-neutral-300 text-sm">{t('pricing:features.featuredAdsDesc')}</p>
+                                </div>
+                                <div className="bg-neutral-700/50 p-4 rounded-lg">
+                                    <p className="font-bold text-base sm:text-lg">{t('pricing:features.fullContact')}</p>
+                                    <p className="text-neutral-300 text-sm">{t('pricing:features.fullContactDesc')}</p>
+                                </div>
+                            </>
+                        )}
                     </div>
                      <button
                         onClick={() => handlePlanSelection('Enterprise', enterprisePrice, 'year', enterpriseDiscount, enterpriseProduct?.productId || 'seller_enterprise_yearly')}
