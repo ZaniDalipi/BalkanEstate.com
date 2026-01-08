@@ -1393,120 +1393,274 @@ class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--[if mso]>
+  <style type="text/css">
+    table { border-collapse: collapse; }
+    .button { padding: 16px 48px !important; }
+  </style>
+  <![endif]-->
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
   <!-- Preview text -->
   <div style="display: none; max-height: 0; overflow: hidden;">
-    You're all set! Start exploring thousands of properties across the Balkans.
+    Welcome to Balkan Estate! Your gateway to properties across 8 Balkan countries. Search, save, compare, and connect with agents.
   </div>
 
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <!-- Celebration Header -->
-    <div style="background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); padding: 48px 24px; text-align: center;">
-      <div style="margin-bottom: 16px;">
-        <span style="font-size: 48px;">🎉</span>
+  <div style="max-width: 640px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Professional Header -->
+    <div style="background: linear-gradient(135deg, #0252CD 0%, #1e40af 50%, #0369a1 100%); padding: 48px 32px; text-align: center;">
+      <div style="margin-bottom: 20px;">
+        <div style="display: inline-block; background: rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 20px;">
+          <span style="font-size: 32px; vertical-align: middle;">🏠</span>
+          <span style="color: #ffffff; font-size: 24px; font-weight: 700; vertical-align: middle; margin-left: 8px;">Balkan Estate</span>
+        </div>
       </div>
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">You're In, ${params.userName}!</h1>
-      <p style="color: #bfdbfe; margin: 12px 0 0 0; font-size: 16px;">Your account is verified and ready to go</p>
+      <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome, ${params.userName}!</h1>
+      <p style="color: #bfdbfe; margin: 12px 0 0 0; font-size: 16px;">Your account is verified and ready to explore</p>
     </div>
 
-    <div style="padding: 32px 24px;">
-      <!-- Personal welcome -->
-      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-        Welcome aboard! You now have full access to Balkan Estate—the smartest way to find properties across Croatia, Slovenia, Montenegro, Serbia, Albania, Kosovo, North Macedonia, and Bosnia.
+    <!-- Main Content -->
+    <div style="padding: 40px 32px;">
+
+      <!-- Introduction -->
+      <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
+        Thank you for joining <strong>Balkan Estate</strong> — the premier real estate platform connecting buyers, sellers, and agents across the Balkans. Whether you're searching for your dream home or looking to list a property, we've got you covered.
       </p>
 
-      <!-- Quick Start Guide -->
-      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin: 24px 0;">
-        <p style="color: #92400e; font-weight: 700; font-size: 15px; margin: 0 0 16px 0;">🚀 Quick Start Guide</p>
+      <!-- Countries Coverage -->
+      <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        <p style="color: #1e40af; font-weight: 600; font-size: 14px; margin: 0 0 12px 0;">🌍 Properties across 8 Balkan countries</p>
+        <p style="color: #374151; font-size: 13px; margin: 0; line-height: 1.6;">
+          Croatia · Slovenia · Serbia · Montenegro · Bosnia · Albania · Kosovo · North Macedonia
+        </p>
+      </div>
 
-        <div style="margin-bottom: 16px;">
-          <div style="display: table; width: 100%;">
-            <div style="display: table-cell; width: 32px; vertical-align: top;">
-              <div style="width: 24px; height: 24px; background: #0252CD; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">1</div>
-            </div>
-            <div style="display: table-cell; vertical-align: top;">
-              <p style="color: #374151; font-size: 14px; margin: 0;"><strong>Set up your search</strong> — Tell us what you're looking for (location, budget, property type)</p>
-            </div>
+      <!-- For Buyers Section -->
+      <div style="margin: 32px 0;">
+        <div style="display: table; width: 100%; margin-bottom: 16px;">
+          <div style="display: table-cell; vertical-align: middle;">
+            <h2 style="color: #1f2937; font-size: 18px; margin: 0; font-weight: 700;">🏡 For Property Seekers</h2>
           </div>
         </div>
 
-        <div style="margin-bottom: 16px;">
-          <div style="display: table; width: 100%;">
-            <div style="display: table-cell; width: 32px; vertical-align: top;">
-              <div style="width: 24px; height: 24px; background: #0252CD; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">2</div>
-            </div>
-            <div style="display: table-cell; vertical-align: top;">
-              <p style="color: #374151; font-size: 14px; margin: 0;"><strong>Save your favorites</strong> — Click the heart icon on properties you love</p>
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <!-- Feature 1 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #eff6ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🔍</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Advanced Property Search</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Filter by location, price, property type, bedrooms, amenities, and more</div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div>
-          <div style="display: table; width: 100%;">
-            <div style="display: table-cell; width: 32px; vertical-align: top;">
-              <div style="width: 24px; height: 24px; background: #0252CD; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: 600;">3</div>
+          <!-- Feature 2 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #fef2f2; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">❤️</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Save & Compare Properties</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Bookmark favorites and compare up to 5 properties side-by-side</div>
+              </div>
             </div>
-            <div style="display: table-cell; vertical-align: top;">
-              <p style="color: #374151; font-size: 14px; margin: 0;"><strong>Enable alerts</strong> — Get notified instantly when matching properties are listed</p>
+          </div>
+          <!-- Feature 3 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🔔</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Smart Alerts & Notifications</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Get instant alerts for new listings and price drops on saved properties</div>
+              </div>
+            </div>
+          </div>
+          <!-- Feature 4 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">💬</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Direct Messaging</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Chat directly with agents and sellers — no phone calls needed</div>
+              </div>
+            </div>
+          </div>
+          <!-- Feature 5 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #fef3c7; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">📊</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Property Valuation Tool</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Get AI-powered estimates to understand fair market prices</div>
+              </div>
+            </div>
+          </div>
+          <!-- Feature 6 -->
+          <div style="padding: 16px 20px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #ecfdf5; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🏦</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Mortgage Calculator</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Calculate monthly payments and plan your budget with ease</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Features Grid -->
-      <p style="color: #374151; font-weight: 600; font-size: 15px; margin: 0 0 16px 0;">What you can do now:</p>
-      <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 8px;">
-        <div style="display: table-row;">
-          <div style="display: table-cell; width: 50%; background: #f0f9ff; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">🔍</div>
-            <div style="font-weight: 600; color: #0369a1; font-size: 14px;">Smart Search</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Filter by location, price, size & more</div>
-          </div>
-          <div style="display: table-cell; width: 50%; background: #fef2f2; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">❤️</div>
-            <div style="font-weight: 600; color: #dc2626; font-size: 14px;">Save & Compare</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Build your shortlist of top picks</div>
+      <!-- For Sellers Section -->
+      <div style="margin: 32px 0;">
+        <div style="display: table; width: 100%; margin-bottom: 16px;">
+          <div style="display: table-cell; vertical-align: middle;">
+            <h2 style="color: #1f2937; font-size: 18px; margin: 0; font-weight: 700;">📈 For Property Sellers & Agents</h2>
           </div>
         </div>
-        <div style="display: table-row;">
-          <div style="display: table-cell; width: 50%; background: #f0fdf4; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">🔔</div>
-            <div style="font-weight: 600; color: #16a34a; font-size: 14px;">Instant Alerts</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Never miss a new listing</div>
+
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <!-- Seller Feature 1 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #f0fdf4; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">✨</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">List Properties for Free</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Create beautiful listings with photos, virtual tours, and detailed descriptions</div>
+              </div>
+            </div>
           </div>
-          <div style="display: table-cell; width: 50%; background: #faf5ff; border-radius: 10px; padding: 16px; vertical-align: top;">
-            <div style="font-size: 28px; margin-bottom: 8px;">💬</div>
-            <div style="font-weight: 600; color: #7c3aed; font-size: 14px;">Direct Messaging</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Chat with agents in real-time</div>
+          <!-- Seller Feature 2 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #fef3c7; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🚀</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Promote Your Listings</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Boost visibility with featured placements and premium badges</div>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Feature 3 -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #eff6ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">📉</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Performance Analytics</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Track views, inquiries, saves, and engagement metrics in real-time</div>
+              </div>
+            </div>
+          </div>
+          <!-- Seller Feature 4 -->
+          <div style="padding: 16px 20px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; width: 44px; vertical-align: top;">
+                <div style="width: 36px; height: 36px; background: #faf5ff; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px;">🏢</div>
+              </div>
+              <div style="display: table-cell; vertical-align: top;">
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Agency Dashboard</div>
+                <div style="color: #6b7280; font-size: 13px; margin-top: 2px;">Manage team members, track performance, and grow your agency</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- CTA Button -->
-      <div style="text-align: center; margin: 32px 0;">
+      <!-- Quick Links -->
+      <div style="margin: 32px 0;">
+        <p style="color: #374151; font-weight: 600; font-size: 15px; margin: 0 0 16px 0;">Quick Links to Get Started:</p>
+        <div style="display: table; width: 100%;">
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/search" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">🔍 Search Properties</span>
+              </a>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/agents" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">👥 Find Agents</span>
+              </a>
+            </div>
+          </div>
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/valuation" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">📊 Property Valuation</span>
+              </a>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/mortgage-calculator" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">🏦 Mortgage Calculator</span>
+              </a>
+            </div>
+          </div>
+          <div style="display: table-row;">
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/explore-cities" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">🏙️ Explore Cities</span>
+              </a>
+            </div>
+            <div style="display: table-cell; width: 50%; padding: 6px;">
+              <a href="${frontendUrl}/account/profile" style="display: block; background: #f3f4f6; padding: 14px 16px; border-radius: 8px; text-decoration: none; text-align: center;">
+                <span style="color: #374151; font-size: 13px; font-weight: 500;">⚙️ Account Settings</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary CTA -->
+      <div style="text-align: center; margin: 40px 0 32px 0;">
         <a href="${frontendUrl}/search"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
-          Start Searching Now →
+           class="button"
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 18px 56px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
+          Start Exploring Properties →
         </a>
       </div>
 
-      <!-- Pro tip -->
-      <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin: 24px 0;">
-        <p style="color: #374151; font-size: 13px; margin: 0;">
-          <strong>💡 Pro tip:</strong> Complete your profile to get personalized property recommendations based on your preferences!
+      <!-- Pro Tip -->
+      <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 10px; padding: 16px 20px; margin: 24px 0;">
+        <p style="color: #166534; font-size: 14px; margin: 0; line-height: 1.5;">
+          <strong>💡 Pro Tip:</strong> Complete your profile and save your first search to receive personalized property recommendations and instant alerts when new matches are listed!
         </p>
       </div>
+
     </div>
 
     <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">
-        Need help? Just reply to this email or visit our <a href="${frontendUrl}/help" style="color: #0252CD; text-decoration: none;">Help Center</a>
+    <div style="background: #1f2937; padding: 32px; text-align: center;">
+      <div style="margin-bottom: 20px;">
+        <span style="color: #ffffff; font-size: 18px; font-weight: 600;">🏠 Balkan Estate</span>
+      </div>
+      <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">
+        The premier real estate platform for the Balkans
       </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} Balkan Estate · Find your place in the Balkans
-      </p>
+      <div style="margin: 20px 0;">
+        <a href="${frontendUrl}/how-it-works" style="color: #60a5fa; text-decoration: none; font-size: 13px; margin: 0 12px;">How It Works</a>
+        <span style="color: #4b5563;">·</span>
+        <a href="${frontendUrl}/agencies" style="color: #60a5fa; text-decoration: none; font-size: 13px; margin: 0 12px;">Browse Agencies</a>
+        <span style="color: #4b5563;">·</span>
+        <a href="mailto:support@balkanestateai.com" style="color: #60a5fa; text-decoration: none; font-size: 13px; margin: 0 12px;">Contact Support</a>
+      </div>
+      <div style="border-top: 1px solid #374151; padding-top: 20px; margin-top: 20px;">
+        <p style="color: #6b7280; font-size: 11px; margin: 0;">
+          © ${new Date().getFullYear()} Balkan Estate. All rights reserved.<br>
+          You're receiving this email because you created an account at balkanestateai.com
+        </p>
+      </div>
     </div>
   </div>
 </body>
@@ -1514,9 +1668,44 @@ class EmailService {
 
     await this.sendEmail({
       to: params.email,
-      subject: "You're in! Start exploring properties now 🏠",
+      subject: "Welcome to Balkan Estate — Your Account is Ready!",
       html,
-      text: `Welcome aboard, ${params.userName}!\n\nYou now have full access to Balkan Estate—the smartest way to find properties across the Balkans.\n\nQuick Start Guide:\n1. Set up your search — Tell us what you're looking for\n2. Save your favorites — Click the heart icon on properties you love\n3. Enable alerts — Get notified instantly when matching properties are listed\n\nStart exploring: ${frontendUrl}/search\n\nPro tip: Complete your profile to get personalized property recommendations!\n\nNeed help? Contact us at support@balkanestateai.com\n\n© ${new Date().getFullYear()} Balkan Estate`,
+      text: `Welcome to Balkan Estate, ${params.userName}!
+
+Your account is verified and ready to explore.
+
+Thank you for joining Balkan Estate — the premier real estate platform connecting buyers, sellers, and agents across the Balkans.
+
+🌍 Properties across 8 Balkan countries:
+Croatia, Slovenia, Serbia, Montenegro, Bosnia, Albania, Kosovo, North Macedonia
+
+FOR PROPERTY SEEKERS:
+• Advanced Property Search — Filter by location, price, property type, bedrooms, amenities
+• Save & Compare Properties — Bookmark favorites and compare up to 5 properties side-by-side
+• Smart Alerts — Get instant alerts for new listings and price drops
+• Direct Messaging — Chat directly with agents and sellers
+• Property Valuation Tool — Get AI-powered estimates for fair market prices
+• Mortgage Calculator — Calculate monthly payments and plan your budget
+
+FOR SELLERS & AGENTS:
+• List Properties for Free — Create beautiful listings with photos and descriptions
+• Promote Your Listings — Boost visibility with featured placements
+• Performance Analytics — Track views, inquiries, and engagement in real-time
+• Agency Dashboard — Manage team members and grow your agency
+
+QUICK LINKS:
+• Search Properties: ${frontendUrl}/search
+• Find Agents: ${frontendUrl}/agents
+• Property Valuation: ${frontendUrl}/valuation
+• Mortgage Calculator: ${frontendUrl}/mortgage-calculator
+• Explore Cities: ${frontendUrl}/explore-cities
+• Account Settings: ${frontendUrl}/account/profile
+
+Pro Tip: Complete your profile and save your first search to receive personalized property recommendations!
+
+Questions? Contact us at support@balkanestateai.com
+
+© ${new Date().getFullYear()} Balkan Estate. All rights reserved.`,
       category: 'support',
     });
   }
