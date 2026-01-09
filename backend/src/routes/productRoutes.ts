@@ -4,7 +4,15 @@ import { protect } from '../middleware/auth';
 
 const router = express.Router();
 
+// ============================================================================
+// PUBLIC ROUTES
+// ============================================================================
 
+/**
+ * @desc    Get all active/visible products
+ * @route   GET /api/products
+ * @access  Public
+ */
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const { store, active, role } = req.query;
@@ -54,6 +62,12 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
         badgeColor: product.badgeColor,
         highlighted: product.highlighted,
         cardStyle: product.cardStyle,
+        listingsLimit: product.listingsLimit,
+        promotionCoupons: product.promotionCoupons,
+        savedSearchesLimit: product.savedSearchesLimit,
+        aiMessagesLimit: product.aiMessagesLimit,
+        aiInsightsLimit: product.aiInsightsLimit,
+        imageDescriptionLimit: product.imageDescriptionLimit,
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,
@@ -67,60 +81,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-/**
- * @desc    Get a single product by ID or productId
- * @route   GET /api/products/:id
- * @access  Public
- */
-router.get('/:id', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-
-    const product = await Product.findOne({
-      $or: [{ _id: id }, { productId: id }],
-      isActive: true,
-      isVisible: true,
-    });
-
-    if (!product) {
-      res.status(404).json({ success: false, message: 'Product not found' });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      product: {
-        id: product._id,
-        productId: product.productId,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        currency: product.currency,
-        billingPeriod: product.billingPeriod,
-        trialPeriodDays: product.trialPeriodDays,
-        gracePeriodDays: product.gracePeriodDays,
-        features: product.features,
-        targetRole: product.targetRole,
-        displayOrder: product.displayOrder,
-        badge: product.badge,
-        badgeColor: product.badgeColor,
-        highlighted: product.highlighted,
-        cardStyle: product.cardStyle,
-        store: {
-          google: product.googlePlayProductId,
-          apple: product.appStoreProductId,
-          stripe: product.stripeProductId,
-        },
-      },
-    });
-  } catch (error: any) {
-    console.error('Error getting product:', error);
-    res.status(500).json({ success: false, message: 'Error getting product', error: error.message });
-  }
-});
-
 // ============================================================================
-// ADMIN ROUTES (Protected)
+// ADMIN ROUTES (Protected) - MUST be defined BEFORE /:id route
 // ============================================================================
 
 /**
@@ -147,7 +109,11 @@ router.get('/admin/all', protect, async (_req: Request, res: Response): Promise<
   }
 });
 
-
+/**
+ * @desc    Create product - Admin only
+ * @route   POST /api/products/admin
+ * @access  Private/Admin
+ */
 router.post('/admin', protect, async (req: Request, res: Response): Promise<void> => {
   try {
     const product = await Product.create(req.body);
@@ -318,6 +284,68 @@ router.patch('/admin/:id/status', protect, async (req: Request, res: Response): 
       message: 'Failed to toggle product status',
       error: error.message,
     });
+  }
+});
+
+// ============================================================================
+// PUBLIC ROUTE - Get single product (MUST be AFTER /admin routes)
+// ============================================================================
+
+/**
+ * @desc    Get a single product by ID or productId
+ * @route   GET /api/products/:id
+ * @access  Public
+ */
+router.get('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findOne({
+      $or: [{ _id: id }, { productId: id }],
+      isActive: true,
+      isVisible: true,
+    });
+
+    if (!product) {
+      res.status(404).json({ success: false, message: 'Product not found' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      product: {
+        id: product._id,
+        productId: product.productId,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        currency: product.currency,
+        billingPeriod: product.billingPeriod,
+        trialPeriodDays: product.trialPeriodDays,
+        gracePeriodDays: product.gracePeriodDays,
+        features: product.features,
+        targetRole: product.targetRole,
+        displayOrder: product.displayOrder,
+        badge: product.badge,
+        badgeColor: product.badgeColor,
+        highlighted: product.highlighted,
+        cardStyle: product.cardStyle,
+        listingsLimit: product.listingsLimit,
+        promotionCoupons: product.promotionCoupons,
+        savedSearchesLimit: product.savedSearchesLimit,
+        aiMessagesLimit: product.aiMessagesLimit,
+        aiInsightsLimit: product.aiInsightsLimit,
+        imageDescriptionLimit: product.imageDescriptionLimit,
+        store: {
+          google: product.googlePlayProductId,
+          apple: product.appStoreProductId,
+          stripe: product.stripeProductId,
+        },
+      },
+    });
+  } catch (error: any) {
+    console.error('Error getting product:', error);
+    res.status(500).json({ success: false, message: 'Error getting product', error: error.message });
   }
 });
 
