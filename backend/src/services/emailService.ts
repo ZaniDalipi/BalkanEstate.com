@@ -1993,6 +1993,150 @@ Questions? Contact us at support@balkanestateai.com
       category: 'alerts',
     });
   }
+
+  /**
+   * Send email with agent registration coupons when Enterprise subscription is created
+   * Contains 5 coupon codes for agents to join the team with yearly Pro subscriptions
+   */
+  async sendAgentRegistrationCouponsEmail(params: {
+    email: string;
+    ownerName: string;
+    agencyName: string;
+    coupons: Array<{ code: string; expiresAt: Date }>;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
+
+    // Sanitize user inputs
+    const safeOwnerName = escapeHtml(params.ownerName);
+    const safeAgencyName = escapeHtml(params.agencyName);
+
+    const currentYear = new Date().getFullYear();
+
+    const couponRows = params.coupons.map((coupon, index) => `
+      <tr>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">
+          <span style="display: inline-block; background: #f3f4f6; padding: 8px 16px; border-radius: 6px; font-family: 'Courier New', monospace; font-weight: 600; font-size: 14px; color: #1f2937; letter-spacing: 1px;">
+            ${escapeHtml(coupon.code)}
+          </span>
+        </td>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 13px;">
+          Agent ${index + 1}
+        </td>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 13px;">
+          ${coupon.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+        </td>
+      </tr>
+    `).join('');
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Your Enterprise subscription is active! Here are your 5 agent registration codes.
+  </div>
+
+  <div style="max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 32px 24px; text-align: center;">
+      <div style="margin-bottom: 12px;">
+        <span style="display: inline-block; width: 60px; height: 60px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; line-height: 60px; font-size: 28px;">🏢</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">Enterprise Plan Activated!</h1>
+      <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 14px;">Welcome to BalkanEstate<sup>AI</sup> Enterprise</p>
+    </div>
+
+    <div style="padding: 28px 24px;">
+      <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">
+        Hello ${safeOwnerName}! 🎉
+      </p>
+
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Congratulations! Your Enterprise subscription for <strong>${safeAgencyName}</strong> is now active.
+        Below are <strong>5 agent registration codes</strong> that your team members can use to join with a full <strong>yearly Pro subscription</strong> included!
+      </p>
+
+      <!-- Agent Coupons Table -->
+      <div style="background: #f9fafb; border-radius: 12px; overflow: hidden; margin-bottom: 24px; border: 1px solid #e5e7eb;">
+        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 12px 16px;">
+          <h2 style="color: #ffffff; margin: 0; font-size: 16px; font-weight: 600;">🎟️ Agent Registration Codes</h2>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #f3f4f6;">
+              <th style="padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase;">Code</th>
+              <th style="padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase;">For</th>
+              <th style="padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase;">Expires</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${couponRows}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- How to Use -->
+      <div style="background: #eff6ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
+        <h3 style="color: #1e40af; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 How to Use These Codes</h3>
+        <ol style="color: #1e40af; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
+          <li>Share a code with each team member you want to invite</li>
+          <li>They register on BalkanEstate<sup>AI</sup> (or log in if already registered)</li>
+          <li>Go to <strong>Agency → Redeem Code</strong> and enter the code</li>
+          <li>They'll automatically get a yearly Pro subscription and join your agency!</li>
+        </ol>
+      </div>
+
+      <!-- Benefits Box -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px; padding: 16px; margin-bottom: 24px; border: 2px solid #f59e0b;">
+        <h3 style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">✨ What Each Agent Gets</h3>
+        <ul style="color: #78350f; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.6;">
+          <li><strong>Full Year</strong> of Pro features included</li>
+          <li><strong>20 listings per month</strong> under your agency</li>
+          <li><strong>Monthly promotion coupons</strong> shared with the team</li>
+          <li><strong>Priority support</strong> and agency branding</li>
+        </ul>
+      </div>
+
+      <!-- CTA Button -->
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${frontendUrl}/agency/dashboard"
+           style="display: inline-block; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);">
+          Go to Agency Dashboard →
+        </a>
+      </div>
+
+      <p style="text-align: center; margin: 0;">
+        <a href="${frontendUrl}/agency/team" style="color: #6b7280; font-size: 13px; text-decoration: none;">Manage your team →</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
+        ${safeAgencyName} · Enterprise Plan
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
+        © ${currentYear} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const couponList = params.coupons.map((c, i) => `Agent ${i + 1}: ${c.code} (expires ${c.expiresAt.toLocaleDateString()})`).join('\n');
+
+    await this.sendEmail({
+      to: params.email,
+      subject: `🏢 Welcome to Enterprise! Your 5 Agent Registration Codes Are Ready`,
+      html,
+      text: `Hello ${params.ownerName}!\n\nCongratulations! Your Enterprise subscription for ${params.agencyName} is now active.\n\nHere are your 5 agent registration codes:\n\n${couponList}\n\nHow to use:\n1. Share a code with each team member\n2. They register or log in to BalkanEstateᴬᴵ\n3. Go to Agency → Redeem Code\n4. Enter the code to join your agency with a yearly Pro subscription!\n\nGo to your agency dashboard: ${frontendUrl}/agency/dashboard\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      category: 'alerts',
+    });
+  }
 }
 
 const emailServiceInstance = new EmailService();
@@ -2012,3 +2156,4 @@ export const sendEmailVerification = emailServiceInstance.sendEmailVerification.
 export const sendWelcomeEmail = emailServiceInstance.sendWelcomeEmail.bind(emailServiceInstance);
 export const getFromAddress = emailServiceInstance.getFromAddress.bind(emailServiceInstance);
 export const sendMonthlyCouponEmail = emailServiceInstance.sendMonthlyCouponEmail.bind(emailServiceInstance);
+export const sendAgentRegistrationCouponsEmail = emailServiceInstance.sendAgentRegistrationCouponsEmail.bind(emailServiceInstance);

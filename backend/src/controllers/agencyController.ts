@@ -193,6 +193,66 @@ export const createAgency = async (
       // Don't fail agency creation if trial fails
     }
 
+    // Generate 5 agent registration coupons for Enterprise subscribers
+    let agentCouponsGenerated = false;
+    let generatedCoupons: Array<{ code: string; expiresAt: Date }> = [];
+
+    // Check if user has Enterprise subscription
+    const isEnterprise = user.subscriptionPlan?.includes('enterprise') ||
+                         user.subscriptionPlan === 'agency_yearly' ||
+                         user.isEnterpriseTier;
+
+    if (isEnterprise) {
+      try {
+        // Generate agent coupons directly
+        const couponExpiresAt = new Date();
+        couponExpiresAt.setFullYear(couponExpiresAt.getFullYear() + 1); // Valid for 1 year
+
+        for (let i = 0; i < 5; i++) {
+          const code = agency.generateCouponCode();
+          agency.agentCoupons.push({
+            code,
+            generatedAt: new Date(),
+            expiresAt: couponExpiresAt,
+            status: 'available',
+          } as any);
+          generatedCoupons.push({ code, expiresAt: couponExpiresAt });
+        }
+
+        // Update agency subscription status
+        const subscriptionExpiresAt = user.subscriptionExpiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        agency.subscription = {
+          status: 'active' as const,
+          startDate: new Date(),
+          expiresAt: subscriptionExpiresAt,
+          amount: 1000,
+          currency: 'EUR',
+          autoRenew: true,
+        };
+
+        await agency.save();
+        agentCouponsGenerated = true;
+        console.log(`🎟️ Generated 5 agent registration coupons for new agency ${agency.name}`);
+
+        // Send email with coupon codes
+        try {
+          const { sendAgentRegistrationCouponsEmail } = await import('../services/emailService');
+          await sendAgentRegistrationCouponsEmail({
+            email: user.email,
+            ownerName: user.name || 'Agency Owner',
+            agencyName: agency.name,
+            coupons: generatedCoupons,
+          });
+          console.log(`📧 Sent agent registration coupons email to ${user.email}`);
+        } catch (emailError) {
+          console.error('⚠️ Failed to send agent coupons email:', emailError);
+        }
+      } catch (couponError) {
+        console.error('⚠️ Error generating agent coupons:', couponError);
+        // Don't fail agency creation if coupon generation fails
+      }
+    }
+
     res.status(201).json({
       agency,
       agent: agentProfile,
@@ -201,6 +261,13 @@ export const createAgency = async (
             active: true,
             subscription: trialSubscription,
             message: '🎉 Your agency has been featured for 7 days free!',
+          }
+        : undefined,
+      agentCoupons: agentCouponsGenerated
+        ? {
+            generated: true,
+            count: generatedCoupons.length,
+            message: '🎟️ 5 agent registration codes have been sent to your email!',
           }
         : undefined,
     });

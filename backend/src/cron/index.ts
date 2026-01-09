@@ -9,8 +9,10 @@ import { updateExpiredSubscriptions } from '../services/subscriptionPaymentServi
 import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
+import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
+let monthlyCouponTask: cron.ScheduledTask | null = null;
 let updateExpiredTask: cron.ScheduledTask | null = null;
 let userSubscriptionTask: cron.ScheduledTask | null = null;
 let subscriptionReminderTask: cron.ScheduledTask | null = null;
@@ -231,7 +233,29 @@ export const startCronJobs = () => {
     }
   });
 
-  console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails)');
+  // ===============================
+  // MONTHLY COUPON REFRESH
+  // ===============================
+
+  // Monthly promotion coupon refresh - runs on the 1st of every month at 9:00 AM UTC
+  // Refreshes promotion coupons for all Pro and Enterprise users and sends email notifications
+  monthlyCouponTask = cron.schedule('0 9 1 * *', async () => {
+    try {
+      console.log('🎟️ Starting monthly promotion coupon refresh...');
+      const result = await processMonthlyCouponRefresh();
+      console.log(`✅ Monthly coupon refresh completed:`);
+      console.log(`   - Pro users refreshed: ${result.usersRefreshed}`);
+      console.log(`   - Agencies refreshed: ${result.agenciesRefreshed}`);
+      console.log(`   - Emails sent: ${result.emailsSent}`);
+      if (result.errors.length > 0) {
+        console.warn(`⚠️ ${result.errors.length} errors occurred during refresh`);
+      }
+    } catch (error) {
+      console.error('Monthly coupon cron error:', error);
+    }
+  });
+
+  console.log('🕐 All cron jobs started (subscription checks, weekly stats, property alerts, pro buyer emails, monthly coupons)');
 };
 
 export const stopCronJobs = () => {
@@ -246,5 +270,6 @@ export const stopCronJobs = () => {
   if (priceDropAlertsTask) priceDropAlertsTask.stop();
   if (proBuyerHotHoursTask) proBuyerHotHoursTask.stop();
   if (activityCleanupTask) activityCleanupTask.stop();
+  if (monthlyCouponTask) monthlyCouponTask.stop();
   console.log('🛑 All cron jobs stopped');
 };

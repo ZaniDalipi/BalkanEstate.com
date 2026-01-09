@@ -4,6 +4,8 @@ import Subscription from '../models/Subscription';
 import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
+import Agency from '../models/Agency';
+import { sendAgentRegistrationCouponsEmail } from './emailService';
 
 /**
  * Secure Subscription Payment Service
@@ -208,6 +210,21 @@ export async function processSubscriptionPayment(
     await session.commitTransaction();
 
     console.log(`✅ Payment processed successfully for user ${userId}`);
+
+    // After successful subscription, handle Enterprise-specific logic
+    // This runs outside the transaction since it's not critical
+    const isEnterpriseProduct = productId.includes('enterprise') || productId === 'agency_yearly';
+    const isNewSubscription = !subscription.isNew === false; // New subscription, not renewal
+
+    if (isEnterpriseProduct && isNewSubscription) {
+      try {
+        await generateEnterpriseAgentCoupons(String(userId), user.name || 'Agency Owner', user.email);
+        console.log(`🎟️ Generated agent coupons for Enterprise subscription`);
+      } catch (couponError) {
+        // Don't fail the subscription if coupon generation fails
+        console.error('⚠️ Error generating Enterprise agent coupons:', couponError);
+      }
+    }
 
     return {
       success: true,
@@ -425,9 +442,87 @@ export async function verifyPaymentIntegrity(
   }
 }
 
+/**
+ * Generate agent coupon codes for new Enterprise subscriptions
+ * Creates 5 coupon codes and sends email to the agency owner
+ */
+async function generateEnterpriseAgentCoupons(
+  userId: string,
+  ownerName: string,
+  ownerEmail: string
+): Promise<void> {
+  // Find or create agency for this user
+  let agency = await Agency.findOne({ ownerId: userId });
+
+  if (!agency) {
+    // If no agency exists yet, the coupons will be generated when they create the agency
+    console.log('📋 No agency found yet - coupons will be generated when agency is created');
+    return;
+  }
+
+  // Check if coupons already exist (in case of duplicate calls)
+  const existingAvailableCoupons = agency.agentCoupons.filter(
+    (c: any) => c.status === 'available'
+  ).length;
+
+  if (existingAvailableCoupons >= 5) {
+    console.log('✅ Agency already has 5 available coupons');
+    return;
+  }
+
+  // Generate coupon codes (up to 5 total)
+  const couponsToGenerate = 5 - existingAvailableCoupons;
+  const newCoupons: Array<{ code: string; expiresAt: Date }> = [];
+
+  for (let i = 0; i < couponsToGenerate; i++) {
+    const code = agency.generateCouponCode();
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Valid for 1 year
+
+    agency.agentCoupons.push({
+      code,
+      generatedAt: new Date(),
+      expiresAt,
+      status: 'available',
+    } as any);
+
+    newCoupons.push({ code, expiresAt });
+  }
+
+  // Update agency subscription status
+  agency.subscription = {
+    ...agency.subscription,
+    status: 'active',
+    expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+    autoRenew: true,
+  };
+
+  await agency.save();
+
+  console.log(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
+
+  // Send email with the coupon codes
+  try {
+    await sendAgentRegistrationCouponsEmail({
+      email: ownerEmail,
+      ownerName,
+      agencyName: agency.name,
+      coupons: newCoupons,
+    });
+    console.log(`📧 Sent agent registration coupons email to ${ownerEmail}`);
+  } catch (emailError) {
+    console.error('⚠️ Failed to send agent coupons email:', emailError);
+    // Don't throw - coupons were still generated successfully
+  }
+}
+
+// Named export for the function
+export { generateEnterpriseAgentCoupons };
+
 export default {
   processSubscriptionPayment,
   cancelSubscriptionSecurely,
   updateExpiredSubscriptions,
   verifyPaymentIntegrity,
+  generateEnterpriseAgentCoupons,
 };
