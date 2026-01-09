@@ -232,16 +232,14 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             href="https://z360-virtual-tour.vercel.app/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group flex items-center gap-3 bg-slate-800/50 hover:bg-slate-700/50 px-4 py-3 rounded-xl transition-all duration-300 border border-slate-700/50 hover:border-primary/30"
+                            className="group block overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
                             title="Z360 Virtual Tours - Professional 360° Property Tours"
                         >
-                            <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                                <span className="text-slate-900 font-bold text-lg">Z</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-slate-300 font-semibold text-sm group-hover:text-white transition-colors">Z360 Virtual Tours</span>
-                                <span className="text-slate-500 text-xs">360° Property Tours</span>
-                            </div>
+                            <img
+                                src="/images/partners/z360-logo.svg"
+                                alt="Z360 Virtual Tours - 360° Property Tours"
+                                className="h-16 w-auto"
+                            />
                         </a>
                     </div>
                 </div>
