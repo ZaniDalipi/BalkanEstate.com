@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Modal from './Modal';
 import { createFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XMarkIcon } from '../../constants';
+
+interface FeaturedProduct {
+  productId: string;
+  name: string;
+  price: number;
+  billingPeriod: string;
+  features: string[];
+  badge?: string;
+  highlighted?: boolean;
+}
 
 interface FeaturedSubscriptionDialogProps {
   isOpen: boolean;
@@ -9,6 +19,8 @@ interface FeaturedSubscriptionDialogProps {
   agencyId: string;
   onSuccess?: () => void;
 }
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
   isOpen,
@@ -19,18 +31,88 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
   const [interval, setInterval] = useState<'weekly' | 'monthly' | 'yearly'>('weekly');
   const [couponCode, setCouponCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
   const [finalPrice, setFinalPrice] = useState<number | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
 
-  const pricing = {
-    weekly: { price: 10, period: 'week', savings: 0 },
-    monthly: { price: 35, period: 'month', savings: 30 },
-    yearly: { price: 400, period: 'year', savings: 23 },
+  // Fetch featured agency products from database
+  useEffect(() => {
+    if (isOpen) {
+      fetchFeaturedProducts();
+    }
+  }, [isOpen]);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const response = await fetch(`${API_URL}/products`);
+      if (response.ok) {
+        const data = await response.json();
+        const featured = (data.products || []).filter((p: any) =>
+          p.productId?.startsWith('featured_agency_')
+        );
+        setFeaturedProducts(featured);
+      }
+    } catch (err) {
+      console.error('Failed to fetch featured products:', err);
+    } finally {
+      setLoadingProducts(false);
+    }
   };
+
+  // Build pricing from DB products or use fallback
+  const pricing = useMemo(() => {
+    const weeklyProduct = featuredProducts.find(p => p.productId === 'featured_agency_weekly');
+    const monthlyProduct = featuredProducts.find(p => p.productId === 'featured_agency_monthly');
+    const yearlyProduct = featuredProducts.find(p => p.productId === 'featured_agency_yearly');
+
+    return {
+      weekly: {
+        price: weeklyProduct?.price ?? 10,
+        period: 'week',
+        savings: 0,
+        features: weeklyProduct?.features || [],
+        badge: weeklyProduct?.badge,
+        highlighted: weeklyProduct?.highlighted,
+      },
+      monthly: {
+        price: monthlyProduct?.price ?? 35,
+        period: 'month',
+        savings: 30,
+        features: monthlyProduct?.features || [],
+        badge: monthlyProduct?.badge,
+        highlighted: monthlyProduct?.highlighted,
+      },
+      yearly: {
+        price: yearlyProduct?.price ?? 400,
+        period: 'year',
+        savings: 23,
+        features: yearlyProduct?.features || [],
+        badge: yearlyProduct?.badge,
+        highlighted: yearlyProduct?.highlighted,
+      },
+    };
+  }, [featuredProducts]);
+
+  // Get features for selected plan from DB or default
+  const selectedFeatures = useMemo(() => {
+    const planFeatures = pricing[interval].features;
+    if (planFeatures.length > 0) {
+      return planFeatures;
+    }
+    return [
+      'Top placement in search results',
+      'Featured in agency carousel',
+      'Premium badge on your profile',
+      'Monthly rotation to maintain freshness',
+      'Cancel anytime',
+    ];
+  }, [interval, pricing]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -42,8 +124,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
       setValidatingCoupon(true);
       setError(null);
 
-      // Call backend to validate coupon and get final price
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/coupons/validate`, {
+      const response = await fetch(`${API_URL}/coupons/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +168,6 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
         startTrial: false,
       });
 
-      // If free (100% coupon or trial), activate immediately
       if (!response.requiresPayment || response.finalPrice === 0) {
         setSuccess(true);
         setTimeout(() => {
@@ -95,8 +175,6 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
           onClose();
         }, 1500);
       } else {
-        // Requires payment - integrate with Stripe/PayPal here
-        // For now, show success (in production, open payment modal)
         setSuccess(true);
         setTimeout(() => {
           onSuccess?.();
@@ -143,68 +221,71 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               </p>
             </div>
 
-            {/* Pricing Options */}
-            <div className="mb-6">
-              <h4 className="font-semibold text-neutral-800 mb-3">Choose Your Plan</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {(Object.keys(pricing) as Array<keyof typeof pricing>).map((key) => {
-                  const plan = pricing[key];
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setInterval(key)}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        interval === key
-                          ? 'border-primary bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="text-left">
-                        <p className="text-sm text-neutral-500 capitalize">{key}</p>
-                        <p className="text-2xl font-bold text-neutral-800">
-                          €{plan.price}
-                        </p>
-                        <p className="text-xs text-neutral-500">per {plan.period}</p>
-                        {plan.savings > 0 && (
-                          <p className="text-xs text-green-600 font-semibold mt-1">
-                            Save {plan.savings}%
-                          </p>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+            {/* Loading Products */}
+            {loadingProducts ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-3 text-neutral-600">Loading pricing...</span>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Pricing Options */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-neutral-800 mb-3">Choose Your Plan</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {(Object.keys(pricing) as Array<keyof typeof pricing>).map((key) => {
+                      const plan = pricing[key];
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => setInterval(key)}
+                          className={`p-4 rounded-lg border-2 transition-all relative ${
+                            interval === key
+                              ? 'border-primary bg-purple-50 shadow-md'
+                              : plan.highlighted
+                                ? 'border-green-300 hover:border-green-400 bg-green-50/30'
+                                : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {plan.badge && (
+                            <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                              {plan.badge}
+                            </span>
+                          )}
+                          <div className="text-left">
+                            <p className="text-sm text-neutral-500 capitalize">{key}</p>
+                            <p className="text-2xl font-bold text-neutral-800">
+                              €{plan.price}
+                            </p>
+                            <p className="text-xs text-neutral-500">per {plan.period}</p>
+                            {plan.savings > 0 && (
+                              <p className="text-xs text-green-600 font-semibold mt-1">
+                                Save {plan.savings}%
+                              </p>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-            {/* Features */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-neutral-800 mb-3">
-                What's Included:
-              </h4>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2 text-sm text-neutral-700">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Top placement in search results</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-neutral-700">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Featured in agency carousel</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-neutral-700">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Premium badge on your profile</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-neutral-700">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Monthly rotation to maintain freshness</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-neutral-700">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Cancel anytime</span>
-                </li>
-              </ul>
-            </div>
+                {/* Features - Dynamic from DB */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <h4 className="font-semibold text-neutral-800 mb-3">
+                    What's Included:
+                  </h4>
+                  <ul className="space-y-2">
+                    {selectedFeatures.map((feature, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm text-neutral-700">
+                        <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
 
             {/* Coupon Code */}
             <div className="mb-6">
@@ -225,7 +306,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                 />
                 <button
                   onClick={handleApplyCoupon}
-                  disabled={!couponCode.trim() || validatingCoupon}
+                  disabled={!couponCode.trim() || validatingCoupon || loadingProducts}
                   className="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {validatingCoupon ? 'Validating...' : 'Apply'}
@@ -245,7 +326,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                   <p>Discount: <span className="font-bold">-€{discountAmount}</span></p>
                   <p className="text-lg font-bold mt-1">
                     Final Price: {finalPrice === 0 ? (
-                      <span className="text-green-600">FREE! 🎉</span>
+                      <span className="text-green-600">FREE!</span>
                     ) : (
                       <span>€{finalPrice}</span>
                     )}
@@ -272,7 +353,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               </button>
               <button
                 onClick={handleSubscribe}
-                disabled={loading}
+                disabled={loading || loadingProducts}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50"
               >
                 {loading ? 'Processing...' : couponApplied && finalPrice !== null

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { getFeaturedSubscription } from '../../services/apiService';
 import { SparklesIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../../constants';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 // Add shimmer animation styles
 const shimmerStyles = `
   @keyframes shimmer {
@@ -30,12 +32,14 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
   const [agencyStatus, setAgencyStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [startingPrice, setStartingPrice] = useState<number | null>(null);
 
   useEffect(() => {
     // Use AbortController to cancel requests if component unmounts
     const abortController = new AbortController();
 
     fetchSubscription();
+    fetchStartingPrice();
 
     return () => {
       abortController.abort();
@@ -54,6 +58,23 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStartingPrice = async () => {
+    try {
+      const response = await fetch(`${API_URL}/products`);
+      if (response.ok) {
+        const data = await response.json();
+        const weeklyProduct = (data.products || []).find(
+          (p: any) => p.productId === 'featured_agency_weekly'
+        );
+        if (weeklyProduct?.price) {
+          setStartingPrice(weeklyProduct.price);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch featured pricing:', err);
     }
   };
 
@@ -193,7 +214,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
               onClick={onUpgrade}
               className="px-6 py-2 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
             >
-              Get Featured Now
+              {startingPrice ? `Get Featured from €${startingPrice}/week` : 'Get Featured Now'}
             </button>
           </div>
         </div>
