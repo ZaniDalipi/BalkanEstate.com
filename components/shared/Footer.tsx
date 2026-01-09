@@ -47,7 +47,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
     const { dispatch } = useAppContext();
     const { getLocalizedPath } = useLocalizedNavigation();
 
-    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities') => {
+    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies') => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
         const route = view === 'search' ? '/' : `/${view}`;
         window.history.pushState({}, '', getLocalizedPath(route));
@@ -221,6 +221,34 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                 {/* Divider */}
                 <div className="my-8 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
 
+                {/* Partners Section */}
+                <div className="mb-8">
+                    <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-4 text-center">
+                        {t('footer:partners.title', 'Our Partners')}
+                    </h4>
+                    <div className="flex flex-wrap gap-6 justify-center items-center">
+                        {/* Z360 Virtual Tours Partner */}
+                        <a
+                            href="https://z360-virtual-tour.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group flex items-center gap-3 bg-slate-800/50 hover:bg-slate-700/50 px-4 py-3 rounded-xl transition-all duration-300 border border-slate-700/50 hover:border-primary/30"
+                            title="Z360 Virtual Tours - Professional 360° Property Tours"
+                        >
+                            <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                                <span className="text-slate-900 font-bold text-lg">Z</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-slate-300 font-semibold text-sm group-hover:text-white transition-colors">Z360 Virtual Tours</span>
+                                <span className="text-slate-500 text-xs">360° Property Tours</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                {/* Divider */}
+                <div className="mb-8 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+
                 {/* Bottom Bar */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-slate-500 text-sm text-center md:text-left">
@@ -233,9 +261,24 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                         >
                             {t('footer:links.howItWorks', 'How It Works')}
                         </button>
-                        <a href="#" className="text-slate-500 hover:text-primary transition-colors">{t('footer:legal.privacyPolicy', 'Privacy Policy')}</a>
-                        <a href="#" className="text-slate-500 hover:text-primary transition-colors">{t('footer:legal.termsOfService', 'Terms of Service')}</a>
-                        <a href="#" className="text-slate-500 hover:text-primary transition-colors">{t('footer:legal.cookiePolicy', 'Cookies')}</a>
+                        <button
+                            onClick={() => handleNavigation('privacy')}
+                            className="text-slate-500 hover:text-primary transition-colors"
+                        >
+                            {t('footer:legal.privacyPolicy', 'Privacy Policy')}
+                        </button>
+                        <button
+                            onClick={() => handleNavigation('terms')}
+                            className="text-slate-500 hover:text-primary transition-colors"
+                        >
+                            {t('footer:legal.termsOfService', 'Terms of Service')}
+                        </button>
+                        <button
+                            onClick={() => handleNavigation('cookies')}
+                            className="text-slate-500 hover:text-primary transition-colors"
+                        >
+                            {t('footer:legal.cookiePolicy', 'Cookie Policy')}
+                        </button>
                     </div>
                 </div>
             </div>

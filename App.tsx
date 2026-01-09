@@ -203,8 +203,11 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/pricing': 'pricing',
         '/subscribe': 'pricing',
         '/privacy': 'privacy',
+        '/privacy-policy': 'privacy',
         '/terms': 'terms',
+        '/terms-of-service': 'terms',
         '/cookies': 'cookies',
+        '/cookie-policy': 'cookies',
       };
 
       const view = routeMap[path];
