@@ -19,14 +19,14 @@ let testUser: any;
 
 // Test data
 const TEST_USER = {
-  email: 'test@balkanestate.com',
+  email: 'test@balkanestateai.com',
   password: 'TestPassword123!',
   name: 'Test User',
   country: 'RS', // Serbia - uses Paddle
 };
 
 const TEST_USER_EU = {
-  email: 'testeu@balkanestate.com',
+  email: 'testeu@balkanestateai.com',
   password: 'TestPassword123!',
   name: 'Test EU User',
   country: 'GR', // Greece - uses Stripe

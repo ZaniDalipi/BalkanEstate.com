@@ -247,7 +247,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
-SMTP_FROM=noreply@balkanestate.com
+SMTP_FROM=noreply@balkanestateai.com
 FRONTEND_URL=http://localhost:5173
 ```
 
@@ -358,7 +358,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
-SMTP_FROM=noreply@balkanestate.com
+SMTP_FROM=noreply@balkanestateai.com
 
 # Frontend URL (for email links)
 FRONTEND_URL=https://balkanestate.com

@@ -70,7 +70,7 @@ const PricingPage: React.FC = () => {
   const [showContactOptions, setShowContactOptions] = useState(false);
 
   // Sales team contact info
-  const salesEmail = 'sales@balkanestate.com';
+  const salesEmail = 'sales@balkanestateai.com';
   const salesPhone = '+389 71 967 915';
 
   // Fetch products from API

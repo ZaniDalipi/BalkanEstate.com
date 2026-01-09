@@ -211,7 +211,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
               </li>
               <li>
                 <a
-                  href="mailto:info@balkanestate.com"
+                  href="mailto:info@balkanestateai.com"
                   className="flex items-center gap-3 hover:translate-x-1 transition-all duration-200 group py-1"
                 >
                   <Mail className="w-4 h-4 text-purple-500 group-hover:text-purple-600 transition-colors flex-shrink-0" />

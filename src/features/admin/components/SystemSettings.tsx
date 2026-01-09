@@ -28,8 +28,8 @@ const SystemSettings: React.FC = () => {
     // General
     siteName: 'BalkanEstate',
     siteDescription: 'Your trusted real estate platform in the Balkans',
-    contactEmail: 'contact@balkanestate.com',
-    supportEmail: 'support@balkanestate.com',
+    contactEmail: 'contact@balkanestateai.com',
+    supportEmail: 'support@balkanestateai.com',
     timezone: 'Europe/Belgrade',
     dateFormat: 'DD/MM/YYYY',
     currency: 'EUR',
@@ -39,7 +39,7 @@ const SystemSettings: React.FC = () => {
     smtpPort: '587',
     smtpSecure: true,
     emailFromName: 'BalkanEstate',
-    emailFromAddress: 'noreply@balkanestate.com',
+    emailFromAddress: 'noreply@balkanestateai.com',
 
     // Security
     requireEmailVerification: true,

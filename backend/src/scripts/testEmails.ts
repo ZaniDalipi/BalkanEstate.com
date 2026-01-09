@@ -31,7 +31,7 @@ function escapeHtml(unsafe: string | undefined | null): string {
 
 const testAgencyOwner = {
   name: 'Zani Dalipi',
-  email: 'zani@balkanestate.com',
+  email: 'zani@balkanestateai.com',
   agencyName: 'Dalipi Real Estate',
 };
 

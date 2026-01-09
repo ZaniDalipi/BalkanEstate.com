@@ -58,7 +58,7 @@ const ActivityLog: React.FC = () => {
           action: 'create',
           message: 'New user registered',
           details: 'User john.doe@email.com created an account',
-          user: { name: 'System', email: 'system@balkanestate.com', role: 'system' },
+          user: { name: 'System', email: 'system@balkanestateai.com', role: 'system' },
           timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
           ipAddress: '192.168.1.100'
         },
@@ -68,7 +68,7 @@ const ActivityLog: React.FC = () => {
           action: 'verify',
           message: 'Agent license verified',
           details: 'License for Agent Smith verified by admin',
-          user: { name: 'Admin User', email: 'admin@balkanestate.com', role: 'admin' },
+          user: { name: 'Admin User', email: 'admin@balkanestateai.com', role: 'admin' },
           timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
           ipAddress: '192.168.1.1'
         },
@@ -78,7 +78,7 @@ const ActivityLog: React.FC = () => {
           action: 'create',
           message: 'New property listed',
           details: 'Property "Modern Apartment in Belgrade" added',
-          user: { name: 'Agent Smith', email: 'agent@balkanestate.com', role: 'agent' },
+          user: { name: 'Agent Smith', email: 'agent@balkanestateai.com', role: 'agent' },
           timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
           ipAddress: '192.168.1.50'
         },
@@ -88,7 +88,7 @@ const ActivityLog: React.FC = () => {
           action: 'create',
           message: 'New inquiry received',
           details: 'Inquiry for property #12345 from buyer@email.com',
-          user: { name: 'System', email: 'system@balkanestate.com', role: 'system' },
+          user: { name: 'System', email: 'system@balkanestateai.com', role: 'system' },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
         },
         {
@@ -97,7 +97,7 @@ const ActivityLog: React.FC = () => {
           action: 'create',
           message: 'Discount code created',
           details: 'Code SUMMER2024 created with 20% off',
-          user: { name: 'Admin User', email: 'admin@balkanestate.com', role: 'admin' },
+          user: { name: 'Admin User', email: 'admin@balkanestateai.com', role: 'admin' },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
           ipAddress: '192.168.1.1'
         },
@@ -107,7 +107,7 @@ const ActivityLog: React.FC = () => {
           action: 'login',
           message: 'Admin login',
           details: 'Admin user logged in to admin panel',
-          user: { name: 'Super Admin', email: 'superadmin@balkanestate.com', role: 'super_admin' },
+          user: { name: 'Super Admin', email: 'superadmin@balkanestateai.com', role: 'super_admin' },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
           ipAddress: '10.0.0.1'
         },
@@ -117,7 +117,7 @@ const ActivityLog: React.FC = () => {
           action: 'update',
           message: 'User profile updated',
           details: 'Email verification status changed for user@email.com',
-          user: { name: 'Admin User', email: 'admin@balkanestate.com', role: 'admin' },
+          user: { name: 'Admin User', email: 'admin@balkanestateai.com', role: 'admin' },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
           ipAddress: '192.168.1.1'
         },
@@ -127,7 +127,7 @@ const ActivityLog: React.FC = () => {
           action: 'delete',
           message: 'Property removed',
           details: 'Property #54321 deleted by owner request',
-          user: { name: 'Admin User', email: 'admin@balkanestate.com', role: 'admin' },
+          user: { name: 'Admin User', email: 'admin@balkanestateai.com', role: 'admin' },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
           ipAddress: '192.168.1.1'
         },
@@ -137,7 +137,7 @@ const ActivityLog: React.FC = () => {
           action: 'settings',
           message: 'System settings updated',
           details: 'Email notification settings modified',
-          user: { name: 'Super Admin', email: 'superadmin@balkanestate.com', role: 'super_admin' },
+          user: { name: 'Super Admin', email: 'superadmin@balkanestateai.com', role: 'super_admin' },
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
           ipAddress: '10.0.0.1'
         },

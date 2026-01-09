@@ -292,7 +292,7 @@ const CookiePolicyPage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>BalkanEstate</strong></p>
-              <p className="text-gray-700">Email: privacy@balkanestate.com</p>
+              <p className="text-gray-700">Email: privacy@balkanestateai.com</p>
               <p className="text-gray-700">Phone: +389 71 967 915</p>
             </div>
           </section>

@@ -73,7 +73,7 @@
       "restrict": "Restricționarea sau obiecția la procesare",
       "portability": "Portabilitatea datelor",
       "withdraw": "Retragerea consimțământului în orice moment",
-      "contact": "Pentru a vă exercita aceste drepturi, contactați-ne la privacy@balkanestate.com",
+      "contact": "Pentru a vă exercita aceste drepturi, contactați-ne la privacy@balkanestateai.com",
       "complaint": "De asemenea, aveți dreptul de a depune o plângere la o autoritate de supraveghere din țara dumneavoastră de rezidență."
     },
     "automated": {
@@ -208,7 +208,7 @@
       "text": "Accesul automatizat la Serviciul nostru este strict reglementat:",
       "prohibited": "Colectarea datelor este interzisă fără acordul nostru scris",
       "rate": "Cererile excesive pot duce la blocarea IP-ului",
-      "partnership": "Pentru acces API, contactați-ne la partners@balkanestate.com",
+      "partnership": "Pentru acces API, contactați-ne la partners@balkanestateai.com",
       "robots": "Trebuie să respectați fișierul nostru robots.txt"
     },
     "professional": {
@@ -223,7 +223,7 @@
       "title": "Soluționarea disputelor",
       "text": "În caz de dispută:",
       "informal": "Soluționare informală:",
-      "informalDesc": "Contactați-ne la legal@balkanestate.com.",
+      "informalDesc": "Contactați-ne la legal@balkanestateai.com.",
       "mediation": "Mediere:",
       "mediationDesc": "Ambele părți sunt de acord să încerce medierea.",
       "jurisdiction": "Jurisdicție:",

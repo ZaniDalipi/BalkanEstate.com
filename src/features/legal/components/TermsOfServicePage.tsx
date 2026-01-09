@@ -212,7 +212,7 @@ const TermsOfServicePage: React.FC = () => {
             <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
               <li>{t('legal:terms.api.prohibited', 'Scraping, crawling, or automated data collection is prohibited without our written consent')}</li>
               <li>{t('legal:terms.api.rate', 'Excessive requests that burden our servers may result in IP blocking')}</li>
-              <li>{t('legal:terms.api.partnership', 'For API access or data partnerships, contact us at partners@balkanestate.com')}</li>
+              <li>{t('legal:terms.api.partnership', 'For API access or data partnerships, contact us at partners@balkanestateai.com')}</li>
               <li>{t('legal:terms.api.robots', 'You must comply with our robots.txt file and any access restrictions')}</li>
             </ul>
           </section>
@@ -248,7 +248,7 @@ const TermsOfServicePage: React.FC = () => {
               {t('legal:terms.disputes.text', 'In the event of any dispute arising from these Terms or your use of the Service:')}
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
-              <li><strong>{t('legal:terms.disputes.informal', 'Informal Resolution:')}</strong> {t('legal:terms.disputes.informalDesc', 'We encourage you to contact us first at legal@balkanestate.com to attempt informal resolution. We commit to responding within 15 business days.')}</li>
+              <li><strong>{t('legal:terms.disputes.informal', 'Informal Resolution:')}</strong> {t('legal:terms.disputes.informalDesc', 'We encourage you to contact us first at legal@balkanestateai.com to attempt informal resolution. We commit to responding within 15 business days.')}</li>
               <li><strong>{t('legal:terms.disputes.mediation', 'Mediation:')}</strong> {t('legal:terms.disputes.mediationDesc', 'If informal resolution fails, both parties agree to attempt mediation before any formal proceedings.')}</li>
               <li><strong>{t('legal:terms.disputes.jurisdiction', 'Jurisdiction:')}</strong> {t('legal:terms.disputes.jurisdictionDesc', 'Any legal proceedings shall be conducted in the courts of Skopje, North Macedonia.')}</li>
               <li><strong>{t('legal:terms.disputes.time', 'Time Limitation:')}</strong> {t('legal:terms.disputes.timeDesc', 'Any claim must be filed within one (1) year of the event giving rise to the claim, or it will be permanently barred.')}</li>
@@ -325,7 +325,7 @@ const TermsOfServicePage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>BalkanEstate</strong></p>
-              <p className="text-gray-700">Email: legal@balkanestate.com</p>
+              <p className="text-gray-700">Email: legal@balkanestateai.com</p>
               <p className="text-gray-700">Phone: +389 71 967 915</p>
             </div>
           </section>

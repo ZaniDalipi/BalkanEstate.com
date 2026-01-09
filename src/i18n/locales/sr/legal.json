@@ -73,7 +73,7 @@
       "restrict": "Ograničavanje ili prigovor na obradu",
       "portability": "Prenosivost podataka",
       "withdraw": "Povlačenje pristanka u bilo kom trenutku",
-      "contact": "Za ostvarivanje ovih prava, kontaktirajte nas na privacy@balkanestate.com",
+      "contact": "Za ostvarivanje ovih prava, kontaktirajte nas na privacy@balkanestateai.com",
       "complaint": "Takođe imate pravo da podnesete žalbu nadzornom organu u vašoj zemlji prebivališta ako verujete da su vaša prava na zaštitu podataka prekršena."
     },
     "automated": {
@@ -208,7 +208,7 @@
       "text": "Automatizovani pristup našoj Usluzi je strogo regulisan:",
       "prohibited": "Prikupljanje, pretraživanje ili automatizovano sakupljanje podataka je zabranjeno bez naše pisane saglasnosti",
       "rate": "Prekomernih zahteva koji opterećuju naše servere može rezultirati blokiranjem IP adrese",
-      "partnership": "Za API pristup ili partnerstva za podatke, kontaktirajte nas na partners@balkanestate.com",
+      "partnership": "Za API pristup ili partnerstva za podatke, kontaktirajte nas na partners@balkanestateai.com",
       "robots": "Morate se pridržavati naše robots.txt datoteke i svih ograničenja pristupa"
     },
     "professional": {
@@ -223,7 +223,7 @@
       "title": "Rešavanje sporova",
       "text": "U slučaju bilo kakvog spora koji proizilazi iz ovih Uslova ili vašeg korišćenja Usluge:",
       "informal": "Neformalno rešavanje:",
-      "informalDesc": "Ohrabrujemo vas da nas prvo kontaktirate na legal@balkanestate.com kako biste pokušali neformalno rešavanje. Obavezujemo se da ćemo odgovoriti u roku od 15 radnih dana.",
+      "informalDesc": "Ohrabrujemo vas da nas prvo kontaktirate na legal@balkanestateai.com kako biste pokušali neformalno rešavanje. Obavezujemo se da ćemo odgovoriti u roku od 15 radnih dana.",
       "mediation": "Medijacija:",
       "mediationDesc": "Ako neformalno rešavanje ne uspe, obe strane se slažu da pokušaju medijaciju pre bilo kakvih formalnih postupaka.",
       "jurisdiction": "Nadležnost:",

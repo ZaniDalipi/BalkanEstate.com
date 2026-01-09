@@ -153,7 +153,7 @@ const PrivacyPolicyPage: React.FC = () => {
               <li>{t('legal:privacy.rights.withdraw', 'Withdraw consent at any time')}</li>
             </ul>
             <p className="text-gray-700 leading-relaxed mt-4">
-              {t('legal:privacy.rights.contact', 'To exercise these rights, please contact us at privacy@balkanestate.com')}
+              {t('legal:privacy.rights.contact', 'To exercise these rights, please contact us at privacy@balkanestateai.com')}
             </p>
             <p className="text-gray-700 leading-relaxed mt-4">
               {t('legal:privacy.rights.complaint', 'You also have the right to lodge a complaint with a supervisory authority in your country of residence if you believe your data protection rights have been violated.')}
@@ -262,7 +262,7 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{t('legal:privacy.dpo.role', 'Data Protection Officer')}</strong></p>
-              <p className="text-gray-700">Email: dpo@balkanestate.com</p>
+              <p className="text-gray-700">Email: dpo@balkanestateai.com</p>
             </div>
           </section>
 
@@ -276,7 +276,7 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>BalkanEstate</strong></p>
-              <p className="text-gray-700">Email: privacy@balkanestate.com</p>
+              <p className="text-gray-700">Email: privacy@balkanestateai.com</p>
               <p className="text-gray-700">Phone: +389 71 967 915</p>
               <p className="text-gray-700">{t('legal:privacy.contact.address', 'Address: Skopje, North Macedonia')}</p>
             </div>

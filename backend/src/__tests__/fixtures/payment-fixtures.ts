@@ -14,7 +14,7 @@ export const TEST_USERS = {
   // User from Serbia (Paddle)
   serbianUser: {
     _id: new mongoose.Types.ObjectId(),
-    email: 'test.serbia@balkanestate.com',
+    email: 'test.serbia@balkanestateai.com',
     name: 'Test Serbian User',
     country: 'RS',
     isSubscribed: false,
@@ -24,7 +24,7 @@ export const TEST_USERS = {
   // User from Greece (Stripe)
   greekUser: {
     _id: new mongoose.Types.ObjectId(),
-    email: 'test.greece@balkanestate.com',
+    email: 'test.greece@balkanestateai.com',
     name: 'Test Greek User',
     country: 'GR',
     isSubscribed: false,
@@ -34,7 +34,7 @@ export const TEST_USERS = {
   // User from Albania (Paddle)
   albanianUser: {
     _id: new mongoose.Types.ObjectId(),
-    email: 'test.albania@balkanestate.com',
+    email: 'test.albania@balkanestateai.com',
     name: 'Test Albanian User',
     country: 'AL',
     isSubscribed: false,
@@ -44,7 +44,7 @@ export const TEST_USERS = {
   // Subscribed user
   subscribedUser: {
     _id: new mongoose.Types.ObjectId(),
-    email: 'subscribed@balkanestate.com',
+    email: 'subscribed@balkanestateai.com',
     name: 'Subscribed User',
     country: 'HR',
     isSubscribed: true,
@@ -168,7 +168,7 @@ export const MOCK_STRIPE_RESPONSES = {
     url: 'https://checkout.stripe.com/pay/cs_test_a1b2c3d4e5f6g7h8i9j0',
     payment_status: 'unpaid',
     status: 'open',
-    customer_email: 'test@balkanestate.com',
+    customer_email: 'test@balkanestateai.com',
     metadata: {
       userId: 'user_123',
       productId: 'pro_monthly',
@@ -371,7 +371,7 @@ export const TEST_CARDS = {
 export function createMockUser(countryCode: string, overrides: any = {}) {
   return {
     _id: new mongoose.Types.ObjectId(),
-    email: `test.${countryCode.toLowerCase()}@balkanestate.com`,
+    email: `test.${countryCode.toLowerCase()}@balkanestateai.com`,
     name: `Test User ${countryCode}`,
     country: countryCode,
     isSubscribed: false,

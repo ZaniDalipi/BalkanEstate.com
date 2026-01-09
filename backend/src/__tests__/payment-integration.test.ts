@@ -354,7 +354,7 @@ describe('Full Subscription Flow', () => {
   it('complete flow: create payment -> webhook -> verify', async () => {
     // 1. Create authenticated user
     const { user, token } = await createAuthenticatedUser(
-      createMockUser('RS', { email: 'flow.test@balkanestate.com' })
+      createMockUser('RS', { email: 'flow.test@balkanestateai.com' })
     );
 
     // 2. Check initial status

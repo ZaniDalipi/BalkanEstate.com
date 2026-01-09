@@ -1730,7 +1730,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
                 <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
                 <div class="warning">
                   <p><strong>⚠️ Didn't make this change?</strong></p>
-                  <p>If you didn't change your password, please contact our support team immediately at support@balkanestate.com</p>
+                  <p>If you didn't change your password, please contact our support team immediately at support@balkanestateai.com</p>
                 </div>
                 <p>For your security, you have been logged out of all devices. Please log in again with your new password.</p>
                 <div class="footer">

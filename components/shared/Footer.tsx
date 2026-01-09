@@ -178,11 +178,11 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                         <ul className="space-y-3 mb-6">
                             <li>
                                 <a
-                                    href="mailto:contact@balkanestate.com"
+                                    href="mailto:contact@balkanestateai.com"
                                     className="flex items-center gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
                                     <EnvelopeIcon className="w-4 h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors" />
-                                    <span className="text-sm">contact@balkanestate.com</span>
+                                    <span className="text-sm">contact@balkanestateai.com</span>
                                 </a>
                             </li>
                             <li>

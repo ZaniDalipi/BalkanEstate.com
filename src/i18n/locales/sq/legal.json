@@ -73,7 +73,7 @@
       "restrict": "Kufizim ose kundërshtim i përpunimit",
       "portability": "Portabiliteti i të dhënave",
       "withdraw": "Tërheqje e pëlqimit në çdo kohë",
-      "contact": "Për të ushtruar këto të drejta, ju lutemi na kontaktoni në privacy@balkanestate.com",
+      "contact": "Për të ushtruar këto të drejta, ju lutemi na kontaktoni në privacy@balkanestateai.com",
       "complaint": "Gjithashtu keni të drejtë të paraqisni një ankesë tek një autoritet mbikëqyrës në vendin tuaj të rezidencës nëse besoni se të drejtat tuaja për mbrojtjen e të dhënave janë shkelur."
     },
     "automated": {
@@ -208,7 +208,7 @@
       "text": "Aksesi i automatizuar në Shërbimin tonë rregullohet rreptësisht:",
       "prohibited": "Gërryerja, kërkimi ose mbledhja e automatizuar e të dhënave ndalohet pa pëlqimin tonë me shkrim",
       "rate": "Kërkesat e tepërta që ngarkojnë serverët tanë mund të rezultojnë në bllokimin e IP",
-      "partnership": "Për akses API ose partneritete të dhënash, na kontaktoni në partners@balkanestate.com",
+      "partnership": "Për akses API ose partneritete të dhënash, na kontaktoni në partners@balkanestateai.com",
       "robots": "Duhet të përputheni me skedarin tonë robots.txt dhe çdo kufizim aksesi"
     },
     "professional": {
@@ -223,7 +223,7 @@
       "title": "Zgjidhja e Mosmarrëveshjeve",
       "text": "Në rast të ndonjë mosmarrëveshjeje që rrjedh nga këto Kushte ose përdorimi juaj i Shërbimit:",
       "informal": "Zgjidhja Joformale:",
-      "informalDesc": "Ju inkurajojmë të na kontaktoni fillimisht në legal@balkanestate.com për të tentuar zgjidhje joformale. Angazhohemi të përgjigjemi brenda 15 ditëve pune.",
+      "informalDesc": "Ju inkurajojmë të na kontaktoni fillimisht në legal@balkanestateai.com për të tentuar zgjidhje joformale. Angazhohemi të përgjigjemi brenda 15 ditëve pune.",
       "mediation": "Ndërmjetësimi:",
       "mediationDesc": "Nëse zgjidhja joformale dështon, të dyja palët pranojnë të tentojnë ndërmjetësim para çdo procedimi formal.",
       "jurisdiction": "Juridiksioni:",

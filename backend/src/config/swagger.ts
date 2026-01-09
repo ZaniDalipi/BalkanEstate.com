@@ -42,7 +42,7 @@ API requests are rate-limited to prevent abuse:
       `,
       contact: {
         name: 'BalkanEstate Support',
-        email: 'support@balkanestate.com',
+        email: 'support@balkanestateai.com',
       },
       license: {
         name: 'Proprietary',

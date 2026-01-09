@@ -73,7 +73,7 @@
       "restrict": "Restrict or object to processing",
       "portability": "Data portability",
       "withdraw": "Withdraw consent at any time",
-      "contact": "To exercise these rights, please contact us at privacy@balkanestate.com",
+      "contact": "To exercise these rights, please contact us at privacy@balkanestateai.com",
       "complaint": "You also have the right to lodge a complaint with a supervisory authority in your country of residence if you believe your data protection rights have been violated."
     },
     "automated": {
@@ -208,7 +208,7 @@
       "text": "Automated access to our Service is strictly regulated:",
       "prohibited": "Scraping, crawling, or automated data collection is prohibited without our written consent",
       "rate": "Excessive requests that burden our servers may result in IP blocking",
-      "partnership": "For API access or data partnerships, contact us at partners@balkanestate.com",
+      "partnership": "For API access or data partnerships, contact us at partners@balkanestateai.com",
       "robots": "You must comply with our robots.txt file and any access restrictions"
     },
     "professional": {
@@ -223,7 +223,7 @@
       "title": "Dispute Resolution",
       "text": "In the event of any dispute arising from these Terms or your use of the Service:",
       "informal": "Informal Resolution:",
-      "informalDesc": "We encourage you to contact us first at legal@balkanestate.com to attempt informal resolution. We commit to responding within 15 business days.",
+      "informalDesc": "We encourage you to contact us first at legal@balkanestateai.com to attempt informal resolution. We commit to responding within 15 business days.",
       "mediation": "Mediation:",
       "mediationDesc": "If informal resolution fails, both parties agree to attempt mediation before any formal proceedings.",
       "jurisdiction": "Jurisdiction:",
