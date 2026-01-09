@@ -972,13 +972,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
 
                 {/* --- Right Panel: Map --- */}
-                <div className="h-full w-full md:w-[45%] relative z-0 flex flex-col">
-                    <div className="flex-grow relative">
+                <div className="h-full w-full md:w-[45%] relative z-0">
+                    <div className="absolute inset-0">
                         <MapComponent {...mapProps} searchMode={searchMode} />
                     </div>
 
-                    {/* Newsletter Subscription Section */}
-                    <div className="bg-gradient-to-br from-primary-dark via-primary to-primary text-white p-2 sm:p-2.5 md:p-3 flex-shrink-0">
+                    {/* Newsletter Subscription Section - Hidden on mobile, overlays map at bottom */}
+                    <div className="hidden md:block absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-br from-primary-dark via-primary to-primary text-white p-2 sm:p-2.5 md:p-3">
                         <div className="max-w-xl mx-auto">
                             <h3 className="text-xs sm:text-sm font-semibold mb-1">Stay Updated with New Properties</h3>
                             <p className="text-xs text-white/80 mb-1.5 sm:mb-2 hidden sm:block">Subscribe to get notifications about new listings in your area</p>
