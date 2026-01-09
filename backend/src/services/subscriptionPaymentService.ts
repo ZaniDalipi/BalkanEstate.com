@@ -5,7 +5,7 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
-import { sendAgentRegistrationCouponsEmail } from './emailService';
+import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } from './emailService';
 
 /**
  * Secure Subscription Payment Service
@@ -501,8 +501,9 @@ async function generateEnterpriseAgentCoupons(
 
   console.log(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
 
-  // Send email with the coupon codes
+  // Send emails with the coupon codes and welcome message
   try {
+    // Send agent registration coupons email
     await sendAgentRegistrationCouponsEmail({
       email: ownerEmail,
       ownerName,
@@ -510,8 +511,16 @@ async function generateEnterpriseAgentCoupons(
       coupons: newCoupons,
     });
     console.log(`📧 Sent agent registration coupons email to ${ownerEmail}`);
+
+    // Send welcome/thank you email
+    await sendEnterpriseWelcomeEmail({
+      email: ownerEmail,
+      ownerName,
+      agencyName: agency.name,
+    });
+    console.log(`📧 Sent Enterprise welcome email to ${ownerEmail}`);
   } catch (emailError) {
-    console.error('⚠️ Failed to send agent coupons email:', emailError);
+    console.error('⚠️ Failed to send Enterprise emails:', emailError);
     // Don't throw - coupons were still generated successfully
   }
 }

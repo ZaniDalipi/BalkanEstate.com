@@ -234,9 +234,11 @@ export const createAgency = async (
         agentCouponsGenerated = true;
         console.log(`🎟️ Generated 5 agent registration coupons for new agency ${agency.name}`);
 
-        // Send email with coupon codes
+        // Send emails with coupon codes and welcome message
         try {
-          const { sendAgentRegistrationCouponsEmail } = await import('../services/emailService');
+          const { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } = await import('../services/emailService');
+
+          // Send agent registration coupons email
           await sendAgentRegistrationCouponsEmail({
             email: user.email,
             ownerName: user.name || 'Agency Owner',
@@ -244,8 +246,16 @@ export const createAgency = async (
             coupons: generatedCoupons,
           });
           console.log(`📧 Sent agent registration coupons email to ${user.email}`);
+
+          // Send welcome/thank you email
+          await sendEnterpriseWelcomeEmail({
+            email: user.email,
+            ownerName: user.name || 'Agency Owner',
+            agencyName: agency.name,
+          });
+          console.log(`📧 Sent Enterprise welcome email to ${user.email}`);
         } catch (emailError) {
-          console.error('⚠️ Failed to send agent coupons email:', emailError);
+          console.error('⚠️ Failed to send Enterprise emails:', emailError);
         }
       } catch (couponError) {
         console.error('⚠️ Error generating agent coupons:', couponError);
