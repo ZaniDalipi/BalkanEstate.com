@@ -242,9 +242,10 @@ export const syncAllSubscriptionCounters = async (req: Request, res: Response): 
           user.subscription.privateSellerCount = privateSellerCount;
           user.subscription.agentCount = agentCount;
 
-          // Ensure listingsLimit is correct
-          if (user.subscription.tier === 'pro' && user.subscription.listingsLimit !== 20) {
-            user.subscription.listingsLimit = 20;
+          // Sync listingsLimit from proSubscription if available (source of truth)
+          // This preserves plan-specific limits: pro_monthly=20, pro_yearly=250
+          if (user.subscription.tier === 'pro' && user.proSubscription?.totalListingsLimit) {
+            user.subscription.listingsLimit = user.proSubscription.totalListingsLimit;
           }
         }
 

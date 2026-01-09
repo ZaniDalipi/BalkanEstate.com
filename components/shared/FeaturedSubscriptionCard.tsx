@@ -193,7 +193,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
               onClick={onUpgrade}
               className="px-6 py-2 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
             >
-              Start €10/week Plan
+              Get Featured Now
             </button>
           </div>
         </div>
