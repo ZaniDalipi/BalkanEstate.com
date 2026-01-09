@@ -7,39 +7,59 @@ interface NumberInputWithSteppersProps {
     min?: number;
     max?: number;
     step?: number;
+    placeholder?: string;
 }
 
-const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label, value, onChange, min = 0, max, step = 1 }) => {
+/**
+ * Simple validated number input (no +/- buttons)
+ * Validates against min/max and prevents invalid values
+ */
+const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({
+    label,
+    value,
+    onChange,
+    min = 0,
+    max,
+    step = 1,
+    placeholder
+}) => {
     const id = useMemo(() => `number-input-${label.toLowerCase().replace(/\s+/g, '-')}`, [label]);
 
-    const handleIncrement = () => {
-        const newValue = (value || 0) + step;
-        if (max === undefined || newValue <= max) {
-            onChange(newValue);
-        }
-    };
-
-    const handleDecrement = () => {
-        const newValue = (value || 0) - step;
-        if (min === undefined || newValue >= min) {
-            onChange(newValue);
-        }
-    };
-    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
+
         // Allow empty input to be treated as min value (usually 0)
         if (inputValue === '') {
             onChange(min ?? 0);
             return;
         }
-        const numValue = parseInt(inputValue, 10);
+
+        // Parse as float to support decimal step values
+        const numValue = step % 1 !== 0 ? parseFloat(inputValue) : parseInt(inputValue, 10);
+
         if (!isNaN(numValue)) {
+            // Clamp value between min and max
             let clampedValue = numValue;
             if (min !== undefined && clampedValue < min) clampedValue = min;
             if (max !== undefined && clampedValue > max) clampedValue = max;
             onChange(clampedValue);
         }
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const inputValue = e.target.value;
+
+        // On blur, ensure the value is valid
+        if (inputValue === '' || isNaN(Number(inputValue))) {
+            onChange(min ?? 0);
+            return;
+        }
+
+        const numValue = Number(inputValue);
+        let clampedValue = numValue;
+        if (min !== undefined && clampedValue < min) clampedValue = min;
+        if (max !== undefined && clampedValue > max) clampedValue = max;
+        onChange(clampedValue);
     };
 
     // Prevent Enter key from submitting the form
@@ -52,38 +72,23 @@ const NumberInputWithSteppers: React.FC<NumberInputWithSteppersProps> = ({ label
 
     return (
         <div className="relative">
-            <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">{label}</label>
-            <div className="flex items-center justify-between w-full h-[58px] bg-white rounded-lg border border-neutral-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
-                <button 
-                    type="button" 
-                    onClick={handleDecrement} 
-                    disabled={value <= min}
-                    className="px-4 sm:px-6 py-2 text-2xl sm:text-3xl font-light text-neutral-600 hover:bg-neutral-100 disabled:text-neutral-300 disabled:cursor-not-allowed h-full rounded-l-lg focus:outline-none transition-colors"
-                    aria-label={`Decrease ${label}`}
-                >
-                    -
-                </button>
-                <input
-                    type="number"
-                    id={id}
-                    value={value === undefined || value === null ? '' : value}
-                    onChange={handleChange}
-                    onKeyDown={handleKeyDown}
-                    className="w-full text-center text-lg font-semibold text-neutral-900 border-none focus:ring-0 bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    min={min}
-                    max={max}
-                    aria-label={label}
-                />
-                <button 
-                    type="button" 
-                    onClick={handleIncrement}
-                    disabled={max !== undefined && value >= max}
-                    className="px-4 sm:px-6 py-2 text-2xl sm:text-3xl font-light text-neutral-600 hover:bg-neutral-100 disabled:text-neutral-300 disabled:cursor-not-allowed h-full rounded-r-lg focus:outline-none transition-colors"
-                    aria-label={`Increase ${label}`}
-                >
-                    +
-                </button>
-            </div>
+            <label htmlFor={id} className="block text-sm font-medium text-neutral-700 mb-1">
+                {label}
+            </label>
+            <input
+                type="number"
+                id={id}
+                value={value === undefined || value === null ? '' : value}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className="w-full h-[58px] px-4 text-lg font-semibold text-neutral-900 bg-white rounded-lg border border-neutral-300 focus:border-primary focus:ring-1 focus:ring-primary transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                min={min}
+                max={max}
+                step={step}
+                aria-label={label}
+            />
         </div>
     );
 };

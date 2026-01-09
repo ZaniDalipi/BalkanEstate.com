@@ -54,6 +54,29 @@ const PricingManager: React.FC = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
+  // Helper for validated number input - prevents negative values where min >= 0
+  const handleNumberChange = (
+    field: keyof Product,
+    value: string,
+    min: number = 0,
+    isFloat: boolean = false
+  ) => {
+    if (!editingProduct) return;
+
+    // Allow empty for editing
+    if (value === '') {
+      setEditingProduct({ ...editingProduct, [field]: min });
+      return;
+    }
+
+    const parsed = isFloat ? parseFloat(value) : parseInt(value, 10);
+    if (isNaN(parsed)) return;
+
+    // Clamp to minimum (prevent negatives where not allowed)
+    const clampedValue = Math.max(parsed, min);
+    setEditingProduct({ ...editingProduct, [field]: clampedValue });
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -399,7 +422,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.price}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('price', e.target.value, 0, true)}
                       min="0"
                       step="0.01"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -436,7 +459,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.durationDays}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, durationDays: parseInt(e.target.value) || 30 })}
+                      onChange={(e) => handleNumberChange('durationDays', e.target.value, 1)}
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -453,7 +476,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.listingsLimit}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, listingsLimit: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('listingsLimit', e.target.value, -1)}
                       min="-1"
                       placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -464,7 +487,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.agentCoupons}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, agentCoupons: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('agentCoupons', e.target.value, 0)}
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
@@ -474,7 +497,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.savedSearchesLimit}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, savedSearchesLimit: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('savedSearchesLimit', e.target.value, -1)}
                       min="-1"
                       placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -490,7 +513,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.promotionCoupons}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, promotionCoupons: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('promotionCoupons', e.target.value, 0)}
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
@@ -500,7 +523,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.premiumCoupons || 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, premiumCoupons: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('premiumCoupons', e.target.value, 0)}
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
@@ -510,7 +533,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.highlightedCoupons || 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, highlightedCoupons: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('highlightedCoupons', e.target.value, 0)}
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
@@ -520,7 +543,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.featuredCoupons || 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, featuredCoupons: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('featuredCoupons', e.target.value, 0)}
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
@@ -538,7 +561,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.aiMessagesLimit ?? 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, aiMessagesLimit: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('aiMessagesLimit', e.target.value, -1)}
                       min="-1"
                       placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -549,7 +572,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.aiInsightsLimit ?? 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, aiInsightsLimit: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('aiInsightsLimit', e.target.value, -1)}
                       min="-1"
                       placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -560,7 +583,7 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.imageDescriptionLimit ?? 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, imageDescriptionLimit: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => handleNumberChange('imageDescriptionLimit', e.target.value, -1)}
                       min="-1"
                       placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"

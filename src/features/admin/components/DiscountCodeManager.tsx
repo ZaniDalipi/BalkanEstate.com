@@ -56,6 +56,25 @@ const DiscountCodeManager: React.FC = () => {
     usageLimit: 1,
   });
 
+  // Helper for validated number input - prevents negative values where min >= 0
+  const handleNewCodeNumber = (field: keyof typeof newCode, value: string, min: number = 0) => {
+    const parsed = parseInt(value, 10);
+    if (value === '' || isNaN(parsed)) {
+      setNewCode({ ...newCode, [field]: min });
+      return;
+    }
+    setNewCode({ ...newCode, [field]: Math.max(parsed, min) });
+  };
+
+  const handleBulkFormNumber = (field: keyof typeof bulkForm, value: string, min: number = 0) => {
+    const parsed = parseInt(value, 10);
+    if (value === '' || isNaN(parsed)) {
+      setBulkForm({ ...bulkForm, [field]: min });
+      return;
+    }
+    setBulkForm({ ...bulkForm, [field]: Math.max(parsed, min) });
+  };
+
   useEffect(() => {
     fetchDiscountCodes();
   }, []);
@@ -453,7 +472,7 @@ const DiscountCodeManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCode.discountValue}
-                    onChange={(e) => setNewCode({ ...newCode, discountValue: Number(e.target.value) })}
+                    onChange={(e) => handleNewCodeNumber('discountValue', e.target.value, 1)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                     required
@@ -482,7 +501,7 @@ const DiscountCodeManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCode.usageLimit}
-                    onChange={(e) => setNewCode({ ...newCode, usageLimit: Number(e.target.value) })}
+                    onChange={(e) => handleNewCodeNumber('usageLimit', e.target.value, 1)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                   />
@@ -496,7 +515,7 @@ const DiscountCodeManager: React.FC = () => {
                 <input
                   type="number"
                   value={newCode.minimumPurchaseAmount}
-                  onChange={(e) => setNewCode({ ...newCode, minimumPurchaseAmount: Number(e.target.value) })}
+                  onChange={(e) => handleNewCodeNumber('minimumPurchaseAmount', e.target.value, 0)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   min="0"
                 />
@@ -646,7 +665,7 @@ const DiscountCodeManager: React.FC = () => {
                   <input
                     type="number"
                     value={bulkForm.count}
-                    onChange={(e) => setBulkForm({ ...bulkForm, count: Number(e.target.value) })}
+                    onChange={(e) => handleBulkFormNumber('count', e.target.value, 1)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                     max="1000"
@@ -690,7 +709,7 @@ const DiscountCodeManager: React.FC = () => {
                   <input
                     type="number"
                     value={bulkForm.discountValue}
-                    onChange={(e) => setBulkForm({ ...bulkForm, discountValue: Number(e.target.value) })}
+                    onChange={(e) => handleBulkFormNumber('discountValue', e.target.value, 1)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                     required
@@ -719,7 +738,7 @@ const DiscountCodeManager: React.FC = () => {
                   <input
                     type="number"
                     value={bulkForm.usageLimit}
-                    onChange={(e) => setBulkForm({ ...bulkForm, usageLimit: Number(e.target.value) })}
+                    onChange={(e) => handleBulkFormNumber('usageLimit', e.target.value, 1)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                   />
