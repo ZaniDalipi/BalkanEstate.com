@@ -146,6 +146,68 @@ const PLAN_COLORS: Record<string, string> = {
   seller_pro_monthly: 'from-blue-500 to-blue-600',
   seller_pro_yearly: 'from-purple-500 to-purple-600',
   seller_enterprise_yearly: 'from-amber-500 to-orange-600',
+  agency_yearly: 'from-amber-500 to-orange-600',
+  enterprise_yearly: 'from-amber-500 to-orange-600',
+};
+
+// Fallback features when database features are missing/incomplete
+const FALLBACK_FEATURES: Record<string, string[]> = {
+  pro_monthly: [
+    '20 listings per month',
+    '3 promotion coupons/month',
+    '20 insights per month',
+    'Unlimited AI chat',
+    'Unlimited saved searches',
+    'Auto-generate image descriptions',
+  ],
+  pro_yearly: [
+    '250 listings per year',
+    '3 promotion coupons/month',
+    '20 insights per month',
+    'Unlimited AI chat',
+    'Unlimited saved searches',
+    'Save 33% vs monthly',
+  ],
+  seller_pro_monthly: [
+    '20 listings per month',
+    '3 promotion coupons/month',
+    '20 insights per month',
+    'Unlimited AI chat',
+    'Unlimited saved searches',
+    'Auto-generate image descriptions',
+  ],
+  seller_pro_yearly: [
+    '250 listings per year',
+    '3 promotion coupons/month',
+    '20 insights per month',
+    'Unlimited AI chat',
+    'Unlimited saved searches',
+    'Save 33% vs monthly',
+  ],
+  agency_yearly: [
+    '500 listings for your agency',
+    '5 team members included',
+    '5 promotion coupons/month',
+    'Agent registration codes',
+    'Unlimited AI & insights',
+    'Dedicated account manager',
+  ],
+  seller_enterprise_yearly: [
+    '500 listings for your agency',
+    '5 team members included',
+    '5 promotion coupons/month',
+    'Agent registration codes',
+    'Unlimited AI & insights',
+    'Dedicated account manager',
+  ],
+  enterprise_yearly: [
+    '500 listings for your agency',
+    '5 team members included',
+    '5 promotion coupons/month',
+    'Agent registration codes',
+    'Unlimited AI & insights',
+    'Dedicated account manager',
+  ],
 };
 
 // Map product IDs to tiers
@@ -273,13 +335,18 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   // Convert product to plan structure - reads from database (single source of truth)
   const productToPlan = useCallback((product: ProductData): Plan => {
+    // Use fallback features if database features are missing or incomplete (less than 3 items)
+    const features = (product.features && product.features.length >= 3)
+      ? product.features
+      : (FALLBACK_FEATURES[product.productId] || product.features || []);
+
     return {
       id: product.productId,
       name: product.name,
       price: product.price,
       period: product.billingPeriod === 'yearly' ? 'year' : product.billingPeriod === 'monthly' ? 'month' : product.billingPeriod,
       periodMonths: PERIOD_TO_MONTHS[product.billingPeriod] || 1,
-      features: product.features,
+      features,
       // All values come from database
       listingLimit: product.listingsLimit ?? 3,
       color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
