@@ -514,7 +514,7 @@ const UserSchema: Schema = new Schema(
       },
       status: {
         type: String,
-        enum: ['active', 'canceled', 'expired', 'trial'],
+        enum: ['active', 'canceled', 'expired', 'trial', 'grace', 'pending_cancellation'],
         default: 'active',
       },
       startDate: Date,
