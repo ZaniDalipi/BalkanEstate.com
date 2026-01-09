@@ -5,7 +5,7 @@
  * Sends actual test emails:
  * 1. Enterprise Agent Registration Coupons (5 codes)
  * 2. Enterprise Welcome/Thank You Email
- * 3. Monthly Promotion Coupons Email
+ * 3. Monthly Promotion Coupons Email (Pro/Enterprise)
  */
 
 import dotenv from 'dotenv';
@@ -18,7 +18,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
 import {
   sendAgentRegistrationCouponsEmail,
-  sendEnterpriseWelcomeEmail
+  sendEnterpriseWelcomeEmail,
+  sendMonthlyCouponEmail
 } from '../services/emailService';
 
 // =============================================================================
@@ -45,6 +46,13 @@ const testAgentCoupons = [
   { code: 'AGENCY-DALP-U6I0O9', expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
 ];
 
+// Pro user for monthly coupons test
+const testProUser = {
+  name: 'Zani Dalipi',
+  email: TEST_EMAIL,
+  planName: 'Pro Yearly',
+};
+
 // =============================================================================
 // Main Function
 // =============================================================================
@@ -56,7 +64,7 @@ async function main() {
 
   try {
     // 1. Send Enterprise Agent Registration Coupons Email
-    console.log('\n📤 Sending Enterprise Agent Coupons Email...');
+    console.log('\n📤 [1/3] Sending Enterprise Agent Coupons Email...');
     console.log('   Contains 5 agent registration codes:');
     testAgentCoupons.forEach((coupon, i) => {
       console.log(`   ${i + 1}. ${coupon.code} (expires: ${coupon.expiresAt.toLocaleDateString()})`);
@@ -74,7 +82,7 @@ async function main() {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // 2. Send Enterprise Welcome/Thank You Email
-    console.log('\n📤 Sending Enterprise Welcome Email...');
+    console.log('\n📤 [2/3] Sending Enterprise Welcome Email...');
 
     await sendEnterpriseWelcomeEmail({
       email: testAgencyOwner.email,
@@ -82,6 +90,32 @@ async function main() {
       agencyName: testAgencyOwner.agencyName,
     });
     console.log('   ✅ Enterprise Welcome email sent!');
+
+    // Small delay between emails
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // 3. Send Monthly Promotion Coupons Email
+    console.log('\n📤 [3/3] Sending Monthly Promotion Coupons Email...');
+    console.log('   Coupon breakdown:');
+    console.log('   - 2 Highlighted coupons');
+    console.log('   - 1 Premium coupon');
+    console.log('   - 0 Featured coupons');
+    console.log('   Total: 3 coupons available');
+
+    await sendMonthlyCouponEmail({
+      email: testProUser.email,
+      userName: testProUser.name,
+      planName: testProUser.planName,
+      totalCoupons: 3,
+      newCoupons: 3,
+      rolledOver: 0,
+      breakdown: {
+        highlighted: 2,
+        premium: 1,
+        featured: 0,
+      },
+    });
+    console.log('   ✅ Monthly Promotion Coupons email sent!');
 
     console.log('\n' + '═'.repeat(50));
     console.log('🎉 All test emails sent successfully!');
@@ -91,6 +125,7 @@ async function main() {
     console.log('\n📋 Summary of emails sent:');
     console.log('   1. Enterprise Agent Coupons - 5 registration codes for team members');
     console.log('   2. Enterprise Welcome - Thank you & benefits overview');
+    console.log('   3. Monthly Promotion Coupons - 3 coupons (2 highlighted + 1 premium)');
 
   } catch (error) {
     console.error('\n❌ Error sending emails:', error);
