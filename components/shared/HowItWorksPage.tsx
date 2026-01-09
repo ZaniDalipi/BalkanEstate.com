@@ -192,11 +192,12 @@ const HowItWorksPage: React.FC = () => {
                     <h4 className="font-semibold mb-4 text-center">What's Included</h4>
                     <ul className="space-y-3">
                       {[
-                        '100 active property listings',
-                        '5 agent slots included FREE',
-                        '15 monthly promotion credits',
-                        'Priority support & visibility',
-                        'Agency profile & branding',
+                        '500 property listings (expandable)',
+                        '5 team members included',
+                        '5 promotion coupons/month',
+                        'Agency branding page',
+                        'Unlimited AI usage for all agents',
+                        'Dedicated account manager',
                         'Team analytics dashboard',
                       ].map((feature, idx) => (
                         <li key={idx} className="flex items-center gap-2">
@@ -317,17 +318,21 @@ const HowItWorksPage: React.FC = () => {
                     <span className="text-sm text-purple-600">Pro Subscription</span>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-4xl font-bold text-neutral-800">€240</span>
-                  <span className="text-neutral-500">/year</span>
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-neutral-800">€25</span>
+                    <span className="text-neutral-500">/month</span>
+                  </div>
+                  <p className="text-sm text-purple-600 mt-1">or €200/year (save 33%)</p>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {[
-                    '20 active listings per month',
-                    '3 monthly promotion credits',
+                    '20 listings/month or 250/year',
+                    '3 promotion coupons/month',
                     'Personal agent profile',
-                    'Direct client messaging',
-                    'Analytics dashboard',
+                    'Unlimited AI chat & insights',
+                    'Advanced analytics dashboard',
+                    'Priority support',
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-purple-500" />
@@ -420,11 +425,74 @@ const HowItWorksPage: React.FC = () => {
               </div>
               <h2 className="text-3xl font-bold text-neutral-800 mb-3">Find Your Dream Property</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                Search, save, and connect with sellers across the Balkans - all for free
+                Search, save, and connect with sellers across the Balkans - free basic features with optional Pro upgrade
               </p>
             </div>
 
+            {/* Buyer Plans */}
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              {/* Free Plan */}
+              <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
+                <span className="text-blue-600 font-medium text-sm">Free Features</span>
+                <div className="flex items-baseline gap-2 mt-2 mb-6">
+                  <span className="text-4xl font-bold text-neutral-800">€0</span>
+                  <span className="text-neutral-500">forever</span>
+                </div>
+                <p className="text-neutral-600 mb-6">
+                  Everything you need to start your property search
+                </p>
+                <ul className="space-y-3 mb-6">
+                  {[
+                    'Browse all listings',
+                    'Interactive map search',
+                    'Save favorites',
+                    'Contact sellers & agents',
+                    'Basic market insights',
+                    'Agent & agency profiles',
+                  ].map((feature, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
+                      <CheckIcon className="w-5 h-5 text-blue-500" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Buyer Pro Plan */}
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
+                <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
+                  7-DAY FREE TRIAL
+                </div>
+                <span className="text-blue-200 font-medium text-sm">Buyer Pro</span>
+                <div className="flex items-baseline gap-2 mt-2 mb-6">
+                  <span className="text-4xl font-bold">€3</span>
+                  <span className="text-blue-200">/month</span>
+                </div>
+                <p className="text-blue-100 mb-6">
+                  Get ahead of other buyers with premium features
+                </p>
+                <ul className="space-y-3 mb-6">
+                  {[
+                    'Instant email & SMS notifications',
+                    'Unlimited saved searches',
+                    'Early access to new listings',
+                    'Advanced market insights',
+                    'Price drop notifications',
+                    'Investment calculator',
+                    'Mortgage pre-qualification',
+                    'Ad-free browsing',
+                  ].map((feature, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-sm text-blue-100">
+                      <CheckIcon className="w-5 h-5 text-blue-200" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
             {/* Features Grid */}
+            <h3 className="text-2xl font-bold text-neutral-800 mb-6 text-center">Powerful Search Tools</h3>
             <div className="grid md:grid-cols-3 gap-6 mb-12">
               {[
                 {
@@ -578,7 +646,9 @@ const HowItWorksPage: React.FC = () => {
                 <ul className="space-y-3 mb-6">
                   {[
                     '3 active listings',
-                    'Basic property photos',
+                    '3 saved searches',
+                    '3 AI chat messages',
+                    'Photo gallery (up to 10 images)',
                     'Direct messaging',
                     'Basic analytics',
                   ].map((feature, idx) => (
@@ -593,23 +663,27 @@ const HowItWorksPage: React.FC = () => {
               {/* Pro Plan */}
               <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white relative overflow-hidden">
                 <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
-                  POPULAR
+                  MOST POPULAR
                 </div>
                 <span className="text-green-200 font-medium text-sm">Pro Plan</span>
-                <div className="flex items-baseline gap-2 mt-2 mb-6">
-                  <span className="text-4xl font-bold">€20</span>
-                  <span className="text-green-200">/month</span>
+                <div className="mt-2 mb-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold">€25</span>
+                    <span className="text-green-200">/month</span>
+                  </div>
+                  <p className="text-sm text-green-200 mt-1">or €200/year (save 33%)</p>
                 </div>
                 <p className="text-green-100 mb-6">
                   For serious sellers who want maximum exposure
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    '20 active listings',
-                    'HD photos & virtual tours',
-                    '3 monthly promotion credits',
-                    'Featured placement',
-                    'Advanced analytics',
+                    '20 listings/month or 250/year',
+                    '3 promotion coupons/month',
+                    'Unlimited AI chat & insights',
+                    'Unlimited saved searches',
+                    'Advanced analytics dashboard',
+                    'Lead management tools',
                     'Priority support',
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-green-100">
