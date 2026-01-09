@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/utils/languageRouting';
+import { buildLocalizedPath } from '../../../utils/languageRouting';
 import AdminLayout from './AdminLayout';
 import type { AdminView } from './AdminLayout';
 import DiscountCodeManager from './DiscountCodeManager';
