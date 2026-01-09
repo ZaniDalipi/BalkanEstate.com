@@ -184,6 +184,19 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Admin routes with section support: /admin/:section
+      const adminMatch = path.match(/^\/admin(?:\/(.+))?$/);
+      if (adminMatch) {
+        const section = adminMatch[1] || 'dashboard'; // Default to dashboard
+        const validSections = ['dashboard', 'users', 'inquiries', 'discounts', 'promotions', 'properties', 'agencies', 'pricing', 'activity', 'settings'];
+        const validSection = validSections.includes(section) ? section : 'dashboard';
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_ADMIN_SECTION', payload: validSection });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'admin' });
+        return;
+      }
+
       // Main navigation routes
       const routeMap: { [key: string]: any } = {
         '/': 'search',
@@ -194,7 +207,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/inbox': 'inbox',
         '/agents': 'agents',
         '/agencies': 'agencies',
-        '/admin': 'admin',
         '/reset-password': 'reset-password',
         '/verify-email': 'verify-email',
         '/analytics': 'analytics',

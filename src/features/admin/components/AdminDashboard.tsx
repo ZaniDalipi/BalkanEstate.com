@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { buildLocalizedPath } from '@/utils/languageRouting';
 import AdminLayout from './AdminLayout';
 import type { AdminView } from './AdminLayout';
 import DiscountCodeManager from './DiscountCodeManager';
@@ -13,13 +14,53 @@ import PricingManager from './PricingManager';
 import InquiryManager from './InquiryManager';
 import SystemSettings from './SystemSettings';
 import ActivityLog from './ActivityLog';
+import type { AdminSection } from '@/types';
+
+// Map URL sections to AdminView types
+const urlToAdminView: Record<AdminSection, AdminView> = {
+  'dashboard': 'dashboard',
+  'users': 'users',
+  'inquiries': 'inquiries',
+  'discounts': 'discounts',
+  'promotions': 'promotionCoupons',
+  'properties': 'properties',
+  'agencies': 'agencies',
+  'pricing': 'pricing',
+  'activity': 'activity',
+  'settings': 'settings',
+};
+
+// Map AdminView to URL sections
+const adminViewToUrl: Record<AdminView, string> = {
+  'dashboard': 'dashboard',
+  'users': 'users',
+  'inquiries': 'inquiries',
+  'discounts': 'discounts',
+  'promotionCoupons': 'promotions',
+  'properties': 'properties',
+  'agencies': 'agencies',
+  'pricing': 'pricing',
+  'activity': 'activity',
+  'settings': 'settings',
+};
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { state, dispatch } = useAppContext();
-  const [activeSection, setActiveSection] = useState<AdminView>('dashboard');
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Get current section from state, map to AdminView
+  const activeSection: AdminView = urlToAdminView[state.adminSection] || 'dashboard';
+
+  // Update URL when section changes
+  const handleSectionChange = useCallback((section: AdminView) => {
+    const urlSection = adminViewToUrl[section];
+    dispatch({ type: 'SET_ADMIN_SECTION', payload: urlSection as AdminSection });
+    // Update URL without full reload
+    const newPath = urlSection === 'dashboard' ? '/admin' : `/admin/${urlSection}`;
+    window.history.pushState({}, '', buildLocalizedPath(newPath));
+  }, [dispatch]);
 
   // Check if user has admin access
   useEffect(() => {
@@ -167,7 +208,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout
       activeSection={activeSection}
-      onSectionChange={setActiveSection}
+      onSectionChange={handleSectionChange}
     >
       {renderContent()}
     </AdminLayout>

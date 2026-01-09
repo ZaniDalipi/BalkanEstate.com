@@ -59,6 +59,7 @@ const initialState: AppState = {
   alertDialog: null,
   accountTab: 'listings',
   howItWorksTab: 'agencies',
+  adminSection: 'dashboard',
 };
 
 
@@ -294,6 +295,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         return { ...state, accountTab: action.payload };
     case 'SET_HOW_IT_WORKS_TAB':
         return { ...state, howItWorksTab: action.payload };
+    case 'SET_ADMIN_SECTION':
+        return { ...state, adminSection: action.payload };
     default:
       return state;
   }

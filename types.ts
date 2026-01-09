@@ -660,7 +660,11 @@ export interface AppState {
     accountTab: string;
     // How It Works page active tab
     howItWorksTab: HowItWorksTab;
+    // Admin panel active section
+    adminSection: AdminSection;
 }
+
+export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'discounts' | 'promotions' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings';
 
 export type AppAction =
     | { type: 'AUTH_CHECK_START' }
@@ -714,4 +718,5 @@ export type AppAction =
     | { type: 'HIDE_ALERT' }
     | { type: 'SET_ACCOUNT_TAB', payload: string }
     | { type: 'SET_HOW_IT_WORKS_TAB', payload: HowItWorksTab }
+    | { type: 'SET_ADMIN_SECTION', payload: AdminSection }
     | { type: 'CLEAR_ALL_SAVED_SEARCHES' };
