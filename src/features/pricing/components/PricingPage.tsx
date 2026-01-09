@@ -71,7 +71,7 @@ const PricingPage: React.FC = () => {
 
   // Sales team contact info
   const salesEmail = 'sales@balkanestate.com';
-  const salesPhone = '+383 49 123 456';
+  const salesPhone = '+389 71 967 915';
 
   // Fetch products from API
   useEffect(() => {
