@@ -53,6 +53,12 @@ const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
 const ValuationPage = lazy(() => import('./src/features/valuation/components/ValuationPage'));
 const MortgageCalculatorPage = lazy(() => import('./src/features/calculators/components/MortgageCalculatorPage'));
 const PricingPage = lazy(() => import('./src/features/pricing/components/PricingPage'));
+const PrivacyPolicyPage = lazy(() => import('./src/features/legal/components/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./src/features/legal/components/TermsOfServicePage'));
+const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
+
+// Cookie Consent Banner
+import CookieConsent from './src/shared/components/CookieConsent';
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -184,6 +190,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/mortgage-calculator': 'mortgage-calculator',
         '/pricing': 'pricing',
         '/subscribe': 'pricing',
+        '/privacy': 'privacy',
+        '/terms': 'terms',
+        '/cookies': 'cookies',
       };
 
       const view = routeMap[path];
@@ -357,6 +366,12 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <MortgageCalculatorPage />;
       case 'pricing':
         return <PricingPage />;
+      case 'privacy':
+        return <PrivacyPolicyPage />;
+      case 'terms':
+        return <TermsOfServicePage />;
+      case 'cookies':
+        return <CookiePolicyPage />;
       case 'search':
       default:
         return <SearchPage onToggleSidebar={onToggleSidebar} />;
@@ -565,6 +580,7 @@ const AppWrapper: React.FC = () => {
         <>
             <MainLayout />
             {state.isAuthModalOpen && <AuthPage />}
+            <CookieConsent />
         </>
     );
 }

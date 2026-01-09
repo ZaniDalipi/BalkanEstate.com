@@ -22,10 +22,18 @@ interface FooterProps {
   className?: string;
 }
 
+// Helper to get current language from URL
+const getCurrentLang = () => {
+  const pathLang = window.location.pathname.split('/')[1];
+  const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+  return validLangs.includes(pathLang) ? pathLang : 'en';
+};
+
 const Footer: React.FC<FooterProps> = ({ className = '' }) => {
   const { t } = useTranslation(['footer', 'common']);
   const currentYear = new Date().getFullYear();
   const { dispatch } = useAppContext();
+  const lang = getCurrentLang();
 
   const handleNavigation = (
     view:
@@ -196,19 +204,37 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             </p>
             <div className="flex flex-wrap gap-6 justify-center">
               <a
-                href="#"
+                href={`/${lang}/privacy`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'privacy' });
+                  window.history.pushState({}, '', `/${lang}/privacy`);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
                 {t('footer:legal.privacyPolicy')}
               </a>
               <a
-                href="#"
+                href={`/${lang}/terms`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'terms' });
+                  window.history.pushState({}, '', `/${lang}/terms`);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
                 {t('footer:legal.termsOfService')}
               </a>
               <a
-                href="#"
+                href={`/${lang}/cookies`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'cookies' });
+                  window.history.pushState({}, '', `/${lang}/cookies`);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
               >
                 {t('footer:legal.cookiePolicy')}
