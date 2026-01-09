@@ -58,6 +58,7 @@ const initialState: AppState = {
   pendingRedirect: null,
   alertDialog: null,
   accountTab: 'listings',
+  howItWorksTab: 'agencies',
 };
 
 
@@ -291,6 +292,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         return { ...state, alertDialog: null };
     case 'SET_ACCOUNT_TAB':
         return { ...state, accountTab: action.payload };
+    case 'SET_HOW_IT_WORKS_TAB':
+        return { ...state, howItWorksTab: action.payload };
     default:
       return state;
   }

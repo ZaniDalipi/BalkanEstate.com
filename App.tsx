@@ -165,6 +165,19 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // How-it-works routes with tab support: /how-it-works/:tab
+      const howItWorksMatch = path.match(/^\/how-it-works(?:\/(.+))?$/);
+      if (howItWorksMatch) {
+        const tab = howItWorksMatch[1] || 'agencies'; // Default to agencies tab
+        const validTabs = ['agencies', 'agents', 'buyers', 'sellers'];
+        const validTab = validTabs.includes(tab) ? tab : 'agencies';
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: validTab });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'how-it-works' });
+        return;
+      }
+
       // Main navigation routes
       const routeMap: { [key: string]: any } = {
         '/': 'search',
@@ -179,7 +192,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/reset-password': 'reset-password',
         '/verify-email': 'verify-email',
         '/analytics': 'analytics',
-        '/how-it-works': 'how-it-works',
         '/valuation': 'valuation',
         '/mortgage-calculator': 'mortgage-calculator',
         '/pricing': 'pricing',

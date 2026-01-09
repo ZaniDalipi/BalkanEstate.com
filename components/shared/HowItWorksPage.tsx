@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAppContext } from '../../context/AppContext';
+import { buildLocalizedPath } from '../../src/utils/languageRouting';
+import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
 
 // Icons
@@ -81,20 +84,24 @@ const BellIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-type TabType = 'agencies' | 'agents' | 'buyers' | 'sellers';
-
 const HowItWorksPage: React.FC = () => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<TabType>('agencies');
+  const { state, dispatch } = useAppContext();
+  const activeTab = state.howItWorksTab;
+
+  const handleTabChange = (tabId: HowItWorksTab) => {
+    dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: tabId });
+    window.history.pushState({}, '', buildLocalizedPath(`/how-it-works/${tabId}`));
+  };
 
   const tabs = [
-    { id: 'agencies' as TabType, label: 'For Agencies', icon: BuildingIcon, color: 'orange' },
-    { id: 'agents' as TabType, label: 'For Agents', icon: UserGroupIcon, color: 'purple' },
-    { id: 'buyers' as TabType, label: 'For Buyers', icon: SearchIcon, color: 'blue' },
-    { id: 'sellers' as TabType, label: 'For Sellers', icon: HomeIcon, color: 'green' },
+    { id: 'agencies' as HowItWorksTab, label: 'For Agencies', icon: BuildingIcon, color: 'orange' },
+    { id: 'agents' as HowItWorksTab, label: 'For Agents', icon: UserGroupIcon, color: 'purple' },
+    { id: 'buyers' as HowItWorksTab, label: 'For Buyers', icon: SearchIcon, color: 'blue' },
+    { id: 'sellers' as HowItWorksTab, label: 'For Sellers', icon: HomeIcon, color: 'green' },
   ];
 
-  const getTabColor = (tab: TabType) => {
+  const getTabColor = (tab: HowItWorksTab) => {
     const colors = {
       agencies: 'orange',
       agents: 'purple',
@@ -136,7 +143,7 @@ const HowItWorksPage: React.FC = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
                   isActive
                     ? `bg-${tab.color}-500 text-white shadow-md`
@@ -500,6 +507,46 @@ const HowItWorksPage: React.FC = () => {
                 })}
               </div>
             </div>
+
+            {/* See It In Action - Buyers */}
+            <div className="mt-12">
+              <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">See It In Action</h3>
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Map Search Demo */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />
+                        <p className="text-blue-400 font-medium">Interactive Map Demo</p>
+                        <p className="text-blue-300 text-sm">Screenshot coming soon</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-semibold text-neutral-800 mb-2">Draw & Search</h4>
+                    <p className="text-sm text-neutral-600">Draw custom areas on the map to find properties in your preferred neighborhoods. Filter by price, size, and amenities in real-time.</p>
+                  </div>
+                </div>
+
+                {/* Save & Compare Demo */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gradient-to-br from-red-100 to-pink-50 flex items-center justify-center relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <HeartIcon className="w-16 h-16 text-red-300 mx-auto mb-2" />
+                        <p className="text-red-400 font-medium">Saved Properties View</p>
+                        <p className="text-red-300 text-sm">Screenshot coming soon</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-semibold text-neutral-800 mb-2">Save & Compare</h4>
+                    <p className="text-sm text-neutral-600">Save properties you love and compare them side by side. Get instant notifications when prices change or similar properties become available.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -657,6 +704,46 @@ const HowItWorksPage: React.FC = () => {
                     </ul>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* See It In Action - Sellers */}
+            <div className="mt-12">
+              <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">See It In Action</h3>
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Create Listing Demo */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-50 flex items-center justify-center relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <HomeIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />
+                        <p className="text-green-400 font-medium">Listing Creator</p>
+                        <p className="text-green-300 text-sm">Screenshot coming soon</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-semibold text-neutral-800 mb-2">Easy Listing Creation</h4>
+                    <p className="text-sm text-neutral-600">Create beautiful property listings in minutes with our intuitive form. Add photos, set your price, and describe your property's best features.</p>
+                  </div>
+                </div>
+
+                {/* Analytics Dashboard Demo */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gradient-to-br from-emerald-100 to-teal-50 flex items-center justify-center relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <ChartIcon className="w-16 h-16 text-emerald-300 mx-auto mb-2" />
+                        <p className="text-emerald-400 font-medium">Analytics Dashboard</p>
+                        <p className="text-emerald-300 text-sm">Screenshot coming soon</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-semibold text-neutral-800 mb-2">Track Your Performance</h4>
+                    <p className="text-sm text-neutral-600">Monitor views, inquiries, and engagement for all your listings. See which properties perform best and optimize your strategy.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

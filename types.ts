@@ -26,7 +26,9 @@ export type PropertyStatus = 'active' | 'pending' | 'sold' | 'draft';
 
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 
-export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'valuation' | 'mortgage-calculator' | 'pricing';
+export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works';
+
+export type HowItWorksTab = 'agencies' | 'agents' | 'buyers' | 'sellers';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
 
@@ -656,6 +658,8 @@ export interface AppState {
     } | null;
     // Account page active tab
     accountTab: string;
+    // How It Works page active tab
+    howItWorksTab: HowItWorksTab;
 }
 
 export type AppAction =
@@ -709,4 +713,5 @@ export type AppAction =
     | { type: 'SHOW_ALERT', payload: { type: 'error' | 'warning' | 'success' | 'info'; title: string; message: string } }
     | { type: 'HIDE_ALERT' }
     | { type: 'SET_ACCOUNT_TAB', payload: string }
+    | { type: 'SET_HOW_IT_WORKS_TAB', payload: HowItWorksTab }
     | { type: 'CLEAR_ALL_SAVED_SEARCHES' };
