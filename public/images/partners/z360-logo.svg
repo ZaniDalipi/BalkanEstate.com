@@ -1,27 +1,21 @@
-<svg width="200" height="80" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="80" rx="8" fill="#1a2332"/>
+<svg width="180" height="70" viewBox="0 0 180 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="180" height="70" rx="8" fill="#1E293B"/>
 
-  <!-- Z Letter -->
-  <text x="20" y="48" font-family="Georgia, serif" font-size="42" font-weight="bold" font-style="italic" fill="#f5e6c8">Z</text>
+  <!-- Z with degree symbol -->
+  <text x="18" y="42" font-family="Arial Black, sans-serif" font-size="36" font-weight="900" fill="#F0D9A0">Z</text>
+  <text x="44" y="24" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#F0D9A0">o</text>
 
-  <!-- Camera Icon Background -->
-  <rect x="52" y="12" width="24" height="28" rx="4" fill="#f5e6c8"/>
+  <!-- 360 text -->
+  <text x="58" y="42" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#F0D9A0">360</text>
 
-  <!-- Camera Lens -->
-  <circle cx="64" cy="24" r="6" fill="#1a2332"/>
-  <circle cx="64" cy="24" r="3" fill="#f5e6c8"/>
+  <!-- Circular arrow around 360 -->
+  <path d="M56 20 Q48 12, 58 10" stroke="#F0D9A0" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <polygon points="58,10 55,14 60,13" fill="#F0D9A0"/>
 
-  <!-- 360 with arrows -->
-  <text x="80" y="38" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f5e6c8">360</text>
+  <path d="M128 44 Q136 52, 126 54" stroke="#F0D9A0" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <polygon points="126,54 129,50 124,51" fill="#F0D9A0"/>
 
-  <!-- Circular arrow (simplified) -->
-  <path d="M78 30 C75 25, 80 20, 88 22" stroke="#f5e6c8" stroke-width="1.5" fill="none"/>
-  <path d="M108 35 C112 40, 107 45, 98 43" stroke="#f5e6c8" stroke-width="1.5" fill="none"/>
-
-  <!-- Arrow heads -->
-  <polygon points="88,22 85,19 86,24" fill="#f5e6c8"/>
-  <polygon points="98,43 101,46 100,41" fill="#f5e6c8"/>
-
-  <!-- 360 VIRTUAL TOURS text -->
-  <text x="20" y="68" font-family="Arial, sans-serif" font-size="11" font-weight="bold" letter-spacing="2" fill="#f5e6c8">360 VIRTUAL TOURS</text>
+  <!-- VIRTUAL TOURS text -->
+  <text x="90" y="60" font-family="Arial, sans-serif" font-size="10" font-weight="bold" letter-spacing="1.5" fill="#F0D9A0" text-anchor="middle">360 VIRTUAL TOURS</text>
 </svg>

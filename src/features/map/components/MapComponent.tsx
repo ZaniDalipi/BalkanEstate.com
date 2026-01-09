@@ -345,10 +345,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
         )}
 
-      {/* Desktop Controls - hidden on mobile via CSS as fallback */}
+      {/* Desktop Controls - positioned above the newsletter bar (bottom-28 = ~112px) */}
       {!isMobile && (
         <>
-          <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+          <div className="absolute bottom-28 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar - compact */}
             <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-colors duration-300">
               <button
@@ -465,7 +465,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             )}
           </div>
-          <div className="absolute bottom-4 left-4 z-[1000]">
+          {/* Legend - positioned above the newsletter on desktop (bottom-28 = ~112px to clear the ~80px newsletter) */}
+          <div className="absolute bottom-28 left-4 z-[1000]">
             <Legend isNightMode={false} />
           </div>
 
