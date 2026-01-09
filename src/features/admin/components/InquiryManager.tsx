@@ -248,7 +248,7 @@ const InquiryManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('${API_URL}/admin/inquiries/bulk-status', {
+      const response = await fetch(`${API_URL}/admin/inquiries/bulk-status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

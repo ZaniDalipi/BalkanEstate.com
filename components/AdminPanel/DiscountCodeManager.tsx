@@ -64,7 +64,7 @@ const DiscountCodeManager: React.FC = () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('${API_URL}/admin/discount-codes', {
+      const response = await fetch(`${API_URL}/admin/discount-codes`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -86,7 +86,7 @@ const DiscountCodeManager: React.FC = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('${API_URL}/admin/discount-codes', {
+      const response = await fetch(`${API_URL}/admin/discount-codes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ const DiscountCodeManager: React.FC = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('${API_URL}/admin/discount-codes/generate', {
+      const response = await fetch(`${API_URL}/admin/discount-codes/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
