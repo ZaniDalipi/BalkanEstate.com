@@ -70,7 +70,7 @@ interface InquiryStats {
 const InquiryManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
-  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [stats, setStats] = useState<InquiryStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,7 +136,7 @@ const InquiryManager: React.FC = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('${API_URL}/admin/inquiries/stats', {
+      const response = await fetch(`${API_URL}/admin/inquiries/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

@@ -45,7 +45,7 @@ interface User {
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
-  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

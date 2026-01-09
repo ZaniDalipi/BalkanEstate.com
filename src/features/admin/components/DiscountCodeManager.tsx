@@ -22,7 +22,7 @@ interface DiscountCode {
 
 const DiscountCodeManager: React.FC = () => {
   const { confirm } = useConfirmation();
-  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
   const [codes, setCodes] = useState<DiscountCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

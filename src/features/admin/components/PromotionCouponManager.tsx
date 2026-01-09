@@ -21,7 +21,7 @@ interface PromotionCoupon {
   createdAt: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const PromotionCouponManager: React.FC = () => {
   const { confirm } = useConfirmation();
