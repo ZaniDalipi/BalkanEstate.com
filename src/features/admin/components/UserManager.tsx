@@ -45,6 +45,7 @@ interface User {
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +102,7 @@ const UserManager: React.FC = () => {
         ...(searchQuery && { search: searchQuery }),
       });
 
-      const response = await fetch(`http://localhost:5001/api/admin/users?${params}`, {
+      const response = await fetch(`${API_URL}/admin/users?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -170,7 +171,7 @@ const UserManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/users/${editingUser._id}`, {
+      const response = await fetch(`${API_URL}/admin/users/${editingUser._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +197,7 @@ const UserManager: React.FC = () => {
   const handleToggleEmailVerification = async (userId: string, currentStatus: boolean) => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/users/${userId}`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +221,7 @@ const UserManager: React.FC = () => {
   const handleToggleLicenseVerification = async (userId: string, currentStatus: boolean) => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/users/${userId}`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -252,7 +253,7 @@ const UserManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/users/${userId}`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

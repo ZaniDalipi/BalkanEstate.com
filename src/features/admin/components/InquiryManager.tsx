@@ -70,6 +70,7 @@ interface InquiryStats {
 const InquiryManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [stats, setStats] = useState<InquiryStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -112,7 +113,7 @@ const InquiryManager: React.FC = () => {
         ...(searchQuery && { search: searchQuery }),
       });
 
-      const response = await fetch(`http://localhost:5001/api/admin/inquiries?${params}`, {
+      const response = await fetch(`${API_URL}/admin/inquiries?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -135,7 +136,7 @@ const InquiryManager: React.FC = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('http://localhost:5001/api/admin/inquiries/stats', {
+      const response = await fetch('${API_URL}/admin/inquiries/stats', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -164,7 +165,7 @@ const InquiryManager: React.FC = () => {
   const updateInquiryStatus = async (id: string, status: string) => {
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/inquiries/${id}`, {
+      const response = await fetch(`${API_URL}/admin/inquiries/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -190,7 +191,7 @@ const InquiryManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/inquiries/${selectedInquiry._id}`, {
+      const response = await fetch(`${API_URL}/admin/inquiries/${selectedInquiry._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +223,7 @@ const InquiryManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/inquiries/${id}`, {
+      const response = await fetch(`${API_URL}/admin/inquiries/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -247,7 +248,7 @@ const InquiryManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('http://localhost:5001/api/admin/inquiries/bulk-status', {
+      const response = await fetch('${API_URL}/admin/inquiries/bulk-status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

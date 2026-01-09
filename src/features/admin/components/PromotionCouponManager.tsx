@@ -21,7 +21,7 @@ interface PromotionCoupon {
   createdAt: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
 
 const PromotionCouponManager: React.FC = () => {
   const { confirm } = useConfirmation();
@@ -301,8 +301,8 @@ const PromotionCouponManager: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredCoupons.map((coupon) => (
-              <tr key={coupon._id} className="hover:bg-gray-50">
+            {filteredCoupons.map((coupon, index) => (
+              <tr key={coupon._id || `coupon-${index}`} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-mono font-bold text-gray-900">{coupon.code}</div>
                   {coupon.description && (

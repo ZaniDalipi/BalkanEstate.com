@@ -22,6 +22,7 @@ interface DiscountCode {
 
 const DiscountCodeManager: React.FC = () => {
   const { confirm } = useConfirmation();
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
   const [codes, setCodes] = useState<DiscountCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -83,7 +84,7 @@ const DiscountCodeManager: React.FC = () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('http://localhost:5001/api/admin/discount-codes', {
+      const response = await fetch('${API_URL}/admin/discount-codes', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -105,7 +106,7 @@ const DiscountCodeManager: React.FC = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('http://localhost:5001/api/admin/discount-codes', {
+      const response = await fetch('${API_URL}/admin/discount-codes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ const DiscountCodeManager: React.FC = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch('http://localhost:5001/api/admin/discount-codes/generate', {
+      const response = await fetch('${API_URL}/admin/discount-codes/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,7 +188,7 @@ const DiscountCodeManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/discount-codes/${id}/deactivate`, {
+      const response = await fetch(`${API_URL}/admin/discount-codes/${id}/deactivate`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -217,7 +218,7 @@ const DiscountCodeManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`http://localhost:5001/api/admin/discount-codes/${id}`, {
+      const response = await fetch(`${API_URL}/admin/discount-codes/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -358,8 +359,8 @@ const DiscountCodeManager: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredCodes.map((code) => (
-              <tr key={code._id} className="hover:bg-gray-50">
+            {filteredCodes.map((code, index) => (
+              <tr key={code._id || `discount-code-${index}`} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-mono font-bold text-gray-900">{code.code}</div>
                   {code.description && (

@@ -14,6 +14,7 @@ interface User {
 const AgencyManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +80,7 @@ const AgencyManager: React.FC = () => {
         limit: '20',
       });
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
       const response = await fetch(`${API_URL}/admin/agencies?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -149,7 +150,7 @@ const AgencyManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
 
       // Filter out empty strings from arrays before submitting
       const sanitizedForm = {
@@ -192,7 +193,7 @@ const AgencyManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
 
       const response = await fetch(`${API_URL}/admin/agencies/${agencyId}`, {
         method: 'DELETE',

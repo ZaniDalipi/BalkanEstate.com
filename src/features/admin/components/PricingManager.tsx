@@ -44,6 +44,7 @@ interface Product {
 }
 
 const PricingManager: React.FC = () => {
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +53,7 @@ const PricingManager: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newFeature, setNewFeature] = useState('');
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
 
   // Helper for validated number input - prevents negative values where min >= 0
   const handleNumberChange = (
