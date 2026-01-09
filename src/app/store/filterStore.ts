@@ -39,7 +39,7 @@ export const useFilterStore = create<FilterState>()(
         mapBoundsJSON: null,
         drawnBoundsJSON: null,
         focusMapOnProperty: null,
-        mobileView: 'map',
+        mobileView: 'list',
         searchMode: 'manual',
 
         // Actions

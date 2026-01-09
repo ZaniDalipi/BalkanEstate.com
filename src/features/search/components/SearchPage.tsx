@@ -121,6 +121,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const debounceTimer = useRef<number | null>(null);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
     const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
+    const [showMapHint, setShowMapHint] = useState(false); // Show hint about map view on mobile
 
 
     useEffect(() => {
@@ -128,6 +129,22 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Show map hint on mobile after 3 seconds, only once per session
+    useEffect(() => {
+        if (isMobile && mobileView === 'list') {
+            const hasSeenMapHint = sessionStorage.getItem('hasSeenMapHint');
+            if (!hasSeenMapHint) {
+                const timer = setTimeout(() => {
+                    setShowMapHint(true);
+                    sessionStorage.setItem('hasSeenMapHint', 'true');
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => setShowMapHint(false), 5000);
+                }, 3000);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [isMobile, mobileView]);
 
     // Sync local filters when global filters change or when modal is opened
     useEffect(() => {
@@ -1022,12 +1039,21 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         </div>
                         
                         <div className="absolute bottom-16 left-0 right-0 z-[1002] p-4 pointer-events-none">
+                            {/* Map hint tooltip */}
+                            {showMapHint && (
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-auto animate-bounce">
+                                    <div className="relative bg-primary text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium whitespace-nowrap">
+                                        <span>Tap here to view the map!</span>
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-primary"></div>
+                                    </div>
+                                </div>
+                            )}
                             <div className="pointer-events-auto mx-auto w-fit bg-white/80 text-neutral-800 p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
                                 <button onClick={() => updateSearchPageState({ mobileView: 'list' })} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${mobileView === 'list' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
                                     <Squares2x2Icon className="w-4 h-4" />
                                     <span>List</span>
                                 </button>
-                                <button onClick={() => updateSearchPageState({ mobileView: 'map' })} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${mobileView === 'map' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
+                                <button onClick={() => { updateSearchPageState({ mobileView: 'map' }); setShowMapHint(false); }} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${mobileView === 'map' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
                                     <MapIcon className="w-4 h-4" />
                                     <span>Map</span>
                                 </button>
