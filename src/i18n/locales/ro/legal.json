@@ -1,0 +1,347 @@
+{
+  "privacy": {
+    "title": "Politica de confidențialitate",
+    "lastUpdated": "Ultima actualizare",
+    "intro": {
+      "title": "Introducere",
+      "text": "Bine ați venit la BalkanEstate (\"noi\", \"noastră\" sau \"ne\"). Ne angajăm să protejăm informațiile dumneavoastră personale și dreptul dumneavoastră la confidențialitate. Această Politică de confidențialitate explică modul în care colectăm, utilizăm, dezvăluim și protejăm informațiile dumneavoastră când vizitați site-ul nostru web și utilizați serviciile noastre."
+    },
+    "collect": {
+      "title": "Informații pe care le colectăm",
+      "text": "Colectăm informații pe care ni le furnizați direct, precum și informații colectate automat când utilizați serviciile noastre.",
+      "personal": {
+        "title": "Informații personale",
+        "name": "Nume și informații de contact (email, număr de telefon)",
+        "account": "Acreditări de cont (nume de utilizator, parolă)",
+        "profile": "Informații de profil (fotografie, biografie, preferințe)",
+        "payment": "Informații de plată (procesate în siguranță prin Stripe)",
+        "communication": "Comunicări și mesaje pe care le trimiteți prin platforma noastră"
+      },
+      "auto": {
+        "title": "Informații colectate automat",
+        "device": "Informații despre dispozitiv (tip browser, sistem de operare)",
+        "ip": "Adresa IP și locația aproximativă",
+        "usage": "Date de utilizare (pagini vizitate, timp petrecut, interogări de căutare)",
+        "cookies": "Cookie-uri și tehnologii similare de urmărire"
+      }
+    },
+    "use": {
+      "title": "Cum utilizăm informațiile dumneavoastră",
+      "provide": "Pentru a furniza și menține serviciile noastre",
+      "account": "Pentru a crea și gestiona contul dumneavoastră",
+      "communicate": "Pentru a comunica cu dumneavoastră despre proprietăți, întrebări și actualizări",
+      "process": "Pentru a procesa tranzacții și abonamente",
+      "improve": "Pentru a analiza și îmbunătăți serviciile noastre",
+      "personalize": "Pentru a personaliza experiența dumneavoastră și a afișa proprietăți relevante",
+      "protect": "Pentru a detecta și preveni frauda și abuzul",
+      "legal": "Pentru a respecta obligațiile legale"
+    },
+    "share": {
+      "title": "Partajarea informațiilor dumneavoastră",
+      "text": "Putem partaja informațiile dumneavoastră în următoarele circumstanțe:",
+      "agents": "Cu agenții imobiliari:",
+      "agentsDesc": "Când întrebați despre o proprietate, informațiile dumneavoastră de contact sunt partajate cu agentul anunțului.",
+      "providers": "Furnizori de servicii:",
+      "providersDesc": "Lucrăm cu terțe părți pentru procesarea plăților (Stripe), servicii de email și analiză.",
+      "legal": "Cerințe legale:",
+      "legalDesc": "Când este cerut de lege sau pentru a ne proteja drepturile.",
+      "business": "Transferuri de afaceri:",
+      "businessDesc": "În legătură cu o fuziune, achiziție sau vânzare de active."
+    },
+    "legalBasis": {
+      "title": "Baza legală pentru procesare (GDPR)",
+      "text": "În conformitate cu Regulamentul general privind protecția datelor (GDPR), procesăm datele dumneavoastră personale pe baza următoarelor temeiuri legale:",
+      "consent": "Consimțământ:",
+      "consentDesc": "Când sunteți explicit de acord să primiți comunicări de marketing sau să permiteți cookie-uri neesențiale.",
+      "contract": "Contract:",
+      "contractDesc": "Pentru a executa contractul nostru cu dumneavoastră, inclusiv furnizarea serviciilor noastre, gestionarea contului și procesarea plăților.",
+      "legitimate": "Interese legitime:",
+      "legitimateDesc": "Pentru a îmbunătăți serviciile noastre, a preveni frauda, a asigura securitatea și a comunica despre platforma noastră.",
+      "legal": "Obligație legală:",
+      "legalDesc": "Pentru a respecta legile, regulamentele și procesele legale aplicabile."
+    },
+    "security": {
+      "title": "Securitatea datelor",
+      "text": "Implementăm măsuri de securitate tehnice și organizaționale adecvate pentru a vă proteja informațiile personale."
+    },
+    "rights": {
+      "title": "Drepturile dumneavoastră",
+      "text": "În funcție de locația dumneavoastră, puteți avea următoarele drepturi:",
+      "access": "Accesul și obținerea unei copii a datelor dumneavoastră personale",
+      "correct": "Corectarea datelor inexacte sau incomplete",
+      "delete": "Solicitarea ștergerii datelor dumneavoastră personale",
+      "restrict": "Restricționarea sau obiecția la procesare",
+      "portability": "Portabilitatea datelor",
+      "withdraw": "Retragerea consimțământului în orice moment",
+      "contact": "Pentru a vă exercita aceste drepturi, contactați-ne la privacy@balkanestate.com",
+      "complaint": "De asemenea, aveți dreptul de a depune o plângere la o autoritate de supraveghere din țara dumneavoastră de rezidență."
+    },
+    "automated": {
+      "title": "Luarea deciziilor automatizate",
+      "text": "Putem utiliza sisteme automatizate pentru a personaliza recomandările de proprietăți pe baza istoricului dumneavoastră de căutare și a preferințelor."
+    },
+    "retention": {
+      "title": "Păstrarea datelor",
+      "text": "Păstrăm informațiile dumneavoastră personale atât timp cât este necesar pentru a furniza serviciile noastre.",
+      "periods": "Perioade specifice de păstrare:",
+      "account": "Date de cont: Durata contului + 30 de zile după ștergere",
+      "transactions": "Înregistrări de tranzacții: 7 ani",
+      "messages": "Mesaje și comunicări: 3 ani",
+      "analytics": "Date de analiză: 26 de luni",
+      "logs": "Jurnale de securitate: 12 luni"
+    },
+    "thirdParty": {
+      "title": "Servicii ale terților",
+      "text": "Utilizăm următoarele servicii ale terților:",
+      "stripe": "Procesare plăți prin Stripe.",
+      "analytics": "Analiză web pentru înțelegerea comportamentului utilizatorilor.",
+      "cloudflare": "Servicii de securitate și performanță.",
+      "aws": "Găzduire cloud și servicii de stocare."
+    },
+    "transfers": {
+      "title": "Transferuri internaționale de date",
+      "text": "Informațiile dumneavoastră pot fi transferate și procesate în alte țări."
+    },
+    "children": {
+      "title": "Confidențialitatea copiilor",
+      "text": "Serviciile noastre nu sunt destinate persoanelor sub 18 ani."
+    },
+    "changes": {
+      "title": "Modificări ale acestei politici",
+      "text": "Putem actualiza această Politică de confidențialitate din când în când."
+    },
+    "dpo": {
+      "title": "Responsabil cu protecția datelor",
+      "text": "Am desemnat un Responsabil cu protecția datelor (DPO).",
+      "role": "Responsabil cu protecția datelor"
+    },
+    "contact": {
+      "title": "Contactați-ne",
+      "text": "Dacă aveți întrebări despre această Politică de confidențialitate, contactați-ne:",
+      "address": "Adresa: Skopje, Macedonia de Nord"
+    }
+  },
+  "terms": {
+    "title": "Termeni și condiții",
+    "lastUpdated": "Ultima actualizare",
+    "intro": {
+      "title": "Acceptarea termenilor",
+      "text": "Prin accesarea sau utilizarea BalkanEstate (\"Serviciul\"), sunteți de acord să fiți obligat de acești Termeni și condiții."
+    },
+    "eligibility": {
+      "title": "Eligibilitate",
+      "text": "Trebuie să aveți cel puțin 18 ani pentru a utiliza Serviciul nostru."
+    },
+    "account": {
+      "title": "Înregistrarea contului",
+      "text": "Pentru a accesa anumite funcții, trebuie să creați un cont.",
+      "accurate": "Furnizarea informațiilor de înregistrare exacte și complete",
+      "update": "Menținerea informațiilor contului actualizate",
+      "secure": "Menținerea securității parolei și contului",
+      "notify": "Notificarea imediată a oricărui acces neautorizat",
+      "responsible": "Responsabilitatea pentru toate activitățile sub contul dumneavoastră"
+    },
+    "listings": {
+      "title": "Anunțuri de proprietăți",
+      "text": "Când listați o proprietate pe BalkanEstate, sunteți de acord că:",
+      "ownership": "Sunteți proprietarul sau agentul autorizat al proprietății",
+      "accurate": "Toate informațiile furnizate sunt exacte și nu sunt înșelătoare",
+      "photos": "Fotografiile reprezintă exact proprietatea",
+      "legal": "Anunțul nu încalcă nicio lege sau regulament",
+      "update": "Veți actualiza sau elimina prompt anunțurile când sunt vândute sau indisponibile",
+      "respond": "Veți răspunde la întrebări în timp util și profesional",
+      "remove": "Ne rezervăm dreptul de a elimina orice anunț care încalcă acești termeni."
+    },
+    "payments": {
+      "title": "Abonamente și plăți",
+      "text": "Anumite funcții necesită un abonament plătit:",
+      "recurring": "Abonamentele sunt facturate pe bază recurentă",
+      "auto": "Abonamentele se reînnoiesc automat",
+      "cancel": "Puteți anula abonamentul în orice moment",
+      "refund": "Rambursările sunt disponibile în termen de 30 de zile de la cumpărare",
+      "price": "Putem modifica prețurile abonamentelor cu preaviz de 30 de zile"
+    },
+    "prohibited": {
+      "title": "Conduită interzisă",
+      "text": "Sunteți de acord să nu:",
+      "false": "Postați anunțuri false sau înșelătoare",
+      "spam": "Trimiteți spam sau comunicări nesolicitate",
+      "harass": "Hărțuiți sau amenințați alți utilizatori",
+      "impersonate": "Vă dați drept altcineva",
+      "scrape": "Colectați date din Serviciul nostru",
+      "interfere": "Interferați cu funcționarea corectă a Serviciului",
+      "circumvent": "Încercați să ocoliți măsurile de securitate",
+      "illegal": "Utilizați Serviciul în scopuri ilegale"
+    },
+    "ip": {
+      "title": "Proprietate intelectuală",
+      "text": "Numele BalkanEstate, logo-ul și tot conținutul asociat sunt proprietatea noastră."
+    },
+    "disclaimer": {
+      "title": "Declinarea garanțiilor",
+      "text": "SERVICIUL ESTE FURNIZAT \"CA ATARE\" FĂRĂ GARANȚII DE NICIUN FEL."
+    },
+    "liability": {
+      "title": "Limitarea răspunderii",
+      "text": "ÎN MĂSURA MAXIMĂ PERMISĂ DE LEGE, BALKANESTATE NU VA FI RESPONSABIL PENTRU NICIO DAUNĂ INDIRECTĂ."
+    },
+    "indemnity": {
+      "title": "Despăgubire",
+      "text": "Sunteți de acord să despăgubiți și să protejați BalkanEstate de toate pretențiile."
+    },
+    "termination": {
+      "title": "Reziliere",
+      "text": "Putem suspenda sau rezilia contul dumneavoastră în orice moment."
+    },
+    "userContent": {
+      "title": "Licență pentru conținutul utilizatorului",
+      "text": "Prin postarea conținutului pe BalkanEstate, dumneavoastră:",
+      "own": "Declarați că dețineți sau aveți dreptul de a utiliza acest conținut",
+      "license": "Ne acordați o licență de a utiliza conținutul dumneavoastră pe platforma noastră",
+      "sublicense": "Permiteți sublicențierea acestui conținut",
+      "retain": "Păstrați toate drepturile de proprietate asupra conținutului",
+      "remove": "Puteți elimina conținutul în orice moment",
+      "responsibility": "Sunteți responsabil pentru conținutul dumneavoastră și consecințele postării acestuia."
+    },
+    "api": {
+      "title": "API și acces automatizat",
+      "text": "Accesul automatizat la Serviciul nostru este strict reglementat:",
+      "prohibited": "Colectarea datelor este interzisă fără acordul nostru scris",
+      "rate": "Cererile excesive pot duce la blocarea IP-ului",
+      "partnership": "Pentru acces API, contactați-ne la partners@balkanestate.com",
+      "robots": "Trebuie să respectați fișierul nostru robots.txt"
+    },
+    "professional": {
+      "title": "Declinarea serviciilor profesionale",
+      "text": "BalkanEstate este o platformă care conectează cumpărătorii și vânzătorii de proprietăți. NU SUNTEM o agenție imobiliară."
+    },
+    "forceMajeure": {
+      "title": "Forță majoră",
+      "text": "BalkanEstate nu va fi responsabil pentru eșecuri datorate circumstanțelor din afara controlului nostru."
+    },
+    "disputes": {
+      "title": "Soluționarea disputelor",
+      "text": "În caz de dispută:",
+      "informal": "Soluționare informală:",
+      "informalDesc": "Contactați-ne la legal@balkanestate.com.",
+      "mediation": "Mediere:",
+      "mediationDesc": "Ambele părți sunt de acord să încerce medierea.",
+      "jurisdiction": "Jurisdicție:",
+      "jurisdictionDesc": "Toate procedurile legale se vor desfășura în instanțele din Skopje.",
+      "time": "Limitare de timp:",
+      "timeDesc": "Orice pretenție trebuie depusă în termen de un an."
+    },
+    "law": {
+      "title": "Legea aplicabilă",
+      "text": "Acești Termeni sunt guvernați de legile Macedoniei de Nord."
+    },
+    "severability": {
+      "title": "Separabilitate",
+      "text": "Dacă orice prevedere este invalidă, prevederile rămase rămân în vigoare."
+    },
+    "entireAgreement": {
+      "title": "Acordul complet",
+      "text": "Acești Termeni constituie acordul complet între dumneavoastră și BalkanEstate."
+    },
+    "waiver": {
+      "title": "Renunțare",
+      "text": "Eșecul nostru de a aplica orice drept nu va constitui o renunțare."
+    },
+    "assignment": {
+      "title": "Cesiune",
+      "text": "Nu puteți cesiona acești Termeni fără acordul nostru scris."
+    },
+    "modifications": {
+      "title": "Modificări ale serviciului",
+      "text": "Ne rezervăm dreptul de a modifica Serviciul în orice moment."
+    },
+    "contact": {
+      "title": "Contactați-ne",
+      "text": "Dacă aveți întrebări, contactați-ne:"
+    }
+  },
+  "cookies": {
+    "title": "Politica de cookie-uri",
+    "lastUpdated": "Ultima actualizare",
+    "intro": {
+      "title": "Ce sunt cookie-urile?",
+      "text": "Cookie-urile sunt fișiere text mici care sunt stocate pe dispozitivul dumneavoastră când vizitați un site web."
+    },
+    "why": {
+      "title": "De ce folosim cookie-uri",
+      "text": "Folosim cookie-uri pentru a:",
+      "essential": "Vă menține autentificat în contul dumneavoastră",
+      "preferences": "Reține preferințele dumneavoastră de limbă și monedă",
+      "searches": "Salva căutările dumneavoastră recente",
+      "analytics": "Înțelege cum utilizați site-ul nostru",
+      "security": "Proteja contul dumneavoastră",
+      "ads": "Vă afișa reclame relevante"
+    },
+    "types": {
+      "title": "Tipuri de cookie-uri pe care le folosim",
+      "essential": {
+        "title": "Cookie-uri esențiale",
+        "required": "Obligatoriu",
+        "desc": "Aceste cookie-uri sunt necesare pentru funcționarea corectă a site-ului web.",
+        "auth": "Vă menține autentificat",
+        "session": "Menține sesiunea dumneavoastră",
+        "csrf": "Protecție de securitate",
+        "consent": "Preferințele dumneavoastră pentru cookie-uri"
+      },
+      "functional": {
+        "title": "Cookie-uri funcționale",
+        "optional": "Opțional",
+        "desc": "Aceste cookie-uri rețin preferințele și setările dumneavoastră.",
+        "language": "Preferința dumneavoastră de limbă",
+        "currency": "Preferința dumneavoastră de monedă",
+        "searches": "Căutările dumneavoastră recente",
+        "viewed": "Anunțuri vizualizate recent"
+      },
+      "analytics": {
+        "title": "Cookie-uri analitice",
+        "optional": "Opțional",
+        "desc": "Aceste cookie-uri ne ajută să înțelegem cum utilizatorii folosesc site-ul nostru web.",
+        "ga": "Google Analytics",
+        "gid": "Sesiune Google Analytics",
+        "gat": "Limitarea ratei de solicitări"
+      },
+      "marketing": {
+        "title": "Cookie-uri de marketing",
+        "optional": "Opțional",
+        "desc": "Aceste cookie-uri urmăresc activitatea dumneavoastră pentru a vă afișa reclame relevante.",
+        "fb": "Facebook Pixel",
+        "ads": "Urmărirea campaniilor publicitare"
+      }
+    },
+    "duration": {
+      "session": "Sesiune",
+      "1minute": "1 minut",
+      "24hours": "24 de ore",
+      "30days": "30 de zile",
+      "3months": "3 luni",
+      "1year": "1 an",
+      "2years": "2 ani"
+    },
+    "manage": {
+      "title": "Gestionarea preferințelor cookie-urilor",
+      "text": "Puteți gestiona preferințele cookie-urilor în orice moment.",
+      "button": "Gestionare preferințe cookie-uri"
+    },
+    "browser": {
+      "title": "Setări cookie-uri în browser",
+      "text": "Majoritatea browserelor vă permit să controlați cookie-urile prin setările lor."
+    },
+    "thirdParty": {
+      "title": "Cookie-uri ale terților",
+      "text": "Unele cookie-uri de pe site-ul nostru sunt setate de servicii ale terților."
+    },
+    "updates": {
+      "title": "Actualizări ale acestei politici",
+      "text": "Putem actualiza această Politică de cookie-uri din când în când."
+    },
+    "contact": {
+      "title": "Contactați-ne",
+      "text": "Dacă aveți întrebări despre utilizarea noastră a cookie-urilor, contactați-ne:"
+    }
+  }
+}

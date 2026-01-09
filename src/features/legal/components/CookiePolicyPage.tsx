@@ -91,17 +91,25 @@ const CookiePolicyPage: React.FC = () => {
                 {t('legal:cookies.types.essential.desc', 'These cookies are necessary for the website to function properly. They enable basic features like authentication, security, and accessibility. You cannot disable these cookies.')}
               </p>
               <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">auth_token</span>
                   <span className="text-gray-500">{t('legal:cookies.types.essential.auth', 'Keeps you logged in')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.30days', '30 days')}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">session_id</span>
                   <span className="text-gray-500">{t('legal:cookies.types.essential.session', 'Maintains your session')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.session', 'Session')}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">csrf_token</span>
                   <span className="text-gray-500">{t('legal:cookies.types.essential.csrf', 'Security protection')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.session', 'Session')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-gray-600">cookie_consent</span>
+                  <span className="text-gray-500">{t('legal:cookies.types.essential.consent', 'Your cookie preferences')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.1year', '1 year')}</span>
                 </div>
               </div>
             </div>
@@ -121,17 +129,25 @@ const CookiePolicyPage: React.FC = () => {
                 {t('legal:cookies.types.functional.desc', 'These cookies remember your preferences and settings to provide a better experience. Disabling them may affect some website features.')}
               </p>
               <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">language</span>
                   <span className="text-gray-500">{t('legal:cookies.types.functional.language', 'Your language preference')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.1year', '1 year')}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">currency</span>
                   <span className="text-gray-500">{t('legal:cookies.types.functional.currency', 'Your currency preference')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.1year', '1 year')}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">recent_searches</span>
                   <span className="text-gray-500">{t('legal:cookies.types.functional.searches', 'Your recent searches')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.30days', '30 days')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-gray-600">viewed_properties</span>
+                  <span className="text-gray-500">{t('legal:cookies.types.functional.viewed', 'Recently viewed listings')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.30days', '30 days')}</span>
                 </div>
               </div>
             </div>
@@ -151,13 +167,20 @@ const CookiePolicyPage: React.FC = () => {
                 {t('legal:cookies.types.analytics.desc', 'These cookies help us understand how visitors use our website. They collect anonymous data about page views, traffic sources, and user behavior.')}
               </p>
               <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">_ga</span>
                   <span className="text-gray-500">{t('legal:cookies.types.analytics.ga', 'Google Analytics')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.2years', '2 years')}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">_gid</span>
                   <span className="text-gray-500">{t('legal:cookies.types.analytics.gid', 'Google Analytics session')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.24hours', '24 hours')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-gray-600">_gat</span>
+                  <span className="text-gray-500">{t('legal:cookies.types.analytics.gat', 'Throttle request rate')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.1minute', '1 minute')}</span>
                 </div>
               </div>
             </div>
@@ -177,13 +200,15 @@ const CookiePolicyPage: React.FC = () => {
                 {t('legal:cookies.types.marketing.desc', 'These cookies track your activity across websites to show you relevant advertisements. They are set by our advertising partners.')}
               </p>
               <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">_fbp</span>
                   <span className="text-gray-500">{t('legal:cookies.types.marketing.fb', 'Facebook Pixel')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.3months', '3 months')}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">ads_session</span>
                   <span className="text-gray-500">{t('legal:cookies.types.marketing.ads', 'Ad campaign tracking')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.30days', '30 days')}</span>
                 </div>
               </div>
             </div>

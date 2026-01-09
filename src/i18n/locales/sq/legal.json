@@ -1,0 +1,347 @@
+{
+  "privacy": {
+    "title": "Politika e Privatësisë",
+    "lastUpdated": "Përditësuar së fundmi",
+    "intro": {
+      "title": "Hyrje",
+      "text": "Mirë se vini në BalkanEstate (\"ne,\" \"jonë,\" ose \"na\"). Jemi të përkushtuar për të mbrojtur informacionin tuaj personal dhe të drejtën tuaj për privatësi. Kjo Politikë e Privatësisë shpjegon se si mbledhim, përdorim, zbulojmë dhe ruajmë informacionin tuaj kur vizitoni faqen tonë dhe përdorni shërbimet tona."
+    },
+    "collect": {
+      "title": "Informacioni që Mbledhim",
+      "text": "Mbledhim informacion që na jepni drejtpërdrejt, si dhe informacion të mbledhur automatikisht kur përdorni shërbimet tona.",
+      "personal": {
+        "title": "Informacioni Personal",
+        "name": "Emri dhe informacioni i kontaktit (email, numri i telefonit)",
+        "account": "Kredencialet e llogarisë (emri i përdoruesit, fjalëkalimi)",
+        "profile": "Informacioni i profilit (foto, bio, preferencat)",
+        "payment": "Informacioni i pagesës (përpunuar në mënyrë të sigurt përmes Stripe)",
+        "communication": "Komunikimet dhe mesazhet që dërgoni përmes platformës sonë"
+      },
+      "auto": {
+        "title": "Informacioni i Mbledhur Automatikisht",
+        "device": "Informacioni i pajisjes (lloji i shfletuesit, sistemi operativ)",
+        "ip": "Adresa IP dhe vendndodhja e përafërt",
+        "usage": "Të dhënat e përdorimit (faqet e vizituara, koha e kaluar, kërkesat e kërkimit)",
+        "cookies": "Cookies dhe teknologji të ngjashme gjurmimi"
+      }
+    },
+    "use": {
+      "title": "Si e Përdorim Informacionin Tuaj",
+      "provide": "Për të ofruar dhe mirëmbajtur shërbimet tona",
+      "account": "Për të krijuar dhe menaxhuar llogarinë tuaj",
+      "communicate": "Për të komunikuar me ju rreth pronave, pyetjeve dhe përditësimeve",
+      "process": "Për të përpunuar transaksionet dhe abonimet",
+      "improve": "Për të analizuar dhe përmirësuar shërbimet tona",
+      "personalize": "Për të personalizuar përvojën tuaj dhe shfaqur prona relevante",
+      "protect": "Për të zbuluar dhe parandaluar mashtrimin dhe abuzimin",
+      "legal": "Për të përmbushur detyrimet ligjore"
+    },
+    "share": {
+      "title": "Ndarja e Informacionit Tuaj",
+      "text": "Mund të ndajmë informacionin tuaj në rrethanat e mëposhtme:",
+      "agents": "Me Agjentët e Pronave:",
+      "agentsDesc": "Kur pyesni për një pronë, informacioni juaj i kontaktit ndahet me agjentin e listimit.",
+      "providers": "Ofruesit e Shërbimeve:",
+      "providersDesc": "Punojmë me palë të treta për përpunimin e pagesave (Stripe), shërbimet e emailit dhe analitikën.",
+      "legal": "Kërkesat Ligjore:",
+      "legalDesc": "Kur kërkohet me ligj ose për të mbrojtur të drejtat tona.",
+      "business": "Transfertat e Biznesit:",
+      "businessDesc": "Në lidhje me një bashkim, blerje ose shitje të aseteve."
+    },
+    "legalBasis": {
+      "title": "Baza Ligjore për Përpunim (GDPR)",
+      "text": "Sipas Rregullores së Përgjithshme për Mbrojtjen e të Dhënave (GDPR), përpunojmë të dhënat tuaja personale bazuar në bazat e mëposhtme ligjore:",
+      "consent": "Pëlqimi:",
+      "consentDesc": "Kur pranoni shprehimisht të merrni komunikime marketingu ose lejoni cookies jo-thelbësore.",
+      "contract": "Kontrata:",
+      "contractDesc": "Për të kryer kontratën tonë me ju, duke përfshirë ofrimin e shërbimeve, menaxhimin e llogarisë dhe përpunimin e pagesave.",
+      "legitimate": "Interesat Legjitime:",
+      "legitimateDesc": "Për të përmirësuar shërbimet tona, parandaluar mashtrimin, siguruar sigurinë dhe komunikuar rreth platformës. Balancojmë interesat tona kundër të drejtave dhe lirive tuaja.",
+      "legal": "Detyrimi Ligjor:",
+      "legalDesc": "Për të përmbushur ligjet, rregulloret dhe proceset ligjore të aplikueshme."
+    },
+    "security": {
+      "title": "Siguria e të Dhënave",
+      "text": "Zbatojmë masa të përshtatshme teknike dhe organizative të sigurisë për të mbrojtur informacionin tuaj personal. Kjo përfshin enkriptimin e të dhënave në transit dhe në pushim, autentifikimin e sigurt dhe auditimet e rregullta të sigurisë. Megjithatë, asnjë metodë transmetimi përmes Internetit nuk është 100% e sigurt."
+    },
+    "rights": {
+      "title": "Të Drejtat Tuaja",
+      "text": "Në varësi të vendndodhjes suaj, mund të keni të drejtat e mëposhtme:",
+      "access": "Qasje dhe marrje të një kopje të të dhënave tuaja personale",
+      "correct": "Korrigjim i të dhënave të pasakta ose të paplota",
+      "delete": "Kërkesë për fshirjen e të dhënave tuaja personale",
+      "restrict": "Kufizim ose kundërshtim i përpunimit",
+      "portability": "Portabiliteti i të dhënave",
+      "withdraw": "Tërheqje e pëlqimit në çdo kohë",
+      "contact": "Për të ushtruar këto të drejta, ju lutemi na kontaktoni në privacy@balkanestate.com",
+      "complaint": "Gjithashtu keni të drejtë të paraqisni një ankesë tek një autoritet mbikëqyrës në vendin tuaj të rezidencës nëse besoni se të drejtat tuaja për mbrojtjen e të dhënave janë shkelur."
+    },
+    "automated": {
+      "title": "Vendimmarrja e Automatizuar",
+      "text": "Mund të përdorim sisteme të automatizuara për të personalizuar rekomandimet e pronave bazuar në historikun tuaj të kërkimit dhe preferencat. Këto rekomandime janë vetëm sugjerime dhe nuk kanë efekte ligjore ose të rëndësishme mbi ju. Mund të kërkoni rishikim njerëzor të çdo vendimi të automatizuar duke na kontaktuar."
+    },
+    "retention": {
+      "title": "Ruajtja e të Dhënave",
+      "text": "Ruajmë informacionin tuaj personal për aq kohë sa është e nevojshme për të ofruar shërbimet tona, përmbushur detyrimet ligjore, zgjidhur mosmarrëveshjet dhe zbatuar marrëveshjet tona. Kur fshini llogarinë tuaj, do të fshijmë ose anonimizojmë të dhënat tuaja personale brenda 30 ditëve, përveç nëse ruajtja kërkohet me ligj.",
+      "periods": "Periudhat Specifike të Ruajtjes:",
+      "account": "Të dhënat e llogarisë: Kohëzgjatja e llogarisë + 30 ditë pas fshirjes",
+      "transactions": "Regjistrat e transaksioneve: 7 vjet (kërkesë ligjore)",
+      "messages": "Mesazhet dhe komunikimet: 3 vjet",
+      "analytics": "Të dhënat analitike: 26 muaj",
+      "logs": "Regjistrat e sigurisë: 12 muaj"
+    },
+    "thirdParty": {
+      "title": "Shërbimet e Palëve të Treta",
+      "text": "Përdorim shërbimet e mëposhtme të palëve të treta që mund të përpunojnë të dhënat tuaja:",
+      "stripe": "Përpunimi i pagesave. Stripe përpunon informacionin tuaj të pagesës në mënyrë të sigurt. Ne nuk ruajmë detajet e plota të kartës suaj të kreditit.",
+      "analytics": "Analitika e faqes për të kuptuar sjelljen e përdoruesve dhe përmirësuar shërbimet tona. Përdorim anonimizimin e IP.",
+      "cloudflare": "Shërbime sigurie dhe performancë duke përfshirë mbrojtjen DDoS dhe shpërndarjen e përmbajtjes.",
+      "aws": "Shërbime pritjeje dhe ruajtjeje në cloud. Të dhënat ruhen në qendrat e të dhënave të BE."
+    },
+    "transfers": {
+      "title": "Transfertat Ndërkombëtare të të Dhënave",
+      "text": "Informacioni juaj mund të transferohet dhe përpunohet në vende të tjera përveç tuajit. Sigurojmë që mbrojtjet e përshtatshme janë në vend për transferta të tilla në përputhje me ligjet e aplikueshme të mbrojtjes së të dhënave."
+    },
+    "children": {
+      "title": "Privatësia e Fëmijëve",
+      "text": "Shërbimet tona nuk janë të destinuara për individë nën 18 vjeç. Nuk mbledhim me vetëdije informacion personal nga fëmijët. Nëse besoni se kemi mbledhur informacion nga një fëmijë, ju lutemi na kontaktoni menjëherë."
+    },
+    "changes": {
+      "title": "Ndryshimet në Këtë Politikë",
+      "text": "Mund ta përditësojmë këtë Politikë të Privatësisë herë pas here. Do t'ju njoftojmë për çdo ndryshim material duke postuar politikën e re në këtë faqe dhe duke përditësuar datën \"Përditësuar së fundmi\". Përdorimi juaj i vazhdueshëm i shërbimeve tona pas çdo ndryshimi përbën pranimin e politikës së përditësuar."
+    },
+    "dpo": {
+      "title": "Oficeri i Mbrojtjes së të Dhënave",
+      "text": "Kemi caktuar një Oficer të Mbrojtjes së të Dhënave (DPO) për të mbikëqyrur praktikat tona të mbrojtjes së të dhënave dhe siguruar përputhshmërinë me ligjet e aplikueshme. Mund të kontaktoni DPO-në tonë për çdo pyetje lidhur me mbrojtjen e të dhënave:",
+      "role": "Oficeri i Mbrojtjes së të Dhënave"
+    },
+    "contact": {
+      "title": "Na Kontaktoni",
+      "text": "Nëse keni pyetje rreth kësaj Politike të Privatësisë ose praktikave tona të të dhënave, ju lutemi na kontaktoni:",
+      "address": "Adresa: Shkup, Maqedonia e Veriut"
+    }
+  },
+  "terms": {
+    "title": "Kushtet e Shërbimit",
+    "lastUpdated": "Përditësuar së fundmi",
+    "intro": {
+      "title": "Marrëveshja për Kushtet",
+      "text": "Duke aksesuar ose përdorur BalkanEstate (\"Shërbimi\"), pranoni të jeni të lidhur nga këto Kushte të Shërbimit. Nëse nuk pranoni këto kushte, ju lutemi mos përdorni Shërbimin tonë. Rezervojmë të drejtën për të modifikuar këto kushte në çdo kohë, dhe përdorimi juaj i vazhdueshëm përbën pranimin e çdo ndryshimi."
+    },
+    "eligibility": {
+      "title": "Përshtatshmëria",
+      "text": "Duhet të jeni të paktën 18 vjeç për të përdorur Shërbimin tonë. Duke përdorur BalkanEstate, përfaqësoni se jeni në moshë ligjore dhe keni kapacitetin ligjor për të hyrë në një marrëveshje detyruese. Nëse përdorni Shërbimin në emër të një kompanie ose organizate, përfaqësoni se keni autoritetin për të lidhur atë entitet me këto kushte."
+    },
+    "account": {
+      "title": "Regjistrimi i Llogarisë",
+      "text": "Për të aksesuar veçori të caktuara, duhet të krijoni një llogari. Pranoni të:",
+      "accurate": "Jepni informacion regjistrimi të saktë dhe të plotë",
+      "update": "Mbani informacionin e llogarisë tuaj të përditësuar",
+      "secure": "Mirëmbani sigurinë e fjalëkalimit dhe llogarisë suaj",
+      "notify": "Na njoftoni menjëherë për çdo akses të paautorizuar",
+      "responsible": "Jeni përgjegjës për të gjitha aktivitetet nën llogarinë tuaj"
+    },
+    "listings": {
+      "title": "Listimet e Pronave",
+      "text": "Kur listoni një pronë në BalkanEstate, pranoni që:",
+      "ownership": "Jeni pronari ose agjenti i autorizuar i pronës",
+      "accurate": "I gjithë informacioni i dhënë është i saktë dhe jo mashtrues",
+      "photos": "Fotot përfaqësojnë saktësisht pronën",
+      "legal": "Listimi nuk shkel asnjë ligj ose rregullore",
+      "update": "Do të përditësoni ose hiqni menjëherë listimet kur shiten ose nuk janë të disponueshme",
+      "respond": "Do t'u përgjigjeni pyetjeve në kohë dhe në mënyrë profesionale",
+      "remove": "Rezervojmë të drejtën për të hequr çdo listim që shkel këto kushte ose raportohet si mashtruese."
+    },
+    "payments": {
+      "title": "Abonimet dhe Pagesat",
+      "text": "Veçori të caktuara kërkojnë një abonim me pagesë:",
+      "recurring": "Abonimet faturohen në bazë të përsëritur (mujore ose vjetore)",
+      "auto": "Abonimet rinovohen automatikisht përveç nëse anulohen para datës së rinovimit",
+      "cancel": "Mund të anuloni abonimin tuaj në çdo kohë përmes cilësimeve të llogarisë",
+      "refund": "Rimbursimet janë të disponueshme brenda 30 ditëve nga blerja nëse nuk jeni të kënaqur",
+      "price": "Mund të ndryshojmë çmimet e abonimit me 30 ditë njoftim"
+    },
+    "prohibited": {
+      "title": "Sjellja e Ndaluar",
+      "text": "Pranoni të mos:",
+      "false": "Postoni listime të rreme, mashtruese ose të pasakta",
+      "spam": "Dërgoni spam ose komunikime të pakërkuara",
+      "harass": "Ngacmoni, abuzoni ose kërcënoni përdorues të tjerë",
+      "impersonate": "Imitoni të tjerët ose keqpërfaqësoni identitetin tuaj",
+      "scrape": "Gërryeni, kërkoni ose mblidhni të dhëna nga Shërbimi ynë",
+      "interfere": "Ndërhyni në funksionimin e duhur të Shërbimit",
+      "circumvent": "Përpiqeni të anashkaloni masat e sigurisë",
+      "illegal": "Përdorni Shërbimin për çdo qëllim të paligjshëm"
+    },
+    "ip": {
+      "title": "Pronësia Intelektuale",
+      "text": "Emri BalkanEstate, logoja dhe të gjitha markat tregtare, shenjat e shërbimit dhe përmbajtja e lidhur janë në pronësinë tonë. Nuk mund të përdorni pronësinë tonë intelektuale pa pëlqimin tonë me shkrim. Mbani pronësinë e përmbajtjes që postoni por na jepni një licencë për ta shfaqur dhe shpërndarë në platformën tonë."
+    },
+    "disclaimer": {
+      "title": "Mohimi i Garancive",
+      "text": "SHËRBIMI OFROHET \"SIÇ ËSHTË\" PA GARANCI TË ASNJË LLOJI. NUK GARANTOJMË SAKTËSINË E LISTIMEVE TË PRONAVE OSE SJELLJEN E PËRDORUESVE TË TJERË. NUK JEMI NJË AGJENCI PASURISHË TË PALUAJTSHME DHE NUK OFROJMË KËSHILLA PËR PASURI TË PALUAJTSHME. TË GJITHA TRANSAKSIONET JANË DREJTPËRDREJT MIDIS BLERËSVE DHE SHITËSVE."
+    },
+    "liability": {
+      "title": "Kufizimi i Përgjegjësisë",
+      "text": "NË MASËN MAKSIMALE TË LEJUAR NGA LIGJI, BALKANESTATE NUK DO TË JETË PËRGJEGJËSE PËR ASNJË DËM TË TËRTHORTË, TË RASTËSISHËM, TË VEÇANTË, PASUES OSE NDËSHKUES QË RRJEDH NGA PËRDORIMI JUAJ I SHËRBIMIT. PËRGJEGJËSIA JONË TOTALE NUK DO TË KALOJË SHUMËN QË NA KENI PAGUAR NË 12 MUAJT E FUNDIT."
+    },
+    "indemnity": {
+      "title": "Dëmshpërblimi",
+      "text": "Pranoni të dëmshpërbleni dhe mbani të padëmtuar BalkanEstate dhe oficerët, drejtorët, punonjësit dhe agjentët e saj nga çdo pretendim, dëm, humbje ose shpenzim që rrjedh nga përdorimi juaj i Shërbimit ose shkelja e këtyre kushteve."
+    },
+    "termination": {
+      "title": "Përfundimi",
+      "text": "Mund të pezullojmë ose përfundojmë llogarinë tuaj në çdo kohë për shkelje të këtyre kushteve ose për çdo arsye tjetër sipas diskrecionit tonë. Gjithashtu mund të fshini llogarinë tuaj në çdo kohë. Pas përfundimit, e drejta juaj për të përdorur Shërbimin do të pushojë menjëherë, dhe listimet tuaja do të hiqen."
+    },
+    "userContent": {
+      "title": "Licenca e Përmbajtjes së Përdoruesit",
+      "text": "Duke postuar përmbajtje (duke përfshirë listimet e pronave, fotot, përshkrimet dhe vlerësimet) në BalkanEstate, ju:",
+      "own": "Përfaqësoni se zotëroni ose keni të drejtën për të përdorur dhe ndarë këtë përmbajtje",
+      "license": "Na jepni një licencë jo-ekskluzive, të botërore, pa royalty për të përdorur, shfaqur, riprodhuar dhe shpërndarë përmbajtjen tuaj në platformën tonë",
+      "sublicense": "Lejoni që ta nën-licencojmë këtë përmbajtje partnerëve dhe filialeve tona për qëllime platforme",
+      "retain": "Mbani të gjitha të drejtat e pronësisë në përmbajtjen tuaj",
+      "remove": "Mund ta hiqni përmbajtjen tuaj në çdo kohë duke e fshirë ose llogarinë tuaj",
+      "responsibility": "Jeni vetëm përgjegjës për përmbajtjen tuaj dhe pasojat e postimit të saj. Ne nuk miratojmë përmbajtjen e përdoruesit dhe rezervojmë të drejtën për të hequr përmbajtje që shkel këto kushte."
+    },
+    "api": {
+      "title": "API dhe Aksesi i Automatizuar",
+      "text": "Aksesi i automatizuar në Shërbimin tonë rregullohet rreptësisht:",
+      "prohibited": "Gërryerja, kërkimi ose mbledhja e automatizuar e të dhënave ndalohet pa pëlqimin tonë me shkrim",
+      "rate": "Kërkesat e tepërta që ngarkojnë serverët tanë mund të rezultojnë në bllokimin e IP",
+      "partnership": "Për akses API ose partneritete të dhënash, na kontaktoni në partners@balkanestate.com",
+      "robots": "Duhet të përputheni me skedarin tonë robots.txt dhe çdo kufizim aksesi"
+    },
+    "professional": {
+      "title": "Mohimi i Shërbimeve Profesionale",
+      "text": "BalkanEstate është një platformë që lidh blerësit dhe shitësit e pronave. NUK JEMI një agjenci pasurishë të paluajtshme, ndërmjetësim, firmë ligjore ose këshilltar financiar. Nuk ofrojmë këshilla ligjore, financiare, tatimore ose të pasurisë së paluajtshme. Të gjitha transaksionet e pronave kryhen drejtpërdrejt midis përdoruesve. Rekomandojmë fuqimisht konsultimin me profesionistë të licencuar (agjentë pasurie të paluajtshme, avokatë, noterë) para se të merrni vendime për pronë. Vlerësimet e pronave, përshkrimet dhe informacioni ofrohen nga përdoruesit dhe nuk janë verifikuar në mënyrë të pavarur nga BalkanEstate."
+    },
+    "forceMajeure": {
+      "title": "Forca Madhore",
+      "text": "BalkanEstate nuk do të jetë përgjegjëse për çdo dështim ose vonesë në kryerjen e detyrimeve tona për shkak të rrethanave jashtë kontrollit tonë të arsyeshëm, duke përfshirë por pa u kufizuar në: fatkeqësi natyrore, luftëra, terrorizëm, trazira, pandemi, veprime qeveritare, ndërprerje energjie, dështime interneti ose dështime të ofruesve të shërbimeve të palëve të treta. Gjatë ngjarjeve të tilla, detyrimet tona do të pezullohen për kohëzgjatjen e ngjarjes."
+    },
+    "disputes": {
+      "title": "Zgjidhja e Mosmarrëveshjeve",
+      "text": "Në rast të ndonjë mosmarrëveshjeje që rrjedh nga këto Kushte ose përdorimi juaj i Shërbimit:",
+      "informal": "Zgjidhja Joformale:",
+      "informalDesc": "Ju inkurajojmë të na kontaktoni fillimisht në legal@balkanestate.com për të tentuar zgjidhje joformale. Angazhohemi të përgjigjemi brenda 15 ditëve pune.",
+      "mediation": "Ndërmjetësimi:",
+      "mediationDesc": "Nëse zgjidhja joformale dështon, të dyja palët pranojnë të tentojnë ndërmjetësim para çdo procedimi formal.",
+      "jurisdiction": "Juridiksioni:",
+      "jurisdictionDesc": "Çdo procedim ligjor do të kryhet në gjykatat e Shkupit, Maqedonisë së Veriut.",
+      "time": "Kufizimi Kohor:",
+      "timeDesc": "Çdo pretendim duhet të paraqitet brenda një (1) viti nga ngjarja që ka shkaktuar pretendimin, ose do të ndalohet përgjithmonë."
+    },
+    "law": {
+      "title": "Ligji i Aplikueshëm",
+      "text": "Këto Kushte do të qeverisen nga ligjet e Maqedonisë së Veriut. Çdo mosmarrëveshje do të zgjidhet në gjykatat e Shkupit, Maqedonisë së Veriut. Nëse ndonjë dispozitë e këtyre kushteve gjendet të jetë e pazbatueshme, dispozitat e mbetura do të vazhdojnë në fuqi."
+    },
+    "severability": {
+      "title": "Ndashëria",
+      "text": "Nëse ndonjë dispozitë e këtyre Kushteve mbahet të jetë e pavlefshme, e paligjshme ose e pazbatueshme nga një gjykatë e juridiksionit kompetent, ajo dispozitë do të modifikohet në masën minimale të nevojshme për ta bërë të zbatueshme, ose nëse modifikimi nuk është i mundur, do të ndahet nga këto Kushte. Pavlefshmëria e ndonjë dispozite nuk do të ndikojë vlefshmërinë e dispozitave të mbetura, të cilat do të vazhdojnë në fuqi dhe efekt të plotë."
+    },
+    "entireAgreement": {
+      "title": "Marrëveshja e Plotë",
+      "text": "Këto Kushte të Shërbimit, së bashku me Politikën tonë të Privatësisë dhe Politikën e Cookies, përbëjnë marrëveshjen e plotë midis jush dhe BalkanEstate lidhur me përdorimin tuaj të Shërbimit. Këto Kushte zëvendësojnë të gjitha marrëveshjet, komunikimet dhe mirëkuptimet e mëparshme, qoftë me shkrim ose me gojë, lidhur me çështjen e këtu."
+    },
+    "waiver": {
+      "title": "Heqja Dorë",
+      "text": "Dështimi ynë për të zbatuar çdo të drejtë ose dispozitë të këtyre Kushteve nuk do të përbëjë heqje dorë nga ajo e drejtë ose dispozitë. Çdo heqje dorë nga çdo dispozitë e këtyre Kushteve do të jetë efektive vetëm nëse është me shkrim dhe e nënshkruar nga BalkanEstate."
+    },
+    "assignment": {
+      "title": "Caktimi",
+      "text": "Nuk mund të caktoni ose transferoni këto Kushte ose të drejtat tuaja nën to pa pëlqimin tonë paraprak me shkrim. Ne mund të caktojmë këto Kushte pa kufizim. Çdo tentativë caktimi në shkelje të këtij seksioni do të jetë e pavlefshme."
+    },
+    "modifications": {
+      "title": "Modifikimet e Shërbimit",
+      "text": "Rezervojmë të drejtën për të modifikuar, pezulluar ose ndërprerë çdo pjesë të Shërbimit në çdo kohë pa njoftim. Nuk do të jemi përgjegjës ndaj jush ose ndonjë pale të tretë për çdo modifikim, pezullim ose ndërprerje të Shërbimit."
+    },
+    "contact": {
+      "title": "Na Kontaktoni",
+      "text": "Nëse keni pyetje rreth këtyre Kushteve të Shërbimit, ju lutemi na kontaktoni:"
+    }
+  },
+  "cookies": {
+    "title": "Politika e Cookies",
+    "lastUpdated": "Përditësuar së fundmi",
+    "intro": {
+      "title": "Çfarë Janë Cookies?",
+      "text": "Cookies janë skedarë të vegjël teksti që ruhen në pajisjen tuaj kur vizitoni një faqe interneti. Ato ndihmojnë faqet të mbajnë mend preferencat tuaja, të kuptojnë si e përdorni faqen dhe të përmirësojnë përvojën tuaj. Kjo Politikë e Cookies shpjegon si BalkanEstate përdor cookies dhe teknologji të ngjashme."
+    },
+    "why": {
+      "title": "Pse Përdorim Cookies",
+      "text": "Përdorim cookies për të:",
+      "essential": "Ju mbajtur të identifikuar në llogarinë tuaj",
+      "preferences": "Mbajtur mend preferencat tuaja të gjuhës dhe monedhës",
+      "searches": "Ruajtur kërkimet tuaja të fundit dhe pronat e shikuara",
+      "analytics": "Kuptuar si e përdorni faqen tonë për ta përmirësuar",
+      "security": "Mbrojtur llogarinë tuaj dhe parandaluar mashtrimin",
+      "ads": "Ju shfaqur reklama relevante (nëse pranoni)"
+    },
+    "types": {
+      "title": "Llojet e Cookies që Përdorim",
+      "essential": {
+        "title": "Cookies Thelbësore",
+        "required": "E detyrueshme",
+        "desc": "Këto cookies janë të nevojshme për funksionimin e duhur të faqes. Mundësojnë veçori bazë si autentifikimi, siguria dhe aksesueshmëria. Nuk mund t'i çaktivizoni këto cookies.",
+        "auth": "Ju mban të identifikuar",
+        "session": "Mirëmban sesionin tuaj",
+        "csrf": "Mbrojtje sigurie",
+        "consent": "Preferencat tuaja të cookies"
+      },
+      "functional": {
+        "title": "Cookies Funksionale",
+        "optional": "Opsionale",
+        "desc": "Këto cookies mbajnë mend preferencat dhe cilësimet tuaja për të ofruar një përvojë më të mirë. Çaktivizimi i tyre mund të ndikojë disa veçori të faqes.",
+        "language": "Preferenca juaj e gjuhës",
+        "currency": "Preferenca juaj e monedhës",
+        "searches": "Kërkimet tuaja të fundit",
+        "viewed": "Listimet e shikuara së fundmi"
+      },
+      "analytics": {
+        "title": "Cookies Analitike",
+        "optional": "Opsionale",
+        "desc": "Këto cookies na ndihmojnë të kuptojmë si vizitorët përdorin faqen tonë. Mbledhin të dhëna anonime rreth shikimeve të faqeve, burimeve të trafikut dhe sjelljes së përdoruesit.",
+        "ga": "Google Analytics",
+        "gid": "Sesioni Google Analytics",
+        "gat": "Rregullim i shkallës së kërkesave"
+      },
+      "marketing": {
+        "title": "Cookies Marketingu",
+        "optional": "Opsionale",
+        "desc": "Këto cookies gjurmojnë aktivitetin tuaj nëpër faqe interneti për t'ju shfaqur reklama relevante. Vendosen nga partnerët tanë të reklamimit.",
+        "fb": "Facebook Pixel",
+        "ads": "Gjurmim i fushatave reklamuese"
+      }
+    },
+    "duration": {
+      "session": "Sesion",
+      "1minute": "1 minutë",
+      "24hours": "24 orë",
+      "30days": "30 ditë",
+      "3months": "3 muaj",
+      "1year": "1 vit",
+      "2years": "2 vjet"
+    },
+    "manage": {
+      "title": "Menaxhimi i Preferencave të Cookies",
+      "text": "Mund të menaxhoni preferencat tuaja të cookies në çdo kohë. Klikoni butonin më poshtë për të përditësuar cilësimet tuaja ose përdorni cilësimet e shfletuesit për të kontrolluar cookies.",
+      "button": "Menaxho Preferencat e Cookies"
+    },
+    "browser": {
+      "title": "Cilësimet e Cookies të Shfletuesit",
+      "text": "Shumica e shfletuesve ju lejojnë të kontrolloni cookies përmes cilësimeve të tyre. Këtu janë lidhjet për të menaxhuar cookies në shfletuesit e njohur:"
+    },
+    "thirdParty": {
+      "title": "Cookies të Palëve të Treta",
+      "text": "Disa cookies në faqen tonë vendosen nga shërbime të palëve të treta që përdorim, si Google Analytics për analitikë të faqes dhe Stripe për përpunim të pagesave. Këto shërbime kanë politikat e tyre të privatësisë që qeversin si i përdorin të dhënat tuaja."
+    },
+    "updates": {
+      "title": "Përditësimet e Kësaj Politike",
+      "text": "Mund ta përditësojmë këtë Politikë të Cookies herë pas here për të reflektuar ndryshimet në praktikat tona ose për arsye ligjore. Do t'ju njoftojmë për ndryshime të rëndësishme duke postuar një njoftim në faqen tonë."
+    },
+    "contact": {
+      "title": "Na Kontaktoni",
+      "text": "Nëse keni pyetje rreth përdorimit tonë të cookies, ju lutemi na kontaktoni:"
+    }
+  }
+}
