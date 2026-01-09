@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { sendPropertyInquiry } from '@/services/apiService';
 import { Property } from '@/types';
@@ -31,6 +32,13 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure we only render portal on client side
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -76,17 +84,57 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const floatingInputClasses = "block px-2.5 pb-2.5 pt-4 w-full text-base text-neutral-900 bg-white rounded-lg border border-neutral-300 appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent peer";
   const floatingLabelClasses = "absolute text-base text-neutral-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1";
 
-  return (
-    <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+  const modalContent = (
+    <>
+      <style>{`
+        @keyframes inquiry-modal-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes inquiry-modal-pop {
+          from { opacity: 0; transform: scale(0.95) translateY(10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .inquiry-modal-backdrop {
+          animation: inquiry-modal-fade-in 0.2s ease-out;
+        }
+        .inquiry-modal-content {
+          animation: inquiry-modal-pop 0.3s ease-out;
+        }
+      `}</style>
       <div
-        className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden"
-        onClick={e => e.stopPropagation()}
+        className="inquiry-modal-backdrop"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+        }}
+        onClick={onClose}
       >
+        <div
+          className="inquiry-modal-content bg-white w-full max-w-lg rounded-2xl shadow-2xl"
+          style={{
+            maxHeight: '90vh',
+            overflowY: 'auto',
+          }}
+          onClick={e => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary-dark p-4 flex items-center justify-between">
           <div>
@@ -284,9 +332,13 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
             </>
           )}
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
+
+  // Use portal to render at document body level, bypassing any parent CSS constraints
+  return createPortal(modalContent, document.body);
 };
 
 export default PropertyInquiryModal;
