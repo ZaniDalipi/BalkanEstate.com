@@ -108,7 +108,6 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                 { icon: FacebookIcon, href: 'https://facebook.com', label: 'Facebook' },
                 { icon: TwitterIcon, href: 'https://twitter.com', label: 'Twitter' },
                 { icon: WhatsappIcon, href: 'https://wa.me/383XXXXXXX', label: 'WhatsApp' },
-                { icon: Z360Icon, href: 'https://z360-virtual-tour.vercel.app/', label: 'Z360 Virtual Tours' },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
@@ -121,6 +120,31 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                   <Icon className="w-4 h-4 text-gray-600 group-hover:text-gray-900 transition-colors" />
                 </a>
               ))}
+            </div>
+
+            {/* Partner Section */}
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">
+                {t('footer:partner', 'Official Partner')}
+              </p>
+              <a
+                href="https://z360-virtual-tour.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-white hover:bg-gray-50 rounded-xl transition-all duration-300 shadow-sm border border-gray-200 hover:shadow-md group"
+              >
+                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <Z360Icon className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                    Z360 Virtual Tours
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {t('footer:partnerTagline', '360° Property Tours')}
+                  </span>
+                </div>
+              </a>
             </div>
           </div>
 
