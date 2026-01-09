@@ -267,7 +267,7 @@ const PRODUCTS = [
       'Dedicated account manager',
       'Team dashboard & analytics',
     ],
-    targetRole: 'agent' as const,
+    targetRole: 'seller' as const, // Show in "For Sellers" tab
     displayOrder: 4,
     badge: 'BEST FOR TEAMS',
     badgeColor: 'purple',
@@ -318,7 +318,7 @@ const PRODUCTS = [
       'Dedicated account manager',
       'Team dashboard & analytics',
     ],
-    targetRole: 'agent' as const,
+    targetRole: 'seller' as const, // Show in "For Sellers" tab
     displayOrder: 4,
     badge: 'BEST FOR TEAMS',
     badgeColor: 'red',
