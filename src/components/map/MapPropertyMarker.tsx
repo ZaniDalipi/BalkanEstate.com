@@ -638,60 +638,67 @@ const PropertyPopup: React.FC<{
 
   // Standard popup for non-promoted properties - modern compact design
   return (
-    <div className="w-40 sm:w-52 cursor-pointer overflow-hidden rounded-xl" onClick={() => onPopupClick(property.id)}>
+    <div className="w-44 sm:w-52 cursor-pointer overflow-hidden rounded-lg shadow-xl" onClick={() => onPopupClick(property.id)}>
       {/* Full-width image with overlay */}
-      <div className="relative">
+      <div className="relative h-28 sm:h-32">
         <img
           src={images[currentImageIndex]}
           alt={property.address}
-          className="w-full h-24 sm:h-28 object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         {/* Property type badge */}
-        <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/90 backdrop-blur-sm text-neutral-700 capitalize">
+        <span className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-sm text-neutral-800 capitalize shadow-sm">
           {property.propertyType}
         </span>
-        {/* Price on image */}
-        <div className="absolute bottom-2 left-2 right-2">
-          <p className={`font-bold text-base drop-shadow-lg ${priceInfo.hasReduction ? 'text-green-400' : 'text-white'}`}>
+        {/* Content on image */}
+        <div className="absolute bottom-0 left-0 right-0 p-2.5">
+          {/* Title */}
+          {property.title && (
+            <p className="font-bold text-xs text-white drop-shadow-md line-clamp-1 mb-0.5">
+              {property.title}
+            </p>
+          )}
+          {/* Price */}
+          <p className={`font-bold text-lg drop-shadow-lg ${priceInfo.hasReduction ? 'text-green-400' : 'text-white'}`}>
             {formatPrice(priceInfo.currentPrice, property.country)}
           </p>
         </div>
       </div>
 
-      {/* Info section with blur */}
-      <div className="p-2 bg-white/95 backdrop-blur-sm">
-        {/* Title */}
-        {property.title && (
-          <p className="font-semibold text-xs text-neutral-800 mb-1 line-clamp-1">
-            {property.title}
-          </p>
-        )}
-
+      {/* Info section */}
+      <div className="p-2.5 bg-white">
         {/* Location */}
-        <p className="text-[10px] text-neutral-500 mb-1.5 line-clamp-1">
-          {property.city}, {property.country}
+        <p className="text-[11px] text-neutral-600 mb-2 line-clamp-1">
+          📍 {property.city}, {property.country}
         </p>
 
         {/* Specs row */}
         {property.propertyType === 'land' ? (
-          <div className="text-[10px] font-medium text-neutral-600">
-            {property.sqft?.toLocaleString()} m²
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-neutral-700">{property.sqft?.toLocaleString()} m²</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 text-[10px] text-neutral-600">
-            <span className="flex items-center gap-0.5">
-              <span className="font-semibold">{property.beds}</span> bed
+          <div className="flex items-center justify-between text-[11px] text-neutral-600 mb-2">
+            <span className="flex items-center gap-1">
+              <span className="font-bold text-neutral-800">{property.beds}</span> bed
             </span>
-            <span className="flex items-center gap-0.5">
-              <span className="font-semibold">{property.baths}</span> bath
+            <span className="w-px h-3 bg-neutral-300" />
+            <span className="flex items-center gap-1">
+              <span className="font-bold text-neutral-800">{property.baths}</span> bath
             </span>
-            <span className="flex items-center gap-0.5">
-              <span className="font-semibold">{property.sqft}</span> m²
+            <span className="w-px h-3 bg-neutral-300" />
+            <span className="flex items-center gap-1">
+              <span className="font-bold text-neutral-800">{property.sqft}</span> m²
             </span>
           </div>
         )}
+
+        {/* Click for more */}
+        <div className="text-center pt-1.5 border-t border-neutral-100">
+          <span className="text-[10px] font-semibold text-primary">Tap for details →</span>
+        </div>
       </div>
     </div>
   );
@@ -758,8 +765,8 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 240 : 180}
-              minWidth={isPromoted ? 200 : 160}
+              maxWidth={isPromoted ? 240 : 200}
+              minWidth={isPromoted ? 200 : 176}
               className={`property-popup ${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
