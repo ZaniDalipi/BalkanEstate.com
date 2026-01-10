@@ -22,7 +22,6 @@ import {
   FlyToController,
   MapEvents,
   ZoomBasedTileSwitch,
-  ZoomBased3DBuildings,
   MapDrawEvents,
 } from '@/src/components/map/MapHelpers';
 import { Markers, Legend, HighlightedPropertyMarkers } from '@/src/components/map/MapPropertyMarker';
@@ -291,7 +290,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
-          <ZoomBased3DBuildings show3DBuildings={show3DBuildings} setShow3DBuildings={setShow3DBuildings} />
+          {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
           {drawnBounds && !isDrawing && (
             <Rectangle
               bounds={drawnBounds}
