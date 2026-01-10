@@ -239,16 +239,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
   const [showMeasurement, setShowMeasurement] = useState(false); // Toggle for measurement tool
 
-  // Check URL params for viewMeasurement flag on mount
+  // Check URL params for measurementId to auto-enable measurement tool
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const viewMeasurement = searchParams.get('viewMeasurement');
-    if (viewMeasurement === 'true') {
+    const measurementId = searchParams.get('measurementId');
+    if (measurementId) {
+      // Enable measurement tool - it will fetch the data from backend
       setShowMeasurement(true);
-      // Clean up URL params after enabling
-      const url = new URL(window.location.href);
-      url.searchParams.delete('viewMeasurement');
-      window.history.replaceState({}, '', url.toString());
     }
   }, []);
 

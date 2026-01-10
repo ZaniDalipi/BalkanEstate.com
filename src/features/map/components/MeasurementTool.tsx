@@ -181,22 +181,32 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
     return Math.max(5, 100 / Math.pow(1.5, zoom - 15));
   }, [map]);
 
-  // Load measurement from localStorage if viewing a saved measurement
+  // Load measurement from backend if measurementId is in URL
   useEffect(() => {
     if (enabled) {
-      const storedMeasurement = localStorage.getItem('viewMeasurement');
-      if (storedMeasurement) {
-        try {
-          const measurement = JSON.parse(storedMeasurement) as SavedMeasurement;
-          setPoints(measurement.points);
-          setIsPolygonClosed(measurement.type === 'area');
-          setIsViewMode(true);
-          setViewMeasurementData(measurement);
-          // Clear from localStorage after loading
-          localStorage.removeItem('viewMeasurement');
-        } catch (e) {
-          console.error('Failed to parse stored measurement:', e);
-        }
+      const searchParams = new URLSearchParams(window.location.search);
+      const measurementId = searchParams.get('measurementId');
+
+      if (measurementId) {
+        // Fetch measurement from backend
+        api.getMeasurementById(measurementId)
+          .then((response) => {
+            if (response.measurement) {
+              const measurement = response.measurement;
+              setPoints(measurement.points);
+              setIsPolygonClosed(measurement.type === 'area');
+              setIsViewMode(true);
+              setViewMeasurementData(measurement as SavedMeasurement);
+
+              // Clean up URL
+              const url = new URL(window.location.href);
+              url.searchParams.delete('measurementId');
+              window.history.replaceState({}, '', url.toString());
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to fetch measurement from backend:', err);
+          });
       }
     }
   }, [enabled]);
