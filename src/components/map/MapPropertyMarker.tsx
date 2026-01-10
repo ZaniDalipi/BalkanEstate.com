@@ -636,68 +636,98 @@ const PropertyPopup: React.FC<{
     );
   }
 
-  // Standard popup for non-promoted properties - modern compact design
+  // Standard popup - Apple liquid glass style
   return (
-    <div className="w-44 sm:w-52 cursor-pointer overflow-hidden rounded-lg shadow-xl" onClick={() => onPopupClick(property.id)}>
-      {/* Full-width image with overlay */}
-      <div className="relative h-28 sm:h-32">
+    <div
+      className="w-[180px] cursor-pointer rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/20"
+      onClick={() => onPopupClick(property.id)}
+      style={{
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 100%)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)'
+      }}
+    >
+      {/* Image section */}
+      <div className="relative h-[100px] m-1.5 rounded-xl overflow-hidden">
         <img
           src={images[currentImageIndex]}
           alt={property.address}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        {/* Property type badge */}
-        <span className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-sm text-neutral-800 capitalize shadow-sm">
+        {/* Subtle vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        {/* Property type pill */}
+        <span
+          className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize"
+          style={{
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+        >
           {property.propertyType}
         </span>
-        {/* Content on image */}
-        <div className="absolute bottom-0 left-0 right-0 p-2.5">
-          {/* Title */}
-          {property.title && (
-            <p className="font-bold text-xs text-white drop-shadow-md line-clamp-1 mb-0.5">
-              {property.title}
-            </p>
-          )}
-          {/* Price */}
-          <p className={`font-bold text-lg drop-shadow-lg ${priceInfo.hasReduction ? 'text-green-400' : 'text-white'}`}>
+        {/* Price overlay */}
+        <div className="absolute bottom-2 left-2">
+          <p className="font-bold text-white text-base drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
             {formatPrice(priceInfo.currentPrice, property.country)}
           </p>
         </div>
       </div>
 
-      {/* Info section */}
-      <div className="p-2.5 bg-white">
-        {/* Location */}
-        <p className="text-[11px] text-neutral-600 mb-2 line-clamp-1">
-          📍 {property.city}, {property.country}
-        </p>
-
-        {/* Specs row */}
-        {property.propertyType === 'land' ? (
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-neutral-700">{property.sqft?.toLocaleString()} m²</span>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between text-[11px] text-neutral-600 mb-2">
-            <span className="flex items-center gap-1">
-              <span className="font-bold text-neutral-800">{property.beds}</span> bed
-            </span>
-            <span className="w-px h-3 bg-neutral-300" />
-            <span className="flex items-center gap-1">
-              <span className="font-bold text-neutral-800">{property.baths}</span> bath
-            </span>
-            <span className="w-px h-3 bg-neutral-300" />
-            <span className="flex items-center gap-1">
-              <span className="font-bold text-neutral-800">{property.sqft}</span> m²
-            </span>
-          </div>
+      {/* Content section */}
+      <div className="px-3 pb-3 pt-1">
+        {/* Title */}
+        {property.title && (
+          <p className="font-semibold text-[13px] text-neutral-800 line-clamp-1 mb-1">
+            {property.title}
+          </p>
         )}
 
-        {/* Click for more */}
-        <div className="text-center pt-1.5 border-t border-neutral-100">
-          <span className="text-[10px] font-semibold text-primary">Tap for details →</span>
+        {/* Location */}
+        <p className="text-[11px] text-neutral-500 mb-2 line-clamp-1">
+          {property.city}, {property.country}
+        </p>
+
+        {/* Specs - glass pills */}
+        <div className="flex items-center gap-1.5 mb-2">
+          {property.propertyType === 'land' ? (
+            <span
+              className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
+              style={{ background: 'rgba(0,0,0,0.05)' }}
+            >
+              {property.sqft?.toLocaleString()} m²
+            </span>
+          ) : (
+            <>
+              <span
+                className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
+                style={{ background: 'rgba(0,0,0,0.05)' }}
+              >
+                {property.beds} bed
+              </span>
+              <span
+                className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
+                style={{ background: 'rgba(0,0,0,0.05)' }}
+              >
+                {property.baths} bath
+              </span>
+              <span
+                className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
+                style={{ background: 'rgba(0,0,0,0.05)' }}
+              >
+                {property.sqft} m²
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* CTA */}
+        <div
+          className="text-center py-1.5 rounded-lg"
+          style={{ background: 'rgba(0,82,205,0.1)' }}
+        >
+          <span className="text-[11px] font-semibold text-primary">View details</span>
         </div>
       </div>
     </div>
@@ -765,9 +795,9 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 240 : 200}
-              minWidth={isPromoted ? 200 : 176}
-              className={`property-popup ${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
+              maxWidth={isPromoted ? 260 : 195}
+              minWidth={isPromoted ? 220 : 180}
+              className={`property-popup-glass ${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>
