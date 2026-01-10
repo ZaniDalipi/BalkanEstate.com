@@ -125,7 +125,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
         zoom={7}
         scrollWheelZoom={true}
         className="w-full h-full rounded-2xl"
-        maxZoom={19}
+        maxZoom={22}
         minZoom={6}
         zoomControl={true}
         maxBounds={BALKAN_BOUNDS}
@@ -139,14 +139,15 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
         <TileLayer
           key={mapType}
           attribution={mapType === 'street'
-            ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            ? '&copy; Google Maps'
             : 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
           }
           url={mapType === 'street'
-            ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            ? "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
             : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           }
-          maxZoom={19}
+          maxZoom={22}
+          maxNativeZoom={mapType === 'street' ? 22 : 19}
           keepBuffer={2}
           updateWhenIdle={true}
           updateWhenZooming={false}

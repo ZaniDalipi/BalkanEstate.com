@@ -42,16 +42,17 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const TILE_LAYERS = {
   street: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19,
+    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google Maps',
+    maxZoom: 22,
+    maxNativeZoom: 22,
   },
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution:
       'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-    maxZoom: 19,
+    maxZoom: 22,
+    maxNativeZoom: 19,
   },
 };
 
@@ -279,7 +280,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           zoom={zoom}
           scrollWheelZoom={true}
           className={`w-full h-full ${show3DBuildings ? 'map-3d-active' : 'map-3d-inactive'}`}
-          maxZoom={19}
+          maxZoom={22}
           minZoom={6}
           zoomControl={false}
           maxBounds={BALKAN_BOUNDS}
@@ -307,6 +308,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             attribution={TILE_LAYERS[mapType].attribution}
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
+            maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
             keepBuffer={2}
             updateWhenIdle={true}
             updateWhenZooming={false}

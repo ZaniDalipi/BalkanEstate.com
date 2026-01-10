@@ -1372,13 +1372,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 zoom={12}
                 scrollWheelZoom={true}
                 className="w-full h-[400px] md:h-[500px]"
-                maxZoom={19}
+                maxZoom={22}
                 minZoom={3}
               >
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  maxZoom={19}
+                  attribution='&copy; Google Maps'
+                  url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                  maxZoom={22}
                 />
                 <MapInvalidator />
                 {agencyProperties.filter(p => p.lat && p.lng).map((property) => (
@@ -1458,13 +1458,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 zoom={13}
                 scrollWheelZoom={true}
                 className="w-full h-80"
-                maxZoom={19}
+                maxZoom={22}
                 minZoom={3}
               >
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  maxZoom={19}
+                  attribution='&copy; Google Maps'
+                  url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                  maxZoom={22}
                 />
                 <MapInvalidator />
                 <Marker
