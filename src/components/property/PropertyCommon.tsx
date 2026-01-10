@@ -21,11 +21,13 @@ interface DetailItemProps {
  * ```
  */
 export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children }) => (
-  <div className="flex items-start gap-2 p-2">
-    <div className="flex-shrink-0 w-5 h-5 text-primary mt-0.5">{icon}</div>
-    <div className="flex-1">
-      <span className="text-xs text-neutral-500 block">{label}</span>
-      <span className="text-sm font-semibold text-neutral-800">{children}</span>
+  <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-neutral-50 to-neutral-100/50 border border-neutral-200/60 hover:border-primary/30 hover:shadow-sm transition-all duration-200">
+    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-primary">
+      {icon}
+    </div>
+    <div className="flex-1 min-w-0">
+      <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wide block">{label}</span>
+      <span className="text-sm font-bold text-neutral-800 block truncate">{children}</span>
     </div>
   </div>
 );
