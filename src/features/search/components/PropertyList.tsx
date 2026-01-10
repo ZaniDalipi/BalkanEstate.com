@@ -750,14 +750,14 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                         </div>
                         <div className="p-4 md:p-3">
                             {isLoadingProperties ? (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} />
                                     ))}
                                 </div>
                             ) : properties.length > 0 ? (
                                 <>
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5">
                                         {properties.slice(0, visibleCount).map(prop => (
                                             <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
                                                 <PropertyCard property={prop} />
@@ -864,14 +864,14 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
 
                             <div className="p-4 md:p-3">
                                 {isLoadingProperties ? (
-                                    <div className="grid grid-cols-1 gap-4 md:gap-3">
+                                    <div className="grid grid-cols-1 gap-5">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} />
                                         ))}
                                     </div>
                                 ) : properties.length > 0 ? (
                                     <>
-                                        <div className="grid grid-cols-1 gap-4 md:gap-3">
+                                        <div className="grid grid-cols-1 gap-5">
                                             {properties.slice(0, visibleCount).map(prop => (
                                                 <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
                                                     <PropertyCard property={prop} />

@@ -484,16 +484,16 @@ const PropertyPopup: React.FC<{
     return () => clearInterval(interval);
   }, [isActivelyPromoted, images.length]);
 
-  // Enhanced popup for promoted properties
+  // Enhanced popup for promoted properties - compact design
   if (isActivelyPromoted) {
     return (
       <div
-        className={`w-56 sm:w-72 cursor-pointer rounded-lg overflow-hidden border-2 ${tierConfig.border}`}
+        className={`w-52 cursor-pointer rounded-xl overflow-hidden border-2 ${tierConfig.border}`}
         onClick={() => onPopupClick(property.id)}
       >
-        {/* Image carousel - larger for promoted */}
+        {/* Image carousel - compact */}
         <div className="relative">
-          <div className="relative h-32 sm:h-40 overflow-hidden">
+          <div className="relative h-28 overflow-hidden">
             {images.map((imgUrl, index) => (
               <div
                 key={index}
@@ -503,7 +503,7 @@ const PropertyPopup: React.FC<{
               >
                 {imageErrors.has(index) ? (
                   <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-                    <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+                    <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
                   </div>
                 ) : (
                   <img
@@ -520,30 +520,30 @@ const PropertyPopup: React.FC<{
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
           </div>
 
-          {/* Promotion tier badge */}
-          <div className={`absolute top-2 left-2 ${tierConfig.bg} text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5`}>
-            <span>{tierConfig.icon}</span>
+          {/* Promotion tier badge - smaller */}
+          <div className={`absolute top-1.5 left-1.5 ${tierConfig.bg} text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow-lg flex items-center gap-1`}>
+            <span className="text-[10px]">{tierConfig.icon}</span>
             {tierConfig.label}
           </div>
 
-          {/* Image navigation for promoted */}
+          {/* Image navigation - smaller */}
           {images.length > 1 && (
             <>
               <button
                 onClick={prevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-700 rounded-full w-7 h-7 flex items-center justify-center transition-colors shadow-lg"
+                className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-700 rounded-full w-5 h-5 flex items-center justify-center transition-colors shadow text-xs"
               >
                 ‹
               </button>
               <button
                 onClick={nextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-700 rounded-full w-7 h-7 flex items-center justify-center transition-colors shadow-lg"
+                className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-neutral-700 rounded-full w-5 h-5 flex items-center justify-center transition-colors shadow text-xs"
               >
                 ›
               </button>
 
               {/* Image dots indicator */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1">
                 {images.map((_, index) => (
                   <button
                     key={index}
@@ -551,82 +551,67 @@ const PropertyPopup: React.FC<{
                       e.stopPropagation();
                       setCurrentImageIndex(index);
                     }}
-                    className={`w-2 h-2 rounded-full transition-all ${
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
                       index === currentImageIndex
-                        ? 'bg-white w-4'
+                        ? 'bg-white w-3'
                         : 'bg-white/50 hover:bg-white/80'
                     }`}
                   />
                 ))}
               </div>
-
-              {/* Image counter */}
-              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
-                {currentImageIndex + 1}/{images.length}
-              </div>
             </>
           )}
         </div>
 
-        {/* Content section */}
-        <div className="p-3 bg-white">
-          {/* Price with gradient */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex flex-col">
-              {priceInfo.hasReduction && (
-                <span className="text-neutral-400 text-xs line-through">
-                  {formatPrice(priceInfo.originalPrice, property.country)}
-                </span>
-              )}
-              <span className={`font-bold px-3 py-1 rounded-lg text-base shadow text-white ${
-                priceInfo.hasReduction
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600'
-                  : 'bg-gradient-to-r from-primary to-primary-dark'
-              }`}>
-                {formatPrice(priceInfo.currentPrice, property.country)}
-                {priceInfo.hasReduction && (
-                  <span className="ml-1 text-xs font-bold">-{priceInfo.discountPercentage}%</span>
-                )}
-              </span>
-            </div>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
+        {/* Content section - compact */}
+        <div className="p-2 bg-white">
+          {/* Price row */}
+          <div className="flex items-center justify-between mb-1.5">
+            <span className={`font-bold px-2 py-0.5 rounded-md text-sm shadow-sm text-white ${
+              priceInfo.hasReduction
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600'
+                : 'bg-gradient-to-r from-primary to-primary-dark'
+            }`}>
+              {formatPrice(priceInfo.currentPrice, property.country)}
+            </span>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 capitalize">
               {property.propertyType}
             </span>
           </div>
 
           {/* Title */}
           {property.title && (
-            <p className="font-bold text-sm text-neutral-900 mb-1 line-clamp-1">
+            <p className="font-semibold text-xs text-neutral-800 mb-1 line-clamp-1">
               {property.title}
             </p>
           )}
 
-          {/* Address */}
-          <p className="text-xs text-neutral-500 mb-2 line-clamp-1">
-            📍 {property.address}, {property.city}
+          {/* Location */}
+          <p className="text-[10px] text-neutral-500 mb-1.5 line-clamp-1">
+            {property.city}, {property.country}
           </p>
 
-          {/* Property stats - different layout for land vs residential */}
+          {/* Property stats - compact */}
           {property.propertyType === 'land' ? (
-            <div className="grid grid-cols-2 gap-1.5 mb-2">
-              <div className="bg-amber-50 rounded-lg py-2 px-2 text-center border border-amber-200">
-                <div className="font-bold text-lg text-amber-800">{property.sqft?.toLocaleString()}</div>
-                <div className="text-[10px] text-amber-600">{t('map.area', 'Area')} (m²)</div>
-              </div>
-              <div className="bg-primary/5 rounded-lg py-2 px-2 text-center border border-primary/10">
-                <div className="font-bold text-sm text-primary">
-                  €{property.sqft > 0 ? (property.price / property.sqft).toFixed(1) : '—'}
-                </div>
-                <div className="text-[10px] text-primary/70">{t('map.pricePerSqm', 'per m²')}</div>
-              </div>
+            <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
+              <span className="font-semibold">{property.sqft?.toLocaleString()} m²</span>
             </div>
           ) : (
-            <div className="grid grid-cols-4 gap-1.5 mb-2">
-              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-                <div className="font-bold text-sm text-primary">{property.beds}</div>
-                <div className="text-[9px] text-primary/70">{t('map.beds')}</div>
-              </div>
-              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
+            <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
+              <span><b>{property.beds}</b> bed</span>
+              <span><b>{property.baths}</b> bath</span>
+              <span><b>{property.sqft}</b> m²</span>
+            </div>
+          )}
+
+          {/* CTA */}
+          <div className="text-center py-1.5 rounded-lg bg-primary/10">
+            <span className="text-[10px] font-semibold text-primary">{t('map.clickForDetails')}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
                 <div className="font-bold text-sm text-primary">{property.baths}</div>
                 <div className="text-[9px] text-primary/70">{t('map.baths')}</div>
               </div>
