@@ -367,11 +367,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
         )}
 
         {/* Debug Info Display - shows zoom level and coordinates for testing */}
-        <div className="absolute top-2 right-2 z-[1001] bg-black/75 text-white text-xs font-mono px-3 py-2 rounded-lg backdrop-blur-sm">
-          <div className="flex flex-col gap-0.5">
-            <span>Zoom: <strong>{currentZoom}</strong> / Max: {TILE_LAYERS[mapType]?.maxZoom || 21}</span>
-            <span>Lat: {mapCenterLat.toFixed(6)}</span>
-            <span>Lng: {mapCenterLng.toFixed(6)}</span>
+        <div className={`absolute ${show3DBuildings ? 'top-32' : 'top-4'} left-4 z-[1001] bg-black/80 text-white text-[11px] font-mono px-2.5 py-1.5 rounded-lg backdrop-blur-sm shadow-lg`}>
+          <div className="flex items-center gap-3">
+            <span>🔍 <strong>{currentZoom}</strong>/{TILE_LAYERS[mapType]?.maxZoom || 21}</span>
+            <span className="text-white/70">📍 {mapCenterLat.toFixed(4)}, {mapCenterLng.toFixed(4)}</span>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${mapType === 'satellite' ? 'bg-green-600' : 'bg-blue-600'}`}>
+              {mapType === 'satellite' ? 'SAT' : 'MAP'}
+            </span>
           </div>
         </div>
 
