@@ -636,51 +636,63 @@ const PropertyPopup: React.FC<{
     );
   }
 
-  // Standard popup for non-promoted properties - compact mobile design
+  // Standard popup for non-promoted properties - modern compact design
   return (
-    <div className="w-36 sm:w-48 cursor-pointer" onClick={() => onPopupClick(property.id)}>
-      {/* Image */}
-      <div className="relative mb-1">
+    <div className="w-40 sm:w-52 cursor-pointer overflow-hidden rounded-xl" onClick={() => onPopupClick(property.id)}>
+      {/* Full-width image with overlay */}
+      <div className="relative">
         <img
           src={images[currentImageIndex]}
           alt={property.address}
-          className="w-full h-16 sm:h-20 object-cover rounded"
+          className="w-full h-24 sm:h-28 object-cover"
         />
-        {/* Property type badge on image */}
-        <span className="absolute top-1 right-1 text-[10px] font-semibold px-1 py-0.5 rounded bg-white/90 text-neutral-700 capitalize">
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        {/* Property type badge */}
+        <span className="absolute top-2 left-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/90 backdrop-blur-sm text-neutral-700 capitalize">
           {property.propertyType}
         </span>
+        {/* Price on image */}
+        <div className="absolute bottom-2 left-2 right-2">
+          <p className={`font-bold text-base drop-shadow-lg ${priceInfo.hasReduction ? 'text-green-400' : 'text-white'}`}>
+            {formatPrice(priceInfo.currentPrice, property.country)}
+          </p>
+        </div>
       </div>
 
-      {/* Title */}
-      {property.title && (
-        <p className="font-bold text-xs text-neutral-900 mb-0.5 line-clamp-1">
-          {property.title}
+      {/* Info section with blur */}
+      <div className="p-2 bg-white/95 backdrop-blur-sm">
+        {/* Title */}
+        {property.title && (
+          <p className="font-semibold text-xs text-neutral-800 mb-1 line-clamp-1">
+            {property.title}
+          </p>
+        )}
+
+        {/* Location */}
+        <p className="text-[10px] text-neutral-500 mb-1.5 line-clamp-1">
+          {property.city}, {property.country}
         </p>
-      )}
 
-      {/* Price */}
-      <p className={`font-bold text-sm mb-0.5 ${priceInfo.hasReduction ? 'text-green-600' : 'text-primary'}`}>
-        {formatPrice(priceInfo.currentPrice, property.country)}
-      </p>
-
-      {/* Address */}
-      <p className="text-[10px] text-neutral-500 mb-1 line-clamp-1">
-        {property.city}, {property.country}
-      </p>
-
-      {/* Compact info row */}
-      {property.propertyType === 'land' ? (
-        <div className="text-[10px] text-neutral-600">
-          {property.sqft?.toLocaleString()} m²
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 text-[10px] text-neutral-600">
-          <span>{property.beds} bed</span>
-          <span>{property.baths} bath</span>
-          <span>{property.sqft} m²</span>
-        </div>
-      )}
+        {/* Specs row */}
+        {property.propertyType === 'land' ? (
+          <div className="text-[10px] font-medium text-neutral-600">
+            {property.sqft?.toLocaleString()} m²
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 text-[10px] text-neutral-600">
+            <span className="flex items-center gap-0.5">
+              <span className="font-semibold">{property.beds}</span> bed
+            </span>
+            <span className="flex items-center gap-0.5">
+              <span className="font-semibold">{property.baths}</span> bath
+            </span>
+            <span className="flex items-center gap-0.5">
+              <span className="font-semibold">{property.sqft}</span> m²
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -746,9 +758,9 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 240 : 160}
-              minWidth={isPromoted ? 200 : 144}
-              className={`${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
+              maxWidth={isPromoted ? 240 : 180}
+              minWidth={isPromoted ? 200 : 160}
+              className={`property-popup ${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>
