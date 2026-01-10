@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../middleware/authMiddleware';
+import { protect } from '../middleware/auth';
 import {
   getMeasurements,
   saveMeasurement,
