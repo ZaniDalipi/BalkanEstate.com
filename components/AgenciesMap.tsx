@@ -125,7 +125,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
         zoom={7}
         scrollWheelZoom={true}
         className="w-full h-full rounded-2xl"
-        maxZoom={22}
+        maxZoom={19}
         minZoom={6}
         zoomControl={true}
         maxBounds={BALKAN_BOUNDS}
@@ -146,8 +146,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
             ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           }
-          maxNativeZoom={19}
-          maxZoom={22}
+          maxZoom={19}
           keepBuffer={2}
           updateWhenIdle={true}
           updateWhenZooming={false}

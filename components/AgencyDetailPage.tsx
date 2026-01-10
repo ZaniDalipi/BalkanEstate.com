@@ -1372,14 +1372,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 zoom={12}
                 scrollWheelZoom={true}
                 className="w-full h-[400px] md:h-[500px]"
-                maxZoom={22}
+                maxZoom={19}
                 minZoom={3}
               >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  maxNativeZoom={19}
-                  maxZoom={22}
+                  maxZoom={19}
                 />
                 <MapInvalidator />
                 {agencyProperties.filter(p => p.lat && p.lng).map((property) => (
@@ -1459,14 +1458,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 zoom={13}
                 scrollWheelZoom={true}
                 className="w-full h-80"
-                maxZoom={22}
+                maxZoom={19}
                 minZoom={3}
               >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  maxNativeZoom={19}
-                  maxZoom={22}
+                  maxZoom={19}
                 />
                 <MapInvalidator />
                 <Marker
