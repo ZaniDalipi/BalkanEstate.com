@@ -573,8 +573,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             )}
           </div>
-          {/* Legend - positioned above the newsletter on desktop (bottom-12 = ~112px to clear the ~80px newsletter) */}
-          {isLegendOpen && (
+          {/* Legend - positioned above the newsletter on desktop, hidden when measurement tool is open */}
+          {isLegendOpen && !showMeasurement && (
             <div className="absolute bottom-12 left-4 z-[1000] animate-fade-in">
               <Legend isNightMode={false} />
             </div>
