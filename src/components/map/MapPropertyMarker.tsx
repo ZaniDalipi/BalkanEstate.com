@@ -636,131 +636,51 @@ const PropertyPopup: React.FC<{
     );
   }
 
-  // Standard popup for non-promoted properties
+  // Standard popup for non-promoted properties - compact mobile design
   return (
-    <div className="w-48 sm:w-56 cursor-pointer" onClick={() => onPopupClick(property.id)}>
-      {/* Image carousel */}
-      <div className="relative mb-2">
+    <div className="w-36 sm:w-48 cursor-pointer" onClick={() => onPopupClick(property.id)}>
+      {/* Image */}
+      <div className="relative mb-1">
         <img
           src={images[currentImageIndex]}
           alt={property.address}
-          className="w-full h-24 sm:h-28 object-cover rounded"
+          className="w-full h-16 sm:h-20 object-cover rounded"
         />
-
-        {/* Image navigation */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={prevImage}
-              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors text-sm"
-            >
-              ‹
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors text-sm"
-            >
-              ›
-            </button>
-
-            {/* Image counter */}
-            <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
-              {currentImageIndex + 1}/{images.length}
-            </div>
-          </>
-        )}
+        {/* Property type badge on image */}
+        <span className="absolute top-1 right-1 text-[10px] font-semibold px-1 py-0.5 rounded bg-white/90 text-neutral-700 capitalize">
+          {property.propertyType}
+        </span>
       </div>
 
       {/* Title */}
       {property.title && (
-        <p className="font-bold text-sm text-neutral-900 mb-1 line-clamp-1">
+        <p className="font-bold text-xs text-neutral-900 mb-0.5 line-clamp-1">
           {property.title}
         </p>
       )}
 
-      {/* Price and property type */}
-      <div className="mb-1.5">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            {priceInfo.hasReduction && (
-              <span className="text-neutral-400 text-xs line-through">
-                {formatPrice(priceInfo.originalPrice, property.country)}
-              </span>
-            )}
-            <p className={`font-bold text-base ${priceInfo.hasReduction ? 'text-green-600' : 'text-primary'}`}>
-              {formatPrice(priceInfo.currentPrice, property.country)}
-              {priceInfo.hasReduction && (
-                <span className="ml-1 text-xs font-bold">-{priceInfo.discountPercentage}%</span>
-              )}
-            </p>
-          </div>
-          <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
-            {property.propertyType}
-          </span>
-        </div>
-      </div>
-
-      {/* Address */}
-      <p className="text-xs text-neutral-600 mb-2 line-clamp-1">
-        {property.address}, {property.city}
+      {/* Price */}
+      <p className={`font-bold text-sm mb-0.5 ${priceInfo.hasReduction ? 'text-green-600' : 'text-primary'}`}>
+        {formatPrice(priceInfo.currentPrice, property.country)}
       </p>
 
-      {/* Essential information - different for land vs residential */}
+      {/* Address */}
+      <p className="text-[10px] text-neutral-500 mb-1 line-clamp-1">
+        {property.city}, {property.country}
+      </p>
+
+      {/* Compact info row */}
       {property.propertyType === 'land' ? (
-        <div className="grid grid-cols-2 gap-1.5 mb-2 text-center">
-          <div className="bg-amber-50 rounded py-2">
-            <div className="font-bold text-base text-amber-800">{property.sqft?.toLocaleString()}</div>
-            <div className="text-xs text-amber-600">{t('map.area', 'Area')} (m²)</div>
-          </div>
-          <div className="bg-neutral-50 rounded py-2">
-            <div className="font-bold text-sm text-neutral-700">
-              €{property.sqft > 0 ? (property.price / property.sqft).toFixed(1) : '—'}
-            </div>
-            <div className="text-xs text-neutral-500">{t('map.pricePerSqm', 'per m²')}</div>
-          </div>
+        <div className="text-[10px] text-neutral-600">
+          {property.sqft?.toLocaleString()} m²
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-3 gap-1.5 mb-2 text-center">
-            <div className="bg-neutral-50 rounded py-1.5">
-              <div className="text-xs text-neutral-500">{t('map.beds')}</div>
-              <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
-            </div>
-            <div className="bg-neutral-50 rounded py-1.5">
-              <div className="text-xs text-neutral-500">{t('map.baths')}</div>
-              <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
-            </div>
-            <div className="bg-neutral-50 rounded py-1.5">
-              <div className="text-xs text-neutral-500">{t('map.area')}</div>
-              <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
-            </div>
-          </div>
-
-          {/* Additional features - only for residential */}
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            {property.livingRooms > 0 && (
-              <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
-                {property.livingRooms} {t('map.living')}
-              </span>
-            )}
-            {property.parking > 0 && (
-              <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
-                {property.parking} {t('map.parking')}
-              </span>
-            )}
-            {property.yearBuilt && (
-              <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">
-                {property.yearBuilt}
-              </span>
-            )}
-          </div>
-        </>
+        <div className="flex items-center gap-2 text-[10px] text-neutral-600">
+          <span>{property.beds} bed</span>
+          <span>{property.baths} bath</span>
+          <span>{property.sqft} m²</span>
+        </div>
       )}
-
-      {/* View details prompt */}
-      <div className="text-center pt-1.5 border-t border-neutral-200">
-        <p className="text-xs font-semibold text-primary">{t('map.clickForDetails')}</p>
-      </div>
     </div>
   );
 };
@@ -826,8 +746,8 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 288 : 224}
-              minWidth={isPromoted ? 224 : 192}
+              maxWidth={isPromoted ? 240 : 160}
+              minWidth={isPromoted ? 200 : 144}
               className={`${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
