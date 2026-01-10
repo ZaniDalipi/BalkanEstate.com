@@ -240,7 +240,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
       {measurements.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Mini Map showing all measurements */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ height: '400px' }}>
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ height: '500px' }}>
             <div className="bg-gray-100 px-3 py-2 border-b flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">📍 All Measurements</span>
               {selectedMeasurement && (
@@ -334,7 +334,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
           </div>
 
           {/* Measurements list */}
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+          <div className="space-y-3 max-h-[500px] overflow-y-auto">
             {measurements.map((measurement, index) => (
               <div
                 key={measurement.id}
