@@ -232,18 +232,40 @@ export const ZoomBased3DBuildings: React.FC<{
   setShow3DBuildings: (show: boolean) => void;
 }> = ({ show3DBuildings, setShow3DBuildings }) => {
   const map = useMap();
+  // Track if user manually disabled 3D at high zoom - don't auto-enable until they zoom out
+  const userDisabledAtHighZoom = React.useRef(false);
+  const prevShow3DBuildings = React.useRef(show3DBuildings);
+
+  useEffect(() => {
+    // Detect manual toggle by user (not triggered by zoom)
+    const currentZoom = map.getZoom();
+    if (prevShow3DBuildings.current && !show3DBuildings && currentZoom >= 18) {
+      // User manually turned off 3D at high zoom
+      userDisabledAtHighZoom.current = true;
+    } else if (show3DBuildings && !prevShow3DBuildings.current) {
+      // User manually turned on 3D - reset the override
+      userDisabledAtHighZoom.current = false;
+    }
+    prevShow3DBuildings.current = show3DBuildings;
+  }, [show3DBuildings, map]);
 
   useEffect(() => {
     const handleZoomEnd = () => {
       const currentZoom = map.getZoom();
 
-      // Enable 3D buildings at zoom 19+ (beyond max useful map tile detail)
-      if (currentZoom >= 19 && !show3DBuildings) {
+      // Reset user override when zooming out below threshold
+      if (currentZoom < 17) {
+        userDisabledAtHighZoom.current = false;
+      }
+
+      // Enable 3D buildings at zoom 19+ (only if user hasn't manually disabled)
+      if (currentZoom >= 19 && !show3DBuildings && !userDisabledAtHighZoom.current) {
         setShow3DBuildings(true);
       }
       // Disable 3D buildings below zoom 18 (hysteresis to prevent rapid toggling)
       else if (currentZoom < 18 && show3DBuildings) {
         setShow3DBuildings(false);
+        userDisabledAtHighZoom.current = false;
       }
     };
 
