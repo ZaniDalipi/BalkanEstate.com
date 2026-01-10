@@ -204,13 +204,12 @@ const formatMarkerPrice = (price: number): string => {
  * Get marker width based on price text length
  */
 const getMarkerWidthForPrice = (price: string): number => {
-  // Base width for short prices like "€45K"
-  const baseWidth = 38;
-  // Add extra width for longer prices
-  if (price.length > 5) {
-    return baseWidth + (price.length - 5) * 6;
-  }
-  return baseWidth;
+  // Base padding on each side (left + right)
+  const horizontalPadding = 20;
+  // Approximate width per character (using Inter font at 11px)
+  const charWidth = 7;
+  // Calculate width based on text length + padding
+  return Math.max(44, (price.length * charWidth) + horizontalPadding);
 };
 
 /**
