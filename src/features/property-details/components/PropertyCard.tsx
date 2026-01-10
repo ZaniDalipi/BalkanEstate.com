@@ -124,11 +124,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-500 text-left w-full flex flex-col cursor-pointer ${getCardStyles()} ${
-        isHovered && !isSold ? 'shadow-2xl -translate-y-2 scale-[1.02]' : 'hover:shadow-xl'
+      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-300 text-left w-full flex flex-col cursor-pointer ${getCardStyles()} ${
+        isHovered && !isSold ? 'shadow-2xl -translate-y-1 scale-[1.01]' : 'hover:shadow-xl active:shadow-2xl active:-translate-y-1 active:scale-[1.01]'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setTimeout(() => setIsHovered(false), 150)}
       onClick={handleCardClick}
     >
       {/* Image Section */}
