@@ -489,35 +489,35 @@ const MapComponent: React.FC<MapComponentProps> = ({
         <>
           {/* Mobile: Bottom-left - Layer toggles in horizontal bar - positioned above List/Map toggle */}
           <div className="absolute bottom-28 left-2 right-2 z-[1000] flex justify-center pointer-events-none md:hidden">
-            <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/85 transition-all duration-300 ease-out">
+            <div className="pointer-events-auto flex items-center gap-1 p-1 rounded-full shadow-md backdrop-blur-md bg-white/90 transition-all duration-300 ease-out">
               {/* 3D Buildings Toggle */}
               <button
                 onClick={() => setShow3DBuildings(!show3DBuildings)}
                 className={`
-                  p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                  p-1.5 rounded-full transition-all duration-200 ease-out active:scale-95
                   ${show3DBuildings
-                    ? 'bg-slate-700 text-white shadow-md'
+                    ? 'bg-slate-700 text-white shadow-sm'
                     : 'text-neutral-500 hover:bg-neutral-100'
                   }
                 `}
                 title={t('search:map.buildings3D', '3D Buildings')}
               >
-                <span className="text-lg">🏢</span>
+                <span className="text-sm">🏢</span>
               </button>
 
               {/* Landmarks Toggle */}
               <button
                 onClick={() => setShowLandmarks(!showLandmarks)}
                 className={`
-                  p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                  p-1.5 rounded-full transition-all duration-200 ease-out active:scale-95
                   ${showLandmarks
-                    ? 'bg-primary text-white shadow-md'
+                    ? 'bg-primary text-white shadow-sm'
                     : 'text-neutral-500 hover:bg-neutral-100'
                   }
                 `}
                 title={t('search:map.landmarks', 'Landmarks')}
               >
-                <span className="text-lg">🏛️</span>
+                <span className="text-sm">🏛️</span>
               </button>
 
               {/* Cadastre Toggle - only in satellite */}
@@ -525,26 +525,26 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <button
                   onClick={() => setShowCadastre(!showCadastre)}
                   className={`
-                    p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                    p-1.5 rounded-full transition-all duration-200 ease-out active:scale-95
                     ${showCadastre
-                      ? 'bg-primary text-white shadow-md'
+                      ? 'bg-primary text-white shadow-sm'
                       : 'text-neutral-500 hover:bg-neutral-100'
                     }
                   `}
                   title={t('search:map.cadastralParcels')}
                 >
-                  <span className="text-lg">📐</span>
+                  <span className="text-sm">📐</span>
                 </button>
               )}
 
               {/* Divider */}
-              <div className="w-px h-6 mx-0.5 bg-neutral-200" />
+              <div className="w-px h-4 bg-neutral-300" />
 
               {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen((p) => !p)}
                 className={`
-                  p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                  p-1.5 rounded-full transition-all duration-200 ease-out active:scale-95
                   ${isLegendOpen
                     ? 'bg-neutral-200 text-neutral-700'
                     : 'text-neutral-500 hover:bg-neutral-100'
@@ -552,7 +552,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 `}
                 title={t('search:map.mapLegend')}
               >
-                <MapLegendIcon className="w-5 h-5" />
+                <MapLegendIcon className="w-4 h-4" />
               </button>
             </div>
 
