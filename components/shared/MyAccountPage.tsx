@@ -5,6 +5,7 @@ import MyListings from './MyListings';
 import SubscriptionManagement from './SubscriptionManagement';
 import ProfileStatistics from './ProfileStatistics';
 import MyPromotions from './MyPromotions';
+import MyMeasurements from './MyMeasurements';
 import { User, UserRole, Agency } from '../../types';
 import { BuildingOfficeIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon } from '../../constants';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -27,7 +28,7 @@ const BALKAN_LANGUAGES = [
   'Hungarian', 'German', 'Italian', 'French', 'Russian', 'Spanish'
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions';
+type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
@@ -43,6 +44,8 @@ const tabRouteMap: Record<string, AccountTab> = {
     'settings': 'profile',
     'profile-settings': 'profile',
     'security': 'security',
+    'measurements': 'measurements',
+    'my-measurements': 'measurements',
 };
 
 // Map account tabs to URL slugs
@@ -53,6 +56,7 @@ const tabToRouteMap: Record<AccountTab, string> = {
     'subscription': 'subscription',
     'profile': 'profile',
     'security': 'security',
+    'measurements': 'measurements',
 };
 
 const TabButton: React.FC<{
@@ -1338,6 +1342,8 @@ const MyAccountPage: React.FC = () => {
                  return <ProfileStatistics key={performanceRefreshKey} user={state.currentUser!} />;
             case 'subscription':
                  return <SubscriptionManagement userId={state.currentUser!.id} />;
+            case 'measurements':
+                 return <MyMeasurements userId={state.currentUser!.id} />;
             case 'security':
                  return <SecuritySettings logoutAllDevices={logoutAllDevices} />;
             default:
@@ -1397,6 +1403,7 @@ const MyAccountPage: React.FC = () => {
                                     </>
                                 )}
                                 <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
+                                <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<MapPinIcon className="w-6 h-6"/>} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />
                                 <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
                                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 mt-4">
                                     <ArrowLeftOnRectangleIcon className="w-6 h-6" />

@@ -766,13 +766,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               ))}
             </div>
 
-            <button
-              onClick={() => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } })}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 mt-4"
+            <a
+              href="/pricing"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 mt-4 cursor-pointer"
             >
               <SparklesIcon className="w-5 h-5" />
               View Plans & Pricing
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -1065,13 +1065,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 <p className="font-semibold text-neutral-800">{t('management.whatsIncluded.wantMoreFeatures')}</p>
                 <p className="text-sm text-neutral-600">{t('management.whatsIncluded.upgradeToProDesc')}</p>
               </div>
-              <button
-                onClick={() => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } })}
+              <a
+                href="/pricing"
                 className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
               >
                 <SparklesIcon className="w-4 h-4" />
                 {t('management.upgradeNow')}
-              </button>
+              </a>
             </div>
           </div>
         )}
@@ -1300,13 +1300,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 After this date, you'll be downgraded to the free plan.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  onClick={() => dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } })}
+                <a
+                  href="/pricing"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
                 >
                   <SparklesIcon className="w-4 h-4" />
                   Resubscribe
-                </button>
+                </a>
               </div>
             </div>
           </div>

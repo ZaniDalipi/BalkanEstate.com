@@ -2109,3 +2109,94 @@ export const triggerMarketDataUpdate = async (): Promise<void> => {
     requiresAuth: true,
   });
 };
+
+// --- MEASUREMENTS API ---
+
+export interface MeasurementPoint {
+  lat: number;
+  lng: number;
+}
+
+export interface SavedMeasurement {
+  id: string;
+  name: string;
+  points: MeasurementPoint[];
+  type: 'distance' | 'area';
+  distance?: number;      // Total distance in meters
+  area?: number;          // Area in square meters
+  perimeter?: number;     // Perimeter in meters
+  address?: string;       // Location name
+  notes?: string;         // User notes
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface MeasurementsResponse {
+  success: boolean;
+  measurements: SavedMeasurement[];
+  count: number;
+  maxAllowed: number;
+  isPro: boolean;
+}
+
+/**
+ * Get all saved measurements for the user
+ */
+export const getMeasurements = async (): Promise<MeasurementsResponse> => {
+  return await apiRequest<MeasurementsResponse>('/measurements', {
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Save a new measurement
+ */
+export const saveMeasurement = async (measurement: {
+  name: string;
+  points: MeasurementPoint[];
+  type: 'distance' | 'area';
+  distance?: number;
+  area?: number;
+  perimeter?: number;
+  address?: string;
+  notes?: string;
+}): Promise<{ success: boolean; measurement: SavedMeasurement; count: number; maxAllowed: number }> => {
+  return await apiRequest('/measurements', {
+    method: 'POST',
+    body: measurement,
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Update a measurement
+ */
+export const updateMeasurement = async (
+  id: string,
+  data: { name?: string; address?: string; notes?: string }
+): Promise<{ success: boolean; measurement: SavedMeasurement }> => {
+  return await apiRequest(`/measurements/${id}`, {
+    method: 'PUT',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Delete a measurement
+ */
+export const deleteMeasurement = async (id: string): Promise<{ success: boolean; count: number }> => {
+  return await apiRequest(`/measurements/${id}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+};
+
+/**
+ * Get a single measurement by ID
+ */
+export const getMeasurementById = async (id: string): Promise<{ success: boolean; measurement: SavedMeasurement }> => {
+  return await apiRequest(`/measurements/${id}`, {
+    requiresAuth: true,
+  });
+};
