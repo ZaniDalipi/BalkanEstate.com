@@ -784,7 +784,9 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
               minWidth={isPromoted ? 280 : 200}
               className={`property-popup ${isPromoted ? 'promoted-property-popup' : 'standard-property-popup'} ${isNightMode ? 'night-mode-popup' : ''}`}
               autoPan={true}
-              autoPanPadding={[50, 50]}
+              autoPanPaddingTopLeft={[50, 120]}
+              autoPanPaddingBottomRight={[50, 150]}
+              keepInView={true}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>
