@@ -349,8 +349,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {!isMobile && (
         <>
           <div className="absolute bottom-28 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
-            {/* Main control bar - compact */}
-            <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-colors duration-300">
+            {/* Main control bar - compact with glass effect */}
+            <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
               <button
                 onClick={onRecenter}
                 className="p-1.5 rounded-full transition-colors hover:bg-black/10"
@@ -394,8 +394,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </button>
             </div>
 
-            {/* Layer toggles - compact row */}
-            <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-lg">
+            {/* Layer toggles - compact row with glass effect */}
+            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
               {/* 3D Buildings Toggle */}
               <button
                 onClick={() => setShow3DBuildings(!show3DBuildings)}

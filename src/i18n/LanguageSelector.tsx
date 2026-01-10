@@ -60,7 +60,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className = '', com
 
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50 max-h-80 overflow-y-auto"
+          className="absolute right-0 mt-2 w-56 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 py-2 z-50 max-h-80 overflow-y-auto"
           role="listbox"
         >
           {SUPPORTED_LANGUAGES.map((lang) => (
@@ -72,8 +72,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ className = '', com
               onClick={() => handleSelectLanguage(lang.code)}
               className={`
                 w-full flex items-center gap-3 px-4 py-2.5 text-left
-                hover:bg-neutral-50 transition-colors
-                ${language === lang.code ? 'bg-primary/5 text-primary' : 'text-neutral-700'}
+                hover:bg-white/60 transition-colors
+                ${language === lang.code ? 'bg-primary/10 text-primary' : 'text-neutral-700'}
               `}
             >
               <span className="text-xl">{lang.flag}</span>
