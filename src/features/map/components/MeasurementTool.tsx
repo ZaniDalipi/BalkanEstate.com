@@ -433,7 +433,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       {/* Measurement info panel - Compact */}
       <div
         ref={containerRef}
-        className="absolute top-4 right-4 z-[1001] bg-white rounded-lg shadow-lg p-2.5 min-w-[220px] max-w-[240px]"
+        className="absolute bottom-24 left-4 z-[1001] bg-white rounded-lg shadow-lg p-2.5 min-w-[220px] max-w-[240px]"
         style={{ pointerEvents: 'auto' }}
       >
         <div className="flex items-center justify-between mb-2">
