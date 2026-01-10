@@ -132,7 +132,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
   const tierConfig = getTierConfig();
 
   return (
-    <div className="absolute bottom-24 md:bottom-auto md:top-20 right-2 md:right-3 z-[999] flex flex-col items-end gap-2">
+    <div className="absolute bottom-36 md:bottom-auto md:top-20 right-2 md:right-3 z-[999] flex flex-col items-end gap-2">
       {/* Recommendation Panel */}
       {showPanel && currentMapFeatured && (
         <div
@@ -285,48 +285,66 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
         </div>
       )}
 
-      {/* Floating Agent Button */}
+      {/* Floating Agent Button - Modern Design */}
       <button
         onClick={handleTogglePanel}
         onMouseEnter={() => setIsExpanded(true)}
         onMouseLeave={() => setIsExpanded(false)}
-        className={`relative transition-all duration-300 ${isExpanded ? 'scale-105' : 'scale-100'}`}
+        className={`relative transition-all duration-300 ${isExpanded ? 'scale-110' : 'scale-100'}`}
       >
-        {/* Pulsing ring */}
+        {/* Outer glow ring */}
         <div
-          className="absolute inset-0 rounded-full animate-ping opacity-20"
-          style={{ backgroundColor: tierConfig.color, animationDuration: '3s' }}
+          className="absolute -inset-1 rounded-full opacity-30 blur-sm"
+          style={{ backgroundColor: tierConfig.color }}
         />
 
-        {/* Main button */}
+        {/* Pulsing ring */}
         <div
-          className="relative w-10 h-10 md:w-11 md:h-11 rounded-full bg-white shadow-lg flex items-center justify-center overflow-hidden"
+          className="absolute -inset-0.5 rounded-full animate-pulse opacity-40"
           style={{
-            border: `2px solid ${tierConfig.color}`,
-            boxShadow: `0 2px 10px ${tierConfig.color}30`,
+            background: `linear-gradient(135deg, ${tierConfig.color}, transparent)`,
+          }}
+        />
+
+        {/* Main button container */}
+        <div
+          className="relative w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center overflow-visible"
+          style={{
+            background: 'linear-gradient(145deg, #ffffff, #f0f0f0)',
+            boxShadow: `0 4px 15px rgba(0,0,0,0.15), 0 2px 6px ${tierConfig.color}40, inset 0 1px 0 rgba(255,255,255,0.8)`,
+            border: `2.5px solid ${tierConfig.color}`,
           }}
         >
-          {/* Agent icon */}
-          <div className="text-lg md:text-xl">🏠</div>
-
-          {/* Tier badge */}
-          <div
-            className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[10px] shadow-sm"
-            style={{ backgroundColor: tierConfig.color }}
-          >
-            {tierConfig.icon}
-          </div>
+          {/* House icon */}
+          <span className="text-xl md:text-2xl">🏠</span>
         </div>
 
-        {/* Count badge */}
-        <div className="absolute -bottom-0.5 -left-0.5 bg-red-500 text-white text-[9px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center shadow">
-          {highlightedProperties.length}
+        {/* Count badge - bottom right */}
+        <div
+          className="absolute -bottom-1 -right-1 min-w-[20px] h-[20px] px-1 rounded-full flex items-center justify-center shadow-lg"
+          style={{
+            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+            border: '2px solid white',
+          }}
+        >
+          <span className="text-white text-[10px] font-bold">{highlightedProperties.length}</span>
+        </div>
+
+        {/* Sparkle/star indicator - top right */}
+        <div
+          className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-md"
+          style={{
+            background: `linear-gradient(135deg, ${tierConfig.color}, ${tierConfig.color}dd)`,
+            border: '1.5px solid white',
+          }}
+        >
+          <span className="text-[10px]">{tierConfig.icon}</span>
         </div>
 
         {/* Tooltip on hover - hidden on mobile */}
         {isExpanded && !showPanel && !showHint && (
-          <div className="hidden lg:block absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[9px] px-2 py-1 rounded whitespace-nowrap animate-fade-in">
-            {highlightedProperties.length} Promoted
+          <div className="hidden lg:block absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900/95 backdrop-blur-sm text-white text-[10px] px-2.5 py-1.5 rounded-lg whitespace-nowrap animate-fade-in shadow-xl">
+            <span className="font-semibold">{highlightedProperties.length}</span> Promoted
             <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900" />
           </div>
         )}

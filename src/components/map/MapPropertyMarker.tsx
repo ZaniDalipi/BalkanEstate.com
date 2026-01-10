@@ -636,130 +636,64 @@ const PropertyPopup: React.FC<{
     );
   }
 
-  // Standard popup for non-promoted properties
+  // Standard popup - clean minimal design (no slider, full-width image)
   return (
-    <div className="w-48 sm:w-56 cursor-pointer" onClick={() => onPopupClick(property.id)}>
-      {/* Image carousel */}
-      <div className="relative mb-2">
+    <div
+      className="w-[200px] cursor-pointer rounded-xl overflow-hidden shadow-lg bg-white"
+      onClick={() => onPopupClick(property.id)}
+    >
+      {/* Full-width image - no slider, just first image */}
+      <div className="relative h-[120px]">
         <img
-          src={images[currentImageIndex]}
+          src={images[0]}
           alt={property.address}
-          className="w-full h-24 sm:h-28 object-cover rounded"
+          className="absolute inset-0 w-full h-full object-cover"
         />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        {/* Property type */}
+        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/90 text-neutral-700 capitalize">
+          {property.propertyType}
+        </span>
+        {/* Price on image */}
+        <div className="absolute bottom-2 left-2 right-2">
+          <p className="font-bold text-white text-lg drop-shadow-md">
+            {formatPrice(priceInfo.currentPrice, property.country)}
+          </p>
+        </div>
+      </div>
 
-        {/* Image navigation */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={prevImage}
-              className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors text-sm"
-            >
-              ‹
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors text-sm"
-            >
-              ›
-            </button>
-
-            {/* Image counter */}
-            <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
-              {currentImageIndex + 1}/{images.length}
-            </div>
-          </>
+      {/* Content */}
+      <div className="p-3">
+        {/* Title */}
+        {property.title && (
+          <p className="font-semibold text-sm text-neutral-800 line-clamp-1 mb-1">
+            {property.title}
+          </p>
         )}
-      </div>
 
-      {/* Title */}
-      {property.title && (
-        <p className="font-bold text-sm text-neutral-900 mb-1 line-clamp-1">
-          {property.title}
+        {/* Location */}
+        <p className="text-[11px] text-neutral-500 mb-2">
+          {property.city}, {property.country}
         </p>
-      )}
 
-      {/* Price and property type */}
-      <div className="mb-1.5">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            {priceInfo.hasReduction && (
-              <span className="text-neutral-400 text-xs line-through">
-                {formatPrice(priceInfo.originalPrice, property.country)}
-              </span>
-            )}
-            <p className={`font-bold text-base ${priceInfo.hasReduction ? 'text-green-600' : 'text-primary'}`}>
-              {formatPrice(priceInfo.currentPrice, property.country)}
-              {priceInfo.hasReduction && (
-                <span className="ml-1 text-xs font-bold">-{priceInfo.discountPercentage}%</span>
-              )}
-            </p>
+        {/* Specs row */}
+        {property.propertyType === 'land' ? (
+          <div className="flex items-center gap-2 text-[11px] text-neutral-600 mb-2">
+            <span className="font-semibold">{property.sqft?.toLocaleString()} m²</span>
           </div>
-          <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
-            {property.propertyType}
-          </span>
+        ) : (
+          <div className="flex items-center gap-3 text-[11px] text-neutral-600 mb-2">
+            <span><span className="font-semibold">{property.beds}</span> bed</span>
+            <span><span className="font-semibold">{property.baths}</span> bath</span>
+            <span><span className="font-semibold">{property.sqft}</span> m²</span>
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="text-center py-2 rounded-lg bg-primary/10">
+          <span className="text-[11px] font-semibold text-primary">View details →</span>
         </div>
-      </div>
-
-      {/* Address */}
-      <p className="text-xs text-neutral-600 mb-2 line-clamp-1">
-        {property.address}, {property.city}
-      </p>
-
-      {/* Essential information - different for land vs residential */}
-      {property.propertyType === 'land' ? (
-        <div className="grid grid-cols-2 gap-1.5 mb-2 text-center">
-          <div className="bg-amber-50 rounded py-2">
-            <div className="font-bold text-base text-amber-800">{property.sqft?.toLocaleString()}</div>
-            <div className="text-xs text-amber-600">{t('map.area', 'Area')} (m²)</div>
-          </div>
-          <div className="bg-neutral-50 rounded py-2">
-            <div className="font-bold text-sm text-neutral-700">
-              €{property.sqft > 0 ? (property.price / property.sqft).toFixed(1) : '—'}
-            </div>
-            <div className="text-xs text-neutral-500">{t('map.pricePerSqm', 'per m²')}</div>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-3 gap-1.5 mb-2 text-center">
-            <div className="bg-neutral-50 rounded py-1.5">
-              <div className="text-xs text-neutral-500">{t('map.beds')}</div>
-              <div className="font-bold text-sm text-neutral-800">{property.beds}</div>
-            </div>
-            <div className="bg-neutral-50 rounded py-1.5">
-              <div className="text-xs text-neutral-500">{t('map.baths')}</div>
-              <div className="font-bold text-sm text-neutral-800">{property.baths}</div>
-            </div>
-            <div className="bg-neutral-50 rounded py-1.5">
-              <div className="text-xs text-neutral-500">{t('map.area')}</div>
-              <div className="font-bold text-sm text-neutral-800">{property.sqft}</div>
-            </div>
-          </div>
-
-          {/* Additional features - only for residential */}
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            {property.livingRooms > 0 && (
-              <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
-                {property.livingRooms} {t('map.living')}
-              </span>
-            )}
-            {property.parking > 0 && (
-              <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
-                {property.parking} {t('map.parking')}
-              </span>
-            )}
-            {property.yearBuilt && (
-              <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">
-                {property.yearBuilt}
-              </span>
-            )}
-          </div>
-        </>
-      )}
-
-      {/* View details prompt */}
-      <div className="text-center pt-1.5 border-t border-neutral-200">
-        <p className="text-xs font-semibold text-primary">{t('map.clickForDetails')}</p>
       </div>
     </div>
   );
@@ -826,9 +760,11 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 288 : 224}
-              minWidth={isPromoted ? 224 : 192}
-              className={`${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
+              maxWidth={isPromoted ? 320 : 220}
+              minWidth={isPromoted ? 280 : 200}
+              className={`property-popup ${isPromoted ? 'promoted-property-popup' : 'standard-property-popup'} ${isNightMode ? 'night-mode-popup' : ''}`}
+              autoPan={true}
+              autoPanPadding={[50, 50]}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>

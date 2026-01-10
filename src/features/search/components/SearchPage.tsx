@@ -1039,12 +1039,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         </div>
                         
                         <div className="absolute bottom-16 left-0 right-0 z-[1002] p-4 pointer-events-none">
-                            {/* Map hint tooltip */}
+                            {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
-                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-auto animate-bounce">
-                                    <div className="relative bg-primary text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium whitespace-nowrap">
-                                        <span>Tap here to view the map!</span>
-                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-primary"></div>
+                                <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">
+                                    <div className="relative bg-primary text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-medium whitespace-nowrap">
+                                        <span>Tap "Map"</span>
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-6 border-transparent border-t-primary"></div>
                                     </div>
                                 </div>
                             )}

@@ -487,37 +487,44 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {/* Mobile Controls - hidden on desktop via CSS as fallback */}
       {isMobile && (
         <>
-          {/* Mobile: Bottom-left - Layer toggles in horizontal bar - positioned above List/Map toggle */}
-          <div className="absolute bottom-28 left-2 right-2 z-[1000] flex justify-center pointer-events-none md:hidden">
-            <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/85 transition-all duration-300 ease-out">
+          {/* Mobile: Layer toggles - positioned at top left */}
+          <div className="absolute top-20 left-2 z-[1003] pointer-events-none md:hidden">
+            <div
+              className="pointer-events-auto flex flex-col gap-1.5 p-2 rounded-2xl shadow-lg"
+              style={{
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)'
+              }}
+            >
               {/* 3D Buildings Toggle */}
               <button
                 onClick={() => setShow3DBuildings(!show3DBuildings)}
                 className={`
-                  p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
                   ${show3DBuildings
-                    ? 'bg-slate-700 text-white shadow-md'
-                    : 'text-neutral-500 hover:bg-neutral-100'
+                    ? 'bg-slate-700 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-100'
                   }
                 `}
-                title={t('search:map.buildings3D', '3D Buildings')}
               >
-                <span className="text-lg">🏢</span>
+                <span className="text-sm">🏢</span>
+                <span className="text-[11px] font-medium">3D</span>
               </button>
 
               {/* Landmarks Toggle */}
               <button
                 onClick={() => setShowLandmarks(!showLandmarks)}
                 className={`
-                  p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
                   ${showLandmarks
-                    ? 'bg-primary text-white shadow-md'
-                    : 'text-neutral-500 hover:bg-neutral-100'
+                    ? 'bg-primary text-white'
+                    : 'text-neutral-600 hover:bg-neutral-100'
                   }
                 `}
-                title={t('search:map.landmarks', 'Landmarks')}
               >
-                <span className="text-lg">🏛️</span>
+                <span className="text-sm">🏛️</span>
+                <span className="text-[11px] font-medium">POI</span>
               </button>
 
               {/* Cadastre Toggle - only in satellite */}
@@ -525,40 +532,40 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <button
                   onClick={() => setShowCadastre(!showCadastre)}
                   className={`
-                    p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                    flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
                     ${showCadastre
-                      ? 'bg-primary text-white shadow-md'
-                      : 'text-neutral-500 hover:bg-neutral-100'
+                      ? 'bg-primary text-white'
+                      : 'text-neutral-600 hover:bg-neutral-100'
                     }
                   `}
-                  title={t('search:map.cadastralParcels')}
                 >
-                  <span className="text-lg">📐</span>
+                  <span className="text-sm">📐</span>
+                  <span className="text-[11px] font-medium">Parcels</span>
                 </button>
               )}
 
               {/* Divider */}
-              <div className="w-px h-6 mx-0.5 bg-neutral-200" />
+              <div className="h-px w-full bg-neutral-200 my-0.5" />
 
               {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen((p) => !p)}
                 className={`
-                  p-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
                   ${isLegendOpen
-                    ? 'bg-neutral-200 text-neutral-700'
-                    : 'text-neutral-500 hover:bg-neutral-100'
+                    ? 'bg-neutral-200 text-neutral-800'
+                    : 'text-neutral-600 hover:bg-neutral-100'
                   }
                 `}
-                title={t('search:map.mapLegend')}
               >
-                <MapLegendIcon className="w-5 h-5" />
+                <MapLegendIcon className="w-4 h-4" />
+                <span className="text-[11px] font-medium">Legend</span>
               </button>
             </div>
 
-            {/* Legend popup - positioned above the bar */}
+            {/* Legend popup - positioned to the right */}
             {isLegendOpen && (
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 pointer-events-auto animate-slide-up">
+              <div className="absolute top-0 left-full ml-2 pointer-events-auto animate-fade-in">
                 <Legend isNightMode={false} />
               </div>
             )}
