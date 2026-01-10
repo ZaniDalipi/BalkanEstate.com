@@ -132,7 +132,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
   const tierConfig = getTierConfig();
 
   return (
-    <div className="absolute bottom-24 md:bottom-auto md:top-20 right-2 md:right-3 z-[999] flex flex-col items-end gap-2">
+    <div className="absolute bottom-36 md:bottom-auto md:top-20 right-2 md:right-3 z-[999] flex flex-col items-end gap-2">
       {/* Recommendation Panel */}
       {showPanel && currentMapFeatured && (
         <div
