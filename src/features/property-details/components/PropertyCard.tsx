@@ -169,10 +169,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         </button>
 
         {/* Top badges row */}
-        <div className="absolute top-3 left-3 right-14 flex flex-col gap-2 z-10">
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 items-start">
             {/* Sold Badge */}
             {isSold && (
-              <div className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5">
+              <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                 {t('property:sold').toUpperCase()}
               </div>
@@ -180,7 +180,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
             {/* New Badge */}
             {!isSold && isNew && !isActivelyPromoted && (
-              <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5">
+              <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
@@ -191,17 +191,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
             {/* Price Reduced Badge */}
             {!isSold && priceInfo.hasReduction && isRecentlyReduced && (
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
+                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
-                {priceInfo.intervalLabel || t('property:status.priceReduced', 'PRICE REDUCED').toUpperCase()}
+                {priceInfo.intervalLabel || t('property:status.priceReduced', 'REDUCED').toUpperCase()}
               </div>
             )}
 
             {/* Promotion Badges - Premium = Gold, Highlight = Light Blue, Featured = Pink */}
             {!isSold && isActivelyPromoted && promotionTier && (
-              <div className={`text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5 ${
+              <div className={`text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 ${
                 promotionTier === 'premium'
                   ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400 animate-pulse'
                   : promotionTier === 'highlight'
@@ -210,7 +210,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   ? 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400'
                   : 'bg-gradient-to-r from-gray-600 to-gray-700'
               }`}>
-                <span className="text-xs">{promotionTier === 'premium' ? '👑' : promotionTier === 'highlight' ? '💎' : '⭐'}</span>
+                <span className="text-[10px]">{promotionTier === 'premium' ? '👑' : promotionTier === 'highlight' ? '💎' : '⭐'}</span>
                 {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
                 {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
                 {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
@@ -220,7 +220,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
             {/* Urgent Badge */}
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
-              <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg animate-pulse flex items-center gap-1.5">
+              <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse flex items-center gap-1">
                 🔥 {t('property:status.urgent').toUpperCase()}
               </div>
             )}
