@@ -2,9 +2,7 @@
 // Uses TanStack Query for automatic caching
 
 import { useQuery } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import * as api from '@/services/apiService';
-import { Property } from '@/types';
+import { propertyKeys, getMyListings } from '../api';
 
 /**
  * Hook to get current user's property listings
@@ -27,9 +25,7 @@ export function useMyListings() {
     refetch,
   } = useQuery({
     queryKey: propertyKeys.myListings(),
-    queryFn: async () => {
-      return await api.getMyListings();
-    },
+    queryFn: getMyListings,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error: any) => {

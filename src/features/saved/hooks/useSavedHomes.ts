@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { savedKeys } from '../api/savedKeys';
-import * as api from '@/services/apiService';
-import { Property } from '@/types';
+import { savedKeys, getFavorites, toggleSavedHome } from '../api';
+import type { Property } from '@/types';
 
 /**
  * Hook to get user's saved homes (favorites)
@@ -22,7 +21,7 @@ export function useSavedHomes() {
     refetch,
   } = useQuery({
     queryKey: savedKeys.homes(),
-    queryFn: async () => await api.getFavorites(),
+    queryFn: getFavorites,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000,
     retry: (failureCount, error: any) => {
@@ -54,9 +53,8 @@ export function useToggleSavedHome() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async ({ propertyId, isSaved }: { propertyId: string; isSaved: boolean }) => {
-      return await api.toggleSavedHome(propertyId, isSaved);
-    },
+    mutationFn: ({ propertyId, isSaved }: { propertyId: string; isSaved: boolean }) =>
+      toggleSavedHome(propertyId, isSaved),
     onMutate: async ({ propertyId, isSaved }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: savedKeys.homes() });

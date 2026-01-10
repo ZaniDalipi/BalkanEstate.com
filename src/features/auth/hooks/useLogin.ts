@@ -2,9 +2,8 @@
 // Uses TanStack Query mutation for login operations
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authKeys } from '../api/authKeys';
-import * as api from '@/services/apiService';
-import { User } from '@/types';
+import { authKeys, login } from '../api';
+import type { User } from '@/types';
 
 interface LoginParams {
   emailOrPhone: string;
@@ -38,9 +37,8 @@ export function useLogin() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async ({ emailOrPhone, password }: LoginParams): Promise<User> => {
-      return await api.login(emailOrPhone, password);
-    },
+    mutationFn: ({ emailOrPhone, password }: LoginParams): Promise<User> =>
+      login(emailOrPhone, password),
     onSuccess: (user) => {
       // Update the current user cache immediately
       queryClient.setQueryData(authKeys.currentUser(), user);

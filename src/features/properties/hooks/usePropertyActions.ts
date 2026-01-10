@@ -2,9 +2,8 @@
 // Mark as sold, promote, renew, etc.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import * as api from '@/services/apiService';
-import { Property } from '@/types';
+import { propertyKeys, markPropertyAsSold, uploadPropertyImages } from '../api';
+import type { Property } from '@/types';
 
 /**
  * Hook to mark property as sold
@@ -19,9 +18,7 @@ export function useMarkPropertyAsSold() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (propertyId: string): Promise<Property> => {
-      return await api.markPropertyAsSold(propertyId);
-    },
+    mutationFn: (propertyId: string): Promise<Property> => markPropertyAsSold(propertyId),
     onSuccess: (updatedProperty) => {
       // Update cache
       queryClient.setQueryData(propertyKeys.detail(updatedProperty.id), updatedProperty);
@@ -84,9 +81,8 @@ export function useUploadPropertyImages() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async ({ propertyId, images }: { propertyId: string; images: File[] }): Promise<string[]> => {
-      return await api.uploadPropertyImages(propertyId, images);
-    },
+    mutationFn: ({ propertyId, images }: { propertyId: string; images: File[] }) =>
+      uploadPropertyImages(images, propertyId),
     onSuccess: (_, { propertyId }) => {
       // Invalidate property to refetch with new images
       queryClient.invalidateQueries({ queryKey: propertyKeys.detail(propertyId) });

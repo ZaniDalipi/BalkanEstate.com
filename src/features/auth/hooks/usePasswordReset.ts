@@ -2,7 +2,7 @@
 // Uses TanStack Query mutation for password reset operations
 
 import { useMutation } from '@tanstack/react-query';
-import * as api from '@/services/apiService';
+import { requestPasswordReset, resetPassword } from '../api';
 
 interface PasswordResetParams {
   email: string;
@@ -28,15 +28,12 @@ interface ResetPasswordParams {
  */
 export function usePasswordReset() {
   const requestMutation = useMutation({
-    mutationFn: async ({ email }: PasswordResetParams) => {
-      return await api.requestPasswordReset(email);
-    },
+    mutationFn: ({ email }: PasswordResetParams) => requestPasswordReset(email),
   });
 
   const resetMutation = useMutation({
-    mutationFn: async ({ token, newPassword }: ResetPasswordParams) => {
-      return await api.resetPassword(token, newPassword);
-    },
+    mutationFn: ({ token, newPassword }: ResetPasswordParams) =>
+      resetPassword(token, newPassword),
   });
 
   return {

@@ -117,7 +117,7 @@ const ToggleSwitch: React.FC<{
   </div>
 );
 
-const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList' | 'aiChatHistory' | 'onAiChatHistoryChange'>> = ({
+const FilterControls = React.memo<Omit<PropertyListProps, 'properties' | 'showList' | 'aiChatHistory' | 'onAiChatHistoryChange'>>(({
     filters, onFilterChange, onSearchClick, onResetFilters, onSaveSearch, isSaving, isMobile, isAreaDrawn, onDrawStart, isDrawing, isSearchingLocation, suggestions = [], onSuggestionClick, isQueryInputFocused, onQueryInputFocusChange
 }) => {
     const { t } = useTranslation(['search', 'common']);
@@ -628,7 +628,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
             )}
         </div>
     );
-};
+}));
 
 
 const ITEMS_PER_PAGE = 20;
@@ -908,4 +908,4 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     );
 };
 
-export default PropertyList;
+export default React.memo(PropertyList);

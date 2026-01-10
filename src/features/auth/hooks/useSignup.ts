@@ -2,9 +2,8 @@
 // Uses TanStack Query mutation for signup operations
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authKeys } from '../api/authKeys';
-import * as api from '@/services/apiService';
-import { User } from '@/types';
+import { authKeys, signup } from '../api';
+import type { User } from '@/types';
 
 interface SignupParams {
   email: string;
@@ -44,9 +43,8 @@ export function useSignup() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async ({ email, password, name, phone, role }: SignupParams): Promise<User> => {
-      return await api.signup(email, password, { name, phone, role });
-    },
+    mutationFn: ({ email, password, name, phone, role }: SignupParams): Promise<User> =>
+      signup(email, password, { name, phone, role }),
     onSuccess: (user) => {
       // Update the current user cache immediately
       queryClient.setQueryData(authKeys.currentUser(), user);

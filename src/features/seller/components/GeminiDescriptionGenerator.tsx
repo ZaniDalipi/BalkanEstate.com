@@ -13,7 +13,7 @@ import MapLocationPicker from './MapLocationPicker';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import * as api from '@/services/apiService';
 import imageCompression from 'browser-image-compression';
-import PromotionSelector from '@/components/promotions/PromotionSelector';
+import PromotionSelector from '@/src/features/promotions/components/PromotionSelector';
 import RoleSelector from './RoleSelector';
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';

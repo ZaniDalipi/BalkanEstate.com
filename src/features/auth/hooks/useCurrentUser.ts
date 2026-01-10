@@ -2,9 +2,7 @@
 // Uses TanStack Query for automatic caching and refetching
 
 import { useQuery } from '@tanstack/react-query';
-import { authKeys } from '../api/authKeys';
-import * as api from '@/services/apiService';
-import { User } from '@/types';
+import { authKeys, checkAuth } from '../api';
 
 /**
  * Hook to get the current authenticated user
@@ -28,10 +26,7 @@ export function useCurrentUser() {
     refetch,
   } = useQuery({
     queryKey: authKeys.currentUser(),
-    queryFn: async () => {
-      const user = await api.checkAuth();
-      return user;
-    },
+    queryFn: checkAuth,
     // Don't retry on 401 (not authenticated)
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) return false;

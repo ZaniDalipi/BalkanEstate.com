@@ -1,7 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { savedKeys } from '../api/savedKeys';
-import * as api from '@/services/apiService';
-import { SavedSearch } from '@/types';
+import {
+  savedKeys,
+  getSavedSearches,
+  addSavedSearch,
+  deleteSavedSearch,
+  updateSavedSearchAccessTime,
+  updateSavedSearch,
+} from '../api';
+import type { SavedSearch } from '@/types';
 
 /**
  * Hook to get user's saved searches
@@ -19,7 +25,7 @@ export function useSavedSearches() {
     refetch,
   } = useQuery({
     queryKey: savedKeys.searches(),
-    queryFn: async () => await api.getSavedSearches(),
+    queryFn: async () => getSavedSearches(),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000,
     retry: (failureCount, error: any) => {
@@ -51,7 +57,7 @@ export function useAddSavedSearch() {
 
   const mutation = useMutation({
     mutationFn: async (search: SavedSearch): Promise<SavedSearch> => {
-      return await api.addSavedSearch(search);
+      return addSavedSearch(search);
     },
     onSuccess: (newSearch) => {
       // Add to cache immediately
@@ -82,7 +88,7 @@ export function useDeleteSavedSearch() {
 
   const mutation = useMutation({
     mutationFn: async (searchId: string): Promise<void> => {
-      await api.deleteSavedSearch(searchId);
+      deleteSavedSearch(searchId);
     },
     onMutate: async (searchId) => {
       // Cancel outgoing refetches
@@ -131,7 +137,7 @@ export function useUpdateSavedSearchAccessTime() {
 
   const mutation = useMutation({
     mutationFn: async (searchId: string): Promise<{ success: true }> => {
-      return await api.updateSavedSearchAccessTime(searchId);
+      return updateSavedSearchAccessTime(searchId);
     },
     onSuccess: (_, searchId) => {
       // Update access time in cache
@@ -163,7 +169,7 @@ export function useUpdateSavedSearch() {
 
   const mutation = useMutation({
     mutationFn: async ({ searchId, name }: { searchId: string; name: string }): Promise<SavedSearch> => {
-      return await api.updateSavedSearch(searchId, name);
+      return updateSavedSearch(searchId, name);
     },
     onSuccess: (updatedSearch) => {
       // Update in cache

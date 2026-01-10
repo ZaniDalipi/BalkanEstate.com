@@ -2,9 +2,9 @@
 // Uses TanStack Query for favorites list and mutation for toggle
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import * as api from '@/services/apiService';
-import { Property } from '@/types';
+import { propertyKeys } from '../api';
+import { getFavorites, toggleSavedHome } from '@/src/features/saved/api';
+import type { Property } from '@/types';
 
 /**
  * Hook to get user's favorite properties
@@ -22,9 +22,7 @@ export function useFavorites() {
     refetch,
   } = useQuery({
     queryKey: propertyKeys.favorites(),
-    queryFn: async () => {
-      return await api.getFavorites();
-    },
+    queryFn: getFavorites,
     staleTime: 3 * 60 * 1000, // 3 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error: any) => {
@@ -66,7 +64,8 @@ export function useToggleFavorite() {
   const mutation = useMutation({
     mutationFn: async (property: Property): Promise<void> => {
       // Toggle favorite via API
-      await api.toggleSavedHome(property);
+      const isFavorite = (await getFavorites()).some((p) => p.id === property.id);
+      await toggleSavedHome(property.id, isFavorite);
     },
     onMutate: async (property) => {
       // Cancel outgoing refetches

@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { agencyKeys } from '../api/agencyKeys';
-import * as api from '@/services/apiService';
+import { agencyKeys, getAgency } from '../api';
 
 export function useAgency(agencyId: string | null | undefined) {
   const {
@@ -10,9 +9,9 @@ export function useAgency(agencyId: string | null | undefined) {
     refetch,
   } = useQuery({
     queryKey: agencyKeys.detail(agencyId || ''),
-    queryFn: async () => {
+    queryFn: () => {
       if (!agencyId) throw new Error('Agency ID is required');
-      return await api.getAgency(agencyId);
+      return getAgency(agencyId);
     },
     enabled: !!agencyId,
     staleTime: 5 * 60 * 1000,

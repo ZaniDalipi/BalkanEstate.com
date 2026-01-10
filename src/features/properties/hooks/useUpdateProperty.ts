@@ -2,9 +2,8 @@
 // Uses TanStack Query mutation with optimistic updates
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import * as api from '@/services/apiService';
-import { Property } from '@/types';
+import { propertyKeys, updateProperty } from '../api';
+import type { Property } from '@/types';
 
 /**
  * Hook to update an existing property listing
@@ -27,9 +26,7 @@ export function useUpdateProperty() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (propertyData: Property): Promise<Property> => {
-      return await api.updateListing(propertyData);
-    },
+    mutationFn: (propertyData: Property): Promise<Property> => updateProperty(propertyData),
     onMutate: async (updatedProperty) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: propertyKeys.detail(updatedProperty.id) });

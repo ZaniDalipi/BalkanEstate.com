@@ -2,9 +2,7 @@
 // Uses TanStack Query for automatic caching and refetching
 
 import { useQuery } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import * as api from '@/services/apiService';
-import { Property } from '@/types';
+import { propertyKeys, getProperty } from '../api';
 
 interface UsePropertyOptions {
   enabled?: boolean;
@@ -34,9 +32,9 @@ export function useProperty(propertyId: string | null | undefined, options?: Use
     refetch,
   } = useQuery({
     queryKey: propertyKeys.detail(propertyId || ''),
-    queryFn: async () => {
+    queryFn: () => {
       if (!propertyId) throw new Error('Property ID is required');
-      return await api.getProperty(propertyId);
+      return getProperty(propertyId);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

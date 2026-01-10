@@ -2,9 +2,8 @@
 // Uses TanStack Query mutation with optimistic updates
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import { authKeys } from '@/src/features/auth/api/authKeys';
-import * as api from '@/services/apiService';
+import { propertyKeys, deleteProperty } from '../api';
+import { authKeys } from '@/src/features/auth/api';
 
 /**
  * Hook to delete a property listing
@@ -29,9 +28,7 @@ export function useDeleteProperty() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (propertyId: string) => {
-      return await api.deleteProperty(propertyId);
-    },
+    mutationFn: (propertyId: string) => deleteProperty(propertyId),
     onMutate: async (propertyId) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: propertyKeys.lists() });

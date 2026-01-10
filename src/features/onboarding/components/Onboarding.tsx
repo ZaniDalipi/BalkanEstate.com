@@ -166,7 +166,7 @@ const Onboarding: React.FC = () => {
             className="group p-6 border border-neutral-200 rounded-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             onClick={handleBuyChoice}
           >
-              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto-format&fit=crop" alt="A couple looking at a new home" className="rounded-lg mb-6 w-full h-48 object-cover" />
+              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto-format&fit=crop" alt="A couple looking at a new home" className="rounded-lg mb-6 w-full h-48 object-cover" loading="lazy" />
               <div className="text-center flex-grow flex flex-col">
                   <h3 className="text-2xl font-semibold text-neutral-900 mb-2">{t('nav:onboarding.lookingToBuy')}</h3>
                   <p className="text-neutral-600 mb-6 flex-grow">{t('nav:onboarding.buyDescription')}</p>
@@ -180,7 +180,7 @@ const Onboarding: React.FC = () => {
             className="group p-6 border border-neutral-200 rounded-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             onClick={handleSellChoice}
           >
-              <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto-format&fit=crop" alt="A modern house exterior" className="rounded-lg mb-6 w-full h-48 object-cover" />
+              <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto-format&fit=crop" alt="A modern house exterior" className="rounded-lg mb-6 w-full h-48 object-cover" loading="lazy" />
               <div className="text-center flex-grow flex flex-col">
                   <h3 className="text-2xl font-semibold text-neutral-900 mb-2">{t('nav:onboarding.wantToSell')}</h3>
                   <p className="text-neutral-600 mb-6 flex-grow">{t('nav:onboarding.sellDescription')}</p>

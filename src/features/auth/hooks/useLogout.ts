@@ -2,8 +2,7 @@
 // Uses TanStack Query mutation for logout operations
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authKeys } from '../api/authKeys';
-import * as api from '@/services/apiService';
+import { authKeys, logout } from '../api';
 
 /**
  * Hook for user logout
@@ -27,9 +26,7 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (): Promise<void> => {
-      await api.logout();
-    },
+    mutationFn: (): Promise<void> => logout(),
     onSuccess: () => {
       // Clear current user from cache
       queryClient.setQueryData(authKeys.currentUser(), null);

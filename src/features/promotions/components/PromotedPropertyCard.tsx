@@ -200,7 +200,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="flex gap-4">
           <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-neutral-100">
             {property.imageUrl ? (
-              <img src={property.imageUrl} alt={property.title || 'Property'} className="w-full h-full object-cover" />
+              <img src={property.imageUrl} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <BuildingOfficeIcon className="w-10 h-10 text-neutral-300" />

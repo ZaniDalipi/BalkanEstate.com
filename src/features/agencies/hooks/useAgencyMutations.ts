@@ -1,12 +1,21 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { agencyKeys } from '../api/agencyKeys';
-import * as api from '@/services/apiService';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import {
+  agencyKeys,
+  createAgency,
+  updateAgency,
+  addAgentToAgency,
+  removeAgentFromAgency,
+  joinAgencyByInvitationCode,
+  createJoinRequest,
+  getAgencyJoinRequests,
+} from '../api';
+import { leaveAgency } from '@/src/features/agents/api';
 
 export function useCreateAgency() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (agencyData: any) => await api.createAgency(agencyData),
+    mutationFn: async (agencyData: any) => createAgency(agencyData),
     onSuccess: (newAgency) => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.lists() });
       queryClient.setQueryData(agencyKeys.detail(newAgency.id), newAgency);
@@ -25,7 +34,7 @@ export function useUpdateAgency() {
 
   const mutation = useMutation({
     mutationFn: async ({ agencyId, agencyData }: { agencyId: string; agencyData: any }) =>
-      await api.updateAgency(agencyId, agencyData),
+      updateAgency(agencyId, agencyData),
     onSuccess: (updatedAgency, { agencyId }) => {
       queryClient.setQueryData(agencyKeys.detail(agencyId), updatedAgency);
       queryClient.invalidateQueries({ queryKey: agencyKeys.lists() });
@@ -44,7 +53,7 @@ export function useAddAgentToAgency() {
 
   const mutation = useMutation({
     mutationFn: async ({ agencyId, agentUserId }: { agencyId: string; agentUserId: string }) =>
-      await api.addAgentToAgency(agencyId, agentUserId),
+      addAgentToAgency(agencyId, agentUserId),
     onSuccess: (_, { agencyId }) => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.detail(agencyId) });
     },
@@ -62,7 +71,7 @@ export function useRemoveAgentFromAgency() {
 
   const mutation = useMutation({
     mutationFn: async ({ agencyId, agentId }: { agencyId: string; agentId: string }) =>
-      await api.removeAgentFromAgency(agencyId, agentId),
+      removeAgentFromAgency(agencyId, agentId),
     onSuccess: (_, { agencyId }) => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.detail(agencyId) });
     },
@@ -80,7 +89,7 @@ export function useJoinAgency() {
 
   const mutation = useMutation({
     mutationFn: async ({ invitationCode, agencyId }: { invitationCode: string; agencyId?: string }) =>
-      await api.joinAgencyByInvitationCode(invitationCode, agencyId),
+      joinAgencyByInvitationCode(invitationCode, agencyId),
     onSuccess: (_, { agencyId }) => {
       if (agencyId) {
         queryClient.invalidateQueries({ queryKey: agencyKeys.detail(agencyId) });
@@ -100,7 +109,7 @@ export function useLeaveAgency() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async () => await api.leaveAgency(),
+    mutationFn: async () => leaveAgency(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.all });
     },
@@ -118,7 +127,7 @@ export function useCreateJoinRequest() {
 
   const mutation = useMutation({
     mutationFn: async ({ agencyId, message }: { agencyId: string; message?: string }) =>
-      await api.createJoinRequest(agencyId, message),
+      createJoinRequest(agencyId, message),
     onSuccess: (_, { agencyId }) => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.joinRequests(agencyId) });
     },
@@ -140,7 +149,7 @@ export function useAgencyJoinRequests(agencyId: string | null) {
     queryKey: agencyKeys.joinRequests(agencyId || ''),
     queryFn: async () => {
       if (!agencyId) throw new Error('Agency ID required');
-      return await api.getAgencyJoinRequests(agencyId);
+      return getAgencyJoinRequests(agencyId);
     },
     enabled: !!agencyId,
     staleTime: 1 * 60 * 1000, // 1 minute - requests should be fresh

@@ -2,10 +2,9 @@
 // Uses TanStack Query mutation
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import { authKeys } from '@/src/features/auth/api/authKeys';
-import * as api from '@/services/apiService';
-import { Property } from '@/types';
+import { propertyKeys, createProperty } from '../api';
+import { authKeys } from '@/src/features/auth/api';
+import type { Property } from '@/types';
 
 /**
  * Hook to create a new property listing
@@ -33,9 +32,7 @@ export function useCreateProperty() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (propertyData: Property) => {
-      return await api.createListing(propertyData);
-    },
+    mutationFn: (propertyData: Property) => createProperty(propertyData),
     onSuccess: (result) => {
       // Invalidate and refetch property lists
       queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });

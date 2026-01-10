@@ -282,7 +282,7 @@ const FeaturedAgencies: React.FC = () => {
                   <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
                     <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center overflow-hidden shadow-lg ring-2 ring-white/30">
                       {agency.logo ? (
-                        <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" />
+                        <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         <span className="text-2xl sm:text-3xl">{typeInfo.emoji}</span>
                       )}

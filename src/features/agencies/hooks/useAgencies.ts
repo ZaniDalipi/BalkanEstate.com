@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { agencyKeys } from '../api/agencyKeys';
-import * as api from '@/services/apiService';
+import { agencyKeys, getAgencies, getFeaturedAgencies } from '../api';
 
 export function useAgencies(filters?: { city?: string; featured?: boolean; page?: number; limit?: number }) {
   const {
@@ -10,7 +9,7 @@ export function useAgencies(filters?: { city?: string; featured?: boolean; page?
     refetch,
   } = useQuery({
     queryKey: agencyKeys.list(filters),
-    queryFn: async () => await api.getAgencies(filters),
+    queryFn: () => getAgencies(filters),
     staleTime: 3 * 60 * 1000, // 3 minutes
     gcTime: 10 * 60 * 1000,
   });
@@ -31,7 +30,7 @@ export function useFeaturedAgencies(limit?: number) {
     error,
   } = useQuery({
     queryKey: agencyKeys.featured(),
-    queryFn: async () => await api.getFeaturedAgencies(limit),
+    queryFn: () => getFeaturedAgencies(limit),
     staleTime: 5 * 60 * 1000, // 5 minutes - featured agencies don't change often
     gcTime: 15 * 60 * 1000,
   });

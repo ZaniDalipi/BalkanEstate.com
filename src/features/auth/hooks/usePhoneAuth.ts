@@ -2,9 +2,8 @@
 // Uses TanStack Query mutation for phone verification
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authKeys } from '../api/authKeys';
-import * as api from '@/services/apiService';
-import { User } from '@/types';
+import { authKeys, sendPhoneCode, verifyPhoneCode } from '../api';
+import type { User } from '@/types';
 
 interface SendCodeParams {
   phone: string;
@@ -37,15 +36,11 @@ export function usePhoneAuth() {
   const queryClient = useQueryClient();
 
   const sendCodeMutation = useMutation({
-    mutationFn: async ({ phone }: SendCodeParams): Promise<void> => {
-      return await api.sendPhoneCode(phone);
-    },
+    mutationFn: ({ phone }: SendCodeParams): Promise<void> => sendPhoneCode(phone),
   });
 
   const verifyCodeMutation = useMutation({
-    mutationFn: async ({ phone, code }: VerifyCodeParams): Promise<User> => {
-      return await api.verifyPhoneCode(phone, code);
-    },
+    mutationFn: ({ phone, code }: VerifyCodeParams) => verifyPhoneCode(phone, code),
     onSuccess: (user) => {
       // Update the current user cache
       queryClient.setQueryData(authKeys.currentUser(), user);

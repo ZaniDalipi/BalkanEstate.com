@@ -2,9 +2,8 @@
 // Uses TanStack Query for automatic caching and refetching
 
 import { useQuery } from '@tanstack/react-query';
-import { propertyKeys } from '../api/propertyKeys';
-import * as api from '@/services/apiService';
-import { Property, Filters } from '@/types';
+import { propertyKeys, getProperties } from '../api';
+import type { Filters } from '@/types';
 
 /**
  * Hook to get list of properties with optional filters
@@ -29,10 +28,7 @@ export function useProperties(filters?: Filters) {
     isFetching,
   } = useQuery({
     queryKey: propertyKeys.list(filters),
-    queryFn: async () => {
-      const result = await api.getProperties(filters);
-      return result;
-    },
+    queryFn: () => getProperties(filters),
     staleTime: 2 * 60 * 1000, // 2 minutes - properties change frequently
     gcTime: 5 * 60 * 1000, // 5 minutes
     // Enable query even without filters
