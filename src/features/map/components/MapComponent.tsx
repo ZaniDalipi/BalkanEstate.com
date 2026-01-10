@@ -246,8 +246,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
     if (measurementId) {
       // Enable measurement tool - it will fetch the data from backend
       setShowMeasurement(true);
+      // Switch to satellite view for better measurement visibility
+      setMapType('satellite');
     }
   }, []);
+
+  // Auto-switch to satellite view when measurement tool is enabled
+  useEffect(() => {
+    if (showMeasurement) {
+      setMapType('satellite');
+    }
+  }, [showMeasurement]);
 
   // Use ref for onMapMove to prevent infinite loops when callback changes
   const onMapMoveRef = useRef(onMapMove);

@@ -402,17 +402,18 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
 
   return (
     <>
-      {/* Measurement lines/polygon */}
+      {/* Measurement lines/polygon - rendered on overlayPane for visibility */}
       {points.length > 1 && (
         isPolygonClosed ? (
           <Polygon
             positions={points.map((p) => [p.lat, p.lng] as [number, number])}
             pathOptions={{
               color: isViewMode ? '#10B981' : '#0252CD',
-              weight: isViewMode ? 4 : 3,
+              weight: isViewMode ? 5 : 3,
               fillColor: isViewMode ? '#10B981' : '#0252CD',
-              fillOpacity: isViewMode ? 0.35 : 0.2,
+              fillOpacity: isViewMode ? 0.4 : 0.2,
             }}
+            pane="overlayPane"
           />
         ) : (
           <>
@@ -421,12 +422,13 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
               positions={previewPoints.map((p) => [p.lat, p.lng] as [number, number])}
               pathOptions={{
                 color: isViewMode ? '#10B981' : '#0252CD',
-                weight: isViewMode ? 4 : 3,
+                weight: isViewMode ? 5 : 3,
                 dashArray: cursorPosition && points.length > 0 ? '10, 5' : undefined,
               }}
+              pane="overlayPane"
             />
             {/* Preview closing line (from last point to first) when 3+ points */}
-            {points.length >= 3 && (
+            {points.length >= 3 && !isViewMode && (
               <Polyline
                 positions={[
                   [points[points.length - 1].lat, points[points.length - 1].lng],
@@ -438,6 +440,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
                   dashArray: '5, 10',
                   opacity: 0.6,
                 }}
+                pane="overlayPane"
               />
             )}
           </>
