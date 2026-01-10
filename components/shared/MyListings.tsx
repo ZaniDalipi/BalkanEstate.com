@@ -24,7 +24,7 @@ type ListingFilter = 'all' | 'active' | 'sold' | 'draft';
 const MyListings: React.FC<MyListingsProps> = ({ sellerId }) => {
   const { t } = useTranslation(['account', 'property', 'common']);
   const { listings, isLoading, error, refetch, isEmpty } = useMyListings();
-  const { deleteProperty, isDeleting } = useDeleteProperty();
+  const { deleteProperty, isLoading: isDeleting } = useDeleteProperty();
   const { markAsSold, isLoading: isMarkingSold } = useMarkPropertyAsSold();
   const { showConfirmation } = useConfirmation();
   const { showNotification } = useNotification();

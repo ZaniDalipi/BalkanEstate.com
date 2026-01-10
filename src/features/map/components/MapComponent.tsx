@@ -41,17 +41,18 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const TILE_LAYERS = {
   street: {
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    // CartoDB Voyager - clean, modern style with good labels
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 20,
+    maxNativeZoom: 20,
+  },
+  satellite: {
+    // Google Maps Satellite - cleaner and more up-to-date
+    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
     attribution: '&copy; Google Maps',
     maxZoom: 21,
     maxNativeZoom: 21,
-  },
-  satellite: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution:
-      'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-    maxZoom: 19,
-    maxNativeZoom: 19, // ESRI has reliable coverage up to zoom 19
   },
 };
 

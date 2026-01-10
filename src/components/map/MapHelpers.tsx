@@ -201,9 +201,9 @@ export const MapEvents: React.FC<{
  * ZoomBasedTileSwitch Component
  *
  * Smart tile switching for maximum zoom capability:
- * - At zoom 18+: switches to satellite for better aerial detail
- * - At zoom 20+: switches to street (Google) which supports up to zoom 21
- * - Below zoom 18: switches to street for better road/label visibility
+ * - At zoom 21: switches to satellite (Google) for max zoom
+ * - At zoom 18-20: switches to satellite for aerial imagery
+ * - Below zoom 18: keeps street view (CartoDB Voyager) for clean labels
  * Night mode is excluded from auto-switching.
  */
 export const ZoomBasedTileSwitch: React.FC<{
@@ -219,20 +219,14 @@ export const ZoomBasedTileSwitch: React.FC<{
 
       const currentZoom = map.getZoom();
 
-      // At very high zoom (20+), use street view which supports up to 21
-      // (Satellite/ESRI only goes to 19)
-      if (currentZoom >= 20) {
-        if (mapType !== 'street') {
-          setMapType('street');
-        }
-      }
-      // At medium-high zoom (18-19), use satellite for aerial imagery
-      else if (currentZoom >= 18) {
+      // At high zoom (18+), use satellite for aerial imagery
+      // Google satellite supports up to zoom 21
+      if (currentZoom >= 18) {
         if (mapType !== 'satellite') {
           setMapType('satellite');
         }
       }
-      // At lower zoom, use street view for better labels/roads
+      // At lower zoom, use street view (CartoDB) for clean labels/roads
       else {
         if (mapType !== 'street') {
           setMapType('street');
