@@ -113,6 +113,43 @@ const measurementIcon = L.divIcon({
   iconAnchor: [6, 6],
 });
 
+// First point marker - larger and green to indicate "click to close"
+const firstPointIcon = L.divIcon({
+  className: 'measurement-first-point-marker',
+  html: `<div style="
+    width: 16px;
+    height: 16px;
+    background: #10B981;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  "></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+// First point marker when cursor is near - pulsing effect
+const firstPointActiveIcon = L.divIcon({
+  className: 'measurement-first-point-active',
+  html: `<div style="
+    width: 20px;
+    height: 20px;
+    background: #10B981;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4), 0 2px 6px rgba(0,0,0,0.4);
+    animation: pulse 1s ease-in-out infinite;
+  "></div>
+  <style>
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+  </style>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
 const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onClose }) => {
   const map = useMap();
   const [points, setPoints] = useState<MeasurementPoint[]>([]);
@@ -120,7 +157,15 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
   const [address, setAddress] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<MeasurementPoint | null>(null);
+  const [isNearFirstPoint, setIsNearFirstPoint] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate close threshold based on zoom level (smaller at higher zoom)
+  const getCloseThreshold = useCallback(() => {
+    const zoom = map.getZoom();
+    // At zoom 21, threshold is ~5m; at zoom 15, threshold is ~50m
+    return Math.max(5, 100 / Math.pow(1.5, zoom - 15));
+  }, [map]);
 
   // Handle map clicks to add points
   useEffect(() => {
@@ -128,6 +173,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       setPoints([]);
       setIsPolygonClosed(false);
       setShowSaveDialog(false);
+      setIsNearFirstPoint(false);
       return;
     }
 
@@ -143,9 +189,11 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       if (points.length >= 3) {
         const firstPoint = points[0];
         const distance = calculateDistance(newPoint, firstPoint);
-        if (distance < 20) {
-          // Within 20 meters of first point
+        const threshold = getCloseThreshold();
+        if (distance < threshold) {
+          // Close the polygon - don't add the point, just close
           setIsPolygonClosed(true);
+          setIsNearFirstPoint(false);
           return;
         }
       }
@@ -155,7 +203,16 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
 
     const handleMouseMove = (e: L.LeafletMouseEvent) => {
       if (!isPolygonClosed) {
-        setCursorPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
+        const currentPos = { lat: e.latlng.lat, lng: e.latlng.lng };
+        setCursorPosition(currentPos);
+
+        // Check if near first point (for visual feedback)
+        if (points.length >= 3) {
+          const firstPoint = points[0];
+          const distance = calculateDistance(currentPos, firstPoint);
+          const threshold = getCloseThreshold();
+          setIsNearFirstPoint(distance < threshold);
+        }
       }
     };
 
@@ -170,7 +227,15 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       map.off('mousemove', handleMouseMove);
       map.getContainer().style.cursor = '';
     };
-  }, [enabled, map, points, isPolygonClosed]);
+  }, [enabled, map, points, isPolygonClosed, getCloseThreshold]);
+
+  // Handle closing polygon manually
+  const handleClosePolygon = useCallback(() => {
+    if (points.length >= 3) {
+      setIsPolygonClosed(true);
+      setIsNearFirstPoint(false);
+    }
+  }, [points.length]);
 
   // Calculate measurements
   const totalDistance = calculateTotalDistance(points);
@@ -248,41 +313,74 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             }}
           />
         ) : (
-          <Polyline
-            positions={previewPoints.map((p) => [p.lat, p.lng] as [number, number])}
-            pathOptions={{
-              color: '#0252CD',
-              weight: 3,
-              dashArray: cursorPosition && points.length > 0 ? '10, 5' : undefined,
-            }}
-          />
+          <>
+            {/* Main measurement line */}
+            <Polyline
+              positions={previewPoints.map((p) => [p.lat, p.lng] as [number, number])}
+              pathOptions={{
+                color: '#0252CD',
+                weight: 3,
+                dashArray: cursorPosition && points.length > 0 ? '10, 5' : undefined,
+              }}
+            />
+            {/* Preview closing line (from last point to first) when 3+ points */}
+            {points.length >= 3 && (
+              <Polyline
+                positions={[
+                  [points[points.length - 1].lat, points[points.length - 1].lng],
+                  [points[0].lat, points[0].lng],
+                ]}
+                pathOptions={{
+                  color: '#10B981',
+                  weight: 2,
+                  dashArray: '5, 10',
+                  opacity: 0.6,
+                }}
+              />
+            )}
+          </>
         )
       )}
 
       {/* Point markers */}
-      {points.map((point, index) => (
-        <Marker
-          key={`point-${index}`}
-          position={[point.lat, point.lng]}
-          icon={measurementIcon}
-        >
-          <Popup>
-            <div className="text-xs">
-              <strong>Point {index + 1}</strong>
-              <br />
-              {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
-              {index > 0 && (
-                <>
-                  <br />
-                  <span className="text-gray-500">
-                    {formatDistance(calculateDistance(points[index - 1], point))} from prev
-                  </span>
-                </>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+      {points.map((point, index) => {
+        // First point gets special icon (green, and pulsing when cursor is near)
+        const isFirstPoint = index === 0;
+        const showActiveFirstPoint = isFirstPoint && !isPolygonClosed && points.length >= 3 && isNearFirstPoint;
+        const icon = isFirstPoint && !isPolygonClosed && points.length >= 3
+          ? (showActiveFirstPoint ? firstPointActiveIcon : firstPointIcon)
+          : measurementIcon;
+
+        return (
+          <Marker
+            key={`point-${index}`}
+            position={[point.lat, point.lng]}
+            icon={icon}
+            eventHandlers={isFirstPoint && !isPolygonClosed && points.length >= 3 ? {
+              click: (e) => {
+                e.originalEvent.stopPropagation();
+                handleClosePolygon();
+              }
+            } : undefined}
+          >
+            <Popup>
+              <div className="text-xs">
+                <strong>{isFirstPoint && points.length >= 3 && !isPolygonClosed ? '🎯 Start Point (click to close)' : `Point ${index + 1}`}</strong>
+                <br />
+                {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
+                {index > 0 && (
+                  <>
+                    <br />
+                    <span className="text-gray-500">
+                      {formatDistance(calculateDistance(points[index - 1], point))} from prev
+                    </span>
+                  </>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
 
       {/* Measurement info panel */}
       <div
@@ -360,6 +458,16 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           </button>
         </div>
 
+        {/* Close Polygon button - only when we have 3+ points and polygon not closed */}
+        {points.length >= 3 && !isPolygonClosed && (
+          <button
+            onClick={handleClosePolygon}
+            className="w-full px-3 py-2 mb-3 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center gap-2"
+          >
+            <span>🔷</span> Close Polygon & Calculate Area
+          </button>
+        )}
+
         {/* Save section */}
         {points.length >= 2 && (
           <>
@@ -398,9 +506,9 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           </>
         )}
 
-        {/* Keyboard shortcuts hint */}
+        {/* Tips */}
         <div className="mt-3 pt-3 border-t text-[10px] text-gray-400">
-          <span className="font-medium">Tips:</span> Click to add points • Double-click near start to close polygon
+          <span className="font-medium">Tips:</span> Click to add points • Click green start point or use button to close polygon
         </div>
       </div>
     </>
