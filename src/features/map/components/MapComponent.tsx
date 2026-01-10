@@ -487,9 +487,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {/* Mobile Controls - hidden on desktop via CSS as fallback */}
       {isMobile && (
         <>
-          {/* Mobile: Bottom-left - Layer toggles in horizontal bar - positioned just above List/Map toggle */}
-          <div className="absolute bottom-[76px] left-2 right-2 z-[1003] flex justify-center pointer-events-none md:hidden">
-            <div className="pointer-events-auto flex items-center gap-1 p-1 rounded-full shadow-md backdrop-blur-md bg-white/90 transition-all duration-300 ease-out">
+          {/* Mobile: Layer toggles - positioned above List/Map toggle with proper spacing */}
+          <div className="absolute bottom-[100px] left-0 right-0 z-[1003] flex justify-center pointer-events-none md:hidden pb-2">
+            <div className="pointer-events-auto flex items-center gap-1 p-1 rounded-full shadow-md backdrop-blur-md bg-white/90">
               {/* 3D Buildings Toggle */}
               <button
                 onClick={() => setShow3DBuildings(!show3DBuildings)}
