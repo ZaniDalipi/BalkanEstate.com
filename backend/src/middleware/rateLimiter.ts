@@ -23,6 +23,9 @@ interface RateLimitEntry {
 const ipLimitStore = new Map<string, RateLimitEntry>();
 const accountLimitStore = new Map<string, RateLimitEntry>();
 
+// Check if we're in development mode - skip rate limiting
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 // Configuration
 const RATE_LIMIT_CONFIG = {
   // Login endpoint: 5 attempts per 15 minutes per IP
@@ -122,6 +125,12 @@ export const loginRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  // Skip rate limiting in development
+  if (isDevelopment) {
+    next();
+    return;
+  }
+
   const ip = getClientIp(req);
   const result = checkRateLimit(`login_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.LOGIN_IP);
 
@@ -141,6 +150,11 @@ export const loginRateLimiterIP = (
  * Call this after identifying the account
  */
 export const loginRateLimiterAccount = (email: string): { allowed: boolean; retryAfter?: number } => {
+  // Skip rate limiting in development
+  if (isDevelopment) {
+    return { allowed: true };
+  }
+
   return checkRateLimit(
     `login_account_${email.toLowerCase()}`,
     accountLimitStore,
@@ -156,6 +170,12 @@ export const signupRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  // Skip rate limiting in development
+  if (isDevelopment) {
+    next();
+    return;
+  }
+
   const ip = getClientIp(req);
   const result = checkRateLimit(`signup_ip_${ip}`, ipLimitStore, RATE_LIMIT_CONFIG.SIGNUP_IP);
 
@@ -178,6 +198,12 @@ export const passwordResetRateLimiterIP = (
   res: Response,
   next: NextFunction
 ): void => {
+  // Skip rate limiting in development
+  if (isDevelopment) {
+    next();
+    return;
+  }
+
   const ip = getClientIp(req);
   const result = checkRateLimit(
     `password_reset_ip_${ip}`,
@@ -202,6 +228,11 @@ export const passwordResetRateLimiterIP = (
 export const passwordResetRateLimiterAccount = (
   email: string
 ): { allowed: boolean; retryAfter?: number } => {
+  // Skip rate limiting in development
+  if (isDevelopment) {
+    return { allowed: true };
+  }
+
   return checkRateLimit(
     `password_reset_account_${email.toLowerCase()}`,
     accountLimitStore,
