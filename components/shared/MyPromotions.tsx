@@ -9,9 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { SparklesIcon } from '../../constants';
-import PromotionModal from '../promotions/PromotionModal';
-import PromotionHistoryModal from '../promotions/PromotionHistoryModal';
-import PromotedPropertyCard, { TIER_CONFIG } from '../promotions/PromotedPropertyCard';
+import PromotionModal from '../../src/features/promotions/components/PromotionModal';
+import PromotionHistoryModal from '../../src/features/promotions/components/PromotionHistoryModal';
+import PromotedPropertyCard, { TIER_CONFIG } from '../../src/features/promotions/components/PromotedPropertyCard';
 import { usePromotions, usePromotionActions, PromotionFilter } from '../../hooks/usePromotions';
 
 const MyPromotions: React.FC = () => {

@@ -78,22 +78,35 @@ export const MapEvents: React.FC<{
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
       setTimeout(() => {
-        if (map && map.getContainer()) {
-          map.invalidateSize();
+        try {
+          if (map && map.getContainer()) {
+            map.invalidateSize();
+          }
+        } catch (e) {
+          // Map not fully initialized yet, ignore
         }
       }, 0);
     });
 
-    const mapContainer = map.getContainer();
-    if (mapContainer) {
-      resizeObserver.observe(mapContainer);
+    let mapContainer: HTMLElement | null = null;
+    try {
+      mapContainer = map.getContainer();
+      if (mapContainer) {
+        resizeObserver.observe(mapContainer);
+      }
+    } catch (e) {
+      // Map not ready yet
     }
 
     // Force a resize check shortly after the component mounts.
     // This helps fix layout issues where the map container size isn't computed correctly on initial render.
     const timer = setTimeout(() => {
-      if (map && map.getContainer()) {
-        map.invalidateSize();
+      try {
+        if (map && map.getContainer()) {
+          map.invalidateSize();
+        }
+      } catch (e) {
+        // Map not ready yet, ignore
       }
     }, 100);
 
@@ -113,8 +126,12 @@ export const MapEvents: React.FC<{
       // container size *after* the React render cycle completes, fixing any
       // layout shifts that might occur from other components updating (like the property count).
       const timer = setTimeout(() => {
-        if (map && map.getContainer()) {
-          map.invalidateSize();
+        try {
+          if (map && map.getContainer()) {
+            map.invalidateSize();
+          }
+        } catch (e) {
+          // Map not ready yet, ignore
         }
       }, 0);
       return () => clearTimeout(timer);
@@ -126,8 +143,12 @@ export const MapEvents: React.FC<{
     // might change, causing a layout shift. We need to tell the map to re-check
     // its container size to fill the space correctly.
     const timer = setTimeout(() => {
-      if (map && map.getContainer()) {
-        map.invalidateSize();
+      try {
+        if (map && map.getContainer()) {
+          map.invalidateSize();
+        }
+      } catch (e) {
+        // Map not ready yet, ignore
       }
     }, 50); // A small delay to let layout settle
     return () => clearTimeout(timer);
