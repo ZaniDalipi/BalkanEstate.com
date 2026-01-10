@@ -1054,7 +1054,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                         zoom={12}
                                                         scrollWheelZoom={true}
                                                         className="w-full h-[400px] sm:h-[500px]"
-                                                        maxZoom={22}
+                                                        maxZoom={23}
                                                         minZoom={3}
                                                     >
                                                         <TileLayer
@@ -1135,7 +1135,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                         zoom={13}
                                                         scrollWheelZoom={true}
                                                         className="w-full h-80"
-                                                        maxZoom={22}
+                                                        maxZoom={23}
                                                         minZoom={3}
                                                     >
                                                         <TileLayer

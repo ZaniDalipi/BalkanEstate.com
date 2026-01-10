@@ -51,8 +51,8 @@ const TILE_LAYERS = {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution:
       'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-    maxZoom: 22,
-    maxNativeZoom: 19,
+    maxZoom: 23,
+    maxNativeZoom: 23,
   },
 };
 
@@ -280,7 +280,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           zoom={zoom}
           scrollWheelZoom={true}
           className={`w-full h-full ${show3DBuildings ? 'map-3d-active' : 'map-3d-inactive'}`}
-          maxZoom={22}
+          maxZoom={23}
           minZoom={6}
           zoomControl={false}
           maxBounds={BALKAN_BOUNDS}
