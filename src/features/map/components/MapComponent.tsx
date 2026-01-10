@@ -488,7 +488,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {isMobile && (
         <>
           {/* Mobile: Bottom-left - Layer toggles in horizontal bar - positioned above List/Map toggle */}
-          <div className="absolute bottom-36 left-2 right-2 z-[1000] flex justify-center pointer-events-none md:hidden">
+          <div className="absolute bottom-28 left-2 right-2 z-[1000] flex justify-center pointer-events-none md:hidden">
             <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl shadow-lg backdrop-blur-md bg-white/85 transition-all duration-300 ease-out">
               {/* 3D Buildings Toggle */}
               <button

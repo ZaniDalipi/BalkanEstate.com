@@ -468,12 +468,12 @@ const PropertyPopup: React.FC<{
   if (isActivelyPromoted) {
     return (
       <div
-        className={`w-72 cursor-pointer rounded-lg overflow-hidden border-2 ${tierConfig.border}`}
+        className={`w-56 sm:w-72 cursor-pointer rounded-lg overflow-hidden border-2 ${tierConfig.border}`}
         onClick={() => onPopupClick(property.id)}
       >
         {/* Image carousel - larger for promoted */}
         <div className="relative">
-          <div className="relative h-40 overflow-hidden">
+          <div className="relative h-32 sm:h-40 overflow-hidden">
             {images.map((imgUrl, index) => (
               <div
                 key={index}
@@ -638,13 +638,13 @@ const PropertyPopup: React.FC<{
 
   // Standard popup for non-promoted properties
   return (
-    <div className="w-56 cursor-pointer" onClick={() => onPopupClick(property.id)}>
+    <div className="w-48 sm:w-56 cursor-pointer" onClick={() => onPopupClick(property.id)}>
       {/* Image carousel */}
       <div className="relative mb-2">
         <img
           src={images[currentImageIndex]}
           alt={property.address}
-          className="w-full h-28 object-cover rounded"
+          className="w-full h-24 sm:h-28 object-cover rounded"
         />
 
         {/* Image navigation */}
@@ -826,8 +826,8 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 300 : 230}
-              minWidth={isPromoted ? 288 : 220}
+              maxWidth={isPromoted ? 288 : 224}
+              minWidth={isPromoted ? 224 : 192}
               className={`${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
