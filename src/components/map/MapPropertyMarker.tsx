@@ -612,34 +612,6 @@ const PropertyPopup: React.FC<{
       </div>
     );
   }
-                <div className="font-bold text-sm text-primary">{property.baths}</div>
-                <div className="text-[9px] text-primary/70">{t('map.baths')}</div>
-              </div>
-              <div className="bg-primary/5 rounded-lg py-1.5 px-1 text-center border border-primary/10">
-                <div className="font-bold text-sm text-primary">{property.livingRooms}</div>
-                <div className="text-[9px] text-primary/70">{t('map.living')}</div>
-              </div>
-              <div className="bg-primary/10 rounded-lg py-1.5 px-1 text-center border border-primary/20">
-                <div className="font-bold text-sm text-primary">{property.sqft}</div>
-                <div className="text-[9px] text-primary/70">m²</div>
-              </div>
-            </div>
-          )}
-
-          {/* View details button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onPopupClick(property.id);
-            }}
-            className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-semibold py-2 rounded-lg transition-colors shadow-md"
-          >
-            {t('map.clickForDetails')}
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // Standard popup - clean minimal design (no slider, full-width image)
   return (
