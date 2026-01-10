@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapContainer, TileLayer, Rectangle, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Rectangle, useMapEvents, useMap } from 'react-leaflet';
 import { Property } from '@/types';
 import L from 'leaflet';
 import { useAppContext } from '@/context/AppContext';
@@ -162,6 +162,32 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
+ * ZoomAdjuster Component - adjusts zoom when switching map types
+ * Ensures zoom level doesn't exceed the new layer's max zoom
+ */
+const ZoomAdjuster: React.FC<{ mapType: TileLayerType; currentZoom: number }> = ({ mapType, currentZoom }) => {
+  const map = useMap();
+  const prevMapTypeRef = useRef(mapType);
+
+  useEffect(() => {
+    // Only act when mapType actually changes
+    if (prevMapTypeRef.current !== mapType) {
+      const maxZoom = TILE_LAYERS[mapType]?.maxZoom || 21;
+      const currentMapZoom = map.getZoom();
+
+      // If current zoom exceeds new layer's max, adjust it
+      if (currentMapZoom > maxZoom) {
+        map.setZoom(maxZoom);
+      }
+
+      prevMapTypeRef.current = mapType;
+    }
+  }, [mapType, map]);
+
+  return null;
+};
+
+/**
  * MapComponent
  *
  * Main map component for property search with:
@@ -306,6 +332,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
+          <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
