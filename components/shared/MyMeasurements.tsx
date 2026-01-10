@@ -108,14 +108,17 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
     }
   };
 
-  // Open in map (if we add this feature later)
+  // Open measurement in map view
   const handleViewOnMap = (measurement: SavedMeasurement) => {
-    // Calculate center of points
+    // Store measurement in localStorage for the map to read
+    localStorage.setItem('viewMeasurement', JSON.stringify(measurement));
+
+    // Calculate center of points for the URL
     const centerLat = measurement.points.reduce((sum, p) => sum + p.lat, 0) / measurement.points.length;
     const centerLng = measurement.points.reduce((sum, p) => sum + p.lng, 0) / measurement.points.length;
 
-    // Open map page with coordinates
-    window.open(`/map?lat=${centerLat}&lng=${centerLng}&zoom=18`, '_blank');
+    // Navigate to map page with viewMeasurement flag
+    window.location.href = `/map?viewMeasurement=true&lat=${centerLat}&lng=${centerLng}&zoom=18`;
   };
 
   if (isLoading) {

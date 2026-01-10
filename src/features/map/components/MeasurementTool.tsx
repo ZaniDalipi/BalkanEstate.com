@@ -26,6 +26,7 @@ interface MeasurementToolProps {
   enabled: boolean;
   onSave?: (measurement: SavedMeasurement) => void;
   onClose?: () => void;
+  viewMeasurement?: SavedMeasurement | null; // Pre-loaded measurement to display
 }
 
 // Calculate distance between two points using Haversine formula
@@ -154,13 +155,15 @@ const firstPointActiveIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
-const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onClose }) => {
+const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onClose, viewMeasurement }) => {
   const map = useMap();
   const { state } = useAppContext();
   const isLoggedIn = !!state.currentUser;
 
   const [points, setPoints] = useState<MeasurementPoint[]>([]);
   const [isPolygonClosed, setIsPolygonClosed] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false);
+  const [viewMeasurementData, setViewMeasurementData] = useState<SavedMeasurement | null>(null);
   const [measurementName, setMeasurementName] = useState('');
   const [address, setAddress] = useState('');
   const [notes, setNotes] = useState('');
@@ -178,6 +181,36 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
     return Math.max(5, 100 / Math.pow(1.5, zoom - 15));
   }, [map]);
 
+  // Load measurement from localStorage if viewing a saved measurement
+  useEffect(() => {
+    if (enabled) {
+      const storedMeasurement = localStorage.getItem('viewMeasurement');
+      if (storedMeasurement) {
+        try {
+          const measurement = JSON.parse(storedMeasurement) as SavedMeasurement;
+          setPoints(measurement.points);
+          setIsPolygonClosed(measurement.type === 'area');
+          setIsViewMode(true);
+          setViewMeasurementData(measurement);
+          // Clear from localStorage after loading
+          localStorage.removeItem('viewMeasurement');
+        } catch (e) {
+          console.error('Failed to parse stored measurement:', e);
+        }
+      }
+    }
+  }, [enabled]);
+
+  // Also handle viewMeasurement prop if passed directly
+  useEffect(() => {
+    if (enabled && viewMeasurement) {
+      setPoints(viewMeasurement.points);
+      setIsPolygonClosed(viewMeasurement.type === 'area');
+      setIsViewMode(true);
+      setViewMeasurementData(viewMeasurement);
+    }
+  }, [enabled, viewMeasurement]);
+
   // Handle map clicks to add points
   useEffect(() => {
     if (!enabled) {
@@ -185,11 +218,14 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       setIsPolygonClosed(false);
       setShowSaveDialog(false);
       setIsNearFirstPoint(false);
+      setIsViewMode(false);
+      setViewMeasurementData(null);
       return;
     }
 
     const handleClick = (e: L.LeafletMouseEvent) => {
-      if (isPolygonClosed) return;
+      // Don't add points in view mode
+      if (isPolygonClosed || isViewMode) return;
 
       const newPoint: MeasurementPoint = {
         lat: e.latlng.lat,
@@ -433,12 +469,12 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       {/* Measurement info panel - Compact */}
       <div
         ref={containerRef}
-        className="absolute bottom-24 left-4 z-[1001] bg-white rounded-lg shadow-lg p-2.5 min-w-[220px] max-w-[240px]"
+        className="absolute bottom-24 left-4 z-[1001] bg-white rounded-lg shadow-lg p-2.5 min-w-[220px] max-w-[260px]"
         style={{ pointerEvents: 'auto' }}
       >
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-1">
-            📏 Measure
+            {isViewMode ? '👁️' : '📏'} {isViewMode && viewMeasurementData ? viewMeasurementData.name : 'Measure'}
           </h3>
           <button
             onClick={onClose}
@@ -448,8 +484,18 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           </button>
         </div>
 
+        {/* View mode info */}
+        {isViewMode && viewMeasurementData && (
+          <div className="mb-2 p-1.5 bg-blue-50 rounded text-[10px] text-blue-700">
+            <span className="font-medium">Viewing saved measurement</span>
+            {viewMeasurementData.address && (
+              <div className="text-blue-600 mt-0.5">📍 {viewMeasurementData.address}</div>
+            )}
+          </div>
+        )}
+
         {/* Instructions - compact */}
-        {points.length === 0 && (
+        {points.length === 0 && !isViewMode && (
           <p className="text-xs text-gray-500 mb-2">
             Click map to add points
           </p>
@@ -481,26 +527,42 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           </div>
         )}
 
-        {/* Action buttons - compact */}
-        <div className="flex gap-1.5 mb-2">
+        {/* View mode: Start New button */}
+        {isViewMode && (
           <button
-            onClick={handleUndo}
-            disabled={points.length === 0}
-            className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
+            onClick={() => {
+              setIsViewMode(false);
+              setViewMeasurementData(null);
+              handleClear();
+            }}
+            className="w-full px-2 py-1.5 mb-2 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
           >
-            ↩ Undo
+            ✏️ Start New Measurement
           </button>
-          <button
-            onClick={handleClear}
-            disabled={points.length === 0}
-            className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
-          >
-            Clear
-          </button>
-        </div>
+        )}
 
-        {/* Close Polygon button - compact */}
-        {points.length >= 3 && !isPolygonClosed && (
+        {/* Action buttons - compact (only in edit mode) */}
+        {!isViewMode && (
+          <div className="flex gap-1.5 mb-2">
+            <button
+              onClick={handleUndo}
+              disabled={points.length === 0}
+              className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
+            >
+              ↩ Undo
+            </button>
+            <button
+              onClick={handleClear}
+              disabled={points.length === 0}
+              className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+
+        {/* Close Polygon button - compact (only in edit mode) */}
+        {!isViewMode && points.length >= 3 && !isPolygonClosed && (
           <button
             onClick={handleClosePolygon}
             className="w-full px-2 py-1.5 mb-2 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700"
@@ -509,8 +571,8 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           </button>
         )}
 
-        {/* Save section - compact */}
-        {points.length >= 2 && (
+        {/* Save section - compact (only in edit mode) */}
+        {!isViewMode && points.length >= 2 && (
           <>
             {!showSaveDialog ? (
               <button

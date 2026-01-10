@@ -272,12 +272,26 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         const cityParam = searchParams.get('city');
         const countryParamRaw = searchParams.get('country');
         const propertyTypeParam = searchParams.get('propertyType');
+        const latParam = searchParams.get('lat');
+        const lngParam = searchParams.get('lng');
+        const zoomParam = searchParams.get('zoom');
 
         // Normalize country param to match BALKAN_COUNTRIES keys
         // Handles: "North Macedonia" → "north-macedonia", "Bosnia and Herzegovina" → "bosnia-herzegovina"
         const countryParam = countryParamRaw ? normalizeCountryKey(countryParamRaw) : null;
 
-        if (cityParam || countryParam || propertyTypeParam) {
+        // Handle direct lat/lng coordinates (e.g., from viewing saved measurements)
+        if (latParam && lngParam) {
+            const lat = parseFloat(latParam);
+            const lng = parseFloat(lngParam);
+            const zoom = zoomParam ? parseInt(zoomParam, 10) : 18;
+            if (!isNaN(lat) && !isNaN(lng)) {
+                setFlyToTarget({
+                    center: [lat, lng],
+                    zoom: zoom
+                });
+            }
+        } else if (cityParam || countryParam || propertyTypeParam) {
             const newFilters = { ...filters };
 
             if (cityParam) {
