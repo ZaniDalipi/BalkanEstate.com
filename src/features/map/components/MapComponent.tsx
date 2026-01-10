@@ -281,7 +281,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           minZoom={6}
           zoomControl={false}
           maxBounds={BALKAN_BOUNDS}
-          maxBoundsViscosity={0.8}
+          maxBoundsViscosity={0.5}
           preferCanvas={true}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />

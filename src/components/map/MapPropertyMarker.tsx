@@ -737,13 +737,12 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 320 : 220}
-              minWidth={isPromoted ? 280 : 200}
+              maxWidth={isPromoted ? 280 : 200}
+              minWidth={isPromoted ? 240 : 180}
               className={`property-popup ${isPromoted ? 'promoted-property-popup' : 'standard-property-popup'} ${isNightMode ? 'night-mode-popup' : ''}`}
               autoPan={true}
-              autoPanPaddingTopLeft={[50, 120]}
-              autoPanPaddingBottomRight={[50, 150]}
-              keepInView={true}
+              autoPanPadding={[40, 40]}
+              keepInView={false}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>
