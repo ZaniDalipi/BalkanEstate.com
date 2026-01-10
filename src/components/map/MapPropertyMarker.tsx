@@ -187,12 +187,30 @@ const PROPERTY_TYPE_COLORS: Record<
  */
 const formatMarkerPrice = (price: number): string => {
   if (price >= 1000000) {
-    return `€${(price / 1000000).toFixed(1).replace('.0', '')}M`;
+    const millions = price / 1000000;
+    // Use integer if it's a whole number, otherwise 1 decimal
+    if (millions >= 10) {
+      return `€${Math.round(millions)}M`;
+    }
+    return `€${millions.toFixed(1).replace('.0', '')}M`;
   }
   if (price >= 1000) {
     return `€${Math.round(price / 1000)}K`;
   }
   return `€${price}`;
+};
+
+/**
+ * Get marker width based on price text length
+ */
+const getMarkerWidthForPrice = (price: string): number => {
+  // Base width for short prices like "€45K"
+  const baseWidth = 38;
+  // Add extra width for longer prices
+  if (price.length > 5) {
+    return baseWidth + (price.length - 5) * 6;
+  }
+  return baseWidth;
 };
 
 /**
@@ -264,32 +282,35 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
   const promotedInnerClass = getPromotedMarkerInnerClass(property);
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
-  // Calculate scaled dimensions
-  const baseSize = 38;
-  const scaledSize = Math.round(baseSize * zoomScale);
+  // Calculate dimensions based on price length - use pill shape for longer prices
+  const baseWidth = getMarkerWidthForPrice(price);
+  const baseHeight = 32;
+  const scaledWidth = Math.round(baseWidth * zoomScale);
+  const scaledHeight = Math.round(baseHeight * zoomScale);
   const fontSize = Math.max(9, Math.round(11 * zoomScale));
-  const circleRadius = Math.round((15 + (isHovered ? 3 : 0)) * zoomScale);
+  const borderRadius = scaledHeight / 2; // Pill shape
+  const hoverScale = isHovered ? 1.15 : 1;
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
-    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
-      <div class="${promotedInnerClass}" style="width: ${scaledSize}px; height: ${scaledSize}px;">
-        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter}; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <circle cx="19" cy="19" r="${15 + (isHovered ? 3 : 0)}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
-            <text x="19" y="20" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+    <div class="promoted-marker-wrapper ${nightModeClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px;">
+      <div class="${promotedInnerClass}" style="width: ${scaledWidth}px; height: ${scaledHeight}px; transform: scale(${hoverScale}); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <svg width="${scaledWidth}" height="${scaledHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: ${baseFilter};">
+            <rect x="${ringWidth / 2}" y="${ringWidth / 2}" width="${baseWidth - ringWidth}" height="${baseHeight - ringWidth}" rx="${(baseHeight - ringWidth) / 2}" fill="${markerColor}" stroke="${strokeColorFinal}" stroke-width="${ringWidth}"/>
+            <text x="${baseWidth / 2}" y="${baseHeight / 2 + 1}" font-family="Inter, sans-serif" font-size="${11}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
         </svg>
       </div>
     </div>
   `;
 
-  const hoverClass = isHovered ? 'scale-150 drop-shadow-lg' : '';
+  const hoverClass = isHovered ? 'drop-shadow-lg' : '';
 
   return L.divIcon({
     html: svgHtml,
     className: hoverClass,
-    iconSize: [scaledSize, scaledSize],
-    iconAnchor: [scaledSize / 2, scaledSize / 2],
-    popupAnchor: [0, -scaledSize / 2],
+    iconSize: [scaledWidth, scaledHeight],
+    iconAnchor: [scaledWidth / 2, scaledHeight / 2],
+    popupAnchor: [0, -scaledHeight / 2],
   });
 };
 
