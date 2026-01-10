@@ -154,9 +154,22 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </div>
         )}
 
+        {/* Favorite Button - Top Right */}
+        <button
+          onClick={handleFavoriteClick}
+          className={`absolute top-3 right-3 z-20 p-2 rounded-full shadow-lg shadow-black/10 transition-all duration-300 ${
+            isFavorited
+              ? 'bg-red-500 text-white scale-110'
+              : 'bg-white/80 backdrop-blur-xl border border-white/50 text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110 hover:border-red-500'
+          }`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
+
         {/* Top badges row */}
-        <div className="absolute top-3 left-3 right-12 flex justify-between items-start z-10">
-          <div className="flex flex-col gap-2">
+        <div className="absolute top-3 left-3 right-14 flex flex-col gap-2 z-10">
             {/* Sold Badge */}
             {isSold && (
               <div className="bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5">
@@ -211,21 +224,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                 🔥 {t('property:status.urgent').toUpperCase()}
               </div>
             )}
-          </div>
-
-          {/* Favorite Button */}
-          <button
-            onClick={handleFavoriteClick}
-            className={`p-2 rounded-full shadow-lg shadow-black/10 transition-all duration-300 ${
-              isFavorited
-                ? 'bg-red-500 text-white scale-110'
-                : 'bg-white/80 backdrop-blur-xl border border-white/50 text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110 hover:border-red-500'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
         </div>
 
         {/* Bottom info bar on image */}
