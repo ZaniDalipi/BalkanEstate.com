@@ -184,9 +184,9 @@ const NotificationCenter: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[70vh] flex flex-col">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-50 max-h-[70vh] flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/20 bg-white/50">
             <h3 className="font-semibold text-gray-900">
               {t('common:notifications', 'Notifications')}
             </h3>
@@ -202,7 +202,7 @@ const NotificationCenter: React.FC = () => {
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-gray-100 rounded"
+                className="p-1 hover:bg-white/50 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4 text-gray-500" />
               </button>
@@ -224,8 +224,8 @@ const NotificationCenter: React.FC = () => {
               notifications.map(notification => (
                 <div
                   key={notification._id}
-                  className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.isRead ? 'bg-blue-50/50' : ''
+                  className={`px-4 py-3 border-b border-white/10 hover:bg-white/40 cursor-pointer transition-colors ${
+                    !notification.isRead ? 'bg-primary/5' : ''
                   }`}
                   onClick={() => !notification.isRead && markAsRead(notification._id)}
                 >
@@ -257,7 +257,7 @@ const NotificationCenter: React.FC = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+            <div className="px-4 py-2 border-t border-white/20 bg-white/50">
               <button
                 onClick={() => {
                   setIsOpen(false);

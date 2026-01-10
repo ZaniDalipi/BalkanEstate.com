@@ -151,8 +151,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
     <div
       ref={cardRef}
       className={`
-        relative bg-white rounded-2xl shadow-lg
-        border border-blue-100 hover:border-blue-300 hover:shadow-xl
+        relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5
+        border border-white/50 hover:border-blue-300/50 hover:shadow-xl hover:shadow-blue-500/10
         transition-all duration-500 cursor-pointer overflow-hidden group
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
       `}
@@ -170,11 +170,11 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       {/* Animated border effect - blue */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-blue-200/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
       
-      {/* Performance Score Badge - Blue theme */}
+      {/* Performance Score Badge - Blue theme with glass effect */}
       <div className="absolute top-4 right-4 z-10">
         <div className="relative group/score">
-          <div className="absolute inset-0 bg-blue-500 rounded-full blur opacity-70 group-hover/score:opacity-100 transition-opacity duration-300" />
-          <div className="relative bg-gradient-to-b from-blue-600 to-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+          <div className="absolute inset-0 bg-blue-500 rounded-full blur opacity-50 group-hover/score:opacity-80 transition-opacity duration-300" />
+          <div className="relative bg-gradient-to-b from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-blue-500/20 border border-white/20">
             <ChartBarIcon className="w-3.5 h-3.5" />
             <span>{performanceScore}%</span>
             <ArrowTrendingUpIcon className="w-3 h-3 ml-1 text-blue-200" />
@@ -224,10 +224,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             </div>
           </div>
 
-          {/* Rating Badge - Clean white with blue accents */}
+          {/* Rating Badge - Glass effect with blue accents */}
           <div className="relative group/rating">
             <div className="absolute -inset-1 bg-blue-100 rounded-xl blur opacity-0 group-hover/rating:opacity-100 transition-opacity duration-300" />
-            <div className="relative bg-white px-4 py-3 rounded-xl shadow-sm border border-blue-100">
+            <div className="relative bg-white/80 backdrop-blur-md px-4 py-3 rounded-xl shadow-sm border border-white/50">
               <div className="flex items-center justify-center gap-2">
                 <div className="flex items-center">
                   <StarRating rating={agent.rating} className="w-5 h-5 text-amber-400" />
@@ -254,9 +254,9 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             {agent.name}
           </h3>
 
-          {/* Location with blue animation - Prominent Badge */}
+          {/* Location with blue animation - Glass Badge */}
           {(agent.address || agent.city || agent.country || agent.serviceAreas?.[0] || agent.officeAddress) && (
-            <div className="flex items-center justify-center gap-2 mt-2 group/location px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-center gap-2 mt-2 group/location px-4 py-2 bg-gradient-to-r from-blue-50/80 to-blue-100/80 backdrop-blur-sm rounded-xl border border-blue-200/50">
               <MapPinIcon className="w-4 h-4 text-blue-600 transform group-hover/location:scale-110 transition-transform duration-300" />
               <p className="text-sm font-semibold text-blue-700 group-hover/location:text-blue-800 transition-colors text-center">
                 {agent.address || [agent.city, agent.country].filter(Boolean).join(', ') || agent.serviceAreas?.[0] || agent.officeAddress}
@@ -267,9 +267,9 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             </div>
           )}
 
-          {/* Specialization Badge */}
+          {/* Specialization Badge - Glass effect */}
           {primarySpecialization && (
-            <div className="flex items-center justify-center gap-2 mt-2 group/spec px-3 py-1.5 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+            <div className="flex items-center justify-center gap-2 mt-2 group/spec px-3 py-1.5 bg-gradient-to-r from-purple-50/80 to-purple-100/80 backdrop-blur-sm rounded-xl border border-purple-200/50">
               <BoltIcon className="w-3.5 h-3.5 text-purple-600" />
               <p className="text-xs font-semibold text-purple-700">
                 {primarySpecialization}
@@ -289,10 +289,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
         {/* Stats Grid */}
         <div className="space-y-4">
-          {/* Price Range Card - Professional blue */}
+          {/* Price Range Card - Glass effect blue */}
           <div className="relative group/price">
             <div className="absolute -inset-0.5 bg-blue-100 rounded-xl blur opacity-0 group-hover/price:opacity-100 transition-opacity duration-500" />
-            <div className="relative bg-blue-50 rounded-xl p-4 border border-blue-100">
+            <div className="relative bg-blue-50/80 backdrop-blur-sm rounded-xl p-4 border border-blue-100/50">
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
                   <CurrencyDollarIcon className="w-4 h-4 text-white" />
@@ -319,7 +319,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             {/* Recent Sales */}
             <div className="group/sales relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl opacity-0 group-hover/sales:opacity-100 transition-opacity duration-300" />
-              <div className="relative bg-white rounded-xl p-4 border border-gray-200 group-hover/sales:border-blue-200 transition-all duration-300">
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-white/50 group-hover/sales:border-blue-200/50 transition-all duration-300">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-blue-100 rounded-lg">
@@ -346,7 +346,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             {/* Active Listings */}
             <div className="group/listings relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl opacity-0 group-hover/listings:opacity-100 transition-opacity duration-300" />
-              <div className="relative bg-white rounded-xl p-4 border border-gray-200 group-hover/listings:border-blue-200 transition-all duration-300">
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-white/50 group-hover/listings:border-blue-200/50 transition-all duration-300">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="p-1.5 bg-blue-100 rounded-lg">
                     <HomeIcon className="w-3.5 h-3.5 text-blue-600" />
@@ -366,11 +366,11 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             </div>
           </div>
 
-          {/* Agency Sales Badge - Professional blue theme */}
+          {/* Agency Sales Badge - Glass blue theme */}
           {isTeam && agent.city && (
             <div className="relative group/agencyBadge">
               <div className="absolute inset-0 bg-blue-100 rounded-xl blur opacity-0 group-hover/agencyBadge:opacity-50 transition-opacity duration-500" />
-              <div className="relative bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-3 border border-blue-200">
+              <div className="relative bg-gradient-to-r from-blue-50/80 to-blue-100/80 backdrop-blur-sm rounded-xl p-3 border border-blue-200/50">
                 <div className="flex items-center gap-2">
                   <BuildingOfficeIcon className="w-4 h-4 text-blue-600" />
                   <span className="text-sm font-semibold text-blue-900">
@@ -405,10 +405,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
           </div>
         </div>
 
-        {/* CTA Button - Professional blue */}
+        {/* CTA Button - Glass blue */}
         <div className="mt-6">
           <button
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:shadow-blue-300/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 group/button"
+            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 border border-white/10 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 group/button"
             onClick={handleSelectAgent}
           >
             <span>{t('agents:card.viewProfile')}</span>

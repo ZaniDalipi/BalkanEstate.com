@@ -43,14 +43,14 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
 
   return (
     <div
-      className={`rounded-xl border ${config.border} ${config.bg} p-4 relative overflow-hidden`}
+      className={`rounded-2xl border ${config.border} ${config.bg} backdrop-blur-sm p-4 relative overflow-hidden`}
     >
       {/* Accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${config.accent}`} />
 
       <div className="flex items-start gap-3 pl-2">
         {/* Icon */}
-        <div className={`p-2 rounded-lg bg-white shadow-sm ${config.icon}`}>
+        <div className={`p-2 rounded-xl bg-white/80 backdrop-blur-md shadow-sm border border-white/50 ${config.icon}`}>
           <Icon className="h-4 w-4" />
         </div>
 
@@ -68,7 +68,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
                 <button
                   key={prop.id}
                   onClick={() => onAction?.(prop.id)}
-                  className="text-xs px-2 py-1 bg-white rounded-full border border-neutral-200 hover:border-primary hover:text-primary transition-colors truncate max-w-[120px]"
+                  className="text-xs px-2 py-1 bg-white/80 backdrop-blur-sm rounded-full border border-white/50 hover:border-primary hover:text-primary transition-colors truncate max-w-[120px]"
                 >
                   {truncateText(prop.title, 15)}
                 </button>

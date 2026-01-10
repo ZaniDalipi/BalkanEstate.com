@@ -82,17 +82,17 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   if (isFloating) {
     return (
       <header className="absolute top-0 right-0 z-[1001] p-3">
-        <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-md">
+        <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/70 backdrop-blur-xl p-1.5 rounded-full shadow-xl shadow-black/10 border border-white/30">
           <button
             onClick={handleSubscribeClick}
-            className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="bg-gradient-to-r from-primary to-primary-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all shadow-md whitespace-nowrap"
             aria-label={t('nav:subscribe')}
           >
             {t('nav:subscribe')}
           </button>
           <button
             onClick={handleNewListingClick}
-            className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+            className="bg-gradient-to-r from-secondary to-orange-400 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-secondary/30 transition-all shadow-md whitespace-nowrap"
             aria-label={t('nav:newListing')}
           >
             + {t('nav:newListing')}

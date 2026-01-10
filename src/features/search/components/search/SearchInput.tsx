@@ -77,14 +77,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 </div>
             )}
             {suggestions.length > 0 && (
-                <ul className="absolute z-20 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <ul className="absolute z-20 w-full mt-1 bg-white/90 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl shadow-black/10 max-h-60 overflow-y-auto">
                     {suggestions.map((suggestion) => (
-                        <li 
-                            key={suggestion.place_id} 
-                            onMouseDown={() => onSuggestionClick(suggestion)} 
-                            className="px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-100 cursor-pointer flex items-center gap-2"
+                        <li
+                            key={suggestion.place_id}
+                            onMouseDown={() => onSuggestionClick(suggestion)}
+                            className="px-4 py-3 text-sm text-neutral-700 hover:bg-white/60 cursor-pointer flex items-center gap-2 transition-colors first:rounded-t-2xl last:rounded-b-2xl"
                         >
-                            <MapPinIcon className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                            <MapPinIcon className="w-4 h-4 text-primary flex-shrink-0" />
                             <span>{suggestion.display_name}</span>
                         </li>
                     ))}

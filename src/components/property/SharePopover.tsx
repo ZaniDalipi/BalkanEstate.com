@@ -78,24 +78,24 @@ export const SharePopover: React.FC<SharePopoverProps> = ({ property, onClose })
   };
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-neutral-200 p-4 z-20 animate-fade-in">
+    <div className="absolute right-0 top-full mt-2 w-64 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 p-4 z-20 animate-fade-in">
       <h4 className="font-bold text-neutral-800 mb-3 text-center">{t('actions.shareThisProperty')}</h4>
 
       <button
         onClick={handleCopyLink}
-        className="w-full text-left px-3 py-2 rounded-md hover:bg-neutral-100 font-semibold text-neutral-700 mb-2"
+        className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/60 font-semibold text-neutral-700 mb-2 transition-colors"
       >
         {copied ? `✅ ${t('actions.linkCopied')}` : `📋 ${t('actions.copyLink')}`}
       </button>
 
-      <div className="border-t border-neutral-200 pt-2 flex items-center justify-around">
+      <div className="border-t border-white/30 pt-2 flex items-center justify-around">
         <a
           href={getShareUrl('facebook')}
           onClick={(e) => {
             e.preventDefault();
             openShareWindow(getShareUrl('facebook'));
           }}
-          className="p-2 rounded-full hover:bg-blue-50 text-[#1877F2]"
+          className="p-2 rounded-full hover:bg-blue-500/10 text-[#1877F2] transition-colors"
           aria-label="Share on Facebook"
         >
           <FacebookIcon className="w-7 h-7" />
@@ -107,7 +107,7 @@ export const SharePopover: React.FC<SharePopoverProps> = ({ property, onClose })
             e.preventDefault();
             openShareWindow(getShareUrl('twitter'));
           }}
-          className="p-2 rounded-full hover:bg-neutral-100 text-black"
+          className="p-2 rounded-full hover:bg-black/5 text-black transition-colors"
           aria-label="Share on Twitter"
         >
           <TwitterIcon className="w-6 h-6" />
@@ -119,7 +119,7 @@ export const SharePopover: React.FC<SharePopoverProps> = ({ property, onClose })
             e.preventDefault();
             openShareWindow(getShareUrl('whatsapp'));
           }}
-          className="p-2 rounded-full hover:bg-green-50 text-[#25D366]"
+          className="p-2 rounded-full hover:bg-green-500/10 text-[#25D366] transition-colors"
           aria-label="Share on WhatsApp"
         >
           <WhatsappIcon className="w-7 h-7" />
@@ -131,7 +131,7 @@ export const SharePopover: React.FC<SharePopoverProps> = ({ property, onClose })
             e.preventDefault();
             openShareWindow(getShareUrl('email'), 'email');
           }}
-          className="p-2 rounded-full hover:bg-neutral-100 text-neutral-600"
+          className="p-2 rounded-full hover:bg-black/5 text-neutral-600 transition-colors"
           aria-label="Share via Email"
         >
           <EnvelopeIcon className="w-7 h-7" />

@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated' | 'outlined';
+  variant?: 'default' | 'elevated' | 'outlined' | 'glass';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hoverable?: boolean;
 }
@@ -10,6 +10,7 @@ const variantClasses: Record<string, string> = {
   default: 'bg-white shadow-sm',
   elevated: 'bg-white shadow-lg',
   outlined: 'bg-white border border-gray-200',
+  glass: 'bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg shadow-black/5',
 };
 
 const paddingClasses: Record<string, string> = {

@@ -18,7 +18,7 @@ const Toast: React.FC<ToastProps> = ({ show, message, type, onClose }) => {
     }
   }, [show, onClose]);
 
-  const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+  const bgColor = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90';
   const icon = type === 'success' ? <CheckCircleIcon className="w-6 h-6" /> : <XCircleIcon className="w-6 h-6" />;
 
   return (
@@ -28,10 +28,10 @@ const Toast: React.FC<ToastProps> = ({ show, message, type, onClose }) => {
       }`}
     >
       {show && (
-        <div className={`flex items-center gap-3 text-white py-3 px-5 rounded-lg shadow-2xl ${bgColor}`}>
+        <div className={`flex items-center gap-3 text-white py-3 px-5 rounded-2xl shadow-2xl backdrop-blur-xl border border-white/20 ${bgColor}`}>
           {icon}
           <p className="font-semibold text-base">{message}</p>
-          <button onClick={onClose} className="ml-4 font-bold text-xl leading-none opacity-70 hover:opacity-100">&times;</button>
+          <button onClick={onClose} className="ml-4 font-bold text-xl leading-none opacity-70 hover:opacity-100 transition-opacity">&times;</button>
         </div>
       )}
     </div>

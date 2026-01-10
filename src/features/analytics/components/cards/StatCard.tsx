@@ -41,20 +41,20 @@ const StatCard: React.FC<StatCardProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 animate-pulse">
+      <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 p-4 animate-pulse">
         <div className="flex items-center justify-between mb-2">
-          <div className="h-3 bg-neutral-200 rounded w-16" />
-          <div className="h-8 w-8 bg-neutral-200 rounded-lg" />
+          <div className="h-3 bg-neutral-200/50 rounded w-16" />
+          <div className="h-8 w-8 bg-neutral-200/50 rounded-lg" />
         </div>
-        <div className="h-7 bg-neutral-200 rounded w-14 mb-2" />
-        <div className="h-2 bg-neutral-200 rounded w-full" />
+        <div className="h-7 bg-neutral-200/50 rounded w-14 mb-2" />
+        <div className="h-2 bg-neutral-200/50 rounded w-full" />
       </div>
     );
   }
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-sm border border-neutral-200 p-4 hover:shadow-md transition-all duration-500 transform ${
+      className={`bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg shadow-black/5 border border-white/30 p-4 hover:shadow-xl hover:bg-white/80 transition-all duration-500 transform ${
         animated ? 'scale-100 opacity-100' : 'scale-90 opacity-0'
       }`}
     >

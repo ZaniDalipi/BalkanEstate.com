@@ -47,7 +47,7 @@ const BottomNav: React.FC = () => {
     ];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50 safe-area-inset-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-white/30 z-50 safe-area-inset-bottom shadow-lg shadow-black/5">
             <div className="flex items-center justify-around px-1.5 py-1.5">
                 {navItems.map(item => {
                     const Icon = item.icon;
@@ -61,7 +61,7 @@ const BottomNav: React.FC = () => {
                                 onClick={handleNewListingClick}
                                 className="flex flex-col items-center justify-center flex-1 py-1.5 relative"
                             >
-                                <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center shadow-lg -mt-5">
+                                <div className="w-10 h-10 bg-gradient-to-br from-secondary to-orange-400 rounded-full flex items-center justify-center shadow-xl shadow-secondary/30 -mt-5 border-2 border-white/50">
                                     <Icon className="w-5 h-5 text-white" />
                                 </div>
                                 <span className="text-xs font-medium text-neutral-600 mt-1">{item.label}</span>

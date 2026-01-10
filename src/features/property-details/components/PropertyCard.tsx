@@ -216,10 +216,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Favorite Button */}
           <button
             onClick={handleFavoriteClick}
-            className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
+            className={`p-2 rounded-full shadow-lg shadow-black/10 transition-all duration-300 ${
               isFavorited
                 ? 'bg-red-500 text-white scale-110'
-                : 'bg-white/95 backdrop-blur-sm text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110'
+                : 'bg-white/80 backdrop-blur-xl border border-white/50 text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110 hover:border-red-500'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -233,13 +233,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           <div className="flex items-center justify-between gap-2">
             {/* Property Type Badge + 360° indicator */}
             <div className="flex items-center gap-1.5">
-              <span className="bg-white/95 backdrop-blur-sm text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md shadow-md">
+              <span className="bg-white/80 backdrop-blur-xl text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-lg shadow-lg shadow-black/10 border border-white/50">
                 {propertyTypeLabel}
               </span>
               {/* 360° Tour Badge - positioned next to property type for less interference */}
               {property.virtualTour360Url && (
                 <div
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold px-1.5 py-1 rounded-md shadow-md flex items-center gap-0.5"
+                  className="bg-gradient-to-r from-purple-500/90 to-pink-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-1 rounded-lg shadow-lg shadow-purple-500/20 flex items-center gap-0.5 border border-white/20"
                   title="360° Virtual Tour Available"
                 >
                   <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -258,10 +258,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   {formatPrice(priceInfo.originalPrice, property.country)}
                 </span>
               )}
-              <span className={`text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-lg ${
+              <span className={`text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-lg shadow-xl shadow-black/20 backdrop-blur-sm border border-white/20 ${
                 priceInfo.hasReduction
-                  ? 'bg-gradient-to-r from-green-600 to-emerald-600'
-                  : 'bg-gradient-to-r from-primary to-primary-dark'
+                  ? 'bg-gradient-to-r from-green-600/90 to-emerald-600/90'
+                  : 'bg-gradient-to-r from-primary/90 to-primary-dark/90'
               }`}>
                 {formatPrice(priceInfo.currentPrice, property.country)}
                 {priceInfo.hasReduction && (
@@ -306,19 +306,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
         {/* Property Stats - Grid layout for better fit */}
         <div className="grid grid-cols-4 gap-1.5 mb-3">
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} ${t('property:features.bedrooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100/80 backdrop-blur-sm py-1.5 px-1 rounded-xl" title={`${property.beds} ${t('property:features.bedrooms')}`}>
             <BedIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.beds}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} ${t('property:features.bathrooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100/80 backdrop-blur-sm py-1.5 px-1 rounded-xl" title={`${property.baths} ${t('property:features.bathrooms')}`}>
             <BathIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.baths}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100/80 backdrop-blur-sm py-1.5 px-1 rounded-xl" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
             <LivingRoomIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.livingRooms}</span>
           </div>
-          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
+          <div className="flex flex-col items-center bg-primary/10 backdrop-blur-sm py-1.5 px-1 rounded-xl border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
             <SqftIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-primary">{property.sqft}</span>
           </div>

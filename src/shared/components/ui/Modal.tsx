@@ -50,12 +50,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto" onClick={handleBackdropClick}>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto" onClick={handleBackdropClick}>
       <div
-        className={`bg-white rounded-lg shadow-xl p-3 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto max-h-screen sm:max-h-[95vh] md:max-h-[90vh]`}
+        className={`bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 p-3 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto max-h-screen sm:max-h-[95vh] md:max-h-[90vh] border border-white/50`}
         onClick={handleContentClick}
       >
-        <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-1" aria-label="Close modal">
+        <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-400 hover:text-neutral-700 z-10 p-1.5 rounded-full hover:bg-black/5 transition-colors" aria-label="Close modal">
           <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         {title && <h2 className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}
