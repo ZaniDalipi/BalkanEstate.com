@@ -216,6 +216,21 @@ export interface IUser extends Document {
     weekResetDate: Date;         // When the weekly counter resets
   };
 
+  // Saved Land Measurements
+  savedMeasurements?: Array<{
+    id: string;
+    name: string;
+    points: Array<{ lat: number; lng: number }>;
+    type: 'distance' | 'area';
+    distance?: number;      // Total distance in meters
+    area?: number;          // Area in square meters (if polygon)
+    perimeter?: number;     // Perimeter in meters (if polygon)
+    address?: string;       // Optional address/location name
+    notes?: string;         // Optional notes
+    createdAt: Date;
+    updatedAt?: Date;
+  }>;
+
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -705,6 +720,43 @@ const UserSchema: Schema = new Schema(
         },
       },
     },
+
+    // Saved Land Measurements
+    savedMeasurements: [{
+      id: {
+        type: String,
+        required: true,
+      },
+      name: {
+        type: String,
+        required: true,
+      },
+      points: [{
+        lat: {
+          type: Number,
+          required: true,
+        },
+        lng: {
+          type: Number,
+          required: true,
+        },
+      }],
+      type: {
+        type: String,
+        enum: ['distance', 'area'],
+        required: true,
+      },
+      distance: Number,      // Total distance in meters
+      area: Number,          // Area in square meters
+      perimeter: Number,     // Perimeter in meters
+      address: String,       // Location name
+      notes: String,         // User notes
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+      updatedAt: Date,
+    }],
   },
   {
     timestamps: true,

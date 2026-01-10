@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useMap, Polyline, Polygon, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { useAppContext } from '../../../../context/AppContext';
+import * as api from '../../../../services/apiService';
 
 interface MeasurementPoint {
   lat: number;
@@ -9,12 +11,14 @@ interface MeasurementPoint {
 
 interface SavedMeasurement {
   id: string;
+  name?: string;
   points: MeasurementPoint[];
   type: 'distance' | 'area';
   distance?: number; // meters
   area?: number; // square meters
   perimeter?: number; // meters
   address?: string;
+  notes?: string;
   createdAt: Date;
 }
 
@@ -152,10 +156,17 @@ const firstPointActiveIcon = L.divIcon({
 
 const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onClose }) => {
   const map = useMap();
+  const { state } = useAppContext();
+  const isLoggedIn = !!state.currentUser;
+
   const [points, setPoints] = useState<MeasurementPoint[]>([]);
   const [isPolygonClosed, setIsPolygonClosed] = useState(false);
+  const [measurementName, setMeasurementName] = useState('');
   const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState<MeasurementPoint | null>(null);
   const [isNearFirstPoint, setIsNearFirstPoint] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -264,32 +275,69 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
     setPoints([]);
     setIsPolygonClosed(false);
     setShowSaveDialog(false);
+    setMeasurementName('');
     setAddress('');
+    setNotes('');
+    setSaveError(null);
   }, []);
 
   // Handle save
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (points.length < 2) return;
+
+    const name = measurementName.trim() || address.trim() || `Measurement ${new Date().toLocaleDateString()}`;
 
     const measurement: SavedMeasurement = {
       id: `measurement-${Date.now()}`,
+      name,
       points,
       type: isPolygonClosed ? 'area' : 'distance',
       distance: totalDistance,
       area: isPolygonClosed ? area : undefined,
       perimeter: isPolygonClosed ? perimeter : undefined,
       address: address || undefined,
+      notes: notes || undefined,
       createdAt: new Date(),
     };
 
-    onSave?.(measurement);
-    setShowSaveDialog(false);
-
-    // Save to localStorage for persistence
-    const saved = JSON.parse(localStorage.getItem('savedMeasurements') || '[]');
-    saved.push(measurement);
-    localStorage.setItem('savedMeasurements', JSON.stringify(saved));
-  }, [points, isPolygonClosed, totalDistance, area, perimeter, address, onSave]);
+    // If logged in, save to backend
+    if (isLoggedIn) {
+      setIsSaving(true);
+      setSaveError(null);
+      try {
+        await api.saveMeasurement({
+          name,
+          points,
+          type: isPolygonClosed ? 'area' : 'distance',
+          distance: totalDistance,
+          area: isPolygonClosed ? area : undefined,
+          perimeter: isPolygonClosed ? perimeter : undefined,
+          address: address || undefined,
+          notes: notes || undefined,
+        });
+        onSave?.(measurement);
+        setShowSaveDialog(false);
+        setMeasurementName('');
+        setAddress('');
+        setNotes('');
+      } catch (error: any) {
+        console.error('Failed to save measurement:', error);
+        setSaveError(error.message || 'Failed to save measurement');
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      // Save to localStorage for non-logged-in users
+      onSave?.(measurement);
+      setShowSaveDialog(false);
+      const saved = JSON.parse(localStorage.getItem('savedMeasurements') || '[]');
+      saved.push(measurement);
+      localStorage.setItem('savedMeasurements', JSON.stringify(saved));
+      setMeasurementName('');
+      setAddress('');
+      setNotes('');
+    }
+  }, [points, isPolygonClosed, totalDistance, area, perimeter, measurementName, address, notes, onSave, isLoggedIn]);
 
   // Get all points including cursor for preview line
   const previewPoints = !isPolygonClosed && cursorPosition && points.length > 0
@@ -382,134 +430,144 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
         );
       })}
 
-      {/* Measurement info panel */}
+      {/* Measurement info panel - Compact */}
       <div
         ref={containerRef}
-        className="absolute top-4 right-4 z-[1001] bg-white rounded-xl shadow-xl p-4 min-w-[280px]"
+        className="absolute top-4 right-4 z-[1001] bg-white rounded-lg shadow-lg p-2.5 min-w-[220px] max-w-[240px]"
         style={{ pointerEvents: 'auto' }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-            <span>📏</span> Measurement Tool
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-1">
+            📏 Measure
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-gray-400 hover:text-gray-600 text-lg leading-none w-5 h-5 flex items-center justify-center"
           >
             ×
           </button>
         </div>
 
-        {/* Instructions */}
+        {/* Instructions - compact */}
         {points.length === 0 && (
-          <p className="text-sm text-gray-500 mb-3">
-            Click on the map to start measuring. Click near the first point to close a polygon.
+          <p className="text-xs text-gray-500 mb-2">
+            Click map to add points
           </p>
         )}
 
-        {/* Measurements display */}
+        {/* Measurements display - compact */}
         {points.length > 0 && (
-          <div className="space-y-2 mb-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Points:</span>
-              <span className="font-medium">{points.length}</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">
-                {isPolygonClosed ? 'Perimeter:' : 'Distance:'}
-              </span>
+          <div className="space-y-1 mb-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Pts: {points.length}</span>
               <span className="font-medium text-blue-600">
                 {formatDistance(isPolygonClosed ? perimeter : totalDistance)}
               </span>
             </div>
 
             {!isPolygonClosed && previewDistance > 0 && (
-              <div className="flex justify-between text-sm text-gray-400">
-                <span>+ to cursor:</span>
+              <div className="flex justify-between text-gray-400">
+                <span>+cursor:</span>
                 <span>{formatDistance(previewDistance)}</span>
               </div>
             )}
 
             {isPolygonClosed && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Area:</span>
-                <span className="font-medium text-green-600">{formatArea(area)}</span>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Area:</span>
+                <span className="font-semibold text-green-600">{formatArea(area)}</span>
               </div>
             )}
           </div>
         )}
 
-        {/* Action buttons */}
-        <div className="flex gap-2 mb-3">
+        {/* Action buttons - compact */}
+        <div className="flex gap-1.5 mb-2">
           <button
             onClick={handleUndo}
             disabled={points.length === 0}
-            className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
           >
             ↩ Undo
           </button>
           <button
             onClick={handleClear}
             disabled={points.length === 0}
-            className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
           >
-            🗑 Clear
+            Clear
           </button>
         </div>
 
-        {/* Close Polygon button - only when we have 3+ points and polygon not closed */}
+        {/* Close Polygon button - compact */}
         {points.length >= 3 && !isPolygonClosed && (
           <button
             onClick={handleClosePolygon}
-            className="w-full px-3 py-2 mb-3 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center gap-2"
+            className="w-full px-2 py-1.5 mb-2 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700"
           >
-            <span>🔷</span> Close Polygon & Calculate Area
+            🔷 Close Polygon
           </button>
         )}
 
-        {/* Save section */}
+        {/* Save section - compact */}
         {points.length >= 2 && (
           <>
             {!showSaveDialog ? (
               <button
                 onClick={() => setShowSaveDialog(true)}
-                className="w-full px-3 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                className="w-full px-2 py-1.5 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
               >
-                💾 Save Measurement
+                💾 Save
               </button>
             ) : (
-              <div className="space-y-2 border-t pt-3">
+              <div className="space-y-1.5 border-t pt-2">
+                {!isLoggedIn && (
+                  <div className="text-[10px] text-amber-600 bg-amber-50 p-1.5 rounded">
+                    Log in to save to profile
+                  </div>
+                )}
+                <input
+                  type="text"
+                  value={measurementName}
+                  onChange={(e) => setMeasurementName(e.target.value)}
+                  placeholder="Name..."
+                  className="w-full px-2 py-1 text-xs border rounded focus:ring-1 focus:ring-blue-500"
+                />
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Enter address or name..."
-                  className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Location..."
+                  className="w-full px-2 py-1 text-xs border rounded focus:ring-1 focus:ring-blue-500"
                 />
-                <div className="flex gap-2">
+                {saveError && (
+                  <div className="text-[10px] text-red-600 bg-red-50 p-1.5 rounded">
+                    {saveError}
+                  </div>
+                )}
+                <div className="flex gap-1.5">
                   <button
-                    onClick={() => setShowSaveDialog(false)}
-                    className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    onClick={() => {
+                      setShowSaveDialog(false);
+                      setSaveError(null);
+                    }}
+                    disabled={isSaving}
+                    className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
-                    className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-green-600 text-white hover:bg-green-700"
+                    disabled={isSaving}
+                    className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-green-600 text-white hover:bg-green-700"
                   >
-                    ✓ Save
+                    {isSaving ? '...' : 'Save'}
                   </button>
                 </div>
               </div>
             )}
           </>
         )}
-
-        {/* Tips */}
-        <div className="mt-3 pt-3 border-t text-[10px] text-gray-400">
-          <span className="font-medium">Tips:</span> Click to add points • Click green start point or use button to close polygon
-        </div>
       </div>
     </>
   );
