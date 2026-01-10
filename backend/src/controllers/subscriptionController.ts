@@ -221,7 +221,35 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
     }
 
     if (!subscription) {
-      // No active subscription found
+      // No Subscription document found - check user's proSubscription field as fallback
+      // This handles cases where subscription was set up via test endpoint or manual update
+      const user = await User.findById(userId);
+
+      if (user?.proSubscription?.isActive && user.proSubscription.expiresAt && new Date(user.proSubscription.expiresAt) > new Date()) {
+        // User has active proSubscription but no Subscription document
+        // Return a synthetic subscription object from user data
+        res.status(200).json({
+          subscription: {
+            _id: `user_${userId}`,
+            userId: userId,
+            store: user.subscriptionSource || 'web',
+            productId: user.subscriptionPlan || user.proSubscription.plan || 'pro_monthly',
+            startDate: user.proSubscription.startedAt || user.subscriptionStartedAt,
+            renewalDate: user.proSubscription.expiresAt,
+            expirationDate: user.proSubscription.expiresAt,
+            status: 'active',
+            autoRenewing: false, // Can't auto-renew without a real Subscription document
+            price: 0, // Unknown price for legacy subscriptions
+            currency: 'EUR',
+            isAcknowledged: true,
+            createdAt: user.proSubscription.startedAt || user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+        });
+        return;
+      }
+
+      // No active subscription found anywhere
       res.status(200).json({ subscription: null });
       return;
     }
