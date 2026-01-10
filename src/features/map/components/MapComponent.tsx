@@ -184,7 +184,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const [mapType, setMapType] = useState<TileLayerType>('street');
-  const [isLegendOpen, setIsLegendOpen] = useState(false);
+  const [isLegendOpen, setIsLegendOpen] = useState(true); // Show legend by default
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [showLandmarks, setShowLandmarks] = useState(true); // Show landmarks by default
@@ -444,6 +444,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   <span className="hidden sm:inline">Parcels</span>
                 </button>
               )}
+
+              {/* Legend Toggle */}
+              <button
+                onClick={() => setIsLegendOpen(!isLegendOpen)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  isLegendOpen
+                    ? 'bg-amber-500 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title={t('search:map.legend', 'Legend')}
+              >
+                <MapLegendIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('search:map.legend', 'Legend')}</span>
+              </button>
             </div>
 
             {drawnBounds && !isDrawing && (
@@ -471,9 +485,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
             )}
           </div>
           {/* Legend - positioned above the newsletter on desktop (bottom-28 = ~112px to clear the ~80px newsletter) */}
-          <div className="absolute bottom-28 left-4 z-[1000]">
-            <Legend isNightMode={false} />
-          </div>
+          {isLegendOpen && (
+            <div className="absolute bottom-28 left-4 z-[1000] animate-fade-in">
+              <Legend isNightMode={false} />
+            </div>
+          )}
 
           {/* Sun Position Control - for shadow simulation when 3D buildings are enabled */}
           {show3DBuildings && (
