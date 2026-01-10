@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
+import { MapContainer, TileLayer, Rectangle, useMapEvents } from 'react-leaflet';
 import { Property } from '@/types';
 import L from 'leaflet';
 import { useAppContext } from '@/context/AppContext';
@@ -43,15 +43,15 @@ const TILE_LAYERS = {
   street: {
     url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
     attribution: '&copy; Google Maps',
-    maxZoom: 22,
-    maxNativeZoom: 22,
+    maxZoom: 21,
+    maxNativeZoom: 21,
   },
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution:
       'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-    maxZoom: 23,
-    maxNativeZoom: 23,
+    maxZoom: 19,
+    maxNativeZoom: 19, // ESRI has reliable coverage up to zoom 19
   },
 };
 
@@ -146,6 +146,21 @@ interface MapComponentProps {
 }
 
 /**
+ * ZoomTracker Component - tracks zoom level changes
+ */
+const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoomChange }) => {
+  useMapEvents({
+    zoomend: (e) => {
+      onZoomChange(e.target.getZoom());
+    },
+    load: (e) => {
+      onZoomChange(e.target.getZoom());
+    },
+  });
+  return null;
+};
+
+/**
  * MapComponent
  *
  * Main map component for property search with:
@@ -191,6 +206,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
   const [mapCenterLng, setMapCenterLng] = useState<number>(22); // Default Balkans longitude
   const [mapCenterLat, setMapCenterLat] = useState<number>(41); // Default Balkans latitude
+  const [currentZoom, setCurrentZoom] = useState<number>(7); // Current zoom level for display
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
 
@@ -279,7 +295,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           zoom={zoom}
           scrollWheelZoom={true}
           className={`w-full h-full ${show3DBuildings ? 'map-3d-active' : 'map-3d-inactive'}`}
-          maxZoom={23}
+          maxZoom={21}
           minZoom={6}
           zoomControl={false}
           maxBounds={BALKAN_BOUNDS}
@@ -288,6 +304,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
+          <ZoomTracker onZoomChange={setCurrentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
@@ -348,6 +365,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
             season={selectedSeason}
           />
         )}
+
+        {/* Debug Info Display - shows zoom level and coordinates for testing */}
+        <div className="absolute top-2 right-2 z-[1001] bg-black/75 text-white text-xs font-mono px-3 py-2 rounded-lg backdrop-blur-sm">
+          <div className="flex flex-col gap-0.5">
+            <span>Zoom: <strong>{currentZoom}</strong> / Max: {TILE_LAYERS[mapType]?.maxZoom || 21}</span>
+            <span>Lat: {mapCenterLat.toFixed(6)}</span>
+            <span>Lng: {mapCenterLng.toFixed(6)}</span>
+          </div>
+        </div>
 
       {/* Desktop Controls - positioned above the newsletter bar (bottom-28 = ~112px) */}
       {!isMobile && (
