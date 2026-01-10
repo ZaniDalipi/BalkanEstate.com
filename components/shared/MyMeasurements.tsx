@@ -178,13 +178,6 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
     }
   };
 
-  // Open measurement in full map view
-  const handleViewOnMap = (measurement: SavedMeasurement) => {
-    const centerLat = measurement.points.reduce((sum, p) => sum + p.lat, 0) / measurement.points.length;
-    const centerLng = measurement.points.reduce((sum, p) => sum + p.lng, 0) / measurement.points.length;
-    window.location.href = `/map?measurementId=${measurement.id}&lat=${centerLat}&lng=${centerLng}&zoom=18`;
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -417,11 +410,11 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
                     {/* Actions */}
                     <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                       <button
-                        onClick={() => handleViewOnMap(measurement)}
+                        onClick={() => setSelectedMeasurement(measurement.id)}
                         className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                        title="View fullscreen"
+                        title="View on map"
                       >
-                        🗺️
+                        🎯
                       </button>
                       <button
                         onClick={() => handleEdit(measurement)}
