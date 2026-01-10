@@ -636,98 +636,63 @@ const PropertyPopup: React.FC<{
     );
   }
 
-  // Standard popup - Apple liquid glass style
+  // Standard popup - clean minimal design (no slider, full-width image)
   return (
     <div
-      className="w-[180px] cursor-pointer rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/20"
+      className="w-[200px] cursor-pointer rounded-xl overflow-hidden shadow-lg bg-white"
       onClick={() => onPopupClick(property.id)}
-      style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 100%)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)'
-      }}
     >
-      {/* Image section */}
-      <div className="relative h-[100px] m-1.5 rounded-xl overflow-hidden">
+      {/* Full-width image - no slider, just first image */}
+      <div className="relative h-[120px]">
         <img
-          src={images[currentImageIndex]}
+          src={images[0]}
           alt={property.address}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Subtle vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-        {/* Property type pill */}
-        <span
-          className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize"
-          style={{
-            background: 'rgba(255,255,255,0.85)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)'
-          }}
-        >
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        {/* Property type */}
+        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/90 text-neutral-700 capitalize">
           {property.propertyType}
         </span>
-        {/* Price overlay */}
-        <div className="absolute bottom-2 left-2">
-          <p className="font-bold text-white text-base drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+        {/* Price on image */}
+        <div className="absolute bottom-2 left-2 right-2">
+          <p className="font-bold text-white text-lg drop-shadow-md">
             {formatPrice(priceInfo.currentPrice, property.country)}
           </p>
         </div>
       </div>
 
-      {/* Content section */}
-      <div className="px-3 pb-3 pt-1">
+      {/* Content */}
+      <div className="p-3">
         {/* Title */}
         {property.title && (
-          <p className="font-semibold text-[13px] text-neutral-800 line-clamp-1 mb-1">
+          <p className="font-semibold text-sm text-neutral-800 line-clamp-1 mb-1">
             {property.title}
           </p>
         )}
 
         {/* Location */}
-        <p className="text-[11px] text-neutral-500 mb-2 line-clamp-1">
+        <p className="text-[11px] text-neutral-500 mb-2">
           {property.city}, {property.country}
         </p>
 
-        {/* Specs - glass pills */}
-        <div className="flex items-center gap-1.5 mb-2">
-          {property.propertyType === 'land' ? (
-            <span
-              className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
-              style={{ background: 'rgba(0,0,0,0.05)' }}
-            >
-              {property.sqft?.toLocaleString()} m²
-            </span>
-          ) : (
-            <>
-              <span
-                className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
-                style={{ background: 'rgba(0,0,0,0.05)' }}
-              >
-                {property.beds} bed
-              </span>
-              <span
-                className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
-                style={{ background: 'rgba(0,0,0,0.05)' }}
-              >
-                {property.baths} bath
-              </span>
-              <span
-                className="text-[10px] font-medium px-2 py-1 rounded-lg text-neutral-700"
-                style={{ background: 'rgba(0,0,0,0.05)' }}
-              >
-                {property.sqft} m²
-              </span>
-            </>
-          )}
-        </div>
+        {/* Specs row */}
+        {property.propertyType === 'land' ? (
+          <div className="flex items-center gap-2 text-[11px] text-neutral-600 mb-2">
+            <span className="font-semibold">{property.sqft?.toLocaleString()} m²</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 text-[11px] text-neutral-600 mb-2">
+            <span><span className="font-semibold">{property.beds}</span> bed</span>
+            <span><span className="font-semibold">{property.baths}</span> bath</span>
+            <span><span className="font-semibold">{property.sqft}</span> m²</span>
+          </div>
+        )}
 
         {/* CTA */}
-        <div
-          className="text-center py-1.5 rounded-lg"
-          style={{ background: 'rgba(0,82,205,0.1)' }}
-        >
-          <span className="text-[11px] font-semibold text-primary">View details</span>
+        <div className="text-center py-2 rounded-lg bg-primary/10">
+          <span className="text-[11px] font-semibold text-primary">View details →</span>
         </div>
       </div>
     </div>
@@ -795,9 +760,11 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 260 : 195}
-              minWidth={isPromoted ? 220 : 180}
-              className={`property-popup-glass ${isPromoted ? 'promoted-property-popup' : ''} ${isNightMode ? 'night-mode-popup' : ''}`}
+              maxWidth={isPromoted ? 320 : 220}
+              minWidth={isPromoted ? 280 : 200}
+              className={`property-popup ${isPromoted ? 'promoted-property-popup' : 'standard-property-popup'} ${isNightMode ? 'night-mode-popup' : ''}`}
+              autoPan={true}
+              autoPanPadding={[50, 50]}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>
