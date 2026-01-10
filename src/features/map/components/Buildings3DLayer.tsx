@@ -1,14 +1,27 @@
 // Buildings3DLayer Component
 // Adds 3D building extrusions with realistic time-based shadows and dynamic theming
+// Enhanced with OSM Buildings for detailed 3D visualization
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useMap } from 'react-leaflet';
+import L from 'leaflet';
 
 interface Buildings3DLayerProps {
   enabled: boolean;
   dateTime?: Date; // For shadow projection and theme based on sun position
-  onBuildingClick?: (buildingInfo: { featureId: string | number; lat: number; lon: number }) => void;
+  onBuildingClick?: (buildingInfo: BuildingInfo) => void;
   highlightedBuilding?: string | number | null;
+  showBuildingInfo?: boolean; // Show popup on building click
+}
+
+interface BuildingInfo {
+  featureId: string | number;
+  lat: number;
+  lon: number;
+  height?: number;
+  levels?: number;
+  type?: string;
+  name?: string;
 }
 
 // Declare OSMBuildings on window
@@ -17,6 +30,15 @@ declare global {
     OSMBuildings: any;
   }
 }
+
+// OSM Buildings data sources - primary and fallbacks
+const OSM_BUILDINGS_DATA_SOURCES = [
+  'https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json',
+  'https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json',
+];
+
+// CDN sources for the OSM Buildings library
+const OSM_BUILDINGS_CDN = 'https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js';
 
 // Patch canvas getContext to add willReadFrequently for better performance
 // This fixes the Chrome warning about multiple readback operations
@@ -131,24 +153,65 @@ const getBuildingColorsByTime = (hour: number): { wallColor: string; roofColor: 
  * - 3D building extrusions with realistic shadows
  * - Dynamic theming based on time of day (dawn, noon, sunset, night)
  * - Time-based shadow projection (see sunlight at any hour)
- * - Building click interaction
+ * - Building click interaction with info popup
  * - Smooth integration with Leaflet
+ * - Fallback data sources for reliability
  */
 const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
   enabled,
   dateTime,
   onBuildingClick,
   highlightedBuilding,
+  showBuildingInfo = true,
 }) => {
   const map = useMap();
   const osmBuildingsRef = useRef<any>(null);
   const scriptLoadedRef = useRef(false);
   const lastHourRef = useRef<number>(-1);
+  const popupRef = useRef<L.Popup | null>(null);
+  const dataSourceIndexRef = useRef(0);
 
   // Get current hour from dateTime
   const getCurrentHour = useCallback(() => {
     return dateTime ? dateTime.getHours() : new Date().getHours();
   }, [dateTime]);
+
+  // Show building info popup
+  const showBuildingPopup = useCallback((info: BuildingInfo) => {
+    if (!showBuildingInfo || !map) return;
+
+    // Close existing popup
+    if (popupRef.current) {
+      map.closePopup(popupRef.current);
+    }
+
+    const heightInfo = info.height ? `${Math.round(info.height)}m` : info.levels ? `~${info.levels * 3}m (${info.levels} floors)` : 'Unknown';
+    const typeInfo = info.type || 'Building';
+    const nameInfo = info.name ? `<strong>${info.name}</strong><br/>` : '';
+
+    const popupContent = `
+      <div style="min-width: 150px; font-family: system-ui, -apple-system, sans-serif;">
+        ${nameInfo}
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <span style="font-size: 16px;">🏢</span>
+          <span style="font-weight: 500; color: #374151;">${typeInfo}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; color: #6b7280; font-size: 13px;">
+          <span>📏</span>
+          <span>Height: ${heightInfo}</span>
+        </div>
+      </div>
+    `;
+
+    popupRef.current = L.popup({
+      closeButton: true,
+      className: 'building-info-popup',
+      maxWidth: 250,
+    })
+      .setLatLng([info.lat, info.lon])
+      .setContent(popupContent)
+      .openOn(map);
+  }, [map, showBuildingInfo]);
 
   useEffect(() => {
     if (!enabled) {
@@ -160,6 +223,11 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
           // Layer might already be removed
         }
         osmBuildingsRef.current = null;
+      }
+      // Close popup
+      if (popupRef.current) {
+        map.closePopup(popupRef.current);
+        popupRef.current = null;
       }
       return;
     }
@@ -174,11 +242,14 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
       // Load the OSM Buildings script if not already loaded
       if (!scriptLoadedRef.current) {
         const script = document.createElement('script');
-        script.src = 'https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js';
+        script.src = OSM_BUILDINGS_CDN;
         script.async = true;
         script.onload = () => {
           scriptLoadedRef.current = true;
           initBuildings();
+        };
+        script.onerror = () => {
+          console.warn('Failed to load OSM Buildings from CDN');
         };
         document.head.appendChild(script);
       }
@@ -191,12 +262,14 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
         // Create OSM Buildings layer
         const osmb = new window.OSMBuildings(map);
 
-        // Load building data from OSM Buildings proxy
-        osmb.load('https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json');
+        // Load building data from primary source, with fallback
+        const dataSource = OSM_BUILDINGS_DATA_SOURCES[dataSourceIndexRef.current];
+        osmb.load(dataSource);
 
         // Set initial style based on time
         const hour = getCurrentHour();
-        osmb.style(getBuildingColorsByTime(hour));
+        const colors = getBuildingColorsByTime(hour);
+        osmb.style(colors);
         lastHourRef.current = hour;
 
         // Set initial date/time for shadow projection
@@ -207,24 +280,35 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
         }
 
         // Handle building click events
-        if (onBuildingClick) {
-          osmb.click((info: { featureId: string | number; lat: number; lon: number }) => {
+        osmb.click((info: BuildingInfo) => {
+          // Show popup with building info
+          showBuildingPopup(info);
+
+          // Call custom handler if provided
+          if (onBuildingClick) {
             onBuildingClick(info);
-          });
-        }
+          }
+        });
 
         // Custom feature styling - highlight specific buildings
-        osmb.each((feature: any) => {
-          if (highlightedBuilding && feature.id === highlightedBuilding) {
-            feature.wallColor = 'rgba(0, 200, 255, 0.9)';
-            feature.roofColor = 'rgba(0, 255, 255, 0.85)';
-          }
-          return true; // Include feature
-        });
+        if (highlightedBuilding) {
+          osmb.each((feature: any) => {
+            if (feature.id === highlightedBuilding) {
+              feature.wallColor = 'rgba(2, 82, 205, 0.95)'; // Primary blue
+              feature.roofColor = 'rgba(59, 130, 246, 0.9)';
+            }
+            return true; // Include feature
+          });
+        }
 
         osmBuildingsRef.current = osmb;
       } catch (e) {
         console.warn('Failed to initialize OSM Buildings:', e);
+        // Try fallback data source
+        if (dataSourceIndexRef.current < OSM_BUILDINGS_DATA_SOURCES.length - 1) {
+          dataSourceIndexRef.current++;
+          initBuildings();
+        }
       }
     };
 
@@ -239,8 +323,12 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
         }
         osmBuildingsRef.current = null;
       }
+      if (popupRef.current) {
+        map.closePopup(popupRef.current);
+        popupRef.current = null;
+      }
     };
-  }, [enabled, map, onBuildingClick, highlightedBuilding, getCurrentHour]);
+  }, [enabled, map, onBuildingClick, highlightedBuilding, getCurrentHour, showBuildingPopup, dateTime]);
 
   // Update date/time for shadow projection AND building colors
   useEffect(() => {
@@ -253,9 +341,10 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
           osmBuildingsRef.current.date(dateTime);
         }
 
-        // Update building colors if hour changed
+        // Update building colors if hour changed (with smooth transition feel)
         if (hour !== lastHourRef.current) {
-          osmBuildingsRef.current.style(getBuildingColorsByTime(hour));
+          const colors = getBuildingColorsByTime(hour);
+          osmBuildingsRef.current.style(colors);
           lastHourRef.current = hour;
         }
       } catch (e) {
@@ -270,5 +359,5 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
 export default Buildings3DLayer;
 
 // Export helpers for use in other components
-export { getTimePeriod, getBuildingColorsByTime };
-export type { TimePeriod };
+export { getTimePeriod, getBuildingColorsByTime, OSM_BUILDINGS_DATA_SOURCES };
+export type { TimePeriod, BuildingInfo, Buildings3DLayerProps };
