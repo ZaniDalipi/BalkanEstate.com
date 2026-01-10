@@ -991,42 +991,39 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         <MapComponent {...mapProps} searchMode={searchMode} />
                     </div>
 
-                    {/* Newsletter Subscription Section - Hidden on mobile, overlays map at bottom with blur */}
-                    <div className="hidden md:block absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-br from-primary-dark/90 via-primary/90 to-primary/90 backdrop-blur-sm text-white p-2 sm:p-2.5 md:p-3">
-                        <div className="max-w-xl mx-auto">
-                            <h3 className="text-xs sm:text-sm font-semibold mb-1">Stay Updated with New Properties</h3>
-                            <p className="text-xs text-white/80 mb-1.5 sm:mb-2 hidden sm:block">Subscribe to get notifications about new listings in your area</p>
-                            <form onSubmit={(e) => {
-                                e.preventDefault();
-                                const formData = new FormData(e.currentTarget);
-                                const email = formData.get('email') as string;
-                                if (!email || !email.trim() || !email.includes('@')) {
-                                    dispatch({
-                                        type: 'SHOW_ALERT',
-                                        payload: {
-                                            type: 'warning',
-                                            title: 'Invalid Email',
-                                            message: 'Please enter a valid email address',
-                                        },
-                                    });
-                                    return;
-                                }
-                                dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true, email: email.trim() } });
-                            }} className="flex gap-2">
-                                <input
-                                    type="email"
-                                    name="email"
-                                    placeholder="Enter your email"
-                                    className="flex-grow px-3 py-1.5 text-xs rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent backdrop-blur-sm"
-                                />
-                                <button
-                                    type="submit"
-                                    className="px-3 py-1.5 text-xs font-semibold bg-secondary text-primary-dark rounded-lg hover:bg-yellow-300 transition-colors whitespace-nowrap"
-                                >
-                                    Subscribe
-                                </button>
-                            </form>
-                        </div>
+                    {/* Newsletter Subscription - Compact bar at bottom */}
+                    <div className="hidden md:flex absolute bottom-0 left-0 right-0 z-10 bg-primary/95 backdrop-blur-sm items-center justify-center gap-3 py-1.5 px-4">
+                        <span className="text-white text-xs font-medium">📬 Get new listings alerts</span>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.currentTarget);
+                            const email = formData.get('email') as string;
+                            if (!email || !email.trim() || !email.includes('@')) {
+                                dispatch({
+                                    type: 'SHOW_ALERT',
+                                    payload: {
+                                        type: 'warning',
+                                        title: 'Invalid Email',
+                                        message: 'Please enter a valid email address',
+                                    },
+                                });
+                                return;
+                            }
+                            dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true, email: email.trim() } });
+                        }} className="flex gap-1.5">
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="Email"
+                                className="w-44 px-2.5 py-1 text-xs rounded bg-white/15 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-secondary"
+                            />
+                            <button
+                                type="submit"
+                                className="px-3 py-1 text-xs font-semibold bg-secondary text-primary-dark rounded hover:bg-yellow-300 transition-colors"
+                            >
+                                Subscribe
+                            </button>
+                        </form>
                     </div>
                 </div>
                 

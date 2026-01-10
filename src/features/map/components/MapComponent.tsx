@@ -411,21 +411,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
         )}
 
-        {/* Debug Info Display - shows zoom level and coordinates for testing */}
-        <div className={`absolute ${show3DBuildings ? 'top-32' : 'top-4'} left-4 z-[1001] bg-black/80 text-white text-[11px] font-mono px-2.5 py-1.5 rounded-lg backdrop-blur-sm shadow-lg`}>
-          <div className="flex items-center gap-3">
-            <span>🔍 <strong>{currentZoom}</strong>/{TILE_LAYERS[mapType]?.maxZoom || 21}</span>
-            <span className="text-white/70">📍 {mapCenterLat.toFixed(4)}, {mapCenterLng.toFixed(4)}</span>
-            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${mapType === 'satellite' ? 'bg-green-600' : 'bg-blue-600'}`}>
-              {mapType === 'satellite' ? 'SAT' : 'MAP'}
-            </span>
-          </div>
+        {/* Debug Info Display - shows zoom level and coordinates */}
+        <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-4 left-4'} z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md`}>
+          <span>🔍{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} 📍{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
         </div>
 
-      {/* Desktop Controls - positioned above the newsletter bar (bottom-28 = ~112px) */}
+      {/* Desktop Controls - positioned above the newsletter bar (bottom-12 = ~112px) */}
       {!isMobile && (
         <>
-          <div className="absolute bottom-28 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+          <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar - compact with glass effect */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
               <button
@@ -570,9 +564,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             )}
           </div>
-          {/* Legend - positioned above the newsletter on desktop (bottom-28 = ~112px to clear the ~80px newsletter) */}
+          {/* Legend - positioned above the newsletter on desktop (bottom-12 = ~112px to clear the ~80px newsletter) */}
           {isLegendOpen && (
-            <div className="absolute bottom-28 left-4 z-[1000] animate-fade-in">
+            <div className="absolute bottom-12 left-4 z-[1000] animate-fade-in">
               <Legend isNightMode={false} />
             </div>
           )}
