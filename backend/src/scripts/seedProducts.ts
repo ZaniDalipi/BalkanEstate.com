@@ -242,7 +242,7 @@ const PRODUCTS = [
     agentCoupons: 0,
     savedSearchesLimit: -1,
     aiMessagesLimit: -1,
-    aiInsightsLimit: 20,
+    aiInsightsLimit: -1,
     imageDescriptionLimit: -1,
   },
   {
@@ -332,7 +332,7 @@ const PRODUCTS = [
     isVisible: true,
     hasFreeTrial: false,
     gracePeriodDays: 7,
-    listingsLimit: 500, // 500 listings for enterprise
+    listingsLimit: 1000, // 1000 listings for enterprise
     promotionCoupons: 5, // 2 premier + 2 highlighted + 1 featured
     premiumCoupons: 2, // 2 premium premier
     highlightedCoupons: 2, // 2 highlighted
