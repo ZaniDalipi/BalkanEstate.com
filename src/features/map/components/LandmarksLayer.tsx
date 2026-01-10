@@ -135,8 +135,8 @@ const createLandmarkIcon = (type: LandmarkType, isNightMode: boolean): L.DivIcon
 const landmarksCache = new Map<string, { landmarks: Landmark[]; timestamp: number }>();
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache
 const MIN_REQUEST_INTERVAL = 10000; // Minimum 10 seconds between API requests
-const MIN_ZOOM_FOR_FETCH = 14; // Only fetch at zoom 14+ (more zoomed in)
-const DEBOUNCE_DELAY = 3000; // 3 second debounce
+const MIN_ZOOM_FOR_FETCH = 12; // Show POIs at zoom 12+
+const DEBOUNCE_DELAY = 2000; // 2 second debounce
 const MAX_CACHE_SIZE = 15; // Maximum cache entries
 
 // Alternative Overpass API endpoints for fallback
@@ -194,7 +194,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     onLandmarkClickRef.current = onLandmarkClick;
   });
 
-  // Build Overpass API query for landmarks - simplified for performance
+  // Build Overpass API query for landmarks
   const buildOverpassQuery = useCallback((bounds: L.LatLngBounds): string => {
     const south = bounds.getSouth();
     const west = bounds.getWest();
@@ -202,16 +202,17 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     const east = bounds.getEast();
     const bbox = `${south},${west},${north},${east}`;
 
-    // Simplified query - only essential landmarks to reduce API load
+    // Query for various POI types
     return `
       [out:json][timeout:25];
       (
-        node["tourism"~"museum|attraction"]["name"](${bbox});
-        node["historic"~"monument|castle"]["name"](${bbox});
-        node["leisure"="stadium"]["name"](${bbox});
-        node["amenity"="university"]["name"](${bbox});
+        node["tourism"~"museum|attraction|viewpoint"]["name"](${bbox});
+        node["historic"~"monument|castle|memorial"]["name"](${bbox});
+        node["amenity"~"place_of_worship|university|hospital"]["name"](${bbox});
+        node["leisure"~"stadium|park"]["name"](${bbox});
+        node["building"~"church|mosque|cathedral"]["name"](${bbox});
       );
-      out 20;
+      out 40;
     `.trim();
   }, []);
 
@@ -300,7 +301,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
           index === self.findIndex((l) => l.name === landmark.name)
       );
 
-      const limitedLandmarks = uniqueLandmarks.slice(0, 30); // Limit to 30 landmarks
+      const limitedLandmarks = uniqueLandmarks.slice(0, 40); // Limit to 40 landmarks
 
       // Cache the result and cleanup old entries
       landmarksCache.set(boundsKey, {

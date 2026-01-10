@@ -198,6 +198,14 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
               setIsViewMode(true);
               setViewMeasurementData(measurement as SavedMeasurement);
 
+              // Fit map to show entire measurement with padding
+              if (measurement.points.length > 0) {
+                const bounds = L.latLngBounds(
+                  measurement.points.map((p: { lat: number; lng: number }) => [p.lat, p.lng] as [number, number])
+                );
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
+              }
+
               // Clean up URL
               const url = new URL(window.location.href);
               url.searchParams.delete('measurementId');
@@ -209,7 +217,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           });
       }
     }
-  }, [enabled]);
+  }, [enabled, map]);
 
   // Also handle viewMeasurement prop if passed directly
   useEffect(() => {
@@ -400,10 +408,10 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           <Polygon
             positions={points.map((p) => [p.lat, p.lng] as [number, number])}
             pathOptions={{
-              color: '#0252CD',
-              weight: 3,
-              fillColor: '#0252CD',
-              fillOpacity: 0.2,
+              color: isViewMode ? '#10B981' : '#0252CD',
+              weight: isViewMode ? 4 : 3,
+              fillColor: isViewMode ? '#10B981' : '#0252CD',
+              fillOpacity: isViewMode ? 0.35 : 0.2,
             }}
           />
         ) : (
@@ -412,8 +420,8 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             <Polyline
               positions={previewPoints.map((p) => [p.lat, p.lng] as [number, number])}
               pathOptions={{
-                color: '#0252CD',
-                weight: 3,
+                color: isViewMode ? '#10B981' : '#0252CD',
+                weight: isViewMode ? 4 : 3,
                 dashArray: cursorPosition && points.length > 0 ? '10, 5' : undefined,
               }}
             />
