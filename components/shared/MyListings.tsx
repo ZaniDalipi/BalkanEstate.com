@@ -6,7 +6,7 @@ import { EyeIcon, HeartIcon, InboxIcon, PencilIcon, SparklesIcon, CheckCircleIco
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
-import PromotionModal from '../promotions/PromotionModal';
+import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 
 // Role badge component to show which role created the listing
 const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
@@ -224,7 +224,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
 
     // Calculate renewal status based on lastRenewed
-    const calculateRenewalStatus = (lastRenewed?: Date) => {
+    const calculateRenewalStatus = (lastRenewed?: Date | number | string) => {
         if (!lastRenewed) return { canRenew: true };
 
         const COOLDOWN_HOURS = 24;
@@ -290,10 +290,10 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     // Calculate counts for each role
     const roleCounts = useMemo(() => {
         const privateSellerCount = myProperties.filter(p =>
-            p.createdAsRole === 'private_seller' || p.createdAsRole === UserRole.PRIVATE_SELLER
+            p.createdAsRole === 'private_seller'
         ).length;
         const agentCount = myProperties.filter(p =>
-            p.createdAsRole === 'agent' || p.createdAsRole === UserRole.AGENT
+            p.createdAsRole === 'agent'
         ).length;
         return {
             all: myProperties.length,
@@ -309,10 +309,10 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         if (roleFilter !== 'all') {
             filtered = filtered.filter(p => {
                 if (roleFilter === 'private_seller') {
-                    return p.createdAsRole === 'private_seller' || p.createdAsRole === UserRole.PRIVATE_SELLER;
+                    return p.createdAsRole === 'private_seller';
                 }
                 if (roleFilter === 'agent') {
-                    return p.createdAsRole === 'agent' || p.createdAsRole === UserRole.AGENT;
+                    return p.createdAsRole === 'agent';
                 }
                 return true;
             });
