@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
+import User from '../models/User';
 
 // =============================================================================
 // Security Utilities
@@ -251,9 +252,95 @@ class EmailService {
   }
 
   /**
+   * Fetch unsubscribe token for a user by email
+   * Also checks if user has opted out of specific email type
+   */
+  private async getUnsubscribeInfo(email: string, emailType: string = 'all'): Promise<{
+    token: string | undefined;
+    canSend: boolean;
+  }> {
+    try {
+      const user = await User.findOne({ email: email.toLowerCase() }).select('unsubscribeToken emailPreferences');
+      if (!user) {
+        return { token: undefined, canSend: true }; // Non-registered users still get emails
+      }
+
+      // Check if user has opted out of this email type
+      const preferences = user.emailPreferences || {
+        weeklyStats: true,
+        propertyAlerts: true,
+        priceDrops: true,
+        messages: true,
+        marketing: true,
+        transactional: true,
+      };
+
+      // Map email types to preference keys
+      const typeToPreference: Record<string, keyof typeof preferences> = {
+        weeklyStats: 'weeklyStats',
+        propertyAlerts: 'propertyAlerts',
+        priceDrops: 'priceDrops',
+        messages: 'messages',
+        marketing: 'marketing',
+        transactional: 'transactional',
+        all: 'transactional', // 'all' only blocked if transactional is blocked (shouldn't happen)
+      };
+
+      const preferenceKey = typeToPreference[emailType] || 'transactional';
+      const canSend = preferences[preferenceKey] !== false;
+
+      return { token: user.unsubscribeToken, canSend };
+    } catch (error) {
+      console.error('Error fetching unsubscribe info:', error);
+      return { token: undefined, canSend: true }; // Default to sending on error
+    }
+  }
+
+  /**
+   * Generate email footer with unsubscribe link
+   * @param unsubscribeToken - User's unique unsubscribe token
+   * @param emailType - Type of email for specific unsubscribe (weeklyStats, propertyAlerts, priceDrops, messages, marketing)
+   * @param reason - Reason shown to user why they're receiving this email
+   */
+  generateEmailFooter(unsubscribeToken: string | undefined, emailType: string = 'all', reason: string = ''): string {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const backendUrl = process.env.BACKEND_URL || 'https://api.balkanestate.com';
+    const year = new Date().getFullYear();
+
+    const unsubscribeUrl = unsubscribeToken
+      ? `${backendUrl}/api/auth/unsubscribe?token=${unsubscribeToken}&type=${emailType}`
+      : `${frontendUrl}/settings/notifications`;
+
+    const unsubscribeAllUrl = unsubscribeToken
+      ? `${backendUrl}/api/auth/unsubscribe?token=${unsubscribeToken}&type=all`
+      : `${frontendUrl}/settings/notifications`;
+
+    return `
+    <!-- Footer -->
+    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
+      ${reason ? `<p style="color: #6b7280; font-size: 12px; margin: 0 0 12px 0;">${escapeHtml(reason)}</p>` : ''}
+      <p style="color: #9ca3af; font-size: 11px; margin: 0 0 8px 0;">
+        <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe from these emails</a>
+        ${emailType !== 'all' ? ` · <a href="${unsubscribeAllUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe from all</a>` : ''}
+        · <a href="${frontendUrl}/settings/notifications" style="color: #9ca3af; text-decoration: underline;">Manage preferences</a>
+      </p>
+      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
+        © ${year} BalkanEstate<sup>AI</sup>. All rights reserved.
+      </p>
+    </div>`;
+  }
+
+  /**
    * Send weekly statistics email to Pro members
    */
   async sendWeeklyStats(data: WeeklyStatsData): Promise<void> {
+    // Check if user has opted out of weekly stats emails
+    const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(data.email, 'weeklyStats');
+    if (!canSend) {
+      console.log(`📧 Skipping weekly stats email to ${data.email} - user unsubscribed`);
+      return;
+    }
+
     // Sanitize user inputs
     const safeUserName = escapeHtml(data.userName);
     const safePeriod = escapeHtml(data.period);
@@ -373,15 +460,7 @@ class EmailService {
       </div>
     </div>
 
-    <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0;">
-        You're receiving this email because you're a Pro member of BalkanEstate<sup>AI</sup>.
-      </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.
-      </p>
-    </div>
+    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email because you're a Pro member of BalkanEstate.")}
   </div>
 </body>
 </html>`;
@@ -399,6 +478,13 @@ class EmailService {
    * Send weekly statistics email to agency owners
    */
   async sendAgencyWeeklyStats(data: AgencyWeeklyStatsData): Promise<void> {
+    // Check if user has opted out of weekly stats emails
+    const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(data.email, 'weeklyStats');
+    if (!canSend) {
+      console.log(`📧 Skipping agency weekly stats email to ${data.email} - user unsubscribed`);
+      return;
+    }
+
     // Sanitize user inputs
     const safeAgencyName = escapeHtml(data.agencyName);
     const safePeriod = escapeHtml(data.period);
@@ -505,15 +591,7 @@ class EmailService {
       </div>
     </div>
 
-    <!-- Footer -->
-    <div style="background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 12px; margin: 0;">
-        You're receiving this email as an agency owner on BalkanEstate<sup>AI</sup>.
-      </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 8px 0 0 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>. All rights reserved.
-      </p>
-    </div>
+    ${this.generateEmailFooter(unsubscribeToken, 'weeklyStats', "You're receiving this email as an agency owner on BalkanEstate.")}
   </div>
 </body>
 </html>`;
@@ -531,6 +609,13 @@ class EmailService {
    * Send enhanced new message notification with property details
    */
   async sendNewMessageNotification(params: NewMessageParams): Promise<void> {
+    // Check if user has opted out of message notifications
+    const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'messages');
+    if (!canSend) {
+      console.log(`📧 Skipping message notification to ${params.recipientEmail} - user unsubscribed`);
+      return;
+    }
+
     // Sanitize all user inputs
     const safeSenderName = escapeHtml(params.senderName);
     const safeMessagePreview = escapeHtml(params.messagePreview);
@@ -592,12 +677,7 @@ class EmailService {
       </a>
     </div>
 
-    <!-- Footer -->
-    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
-      </p>
-    </div>
+    ${this.generateEmailFooter(unsubscribeToken, 'messages', "You received this message through BalkanEstate.")}
   </div>
 </body>
 </html>`;
@@ -672,6 +752,13 @@ class EmailService {
       imageUrl?: string;
     };
   }): Promise<void> {
+    // Check if user has opted out of property alerts
+    const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'propertyAlerts');
+    if (!canSend) {
+      console.log(`📧 Skipping property alert to ${params.recipientEmail} - user unsubscribed`);
+      return;
+    }
+
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
 
     // Sanitize all user inputs
@@ -756,15 +843,7 @@ class EmailService {
       </p>
     </div>
 
-    <!-- Footer -->
-    <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        Alert from your saved search: "${safeSearchName}"
-      </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
-      </p>
-    </div>
+    ${this.generateEmailFooter(unsubscribeToken, 'propertyAlerts', `Alert from your saved search: "${safeSearchName}"`)}
   </div>
 </body>
 </html>`;
@@ -798,6 +877,13 @@ class EmailService {
     }>;
     frequency: 'instant' | 'daily' | 'weekly';
   }): Promise<void> {
+    // Check if user has opted out of property alerts
+    const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'propertyAlerts');
+    if (!canSend) {
+      console.log(`📧 Skipping listings digest to ${params.recipientEmail} - user unsubscribed`);
+      return;
+    }
+
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const frequencyLabel = params.frequency === 'daily' ? 'Daily' : params.frequency === 'weekly' ? 'Weekly' : '';
 
@@ -855,15 +941,7 @@ class EmailService {
       </a>
     </div>
 
-    <!-- Footer -->
-    <div style="background: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        You're receiving this because you have alerts enabled for "${safeSearchName}"
-      </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup>
-      </p>
-    </div>
+    ${this.generateEmailFooter(unsubscribeToken, 'propertyAlerts', `You're receiving this because you have alerts enabled for "${safeSearchName}"`)}
   </div>
 </body>
 </html>`;
@@ -897,6 +975,13 @@ class EmailService {
       imageUrl?: string;
     };
   }): Promise<void> {
+    // Check if user has opted out of price drop alerts
+    const { token: unsubscribeToken, canSend } = await this.getUnsubscribeInfo(params.recipientEmail, 'priceDrops');
+    if (!canSend) {
+      console.log(`📧 Skipping price drop alert to ${params.recipientEmail} - user unsubscribed`);
+      return;
+    }
+
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
     const savings = params.property.previousPrice - params.property.newPrice;
 
@@ -991,15 +1076,7 @@ class EmailService {
       </p>
     </div>
 
-    <!-- Footer -->
-    <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 11px; margin: 0 0 4px 0;">
-        You saved this property and enabled price drop alerts
-      </p>
-      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-        © ${new Date().getFullYear()} BalkanEstate<sup>AI</sup> · Find your place in the Balkans
-      </p>
-    </div>
+    ${this.generateEmailFooter(unsubscribeToken, 'priceDrops', "You saved this property and enabled price drop alerts")}
   </div>
 </body>
 </html>`;

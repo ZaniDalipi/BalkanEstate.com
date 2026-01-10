@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export interface IUser extends Document {
   _id: string;
@@ -188,6 +189,17 @@ export interface IUser extends Document {
   freeSubscription?: {
     activeListingsCount: number;
     listingsLimit?: number; // Legacy field
+  };
+
+  // Email Preferences & Unsubscribe
+  unsubscribeToken?: string; // Unique token for unsubscribe links
+  emailPreferences: {
+    weeklyStats: boolean;      // Weekly analytics emails
+    propertyAlerts: boolean;   // New property matches
+    priceDrops: boolean;       // Price drop notifications
+    messages: boolean;         // New message notifications
+    marketing: boolean;        // Marketing & promotional emails
+    transactional: boolean;    // Always true - payment confirmations, etc.
   };
 
   // Neighborhood Insights Usage Tracking
@@ -625,6 +637,37 @@ const UserSchema: Schema = new Schema(
       couponCode: String,
       leftAt: Date,
     },
+    // Email Preferences & Unsubscribe
+    unsubscribeToken: {
+      type: String,
+      index: true,
+    },
+    emailPreferences: {
+      weeklyStats: {
+        type: Boolean,
+        default: true,
+      },
+      propertyAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      priceDrops: {
+        type: Boolean,
+        default: true,
+      },
+      messages: {
+        type: Boolean,
+        default: true,
+      },
+      marketing: {
+        type: Boolean,
+        default: true,
+      },
+      transactional: {
+        type: Boolean,
+        default: true, // Always true - users cannot unsubscribe from transactional emails
+      },
+    },
     neighborhoodInsights: {
       monthlyCount: {
         type: Number,
@@ -714,6 +757,11 @@ UserSchema.pre('save', function (next) {
 
   if (!this.get('primaryRole')) {
     this.set('primaryRole', currentRole);
+  }
+
+  // Generate unsubscribe token for new users
+  if (!this.get('unsubscribeToken')) {
+    this.set('unsubscribeToken', crypto.randomBytes(32).toString('hex'));
   }
 
   next();

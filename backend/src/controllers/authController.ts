@@ -1909,3 +1909,193 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Error adding role', error: error.message });
   }
 };
+
+// @desc    Get email preferences
+// @route   GET /api/auth/email-preferences
+// @access  Private
+export const getEmailPreferences = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user?._id) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(req.user._id).select('emailPreferences');
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Return default preferences if not set
+    const preferences = user.emailPreferences || {
+      weeklyStats: true,
+      propertyAlerts: true,
+      priceDrops: true,
+      messages: true,
+      marketing: true,
+      transactional: true,
+    };
+
+    res.json({ emailPreferences: preferences });
+  } catch (error: any) {
+    console.error('Get email preferences error:', error);
+    res.status(500).json({ message: 'Error getting email preferences', error: error.message });
+  }
+};
+
+// @desc    Update email preferences
+// @route   PUT /api/auth/email-preferences
+// @access  Private
+export const updateEmailPreferences = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user?._id) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const { weeklyStats, propertyAlerts, priceDrops, messages, marketing } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Update only the preferences that are provided
+    if (!user.emailPreferences) {
+      user.emailPreferences = {
+        weeklyStats: true,
+        propertyAlerts: true,
+        priceDrops: true,
+        messages: true,
+        marketing: true,
+        transactional: true,
+      };
+    }
+
+    if (typeof weeklyStats === 'boolean') user.emailPreferences.weeklyStats = weeklyStats;
+    if (typeof propertyAlerts === 'boolean') user.emailPreferences.propertyAlerts = propertyAlerts;
+    if (typeof priceDrops === 'boolean') user.emailPreferences.priceDrops = priceDrops;
+    if (typeof messages === 'boolean') user.emailPreferences.messages = messages;
+    if (typeof marketing === 'boolean') user.emailPreferences.marketing = marketing;
+    // transactional is always true and cannot be changed
+
+    await user.save();
+
+    res.json({
+      message: 'Email preferences updated successfully',
+      emailPreferences: user.emailPreferences,
+    });
+  } catch (error: any) {
+    console.error('Update email preferences error:', error);
+    res.status(500).json({ message: 'Error updating email preferences', error: error.message });
+  }
+};
+
+// @desc    Unsubscribe from emails via token (no auth required)
+// @route   GET /api/auth/unsubscribe
+// @access  Public
+export const unsubscribeFromEmails = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, type } = req.query;
+
+    if (!token || typeof token !== 'string') {
+      res.status(400).json({ message: 'Invalid unsubscribe token' });
+      return;
+    }
+
+    const user = await User.findOne({ unsubscribeToken: token });
+
+    if (!user) {
+      res.status(404).json({ message: 'Invalid or expired unsubscribe link' });
+      return;
+    }
+
+    // Initialize email preferences if not set
+    if (!user.emailPreferences) {
+      user.emailPreferences = {
+        weeklyStats: true,
+        propertyAlerts: true,
+        priceDrops: true,
+        messages: true,
+        marketing: true,
+        transactional: true,
+      };
+    }
+
+    // Handle different unsubscribe types
+    const validTypes = ['weeklyStats', 'propertyAlerts', 'priceDrops', 'messages', 'marketing', 'all'];
+    const unsubscribeType = typeof type === 'string' && validTypes.includes(type) ? type : 'all';
+
+    if (unsubscribeType === 'all') {
+      // Unsubscribe from all non-transactional emails
+      user.emailPreferences.weeklyStats = false;
+      user.emailPreferences.propertyAlerts = false;
+      user.emailPreferences.priceDrops = false;
+      user.emailPreferences.messages = false;
+      user.emailPreferences.marketing = false;
+    } else if (unsubscribeType !== 'transactional') {
+      // Unsubscribe from specific type
+      (user.emailPreferences as any)[unsubscribeType] = false;
+    }
+
+    await user.save();
+
+    // Return a nice HTML page for browser access
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Unsubscribed - BalkanEstate</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+          }
+          .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+          }
+          h1 { color: #22c55e; font-size: 24px; margin: 0 0 16px 0; }
+          p { color: #6b7280; line-height: 1.6; margin: 0 0 24px 0; }
+          a {
+            display: inline-block;
+            background: #0252CD;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+          }
+          a:hover { background: #0369a1; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1>✓ Successfully Unsubscribed</h1>
+          <p>You've been unsubscribed from ${unsubscribeType === 'all' ? 'all promotional emails' : unsubscribeType + ' emails'}. You can update your email preferences anytime in your account settings.</p>
+          <a href="${frontendUrl}/settings/notifications">Manage Preferences</a>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (error: any) {
+    console.error('Unsubscribe error:', error);
+    res.status(500).json({ message: 'Error processing unsubscribe request' });
+  }
+};

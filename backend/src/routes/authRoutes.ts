@@ -21,6 +21,9 @@ import {
   changePassword,
   setActiveRole,
   addRole,
+  getEmailPreferences,
+  updateEmailPreferences,
+  unsubscribeFromEmails,
 } from '../controllers/authController';
 import { getUserStats, getAllAgents, syncStats, syncAllSubscriptionCounters } from '../controllers/userController';
 import { protect } from '../middleware/auth';
@@ -218,6 +221,11 @@ router.post('/change-password', protect, changePassword);
 // Role management routes
 router.post('/set-active-role', protect, setActiveRole);
 router.post('/add-role', protect, addRole);
+
+// Email preferences & unsubscribe routes
+router.get('/email-preferences', protect, getEmailPreferences);
+router.put('/email-preferences', protect, updateEmailPreferences);
+router.get('/unsubscribe', unsubscribeFromEmails); // Public route - no auth needed
 
 // OAuth providers endpoint - returns which providers are available
 router.get('/oauth/providers', (req, res) => {
