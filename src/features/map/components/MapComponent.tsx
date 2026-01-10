@@ -45,11 +45,15 @@ const TILE_LAYERS = {
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxNativeZoom: 19,
+    maxZoom: 22,
   },
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution:
       'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    maxNativeZoom: 19,
+    maxZoom: 22,
   },
 };
 
@@ -304,6 +308,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
             key={mapType}
             attribution={TILE_LAYERS[mapType].attribution}
             url={TILE_LAYERS[mapType].url}
+            maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
+            maxZoom={TILE_LAYERS[mapType].maxZoom}
             keepBuffer={2}
             updateWhenIdle={true}
             updateWhenZooming={false}
