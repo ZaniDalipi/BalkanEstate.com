@@ -18,6 +18,7 @@ import SunPositionControl from './SunPositionControl';
 import SunArcAnimation, { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
 import PropertyAddressLabels from './PropertyAddressLabels';
+import MeasurementTool from './MeasurementTool';
 import {
   FlyToController,
   MapEvents,
@@ -236,6 +237,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [currentZoom, setCurrentZoom] = useState<number>(7); // Current zoom level for display
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
+  const [showMeasurement, setShowMeasurement] = useState(false); // Toggle for measurement tool
 
   // Use ref for onMapMove to prevent infinite loops when callback changes
   const onMapMoveRef = useRef(onMapMove);
@@ -379,6 +381,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={false} />
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
+          {/* Land Measurement Tool */}
+          <MeasurementTool
+            enabled={showMeasurement}
+            onClose={() => setShowMeasurement(false)}
+          />
         </MapContainer>
 
         {/* Sun/Moon arc animation - shows celestial body position when 3D buildings enabled */}
@@ -500,6 +507,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 </button>
               )}
 
+              {/* Measurement Tool Toggle */}
+              <button
+                onClick={() => setShowMeasurement(!showMeasurement)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  showMeasurement
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title="Measure land"
+              >
+                <span className="text-sm">📏</span>
+                <span className="hidden sm:inline">Measure</span>
+              </button>
+
               {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen(!isLegendOpen)}
@@ -619,6 +640,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   <span className="text-[11px] font-medium">Parcels</span>
                 </button>
               )}
+
+              {/* Measurement Tool Toggle */}
+              <button
+                onClick={() => setShowMeasurement(!showMeasurement)}
+                className={`
+                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
+                  ${showMeasurement
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                  }
+                `}
+              >
+                <span className="text-sm">📏</span>
+                <span className="text-[11px] font-medium">Measure</span>
+              </button>
 
               {/* Divider */}
               <div className="h-px w-full bg-neutral-200 my-0.5" />
