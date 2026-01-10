@@ -200,39 +200,16 @@ export const MapEvents: React.FC<{
 /**
  * ZoomBasedTileSwitch Component
  *
- * Switches to satellite view only when zooming past street view's max (20).
- * - Street view (CartoDB Positron): max zoom 20
- * - Satellite view (Google): max zoom 21
- * When on street and user zooms to 21, auto-switch to satellite for max detail.
- * User controls layer choice otherwise.
+ * Both Google Maps street and satellite support max zoom 21.
+ * No auto-switching needed - user has full control of layer choice.
+ * This component is kept for potential future use.
  */
 export const ZoomBasedTileSwitch: React.FC<{
   mapType: 'street' | 'satellite' | 'night';
   setMapType: (type: 'street' | 'satellite' | 'night') => void;
 }> = ({ mapType, setMapType }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    const handleZoomEnd = () => {
-      // Don't auto-switch when in night mode - let user control it
-      if (mapType === 'night') return;
-
-      const currentZoom = map.getZoom();
-
-      // Only switch to satellite when zooming past street's max (20)
-      // This allows user to zoom to 21 on satellite
-      if (currentZoom > 20 && mapType === 'street') {
-        setMapType('satellite');
-      }
-    };
-
-    map.on('zoomend', handleZoomEnd);
-
-    return () => {
-      map.off('zoomend', handleZoomEnd);
-    };
-  }, [map, mapType, setMapType]);
-
+  // Both layers now support zoom 21, no auto-switching needed
+  // User has full control over layer selection at all zoom levels
   return null;
 };
 

@@ -41,14 +41,14 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const TILE_LAYERS = {
   street: {
-    // CartoDB Positron - minimal white/gray style, very clean
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    maxZoom: 20,
-    maxNativeZoom: 20,
+    // Google Maps Street - clean labels and roads, max zoom 21
+    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google Maps',
+    maxZoom: 21,
+    maxNativeZoom: 21,
   },
   satellite: {
-    // Google Maps Satellite - high quality aerial imagery
+    // Google Maps Satellite - high quality aerial imagery, max zoom 21
     url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
     attribution: '&copy; Google Maps',
     maxZoom: 21,
