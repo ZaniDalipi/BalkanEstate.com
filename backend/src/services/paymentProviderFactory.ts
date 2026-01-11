@@ -2,15 +2,17 @@
  * Payment Provider Factory
  *
  * Unified payment routing system for all Balkan countries.
- * Currently using Stripe for all regions as it provides the best
- * coverage and accepts payments from all Balkan countries.
+ * Using Paddle as the primary payment provider for all regions.
  *
- * Stripe accepts payments from customers worldwide, including all Balkan countries.
- * The merchant account can be registered in any Stripe-supported country
- * (Croatia, Bulgaria, Romania, Slovenia, Greece, or via Stripe Atlas).
+ * Paddle acts as Merchant of Record (MoR), handling:
+ * - Payment processing
+ * - VAT/tax compliance automatically
+ * - Chargeback protection
+ * - Global coverage including all Balkan countries
  */
 
 import Stripe from 'stripe';
+import { paddleService } from './paddleService';
 
 // Payment provider types
 export type PaymentProvider = 'stripe' | 'paddle';
@@ -27,14 +29,14 @@ export interface CountryProviderMapping {
 
 /**
  * Country to Payment Provider Mapping
- * All countries use Stripe for simplicity and universal coverage
+ * All countries use Paddle for unified payment processing and VAT compliance
  */
 export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   // EU Countries
   GR: {
     countryCode: 'GR',
     countryName: 'Greece',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -42,7 +44,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   HR: {
     countryCode: 'HR',
     countryName: 'Croatia',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -50,7 +52,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   BG: {
     countryCode: 'BG',
     countryName: 'Bulgaria',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -58,7 +60,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   RO: {
     countryCode: 'RO',
     countryName: 'Romania',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -66,17 +68,17 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   SI: {
     countryCode: 'SI',
     countryName: 'Slovenia',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
   },
 
-  // Non-EU Balkans - Also using Stripe (accepts payments from these countries)
+  // Non-EU Balkans
   RS: {
     countryCode: 'RS',
     countryName: 'Serbia',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -84,7 +86,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   AL: {
     countryCode: 'AL',
     countryName: 'Albania',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -92,7 +94,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   BA: {
     countryCode: 'BA',
     countryName: 'Bosnia and Herzegovina',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: false,
@@ -100,7 +102,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   MK: {
     countryCode: 'MK',
     countryName: 'North Macedonia',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -108,7 +110,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   ME: {
     countryCode: 'ME',
     countryName: 'Montenegro',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -116,7 +118,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   XK: {
     countryCode: 'XK',
     countryName: 'Kosovo',
-    provider: 'stripe',
+    provider: 'paddle',
     currency: 'EUR',
     isEU: false,
     isSEPA: false,
