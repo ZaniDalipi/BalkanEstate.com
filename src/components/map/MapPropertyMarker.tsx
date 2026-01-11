@@ -155,20 +155,17 @@ const ZOOM_THRESHOLD = 12;
 
 /**
  * Calculate marker scale factor based on zoom level
- * Markers scale based on zoom level - smaller when zoomed in to avoid clutter
+ * Markers maintain good visibility at all zoom levels
  */
 const getMarkerScaleForZoom = (zoom: number): number => {
-  // When very zoomed in (street level), make markers smaller
-  if (zoom >= 18) return 0.6;    // 60% at zoom 18+
-  if (zoom >= 16) return 0.7;    // 70% at zoom 16-17
-  if (zoom >= 14) return 0.8;    // 80% at zoom 14-15
-  if (zoom >= 12) return 0.9;    // 90% at zoom 12-13
-  // Medium zoom levels - full size
-  if (zoom >= 10) return 1.0;    // 100% at zoom 10-11
-  // Zoomed out - slightly smaller
-  if (zoom >= 8) return 0.9;     // 90% at zoom 8-9
-  if (zoom >= 6) return 0.8;     // 80% at zoom 6-7
-  return 0.7;                     // 70% at zoom 5 and below
+  // Keep markers visible at all zoom levels
+  // Slightly larger when zoomed in for better visibility
+  if (zoom >= 16) return 1.1;     // 110% at zoom 16+ (street level)
+  if (zoom >= 14) return 1.0;     // 100% at zoom 14-15
+  if (zoom >= 12) return 0.95;    // 95% at zoom 12-13
+  if (zoom >= 10) return 0.9;     // 90% at zoom 10-11
+  if (zoom >= 8) return 0.85;     // 85% at zoom 8-9
+  return 0.8;                      // 80% at zoom 7 and below
 };
 
 const PROPERTY_TYPE_COLORS: Record<
@@ -283,10 +280,10 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
 
   // Calculate dimensions based on price length - use pill shape for longer prices
   const baseWidth = getMarkerWidthForPrice(price);
-  const baseHeight = 26;
-  const scaledWidth = Math.round(baseWidth * zoomScale * 0.85);
-  const scaledHeight = Math.round(baseHeight * zoomScale * 0.85);
-  const fontSize = Math.max(8, Math.round(10 * zoomScale));
+  const baseHeight = 28;
+  const scaledWidth = Math.round(baseWidth * zoomScale);
+  const scaledHeight = Math.round(baseHeight * zoomScale);
+  const fontSize = Math.max(9, Math.round(11 * zoomScale));
   const borderRadius = scaledHeight / 2; // Pill shape
   const hoverScale = isHovered ? 1.15 : 1;
 
@@ -378,11 +375,11 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
   // Calculate scaled dimensions based on zoom
-  const baseWidth = 48;
-  const baseHeight = 38;
-  const scaledWidth = Math.round(baseWidth * zoomScale * 0.85);
-  const scaledHeight = Math.round(baseHeight * zoomScale * 0.85);
-  const fontSize = Math.max(10, Math.round(14 * zoomScale));
+  const baseWidth = 52;
+  const baseHeight = 42;
+  const scaledWidth = Math.round(baseWidth * zoomScale);
+  const scaledHeight = Math.round(baseHeight * zoomScale);
+  const fontSize = Math.max(11, Math.round(14 * zoomScale));
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
