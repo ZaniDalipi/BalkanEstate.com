@@ -586,46 +586,52 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             {!isAgencyAgent && (
                 <div className="sticky top-0 z-40">
                     {/* Dark gradient bar for independent agents */}
-                    <div className="relative h-14 bg-gradient-to-r from-gray-800 to-gray-900">
-                        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex items-center justify-between h-full">
+                    <div className="relative bg-gradient-to-r from-gray-800 to-gray-900">
+                        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-0 sm:h-14">
+                            <div className="flex items-center justify-between sm:h-full gap-2">
+                                {/* Back Button */}
                                 <button
                                     onClick={handleBack}
-                                    className="flex items-center gap-2 text-white/90 hover:text-white font-medium transition-colors group"
+                                    className="flex items-center gap-1.5 sm:gap-2 text-white/90 hover:text-white font-medium transition-colors group flex-shrink-0"
                                 >
-                                    <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                                    <span>{t('profilePage.header.backToAgents')}</span>
+                                    <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
+                                    <span className="text-sm sm:text-base">{t('profilePage.header.backToAgents')}</span>
                                 </button>
 
-                                <div className="flex items-center gap-3">
+                                {/* Independent Agent Badge - hidden on mobile */}
+                                <div className="hidden sm:flex items-center gap-3">
                                     <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
                                         <span className="text-white font-semibold text-sm">{t('profilePage.header.independentAgent')}</span>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                {/* Actions - icons only on mobile */}
+                                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                                     {isOwner && (
                                         <button
                                             onClick={handleOpenEditModal}
-                                            className="flex items-center gap-2 px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                            className="flex items-center gap-2 p-2 sm:px-3 sm:py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                            title={t('profilePage.header.editProfile')}
                                         >
                                             <PencilIcon className="w-5 h-5" />
-                                            <span className="hidden sm:inline text-sm font-medium">{t('profilePage.header.editProfile')}</span>
+                                            <span className="hidden md:inline text-sm font-medium">{t('profilePage.header.editProfile')}</span>
                                         </button>
                                     )}
                                     <button
                                         onClick={handleSaveAgent}
-                                        className="flex items-center gap-2 px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        className="flex items-center gap-2 p-2 sm:px-3 sm:py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        title={savedAgent ? t('profilePage.header.saved') : t('profilePage.header.save')}
                                     >
                                         <HeartIcon className={`w-5 h-5 ${savedAgent ? 'fill-red-400 text-red-400' : ''}`} />
-                                        <span className="hidden sm:inline text-sm font-medium">{savedAgent ? t('profilePage.header.saved') : t('profilePage.header.save')}</span>
+                                        <span className="hidden md:inline text-sm font-medium">{savedAgent ? t('profilePage.header.saved') : t('profilePage.header.save')}</span>
                                     </button>
                                     <button
                                         onClick={handleShareAgent}
-                                        className="flex items-center gap-2 px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        className="flex items-center gap-2 p-2 sm:px-3 sm:py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        title={t('profilePage.header.share')}
                                     >
                                         <ShareIcon className="w-5 h-5" />
-                                        <span className="hidden sm:inline text-sm font-medium">{t('profilePage.header.share')}</span>
+                                        <span className="hidden md:inline text-sm font-medium">{t('profilePage.header.share')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -969,7 +975,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                                                 <ChartBarIcon className="w-6 h-6 text-blue-600" />
                                                 {t('profilePage.marketInsights.title')}
-                                                <span className="text-sm font-normal text-gray-600 ml-2">({agent.city})</span>
+                                                {agent.city && <span className="text-sm font-normal text-gray-600 ml-2">({agent.city})</span>}
                                             </h3>
 
                                             <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-xl p-6">
