@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
+import Footer from '@/components/shared/Footer';
 
 const PrivacyPolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -283,6 +284,8 @@ const PrivacyPolicyPage: React.FC = () => {
           </section>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

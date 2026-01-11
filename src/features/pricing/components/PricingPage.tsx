@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
+import Footer from '@/components/shared/Footer';
 import {
   BuildingOfficeIcon,
   ChartBarIcon,
@@ -618,6 +619,8 @@ const PricingPage: React.FC = () => {
           `}</style>
         </div>
       </div>
+
+      <Footer />
 
       {/* Payment Window */}
       {selectedPlan && (

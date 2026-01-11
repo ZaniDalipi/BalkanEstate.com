@@ -6,6 +6,7 @@ import ValuationResult from './ValuationResult';
 import { useCreateValuation } from '../hooks/useValuation';
 import type { ValuationInput, PropertyValuation } from '../types';
 import { SparklesIcon } from '@/constants';
+import Footer from '@/components/shared/Footer';
 
 const ValuationPage: React.FC = () => {
   const { t } = useTranslation(['valuation', 'common']);
@@ -213,6 +214,8 @@ const ValuationPage: React.FC = () => {
           </motion.div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

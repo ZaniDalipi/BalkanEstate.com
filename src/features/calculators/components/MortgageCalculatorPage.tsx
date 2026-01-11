@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import MortgageCalculator from './MortgageCalculator';
 import { CalculatorIcon } from '@/constants';
+import Footer from '@/components/shared/Footer';
 
 // Balkan countries with their currency codes
 const COUNTRIES = [
@@ -240,6 +241,8 @@ const MortgageCalculatorPage: React.FC = () => {
           </motion.div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

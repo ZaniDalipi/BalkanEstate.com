@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
+import Footer from '@/components/shared/Footer';
 
 const CookiePolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -298,6 +299,8 @@ const CookiePolicyPage: React.FC = () => {
           </section>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
