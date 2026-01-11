@@ -501,7 +501,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <div className="flex-1">
                   <p className="text-xs sm:text-sm font-semibold text-blue-900 mb-0.5 sm:mb-1">Secure External Payment</p>
                   <p className="text-[10px] sm:text-xs text-blue-700 leading-relaxed">
-                    You'll be redirected to our secure payment partner (Stripe) to complete your purchase.
+                    You'll be redirected to our secure payment partner (Paddle) to complete your purchase.
                     We never store your card details - they're handled entirely by our certified payment processor.
                   </p>
                 </div>
