@@ -108,53 +108,37 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
         }
       `}</style>
       <div
-        className="inquiry-modal-backdrop"
+        className="inquiry-modal-backdrop fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4"
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 99999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem',
           backgroundColor: 'rgba(0, 0, 0, 0.6)',
           backdropFilter: 'blur(4px)',
         }}
         onClick={onClose}
       >
         <div
-          className="inquiry-modal-content bg-white w-full max-w-lg rounded-2xl shadow-2xl"
-          style={{
-            maxHeight: '90vh',
-            overflowY: 'auto',
-          }}
+          className="inquiry-modal-content bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
         {/* Header */}
-        <div className="bg-gradient-to-r from-primary to-primary-dark p-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-primary to-primary-dark p-4 flex items-center justify-between sticky top-0 z-10">
           <div>
             <h2 className="text-lg font-bold text-white">
               {t('property:inquiry.title', 'Send Inquiry')}
             </h2>
-            <p className="text-sm text-white/80">
+            <p className="text-sm text-white/80 line-clamp-1">
               {property.title}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-white/80 hover:text-white p-1"
+            className="text-white/80 hover:text-white p-1 flex-shrink-0"
             aria-label="Close"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {success ? (
             <div className="text-center py-8">
               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
