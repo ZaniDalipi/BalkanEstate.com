@@ -400,10 +400,17 @@ class PaddleService {
   }
 
   /**
-   * Check if Paddle is configured
+   * Check if Paddle is configured with real credentials
    */
   public isConfigured(): boolean {
-    return !!(this.config.apiKey && this.config.clientToken);
+    const apiKey = this.config.apiKey;
+    const clientToken = this.config.clientToken;
+
+    // Check if keys exist and are not placeholder values
+    const hasApiKey = apiKey && apiKey.length > 10 && !apiKey.endsWith('...');
+    const hasClientToken = clientToken && clientToken.length > 10 && !clientToken.endsWith('...');
+
+    return !!(hasApiKey && hasClientToken);
   }
 
   /**

@@ -300,11 +300,19 @@ class PaymentProviderFactory {
    */
   private async createPaddlePayment(params: CreatePaymentParams): Promise<PaymentResult> {
     try {
-      // Check if Paddle is configured
+      // Check if Paddle is configured with real credentials
       if (!paddleService.isConfigured()) {
-        // Fallback to Stripe if Paddle is not configured
-        console.warn('⚠️ Paddle not configured, falling back to Stripe');
-        return this.createStripePayment(params);
+        // Check if Stripe is configured before falling back
+        const stripeKey = process.env.STRIPE_SECRET_KEY;
+        if (stripeKey && stripeKey.startsWith('sk_')) {
+          console.warn('⚠️ Paddle not configured, falling back to Stripe');
+          return this.createStripePayment(params);
+        }
+        return {
+          success: false,
+          provider: 'paddle',
+          error: 'Payment provider not configured. Please contact support.',
+        };
       }
 
       const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -323,9 +331,13 @@ class PaymentProviderFactory {
       });
 
       if (!result.success) {
-        // Fallback to Stripe if Paddle fails
-        console.warn('⚠️ Paddle payment creation failed, falling back to Stripe');
-        return this.createStripePayment(params);
+        // Don't fallback to Stripe - return Paddle error
+        console.error('❌ Paddle payment creation failed:', result.error);
+        return {
+          success: false,
+          provider: 'paddle',
+          error: result.error || 'Failed to create Paddle checkout',
+        };
       }
 
       return {
@@ -336,9 +348,11 @@ class PaymentProviderFactory {
       };
     } catch (error: any) {
       console.error('❌ Paddle payment creation failed:', error);
-      // Fallback to Stripe
-      console.warn('⚠️ Falling back to Stripe due to Paddle error');
-      return this.createStripePayment(params);
+      return {
+        success: false,
+        provider: 'paddle',
+        error: error.message || 'Failed to create payment session',
+      };
     }
   }
 
