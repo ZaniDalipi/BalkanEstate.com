@@ -226,7 +226,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const [mapType, setMapType] = useState<TileLayerType>('street');
-  const [isLegendOpen, setIsLegendOpen] = useState(true); // Show legend by default
+  const [isLegendOpen, setIsLegendOpen] = useState(false); // Legend closed by default, user can open it
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [showLandmarks, setShowLandmarks] = useState(true); // Show landmarks by default
@@ -606,85 +606,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 className="absolute bottom-full left-0 mb-2 pointer-events-auto animate-fade-in"
               >
                 <div
-                  className="flex flex-col gap-1 p-2 rounded-2xl shadow-lg min-w-[140px]"
+                  className="flex flex-col gap-0.5 p-1.5 rounded-xl shadow-lg"
                   style={{
                     background: 'rgba(255,255,255,0.95)',
                     backdropFilter: 'blur(16px)',
                     WebkitBackdropFilter: 'blur(16px)'
                   }}
                 >
-                  {/* 3D Buildings Toggle */}
-                  <button
-                    onClick={() => setShow3DBuildings(!show3DBuildings)}
-                    className={`
-                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
-                      ${show3DBuildings
-                        ? 'bg-slate-700 text-white'
-                        : 'text-neutral-600 hover:bg-neutral-100'
-                      }
-                    `}
-                  >
-                    <span className="text-base">🏢</span>
-                    <span className="text-xs font-medium">3D Buildings</span>
-                  </button>
-
-                  {/* Landmarks Toggle */}
-                  <button
-                    onClick={() => setShowLandmarks(!showLandmarks)}
-                    className={`
-                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
-                      ${showLandmarks
-                        ? 'bg-primary text-white'
-                        : 'text-neutral-600 hover:bg-neutral-100'
-                      }
-                    `}
-                  >
-                    <span className="text-base">🏛️</span>
-                    <span className="text-xs font-medium">Points of Interest</span>
-                  </button>
-
-                  {/* Cadastre Toggle - only in satellite */}
-                  {mapType === 'satellite' && (
-                    <button
-                      onClick={() => setShowCadastre(!showCadastre)}
-                      className={`
-                        flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
-                        ${showCadastre
-                          ? 'bg-primary text-white'
-                          : 'text-neutral-600 hover:bg-neutral-100'
-                        }
-                      `}
-                    >
-                      <span className="text-base">📐</span>
-                      <span className="text-xs font-medium">Parcels</span>
-                    </button>
-                  )}
-
-                  {/* Measurement Tool Toggle */}
-                  <button
-                    onClick={() => setShowMeasurement(!showMeasurement)}
-                    className={`
-                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
-                      ${showMeasurement
-                        ? 'bg-emerald-600 text-white'
-                        : 'text-neutral-600 hover:bg-neutral-100'
-                      }
-                    `}
-                  >
-                    <span className="text-base">📏</span>
-                    <span className="text-xs font-medium">Measure Land</span>
-                  </button>
-
-                  {/* Divider */}
-                  <div className="h-px w-full bg-neutral-200 my-1" />
-
-                  {/* Legend Toggle */}
+                  {/* Legend Toggle - First for easy access */}
                   <button
                     onClick={() => {
                       setIsLegendOpen((p) => !p);
+                      setIsLayerMenuOpen(false);
                     }}
                     className={`
-                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
+                      flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200 ease-out active:scale-95
                       ${isLegendOpen
                         ? 'bg-amber-500 text-white'
                         : 'text-neutral-600 hover:bg-neutral-100'
@@ -692,7 +628,72 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     `}
                   >
                     <MapLegendIcon className="w-4 h-4" />
-                    <span className="text-xs font-medium">Legend</span>
+                    <span className="text-[11px] font-medium">Legend</span>
+                  </button>
+
+                  {/* Landmarks Toggle */}
+                  <button
+                    onClick={() => setShowLandmarks(!showLandmarks)}
+                    className={`
+                      flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200 ease-out active:scale-95
+                      ${showLandmarks
+                        ? 'bg-primary text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                      }
+                    `}
+                  >
+                    <span className="text-sm">🏛️</span>
+                    <span className="text-[11px] font-medium">POI</span>
+                  </button>
+
+                  {/* Measurement Tool Toggle */}
+                  <button
+                    onClick={() => {
+                      setShowMeasurement(!showMeasurement);
+                      setIsLayerMenuOpen(false);
+                    }}
+                    className={`
+                      flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200 ease-out active:scale-95
+                      ${showMeasurement
+                        ? 'bg-emerald-600 text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                      }
+                    `}
+                  >
+                    <span className="text-sm">📏</span>
+                    <span className="text-[11px] font-medium">Measure</span>
+                  </button>
+
+                  {/* Cadastre Toggle - only in satellite */}
+                  {mapType === 'satellite' && (
+                    <button
+                      onClick={() => setShowCadastre(!showCadastre)}
+                      className={`
+                        flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200 ease-out active:scale-95
+                        ${showCadastre
+                          ? 'bg-primary text-white'
+                          : 'text-neutral-600 hover:bg-neutral-100'
+                        }
+                      `}
+                    >
+                      <span className="text-sm">📐</span>
+                      <span className="text-[11px] font-medium">Parcels</span>
+                    </button>
+                  )}
+
+                  {/* 3D Buildings Toggle - Last as less common */}
+                  <button
+                    onClick={() => setShow3DBuildings(!show3DBuildings)}
+                    className={`
+                      flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all duration-200 ease-out active:scale-95
+                      ${show3DBuildings
+                        ? 'bg-slate-700 text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                      }
+                    `}
+                  >
+                    <span className="text-sm">🏢</span>
+                    <span className="text-[11px] font-medium">3D</span>
                   </button>
                 </div>
               </div>
