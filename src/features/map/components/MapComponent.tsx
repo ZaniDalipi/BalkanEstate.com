@@ -688,9 +688,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </button>
             </div>
 
-            {/* Legend popup - positioned to the right */}
+            {/* Legend popup - positioned below the layer panel on mobile */}
             {isLegendOpen && (
-              <div className="absolute top-0 left-full ml-2 pointer-events-auto animate-fade-in">
+              <div className="absolute top-full left-0 mt-2 pointer-events-auto animate-fade-in">
                 <Legend isNightMode={false} />
               </div>
             )}
