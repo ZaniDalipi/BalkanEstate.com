@@ -86,17 +86,9 @@ const AgentsPage: React.FC = () => {
     }
   };
 
-  // Debounced search effect
-  useEffect(() => {
-    // Skip the initial render (handled by the mount effect)
-    if (searchQuery === '') return;
-
-    const timeoutId = setTimeout(() => {
-      fetchAgents(searchQuery);
-    }, 300); // 300ms debounce
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  // Client-side filtering is now used for immediate results
+  // The filteredAgents useMemo handles all search filtering
+  // No need for debounced server calls since filtering is instant
 
   const fetchAgencies = async () => {
     try {
@@ -159,7 +151,38 @@ const AgentsPage: React.FC = () => {
   const filteredAgents = useMemo(() => {
     let result = [...agents];
 
-    // Server handles the search query now, but apply local advanced filters
+    // Apply client-side search filtering (in addition to server-side)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+
+      result = result.filter(agent => {
+        const name = (agent.name || '').toLowerCase();
+        const city = (agent.city || '').toLowerCase();
+        const country = (agent.country || '').toLowerCase();
+        const bio = (agent.bio || '').toLowerCase();
+        const specializations = (agent.specializations || []).map(s => s.toLowerCase()).join(' ');
+        const languages = (agent.languages || []).map(l => l.toLowerCase()).join(' ');
+
+        // Based on selected tab, filter accordingly
+        switch (searchTab) {
+          case 'name':
+            return name.includes(query);
+          case 'location':
+            return city.includes(query) || country.includes(query);
+          case 'specialization':
+            return specializations.includes(query);
+          case 'all':
+          default:
+            // Search across all fields
+            return name.includes(query) ||
+                   city.includes(query) ||
+                   country.includes(query) ||
+                   specializations.includes(query) ||
+                   languages.includes(query) ||
+                   bio.includes(query);
+        }
+      });
+    }
 
     // Apply advanced filters
     result = result.filter(agent => {
@@ -224,7 +247,7 @@ const AgentsPage: React.FC = () => {
     });
 
     return result;
-  }, [agents, filters, sortBy]);
+  }, [agents, filters, sortBy, searchQuery, searchTab]);
 
   const selectedAgent = useMemo(() => {
     if (!selectedAgentId) return null;
