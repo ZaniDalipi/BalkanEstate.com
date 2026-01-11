@@ -229,7 +229,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
     }
   }, [enabled, viewMeasurement]);
 
-  // Handle map clicks to add points
+  // Reset state when measurement tool is disabled
   useEffect(() => {
     if (!enabled) {
       setPoints([]);
@@ -238,8 +238,12 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       setIsNearFirstPoint(false);
       setIsViewMode(false);
       setViewMeasurementData(null);
-      return;
     }
+  }, [enabled]);
+
+  // Handle map clicks to add points
+  useEffect(() => {
+    if (!enabled) return;
 
     const handleClick = (e: L.LeafletMouseEvent) => {
       // Don't add points in view mode
