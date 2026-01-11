@@ -227,6 +227,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         // Clear selected items when navigating to main routes
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        // Clear selected agent when navigating to agents list (not agent profile)
+        if (view === 'agents') {
+          dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
+        }
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
       } else {
         // Unknown route - default to search and clear selections
