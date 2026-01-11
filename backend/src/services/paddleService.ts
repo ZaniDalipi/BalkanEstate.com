@@ -16,11 +16,6 @@
 
 import crypto from 'crypto';
 
-// Paddle API endpoints
-const PADDLE_API_URL = process.env.PADDLE_ENVIRONMENT === 'production'
-  ? 'https://api.paddle.com'
-  : 'https://sandbox-api.paddle.com';
-
 export interface PaddleConfig {
   apiKey: string;
   clientToken: string;
