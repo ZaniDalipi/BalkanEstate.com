@@ -27,6 +27,7 @@ const AgentsPage: React.FC = () => {
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [visibleAgentsCount, setVisibleAgentsCount] = useState(9);
 
   // Advanced filters
   const [sortBy, setSortBy] = useState<SortOption>('rating');
@@ -89,6 +90,11 @@ const AgentsPage: React.FC = () => {
   // Client-side filtering is now used for immediate results
   // The filteredAgents useMemo handles all search filtering
   // No need for debounced server calls since filtering is instant
+
+  // Reset visible count when search changes
+  useEffect(() => {
+    setVisibleAgentsCount(9);
+  }, [searchQuery, searchTab]);
 
   const fetchAgencies = async () => {
     try {
@@ -729,26 +735,32 @@ const AgentsPage: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-              {filteredAgents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} />
-              ))}
-            </div>
-          )}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+                {filteredAgents.slice(0, visibleAgentsCount).map((agent) => (
+                  <AgentCard key={agent.id} agent={agent} />
+                ))}
+              </div>
 
-          {/* View More Button */}
-          {!loading && filteredAgents.length > 0 && (
-            <div className="text-center mb-12">
-              <button
-                onClick={() => {
-                  // TODO: Implement pagination or load more functionality
-                  window.scrollTo || window.scrollTo(0, 0);
-                }}
-                className="px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-primary text-primary font-semibold rounded-md hover:bg-primary hover:text-white transition-colors text-sm sm:text-base"
-              >
-                {t('agents:results.viewMore')}
-              </button>
-            </div>
+              {/* Show More Button - only if there are more agents to show */}
+              {filteredAgents.length > visibleAgentsCount && (
+                <div className="text-center mb-12">
+                  <p className="text-sm text-neutral-500 mb-3">
+                    {t('agents:results.showing', {
+                      shown: visibleAgentsCount,
+                      total: filteredAgents.length,
+                      defaultValue: `Showing ${visibleAgentsCount} of ${filteredAgents.length} agents`
+                    })}
+                  </p>
+                  <button
+                    onClick={() => setVisibleAgentsCount(prev => prev + 9)}
+                    className="px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors text-sm sm:text-base"
+                  >
+                    {t('agents:results.showMore', 'Show More Agents')}
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           {/* Agencies Section with AgencyBadge */}
