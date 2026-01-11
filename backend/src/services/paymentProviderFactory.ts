@@ -1,18 +1,16 @@
 /**
  * Payment Provider Factory
  *
- * Unified payment routing system that selects the appropriate payment provider
- * based on the user's country. This ensures the lowest fees while maintaining
- * full coverage across all Balkan countries.
+ * Unified payment routing system for all Balkan countries.
+ * Currently using Stripe for all regions as it provides the best
+ * coverage and accepts payments from all Balkan countries.
  *
- * Provider Selection:
- * - Stripe: EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
- * - Paddle: Non-EU Balkans (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
- *   Paddle is a Merchant of Record (MoR) handling VAT/tax compliance globally
+ * Stripe accepts payments from customers worldwide, including all Balkan countries.
+ * The merchant account can be registered in any Stripe-supported country
+ * (Croatia, Bulgaria, Romania, Slovenia, Greece, or via Stripe Atlas).
  */
 
 import Stripe from 'stripe';
-import { paddleService } from './paddleService';
 
 // Payment provider types
 export type PaymentProvider = 'stripe' | 'paddle';
@@ -29,10 +27,10 @@ export interface CountryProviderMapping {
 
 /**
  * Country to Payment Provider Mapping
- * Based on Stripe availability and PaySera coverage in the Balkans
+ * All countries use Stripe for simplicity and universal coverage
  */
 export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
-  // EU Countries - Use Stripe (lower fees, better integration)
+  // EU Countries
   GR: {
     countryCode: 'GR',
     countryName: 'Greece',
@@ -53,7 +51,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
     countryCode: 'BG',
     countryName: 'Bulgaria',
     provider: 'stripe',
-    currency: 'EUR', // We accept EUR, even though local is BGN
+    currency: 'EUR',
     isEU: true,
     isSEPA: true,
   },
@@ -61,7 +59,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
     countryCode: 'RO',
     countryName: 'Romania',
     provider: 'stripe',
-    currency: 'EUR', // We accept EUR, even though local is RON
+    currency: 'EUR',
     isEU: true,
     isSEPA: true,
   },
@@ -74,27 +72,27 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
     isSEPA: true,
   },
 
-  // Non-EU Balkans - Use Paddle (Merchant of Record with VAT compliance)
+  // Non-EU Balkans - Also using Stripe (accepts payments from these countries)
   RS: {
     countryCode: 'RS',
     countryName: 'Serbia',
-    provider: 'paddle',
+    provider: 'stripe',
     currency: 'EUR',
     isEU: false,
-    isSEPA: true, // Joined SEPA in 2025
+    isSEPA: true,
   },
   AL: {
     countryCode: 'AL',
     countryName: 'Albania',
-    provider: 'paddle',
+    provider: 'stripe',
     currency: 'EUR',
     isEU: false,
-    isSEPA: true, // Joined SEPA in 2024
+    isSEPA: true,
   },
   BA: {
     countryCode: 'BA',
     countryName: 'Bosnia and Herzegovina',
-    provider: 'paddle',
+    provider: 'stripe',
     currency: 'EUR',
     isEU: false,
     isSEPA: false,
@@ -102,24 +100,24 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   MK: {
     countryCode: 'MK',
     countryName: 'North Macedonia',
-    provider: 'paddle',
+    provider: 'stripe',
     currency: 'EUR',
     isEU: false,
-    isSEPA: true, // Joined SEPA in 2025
+    isSEPA: true,
   },
   ME: {
     countryCode: 'ME',
     countryName: 'Montenegro',
-    provider: 'paddle',
-    currency: 'EUR', // Uses EUR as official currency
+    provider: 'stripe',
+    currency: 'EUR',
     isEU: false,
-    isSEPA: true, // Joined SEPA in 2024
+    isSEPA: true,
   },
   XK: {
     countryCode: 'XK',
     countryName: 'Kosovo',
-    provider: 'paddle',
-    currency: 'EUR', // Uses EUR
+    provider: 'stripe',
+    currency: 'EUR',
     isEU: false,
     isSEPA: false,
   },
