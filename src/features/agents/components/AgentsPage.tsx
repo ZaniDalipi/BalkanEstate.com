@@ -12,6 +12,7 @@ import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
+type SearchTab = 'all' | 'name' | 'location' | 'specialization';
 
 const AgentsPage: React.FC = () => {
   const { t } = useTranslation(['agents', 'common']);
@@ -21,6 +22,7 @@ const AgentsPage: React.FC = () => {
 
   // Universal search state - searches across name, city, country, specializations, languages, bio
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchTab, setSearchTab] = useState<SearchTab>('all');
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [loading, setLoading] = useState(true);
@@ -407,6 +409,32 @@ const AgentsPage: React.FC = () => {
               </p>
             </div>
 
+            {/* Search Tabs */}
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {[
+                { id: 'all' as SearchTab, label: t('search.tabs.all', 'All'), icon: '🔍' },
+                { id: 'name' as SearchTab, label: t('search.tabs.name', 'Name'), icon: '👤' },
+                { id: 'location' as SearchTab, label: t('search.tabs.location', 'Location'), icon: '📍' },
+                { id: 'specialization' as SearchTab, label: t('search.tabs.specialization', 'Specialty'), icon: '⭐' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setSearchTab(tab.id);
+                    setSearchQuery('');
+                  }}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                    searchTab === tab.id
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
             {/* Search Input */}
             <div className="relative mb-6">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
@@ -417,7 +445,12 @@ const AgentsPage: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
-                placeholder={t('search.placeholders.name', 'Search by name, city, country, or specialty...')}
+                placeholder={
+                  searchTab === 'all' ? t('search.placeholders.all', 'Search by name, city, country, or specialty...') :
+                  searchTab === 'name' ? t('search.placeholders.name', 'Search by agent name...') :
+                  searchTab === 'location' ? t('search.placeholders.location', 'Search by city, country, or region...') :
+                  t('search.placeholders.specialization', 'Search by specialty (Luxury, Commercial, Residential...)')
+                }
                 className="w-full pl-12 pr-28 sm:pl-14 sm:pr-36 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all bg-white text-base sm:text-lg"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -435,19 +468,26 @@ const AgentsPage: React.FC = () => {
                   className="px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
                 >
                   <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">Search</span>
+                  <span className="hidden sm:inline">{t('search.searchButton', 'Search')}</span>
                 </button>
               </div>
             </div>
 
-            {/* Popular Searches */}
+            {/* Quick Search Suggestions based on tab */}
             {!searchQuery && (
               <div className="mb-6">
                 <p className="text-center text-sm text-neutral-600 mb-3">
-                  {t('search.popularSearches', 'Popular searches:')}
+                  {searchTab === 'all' && t('search.quickSearch.all', 'Popular searches:')}
+                  {searchTab === 'name' && t('search.quickSearch.name', 'Try searching for:')}
+                  {searchTab === 'location' && t('search.quickSearch.location', 'Popular locations:')}
+                  {searchTab === 'specialization' && t('search.quickSearch.specialization', 'Popular specialties:')}
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential'].map((term) => (
+                  {(searchTab === 'all' ? ['Belgrade', 'Zagreb', 'Luxury', 'Commercial'] :
+                    searchTab === 'name' ? ['Top Rated', 'Verified', 'Expert'] :
+                    searchTab === 'location' ? ['Serbia', 'Croatia', 'Albania', 'Montenegro', 'Bosnia', 'Kosovo'] :
+                    ['Luxury', 'Commercial', 'Residential', 'Investment', 'New Construction']
+                  ).map((term) => (
                     <button
                       key={term}
                       onClick={() => setSearchQuery(term)}
