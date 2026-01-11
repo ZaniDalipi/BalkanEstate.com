@@ -467,33 +467,23 @@ const AgentsPage: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
                 placeholder={
                   searchTab === 'all' ? t('search.placeholders.all', 'Search by name, city, country, or specialty...') :
                   searchTab === 'name' ? t('search.placeholders.name', 'Search by agent name...') :
                   searchTab === 'location' ? t('search.placeholders.location', 'Search by city, country, or region...') :
                   t('search.placeholders.specialization', 'Search by specialty (Luxury, Commercial, Residential...)')
                 }
-                className="w-full pl-12 pr-28 sm:pl-14 sm:pr-36 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all bg-white text-base sm:text-lg"
+                className="w-full pl-12 pr-12 sm:pl-14 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all bg-white text-base sm:text-lg"
               />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-                    title="Clear search"
-                  >
-                    <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
-                  </button>
-                )}
+              {searchQuery && (
                 <button
-                  onClick={() => fetchAgents(searchQuery)}
-                  className="px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                  title="Clear search"
                 >
-                  <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">{t('search.searchButton', 'Search')}</span>
+                  <span className="text-neutral-400 hover:text-neutral-600">✕</span>
                 </button>
-              </div>
+              )}
             </div>
 
             {/* Quick Search Suggestions based on tab */}
