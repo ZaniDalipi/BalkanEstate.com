@@ -283,10 +283,10 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
 
   // Calculate dimensions based on price length - use pill shape for longer prices
   const baseWidth = getMarkerWidthForPrice(price);
-  const baseHeight = 32;
-  const scaledWidth = Math.round(baseWidth * zoomScale);
-  const scaledHeight = Math.round(baseHeight * zoomScale);
-  const fontSize = Math.max(9, Math.round(11 * zoomScale));
+  const baseHeight = 26;
+  const scaledWidth = Math.round(baseWidth * zoomScale * 0.85);
+  const scaledHeight = Math.round(baseHeight * zoomScale * 0.85);
+  const fontSize = Math.max(8, Math.round(10 * zoomScale));
   const borderRadius = scaledHeight / 2; // Pill shape
   const hoverScale = isHovered ? 1.15 : 1;
 
@@ -378,11 +378,11 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
   const nightModeClass = shouldGlow ? 'night-mode-marker-pulse' : '';
 
   // Calculate scaled dimensions based on zoom
-  const baseWidth = 56;
-  const baseHeight = 45;
-  const scaledWidth = Math.round(baseWidth * zoomScale);
-  const scaledHeight = Math.round(baseHeight * zoomScale);
-  const fontSize = Math.max(12, Math.round(16 * zoomScale));
+  const baseWidth = 48;
+  const baseHeight = 38;
+  const scaledWidth = Math.round(baseWidth * zoomScale * 0.85);
+  const scaledHeight = Math.round(baseHeight * zoomScale * 0.85);
+  const fontSize = Math.max(10, Math.round(14 * zoomScale));
 
   // Wrap SVG in a container - the outer div stays in place, the inner div animates
   const svgHtml = `
