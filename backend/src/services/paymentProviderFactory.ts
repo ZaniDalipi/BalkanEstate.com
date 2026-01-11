@@ -302,16 +302,14 @@ class PaymentProviderFactory {
     try {
       // Check if Paddle is configured with real credentials
       if (!paddleService.isConfigured()) {
-        // Check if Stripe is configured before falling back
-        const stripeKey = process.env.STRIPE_SECRET_KEY;
-        if (stripeKey && stripeKey.startsWith('sk_')) {
-          console.warn('⚠️ Paddle not configured, falling back to Stripe');
-          return this.createStripePayment(params);
-        }
+        console.error('❌ Paddle not configured');
+        console.error('   API Key:', process.env.PADDLE_API_KEY?.substring(0, 15) + '...');
+        console.error('   Client Token:', process.env.PADDLE_CLIENT_TOKEN?.substring(0, 10) + '...');
+        console.error('   Environment:', process.env.PADDLE_ENVIRONMENT);
         return {
           success: false,
           provider: 'paddle',
-          error: 'Payment provider not configured. Please contact support.',
+          error: 'Payment provider not configured. Please restart the backend server.',
         };
       }
 
@@ -363,6 +361,18 @@ class PaymentProviderFactory {
   private getPaddlePriceId(planName: string, interval: string): string {
     // Map plan names to Paddle price IDs
     const priceMap: Record<string, Record<string, string>> = {
+      // Buyer plans
+      'Buyer Pro': {
+        'month': process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '',
+        'year': process.env.PADDLE_PRICE_BUYER_PRO_YEARLY || '',
+      },
+      'Buyer Pro Monthly': {
+        'month': process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '',
+      },
+      'buyer_pro_monthly': {
+        'month': process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '',
+      },
+      // Pro/Seller plans
       'Pro': {
         'month': process.env.PADDLE_PRICE_PRO_MONTHLY || '',
         'year': process.env.PADDLE_PRICE_PRO_YEARLY || '',
@@ -373,6 +383,7 @@ class PaymentProviderFactory {
       'Pro Yearly': {
         'year': process.env.PADDLE_PRICE_PRO_YEARLY || '',
       },
+      // Agency plans
       'Agency': {
         'month': process.env.PADDLE_PRICE_AGENCY_MONTHLY || '',
         'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
@@ -383,15 +394,23 @@ class PaymentProviderFactory {
       'Agency Yearly': {
         'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
       },
+      'Enterprise': {
+        'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
+      },
     };
+
+    console.log(`🔍 Looking up price for plan: "${planName}", interval: "${interval}"`);
 
     const planPrices = priceMap[planName];
     if (planPrices && planPrices[interval]) {
+      console.log(`   Found price ID: ${planPrices[interval]}`);
       return planPrices[interval];
     }
 
-    // Default to Pro monthly if no match
-    return process.env.PADDLE_PRICE_PRO_MONTHLY || '';
+    // Default to Buyer Pro monthly if no match
+    const defaultPrice = process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '';
+    console.log(`   Using default price ID: ${defaultPrice}`);
+    return defaultPrice;
   }
 
   /**
