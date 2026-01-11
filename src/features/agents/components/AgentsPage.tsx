@@ -7,7 +7,6 @@ import { getAllAgents, getAgencies } from '@/services/apiService';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
-import HeroSearchSection from '@/components/shared/HeroSearchSection';
 import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
@@ -374,27 +373,128 @@ const AgentsPage: React.FC = () => {
         }
       `}</style>
 
-      {/* Hero Section with Integrated Search */}
-      <HeroSearchSection
-        badge={t('hero.badge')}
-        title={t('hero.title')}
-        titleHighlight={t('hero.titleHighlight')}
-        subtitle={t('hero.subtitle')}
-        searchTitle={t('search.title')}
-        searchSubtitle={t('search.subtitle', { count: agents.length })}
-        searchPlaceholder={t('search.placeholders.name', 'Search by name, city, country, or specialty...')}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onSearch={() => fetchAgents(searchQuery)}
-        popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
-        popularSearchesLabel={t('search.popularSearches')}
-        stats={[
-          { icon: 'building', count: agencies.length, label: t('stats.professionalAgencies', 'Professional Agencies'), color: 'blue' },
-          { icon: 'users', count: agents.length, label: t('stats.verifiedAgents', 'Expert Agents'), color: 'green' },
-          { icon: 'home', count: totalActiveListings, label: t('agencies.listedProperties', 'Listed Properties'), color: 'purple' }
-        ]}
-        mousePosition={mousePosition}
-      />
+      {/* Hero Section with Integrated Search - Always visible */}
+      <section className="relative z-10 w-full flex-shrink-0 bg-gradient-to-b from-neutral-100 via-neutral-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          {/* Badge */}
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center px-4 py-2 bg-primary/10 rounded-full text-primary font-semibold text-sm uppercase tracking-wider">
+              {t('hero.badge', 'Connecting You with Experts')}
+            </span>
+          </div>
+
+          {/* Title */}
+          <div className="text-center max-w-4xl mx-auto mb-8">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 mb-4 leading-tight">
+              {t('hero.title', 'Find Your Perfect')}
+              <span className="block mt-2 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+                {t('hero.titleHighlight', 'Real Estate Partner')}
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto">
+              {t('hero.subtitle', 'Connect with top-rated agents in the Balkans who specialize in your local market.')}
+            </p>
+          </div>
+
+          {/* Search Box */}
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-neutral-200 p-6 sm:p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
+                {t('search.title', 'Find Your Ideal Agent')}
+              </h2>
+              <p className="text-neutral-600 text-sm sm:text-base">
+                {t('search.subtitle', { count: agents.length, defaultValue: `Search ${agents.length}+ verified professionals across the Balkans` })}
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative mb-6">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${searchQuery ? 'text-primary' : 'text-neutral-400'}`} />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && fetchAgents(searchQuery)}
+                placeholder={t('search.placeholders.name', 'Search by name, city, country, or specialty...')}
+                className="w-full pl-12 pr-28 sm:pl-14 sm:pr-36 py-3 sm:py-4 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all bg-white text-base sm:text-lg"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Clear search"
+                  >
+                    <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => fetchAgents(searchQuery)}
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+                >
+                  <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Search</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Popular Searches */}
+            {!searchQuery && (
+              <div className="mb-6">
+                <p className="text-center text-sm text-neutral-600 mb-3">
+                  {t('search.popularSearches', 'Popular searches:')}
+                </p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential'].map((term) => (
+                    <button
+                      key={term}
+                      onClick={() => setSearchQuery(term)}
+                      className="px-3 py-1.5 text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-lg transition-colors font-medium"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="pt-6 border-t border-neutral-200">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-3 bg-blue-50 px-4 py-3 rounded-xl border border-blue-100">
+                  <div className="p-2 bg-blue-500 rounded-lg">
+                    <BuildingOfficeIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xl text-neutral-900">{agencies.length || 0}</div>
+                    <div className="text-blue-700 text-xs font-medium">{t('stats.professionalAgencies', 'Agencies')}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-green-50 px-4 py-3 rounded-xl border border-green-100">
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <UsersIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xl text-neutral-900">{agents.length || 0}</div>
+                    <div className="text-green-700 text-xs font-medium">{t('stats.verifiedAgents', 'Agents')}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-purple-50 px-4 py-3 rounded-xl border border-purple-100">
+                  <div className="p-2 bg-purple-500 rounded-lg">
+                    <HomeIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xl text-neutral-900">{totalActiveListings || 0}</div>
+                    <div className="text-purple-700 text-xs font-medium">{t('agencies.listedProperties', 'Properties')}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Main Content */}
       <main className="w-full flex-grow">
