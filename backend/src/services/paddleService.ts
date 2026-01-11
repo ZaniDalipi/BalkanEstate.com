@@ -135,7 +135,10 @@ class PaddleService {
     method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET',
     body?: any
   ): Promise<T> {
-    const response = await fetch(`${PADDLE_API_URL}${endpoint}`, {
+    const url = `${PADDLE_API_URL}${endpoint}`;
+    console.log(`📤 Paddle API ${method} ${url}`);
+
+    const response = await fetch(url, {
       method,
       headers: {
         'Authorization': `Bearer ${this.config.apiKey}`,
@@ -145,7 +148,13 @@ class PaddleService {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: response.statusText })) as { error?: { detail?: string }; message?: string };
+      const errorData = await response.json().catch(() => ({ message: response.statusText })) as {
+        error?: { detail?: string; code?: string; type?: string };
+        message?: string
+      };
+      console.error('❌ Paddle API Error Response:', JSON.stringify(errorData, null, 2));
+      console.error('   Status:', response.status);
+      console.error('   API Key prefix:', this.config.apiKey?.substring(0, 10) + '...');
       throw new Error(`Paddle API error: ${errorData.error?.detail || errorData.message || response.statusText}`);
     }
 
@@ -170,18 +179,17 @@ class PaddleService {
         throw new Error('Paddle not configured. Set PADDLE_API_KEY and PADDLE_CLIENT_TOKEN');
       }
 
+      console.log('📤 Creating Paddle checkout with price ID:', request.priceId);
+
       // Create a transaction (checkout session)
-      const transaction = await this.apiRequest<{ data: any }>('/transactions', 'POST', {
+      // Paddle API v2 format
+      const requestBody: any = {
         items: [
           {
             price_id: request.priceId,
             quantity: 1,
           },
         ],
-        customer_id: null, // Will create new customer or use email
-        customer: {
-          email: request.userEmail,
-        },
         custom_data: {
           user_id: request.userId,
           product_id: request.productId,
@@ -191,11 +199,21 @@ class PaddleService {
         checkout: {
           url: request.successUrl,
         },
-      });
+      };
+
+      // Only add customer email if provided
+      if (request.userEmail) {
+        requestBody.customer = {
+          email: request.userEmail,
+        };
+      }
+
+      const transaction = await this.apiRequest<{ data: any }>('/transactions', 'POST', requestBody);
 
       const checkoutUrl = transaction.data?.checkout?.url;
 
       console.log(`✅ Paddle checkout created: ${transaction.data?.id}`);
+      console.log(`   Checkout URL: ${checkoutUrl}`);
 
       return {
         success: true,
