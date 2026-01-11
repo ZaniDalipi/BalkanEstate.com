@@ -599,7 +599,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {isMobile && (
         <>
           {/* Mobile: Layers FAB with dropdown - positioned at bottom left, hidden when measurement is active */}
-          <div className={`absolute bottom-44 left-3 z-[1003] pointer-events-none md:hidden transition-opacity duration-200 ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <div className={`absolute bottom-24 left-3 z-[1003] pointer-events-none md:hidden transition-opacity duration-200 ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             {/* Dropdown menu - appears above the FAB */}
             {isLayerMenuOpen && (
               <div

@@ -147,8 +147,7 @@ const FeaturedAgencies: React.FC = () => {
             height: `${40 + i * 10}px`,
             left: `${10 + i * 15}%`,
             top: `${20 + i * 5}%`,
-            animation: isVisible ? `float 8s ease-in-out infinite` : 'none',
-            animationDelay: `${i * 0.5}s`,
+            animation: isVisible ? `float 8s ease-in-out ${i * 0.5}s infinite` : 'none',
             filter: 'blur(10px)',
             transitionDelay: `${i * 0.1}s`
           }}
@@ -272,8 +271,7 @@ const FeaturedAgencies: React.FC = () => {
                       style={{
                         left: `${Math.random() * 100}%`,
                         top: `${Math.random() * 100}%`,
-                        animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
-                        animationDelay: `${i * 0.3}s`
+                        animation: `float ${3 + Math.random() * 4}s ease-in-out ${i * 0.3}s infinite`
                       }}
                     />
                   ))}
