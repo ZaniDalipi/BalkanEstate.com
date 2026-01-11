@@ -293,7 +293,7 @@ const AgentsPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 min-h-screen flex flex-col">
+    <div className="bg-neutral-50 flex flex-col">
       {/* SEO Meta Tags */}
       <SEO
         title={t('agents:page.title')}

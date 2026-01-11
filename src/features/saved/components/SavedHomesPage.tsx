@@ -309,7 +309,7 @@ const SavedPropertiesPage: React.FC = () => {
   const totalSaved = savedHomes.length + savedAgentsList.length;
 
   return (
-    <div className="bg-neutral-50 min-h-screen flex flex-col">
+    <div className="bg-neutral-50 flex flex-col">
 
       <Toast
           show={toast.show}

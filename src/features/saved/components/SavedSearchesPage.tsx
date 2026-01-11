@@ -230,7 +230,7 @@ const SavedSearchesPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-neutral-50 min-h-screen flex flex-col">
+    <div className="bg-neutral-50 flex flex-col">
       {/* SEO - noindex for private page */}
       <SEO
         title={t('page.title')}
