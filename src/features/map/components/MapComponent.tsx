@@ -238,6 +238,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
   const [showMeasurement, setShowMeasurement] = useState(false); // Toggle for measurement tool
+  const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false); // Mobile FAB layer menu
 
   // Check URL params for measurementId to auto-enable measurement tool
   useEffect(() => {
@@ -597,100 +598,133 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {/* Mobile Controls - hidden on desktop via CSS as fallback */}
       {isMobile && (
         <>
-          {/* Mobile: Layer toggles - positioned at top left */}
-          <div className="absolute top-20 left-2 z-[1003] pointer-events-none md:hidden">
-            <div
-              className="pointer-events-auto flex flex-col gap-1.5 p-2 rounded-2xl shadow-lg"
+          {/* Mobile: Layers FAB with dropdown - positioned at bottom left, hidden when measurement is active */}
+          <div className={`absolute bottom-44 left-3 z-[1003] pointer-events-none md:hidden transition-opacity duration-200 ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            {/* Dropdown menu - appears above the FAB */}
+            {isLayerMenuOpen && (
+              <div
+                className="absolute bottom-full left-0 mb-2 pointer-events-auto animate-fade-in"
+              >
+                <div
+                  className="flex flex-col gap-1 p-2 rounded-2xl shadow-lg min-w-[140px]"
+                  style={{
+                    background: 'rgba(255,255,255,0.95)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)'
+                  }}
+                >
+                  {/* 3D Buildings Toggle */}
+                  <button
+                    onClick={() => setShow3DBuildings(!show3DBuildings)}
+                    className={`
+                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
+                      ${show3DBuildings
+                        ? 'bg-slate-700 text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                      }
+                    `}
+                  >
+                    <span className="text-base">🏢</span>
+                    <span className="text-xs font-medium">3D Buildings</span>
+                  </button>
+
+                  {/* Landmarks Toggle */}
+                  <button
+                    onClick={() => setShowLandmarks(!showLandmarks)}
+                    className={`
+                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
+                      ${showLandmarks
+                        ? 'bg-primary text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                      }
+                    `}
+                  >
+                    <span className="text-base">🏛️</span>
+                    <span className="text-xs font-medium">Points of Interest</span>
+                  </button>
+
+                  {/* Cadastre Toggle - only in satellite */}
+                  {mapType === 'satellite' && (
+                    <button
+                      onClick={() => setShowCadastre(!showCadastre)}
+                      className={`
+                        flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
+                        ${showCadastre
+                          ? 'bg-primary text-white'
+                          : 'text-neutral-600 hover:bg-neutral-100'
+                        }
+                      `}
+                    >
+                      <span className="text-base">📐</span>
+                      <span className="text-xs font-medium">Parcels</span>
+                    </button>
+                  )}
+
+                  {/* Measurement Tool Toggle */}
+                  <button
+                    onClick={() => setShowMeasurement(!showMeasurement)}
+                    className={`
+                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
+                      ${showMeasurement
+                        ? 'bg-emerald-600 text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                      }
+                    `}
+                  >
+                    <span className="text-base">📏</span>
+                    <span className="text-xs font-medium">Measure Land</span>
+                  </button>
+
+                  {/* Divider */}
+                  <div className="h-px w-full bg-neutral-200 my-1" />
+
+                  {/* Legend Toggle */}
+                  <button
+                    onClick={() => {
+                      setIsLegendOpen((p) => !p);
+                    }}
+                    className={`
+                      flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 ease-out active:scale-95
+                      ${isLegendOpen
+                        ? 'bg-amber-500 text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                      }
+                    `}
+                  >
+                    <MapLegendIcon className="w-4 h-4" />
+                    <span className="text-xs font-medium">Legend</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* FAB Button */}
+            <button
+              onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
+              className={`
+                pointer-events-auto w-12 h-12 rounded-full shadow-lg flex items-center justify-center
+                transition-all duration-300 ease-out active:scale-95
+                ${isLayerMenuOpen
+                  ? 'bg-primary text-white rotate-45'
+                  : 'bg-white text-neutral-700 hover:bg-neutral-50'
+                }
+              `}
               style={{
-                background: 'rgba(255,255,255,0.92)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)'
+                boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
               }}
             >
-              {/* 3D Buildings Toggle */}
-              <button
-                onClick={() => setShow3DBuildings(!show3DBuildings)}
-                className={`
-                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                  ${show3DBuildings
-                    ? 'bg-slate-700 text-white'
-                    : 'text-neutral-600 hover:bg-neutral-100'
-                  }
-                `}
-              >
-                <span className="text-sm">🏢</span>
-                <span className="text-[11px] font-medium">3D</span>
-              </button>
-
-              {/* Landmarks Toggle */}
-              <button
-                onClick={() => setShowLandmarks(!showLandmarks)}
-                className={`
-                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                  ${showLandmarks
-                    ? 'bg-primary text-white'
-                    : 'text-neutral-600 hover:bg-neutral-100'
-                  }
-                `}
-              >
-                <span className="text-sm">🏛️</span>
-                <span className="text-[11px] font-medium">POI</span>
-              </button>
-
-              {/* Cadastre Toggle - only in satellite */}
-              {mapType === 'satellite' && (
-                <button
-                  onClick={() => setShowCadastre(!showCadastre)}
-                  className={`
-                    flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                    ${showCadastre
-                      ? 'bg-primary text-white'
-                      : 'text-neutral-600 hover:bg-neutral-100'
-                    }
-                  `}
-                >
-                  <span className="text-sm">📐</span>
-                  <span className="text-[11px] font-medium">Parcels</span>
-                </button>
+              {isLayerMenuOpen ? (
+                <XCircleIcon className="w-6 h-6" />
+              ) : (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
               )}
+            </button>
 
-              {/* Measurement Tool Toggle */}
-              <button
-                onClick={() => setShowMeasurement(!showMeasurement)}
-                className={`
-                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                  ${showMeasurement
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-neutral-600 hover:bg-neutral-100'
-                  }
-                `}
-              >
-                <span className="text-sm">📏</span>
-                <span className="text-[11px] font-medium">Measure</span>
-              </button>
-
-              {/* Divider */}
-              <div className="h-px w-full bg-neutral-200 my-0.5" />
-
-              {/* Legend Toggle */}
-              <button
-                onClick={() => setIsLegendOpen((p) => !p)}
-                className={`
-                  flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all duration-200 ease-out active:scale-95
-                  ${isLegendOpen
-                    ? 'bg-neutral-200 text-neutral-800'
-                    : 'text-neutral-600 hover:bg-neutral-100'
-                  }
-                `}
-              >
-                <MapLegendIcon className="w-4 h-4" />
-                <span className="text-[11px] font-medium">Legend</span>
-              </button>
-            </div>
-
-            {/* Legend popup - positioned below the layer panel on mobile */}
-            {isLegendOpen && (
-              <div className="absolute top-full left-0 mt-2 pointer-events-auto animate-fade-in">
+            {/* Legend popup - positioned to the right of FAB when legend is open */}
+            {isLegendOpen && !isLayerMenuOpen && (
+              <div className="absolute bottom-0 left-full ml-3 pointer-events-auto animate-fade-in">
                 <Legend isNightMode={false} />
               </div>
             )}
