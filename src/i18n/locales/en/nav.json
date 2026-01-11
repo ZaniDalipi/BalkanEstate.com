@@ -9,7 +9,7 @@
   "topAgents": "Top Agents",
   "agencies": "Agencies",
   "savedSearches": "Saved Searches",
-  "savedProperties": "Saved Properties",
+  "savedProperties": "Saved Items",
   "favorites": "Favorites",
   "inbox": "Inbox",
   "messages": "Messages",
@@ -71,7 +71,7 @@
     "account": "My Account",
     "messages": "Messages",
     "savedSearches": "Saved Searches",
-    "savedProperties": "Saved Properties",
+    "savedProperties": "Saved Items",
     "createListing": "Create Listing",
     "editListing": "Edit Listing"
   },
