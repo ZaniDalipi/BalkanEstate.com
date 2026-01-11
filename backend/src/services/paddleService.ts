@@ -128,6 +128,16 @@ class PaddleService {
   }
 
   /**
+   * Get current API URL based on environment
+   */
+  private getApiUrl(): string {
+    const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
+    return env === 'production'
+      ? 'https://api.paddle.com'
+      : 'https://sandbox-api.paddle.com';
+  }
+
+  /**
    * Make authenticated request to Paddle API
    */
   private async apiRequest<T>(
@@ -135,13 +145,19 @@ class PaddleService {
     method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET',
     body?: any
   ): Promise<T> {
-    const url = `${PADDLE_API_URL}${endpoint}`;
+    // Read fresh values from env vars
+    const apiKey = process.env.PADDLE_API_KEY || '';
+    const apiUrl = this.getApiUrl();
+    const url = `${apiUrl}${endpoint}`;
+
     console.log(`📤 Paddle API ${method} ${url}`);
+    console.log(`   Environment: ${process.env.PADDLE_ENVIRONMENT}`);
+    console.log(`   API Key prefix: ${apiKey.substring(0, 12)}...`);
 
     const response = await fetch(url, {
       method,
       headers: {
-        'Authorization': `Bearer ${this.config.apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -419,16 +435,26 @@ class PaddleService {
 
   /**
    * Check if Paddle is configured with real credentials
+   * Reads directly from env vars to ensure we get current values
    */
   public isConfigured(): boolean {
-    const apiKey = this.config.apiKey;
-    const clientToken = this.config.clientToken;
+    // Read directly from env vars (not cached config) to ensure fresh values
+    const apiKey = process.env.PADDLE_API_KEY || '';
+    const clientToken = process.env.PADDLE_CLIENT_TOKEN || '';
 
     // Check if keys exist and are not placeholder values
-    const hasApiKey = apiKey && apiKey.length > 10 && !apiKey.endsWith('...');
-    const hasClientToken = clientToken && clientToken.length > 10 && !clientToken.endsWith('...');
+    const hasApiKey = apiKey.length > 10 && !apiKey.endsWith('...') && !apiKey.includes('your_');
+    const hasClientToken = clientToken.length > 10 && !clientToken.endsWith('...') && !clientToken.includes('your_');
 
-    return !!(hasApiKey && hasClientToken);
+    const configured = hasApiKey && hasClientToken;
+
+    if (!configured) {
+      console.log('🔍 Paddle config check:');
+      console.log('   API Key present:', hasApiKey, `(length: ${apiKey.length})`);
+      console.log('   Client Token present:', hasClientToken, `(length: ${clientToken.length})`);
+    }
+
+    return configured;
   }
 
   /**
