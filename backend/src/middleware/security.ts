@@ -43,14 +43,12 @@ export const validateEnvironment = (): void => {
 
   // Check for weak default secrets
   if (process.env.JWT_SECRET === 'secret' || process.env.JWT_SECRET === 'your-secret-key') {
-    console.warn('⚠️  WARNING: JWT_SECRET is using a weak default value. Change it for production!');
     if (isProduction) {
       throw new Error('JWT_SECRET must be changed from default value in production');
     }
   }
 
   if (process.env.ENCRYPTION_KEY?.includes('default') || process.env.ENCRYPTION_KEY?.includes('change')) {
-    console.warn('⚠️  WARNING: ENCRYPTION_KEY is using a default value. Change it for production!');
     if (isProduction) {
       throw new Error('ENCRYPTION_KEY must be changed from default value in production');
     }
@@ -58,15 +56,12 @@ export const validateEnvironment = (): void => {
 
   if (missing.length > 0) {
     const errorMsg = `Missing required environment variables: ${missing.join(', ')}`;
-    console.error(`❌ ${errorMsg}`);
     if (isProduction) {
       throw new Error(errorMsg);
     } else {
-      console.warn('⚠️  Running in development mode - some features may not work correctly');
     }
   }
 
-  console.log('✅ Environment variables validated');
 };
 
 /**
@@ -211,7 +206,6 @@ export const getCorsConfig = () => {
         if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
           callback(null, true);
         } else {
-          console.warn(`CORS blocked origin: ${origin}`);
           callback(new Error('Not allowed by CORS'));
         }
       } else {
@@ -315,7 +309,6 @@ const sanitizeNoSQLInjection = (obj: any, path = ''): any => {
   if (typeof obj === 'string') {
     // Check for MongoDB operators in string values
     if (obj.includes('$') && /\$[a-zA-Z]/.test(obj)) {
-      console.warn(`🚨 Potential NoSQL injection blocked in string at ${path}: ${obj.substring(0, 50)}`);
       return obj.replace(/\$/g, '_');
     }
     return obj;
@@ -331,7 +324,6 @@ const sanitizeNoSQLInjection = (obj: any, path = ''): any => {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         // Block keys starting with $ (MongoDB operators)
         if (key.startsWith('$')) {
-          console.warn(`🚨 Potential NoSQL injection blocked: operator "${key}" at ${path}`);
           sanitized[`_${key.slice(1)}`] = sanitizeNoSQLInjection(obj[key], `${path}.${key}`);
         } else {
           sanitized[key] = sanitizeNoSQLInjection(obj[key], `${path}.${key}`);
@@ -438,14 +430,6 @@ export const securityLogger = (req: Request, _res: Response, next: NextFunction)
 
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(requestData) || pattern.test(req.path)) {
-      console.warn(`🚨 SECURITY: Suspicious request pattern detected`, {
-        requestId: req.headers['x-request-id'],
-        ip: req.ip,
-        path: req.path,
-        method: req.method,
-        pattern: pattern.toString(),
-        timestamp: new Date().toISOString(),
-      });
       break;
     }
   }
@@ -457,7 +441,6 @@ export const securityLogger = (req: Request, _res: Response, next: NextFunction)
  * Apply all security middleware to Express app
  */
 export const applySecurityMiddleware = (app: Application): void => {
-  console.log('🔒 Applying security middleware...');
 
   // 1. Request ID (first, for tracking)
   app.use(requestId);
@@ -474,8 +457,8 @@ export const applySecurityMiddleware = (app: Application): void => {
   // 5. MongoDB sanitization
   app.use(mongoSanitization);
 
-  // 6. XSS sanitization (applied to specific routes, not globally)
-  // app.use(xssSanitizer); // Uncomment if needed globally
+  // 6. XSS sanitization - enabled globally for security
+  app.use(xssSanitizer);
 
   // 7. Security logging
   app.use(securityLogger);
@@ -483,7 +466,6 @@ export const applySecurityMiddleware = (app: Application): void => {
   // 8. General rate limiting (applied to /api routes in server.ts)
   // Rate limiting is applied per-route for more granular control
 
-  console.log('✅ Security middleware applied');
 };
 
 /**

@@ -256,11 +256,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
         await user.save();
 
-        console.log(`✅ Agent ${user.email} registered. Pro subscription required to post listings.`);
       } catch (agentError: any) {
         // If agent creation fails, delete the user to maintain consistency
         await User.findByIdAndDelete(user._id);
-        console.error('Agent creation failed, rolled back user:', agentError);
         res.status(500).json({
           message: 'Failed to create agent profile. Please try again.',
           code: 'AGENT_CREATION_FAILED'
@@ -273,7 +271,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     try {
       await sendVerificationEmail(user);
     } catch (emailError) {
-      console.error('Failed to send verification email:', emailError);
       // Don't block signup if email fails
     }
 
@@ -310,7 +307,6 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('Signup error:', error);
 
     // Handle MongoDB duplicate key errors
     if (error.code === 11000) {
@@ -498,7 +494,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('Login error:', error);
     res.status(500).json({ message: 'Error logging in', error: error.message });
   }
 };
@@ -535,13 +530,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     let savedSearchesLimit = 1;
     let subscriptionExpiresAt: Date | undefined;
     let subscriptionStatus: string = 'active';
-    let isCancelledButActive = false;
 
     // **CRITICAL: Check Subscriptions collection - this is the source of truth**
     // Handle both ObjectId and string userId formats for compatibility
     const userIdVariants = [user._id, String(user._id)];
 
-    console.log(`🔍 [getMe] Looking for subscription for user ${user.email} (id: ${user._id})`);
 
     // PRIORITY 1: Check for active/trial subscriptions
     let dbSubscription = await Subscription.findOne({
@@ -558,10 +551,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         expirationDate: { $gt: new Date() },
       }).sort({ expirationDate: -1 });
 
-      if (dbSubscription) {
-        isCancelledButActive = true;
-        console.log(`⚠️ [getMe] Found ${dbSubscription.status} subscription for ${user.email}, valid until ${dbSubscription.expirationDate}`);
-      }
     }
 
     // Debug: Log all subscriptions for this user if none found
@@ -571,12 +560,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       }).sort({ createdAt: -1 }).limit(3);
 
       if (allUserSubs.length > 0) {
-        console.log(`⚠️ [getMe] Found ${allUserSubs.length} subscription(s) for ${user.email}, but none match active criteria:`);
         allUserSubs.forEach(sub => {
-          console.log(`   - ${sub.productId}: status=${sub.status}, expires=${sub.expirationDate}, now=${new Date()}, isExpired=${sub.expirationDate <= new Date()}`);
         });
       } else {
-        console.log(`❌ [getMe] No subscriptions found in DB for user ${user.email} (id: ${user._id})`);
       }
     }
 
@@ -597,19 +583,16 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         promotionCoupons = { monthly: 3, available: 3, used: 0, rollover: 0, lastRefresh: new Date() };
         savedSearchesLimit = -1; // Unlimited for Pro
         subscriptionExpiresAt = dbSubscription.expirationDate;
-        console.log(`🎫 [getMe] Found ${isCancelledButActive ? 'cancelled-but-valid' : 'active'} subscription in DB for ${user.email}: ${productId}, limit: ${listingsLimit}, expires: ${subscriptionExpiresAt}`);
       } else if (productId?.includes('enterprise') || productId?.includes('agency')) {
         tier = 'agency_owner';
         listingsLimit = 500; // 500 listings for enterprise
         promotionCoupons = { monthly: 5, available: 5, used: 0, rollover: 0, lastRefresh: new Date() };
         savedSearchesLimit = -1; // Unlimited for Enterprise
         subscriptionExpiresAt = dbSubscription.expirationDate;
-        console.log(`🎫 [getMe] Found enterprise subscription in DB for ${user.email}: ${productId}, limit: ${listingsLimit}, expires: ${subscriptionExpiresAt}`);
       }
     } else {
       // **NO VALID SUBSCRIPTION FOUND** - check if user.subscription thinks they have Pro and downgrade
       if (user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
-        console.log(`⚠️ [getMe] User ${user.email} has no valid subscription in DB but tier is ${user.subscription.tier}. Downgrading to free.`);
         subscriptionStatus = 'expired';
       }
     }
@@ -642,11 +625,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     const privateSellerCount = existingProperties.filter((p: any) => p.createdAsRole === 'private_seller').length;
     const agentCount = existingProperties.filter((p: any) => p.createdAsRole === 'agent').length;
 
-    console.log(`📊 [getMe] Syncing counters for ${user.email}: ${activeListingsCount} total (${privateSellerCount} private, ${agentCount} agent)`);
 
     if (!user.subscription) {
       // Initialize new subscription
-      console.log(`🔄 [getMe] Initializing subscription for ${user.email}: ${listingsLimit} listings, tier: ${tier}, status: ${subscriptionStatus}`);
       user.subscription = {
         tier,
         status: subscriptionStatus as 'active' | 'trial' | 'grace' | 'canceled' | 'expired' | 'pending_cancellation',
@@ -660,7 +641,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         startDate: user.proSubscription?.startedAt || new Date(),
         expiresAt: subscriptionExpiresAt || user.proSubscription?.expiresAt,
       };
-      console.log(`✅ [getMe] Subscription initialized for ${user.email}: ${tier} tier with ${listingsLimit} listings (${activeListingsCount}/${listingsLimit} used)`);
     } else {
       // Sync existing subscription counters from database
       user.subscription.activeListingsCount = activeListingsCount;
@@ -670,12 +650,10 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       // **CRITICAL: Always sync tier and status from database truth**
       // If DB shows Pro (from active or cancelled-but-valid subscription), update to Pro
       if (tier === 'pro' && user.subscription.tier !== 'pro') {
-        console.log(`🔧 [getMe] Upgrading ${user.email} from ${user.subscription.tier} to pro tier`);
         user.subscription.tier = 'pro';
         user.subscription.listingsLimit = listingsLimit; // Use plan-specific limit (20 or 250)
         user.subscription.expiresAt = subscriptionExpiresAt;
       } else if (tier === 'agency_owner' && user.subscription.tier !== 'agency_owner') {
-        console.log(`🔧 [getMe] Upgrading ${user.email} from ${user.subscription.tier} to agency_owner tier`);
         user.subscription.tier = 'agency_owner';
         user.subscription.listingsLimit = 500; // Enterprise gets 500 listings
         user.subscription.expiresAt = subscriptionExpiresAt;
@@ -683,7 +661,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
       // **AUTO-DOWNGRADE: If NO valid subscription in DB, downgrade to free**
       if (subscriptionStatus === 'expired' && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
-        console.log(`⬇️ [getMe] Downgrading ${user.email} from ${user.subscription.tier} to free tier (no valid subscription in DB)`);
         user.subscription.tier = 'free';
         user.subscription.status = 'expired';
         user.subscription.listingsLimit = 3;
@@ -700,11 +677,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
       // Sync listingsLimit for Pro users based on their actual plan
       if (user.subscription.tier === 'pro' && listingsLimit > 0 && user.subscription.listingsLimit !== listingsLimit) {
-        console.log(`🔧 [getMe] Syncing listingsLimit for ${user.email}: ${user.subscription.listingsLimit} -> ${listingsLimit}`);
         user.subscription.listingsLimit = listingsLimit;
       }
 
-      console.log(`✅ [getMe] Subscription synced for ${user.email}: ${user.subscription.tier} tier (status: ${user.subscription.status}), ${activeListingsCount}/${user.subscription.listingsLimit} listings used`);
     }
 
     await user.save();
@@ -736,7 +711,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('Get me error:', error);
     res.status(500).json({ message: 'Error fetching user', error: error.message });
   }
 };
@@ -778,8 +752,6 @@ export const updateProfile = async (
 
     await user.save();
 
-    console.log('Profile updated for user:', user._id);
-    console.log('Updated fields:', { name, phone, city, country, address });
 
     res.json({
       user: {
@@ -801,7 +773,6 @@ export const updateProfile = async (
       },
     });
   } catch (error: any) {
-    console.error('Update profile error:', error);
     res.status(500).json({ message: 'Error updating profile', error: error.message });
   }
 };
@@ -855,7 +826,6 @@ export const setPublicKey = async (req: Request, res: Response): Promise<void> =
       publicKey: user.publicKey,
     });
   } catch (error: any) {
-    console.error('Set public key error:', error);
     res.status(500).json({ message: 'Error setting public key', error: error.message });
   }
 };
@@ -891,7 +861,6 @@ export const oauthCallback = async (req: Request, res: Response): Promise<void> 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     res.redirect(`${frontendUrl}/auth/callback?token=${token}&refresh=${refreshToken}`);
   } catch (error: any) {
-    console.error('OAuth callback error:', error);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     res.redirect(`${frontendUrl}/auth/callback?error=server_error`);
   }
@@ -997,18 +966,15 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
 
       // If agency invitation code is provided, verify it
       if (agencyInvitationCode) {
-        console.log(`🔍 Looking for agency with invitation code: ${agencyInvitationCode.toUpperCase()}`);
         agency = await Agency.findOne({ invitationCode: agencyInvitationCode.toUpperCase() });
 
         if (!agency) {
-          console.log(`❌ Agency not found with code: ${agencyInvitationCode.toUpperCase()}`);
           res.status(404).json({
             message: 'Invalid agency invitation code. Please check the code and try again.'
           });
           return;
         }
 
-        console.log(`✅ Found agency: ${agency.name} (ID: ${agency._id})`);
         agencyName = agency.name; // Use verified agency name
       }
 
@@ -1119,7 +1085,6 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       await user.save();
     }
 
-    console.log(`✅ Role switch successful for user ${user._id}: ${user.role} ${user.agencyId ? `(Agency: ${user.agencyName})` : ''}`);
 
     res.json({
       message: 'Role updated successfully',
@@ -1143,7 +1108,6 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
       },
     });
   } catch (error: any) {
-    console.error('Switch role error:', error);
     res.status(500).json({ message: 'Error switching role', error: error.message });
   }
 };
@@ -1205,9 +1169,7 @@ export const requestPasswordReset = async (
         userName: user.name,
         resetUrl,
       });
-      console.log('Password reset email sent to:', user.email);
     } catch (emailError) {
-      console.error('Failed to send password reset email:', emailError);
       // Still return success message to prevent account enumeration
     }
 
@@ -1217,7 +1179,6 @@ export const requestPasswordReset = async (
       resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
     });
   } catch (error: any) {
-    console.error('Password reset request error:', error);
     res.status(500).json({ message: 'Error processing request', error: error.message });
   }
 };
@@ -1307,7 +1268,6 @@ export const resetPassword = async (
       },
     });
   } catch (error: any) {
-    console.error('Password reset error:', error);
     res.status(500).json({ message: 'Error resetting password', error: error.message });
   }
 };
@@ -1336,7 +1296,6 @@ export const uploadAvatar = async (
                                    process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudinaryConfigured) {
-      console.error('❌ Cloudinary is not fully configured');
       res.status(500).json({
         message: 'Image upload service not configured. Please add your Cloudinary credentials to the .env file.',
         missingFields: {
@@ -1356,16 +1315,12 @@ export const uploadAvatar = async (
       return;
     }
 
-    console.log('✓ Starting avatar upload for user:', userId);
-    console.log('File size:', req.file.size, 'bytes');
-    console.log('File type:', req.file.mimetype);
 
     // Delete old avatar from Cloudinary if exists
     if (user.avatarPublicId) {
       try {
         await deleteImage(user.avatarPublicId);
       } catch (deleteError) {
-        console.log('Could not delete old avatar:', deleteError);
         // Continue with upload even if deletion fails
       }
     }
@@ -1384,7 +1339,6 @@ export const uploadAvatar = async (
     user.avatarPublicId = uploadResult.publicId;
     await user.save();
 
-    console.log('✅ Avatar uploaded successfully:', uploadResult.url);
 
     res.json({
       avatarUrl: uploadResult.url,
@@ -1406,7 +1360,6 @@ export const uploadAvatar = async (
       }
     });
   } catch (error: any) {
-    console.error('Upload avatar error:', error);
     res.status(500).json({ message: 'Error uploading avatar', error: error.message });
   }
 };
@@ -1441,7 +1394,6 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       refreshToken: result.refreshToken,
     });
   } catch (error: any) {
-    console.error('Refresh token error:', error);
     res.status(500).json({ message: 'Error refreshing token', error: error.message });
   }
 };
@@ -1471,7 +1423,6 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
       try {
         await sendWelcomeEmail(result.user);
       } catch (emailError) {
-        console.error('Failed to send welcome email:', emailError);
         // Don't block verification if email fails
       }
     }
@@ -1487,7 +1438,6 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
       } : undefined,
     });
   } catch (error: any) {
-    console.error('Email verification error:', error);
     res.status(500).json({ success: false, message: 'Error verifying email', error: error.message });
   }
 };
@@ -1510,7 +1460,6 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
     // Always return success to prevent account enumeration
     res.json({ message: result.message });
   } catch (error: any) {
-    console.error('Resend verification error:', error);
     res.status(500).json({ message: 'Error resending verification email', error: error.message });
   }
 };
@@ -1537,7 +1486,6 @@ export const enhancedLogout = async (req: Request, res: Response): Promise<void>
 
     res.json({ message: 'Logged out successfully' });
   } catch (error: any) {
-    console.error('Logout error:', error);
     res.status(500).json({ message: 'Error logging out', error: error.message });
   }
 };
@@ -1559,7 +1507,6 @@ export const logoutAllDevices = async (req: Request, res: Response): Promise<voi
 
     res.json({ message: 'Logged out from all devices successfully' });
   } catch (error: any) {
-    console.error('Logout all devices error:', error);
     res.status(500).json({ message: 'Error logging out', error: error.message });
   }
 };
@@ -1581,7 +1528,6 @@ export const getActiveSessions = async (req: Request, res: Response): Promise<vo
 
     res.json({ sessions });
   } catch (error: any) {
-    console.error('Get sessions error:', error);
     res.status(500).json({ message: 'Error fetching sessions', error: error.message });
   }
 };
@@ -1614,7 +1560,6 @@ export const getLoginHistory = async (req: Request, res: Response): Promise<void
       total: sortedHistory.length,
     });
   } catch (error: any) {
-    console.error('Get login history error:', error);
     res.status(500).json({ message: 'Error fetching login history', error: error.message });
   }
 };
@@ -1696,7 +1641,6 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       const { revokeAllRefreshTokens } = await import('../services/refreshTokenService');
       await revokeAllRefreshTokens(String(user._id));
     } catch (error) {
-      console.error('Failed to revoke refresh tokens:', error);
       // Continue even if this fails
     }
 
@@ -1744,7 +1688,6 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
         text: `Hi ${user.name},\n\nYour password for your Balkan Estate account has been changed successfully on ${new Date().toLocaleString()}.\n\nIf you didn't make this change, please contact our support team immediately.\n\nFor your security, you have been logged out of all devices.`,
       });
     } catch (emailError) {
-      console.error('Failed to send password change confirmation email:', emailError);
       // Don't block the response if email fails
     }
 
@@ -1752,7 +1695,6 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       message: 'Password changed successfully. You have been logged out of all devices for security.',
     });
   } catch (error: any) {
-    console.error('Change password error:', error);
     res.status(500).json({ message: 'Error changing password', error: error.message });
   }
 };
@@ -1819,7 +1761,6 @@ export const setActiveRole = async (req: Request, res: Response): Promise<void> 
       },
     });
   } catch (error: any) {
-    console.error('Set active role error:', error);
     res.status(500).json({ message: 'Error setting active role', error: error.message });
   }
 };
@@ -1905,7 +1846,6 @@ export const addRole = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('Add role error:', error);
     res.status(500).json({ message: 'Error adding role', error: error.message });
   }
 };
@@ -1939,7 +1879,6 @@ export const getEmailPreferences = async (req: Request, res: Response): Promise<
 
     res.json({ emailPreferences: preferences });
   } catch (error: any) {
-    console.error('Get email preferences error:', error);
     res.status(500).json({ message: 'Error getting email preferences', error: error.message });
   }
 };
@@ -1989,7 +1928,6 @@ export const updateEmailPreferences = async (req: Request, res: Response): Promi
       emailPreferences: user.emailPreferences,
     });
   } catch (error: any) {
-    console.error('Update email preferences error:', error);
     res.status(500).json({ message: 'Error updating email preferences', error: error.message });
   }
 };
@@ -2095,7 +2033,6 @@ export const unsubscribeFromEmails = async (req: Request, res: Response): Promis
       </html>
     `);
   } catch (error: any) {
-    console.error('Unsubscribe error:', error);
     res.status(500).json({ message: 'Error processing unsubscribe request' });
   }
 };

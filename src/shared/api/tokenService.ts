@@ -53,12 +53,10 @@ const refreshTokenProactively = async (): Promise<boolean> => {
 
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
   if (!refreshToken) {
-    console.log('[TokenService] No refresh token available');
     return false;
   }
 
   isRefreshing = true;
-  console.log('[TokenService] Proactively refreshing token...');
 
   try {
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
@@ -68,7 +66,6 @@ const refreshTokenProactively = async (): Promise<boolean> => {
     });
 
     if (!response.ok) {
-      console.log('[TokenService] Proactive refresh failed, session expired');
       tokenService.clearTokens();
       onSessionExpired?.();
       return false;
@@ -80,14 +77,12 @@ const refreshTokenProactively = async (): Promise<boolean> => {
       if (data.refreshToken) {
         tokenService.setRefreshToken(data.refreshToken);
       }
-      console.log('[TokenService] Token refreshed successfully');
       scheduleRefresh(data.accessToken);
       return true;
     }
 
     return false;
   } catch (error) {
-    console.error('[TokenService] Refresh error:', error);
     return false;
   } finally {
     isRefreshing = false;
@@ -107,7 +102,6 @@ const scheduleRefresh = (token: string): void => {
   // Schedule refresh 5 minutes before expiry
   const refreshIn = Math.max(0, timeUntilExpiry - REFRESH_BUFFER_MS);
 
-  console.log(`[TokenService] Scheduling refresh in ${Math.round(refreshIn / 1000 / 60)} minutes`);
 
   refreshTimer = setTimeout(() => {
     refreshTokenProactively();

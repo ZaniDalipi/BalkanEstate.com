@@ -212,8 +212,6 @@ class PaymentProviderFactory {
   public async createPayment(params: CreatePaymentParams): Promise<PaymentResult> {
     const provider = this.getProviderForCountry(params.countryCode);
 
-    console.log(`🔄 Routing payment for country ${params.countryCode} to provider: ${provider}`);
-
     switch (provider) {
       case 'stripe':
         return this.createStripePayment(params);
@@ -277,8 +275,6 @@ class PaymentProviderFactory {
 
       const session = await getStripe().checkout.sessions.create(sessionConfig);
 
-      console.log(`✅ Stripe checkout session created: ${session.id}`);
-
       return {
         success: true,
         provider: 'stripe',
@@ -286,7 +282,6 @@ class PaymentProviderFactory {
         sessionId: session.id,
       };
     } catch (error: any) {
-      console.error('❌ Stripe payment creation failed:', error);
       return {
         success: false,
         provider: 'stripe',
@@ -302,10 +297,6 @@ class PaymentProviderFactory {
     try {
       // Check if Paddle is configured with real credentials
       if (!paddleService.isConfigured()) {
-        console.error('❌ Paddle not configured');
-        console.error('   API Key:', process.env.PADDLE_API_KEY?.substring(0, 15) + '...');
-        console.error('   Client Token:', process.env.PADDLE_CLIENT_TOKEN?.substring(0, 10) + '...');
-        console.error('   Environment:', process.env.PADDLE_ENVIRONMENT);
         return {
           success: false,
           provider: 'paddle',
@@ -329,8 +320,6 @@ class PaymentProviderFactory {
       });
 
       if (!result.success) {
-        // Don't fallback to Stripe - return Paddle error
-        console.error('❌ Paddle payment creation failed:', result.error);
         return {
           success: false,
           provider: 'paddle',
@@ -345,7 +334,6 @@ class PaymentProviderFactory {
         sessionId: result.transactionId,
       };
     } catch (error: any) {
-      console.error('❌ Paddle payment creation failed:', error);
       return {
         success: false,
         provider: 'paddle',
@@ -399,18 +387,13 @@ class PaymentProviderFactory {
       },
     };
 
-    console.log(`🔍 Looking up price for plan: "${planName}", interval: "${interval}"`);
-
     const planPrices = priceMap[planName];
     if (planPrices && planPrices[interval]) {
-      console.log(`   Found price ID: ${planPrices[interval]}`);
       return planPrices[interval];
     }
 
     // Default to Buyer Pro monthly if no match
-    const defaultPrice = process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '';
-    console.log(`   Using default price ID: ${defaultPrice}`);
-    return defaultPrice;
+    return process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '';
   }
 
   /**

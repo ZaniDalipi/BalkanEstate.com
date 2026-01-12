@@ -145,10 +145,6 @@ class PaddleService {
     const apiUrl = this.getApiUrl();
     const url = `${apiUrl}${endpoint}`;
 
-    console.log(`📤 Paddle API ${method} ${url}`);
-    console.log(`   Environment: ${process.env.PADDLE_ENVIRONMENT}`);
-    console.log(`   API Key prefix: ${apiKey.substring(0, 12)}...`);
-
     const response = await fetch(url, {
       method,
       headers: {
@@ -163,9 +159,6 @@ class PaddleService {
         error?: { detail?: string; code?: string; type?: string };
         message?: string
       };
-      console.error('❌ Paddle API Error Response:', JSON.stringify(errorData, null, 2));
-      console.error('   Status:', response.status);
-      console.error('   API Key prefix:', this.config.apiKey?.substring(0, 10) + '...');
       throw new Error(`Paddle API error: ${errorData.error?.detail || errorData.message || response.statusText}`);
     }
 
@@ -189,8 +182,6 @@ class PaddleService {
       if (!this.isConfigured()) {
         throw new Error('Paddle not configured. Set PADDLE_API_KEY and PADDLE_CLIENT_TOKEN');
       }
-
-      console.log('📤 Creating Paddle checkout with price ID:', request.priceId);
 
       // Create a transaction (checkout session)
       // Paddle API v2 format
@@ -223,16 +214,12 @@ class PaddleService {
 
       const checkoutUrl = transaction.data?.checkout?.url;
 
-      console.log(`✅ Paddle checkout created: ${transaction.data?.id}`);
-      console.log(`   Checkout URL: ${checkoutUrl}`);
-
       return {
         success: true,
         checkoutUrl,
         transactionId: transaction.data?.id,
       };
     } catch (error: any) {
-      console.error('❌ Paddle checkout creation failed:', error);
       return {
         success: false,
         error: error.message,
@@ -276,7 +263,6 @@ class PaddleService {
    */
   public verifyWebhookSignature(payload: string, signature: string): boolean {
     if (!this.config.webhookSecret) {
-      console.warn('⚠️ Paddle webhook secret not configured');
       return false;
     }
 
@@ -303,8 +289,7 @@ class PaddleService {
         .digest('hex');
 
       return hmac === expectedSignature;
-    } catch (error) {
-      console.error('❌ Webhook signature verification failed:', error);
+    } catch {
       return false;
     }
   }
@@ -321,8 +306,7 @@ class PaddleService {
         notification_id: body.notification_id,
         data: body.data,
       };
-    } catch (error) {
-      console.error('❌ Failed to parse Paddle webhook:', error);
+    } catch {
       return null;
     }
   }
@@ -334,8 +318,7 @@ class PaddleService {
     try {
       const response = await this.apiRequest<{ data: any }>(`/subscriptions/${subscriptionId}`);
       return this.mapSubscription(response.data);
-    } catch (error) {
-      console.error('❌ Failed to get Paddle subscription:', error);
+    } catch {
       return null;
     }
   }
@@ -348,10 +331,8 @@ class PaddleService {
       await this.apiRequest(`/subscriptions/${subscriptionId}/cancel`, 'POST', {
         effective_from: effectiveFrom,
       });
-      console.log(`✅ Paddle subscription canceled: ${subscriptionId}`);
       return true;
-    } catch (error) {
-      console.error('❌ Failed to cancel Paddle subscription:', error);
+    } catch {
       return false;
     }
   }
@@ -362,10 +343,8 @@ class PaddleService {
   public async pauseSubscription(subscriptionId: string): Promise<boolean> {
     try {
       await this.apiRequest(`/subscriptions/${subscriptionId}/pause`, 'POST');
-      console.log(`✅ Paddle subscription paused: ${subscriptionId}`);
       return true;
-    } catch (error) {
-      console.error('❌ Failed to pause Paddle subscription:', error);
+    } catch {
       return false;
     }
   }
@@ -378,10 +357,8 @@ class PaddleService {
       await this.apiRequest(`/subscriptions/${subscriptionId}/resume`, 'POST', {
         effective_from: 'immediately',
       });
-      console.log(`✅ Paddle subscription resumed: ${subscriptionId}`);
       return true;
-    } catch (error) {
-      console.error('❌ Failed to resume Paddle subscription:', error);
+    } catch {
       return false;
     }
   }
@@ -441,15 +418,7 @@ class PaddleService {
     const hasApiKey = apiKey.length > 10 && !apiKey.endsWith('...') && !apiKey.includes('your_');
     const hasClientToken = clientToken.length > 10 && !clientToken.endsWith('...') && !clientToken.includes('your_');
 
-    const configured = hasApiKey && hasClientToken;
-
-    if (!configured) {
-      console.log('🔍 Paddle config check:');
-      console.log('   API Key present:', hasApiKey, `(length: ${apiKey.length})`);
-      console.log('   Client Token present:', hasClientToken, `(length: ${clientToken.length})`);
-    }
-
-    return configured;
+    return hasApiKey && hasClientToken;
   }
 
   /**

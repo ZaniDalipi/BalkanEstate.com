@@ -2,6 +2,15 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 import User from '../models/User';
 
+// Get JWT secret - MUST be set in environment variables
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('CRITICAL: JWT_SECRET environment variable is not set.');
+  }
+  return secret;
+};
+
 export const protect = async (
   req: Request,
   res: Response,
@@ -24,7 +33,7 @@ export const protect = async (
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
+    const decoded = jwt.verify(token, getJwtSecret()) as {
       id: string;
     };
 
@@ -39,8 +48,6 @@ export const protect = async (
     req.user = user;
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-
     // Handle specific JWT errors
     if (error instanceof TokenExpiredError) {
       res.status(401).json({
@@ -129,7 +136,7 @@ export const optionalAuth = async (
 
     if (token) {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
+      const decoded = jwt.verify(token, getJwtSecret()) as {
         id: string;
       };
 

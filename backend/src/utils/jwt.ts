@@ -1,17 +1,35 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
+// Get JWT secret - MUST be set in environment variables
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('CRITICAL: JWT_SECRET environment variable is not set. Application cannot start without it.');
+  }
+  return secret;
+};
+
+// Get JWT refresh secret - falls back to JWT_SECRET if not set separately
+const getJwtRefreshSecret = (): string => {
+  const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('CRITICAL: JWT_SECRET or JWT_REFRESH_SECRET environment variable is not set. Application cannot start without it.');
+  }
+  return secret;
+};
+
 // Access token: Medium-lived (1 hour) - extended for better UX while maintaining security
 export const generateAccessToken = (userId: string): string => {
-  const secret: string = process.env.JWT_SECRET || 'secret';
-  const expiresIn: any = process.env.ACCESS_TOKEN_EXPIRES_IN || '1h';
-  return jwt.sign({ id: userId, type: 'access' }, secret, { expiresIn });
+  const secret: string = getJwtSecret();
+  const expiresIn = process.env.ACCESS_TOKEN_EXPIRES_IN || '1h';
+  return jwt.sign({ id: userId, type: 'access' }, secret, { expiresIn } as any);
 };
 
 // Refresh token: Long-lived (7 days)
 export const generateRefreshToken = (userId: string): string => {
-  const secret: string = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'secret';
-  const expiresIn: any = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+  const secret: string = getJwtRefreshSecret();
+  const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
   // Generate a unique token identifier to allow revocation
   const tokenId = crypto.randomBytes(32).toString('hex');
@@ -19,13 +37,13 @@ export const generateRefreshToken = (userId: string): string => {
   return jwt.sign(
     { id: userId, type: 'refresh', tokenId },
     secret,
-    { expiresIn }
+    { expiresIn } as any
   );
 };
 
 // Verify access token
 export const verifyAccessToken = (token: string): any => {
-  const secret: string = process.env.JWT_SECRET || 'secret';
+  const secret: string = getJwtSecret();
   const decoded = jwt.verify(token, secret);
 
   if (typeof decoded === 'object' && decoded.type !== 'access') {
@@ -37,7 +55,7 @@ export const verifyAccessToken = (token: string): any => {
 
 // Verify refresh token
 export const verifyRefreshToken = (token: string): any => {
-  const secret: string = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'secret';
+  const secret: string = getJwtRefreshSecret();
   const decoded = jwt.verify(token, secret);
 
   if (typeof decoded === 'object' && decoded.type !== 'refresh') {
@@ -58,7 +76,7 @@ export const verifyToken = (token: string): any => {
     return verifyAccessToken(token);
   } catch {
     // Fallback for old tokens without type field
-    const secret: string = process.env.JWT_SECRET || 'secret';
+    const secret: string = getJwtSecret();
     return jwt.verify(token, secret);
   }
 };

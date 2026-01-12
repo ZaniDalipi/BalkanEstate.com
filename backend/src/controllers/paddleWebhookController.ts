@@ -58,7 +58,6 @@ export const handlePaddleWebhook = async (req: Request, res: Response): Promise<
 
     // Verify webhook signature
     if (signature && !paddleService.verifyWebhookSignature(rawBody, signature)) {
-      console.error('❌ Paddle webhook: Invalid signature');
       res.status(401).json({ error: 'Invalid signature' });
       return;
     }
@@ -67,13 +66,10 @@ export const handlePaddleWebhook = async (req: Request, res: Response): Promise<
     const event = paddleService.parseWebhookEvent(req.body);
 
     if (!event) {
-      console.error('❌ Paddle webhook: Failed to parse event');
       res.status(400).json({ error: 'Invalid event format' });
       return;
     }
 
-    console.log(`📥 Paddle webhook received: ${event.event_type}`);
-    console.log(`   Event ID: ${event.event_id}`);
 
     // Handle different event types
     switch (event.event_type) {
@@ -107,7 +103,6 @@ export const handlePaddleWebhook = async (req: Request, res: Response): Promise<
         break;
 
       case PADDLE_EVENTS.TRANSACTION_PAYMENT_FAILED:
-        console.log(`❌ Paddle payment failed for transaction: ${event.data.id}`);
         break;
 
       case PADDLE_EVENTS.TRANSACTION_REFUNDED:
@@ -116,13 +111,11 @@ export const handlePaddleWebhook = async (req: Request, res: Response): Promise<
         break;
 
       default:
-        console.log(`ℹ️ Unhandled Paddle event: ${event.event_type}`);
     }
 
     // Paddle expects a 200 response
     res.status(200).json({ received: true });
   } catch (error: any) {
-    console.error('❌ Paddle webhook error:', error);
     // Return 200 to prevent retries for unrecoverable errors
     res.status(200).json({ received: true, error: error.message });
   }
@@ -140,16 +133,13 @@ async function handleTransactionCompleted(data: any): Promise<void> {
     const planInterval = customData.plan_interval;
 
     if (!userId) {
-      console.error('❌ Paddle transaction: No userId in custom_data');
       return;
     }
 
-    console.log(`✅ Processing Paddle transaction for user ${userId}`);
 
     // Find user
     const user = await User.findById(userId);
     if (!user) {
-      console.error(`❌ Paddle webhook: User not found: ${userId}`);
       return;
     }
 
@@ -194,14 +184,9 @@ async function handleTransactionCompleted(data: any): Promise<void> {
         transactionId: data.id,
       });
     } catch (emailError) {
-      console.error('Failed to send payment confirmation email:', emailError);
     }
 
-    console.log(`✅ Paddle subscription activated for user ${user.email}`);
-    console.log(`   Subscription ID: ${result.subscription._id}`);
-    console.log(`   Expires: ${result.subscription.expirationDate}`);
   } catch (error: any) {
-    console.error('❌ Error processing Paddle transaction:', error);
     throw error;
   }
 }
@@ -215,13 +200,11 @@ async function handleSubscriptionCreated(data: any): Promise<void> {
     const userId = customData.user_id;
 
     if (!userId) {
-      console.log('ℹ️ Paddle subscription created without userId:', data.id);
       return;
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      console.error(`❌ Paddle subscription: User not found: ${userId}`);
       return;
     }
 
@@ -232,9 +215,7 @@ async function handleSubscriptionCreated(data: any): Promise<void> {
       subscriptionExternalId: data.id,
     });
 
-    console.log(`✅ Paddle subscription ${data.id} linked to user ${user.email}`);
   } catch (error: any) {
-    console.error('❌ Error handling subscription created:', error);
   }
 }
 
@@ -253,7 +234,6 @@ async function handleSubscriptionUpdated(data: any): Promise<void> {
         await User.findByIdAndUpdate(user._id, {
           subscriptionStatus: data.status,
         });
-        console.log(`✅ Paddle subscription ${data.id} updated to status: ${data.status}`);
       }
       return;
     }
@@ -262,9 +242,7 @@ async function handleSubscriptionUpdated(data: any): Promise<void> {
       subscriptionStatus: data.status,
     });
 
-    console.log(`✅ Paddle subscription updated for user ${userId}: ${data.status}`);
   } catch (error: any) {
-    console.error('❌ Error handling subscription updated:', error);
   }
 }
 
@@ -317,16 +295,11 @@ async function handleSubscriptionCanceled(data: any): Promise<void> {
             : user.subscriptionExpiresAt || new Date(),
         });
       } catch (emailError) {
-        console.error('Failed to send cancellation email:', emailError);
       }
 
-      console.log(`⚠️ Paddle subscription canceled for user ${user.email}`);
-      console.log(`   Will remain active until: ${data.current_billing_period?.ends_at}`);
     } else {
-      console.log(`ℹ️ Paddle subscription canceled but user not found: ${data.id}`);
     }
   } catch (error: any) {
-    console.error('❌ Error handling subscription canceled:', error);
   }
 }
 
@@ -342,10 +315,8 @@ async function handleSubscriptionPaused(data: any): Promise<void> {
         subscriptionStatus: 'paused',
       });
 
-      console.log(`⏸️ Paddle subscription paused for user ${user.email}`);
     }
   } catch (error: any) {
-    console.error('❌ Error handling subscription paused:', error);
   }
 }
 
@@ -361,10 +332,8 @@ async function handleSubscriptionResumed(data: any): Promise<void> {
         subscriptionStatus: 'active',
       });
 
-      console.log(`▶️ Paddle subscription resumed for user ${user.email}`);
     }
   } catch (error: any) {
-    console.error('❌ Error handling subscription resumed:', error);
   }
 }
 
@@ -380,10 +349,8 @@ async function handleSubscriptionPastDue(data: any): Promise<void> {
         subscriptionStatus: 'past_due',
       });
 
-      console.log(`⚠️ Paddle subscription past due for user ${user.email}`);
     }
   } catch (error: any) {
-    console.error('❌ Error handling subscription past due:', error);
   }
 }
 
@@ -434,7 +401,6 @@ export const verifyPaddlePayment = async (req: Request, res: Response): Promise<
       });
     }
   } catch (error: any) {
-    console.error('Error verifying Paddle payment:', error);
     res.status(500).json({ message: 'Error verifying payment', error: error.message });
   }
 };
@@ -452,7 +418,6 @@ export const getPaddleConfig = async (req: Request, res: Response): Promise<void
       environment: paddleService.getEnvironment(),
     });
   } catch (error: any) {
-    console.error('Error getting Paddle config:', error);
     res.status(500).json({ message: 'Error getting Paddle config', error: error.message });
   }
 };
@@ -462,7 +427,6 @@ export const getPaddleConfig = async (req: Request, res: Response): Promise<void
  */
 async function handleRefund(data: any): Promise<void> {
   try {
-    console.log(`💰 Processing Paddle refund/adjustment: ${data.id}`);
 
     const transactionId = data.transaction_id || data.id;
     const adjustmentType = data.action || 'refund';
@@ -480,7 +444,6 @@ async function handleRefund(data: any): Promise<void> {
     });
 
     if (!paymentRecord) {
-      console.warn(`⚠️ Payment record not found for Paddle refund: ${transactionId}`);
       return;
     }
 
@@ -498,7 +461,6 @@ async function handleRefund(data: any): Promise<void> {
     // Find user
     const user = await User.findById(paymentRecord.userId);
     if (!user) {
-      console.error(`User not found for Paddle refund: ${paymentRecord.userId}`);
       return;
     }
 
@@ -538,12 +500,9 @@ async function handleRefund(data: any): Promise<void> {
         reason: data.reason,
       });
     } catch (emailError) {
-      console.error('Failed to send refund email:', emailError);
     }
 
-    console.log(`✅ Paddle refund processed for user ${user.email}: ${currency} ${refundAmount}`);
   } catch (error) {
-    console.error('❌ Error handling Paddle refund:', error);
   }
 }
 

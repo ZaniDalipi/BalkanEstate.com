@@ -7,15 +7,24 @@ const SALT_LENGTH = 64;
 const KEY_LENGTH = 32;
 const ITERATIONS = 100000;
 
-// Get encryption key from environment or use default (in production, MUST use env variable)
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default-key-change-in-production-please-use-env-variable';
+// Get encryption key - MUST be set in environment variables
+const getEncryptionKey = (): string => {
+  const key = process.env.ENCRYPTION_KEY;
+  if (!key) {
+    throw new Error('CRITICAL: ENCRYPTION_KEY environment variable is not set. Application cannot encrypt data without it.');
+  }
+  if (key.length < 32) {
+    throw new Error('CRITICAL: ENCRYPTION_KEY must be at least 32 characters long for security.');
+  }
+  return key;
+};
 
 /**
  * Derives a cryptographic key from the master key using PBKDF2
  */
 function deriveKey(salt: Buffer): Buffer {
   return crypto.pbkdf2Sync(
-    ENCRYPTION_KEY,
+    getEncryptionKey(),
     salt,
     ITERATIONS,
     KEY_LENGTH,
@@ -49,8 +58,7 @@ export function encryptMessage(text: string): string {
 
     // Combine salt, IV, auth tag, and encrypted data
     return `${salt.toString('base64')}:${iv.toString('base64')}:${authTag.toString('base64')}:${encrypted}`;
-  } catch (error) {
-    console.error('Encryption error:', error);
+  } catch {
     throw new Error('Failed to encrypt message');
   }
 }
@@ -87,8 +95,7 @@ export function decryptMessage(encryptedText: string): string {
     decrypted += decipher.final('utf8');
 
     return decrypted;
-  } catch (error) {
-    console.error('Decryption error:', error);
+  } catch {
     throw new Error('Failed to decrypt message');
   }
 }

@@ -149,8 +149,7 @@ export const refreshAccessToken = async (
       refreshToken: tokens.refreshToken,
     };
   } catch (error) {
-    console.error('Refresh token error:', error);
-    return {
+        return {
       success: false,
       error: 'Invalid or expired refresh token',
     };
@@ -183,8 +182,7 @@ export const revokeRefreshToken = async (
     await user.save();
     return true;
   } catch (error) {
-    console.error('Error revoking refresh token:', error);
-    return false;
+        return false;
   }
 };
 
@@ -202,8 +200,7 @@ export const revokeAllRefreshTokens = async (userId: string): Promise<boolean> =
     await user.save();
     return true;
   } catch (error) {
-    console.error('Error revoking all refresh tokens:', error);
-    return false;
+        return false;
   }
 };
 
@@ -224,8 +221,7 @@ export const cleanupExpiredTokens = async (userId: string): Promise<void> => {
 
     await user.save();
   } catch (error) {
-    console.error('Error cleaning up expired tokens:', error);
-  }
+      }
 };
 
 /**
@@ -249,8 +245,7 @@ export const getActiveSessions = async (userId: string): Promise<any[]> => {
         ipAddress: t.ipAddress,
       }));
   } catch (error) {
-    console.error('Error getting active sessions:', error);
-    return [];
+        return [];
   }
 };
 
@@ -274,8 +269,7 @@ export const cleanupAllExpiredTokens = async (): Promise<number> => {
 
     return result.modifiedCount || 0;
   } catch (error) {
-    console.error('Error cleaning up all expired tokens:', error);
-    return 0;
+        return 0;
   }
 };
 

@@ -2,6 +2,14 @@ import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Conversation from '../models/Conversation';
 
+// Get JWT secret - MUST be set in environment variables
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('CRITICAL: JWT_SECRET environment variable is not set.');
+  }
+  return secret;
+};
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -26,7 +34,7 @@ export const setupChatSocket = (io: Server) => {
       }
 
       // Verify JWT token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { id: string };
+      const decoded = jwt.verify(token, getJwtSecret()) as { id: string };
 
       socket.userId = decoded.id;
       next();
@@ -43,7 +51,6 @@ export const setupChatSocket = (io: Server) => {
       return;
     }
 
-    console.log(`✅ User connected to chat: ${userId}`);
 
     // Store user's socket connection
     userSockets.set(userId, socket.id);
@@ -57,7 +64,6 @@ export const setupChatSocket = (io: Server) => {
         // Check if already authorized for this conversation (cached)
         if (socket.authorizedConversations?.has(conversationId)) {
           socket.join(conversationId);
-          console.log(`👥 User ${userId} rejoined conversation ${conversationId} (cached auth)`);
           return;
         }
 
@@ -65,7 +71,6 @@ export const setupChatSocket = (io: Server) => {
         const conversation = await Conversation.findById(conversationId).select('buyerId sellerId');
 
         if (!conversation) {
-          console.warn(`⚠️ User ${userId} tried to join non-existent conversation ${conversationId}`);
           socket.emit('error', { message: 'Conversation not found' });
           return;
         }
@@ -74,7 +79,6 @@ export const setupChatSocket = (io: Server) => {
         const isSeller = String(conversation.sellerId) === userId;
 
         if (!isBuyer && !isSeller) {
-          console.warn(`🚫 UNAUTHORIZED: User ${userId} tried to join conversation ${conversationId} (not a participant)`);
           socket.emit('error', { message: 'Not authorized to join this conversation' });
           return;
         }
@@ -88,10 +92,7 @@ export const setupChatSocket = (io: Server) => {
           conversationRooms.set(conversationId, new Set());
         }
         conversationRooms.get(conversationId)?.add(userId);
-
-        console.log(`👥 User ${userId} joined conversation ${conversationId} (authorized as ${isBuyer ? 'buyer' : 'seller'})`);
-      } catch (error) {
-        console.error(`❌ Error joining conversation ${conversationId}:`, error);
+      } catch {
         socket.emit('error', { message: 'Error joining conversation' });
       }
     });
@@ -101,15 +102,12 @@ export const setupChatSocket = (io: Server) => {
       socket.leave(conversationId);
       conversationRooms.get(conversationId)?.delete(userId);
       // Keep authorization cached in case they rejoin
-
-      console.log(`👋 User ${userId} left conversation ${conversationId}`);
     });
 
     // Handle new message - only broadcast if sender is authorized
     socket.on('new-message', (data: { conversationId: string; message: any }) => {
       // Verify the sender is authorized for this conversation
       if (!socket.authorizedConversations?.has(data.conversationId)) {
-        console.warn(`🚫 UNAUTHORIZED: User ${userId} tried to send message to conversation ${data.conversationId}`);
         socket.emit('error', { message: 'Not authorized to send messages in this conversation' });
         return;
       }
@@ -117,7 +115,6 @@ export const setupChatSocket = (io: Server) => {
       // Verify the message senderId matches the socket user
       if (data.message.senderId && String(data.message.senderId) !== userId &&
           String(data.message.senderId?._id) !== userId) {
-        console.warn(`🚫 SPOOFING ATTEMPT: User ${userId} tried to send message as ${data.message.senderId}`);
         socket.emit('error', { message: 'Sender ID mismatch' });
         return;
       }
@@ -127,8 +124,6 @@ export const setupChatSocket = (io: Server) => {
         conversationId: data.conversationId,
         message: data.message,
       });
-
-      console.log(`💬 Message sent in conversation ${data.conversationId} by ${userId}`);
     });
 
     // Handle typing indicator - only if authorized
@@ -159,7 +154,6 @@ export const setupChatSocket = (io: Server) => {
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      console.log(`❌ User disconnected from chat: ${userId}`);
 
       // Remove user from all conversation rooms
       conversationRooms.forEach((users, conversationId) => {
