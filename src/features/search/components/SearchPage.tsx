@@ -814,32 +814,50 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     };
 
     const handleApplyAiFilters = useCallback(async (aiQuery: AiSearchQuery) => {
-        // Map country name to our normalized key format
-        const normalizeCountryFromAi = (country?: string): string => {
-            if (!country) return 'any';
-            const countryLower = country.toLowerCase();
-            // Direct mapping for common country names
-            const countryMap: Record<string, string> = {
-                'albania': 'albania',
-                'bosnia': 'bosnia-herzegovina',
-                'bosnia and herzegovina': 'bosnia-herzegovina',
-                'bulgaria': 'bulgaria',
-                'croatia': 'croatia',
-                'greece': 'greece',
-                'kosovo': 'kosovo',
-                'montenegro': 'montenegro',
-                'north macedonia': 'north-macedonia',
-                'macedonia': 'north-macedonia',
-                'romania': 'romania',
-                'serbia': 'serbia',
-                'slovenia': 'slovenia',
-            };
-            return countryMap[countryLower] || 'any';
+        // Map for normalizing country names to our key format
+        const countryNameToKey: Record<string, string> = {
+            'albania': 'albania',
+            'bosnia': 'bosnia-herzegovina',
+            'bosnia and herzegovina': 'bosnia-herzegovina',
+            'bulgaria': 'bulgaria',
+            'croatia': 'croatia',
+            'greece': 'greece',
+            'kosovo': 'kosovo',
+            'montenegro': 'montenegro',
+            'north macedonia': 'north-macedonia',
+            'macedonia': 'north-macedonia',
+            'romania': 'romania',
+            'serbia': 'serbia',
+            'slovenia': 'slovenia',
         };
 
+        // Check if a string is a country name
+        const isCountryName = (str?: string): boolean => {
+            if (!str) return false;
+            return str.toLowerCase() in countryNameToKey;
+        };
+
+        // Get normalized country key from name
+        const normalizeCountryFromAi = (country?: string): string => {
+            if (!country) return 'any';
+            return countryNameToKey[country.toLowerCase()] || 'any';
+        };
+
+        // Determine the country key - from explicit country field or from location if it's a country name
+        const countryFromLocation = aiQuery.location && isCountryName(aiQuery.location)
+            ? normalizeCountryFromAi(aiQuery.location)
+            : null;
+        const countryKey = normalizeCountryFromAi(aiQuery.country) !== 'any'
+            ? normalizeCountryFromAi(aiQuery.country)
+            : countryFromLocation || 'any';
+
+        // Only put city/area in query, not country names
+        const locationIsCountry = aiQuery.location && isCountryName(aiQuery.location);
+        const queryValue = locationIsCountry ? '' : (aiQuery.location || '');
+
         const newFilters: Partial<Filters> = {
-            query: aiQuery.location || '',
-            country: normalizeCountryFromAi(aiQuery.country),
+            query: queryValue,
+            country: countryKey,
             minPrice: aiQuery.minPrice || null,
             maxPrice: aiQuery.maxPrice || null,
             beds: aiQuery.beds || null,
@@ -855,10 +873,33 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         updateSearchPageState({ filters: updatedFilters, activeFilters: updatedFilters, searchMode: 'manual', isAiChatModalOpen: false });
         updateSearchPageState({ isFiltersOpen: false });
 
-        // Navigate map to the AI-provided location if available
-        if (aiQuery.location) {
+        // Navigate map based on location type
+        // If location is a country name, use our BALKAN_COUNTRIES data directly
+        if (locationIsCountry && countryKey !== 'any') {
+            const countryData = BALKAN_COUNTRIES[countryKey];
+            if (countryData) {
+                const bounds = L.latLngBounds(countryData.bounds[0], countryData.bounds[1]);
+                updateSearchPageState({
+                    drawnBoundsJSON: serializeBounds(bounds),
+                });
+                setFlyToTarget({ center: countryData.center, zoom: countryData.zoom });
+                return;
+            }
+        }
+
+        // If we have a country but location is a city, search for "city, country" for better OSM results
+        if (aiQuery.location && !locationIsCountry) {
             try {
-                const results = await searchLocation(aiQuery.location);
+                // Build search query with English country name for better OSM results
+                let searchQuery = aiQuery.location;
+                if (countryKey !== 'any') {
+                    const countryData = BALKAN_COUNTRIES[countryKey];
+                    if (countryData) {
+                        searchQuery = `${aiQuery.location}, ${countryData.name}`;
+                    }
+                }
+
+                const results = await searchLocation(searchQuery);
 
                 if (results.length > 0) {
                     const [south, north, west, east] = results[0].boundingbox.map(Number);
@@ -867,17 +908,24 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         [north, east],
                     ]);
 
-                    // Set drawn bounds instead of just map bounds to ensure the area is used for filtering
                     updateSearchPageState({
                         mapBoundsJSON: serializeBounds(searchBounds),
-                        drawnBoundsJSON: serializeBounds(searchBounds), // Also set drawn bounds for filtering
+                        drawnBoundsJSON: serializeBounds(searchBounds),
                     });
                     setFlyToTarget({ center: [Number(results[0].lat), Number(results[0].lon)], zoom: 12 });
-                } else {
-                    console.warn('[AI Search] No location results found for:', aiQuery.location);
                 }
             } catch (error) {
                 console.error("[AI Search] Error searching location:", error);
+            }
+        } else if (countryKey !== 'any' && !aiQuery.location) {
+            // Only country specified (from country field), no city - fly to country
+            const countryData = BALKAN_COUNTRIES[countryKey];
+            if (countryData) {
+                const bounds = L.latLngBounds(countryData.bounds[0], countryData.bounds[1]);
+                updateSearchPageState({
+                    drawnBoundsJSON: serializeBounds(bounds),
+                });
+                setFlyToTarget({ center: countryData.center, zoom: countryData.zoom });
             }
         }
     }, [updateSearchPageState]);
