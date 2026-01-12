@@ -438,7 +438,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
     const baseFilteredProperties = useMemo(() => {
         const filtered = filterProperties(properties, activeFilters);
-        console.log('[Filter Debug] Total properties:', properties.length, '| After filter:', filtered.length, '| Active filters:', activeFilters);
         const now = Date.now();
 
         // Helper to calculate promotion priority score
@@ -609,12 +608,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // If a specific area is drawn/searched by the user, filter to that area
         if (drawnBounds) {
             const withinDrawn = baseFilteredProperties.filter(p => drawnBounds.contains([p.lat, p.lng]));
-            console.log('[List Debug] Drawn bounds active | Within bounds:', withinDrawn.length, '| Total filtered:', baseFilteredProperties.length);
             // Only filter by drawn bounds if there are results, otherwise show all
             if (withinDrawn.length > 0) {
                 return { listProperties: withinDrawn, fallbackLocationValue: null };
             }
-            console.log('[List Debug] No properties in drawn bounds, using fallback');
             // No properties in drawn area - fall through to mapBounds check or show all
         }
 
@@ -626,13 +623,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // Filter to show only properties visible in the current map view
         if (mapBounds) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
-            console.log('[List Debug] Map bounds active | Within view:', withinView.length, '| Total filtered:', baseFilteredProperties.length);
 
             // If properties in view, show them
             if (withinView.length > 0) {
                 return { listProperties: withinView, fallbackLocationValue: null };
             }
-            console.log('[List Debug] No properties in map view, using smart fallback');
 
             // No properties in view - use smart fallback
             if (baseFilteredProperties.length > 0) {
@@ -748,11 +743,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 const center = drawnBounds.getCenter();
                 const name = await generateSearchNameFromCoords(center.lat, center.lng, drawnBounds);
                 const serializedBounds = serializeBounds(drawnBounds);
-                console.log('[SearchPage] Saving drawn bounds:', {
-                    drawnBounds,
-                    serializedBounds,
-                    isAreaOnly,
-                });
                 newSearch = {
                     id: `ss-${now}`,
                     name,
@@ -824,10 +814,32 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     };
 
     const handleApplyAiFilters = useCallback(async (aiQuery: AiSearchQuery) => {
-        console.log('[AI Search] Applying filters:', aiQuery);
+        // Map country name to our normalized key format
+        const normalizeCountryFromAi = (country?: string): string => {
+            if (!country) return 'any';
+            const countryLower = country.toLowerCase();
+            // Direct mapping for common country names
+            const countryMap: Record<string, string> = {
+                'albania': 'albania',
+                'bosnia': 'bosnia-herzegovina',
+                'bosnia and herzegovina': 'bosnia-herzegovina',
+                'bulgaria': 'bulgaria',
+                'croatia': 'croatia',
+                'greece': 'greece',
+                'kosovo': 'kosovo',
+                'montenegro': 'montenegro',
+                'north macedonia': 'north-macedonia',
+                'macedonia': 'north-macedonia',
+                'romania': 'romania',
+                'serbia': 'serbia',
+                'slovenia': 'slovenia',
+            };
+            return countryMap[countryLower] || 'any';
+        };
 
         const newFilters: Partial<Filters> = {
             query: aiQuery.location || '',
+            country: normalizeCountryFromAi(aiQuery.country),
             minPrice: aiQuery.minPrice || null,
             maxPrice: aiQuery.maxPrice || null,
             beds: aiQuery.beds || null,
@@ -835,9 +847,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             livingRooms: aiQuery.livingRooms || null,
             minSqft: aiQuery.minSqft || null,
             maxSqft: aiQuery.maxSqft || null,
+            propertyType: aiQuery.propertyType === 'commercial' ? 'other' : (aiQuery.propertyType || 'any'),
+            sellerType: aiQuery.sellerType || 'any',
         };
         const updatedFilters = { ...initialFilters, ...newFilters };
-        console.log('[AI Search] Updated filters:', updatedFilters);
 
         updateSearchPageState({ filters: updatedFilters, activeFilters: updatedFilters, searchMode: 'manual', isAiChatModalOpen: false });
         updateSearchPageState({ isFiltersOpen: false });
@@ -845,9 +858,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // Navigate map to the AI-provided location if available
         if (aiQuery.location) {
             try {
-                console.log('[AI Search] Searching for location:', aiQuery.location);
                 const results = await searchLocation(aiQuery.location);
-                console.log('[AI Search] Location search results:', results);
 
                 if (results.length > 0) {
                     const [south, north, west, east] = results[0].boundingbox.map(Number);
@@ -855,7 +866,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         [south, west],
                         [north, east],
                     ]);
-                    console.log('[AI Search] Setting map bounds:', { south, north, west, east });
 
                     // Set drawn bounds instead of just map bounds to ensure the area is used for filtering
                     updateSearchPageState({

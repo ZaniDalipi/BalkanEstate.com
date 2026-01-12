@@ -467,6 +467,7 @@ export interface ChatMessage {
 
 export interface AiSearchQuery {
     location?: string;
+    country?: string;
     minPrice?: number;
     maxPrice?: number;
     beds?: number;
@@ -474,6 +475,8 @@ export interface AiSearchQuery {
     livingRooms?: number;
     minSqft?: number;
     maxSqft?: number;
+    propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'commercial';
+    sellerType?: 'agent' | 'private';
     features?: string[];
 }
 
