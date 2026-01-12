@@ -159,7 +159,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         {/* Favorite Button - Top Right */}
         <button
           onClick={handleFavoriteClick}
-          className={`absolute top-3 right-3 z-20 p-2 rounded-full shadow-lg shadow-black/10 transition-all duration-300 ${
+          className={`absolute top-4 right-4 z-20 p-2 rounded-full shadow-lg shadow-black/10 transition-all duration-300 ${
             isFavorited
               ? 'bg-red-500 text-white scale-110'
               : 'bg-white/80 backdrop-blur-xl border border-white/50 text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110 hover:border-red-500'
@@ -171,7 +171,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         </button>
 
         {/* Top badges row */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 items-start">
+        <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10 items-start">
             {/* Sold Badge */}
             {isSold && (
               <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
