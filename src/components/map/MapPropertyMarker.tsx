@@ -620,13 +620,20 @@ const PropertyPopup: React.FC<{
     >
       {/* Full-width image - no slider, just first image */}
       <div className="relative h-[90px] sm:h-[100px]">
-        <img
-          src={images[0]}
-          alt={property.address}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {imageErrors.has(0) ? (
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+            <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+          </div>
+        ) : (
+          <img
+            src={images[0]}
+            alt={property.address}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => handleImageError(0)}
+          />
+        )}
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
         {/* Property type */}
         <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-white/90 text-neutral-700 capitalize">
           {property.propertyType}
