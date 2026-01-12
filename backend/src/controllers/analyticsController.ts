@@ -4,7 +4,28 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import User from '../models/User';
 import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
-import { UAParser } from 'ua-parser-js';
+
+// Simple user agent parser (no external dependency)
+const parseUserAgent = (ua: string) => {
+  const isMobile = /Mobile|Android|iPhone|iPad/i.test(ua);
+  const isTablet = /iPad|Tablet/i.test(ua);
+  const deviceType = isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop';
+
+  let browser = 'Unknown';
+  if (ua.includes('Chrome')) browser = 'Chrome';
+  else if (ua.includes('Safari')) browser = 'Safari';
+  else if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Edge')) browser = 'Edge';
+
+  let os = 'Unknown';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac')) os = 'MacOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iOS') || ua.includes('iPhone')) os = 'iOS';
+
+  return { deviceType, browser, os };
+};
 
 /**
  * Track an analytics event
@@ -28,15 +49,7 @@ export const trackEvent = async (req: Request, res: Response) => {
 
     // Parse user agent
     const userAgent = req.headers['user-agent'] || '';
-    const parser = new UAParser(userAgent);
-    const device = parser.getDevice();
-    const browser = parser.getBrowser();
-    const os = parser.getOS();
-
-    // Determine device type
-    let deviceType: 'desktop' | 'mobile' | 'tablet' = 'desktop';
-    if (device.type === 'mobile') deviceType = 'mobile';
-    else if (device.type === 'tablet') deviceType = 'tablet';
+    const { deviceType, browser, os } = parseUserAgent(userAgent);
 
     // Get IP and geo info (in production, use a geo-IP service)
     const ipAddress = req.ip || req.headers['x-forwarded-for']?.toString().split(',')[0] || '';
@@ -57,8 +70,8 @@ export const trackEvent = async (req: Request, res: Response) => {
       userId: (req as any).userId,
       userAgent,
       deviceType,
-      browser: browser.name,
-      os: os.name,
+      browser,
+      os,
       ipAddress,
       timestamp: new Date(),
     });

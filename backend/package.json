@@ -69,7 +69,6 @@
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/socket.io": "^3.0.1",
     "@types/stripe": "^8.0.416",
-    "@types/ua-parser-js": "^0.7.39",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
@@ -97,7 +96,6 @@
     "socket.io": "^4.8.1",
     "stripe": "^19.3.1",
     "swagger-jsdoc": "^6.2.8",
-    "ua-parser-js": "^1.0.40",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
@@ -108,7 +106,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
-    "@types/node": "^24.10.6",
+    "@types/node": "^24.10.7",
     "@types/sharp": "^0.31.1",
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
