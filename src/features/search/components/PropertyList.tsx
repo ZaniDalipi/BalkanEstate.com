@@ -786,7 +786,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
 
                             {/* Footer */}
                             <div className="mt-8">
-                                <Footer />
+                                <Footer contained />
                             </div>
                         </div>
                     </div>
@@ -925,7 +925,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 )}
 
                                 {/* Footer */}
-                                <Footer />
+                                <Footer contained />
                             </div>
                         </div>
                     )}

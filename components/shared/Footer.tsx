@@ -25,6 +25,7 @@ import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface FooterProps {
     className?: string;
+    contained?: boolean;
 }
 
 // Balkan countries with flags
@@ -41,7 +42,7 @@ const balkanCountries = [
     { code: 'RS', name: 'Serbia', flag: '🇷🇸' },
 ];
 
-const Footer: React.FC<FooterProps> = ({ className = '' }) => {
+const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) => {
     const { t } = useTranslation(['footer', 'common']);
     const currentYear = new Date().getFullYear();
     const { dispatch } = useAppContext();
@@ -70,17 +71,19 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
         { icon: UserCircleIcon, labelKey: 'links.myAccount', view: 'account' }
     ];
 
+    const fullWidthStyle = contained ? {} : {
+        width: '100vw',
+        position: 'relative' as const,
+        left: '50%',
+        right: '50%',
+        marginLeft: '-50vw',
+        marginRight: '-50vw',
+    };
+
     return (
         <footer
-            className={`relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white mt-auto overflow-hidden ${className}`}
-            style={{
-                width: '100vw',
-                position: 'relative',
-                left: '50%',
-                right: '50%',
-                marginLeft: '-50vw',
-                marginRight: '-50vw',
-            }}
+            className={`relative bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white mt-auto overflow-hidden ${contained ? 'w-full rounded-t-2xl' : ''} ${className}`}
+            style={fullWidthStyle}
         >
             {/* Animated gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-600/10" />
