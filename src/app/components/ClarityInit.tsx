@@ -10,13 +10,20 @@ declare global {
  * Microsoft Clarity initialization component
  * Provides heatmaps, session recordings, and user behavior analytics
  * Dashboard: https://clarity.microsoft.com
+ *
+ * Only runs in production (when VITE_CLARITY_PROJECT_ID is set via GitHub Actions)
  */
 const ClarityInit: React.FC = () => {
   useEffect(() => {
+    // Only run in production mode
+    if (import.meta.env.DEV) {
+      return;
+    }
+
     const clarityId = import.meta.env.VITE_CLARITY_PROJECT_ID;
 
+    // Skip if no project ID configured
     if (!clarityId || clarityId === 'YOUR_PROJECT_ID') {
-      console.log('[Clarity] No project ID configured. Set VITE_CLARITY_PROJECT_ID in .env');
       return;
     }
 
@@ -37,8 +44,6 @@ const ClarityInit: React.FC = () => {
       const y = l.getElementsByTagName(r)[0];
       y.parentNode?.insertBefore(t, y);
     })(window, document, "clarity", "script", clarityId);
-
-    console.log('[Clarity] Initialized with project:', clarityId);
   }, []);
 
   return null;
