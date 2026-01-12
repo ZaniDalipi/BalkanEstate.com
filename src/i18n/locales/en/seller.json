@@ -216,10 +216,11 @@
     },
     "virtualTour": {
       "title": "360° Virtual Tour (Optional)",
-      "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
+      "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Z360, Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
       "label": "360° Tour URL",
-      "placeholder": "https://my.matterport.com/show/?m=... or https://kuula.co/share/...",
-      "hint": "Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing."
+      "placeholder": "https://z360-virtual-tour.vercel.app/tour/... or other 360 tour URL",
+      "hint": "Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing.",
+      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
     },
     "progress": {
       "compressing": "Compressing images...",
