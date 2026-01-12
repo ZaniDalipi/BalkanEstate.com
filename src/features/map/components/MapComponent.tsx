@@ -42,8 +42,8 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const TILE_LAYERS = {
   street: {
-    // Google Maps Street - clean labels and roads, max zoom 21
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    // Google Maps Street - clean labels and roads, max zoom 21, English labels
+    url: 'https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
     attribution: '&copy; Google Maps',
     maxZoom: 21,
     maxNativeZoom: 21,
