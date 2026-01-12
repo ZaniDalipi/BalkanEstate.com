@@ -855,6 +855,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         const locationIsCountry = aiQuery.location && isCountryName(aiQuery.location);
         const queryValue = locationIsCountry ? '' : (aiQuery.location || '');
 
+        // Only include fields that were explicitly provided by the AI
+        // Don't override defaults with AI-generated values the user didn't request
         const newFilters: Partial<Filters> = {
             query: queryValue,
             country: countryKey,
@@ -865,9 +867,17 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             livingRooms: aiQuery.livingRooms || null,
             minSqft: aiQuery.minSqft || null,
             maxSqft: aiQuery.maxSqft || null,
-            propertyType: aiQuery.propertyType === 'commercial' ? 'other' : (aiQuery.propertyType || 'any'),
-            sellerType: aiQuery.sellerType || 'any',
         };
+
+        // Only set propertyType if AI explicitly provided it
+        if (aiQuery.propertyType) {
+            newFilters.propertyType = aiQuery.propertyType === 'commercial' ? 'other' : aiQuery.propertyType;
+        }
+
+        // Only set sellerType if AI explicitly provided it (user asked for agent/private)
+        if (aiQuery.sellerType) {
+            newFilters.sellerType = aiQuery.sellerType;
+        }
         const updatedFilters = { ...initialFilters, ...newFilters };
 
         updateSearchPageState({ filters: updatedFilters, activeFilters: updatedFilters, searchMode: 'manual', isAiChatModalOpen: false });
