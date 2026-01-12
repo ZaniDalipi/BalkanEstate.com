@@ -300,8 +300,8 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                 </div>
             </div>
 
-            {/* Animated Cityscape */}
-            <FooterCityscape />
+            {/* Animated Cityscape - only show when not contained to prevent overflow */}
+            {!contained && <FooterCityscape />}
         </footer>
     );
 };
