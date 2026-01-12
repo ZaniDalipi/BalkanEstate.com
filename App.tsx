@@ -61,6 +61,9 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 // Cookie Consent Banner
 import CookieConsent from './src/shared/components/CookieConsent';
 
+// Microsoft Clarity - Heatmaps & Session Recordings
+import ClarityInit from './src/app/components/ClarityInit';
+
 // Loading fallback component
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
@@ -644,6 +647,9 @@ const App: React.FC = () => {
                       facebookPixelId={facebookPixelId}
                     />
                   )}
+
+                  {/* Microsoft Clarity - Heatmaps & Session Recordings */}
+                  <ClarityInit />
 
                   <AppWrapper />
                 </ConfirmationProvider>
