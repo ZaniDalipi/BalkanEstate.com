@@ -547,17 +547,16 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         }
     }, [properties, activeFilters]);
 
-    const listProperties = useMemo(() => {
+    const { listProperties, fallbackLocationValue } = useMemo(() => {
         // Helper to calculate distance between two points
         const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
             return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
         };
 
         // Helper to get smart fallback properties with location priority
-        const getSmartFallback = (centerLat: number, centerLng: number) => {
+        const getSmartFallback = (centerLat: number, centerLng: number): { properties: Property[], location: string | null } => {
             if (baseFilteredProperties.length === 0) {
-                setFallbackLocation(null);
-                return [];
+                return { properties: [], location: null };
             }
 
             // Find the closest property to determine the search city/country
@@ -581,8 +580,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     getDistance(centerLat, centerLng, a.lat, a.lng) -
                     getDistance(centerLat, centerLng, b.lat, b.lng)
                 );
-                setFallbackLocation(searchCity || null);
-                return sorted;
+                return { properties: sorted, location: searchCity || null };
             }
 
             // Priority 2: Properties in nearby cities (same country, sorted by distance)
@@ -598,30 +596,24 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 );
                 // Get the city of the closest property in the country
                 const nearestCity = sorted[0]?.city;
-                setFallbackLocation(nearestCity || searchCountry || null);
-                return sorted;
+                return { properties: sorted, location: nearestCity || searchCountry || null };
             }
 
             // Priority 3: All available properties (sorted by distance)
             const sorted = propertiesWithDistance.sort((a, b) => a.distance - b.distance);
             const nearestLocation = sorted[0]?.city || sorted[0]?.country;
-            setFallbackLocation(nearestLocation || null);
-            return sorted;
+            return { properties: sorted, location: nearestLocation || null };
         };
 
         // If a specific area is drawn/searched by the user, filter to that area
         if (drawnBounds) {
             const withinDrawn = baseFilteredProperties.filter(p => drawnBounds.contains([p.lat, p.lng]));
-            setFallbackLocation(null);
-            return withinDrawn;
+            return { listProperties: withinDrawn, fallbackLocationValue: null };
         }
 
         // On mobile, show ALL properties only when filters were explicitly reset
-        // This ensures users see all available properties after reset, but
-        // when they move the map or search a location, it shows only visible properties
         if (isMobile && showAllOnMobile) {
-            setFallbackLocation(null);
-            return baseFilteredProperties;
+            return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
         }
 
         // Filter to show only properties visible in the current map view
@@ -630,24 +622,27 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
             // If properties in view, show them
             if (withinView.length > 0) {
-                setFallbackLocation(null);
-                return withinView;
+                return { listProperties: withinView, fallbackLocationValue: null };
             }
 
             // No properties in view - use smart fallback
             if (baseFilteredProperties.length > 0) {
                 const center = mapBounds.getCenter();
-                return getSmartFallback(center.lat, center.lng);
+                const fallback = getSmartFallback(center.lat, center.lng);
+                return { listProperties: fallback.properties, fallbackLocationValue: fallback.location };
             }
 
-            setFallbackLocation(null);
-            return [];
+            return { listProperties: [], fallbackLocationValue: null };
         }
 
         // Fallback to all filtered properties if no bounds set (initial load)
-        setFallbackLocation(null);
-        return baseFilteredProperties;
+        return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
     }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
+
+    // Update fallback location state when computed value changes
+    useEffect(() => {
+        setFallbackLocation(fallbackLocationValue);
+    }, [fallbackLocationValue]);
 
 
     const handleFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
