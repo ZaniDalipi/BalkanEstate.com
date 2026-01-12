@@ -12,6 +12,7 @@ import PropertyManager from './PropertyManager';
 import AgencyManager from './AgencyManager';
 import PricingManager from './PricingManager';
 import InquiryManager from './InquiryManager';
+import AgentRequestManager from './AgentRequestManager';
 import SystemSettings from './SystemSettings';
 import ActivityLog from './ActivityLog';
 import type { AdminSection } from '@/types';
@@ -21,6 +22,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'dashboard': 'dashboard',
   'users': 'users',
   'inquiries': 'inquiries',
+  'agent-requests': 'agentRequests',
   'discounts': 'discounts',
   'promotions': 'promotionCoupons',
   'properties': 'properties',
@@ -35,6 +37,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'dashboard': 'dashboard',
   'users': 'users',
   'inquiries': 'inquiries',
+  'agentRequests': 'agent-requests',
   'discounts': 'discounts',
   'promotionCoupons': 'promotions',
   'properties': 'properties',
@@ -184,6 +187,8 @@ const AdminDashboard: React.FC = () => {
         return <AnalyticsDashboard />;
       case 'inquiries':
         return <InquiryManager />;
+      case 'agentRequests':
+        return <AgentRequestManager />;
       case 'activity':
         return <ActivityLog />;
       case 'pricing':

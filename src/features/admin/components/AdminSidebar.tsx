@@ -4,6 +4,7 @@ import {
   ChartBarIcon,
   TicketIcon,
   UsersIcon,
+  UserGroupIcon,
   HomeIcon,
   BuildingOfficeIcon,
   SparklesIcon,
@@ -84,6 +85,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: <EnvelopeIcon className="w-5 h-5" />,
           badge: stats?.newInquiries,
           badgeColor: 'bg-red-500'
+        },
+        {
+          id: 'agentRequests',
+          label: t('admin:sidebar.agentRequests', 'Agent Requests'),
+          icon: <UserGroupIcon className="w-5 h-5" />
         },
         {
           id: 'activity',

@@ -26,6 +26,7 @@ export type AdminView =
   | 'properties'
   | 'agencies'
   | 'inquiries'
+  | 'agentRequests'
   | 'settings'
   | 'activity';
 
