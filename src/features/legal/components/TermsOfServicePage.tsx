@@ -13,7 +13,7 @@ const TermsOfServicePage: React.FC = () => {
     window.history.pushState({}, '', '/');
   };
 
-  const lastUpdated = 'January 9, 2026';
+  const lastUpdated = 'January 12, 2026';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -107,9 +107,16 @@ const TermsOfServicePage: React.FC = () => {
               <li>{t('legal:terms.payments.recurring', 'Subscriptions are billed on a recurring basis (monthly or yearly)')}</li>
               <li>{t('legal:terms.payments.auto', 'Subscriptions auto-renew unless cancelled before the renewal date')}</li>
               <li>{t('legal:terms.payments.cancel', 'You can cancel your subscription at any time through your account settings')}</li>
-              <li>{t('legal:terms.payments.refund', 'Refunds are available within 30 days of purchase if you are not satisfied')}</li>
+              <li>{t('legal:terms.payments.refund', 'Refunds are available within 30 days of purchase if you are not satisfied (see our Refund Policy)')}</li>
               <li>{t('legal:terms.payments.price', 'We may change subscription prices with 30 days notice')}</li>
             </ul>
+            <div className="bg-gray-50 rounded-lg p-4 mt-4">
+              <h4 className="font-semibold text-gray-800 mb-2">{t('legal:terms.payments.paddle.title', 'Payment Processing')}</h4>
+              <p className="text-gray-600 text-sm">
+                {t('legal:terms.payments.paddle.text', 'All payments are processed by Paddle.com, our Merchant of Record. Paddle handles payment processing, invoicing, VAT/tax compliance, and refunds on our behalf. When you make a purchase, you are transacting with Paddle, who then remits payment to us. Your payment will appear on your statement as a charge from Paddle.')}
+              </p>
+              <a href="https://www.paddle.com/legal/terms" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline mt-2 inline-block">Paddle Terms of Service →</a>
+            </div>
           </section>
 
           {/* Prohibited Conduct */}

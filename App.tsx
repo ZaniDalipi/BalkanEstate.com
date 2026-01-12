@@ -56,6 +56,7 @@ const PricingPage = lazy(() => import('./src/features/pricing/components/Pricing
 const PrivacyPolicyPage = lazy(() => import('./src/features/legal/components/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('./src/features/legal/components/TermsOfServicePage'));
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
+const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 
 // Cookie Consent Banner
 import CookieConsent from './src/shared/components/CookieConsent';
@@ -403,6 +404,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <TermsOfServicePage />;
       case 'cookies':
         return <CookiePolicyPage />;
+      case 'refund':
+        return <RefundPolicyPage />;
       case 'search':
       default:
         return <SearchPage onToggleSidebar={onToggleSidebar} />;

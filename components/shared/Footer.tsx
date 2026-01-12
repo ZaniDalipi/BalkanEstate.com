@@ -47,7 +47,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
     const { dispatch } = useAppContext();
     const { getLocalizedPath } = useLocalizedNavigation();
 
-    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies') => {
+    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies' | 'refund') => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
         const route = view === 'search' ? '/' : `/${view}`;
         window.history.pushState({}, '', getLocalizedPath(route));
@@ -276,6 +276,12 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             className="text-slate-500 hover:text-primary transition-colors"
                         >
                             {t('footer:legal.cookiePolicy', 'Cookie Policy')}
+                        </button>
+                        <button
+                            onClick={() => handleNavigation('refund')}
+                            className="text-slate-500 hover:text-primary transition-colors"
+                        >
+                            {t('footer:legal.refundPolicy', 'Refund Policy')}
                         </button>
                     </div>
                 </div>
