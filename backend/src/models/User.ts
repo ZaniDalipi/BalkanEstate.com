@@ -779,9 +779,13 @@ UserSchema.pre('save', async function (next) {
   if (!this.get('password') || !this.isModified('password')) return next();
 
   try {
-    const salt = await bcrypt.genSalt(10);
+    // Add pepper to password for extra security layer
+    const pepper = process.env.PASSWORD_PEPPER || '';
     const password = this.get('password') as string;
-    this.set('password', await bcrypt.hash(password, salt));
+    const pepperedPassword = password + pepper;
+
+    const salt = await bcrypt.genSalt(12); // Increased from 10 to 12 for stronger hashing
+    this.set('password', await bcrypt.hash(pepperedPassword, salt));
     next();
   } catch (error: any) {
     next(error);
@@ -823,8 +827,11 @@ UserSchema.pre('save', function (next) {
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
+  // Add pepper to candidate password for comparison
+  const pepper = process.env.PASSWORD_PEPPER || '';
+  const pepperedCandidate = candidatePassword + pepper;
   const password = this.get('password') as string;
-  return bcrypt.compare(candidatePassword, password);
+  return bcrypt.compare(pepperedCandidate, password);
 };
 
 // Check if user has an active subscription

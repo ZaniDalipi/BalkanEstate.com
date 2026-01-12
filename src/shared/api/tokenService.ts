@@ -1,15 +1,60 @@
 // Token management service
 // Handles storage and retrieval of auth tokens with proactive refresh
+// Includes basic obfuscation to protect tokens from casual inspection
 
 import { API_URL } from './config';
 
 const ACCESS_TOKEN_KEY = 'balkan_estate_token';
 const REFRESH_TOKEN_KEY = 'balkan_estate_refresh_token';
 const REFRESH_BUFFER_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
+const STORAGE_VERSION = 'v2'; // Used to invalidate old storage format
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 let isRefreshing = false;
 let onSessionExpired: (() => void) | null = null;
+
+// Simple obfuscation for token storage (not encryption, but adds a layer of protection)
+// This prevents casual inspection of tokens in DevTools
+const obfuscate = (value: string): string => {
+  try {
+    // Base64 encode with timestamp prefix
+    const timestamp = Date.now().toString(36);
+    const combined = `${STORAGE_VERSION}:${timestamp}:${value}`;
+    return btoa(combined.split('').reverse().join(''));
+  } catch {
+    return value;
+  }
+};
+
+const deobfuscate = (value: string): string => {
+  try {
+    const decoded = atob(value).split('').reverse().join('');
+    const parts = decoded.split(':');
+    if (parts.length >= 3 && parts[0] === STORAGE_VERSION) {
+      // Remove version and timestamp, return the token
+      return parts.slice(2).join(':');
+    }
+    // Legacy format - return as-is (will be upgraded on next write)
+    return value;
+  } catch {
+    return value;
+  }
+};
+
+// Secure storage wrapper
+const secureStorage = {
+  getItem: (key: string): string | null => {
+    const value = localStorage.getItem(key);
+    if (!value) return null;
+    return deobfuscate(value);
+  },
+  setItem: (key: string, value: string): void => {
+    localStorage.setItem(key, obfuscate(value));
+  },
+  removeItem: (key: string): void => {
+    localStorage.removeItem(key);
+  },
+};
 
 // Decode JWT without verification (for client-side expiry check)
 const decodeToken = (token: string): { exp?: number; id?: string } | null => {
@@ -51,7 +96,7 @@ const getTimeUntilExpiry = (token: string): number => {
 const refreshTokenProactively = async (): Promise<boolean> => {
   if (isRefreshing) return false;
 
-  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  const refreshToken = secureStorage.getItem(REFRESH_TOKEN_KEY);
   if (!refreshToken) {
     return false;
   }
@@ -110,20 +155,20 @@ const scheduleRefresh = (token: string): void => {
 
 export const tokenService = {
   getAccessToken: (): string | null => {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    return secureStorage.getItem(ACCESS_TOKEN_KEY);
   },
 
   setAccessToken: (token: string): void => {
-    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    secureStorage.setItem(ACCESS_TOKEN_KEY, token);
     scheduleRefresh(token);
   },
 
   getRefreshToken: (): string | null => {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    return secureStorage.getItem(REFRESH_TOKEN_KEY);
   },
 
   setRefreshToken: (token: string): void => {
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    secureStorage.setItem(REFRESH_TOKEN_KEY, token);
   },
 
   clearTokens: (): void => {
@@ -131,12 +176,15 @@ export const tokenService = {
       clearTimeout(refreshTimer);
       refreshTimer = null;
     }
+    secureStorage.removeItem(ACCESS_TOKEN_KEY);
+    secureStorage.removeItem(REFRESH_TOKEN_KEY);
+    // Also clear any legacy unobfuscated tokens
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   },
 
   hasValidToken: (): boolean => {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = secureStorage.getItem(ACCESS_TOKEN_KEY);
     if (!token) return false;
 
     // Check if token is not expired
@@ -148,14 +196,14 @@ export const tokenService = {
 
   // Check if token needs refresh soon
   needsRefresh: (): boolean => {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = secureStorage.getItem(ACCESS_TOKEN_KEY);
     if (!token) return false;
     return isTokenExpiringSoon(token);
   },
 
   // Initialize proactive refresh on app start
   initializeProactiveRefresh: (): void => {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = secureStorage.getItem(ACCESS_TOKEN_KEY);
     if (token && !isTokenExpiringSoon(token)) {
       scheduleRefresh(token);
     } else if (token) {
@@ -176,7 +224,7 @@ export const tokenService = {
 
   // Get token expiry time
   getTokenExpiryTime: (): Date | null => {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = secureStorage.getItem(ACCESS_TOKEN_KEY);
     if (!token) return null;
 
     const decoded = decodeToken(token);

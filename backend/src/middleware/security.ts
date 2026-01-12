@@ -27,6 +27,9 @@ export const validateEnvironment = (): void => {
   const productionRequiredVars = [
     ...requiredVars,
     'ENCRYPTION_KEY',
+    'FIELD_ENCRYPTION_KEY',
+    'PASSWORD_PEPPER',
+    'FINGERPRINT_SECRET',
     'CLOUDINARY_CLOUD_NAME',
     'CLOUDINARY_API_KEY',
     'CLOUDINARY_API_SECRET',

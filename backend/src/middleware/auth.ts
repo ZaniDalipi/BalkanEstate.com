@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 import User from '../models/User';
+import { verifyFingerprint, generateFingerprint } from '../utils/tokenFingerprint';
+import { activityLogger } from '../services/activityLogger';
 
 // Get JWT secret - MUST be set in environment variables
 const getJwtSecret = (): string => {
@@ -9,6 +11,11 @@ const getJwtSecret = (): string => {
     throw new Error('CRITICAL: JWT_SECRET environment variable is not set.');
   }
   return secret;
+};
+
+// Check if fingerprint verification is enabled
+const isFingerprintEnabled = (): boolean => {
+  return process.env.ENABLE_TOKEN_FINGERPRINT === 'true';
 };
 
 export const protect = async (
@@ -35,7 +42,26 @@ export const protect = async (
     // Verify token
     const decoded = jwt.verify(token, getJwtSecret()) as {
       id: string;
+      fingerprint?: string;
     };
+
+    // Verify fingerprint if enabled and present in token
+    if (isFingerprintEnabled() && decoded.fingerprint) {
+      if (!verifyFingerprint(req, decoded.fingerprint)) {
+        // Log potential token theft
+        activityLogger.logSuspiciousActivity('token_fingerprint_mismatch', {
+          userId: decoded.id,
+          expectedFingerprint: decoded.fingerprint,
+          actualFingerprint: generateFingerprint(req),
+        }, req);
+
+        res.status(401).json({
+          message: 'Security validation failed. Please login again.',
+          code: 'FINGERPRINT_MISMATCH'
+        });
+        return;
+      }
+    }
 
     // Get user from token
     const user = await User.findById(decoded.id).select('-password');
