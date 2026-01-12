@@ -352,22 +352,36 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
             - "villa", "vila" → propertyType: "villa"
             - "land", "plot", "plac" → propertyType: "land"
             - "office", "shop", "commercial" → propertyType: "commercial"
-        5.  **Extract Seller Preference:** If user mentions "from owner", "private seller", "bez agencije" → sellerType: "private". If "through agent", "agency" → sellerType: "agent".
-        6.  **Ask Clarifying Questions:** If key details like budget or location are missing, ask a SINGLE, brief follow-up question.
-        7.  **Formulate a Search Query:** Once you have enough information (at least location OR country, plus ideally price), formulate the search query. Be generous with isFinalQuery - even partial info is useful.
-        8.  **Respond in JSON:** Your entire response MUST be a single JSON object.
-        9.  **When isFinalQuery is true:** Ask the user to confirm by clicking 'Proceed'.
+        5.  **Extract ONLY what user mentions:** Do NOT add fields the user didn't request. Only set sellerType if user explicitly mentions "from owner", "private", "agent", etc. Only set propertyType if user mentions it. Don't assume or add extra criteria.
+        6.  **CRITICAL - isFinalQuery Rules:**
+            - Set \`isFinalQuery: false\` when you are ASKING a question. The user should answer before proceeding.
+            - Set \`isFinalQuery: true\` ONLY when you are NOT asking any questions and the search is ready.
+            - NEVER set isFinalQuery to true AND ask a question in the same message!
+            - When isFinalQuery is true, tell the user to click 'Proceed' to see results.
+        7.  **Respond in JSON:** Your entire response MUST be a single JSON object.
 
         **JSON Output Structure:**
         - \`responseMessage\`: Your friendly message in the user's language.
         - \`searchQuery\`: JSON object with: location, country, minPrice, maxPrice, beds, baths, livingRooms, minSqft, maxSqft, propertyType, sellerType, features. Set to \`null\` if no useful info yet.
-        - \`isFinalQuery\`: Set to \`true\` when you have useful search criteria (even just location is enough to start).
+        - \`isFinalQuery\`: true = ready to search (no questions asked), false = still gathering info (asking questions).
 
         **Example Interactions:**
-        User: "Looking for an apartment in Albania under 100k"
-        Response:
+
+        User: "Looking for an apartment in Albania"
+        Response (asking for more info):
         {
-          "responseMessage": "Perfect! An apartment in Albania for under €100,000. How many bedrooms do you need?",
+          "responseMessage": "An apartment in Albania - great choice! Do you have a budget in mind?",
+          "searchQuery": {
+            "country": "Albania",
+            "propertyType": "apartment"
+          },
+          "isFinalQuery": false
+        }
+
+        User: "under 100k"
+        Response (ready to search - NO question asked):
+        {
+          "responseMessage": "Perfect! I've set up a search for apartments in Albania under €100,000. Click 'Proceed' to see the results!",
           "searchQuery": {
             "country": "Albania",
             "propertyType": "apartment",
@@ -377,9 +391,9 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
         }
 
         User: "Tražim kuću u Beogradu, 3 spavaće sobe, do 200000 evra"
-        Response:
+        Response (complete request - ready to search):
         {
-          "responseMessage": "Odlično! Kuća u Beogradu sa 3 spavaće sobe do €200.000. Da li imate preferiranu veličinu u kvadratima ili neku drugu želju?",
+          "responseMessage": "Odlično! Kuća u Beogradu sa 3 spavaće sobe do €200.000. Kliknite 'Proceed' da vidite rezultate!",
           "searchQuery": {
             "location": "Belgrade",
             "country": "Serbia",
@@ -390,15 +404,11 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
           "isFinalQuery": true
         }
 
-        User: "villa with pool near the sea in Croatia"
-        Response:
+        User: "show me what you got" or "just show me" or "proceed"
+        Response (user wants to see results):
         {
-          "responseMessage": "A villa with pool near the sea in Croatia - lovely choice! What's your budget range?",
-          "searchQuery": {
-            "country": "Croatia",
-            "propertyType": "villa",
-            "features": ["pool", "sea view"]
-          },
+          "responseMessage": "Sure! Click 'Proceed' to see the available properties!",
+          "searchQuery": { ... current filters ... },
           "isFinalQuery": true
         }
         ---
