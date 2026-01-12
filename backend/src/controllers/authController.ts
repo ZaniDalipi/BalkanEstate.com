@@ -11,6 +11,7 @@ import { validatePassword, passwordContainsUserInfo } from '../utils/passwordVal
 import { sendVerificationEmail } from '../services/emailVerificationService';
 import { generateTokenPair } from '../services/refreshTokenService';
 import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rateLimiter';
+import { activityLogger } from '../services/activityLogger';
 
 // @desc    Register new user
 // @route   POST /api/auth/signup
@@ -281,6 +282,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     };
     const tokens = await generateTokenPair(user, deviceInfo);
 
+    // Log successful signup
+    activityLogger.logSignup(String(user._id), user.email, role || 'buyer', req);
+
     res.status(201).json({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
@@ -435,12 +439,18 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       // Increment failed login attempts
       await user.incrementLoginAttempts();
 
+      // Log failed login attempt
+      activityLogger.logLoginFailed(email, 'Invalid password', req);
+
       res.status(401).json({ message: invalidCredentialsMsg });
       return;
     }
 
     // Password is correct - reset login attempts
     await user.resetLoginAttempts();
+
+    // Log successful login
+    activityLogger.logLogin(String(user._id), user.email, req);
 
     // Log successful login
     if (!user.loginHistory) user.loginHistory = [];

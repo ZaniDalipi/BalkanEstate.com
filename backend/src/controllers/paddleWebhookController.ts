@@ -18,6 +18,7 @@ import Subscription from '../models/Subscription';
 import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import emailService from '../services/emailService';
+import { activityLogger } from '../services/activityLogger';
 
 /**
  * Paddle webhook event types we handle
@@ -186,6 +187,17 @@ async function handleTransactionCompleted(data: any): Promise<void> {
     } catch (emailError) {
     }
 
+    // Log subscription creation
+    activityLogger.logSubscriptionCreated(
+      userId,
+      user.email,
+      product.name || planName || 'Subscription',
+      amount,
+      data.currency_code || 'EUR',
+      result.subscription.expirationDate,
+      data.id
+    );
+
   } catch (error: any) {
     throw error;
   }
@@ -297,7 +309,15 @@ async function handleSubscriptionCanceled(data: any): Promise<void> {
       } catch (emailError) {
       }
 
-    } else {
+      // Log subscription cancellation
+      activityLogger.logSubscriptionCanceled(
+        String(user._id),
+        user.email,
+        user.subscriptionProductName || 'Subscription',
+        data.current_billing_period?.ends_at
+          ? new Date(data.current_billing_period.ends_at)
+          : undefined
+      );
     }
   } catch (error: any) {
   }
@@ -501,6 +521,16 @@ async function handleRefund(data: any): Promise<void> {
       });
     } catch (emailError) {
     }
+
+    // Log refund
+    activityLogger.logRefund(
+      String(user._id),
+      user.email,
+      refundAmount,
+      currency,
+      data.id,
+      data.reason
+    );
 
   } catch (error) {
   }

@@ -35,6 +35,12 @@ import {
   sendTestAgencyCouponEmail,
   runMonthlyCouponRefreshManually,
 } from '../jobs/monthlyCouponJob';
+import {
+  getActivityLogs,
+  getDailySummary,
+  getUserActivityLogs,
+} from '../controllers/activityLogController';
+import { triggerDailyReportManually } from '../jobs/dailyActivityReportJob';
 
 const router = express.Router();
 
@@ -45,6 +51,11 @@ router.use(checkAdminRole);
 // ===== Dashboard & Statistics =====
 router.get('/stats', getAdminStats);
 router.get('/config', getSystemConfig);
+
+// ===== Activity Logs =====
+router.get('/activity-logs', logAdminAction('VIEW_ACTIVITY_LOGS'), getActivityLogs);
+router.get('/activity-logs/summary', logAdminAction('VIEW_ACTIVITY_SUMMARY'), getDailySummary);
+router.get('/activity-logs/user/:userId', logAdminAction('VIEW_USER_ACTIVITY'), getUserActivityLogs);
 
 // ===== User Management =====
 router.get('/users', logAdminAction('VIEW_USERS'), getAllUsers);
@@ -93,7 +104,6 @@ router.post('/test-emails/monthly-coupon', logAdminAction('TEST_EMAIL_MONTHLY_CO
     await sendTestMonthlyCouponEmail(email, userName || 'Test User');
     res.json({ success: true, message: `Test monthly coupon email sent to ${email}` });
   } catch (error) {
-    console.error('Error sending test email:', error);
     res.status(500).json({ message: 'Failed to send test email', error: String(error) });
   }
 });
@@ -111,7 +121,6 @@ router.post('/test-emails/agency-coupon', logAdminAction('TEST_EMAIL_AGENCY_COUP
     await sendTestAgencyCouponEmail(email, userName || 'Test User', agencyName || 'Test Agency');
     res.json({ success: true, message: `Test agency coupon email sent to ${email}` });
   } catch (error) {
-    console.error('Error sending test email:', error);
     res.status(500).json({ message: 'Failed to send test email', error: String(error) });
   }
 });
@@ -122,8 +131,17 @@ router.post('/test-emails/run-monthly-refresh', logAdminAction('RUN_MONTHLY_COUP
     await runMonthlyCouponRefreshManually();
     res.json({ success: true, message: 'Monthly coupon refresh completed' });
   } catch (error) {
-    console.error('Error running monthly refresh:', error);
     res.status(500).json({ message: 'Failed to run monthly refresh', error: String(error) });
+  }
+});
+
+// Trigger daily activity report manually
+router.post('/test-emails/daily-activity-report', logAdminAction('TRIGGER_DAILY_REPORT'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    await triggerDailyReportManually();
+    res.json({ success: true, message: 'Daily activity report sent' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to send daily report', error: String(error) });
   }
 });
 
