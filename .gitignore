@@ -29,6 +29,11 @@ backend/.env.local
 backend/.env.development
 backend/.env.staging
 backend/.env.production
+backend/.env.secrets
+
+# Generated secret files (NEVER commit these!)
+secrets-*.txt
+*.secrets
 
 # Keep example files
 !.env.example
