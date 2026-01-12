@@ -722,7 +722,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                 {/* PROPERTY LIST SECTION */}
                 <div className="flex-grow min-h-0">
                     <div className="h-full overflow-y-auto">
-                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-sm z-20">
                             <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
                             <div className="relative">
                                 <select
@@ -821,7 +821,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
 
                     {showList && (
                         <div className="flex-grow min-h-0 overflow-y-auto">
-                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-10">
+                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-20">
                                 <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
                                 <div className="relative">
                                     <select
