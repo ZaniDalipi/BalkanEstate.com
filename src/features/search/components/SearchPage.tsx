@@ -920,7 +920,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             {/* Main Content Wrapper */}
             <div className={`flex h-full w-full flex-col md:flex-row transition-all duration-300 relative ${isMobile && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
-                 <div className={`absolute inset-0 z-10 h-full w-full bg-white md:relative md:w-[55%] md:flex-shrink-0 md:border-r md:border-neutral-200 md:flex md:flex-col ${ isMobile && mobileView === 'list' ? 'translate-x-0' : 'translate-x-full md:translate-x-0' } transition-transform duration-300`}>
+                 <div className={`absolute inset-0 z-10 h-full w-full bg-white md:relative md:w-[55%] md:flex-shrink-0 md:border-r md:border-neutral-200 md:flex md:flex-col isolate overflow-hidden ${ isMobile && mobileView === 'list' ? 'translate-x-0' : 'translate-x-full md:translate-x-0' } transition-transform duration-300`}>
                     <div className="hidden md:flex p-3 border-b border-neutral-200 flex-shrink-0 items-center gap-3">
                         <h2 className="text-base font-semibold text-neutral-800 flex-shrink-0">{t('search:propertiesForSale')}</h2>
                         {/* Desktop Search Bar */}
@@ -1030,9 +1030,9 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Mobile View Overlays --- */}
                 {isMobile && !isFiltersOpen && (
                     <>
-                        <div className="absolute top-0 left-0 right-0 z-20 p-2 pointer-events-none">
+                        <div className="absolute top-0 left-0 right-0 z-[100] p-2 pointer-events-none">
                             <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
-                                <div className="w-full bg-white/80 backdrop-blur-sm rounded-full shadow-lg p-1 flex items-center gap-1">
+                                <div className="w-full bg-white/95 backdrop-blur-md rounded-full shadow-lg p-1 flex items-center gap-1">
                                     <button onClick={onToggleSidebar} className="p-2 flex-shrink-0"><Bars3Icon className="w-6 h-6 text-neutral-800"/></button>
                                     {renderSearchInput(true)}
                                     <button onClick={() => updateSearchPageState({ isFiltersOpen: true })} className="p-2 flex-shrink-0 hover:bg-neutral-100 rounded-full"><AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/></button>
@@ -1049,7 +1049,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             </div>
                         </div>
                         
-                        <div className="absolute bottom-16 left-0 right-0 z-[1002] p-4 pointer-events-none">
+                        <div className="absolute bottom-16 left-0 right-0 z-[100] p-4 pointer-events-none">
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">
