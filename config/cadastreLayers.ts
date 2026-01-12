@@ -34,6 +34,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'AL',
     enabled: true,
     wmsUrl: 'https://geoportal.asig.gov.al/service/zrpp/wms',
+    wfsUrl: 'https://geoportal.asig.gov.al/service/zrpp/wfs',
     layers: 'ZRPP',
     format: 'image/png',
     version: '1.3.0',
@@ -46,7 +47,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       STYLES: '',
       TILED: 'true'
     },
-    notes: '✅ ASIG GeoServer WMS. Portal: geoportal.asig.gov.al'
+    notes: '✅ ASIG GeoServer WMS/WFS. Portal: geoportal.asig.gov.al'
   },
 
   MK: {
@@ -54,6 +55,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'MK',
     enabled: true,
     wmsUrl: 'https://ossp.katastar.gov.mk/geoserver/KC/wms',
+    wfsUrl: 'https://ossp.katastar.gov.mk/geoserver/KC/wfs',
     layers: 'KC:katastarski_parceli',
     format: 'image/png',
     version: '1.3.0',
@@ -65,7 +67,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       CRS: 'EPSG:4326',
       STYLES: ''
     },
-    notes: '✅ AREC OSSP GeoServer. Portal: ossp.katastar.gov.mk'
+    notes: '✅ AREC OSSP GeoServer WMS/WFS. Portal: ossp.katastar.gov.mk'
   },
 
   GR: {
@@ -93,6 +95,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'BG',
     enabled: true,
     wmsUrl: 'https://inspire.cadastre.bg/arcgis/services/Cadastral_Parcel/MapServer/WMSServer',
+    wfsUrl: 'https://inspire.cadastre.bg/arcgis/services/Cadastral_Parcel/MapServer/WFSServer',
     layers: '0',
     format: 'image/png',
     version: '1.3.0',
@@ -104,7 +107,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       CRS: 'EPSG:4326',
       STYLES: ''
     },
-    notes: '✅ INSPIRE ArcGIS MapServer. Portal: kais.cadastre.bg, inspire.cadastre.bg'
+    notes: '✅ INSPIRE ArcGIS MapServer WMS/WFS. Portal: kais.cadastre.bg, inspire.cadastre.bg'
   },
 
   RO: {
@@ -112,6 +115,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'RO',
     enabled: true,
     wmsUrl: 'https://geoportal.ancpi.ro/inspireview/rest/services/CP/CP_View/MapServer/exts/InspireView/service',
+    wfsUrl: 'https://geoportal.ancpi.ro/inspiredownload/rest/services/CP/CP_Download/MapServer/exts/InspireFeatureDownload/service',
     layers: 'CP.CadastralParcel',
     format: 'image/png',
     version: '1.3.0',
@@ -123,7 +127,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       CRS: 'EPSG:4326',
       STYLES: ''
     },
-    notes: '✅ INSPIRE View Service. eTerra3. Portal: geoportal.ancpi.ro, myeterra.ancpi.ro'
+    notes: '✅ INSPIRE View/Download Service. eTerra3. Portal: geoportal.ancpi.ro, myeterra.ancpi.ro'
   },
 
   BA: {
@@ -131,6 +135,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'BA',
     enabled: true,
     wmsUrl: 'https://katastar.ba/geoserver/wms',
+    wfsUrl: 'https://katastar.ba/geoserver/wfs',
     layers: 'katastarske_parcele',
     format: 'image/png',
     version: '1.3.0',
@@ -142,7 +147,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       CRS: 'EPSG:4326',
       STYLES: ''
     },
-    notes: '✅ FGU GeoServer WMS. 79 municipalities. Portal: katastar.ba'
+    notes: '✅ FGU GeoServer WMS/WFS. 79 municipalities. Portal: katastar.ba'
   },
 
   HR: {
@@ -169,6 +174,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'RS',
     enabled: true,
     wmsUrl: 'http://ogc4u.geosrbija.rs/dkp/wms',
+    wfsUrl: 'http://ogc4u.geosrbija.rs/dkp/wfs',
     layers: 'dkp:Parcele',
     format: 'image/png',
     version: '1.3.0',
@@ -180,7 +186,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       CRS: 'EPSG:3857',
       STYLES: ''
     },
-    notes: '✅ OGC WMS Service. Monthly updates. Portal: geosrbija.rs, a3.geosrbija.rs/katastar'
+    notes: '✅ OGC WMS/WFS Service. Monthly updates. Portal: geosrbija.rs, a3.geosrbija.rs/katastar'
   },
 
   ME: {
@@ -188,6 +194,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'ME',
     enabled: true,
     wmsUrl: 'https://geoportal.co.me/geoserver/wms',
+    wfsUrl: 'https://geoportal.co.me/geoserver/wfs',
     layers: 'cadastre:katastarske_parcele',
     format: 'image/png',
     version: '1.3.0',
@@ -199,7 +206,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
       CRS: 'EPSG:4326',
       STYLES: ''
     },
-    notes: '✅ GeoServer WMS. Portal: geoportal.co.me'
+    notes: '✅ GeoServer WMS/WFS. Portal: geoportal.co.me'
   }
 };
 
