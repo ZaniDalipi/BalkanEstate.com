@@ -6,18 +6,18 @@ import {
   getNavigationHeatmap,
   getRecentSubscriptions,
 } from '../controllers/analyticsController';
-import { authMiddleware, adminMiddleware } from '../middleware/auth';
+import { protect, restrictTo, optionalAuth } from '../middleware/auth';
 
 const router = express.Router();
 
 // Public route - track events (can be called from frontend)
 // Optional auth - if user is logged in, we capture their userId
-router.post('/track', authMiddleware({ required: false }), trackEvent);
+router.post('/track', optionalAuth, trackEvent);
 
 // Admin-only routes
-router.get('/activity-log', authMiddleware(), adminMiddleware, getActivityLog);
-router.get('/dashboard', authMiddleware(), adminMiddleware, getDashboardAnalytics);
-router.get('/heatmap', authMiddleware(), adminMiddleware, getNavigationHeatmap);
-router.get('/subscriptions/recent', authMiddleware(), adminMiddleware, getRecentSubscriptions);
+router.get('/activity-log', protect, restrictTo('admin', 'super_admin'), getActivityLog);
+router.get('/dashboard', protect, restrictTo('admin', 'super_admin'), getDashboardAnalytics);
+router.get('/heatmap', protect, restrictTo('admin', 'super_admin'), getNavigationHeatmap);
+router.get('/subscriptions/recent', protect, restrictTo('admin', 'super_admin'), getRecentSubscriptions);
 
 export default router;
