@@ -13,7 +13,7 @@ const PrivacyPolicyPage: React.FC = () => {
     window.history.pushState({}, '', '/');
   };
 
-  const lastUpdated = 'January 9, 2026';
+  const lastUpdated = 'January 12, 2026';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,7 +63,7 @@ const PrivacyPolicyPage: React.FC = () => {
               <li>{t('legal:privacy.collect.personal.name', 'Name and contact information (email, phone number)')}</li>
               <li>{t('legal:privacy.collect.personal.account', 'Account credentials (username, password)')}</li>
               <li>{t('legal:privacy.collect.personal.profile', 'Profile information (photo, bio, preferences)')}</li>
-              <li>{t('legal:privacy.collect.personal.payment', 'Payment information (processed securely via Stripe)')}</li>
+              <li>{t('legal:privacy.collect.personal.payment', 'Payment information (processed securely via Paddle, our Merchant of Record)')}</li>
               <li>{t('legal:privacy.collect.personal.communication', 'Communications and messages you send through our platform')}</li>
             </ul>
 
@@ -105,7 +105,7 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
               <li><strong>{t('legal:privacy.share.agents', 'With Property Agents:')}</strong> {t('legal:privacy.share.agentsDesc', 'When you inquire about a property, your contact information is shared with the listing agent.')}</li>
-              <li><strong>{t('legal:privacy.share.providers', 'Service Providers:')}</strong> {t('legal:privacy.share.providersDesc', 'We work with third parties for payment processing (Stripe), email services, and analytics.')}</li>
+              <li><strong>{t('legal:privacy.share.providers', 'Service Providers:')}</strong> {t('legal:privacy.share.providersDesc', 'We work with third parties for payment processing (Paddle), email services, and analytics.')}</li>
               <li><strong>{t('legal:privacy.share.legal', 'Legal Requirements:')}</strong> {t('legal:privacy.share.legalDesc', 'When required by law or to protect our rights.')}</li>
               <li><strong>{t('legal:privacy.share.business', 'Business Transfers:')}</strong> {t('legal:privacy.share.businessDesc', 'In connection with a merger, acquisition, or sale of assets.')}</li>
             </ul>
@@ -201,9 +201,9 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <div className="space-y-3">
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-1">Stripe</h4>
-                <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.stripe', 'Payment processing. Stripe processes your payment information securely. We do not store your full credit card details.')}</p>
-                <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+                <h4 className="font-semibold text-gray-800 mb-1">Paddle</h4>
+                <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.paddle', 'Paddle is our Merchant of Record for payment processing. As MoR, Paddle handles all payment transactions, VAT/tax compliance, invoicing, and refunds on our behalf. Paddle processes your payment information securely and we do not store your full credit card details. Paddle may collect your name, email, billing address, and payment method details to process transactions.')}</p>
+                <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-semibold text-gray-800 mb-1">Google Analytics</h4>
