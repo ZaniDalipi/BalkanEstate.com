@@ -10,6 +10,7 @@ import AgencyBadge from '@/components/shared/AgencyBadge';
 import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
+import { BALKAN_COUNTRIES } from '@/constants/countries';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -154,6 +155,48 @@ const AgentsPage: React.FC = () => {
     }
   };
 
+  // Helper function to check if agent matches location query
+  const matchesLocation = (agent: Agent, query: string): boolean => {
+    const q = query.toLowerCase().trim();
+
+    // Direct field matches
+    const city = (agent.city || '').toLowerCase();
+    const country = (agent.country || '').toLowerCase();
+    const officeAddress = (agent.officeAddress || '').toLowerCase();
+    const serviceAreas = (agent.serviceAreas || []).map(s => s.toLowerCase());
+
+    // Check direct matches
+    if (city.includes(q) || country.includes(q) || officeAddress.includes(q)) {
+      return true;
+    }
+
+    // Check service areas
+    if (serviceAreas.some(area => area.includes(q))) {
+      return true;
+    }
+
+    // Check country name variations using BALKAN_COUNTRIES
+    for (const [key, data] of Object.entries(BALKAN_COUNTRIES)) {
+      const countryName = data.name.toLowerCase();
+      const countryCode = data.code.toLowerCase();
+
+      // If query matches any country identifier
+      if (q === countryName || q === countryCode || q === key ||
+          countryName.includes(q) || q.includes(key.replace(/-/g, ' '))) {
+        // Check if agent is in this country
+        if (country === countryName || country === countryCode || country === key ||
+            country.includes(key) || key.includes(country) ||
+            serviceAreas.some(area =>
+              area.includes(countryName) || area.includes(key) || area.includes(countryCode)
+            )) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
   const filteredAgents = useMemo(() => {
     let result = [...agents];
 
@@ -163,8 +206,6 @@ const AgentsPage: React.FC = () => {
 
       result = result.filter(agent => {
         const name = (agent.name || '').toLowerCase();
-        const city = (agent.city || '').toLowerCase();
-        const country = (agent.country || '').toLowerCase();
         const bio = (agent.bio || '').toLowerCase();
         const specializations = (agent.specializations || []).map(s => s.toLowerCase()).join(' ');
         const languages = (agent.languages || []).map(l => l.toLowerCase()).join(' ');
@@ -174,15 +215,14 @@ const AgentsPage: React.FC = () => {
           case 'name':
             return name.includes(query);
           case 'location':
-            return city.includes(query) || country.includes(query);
+            return matchesLocation(agent, query);
           case 'specialization':
             return specializations.includes(query);
           case 'all':
           default:
             // Search across all fields
             return name.includes(query) ||
-                   city.includes(query) ||
-                   country.includes(query) ||
+                   matchesLocation(agent, query) ||
                    specializations.includes(query) ||
                    languages.includes(query) ||
                    bio.includes(query);
