@@ -14,7 +14,8 @@
   "cannotSaveEmptySearch": "Nuk mund të ruhet një kërkim bosh. Ju lutemi shtoni disa kritere ose lëvizni në një zonë në hartë.",
   "searchSaved": "Kërkimi u ruajt me sukses!",
   "couldNotSaveSearch": "Nuk mund të ruhet kërkimi. AI mund të jetë i zënë.",
-  "mobileMapInfo": "Duke shfaqur pronat e dukshme në hartë",
+  "mobileMapInfo": "Showing properties visible on map",
+  "showingNearbyProperties": "Showing properties you may like in {{location}}",
   "filters": {
     "title": "Filtrat",
     "showFilters": "Trego Filtrat",

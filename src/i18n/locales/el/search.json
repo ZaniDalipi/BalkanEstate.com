@@ -14,7 +14,8 @@
   "cannotSaveEmptySearch": "Δεν είναι δυνατή η αποθήκευση κενής αναζήτησης. Προσθέστε κριτήρια ή μετακινηθείτε σε μια περιοχή στο χάρτη.",
   "searchSaved": "Η αναζήτηση αποθηκεύτηκε επιτυχώς!",
   "couldNotSaveSearch": "Δεν ήταν δυνατή η αποθήκευση της αναζήτησης. Η AI μπορεί να είναι απασχολημένη.",
-  "mobileMapInfo": "Εμφανίζονται ακίνητα ορατά στον χάρτη",
+  "mobileMapInfo": "Showing properties visible on map",
+  "showingNearbyProperties": "Showing properties you may like in {{location}}",
   "filters": {
     "title": "Φίλτρα",
     "showFilters": "Εμφάνιση Φίλτρων",

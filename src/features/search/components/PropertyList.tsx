@@ -34,6 +34,7 @@ interface PropertyListProps {
   onSuggestionClick?: (suggestion: { place_id: number; display_name: string; lat: string; lon: string; boundingbox: string[] }) => void;
   isQueryInputFocused?: boolean;
   onQueryInputFocusChange?: (focused: boolean) => void;
+  fallbackLocation?: string | null;
 }
 
 const FilterButton: React.FC<{
@@ -638,7 +639,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     const { state, dispatch } = useAppContext();
     const { isLoadingProperties, isAuthenticated } = state;
 
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, fallbackLocation } = props;
 
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
@@ -749,6 +750,15 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             </div>
                         </div>
                         <div className="p-4 md:p-3">
+                            {/* Fallback location message */}
+                            {fallbackLocation && !isLoadingProperties && properties.length > 0 && (
+                                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
+                                    <MapPinIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                                    <p className="text-xs text-amber-800">
+                                        {t('search:showingNearbyProperties', { location: fallbackLocation })}
+                                    </p>
+                                </div>
+                            )}
                             {isLoadingProperties ? (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5">
                                     {Array.from({ length: 6 }).map((_, index) => (
@@ -848,19 +858,36 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             </div>
 
-                            {/* Mobile: Info banner about map-visible properties */}
-                            <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <MapPinIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                                    <p className="text-xs text-blue-700">{t('search:mobileMapInfo', { defaultValue: 'Showing properties visible on map' })}</p>
+                            {/* Mobile: Info banner - show fallback message or map-visible info */}
+                            {fallbackLocation ? (
+                                <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <MapPinIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                                        <p className="text-xs text-amber-800">
+                                            {t('search:showingNearbyProperties', { location: fallbackLocation })}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={props.onResetFilters}
+                                        className="text-xs font-semibold text-amber-600 hover:text-amber-800 underline whitespace-nowrap"
+                                    >
+                                        {t('search:filters.seeAll', { defaultValue: 'See All' })}
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={props.onResetFilters}
-                                    className="text-xs font-semibold text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
-                                >
-                                    {t('search:filters.seeAll', { defaultValue: 'See All' })}
-                                </button>
-                            </div>
+                            ) : (
+                                <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <MapPinIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                        <p className="text-xs text-blue-700">{t('search:mobileMapInfo', { defaultValue: 'Showing properties visible on map' })}</p>
+                                    </div>
+                                    <button
+                                        onClick={props.onResetFilters}
+                                        className="text-xs font-semibold text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
+                                    >
+                                        {t('search:filters.seeAll', { defaultValue: 'See All' })}
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="p-4 md:p-3">
                                 {isLoadingProperties ? (

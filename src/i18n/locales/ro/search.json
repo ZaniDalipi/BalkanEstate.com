@@ -14,7 +14,8 @@
   "cannotSaveEmptySearch": "Nu se poate salva o căutare goală. Adăugați criterii sau deplasați-vă într-o zonă pe hartă.",
   "searchSaved": "Căutarea a fost salvată cu succes!",
   "couldNotSaveSearch": "Nu s-a putut salva căutarea. AI-ul poate fi ocupat.",
-  "mobileMapInfo": "Se afișează proprietăți vizibile pe hartă",
+  "mobileMapInfo": "Showing properties visible on map",
+  "showingNearbyProperties": "Showing properties you may like in {{location}}",
   "filters": {
     "title": "Filtre",
     "showFilters": "Afișează Filtrele",

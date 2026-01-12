@@ -122,6 +122,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
     const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
     const [showMapHint, setShowMapHint] = useState(false); // Show hint about map view on mobile
+    const [fallbackLocation, setFallbackLocation] = useState<string | null>(null); // Location name when showing fallback properties
 
 
     useEffect(() => {
@@ -547,9 +548,71 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     }, [properties, activeFilters]);
 
     const listProperties = useMemo(() => {
+        // Helper to calculate distance between two points
+        const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+            return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
+        };
+
+        // Helper to get smart fallback properties with location priority
+        const getSmartFallback = (centerLat: number, centerLng: number) => {
+            if (baseFilteredProperties.length === 0) {
+                setFallbackLocation(null);
+                return [];
+            }
+
+            // Find the closest property to determine the search city/country
+            const propertiesWithDistance = baseFilteredProperties.map(p => ({
+                ...p,
+                distance: getDistance(centerLat, centerLng, p.lat, p.lng)
+            })).sort((a, b) => a.distance - b.distance);
+
+            const closestProperty = propertiesWithDistance[0];
+            const searchCity = closestProperty?.city;
+            const searchCountry = closestProperty?.country;
+
+            // Priority 1: Properties in the same city
+            const sameCityProps = baseFilteredProperties.filter(p =>
+                p.city?.toLowerCase() === searchCity?.toLowerCase()
+            );
+
+            if (sameCityProps.length > 0) {
+                // Sort by distance from center
+                const sorted = sameCityProps.sort((a, b) =>
+                    getDistance(centerLat, centerLng, a.lat, a.lng) -
+                    getDistance(centerLat, centerLng, b.lat, b.lng)
+                );
+                setFallbackLocation(searchCity || null);
+                return sorted;
+            }
+
+            // Priority 2: Properties in nearby cities (same country, sorted by distance)
+            const sameCountryProps = baseFilteredProperties.filter(p =>
+                p.country?.toLowerCase() === searchCountry?.toLowerCase()
+            );
+
+            if (sameCountryProps.length > 0) {
+                // Sort by distance to show nearest cities first
+                const sorted = sameCountryProps.sort((a, b) =>
+                    getDistance(centerLat, centerLng, a.lat, a.lng) -
+                    getDistance(centerLat, centerLng, b.lat, b.lng)
+                );
+                // Get the city of the closest property in the country
+                const nearestCity = sorted[0]?.city;
+                setFallbackLocation(nearestCity || searchCountry || null);
+                return sorted;
+            }
+
+            // Priority 3: All available properties (sorted by distance)
+            const sorted = propertiesWithDistance.sort((a, b) => a.distance - b.distance);
+            const nearestLocation = sorted[0]?.city || sorted[0]?.country;
+            setFallbackLocation(nearestLocation || null);
+            return sorted;
+        };
+
         // If a specific area is drawn/searched by the user, filter to that area
         if (drawnBounds) {
             const withinDrawn = baseFilteredProperties.filter(p => drawnBounds.contains([p.lat, p.lng]));
+            setFallbackLocation(null);
             return withinDrawn;
         }
 
@@ -557,19 +620,32 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // This ensures users see all available properties after reset, but
         // when they move the map or search a location, it shows only visible properties
         if (isMobile && showAllOnMobile) {
+            setFallbackLocation(null);
             return baseFilteredProperties;
         }
 
         // Filter to show only properties visible in the current map view
         if (mapBounds) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
-            // If no properties in view but we have properties, show all (better UX than empty list)
-            if (withinView.length === 0 && baseFilteredProperties.length > 0) {
-                return baseFilteredProperties;
+
+            // If properties in view, show them
+            if (withinView.length > 0) {
+                setFallbackLocation(null);
+                return withinView;
             }
-            return withinView;
+
+            // No properties in view - use smart fallback
+            if (baseFilteredProperties.length > 0) {
+                const center = mapBounds.getCenter();
+                return getSmartFallback(center.lat, center.lng);
+            }
+
+            setFallbackLocation(null);
+            return [];
         }
+
         // Fallback to all filtered properties if no bounds set (initial load)
+        setFallbackLocation(null);
         return baseFilteredProperties;
     }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
 
@@ -827,6 +903,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         onSuggestionClick: handleSuggestionClick,
         isQueryInputFocused: isQueryInputFocused,
         onQueryInputFocusChange: setIsQueryInputFocused,
+        fallbackLocation: fallbackLocation,
     };
 
     // Generate dynamic SEO based on current filters

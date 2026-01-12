@@ -14,7 +14,8 @@
   "cannotSaveEmptySearch": "Не може да се запази празно търсене. Моля, добавете критерии или изберете зона на картата.",
   "searchSaved": "Търсенето е запазено успешно!",
   "couldNotSaveSearch": "Неуспешно запазване на търсенето. AI може да е зает.",
-  "mobileMapInfo": "Показват се имоти, видими на картата",
+  "mobileMapInfo": "Showing properties visible on map",
+  "showingNearbyProperties": "Showing properties you may like in {{location}}",
   "filters": {
     "title": "Филтри",
     "showFilters": "Покажи филтрите",

@@ -14,7 +14,8 @@
   "cannotSaveEmptySearch": "Ne možete sačuvati praznu pretragu. Molimo dodajte neke kriterijume ili se pomerite na oblast na mapi.",
   "searchSaved": "Pretraga uspešno sačuvana!",
   "couldNotSaveSearch": "Nije moguće sačuvati pretragu. AI može biti zauzet.",
-  "mobileMapInfo": "Приказују се непокретности видљиве на мапи",
+  "mobileMapInfo": "Showing properties visible on map",
+  "showingNearbyProperties": "Showing properties you may like in {{location}}",
   "filters": {
     "title": "Filteri",
     "showFilters": "Prikaži Filtere",
