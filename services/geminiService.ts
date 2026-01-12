@@ -356,7 +356,7 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
         6.  **Ask Clarifying Questions:** If key details like budget or location are missing, ask a SINGLE, brief follow-up question.
         7.  **Formulate a Search Query:** Once you have enough information (at least location OR country, plus ideally price), formulate the search query. Be generous with isFinalQuery - even partial info is useful.
         8.  **Respond in JSON:** Your entire response MUST be a single JSON object.
-        9.  **When isFinalQuery is true:** Ask the user to confirm by clicking 'Apply Filters'.
+        9.  **When isFinalQuery is true:** Ask the user to confirm by clicking 'Proceed'.
 
         **JSON Output Structure:**
         - \`responseMessage\`: Your friendly message in the user's language.
