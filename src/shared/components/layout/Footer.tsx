@@ -74,7 +74,12 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
 
   return (
     <footer
-      className={`relative bg-gray-50 text-gray-900 border-t border-gray-200 mt-auto pb-4 w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${className}`}
+      className={`relative bg-gray-50 text-gray-900 border-t border-gray-200 mt-auto pb-4 ${className}`}
+      style={{
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)',
+        marginRight: 'calc(-50vw + 50%)',
+      }}
     >
       {/* Subtle Background Pattern */}
       <div
