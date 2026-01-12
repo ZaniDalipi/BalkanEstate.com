@@ -57,21 +57,30 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
 
     try {
       const bounds = map.getBounds();
-      const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
+      // INSPIRE WFS uses lat,lon order for EPSG:4326
+      const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()},EPSG:4326`;
 
+      // Try different WFS parameter combinations for INSPIRE compatibility
       const wfsParams = new URLSearchParams({
         service: 'WFS',
         version: '2.0.0',
         request: 'GetFeature',
-        typeName: currentLayer.layers,
+        typeNames: currentLayer.layers, // INSPIRE uses typeNames (plural)
         outputFormat: 'application/json',
         srsName: 'EPSG:4326',
         bbox: bbox,
-        maxFeatures: '100',
+        count: '100', // INSPIRE uses count instead of maxFeatures
       });
 
-      const response = await fetch(`${currentLayer.wfsUrl}?${wfsParams}`);
-      
+      // Also add typeName for backwards compatibility
+      wfsParams.append('typeName', currentLayer.layers);
+
+      const response = await fetch(`${currentLayer.wfsUrl}?${wfsParams}`, {
+        headers: {
+          'Accept': 'application/json, application/geo+json, */*',
+        },
+      });
+
       if (!response.ok) throw new Error(`WFS request failed: ${response.status}`);
 
       const geojson = await response.json();
@@ -183,10 +192,11 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
     layer.bindPopup(popupContent).openPopup();
   };
 
-  const handleMapClick = (e: L.LeafletMouseEvent) => {
-    if (selectedParcel) {
-      setSelectedParcel(null);
-      if (parcelsLayerRef.current) {
+  const handleMapClick = async (e: L.LeafletMouseEvent) => {
+    // If we have WFS parcels, just deselect
+    if (parcelsLayerRef.current) {
+      if (selectedParcel) {
+        setSelectedParcel(null);
         parcelsLayerRef.current.eachLayer((layer: any) => {
           layer.setStyle({
             color: '#0252CD',
@@ -196,25 +206,86 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
           });
         });
       }
+      return;
+    }
+
+    // If we only have WMS layer, use GetFeatureInfo for parcel selection
+    if (wmsLayerRef.current && currentLayer && enabled) {
+      try {
+        const point = map.latLngToContainerPoint(e.latlng);
+        const size = map.getSize();
+        const bounds = map.getBounds();
+
+        // Build GetFeatureInfo URL
+        const params = new URLSearchParams({
+          service: 'WMS',
+          version: currentLayer.version || '1.3.0',
+          request: 'GetFeatureInfo',
+          layers: currentLayer.layers,
+          query_layers: currentLayer.layers,
+          info_format: 'application/json',
+          feature_count: '1',
+          i: Math.round(point.x).toString(),
+          j: Math.round(point.y).toString(),
+          width: size.x.toString(),
+          height: size.y.toString(),
+          crs: 'EPSG:4326',
+          bbox: `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`,
+        });
+
+        const response = await fetch(`${currentLayer.wmsUrl}?${params}`);
+        if (!response.ok) throw new Error('GetFeatureInfo failed');
+
+        const data = await response.json();
+
+        if (data.features && data.features.length > 0) {
+          const feature = data.features[0];
+
+          // Create a temporary marker/popup for the selected parcel
+          const popup = L.popup()
+            .setLatLng(e.latlng)
+            .setContent(createParcelPopup(feature))
+            .openOn(map);
+
+          setSelectedParcel(feature);
+          onParcelSelect?.({
+            properties: feature.properties,
+            geometry: feature.geometry,
+            clickLatLng: e.latlng,
+          });
+        }
+      } catch (error) {
+        console.warn('GetFeatureInfo failed:', error);
+      }
     }
   };
 
   const createParcelPopup = (feature: any) => {
-    const props = feature.properties;
+    const props = feature.properties || {};
+
+    // INSPIRE and various cadastre systems use different property names
+    const parcelId = props.nationalCadastralReference || props.inspireId || props.id || props.ID || props.gml_id || props.PARCEL_ID || props.parcel_id || 'N/A';
+    const area = props.areaValue || props.area || props.AREA || props.Area || props.surface || props.SURFACE;
+    const label = props.label || props.LABEL || props.name || props.NAME;
+    const municipality = props.administrativeUnit || props.municipality || props.MUNICIPALITY || props.KO_NAME || props.cadastralZoning;
+
+    // Format area if available
+    const areaStr = area ? `${Number(area).toLocaleString()} m²` : null;
+
     return `
-      <div class="p-2 min-w-[200px]">
-        <h3 class="font-bold text-lg mb-2">Cadastre Parcel</h3>
+      <div class="p-2 min-w-[180px]">
+        <h3 class="font-bold text-base mb-2">Cadastre Parcel</h3>
         <div class="space-y-1 text-sm">
-          ${props.id ? `<div><strong>ID:</strong> ${props.id}</div>` : ''}
-          ${props.area ? `<div><strong>Area:</strong> ${props.area} m²</div>` : ''}
-          ${props.cadastre_number ? `<div><strong>Cadastre No:</strong> ${props.cadastre_number}</div>` : ''}
-          ${props.municipality ? `<div><strong>Municipality:</strong> ${props.municipality}</div>` : ''}
+          <div><strong>ID:</strong> ${parcelId}</div>
+          ${areaStr ? `<div><strong>Area:</strong> ${areaStr}</div>` : ''}
+          ${label ? `<div><strong>Label:</strong> ${label}</div>` : ''}
+          ${municipality ? `<div><strong>Municipality:</strong> ${municipality}</div>` : ''}
         </div>
-        <button 
-          onclick="event.stopPropagation(); window.dispatchEvent(new CustomEvent('parcel-details', { detail: ${JSON.stringify(feature)} }))"
+        <button
+          onclick="event.stopPropagation(); window.dispatchEvent(new CustomEvent('parcel-details', { detail: ${JSON.stringify(props).replace(/"/g, '&quot;')} }))"
           class="mt-2 w-full bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700 text-sm"
         >
-          View Details
+          Select Parcel
         </button>
       </div>
     `;

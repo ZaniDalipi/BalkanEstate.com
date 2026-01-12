@@ -72,19 +72,20 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     country: 'Greece',
     countryCode: 'GR',
     enabled: true,
-    wmsUrl: 'http://gis.ktimanet.gr/wms/wmsopen/wmsserver.aspx',
-    layers: 'KTBASEMAP',
+    wmsUrl: 'https://gis.ktimanet.gr/wms/inspire/inspire.aspx',
+    wfsUrl: 'https://gis.ktimanet.gr/inspire/rest/services/cadastralparcels/CadastralParcel/MapServer/exts/InspireFeatureDownload/service',
+    layers: 'CP.CadastralParcel',
     format: 'image/png',
-    version: '1.1.1',
+    version: '1.3.0',
     transparent: true,
     attribution: 'Hellenic Cadastre (Ktimatologio)',
     minZoom: 16,
     bounds: [[34.8, 19.4], [41.7, 28.2]],
     additionalParams: {
-      SRS: 'EPSG:4326',
+      CRS: 'EPSG:4326',
       STYLES: ''
     },
-    notes: '✅ Ktimanet WMS Open Server. Min scale 1:9000. Portal: gis.ktimanet.gr'
+    notes: '✅ INSPIRE WMS/WFS. Selectable parcels. Portal: gis.ktimanet.gr'
   },
 
   BG: {
@@ -149,6 +150,7 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     countryCode: 'HR',
     enabled: true,
     wmsUrl: 'https://api.uredjenazemlja.hr/services/inspire/cp_wms/wms',
+    wfsUrl: 'https://api.uredjenazemlja.hr/services/inspire/cp/wfs',
     layers: 'CP.CadastralParcel',
     format: 'image/png',
     version: '1.3.0',
@@ -157,10 +159,10 @@ export const CADASTRE_LAYERS: Record<string, CadastreLayerConfig> = {
     minZoom: 16,
     bounds: [[42.4, 13.5], [46.5, 19.4]],
     additionalParams: {
-      CRS: 'EPSG:3857',
+      CRS: 'EPSG:4326',
       STYLES: ''
     },
-    notes: '✅ WORKING: INSPIRE WMS with labels. Portal: oss.uredjenazemlja.hr'
+    notes: '✅ INSPIRE WMS/WFS. Selectable parcels. Portal: oss.uredjenazemlja.hr'
   },
 
   RS: {
