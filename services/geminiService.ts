@@ -352,7 +352,10 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
             - "villa", "vila" → propertyType: "villa"
             - "land", "plot", "plac" → propertyType: "land"
             - "office", "shop", "commercial" → propertyType: "commercial"
-        5.  **Extract ONLY what user mentions:** Do NOT add fields the user didn't request. Only set sellerType if user explicitly mentions "from owner", "private", "agent", etc. Only set propertyType if user mentions it. Don't assume or add extra criteria.
+        5.  **CRITICAL - Extract ONLY what user mentions:**
+            - Do NOT include sellerType unless user explicitly says "private seller", "from owner", "bez agencije", "agent", "through agency", etc.
+            - Do NOT include propertyType unless user explicitly mentions "house", "apartment", "villa", "land", etc.
+            - If user doesn't mention these, OMIT them from searchQuery entirely. Never assume or add defaults.
         6.  **CRITICAL - isFinalQuery Rules:**
             - Set \`isFinalQuery: false\` when you are ASKING a question. The user should answer before proceeding.
             - Set \`isFinalQuery: true\` ONLY when you are NOT asking any questions and the search is ready.
@@ -439,12 +442,12 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
                     propertyType: {
                         type: Type.STRING,
                         enum: ['house', 'apartment', 'villa', 'land', 'commercial'],
-                        description: 'The type of property (house, apartment, villa, land, commercial).'
+                        description: 'ONLY set if user explicitly mentions property type (house, apartment, etc). OMIT if not mentioned.'
                     },
                     sellerType: {
                         type: Type.STRING,
                         enum: ['agent', 'private'],
-                        description: 'Seller preference: agent or private seller.'
+                        description: 'ONLY set if user explicitly says "private seller", "from owner", "agent", etc. OMIT if not mentioned.'
                     },
                     features: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
