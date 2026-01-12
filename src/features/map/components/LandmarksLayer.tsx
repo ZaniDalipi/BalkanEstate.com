@@ -144,6 +144,7 @@ const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
 ];
 
 let lastRequestTime = 0;
@@ -317,10 +318,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       // Rotate to next endpoint on any failure
       currentEndpointIndex = (currentEndpointIndex + 1) % OVERPASS_ENDPOINTS.length;
 
-      if (error?.name === 'AbortError') {
-        console.warn('Landmarks fetch timed out, will try different endpoint');
-      } else {
-        console.warn('Failed to fetch landmarks:', error?.message || error);
+      // Silently handle errors - just rotate to next endpoint
+      // Only log in development if really needed
+      if (process.env.NODE_ENV === 'development' && consecutiveFailures >= OVERPASS_ENDPOINTS.length) {
+        console.debug('[Landmarks] All endpoints failed, will retry later');
       }
     } finally {
       requestInFlight = false;
