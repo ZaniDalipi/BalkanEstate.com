@@ -47,6 +47,7 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_GA_ID: ${{ secrets.VITE_GA_ID }}
           VITE_FB_PIXEL_ID: ${{ secrets.VITE_FB_PIXEL_ID }}
+          VITE_CLARITY_PROJECT_ID: ${{ secrets.VITE_CLARITY_PROJECT_ID }}
 
       - name: Build backend
         working-directory: ./backend

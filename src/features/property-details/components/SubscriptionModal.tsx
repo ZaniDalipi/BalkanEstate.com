@@ -22,6 +22,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   const [email, setEmail] = useState(initialEmail || state.currentUser?.email || '');
   const [buyerProducts, setBuyerProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showPromotionGuide, setShowPromotionGuide] = useState<'featured' | 'highlight' | 'premium' | null>(null);
 
   // Update email when initialEmail changes
   useEffect(() => {
@@ -74,6 +75,40 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     // A small delay to ensure the first modal has time to start closing animation
     setTimeout(() => {
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    }, 150);
+  };
+
+  const handlePromotionClick = (tier: 'featured' | 'highlight' | 'premium') => {
+    setShowPromotionGuide(tier);
+  };
+
+  const handleGoToMyListings = () => {
+    if (!state.isAuthenticated) {
+      onClose();
+      dispatch({
+        type: 'TOGGLE_AUTH_MODAL',
+        payload: { isOpen: true, view: 'login' },
+      });
+      return;
+    }
+    onClose();
+    setTimeout(() => {
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' });
+    }, 150);
+  };
+
+  const handleCreateNewListing = () => {
+    if (!state.isAuthenticated) {
+      onClose();
+      dispatch({
+        type: 'TOGGLE_AUTH_MODAL',
+        payload: { isOpen: true, view: 'login' },
+      });
+      return;
+    }
+    onClose();
+    setTimeout(() => {
+      dispatch({ type: 'TOGGLE_LIST_MODAL', payload: true });
     }, 150);
   };
 
@@ -215,7 +250,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
         {/* Promotion Tiers - Horizontal scroll on mobile */}
         <div className="flex gap-3 overflow-x-auto pb-2 sm:pb-0 sm:overflow-visible sm:grid sm:grid-cols-3 sm:gap-4 mb-4 sm:mb-6 -mx-2 px-2 sm:mx-0 sm:px-0 snap-x snap-mandatory">
             {/* Featured - Violet theme */}
-            <div className="flex-shrink-0 w-[200px] sm:w-auto snap-center bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-100 transition-all group">
+            <div
+                onClick={() => handlePromotionClick('featured')}
+                className="flex-shrink-0 w-[200px] sm:w-auto snap-center bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-100 transition-all group cursor-pointer">
                 <div className="text-center mb-2 sm:mb-3">
                     <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg shadow-lg mb-2 group-hover:scale-110 transition-transform">
                         <span className="text-base sm:text-lg filter drop-shadow">⭐</span>
@@ -242,7 +279,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
             </div>
 
             {/* Highlight - Sky/Cyan theme */}
-            <div className="flex-shrink-0 w-[200px] sm:w-auto snap-center bg-gradient-to-br from-sky-50 to-cyan-50 border-2 border-sky-300 rounded-xl sm:rounded-2xl p-3 sm:p-4 pt-6 sm:pt-6 hover:shadow-xl hover:shadow-sky-100 transition-all relative group sm:scale-[1.02]">
+            <div
+                onClick={() => handlePromotionClick('highlight')}
+                className="flex-shrink-0 w-[200px] sm:w-auto snap-center bg-gradient-to-br from-sky-50 to-cyan-50 border-2 border-sky-300 rounded-xl sm:rounded-2xl p-3 sm:p-4 pt-6 sm:pt-6 hover:shadow-xl hover:shadow-sky-100 transition-all relative group sm:scale-[1.02] cursor-pointer">
                 <div className="absolute -top-2.5 sm:-top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-[10px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
                     ✨ Popular
                 </div>
@@ -272,7 +311,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
             </div>
 
             {/* Premium - Amber/Gold theme */}
-            <div className="flex-shrink-0 w-[200px] sm:w-auto snap-center bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-100 transition-all group">
+            <div
+                onClick={() => handlePromotionClick('premium')}
+                className="flex-shrink-0 w-[200px] sm:w-auto snap-center bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-100 transition-all group cursor-pointer">
                 <div className="text-center mb-2 sm:mb-3">
                     <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg shadow-lg mb-2 group-hover:scale-110 transition-transform">
                         <span className="text-base sm:text-lg filter drop-shadow">👑</span>
@@ -299,7 +340,53 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
             </div>
         </div>
 
+        {/* Promotion Guide Overlay */}
+        {showPromotionGuide && (
+            <div className="bg-gradient-to-br from-primary/5 to-indigo-50 border-2 border-primary/20 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6 animate-fade-in">
+                <div className="text-center mb-4">
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-indigo-600 rounded-xl shadow-lg mb-3">
+                        <span className="text-2xl">
+                            {showPromotionGuide === 'featured' && '⭐'}
+                            {showPromotionGuide === 'highlight' && '💎'}
+                            {showPromotionGuide === 'premium' && '👑'}
+                        </span>
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 capitalize">{showPromotionGuide} Promotion</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                        To promote a listing, go to your My Listings page and click "Promote" on any listing, or select a promotion when creating a new listing.
+                    </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <button
+                        onClick={handleGoToMyListings}
+                        className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:border-primary hover:text-primary transition-all shadow-sm text-sm flex items-center justify-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        Go to My Listings
+                    </button>
+                    <button
+                        onClick={handleCreateNewListing}
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all shadow-sm text-sm flex items-center justify-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create New Listing
+                    </button>
+                </div>
+                <button
+                    onClick={() => setShowPromotionGuide(null)}
+                    className="w-full mt-3 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                    ← Back to promotion options
+                </button>
+            </div>
+        )}
+
         {/* Info Box - Compact on mobile */}
+        {!showPromotionGuide && (
         <div className="bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
             <div className="flex items-start gap-2.5 sm:gap-4">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
@@ -308,13 +395,15 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
                 <div className="flex-1">
                     <p className="font-semibold text-gray-900 mb-0.5 text-sm sm:text-base">How it works:</p>
                     <p className="text-xs sm:text-sm text-gray-600">
-                        Select promotion tier when creating listing. Discount coupons supported!
+                        Click on a promotion tier above to get started, or create a listing first.
                     </p>
                 </div>
             </div>
         </div>
+        )}
 
-        {/* Buttons - Stacked on mobile */}
+        {/* Buttons - Stacked on mobile - Hide when promotion guide is showing */}
+        {!showPromotionGuide && (
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             <button
                 onClick={onClose}
@@ -329,6 +418,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
                 {t('modals:subscription.sellerPromotion.viewSubscriptionPlans')}
             </button>
         </div>
+        )}
     </div>
   );
 

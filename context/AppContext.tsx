@@ -101,6 +101,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, authModalView: action.payload };
     case 'SET_SELECTED_PROPERTY':
       return { ...state, selectedProperty: state.properties.find(p => p.id === action.payload) || null };
+    case 'SET_SELECTED_PROPERTY_OBJECT':
+      return { ...state, selectedProperty: action.payload };
     case 'SET_PROPERTY_TO_EDIT':
       return { ...state, propertyToEdit: action.payload };
     case 'SET_SELECTED_AGENT':

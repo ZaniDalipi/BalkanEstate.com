@@ -133,17 +133,74 @@ const createLandmarkIcon = (type: LandmarkType, isNightMode: boolean): L.DivIcon
  */
 // Global cache to persist across component remounts
 const landmarksCache = new Map<string, { landmarks: Landmark[]; timestamp: number }>();
-const CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes for in-memory cache
+const STORAGE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours for localStorage cache
+const STORAGE_KEY = 'balkanestate_poi_cache';
 const MIN_REQUEST_INTERVAL = 10000; // Minimum 10 seconds between API requests
 const MIN_ZOOM_FOR_FETCH = 12; // Show POIs at zoom 12+
+const PREFETCH_ZOOM = 10; // Start pre-fetching at zoom 10+ (before POIs are shown)
 const DEBOUNCE_DELAY = 2000; // 2 second debounce
+const PREFETCH_DELAY = 5000; // 5 second delay for background pre-fetch
 const MAX_CACHE_SIZE = 15; // Maximum cache entries
+const MAX_STORAGE_ENTRIES = 50; // Maximum localStorage cache entries
 
-// Alternative Overpass API endpoints for fallback
+// Load cache from localStorage on startup
+const loadCacheFromStorage = (): void => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Record<string, { landmarks: Landmark[]; timestamp: number }>;
+      const now = Date.now();
+      let loadedCount = 0;
+
+      for (const [key, value] of Object.entries(parsed)) {
+        // Only load entries that haven't expired
+        if (now - value.timestamp < STORAGE_CACHE_TTL) {
+          landmarksCache.set(key, value);
+          loadedCount++;
+        }
+      }
+
+      if (loadedCount > 0) {
+        console.debug(`[POI] Loaded ${loadedCount} cached areas from storage`);
+      }
+    }
+  } catch (e) {
+    // Silently ignore storage errors
+  }
+};
+
+// Save cache to localStorage
+const saveCacheToStorage = (): void => {
+  try {
+    const entries = Array.from(landmarksCache.entries());
+    const now = Date.now();
+
+    // Only save recent entries, limit size
+    const validEntries = entries
+      .filter(([_, v]) => now - v.timestamp < STORAGE_CACHE_TTL)
+      .slice(-MAX_STORAGE_ENTRIES);
+
+    const obj: Record<string, { landmarks: Landmark[]; timestamp: number }> = {};
+    for (const [key, value] of validEntries) {
+      obj[key] = value;
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  } catch (e) {
+    // Silently ignore storage errors (quota exceeded, etc.)
+  }
+};
+
+// Initialize cache from storage
+loadCacheFromStorage();
+
+// Alternative Overpass API endpoints for fallback (ordered by reliability)
 const OVERPASS_ENDPOINTS = [
-  'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
 ];
 
 let lastRequestTime = 0;
@@ -186,6 +243,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   const [landmarks, setLandmarks] = useState<Landmark[]>(EMPTY_LANDMARKS);
   const markersRef = useRef<L.Marker[]>([]);
   const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastBoundsKeyRef = useRef<string | null>(null);
   const onLandmarkClickRef = useRef(onLandmarkClick);
 
@@ -204,7 +262,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
 
     // Query for various POI types
     return `
-      [out:json][timeout:25];
+      [out:json][timeout:10];
       (
         node["tourism"~"museum|attraction|viewpoint"]["name"](${bbox});
         node["historic"~"monument|castle|memorial"]["name"](${bbox});
@@ -223,9 +281,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     // Skip if bounds haven't changed significantly
     if (boundsKey === lastBoundsKeyRef.current) return;
 
-    // Check cache first
+    // Check cache first (includes localStorage cache loaded on startup)
     const cached = landmarksCache.get(boundsKey);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    if (cached && Date.now() - cached.timestamp < STORAGE_CACHE_TTL) {
+      console.debug(`[POI] Cache hit: ${cached.landmarks.length} landmarks`);
       setLandmarks(cached.landmarks);
       lastBoundsKeyRef.current = boundsKey;
       return;
@@ -233,16 +292,23 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
 
     // Rate limiting: check if we can make a request
     const now = Date.now();
-    if (requestInFlight || now - lastRequestTime < MIN_REQUEST_INTERVAL) {
+    if (requestInFlight) {
+      console.debug('[POI] Request already in flight, skipping');
+      return;
+    }
+    if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
+      console.debug(`[POI] Rate limited, wait ${Math.ceil((MIN_REQUEST_INTERVAL - (now - lastRequestTime)) / 1000)}s`);
       return;
     }
 
     // Stop trying if too many consecutive failures
-    if (consecutiveFailures >= 3) {
+    if (consecutiveFailures >= OVERPASS_ENDPOINTS.length) {
       // Reset after 5 minutes
       if (now - lastRequestTime > 5 * 60 * 1000) {
+        console.debug('[POI] Resetting failure counter after 5 min cooldown');
         consecutiveFailures = 0;
       } else {
+        console.debug(`[POI] All endpoints failed (${consecutiveFailures}x), waiting for cooldown`);
         return;
       }
     }
@@ -253,9 +319,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     try {
       const query = buildOverpassQuery(bounds);
       const endpoint = OVERPASS_ENDPOINTS[currentEndpointIndex];
+      console.debug(`[POI] Fetching from endpoint ${currentEndpointIndex + 1}/${OVERPASS_ENDPOINTS.length}`);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s client timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s client timeout - fail fast, try next endpoint
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -302,6 +369,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       );
 
       const limitedLandmarks = uniqueLandmarks.slice(0, 40); // Limit to 40 landmarks
+      console.debug(`[POI] Found ${limitedLandmarks.length} landmarks`);
 
       // Cache the result and cleanup old entries
       landmarksCache.set(boundsKey, {
@@ -309,6 +377,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         timestamp: Date.now(),
       });
       cleanupCache();
+      saveCacheToStorage(); // Persist to localStorage
 
       setLandmarks(limitedLandmarks);
       lastBoundsKeyRef.current = boundsKey;
@@ -316,12 +385,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       consecutiveFailures++;
       // Rotate to next endpoint on any failure
       currentEndpointIndex = (currentEndpointIndex + 1) % OVERPASS_ENDPOINTS.length;
-
-      if (error?.name === 'AbortError') {
-        console.warn('Landmarks fetch timed out, will try different endpoint');
-      } else {
-        console.warn('Failed to fetch landmarks:', error?.message || error);
-      }
+      console.debug(`[POI] Endpoint failed (${consecutiveFailures}/${OVERPASS_ENDPOINTS.length}), trying next...`);
     } finally {
       requestInFlight = false;
     }
@@ -331,6 +395,88 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
   const clearLandmarks = useCallback(() => {
     setLandmarks(prev => prev.length === 0 ? prev : EMPTY_LANDMARKS);
   }, []);
+
+  // Background pre-fetch (silently caches POIs without updating UI)
+  const prefetchLandmarks = useCallback(async (bounds: L.LatLngBounds) => {
+    const boundsKey = bounds.toBBoxString();
+
+    // Already cached? Skip
+    const cached = landmarksCache.get(boundsKey);
+    if (cached && Date.now() - cached.timestamp < STORAGE_CACHE_TTL) {
+      return;
+    }
+
+    // Rate limiting check
+    const now = Date.now();
+    if (requestInFlight || now - lastRequestTime < MIN_REQUEST_INTERVAL) {
+      return;
+    }
+
+    // Too many failures? Skip
+    if (consecutiveFailures >= OVERPASS_ENDPOINTS.length) {
+      return;
+    }
+
+    console.debug(`[POI] Background pre-fetching for current area...`);
+    requestInFlight = true;
+    lastRequestTime = now;
+
+    try {
+      const query = buildOverpassQuery(bounds);
+      const endpoint = OVERPASS_ENDPOINTS[currentEndpointIndex];
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: query,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error('Pre-fetch failed');
+      }
+
+      consecutiveFailures = 0;
+      const data = await response.json();
+      const elements = data.elements || [];
+
+      const fetchedLandmarks: Landmark[] = elements
+        .filter((el: any) => el.tags?.name)
+        .map((el: any) => ({
+          id: el.id,
+          name: el.tags.name,
+          type: getLandmarkType(el.tags),
+          lat: el.lat,
+          lon: el.lon,
+          tags: el.tags,
+        }));
+
+      const uniqueLandmarks = fetchedLandmarks.filter(
+        (landmark, index, self) =>
+          index === self.findIndex((l) => l.name === landmark.name)
+      );
+
+      const limitedLandmarks = uniqueLandmarks.slice(0, 40);
+      console.debug(`[POI] Pre-fetched ${limitedLandmarks.length} landmarks (cached for later)`);
+
+      landmarksCache.set(boundsKey, {
+        landmarks: limitedLandmarks,
+        timestamp: Date.now(),
+      });
+      cleanupCache();
+      saveCacheToStorage();
+    } catch {
+      consecutiveFailures++;
+      currentEndpointIndex = (currentEndpointIndex + 1) % OVERPASS_ENDPOINTS.length;
+    } finally {
+      requestInFlight = false;
+    }
+  }, [buildOverpassQuery]);
 
   // Fetch landmarks on map move (debounced with longer delay)
   useEffect(() => {
@@ -342,8 +488,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         clearTimeout(fetchTimeoutRef.current);
       }
 
-      // Only fetch at zoom level 14+ to reduce API calls
-      if (map.getZoom() < MIN_ZOOM_FOR_FETCH) {
+      const currentZoom = map.getZoom();
+      // Only fetch at zoom level 12+ to reduce API calls
+      if (currentZoom < MIN_ZOOM_FOR_FETCH) {
+        console.debug(`[POI] Zoom ${currentZoom} < ${MIN_ZOOM_FOR_FETCH}, need to zoom in more`);
         clearLandmarks();
         return;
       }
@@ -368,6 +516,53 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       }
     };
   }, [enabled, map, fetchLandmarks, clearLandmarks]);
+
+  // Background pre-fetch at lower zoom levels (before POIs are needed)
+  useEffect(() => {
+    if (!enabled) return;
+
+    const handlePrefetch = () => {
+      // Clear previous timeout
+      if (prefetchTimeoutRef.current) {
+        clearTimeout(prefetchTimeoutRef.current);
+      }
+
+      const currentZoom = map.getZoom();
+
+      // Only pre-fetch at zoom 10-11 (before POIs are shown at 12+)
+      if (currentZoom < PREFETCH_ZOOM || currentZoom >= MIN_ZOOM_FOR_FETCH) {
+        return;
+      }
+
+      // Use requestIdleCallback if available, otherwise setTimeout
+      const schedulePreFetch = () => {
+        prefetchTimeoutRef.current = setTimeout(() => {
+          // Double-check we're still at the right zoom level
+          if (map.getZoom() >= PREFETCH_ZOOM && map.getZoom() < MIN_ZOOM_FOR_FETCH) {
+            prefetchLandmarks(map.getBounds());
+          }
+        }, PREFETCH_DELAY);
+      };
+
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(schedulePreFetch, { timeout: 10000 });
+      } else {
+        schedulePreFetch();
+      }
+    };
+
+    // Initial check
+    handlePrefetch();
+
+    map.on('moveend', handlePrefetch);
+
+    return () => {
+      map.off('moveend', handlePrefetch);
+      if (prefetchTimeoutRef.current) {
+        clearTimeout(prefetchTimeoutRef.current);
+      }
+    };
+  }, [enabled, map, prefetchLandmarks]);
 
   // Create/update markers
   useEffect(() => {

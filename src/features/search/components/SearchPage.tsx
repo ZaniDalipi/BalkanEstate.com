@@ -122,6 +122,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
     const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
     const [showMapHint, setShowMapHint] = useState(false); // Show hint about map view on mobile
+    const [fallbackLocation, setFallbackLocation] = useState<string | null>(null); // Location name when showing fallback properties
 
 
     useEffect(() => {
@@ -546,32 +547,112 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         }
     }, [properties, activeFilters]);
 
-    const listProperties = useMemo(() => {
+    const { listProperties, fallbackLocationValue } = useMemo(() => {
+        // Helper to calculate distance between two points
+        const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+            return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
+        };
+
+        // Helper to get smart fallback properties with location priority
+        const getSmartFallback = (centerLat: number, centerLng: number): { properties: Property[], location: string | null } => {
+            if (baseFilteredProperties.length === 0) {
+                return { properties: [], location: null };
+            }
+
+            // Find the closest property to determine the search city/country
+            const propertiesWithDistance = baseFilteredProperties.map(p => ({
+                ...p,
+                distance: getDistance(centerLat, centerLng, p.lat, p.lng)
+            })).sort((a, b) => a.distance - b.distance);
+
+            const closestProperty = propertiesWithDistance[0];
+            const searchCity = closestProperty?.city;
+            const searchCountry = closestProperty?.country;
+
+            // Priority 1: Properties in the same city
+            const sameCityProps = baseFilteredProperties.filter(p =>
+                p.city?.toLowerCase() === searchCity?.toLowerCase()
+            );
+
+            if (sameCityProps.length > 0) {
+                // Sort by distance from center
+                const sorted = sameCityProps.sort((a, b) =>
+                    getDistance(centerLat, centerLng, a.lat, a.lng) -
+                    getDistance(centerLat, centerLng, b.lat, b.lng)
+                );
+                return { properties: sorted, location: searchCity || null };
+            }
+
+            // Priority 2: Properties in nearby cities (same country, sorted by distance)
+            const sameCountryProps = baseFilteredProperties.filter(p =>
+                p.country?.toLowerCase() === searchCountry?.toLowerCase()
+            );
+
+            if (sameCountryProps.length > 0) {
+                // Sort by distance to show nearest cities first
+                const sorted = sameCountryProps.sort((a, b) =>
+                    getDistance(centerLat, centerLng, a.lat, a.lng) -
+                    getDistance(centerLat, centerLng, b.lat, b.lng)
+                );
+                // Get the city of the closest property in the country
+                const nearestCity = sorted[0]?.city;
+                return { properties: sorted, location: nearestCity || searchCountry || null };
+            }
+
+            // Priority 3: All available properties (sorted by distance)
+            const sorted = propertiesWithDistance.sort((a, b) => a.distance - b.distance);
+            const nearestLocation = sorted[0]?.city || sorted[0]?.country;
+            return { properties: sorted, location: nearestLocation || null };
+        };
+
         // If a specific area is drawn/searched by the user, filter to that area
         if (drawnBounds) {
             const withinDrawn = baseFilteredProperties.filter(p => drawnBounds.contains([p.lat, p.lng]));
-            return withinDrawn;
+            // Only filter by drawn bounds if there are results, otherwise show all
+            if (withinDrawn.length > 0) {
+                return { listProperties: withinDrawn, fallbackLocationValue: null };
+            }
+            // No properties in drawn area - fall through to mapBounds check or show all
         }
 
         // On mobile, show ALL properties only when filters were explicitly reset
-        // This ensures users see all available properties after reset, but
-        // when they move the map or search a location, it shows only visible properties
         if (isMobile && showAllOnMobile) {
-            return baseFilteredProperties;
+            return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
         }
 
         // Filter to show only properties visible in the current map view
         if (mapBounds) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
-            // If no properties in view but we have properties, show all (better UX than empty list)
-            if (withinView.length === 0 && baseFilteredProperties.length > 0) {
-                return baseFilteredProperties;
+
+            // If properties in view, show them
+            if (withinView.length > 0) {
+                return { listProperties: withinView, fallbackLocationValue: null };
             }
-            return withinView;
+
+            // No properties in view - use smart fallback
+            if (baseFilteredProperties.length > 0) {
+                const center = mapBounds.getCenter();
+                const fallback = getSmartFallback(center.lat, center.lng);
+
+                // Safety: never return empty if we have properties
+                if (fallback.properties.length === 0) {
+                    return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
+                }
+
+                return { listProperties: fallback.properties, fallbackLocationValue: fallback.location };
+            }
+
+            return { listProperties: [], fallbackLocationValue: null };
         }
+
         // Fallback to all filtered properties if no bounds set (initial load)
-        return baseFilteredProperties;
+        return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
     }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
+
+    // Update fallback location state when computed value changes
+    useEffect(() => {
+        setFallbackLocation(fallbackLocationValue);
+    }, [fallbackLocationValue]);
 
 
     const handleFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
@@ -662,11 +743,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 const center = drawnBounds.getCenter();
                 const name = await generateSearchNameFromCoords(center.lat, center.lng, drawnBounds);
                 const serializedBounds = serializeBounds(drawnBounds);
-                console.log('[SearchPage] Saving drawn bounds:', {
-                    drawnBounds,
-                    serializedBounds,
-                    isAreaOnly,
-                });
                 newSearch = {
                     id: `ss-${now}`,
                     name,
@@ -738,8 +814,52 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     };
 
     const handleApplyAiFilters = useCallback(async (aiQuery: AiSearchQuery) => {
+        // Map for normalizing country names to our key format
+        const countryNameToKey: Record<string, string> = {
+            'albania': 'albania',
+            'bosnia': 'bosnia-herzegovina',
+            'bosnia and herzegovina': 'bosnia-herzegovina',
+            'bulgaria': 'bulgaria',
+            'croatia': 'croatia',
+            'greece': 'greece',
+            'kosovo': 'kosovo',
+            'montenegro': 'montenegro',
+            'north macedonia': 'north-macedonia',
+            'macedonia': 'north-macedonia',
+            'romania': 'romania',
+            'serbia': 'serbia',
+            'slovenia': 'slovenia',
+        };
+
+        // Check if a string is a country name
+        const isCountryName = (str?: string): boolean => {
+            if (!str) return false;
+            return str.toLowerCase() in countryNameToKey;
+        };
+
+        // Get normalized country key from name
+        const normalizeCountryFromAi = (country?: string): string => {
+            if (!country) return 'any';
+            return countryNameToKey[country.toLowerCase()] || 'any';
+        };
+
+        // Determine the country key - from explicit country field or from location if it's a country name
+        const countryFromLocation = aiQuery.location && isCountryName(aiQuery.location)
+            ? normalizeCountryFromAi(aiQuery.location)
+            : null;
+        const countryKey = normalizeCountryFromAi(aiQuery.country) !== 'any'
+            ? normalizeCountryFromAi(aiQuery.country)
+            : countryFromLocation || 'any';
+
+        // Only put city/area in query, not country names
+        const locationIsCountry = aiQuery.location && isCountryName(aiQuery.location);
+        const queryValue = locationIsCountry ? '' : (aiQuery.location || '');
+
+        // Only include fields that were explicitly provided by the AI
+        // Don't override defaults with AI-generated values the user didn't request
         const newFilters: Partial<Filters> = {
-            query: aiQuery.location || '',
+            query: queryValue,
+            country: countryKey,
             minPrice: aiQuery.minPrice || null,
             maxPrice: aiQuery.maxPrice || null,
             beds: aiQuery.beds || null,
@@ -748,27 +868,74 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             minSqft: aiQuery.minSqft || null,
             maxSqft: aiQuery.maxSqft || null,
         };
+
+        // Only set propertyType if AI explicitly provided it
+        if (aiQuery.propertyType) {
+            newFilters.propertyType = aiQuery.propertyType === 'commercial' ? 'other' : aiQuery.propertyType;
+        }
+
+        // Only set sellerType if AI explicitly provided it (user asked for agent/private)
+        if (aiQuery.sellerType) {
+            newFilters.sellerType = aiQuery.sellerType;
+        }
         const updatedFilters = { ...initialFilters, ...newFilters };
+
         updateSearchPageState({ filters: updatedFilters, activeFilters: updatedFilters, searchMode: 'manual', isAiChatModalOpen: false });
         updateSearchPageState({ isFiltersOpen: false });
 
-        // Navigate map to the AI-provided location if available
-        if (aiQuery.location) {
+        // Navigate map based on location type
+        // If location is a country name, use our BALKAN_COUNTRIES data directly
+        if (locationIsCountry && countryKey !== 'any') {
+            const countryData = BALKAN_COUNTRIES[countryKey];
+            if (countryData) {
+                const bounds = L.latLngBounds(countryData.bounds[0], countryData.bounds[1]);
+                updateSearchPageState({
+                    drawnBoundsJSON: serializeBounds(bounds),
+                });
+                setFlyToTarget({ center: countryData.center, zoom: countryData.zoom });
+                return;
+            }
+        }
+
+        // If we have a country but location is a city, search for "city, country" for better OSM results
+        if (aiQuery.location && !locationIsCountry) {
             try {
-                const results = await searchLocation(aiQuery.location);
+                // Build search query with English country name for better OSM results
+                let searchQuery = aiQuery.location;
+                if (countryKey !== 'any') {
+                    const countryData = BALKAN_COUNTRIES[countryKey];
+                    if (countryData) {
+                        searchQuery = `${aiQuery.location}, ${countryData.name}`;
+                    }
+                }
+
+                const results = await searchLocation(searchQuery);
+
                 if (results.length > 0) {
                     const [south, north, west, east] = results[0].boundingbox.map(Number);
                     const searchBounds = L.latLngBounds([
                         [south, west],
                         [north, east],
                     ]);
+
                     updateSearchPageState({
                         mapBoundsJSON: serializeBounds(searchBounds),
+                        drawnBoundsJSON: serializeBounds(searchBounds),
                     });
                     setFlyToTarget({ center: [Number(results[0].lat), Number(results[0].lon)], zoom: 12 });
                 }
             } catch (error) {
-                console.error("Error searching location:", error);
+                console.error("[AI Search] Error searching location:", error);
+            }
+        } else if (countryKey !== 'any' && !aiQuery.location) {
+            // Only country specified (from country field), no city - fly to country
+            const countryData = BALKAN_COUNTRIES[countryKey];
+            if (countryData) {
+                const bounds = L.latLngBounds(countryData.bounds[0], countryData.bounds[1]);
+                updateSearchPageState({
+                    drawnBoundsJSON: serializeBounds(bounds),
+                });
+                setFlyToTarget({ center: countryData.center, zoom: countryData.zoom });
             }
         }
     }, [updateSearchPageState]);
@@ -827,6 +994,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         onSuggestionClick: handleSuggestionClick,
         isQueryInputFocused: isQueryInputFocused,
         onQueryInputFocusChange: setIsQueryInputFocused,
+        fallbackLocation: fallbackLocation,
     };
 
     // Generate dynamic SEO based on current filters
@@ -1030,9 +1198,9 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Mobile View Overlays --- */}
                 {isMobile && !isFiltersOpen && (
                     <>
-                        <div className="absolute top-0 left-0 right-0 z-20 p-2 pointer-events-none">
+                        <div className="absolute top-0 left-0 right-0 z-[100] p-2 pointer-events-none">
                             <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
-                                <div className="w-full bg-white/80 backdrop-blur-sm rounded-full shadow-lg p-1 flex items-center gap-1">
+                                <div className="w-full bg-white/95 backdrop-blur-md rounded-full shadow-lg p-1 flex items-center gap-1">
                                     <button onClick={onToggleSidebar} className="p-2 flex-shrink-0"><Bars3Icon className="w-6 h-6 text-neutral-800"/></button>
                                     {renderSearchInput(true)}
                                     <button onClick={() => updateSearchPageState({ isFiltersOpen: true })} className="p-2 flex-shrink-0 hover:bg-neutral-100 rounded-full"><AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/></button>
@@ -1049,7 +1217,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             </div>
                         </div>
                         
-                        <div className="absolute bottom-16 left-0 right-0 z-[1002] p-4 pointer-events-none">
+                        <div className="absolute bottom-16 left-0 right-0 z-[100] p-4 pointer-events-none">
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">

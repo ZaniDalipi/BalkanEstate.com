@@ -82,6 +82,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import propertyValuationRoutes from './routes/propertyValuationRoutes';
 import inquiryRoutes from './routes/inquiryRoutes';
 import measurementRoutes from './routes/measurementRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -256,6 +257,7 @@ app.use('/api/notifications', notificationRoutes); // User notifications
 app.use('/api/valuations', propertyValuationRoutes); // AI property valuation
 app.use('/api/inquiries', inquiryRoutes); // Buyer-to-agent inquiries (rate limited)
 app.use('/api/measurements', measurementRoutes); // User land measurements
+app.use('/api/analytics', analyticsRoutes); // Analytics and activity tracking
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

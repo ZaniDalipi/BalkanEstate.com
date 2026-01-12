@@ -42,8 +42,8 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const TILE_LAYERS = {
   street: {
-    // Google Maps Street - clean labels and roads, max zoom 21
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    // Google Maps Street - clean labels and roads, max zoom 21, English labels
+    url: 'https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
     attribution: '&copy; Google Maps',
     maxZoom: 21,
     maxNativeZoom: 21,
@@ -229,7 +229,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [isLegendOpen, setIsLegendOpen] = useState(false); // Legend closed by default, user can open it
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
-  const [showLandmarks, setShowLandmarks] = useState(true); // Show landmarks by default
+  const [showLandmarks, setShowLandmarks] = useState(false); // Landmarks off by default
   const [show3DBuildings, setShow3DBuildings] = useState(false); // Toggle for 3D buildings
   const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
   const [mapCenterLng, setMapCenterLng] = useState<number>(22); // Default Balkans longitude

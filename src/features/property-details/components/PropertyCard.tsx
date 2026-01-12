@@ -134,7 +134,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       onClick={handleCardClick}
     >
       {/* Image Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden rounded-t-2xl">
         {imageError ? (
           <div className="w-full h-40 sm:h-44 md:h-48 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
             <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />

@@ -467,6 +467,7 @@ export interface ChatMessage {
 
 export interface AiSearchQuery {
     location?: string;
+    country?: string;
     minPrice?: number;
     maxPrice?: number;
     beds?: number;
@@ -474,6 +475,8 @@ export interface AiSearchQuery {
     livingRooms?: number;
     minSqft?: number;
     maxSqft?: number;
+    propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'commercial';
+    sellerType?: 'agent' | 'private';
     features?: string[];
 }
 
@@ -664,7 +667,7 @@ export interface AppState {
     adminSection: AdminSection;
 }
 
-export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'discounts' | 'promotions' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings';
+export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings';
 
 export type AppAction =
     | { type: 'AUTH_CHECK_START' }
@@ -677,6 +680,7 @@ export type AppAction =
     | { type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: boolean, view?: AuthModalView } }
     | { type: 'SET_AUTH_MODAL_VIEW', payload: AuthModalView }
     | { type: 'SET_SELECTED_PROPERTY', payload: string | null }
+    | { type: 'SET_SELECTED_PROPERTY_OBJECT', payload: Property | null }
     | { type: 'SET_PROPERTY_TO_EDIT', payload: Property | null }
     | { type: 'SET_SELECTED_AGENT', payload: string | null }
     | { type: 'SET_SELECTED_AGENCY', payload: string | null }

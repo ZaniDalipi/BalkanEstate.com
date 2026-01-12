@@ -14,7 +14,8 @@
   "cannotSaveEmptySearch": "Cannot save an empty search. Please add some criteria or move to an area on the map.",
   "searchSaved": "Search saved successfully!",
   "couldNotSaveSearch": "Could not save search. AI might be busy.",
-  "mobileMapInfo": "Prikazuju se nekretnine vidljive na mapi",
+  "mobileMapInfo": "Prikazivanje nekretnina vidljivih na karti",
+  "showingNearbyProperties": "Prikazivanje nekretnina koje bi vam se mogle svidjeti u {{location}}",
   "filters": {
     "title": "Filters",
     "showFilters": "Show Filters",

@@ -133,8 +133,10 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
     if (matchedAgents.length > 0) {
       agentRequest.assignedAgents = matchedAgents.map(agent => agent._id);
       agentRequest.status = 'assigned';
-      await agentRequest.save();
     }
+
+    // Track emails to be sent
+    let emailsSentCount = 0;
 
     // Send email notifications to matched agents and agencies
     const emailsSent: string[] = [];
@@ -158,6 +160,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
             }),
           });
           emailsSent.push(user.email);
+          emailsSentCount++;
         } catch (err) {
           console.error(`Failed to send email to agent ${user.email}:`, err);
         }
@@ -182,6 +185,7 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
             }),
           });
           emailsSent.push(agency.email);
+          emailsSentCount++;
         } catch (err) {
           console.error(`Failed to send email to agency ${agency.email}:`, err);
         }
@@ -189,6 +193,10 @@ export const createAgentRequest = async (req: Request, res: Response): Promise<v
     }
 
     console.log(`📧 Sent ${emailsSent.length} notification emails`);
+
+    // Save final state with email count
+    agentRequest.emailsSent = emailsSentCount;
+    await agentRequest.save();
 
     res.status(201).json({
       message: 'Request submitted successfully',
@@ -352,18 +360,35 @@ export const getAgentRequests = async (req: Request, res: Response): Promise<voi
 export const updateAgentRequestStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, outcome, notes, contactedBy } = req.body;
 
-    if (!['pending', 'assigned', 'contacted', 'completed', 'cancelled'].includes(status)) {
+    if (status && !['pending', 'assigned', 'contacted', 'completed', 'cancelled'].includes(status)) {
        res.status(400).json({ message: 'Invalid status' });
        return;
     }
 
+    if (outcome && !['success', 'no_response', 'not_interested', 'pending'].includes(outcome)) {
+       res.status(400).json({ message: 'Invalid outcome' });
+       return;
+    }
+
+    const updateData: any = {};
+    if (status) updateData.status = status;
+    if (outcome) updateData.outcome = outcome;
+    if (notes !== undefined) updateData.notes = notes;
+    if (contactedBy) updateData.contactedBy = contactedBy;
+
+    // Set completedAt when status is completed or cancelled
+    if (status === 'completed' || status === 'cancelled') {
+      updateData.completedAt = new Date();
+    }
+
     const agentRequest = await AgentRequest.findByIdAndUpdate(
       id,
-      { status },
+      updateData,
       { new: true }
-    );
+    ).populate('assignedAgents', 'agentId userId')
+     .populate('contactedBy', 'agentId userId');
 
     if (!agentRequest) {
        res.status(404).json({ message: 'Request not found' });
@@ -373,6 +398,111 @@ export const updateAgentRequestStatus = async (req: Request, res: Response): Pro
     res.json({ agentRequest });
   } catch (error) {
     console.error('Error updating agent request:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get agent request statistics for admin dashboard
+export const getAgentRequestStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    const dateFilter: any = {};
+    if (startDate) {
+      dateFilter.createdAt = { $gte: new Date(startDate as string) };
+    }
+    if (endDate) {
+      dateFilter.createdAt = { ...dateFilter.createdAt, $lte: new Date(endDate as string) };
+    }
+
+    // Get total counts by status
+    const statusCounts = await AgentRequest.aggregate([
+      { $match: dateFilter },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Get outcome statistics
+    const outcomeCounts = await AgentRequest.aggregate([
+      { $match: { ...dateFilter, outcome: { $exists: true, $ne: 'pending' } } },
+      {
+        $group: {
+          _id: '$outcome',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Calculate success rate
+    const totalCompleted = await AgentRequest.countDocuments({
+      ...dateFilter,
+      status: { $in: ['completed', 'cancelled'] },
+    });
+    const successCount = await AgentRequest.countDocuments({
+      ...dateFilter,
+      outcome: 'success',
+    });
+    const successRate = totalCompleted > 0 ? (successCount / totalCompleted) * 100 : 0;
+
+    // Get recent requests
+    const recentRequests = await AgentRequest.find(dateFilter)
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('assignedAgents', 'agentId userId')
+      .populate('contactedBy', 'agentId userId');
+
+    // Get location distribution
+    const locationStats = await AgentRequest.aggregate([
+      { $match: dateFilter },
+      {
+        $group: {
+          _id: '$location',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
+    // Get average emails sent
+    const emailStats = await AgentRequest.aggregate([
+      { $match: dateFilter },
+      {
+        $group: {
+          _id: null,
+          avgEmails: { $avg: '$emailsSent' },
+          totalEmails: { $sum: '$emailsSent' },
+        },
+      },
+    ]);
+
+    // Total count
+    const totalRequests = await AgentRequest.countDocuments(dateFilter);
+
+    res.json({
+      stats: {
+        total: totalRequests,
+        byStatus: statusCounts.reduce((acc, item) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {} as Record<string, number>),
+        byOutcome: outcomeCounts.reduce((acc, item) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {} as Record<string, number>),
+        successRate: Math.round(successRate * 10) / 10,
+        avgEmailsSent: emailStats[0]?.avgEmails?.toFixed(1) || 0,
+        totalEmailsSent: emailStats[0]?.totalEmails || 0,
+        topLocations: locationStats,
+      },
+      recentRequests,
+    });
+  } catch (error) {
+    console.error('Error fetching agent request stats:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

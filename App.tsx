@@ -61,6 +61,9 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 // Cookie Consent Banner
 import CookieConsent from './src/shared/components/CookieConsent';
 
+// Microsoft Clarity - Heatmaps & Session Recordings
+import ClarityInit from './src/app/components/ClarityInit';
+
 // Loading fallback component
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
@@ -102,9 +105,31 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       const propertyMatch = path.match(/^\/property\/(.+)$/);
       if (propertyMatch) {
         const propertyId = decodeURIComponent(propertyMatch[1]);
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+
+        // Fetch property from API to ensure we have full data
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        fetch(`${API_URL}/properties/${propertyId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.property) {
+              // Transform backend property to frontend format
+              const property = {
+                ...data.property,
+                id: data.property._id || data.property.id,
+                sellerId: data.property.sellerId?._id || data.property.sellerId,
+              };
+              dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+            } else {
+              console.error('Property not found:', propertyId);
+              dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+            }
+          })
+          .catch(err => {
+            console.error('Error loading property:', err);
+            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+          });
         return;
       }
 
@@ -644,6 +669,9 @@ const App: React.FC = () => {
                       facebookPixelId={facebookPixelId}
                     />
                   )}
+
+                  {/* Microsoft Clarity - Heatmaps & Session Recordings */}
+                  <ClarityInit />
 
                   <AppWrapper />
                 </ConfirmationProvider>

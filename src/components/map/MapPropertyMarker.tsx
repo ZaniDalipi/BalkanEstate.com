@@ -482,15 +482,16 @@ const PropertyPopup: React.FC<{
   }, [isActivelyPromoted, images.length]);
 
   // Enhanced popup for promoted properties - compact design
+  // Responsive: smaller on mobile
   if (isActivelyPromoted) {
     return (
       <div
-        className={`w-52 cursor-pointer rounded-xl overflow-hidden border-2 ${tierConfig.border}`}
+        className={`w-40 sm:w-48 cursor-pointer rounded-xl overflow-hidden border-2 ${tierConfig.border}`}
         onClick={() => onPopupClick(property.id)}
       >
         {/* Image carousel - compact */}
         <div className="relative">
-          <div className="relative h-28 overflow-hidden">
+          <div className="relative h-24 sm:h-28 overflow-hidden">
             {images.map((imgUrl, index) => (
               <div
                 key={index}
@@ -611,53 +612,61 @@ const PropertyPopup: React.FC<{
   }
 
   // Standard popup - clean minimal design (no slider, full-width image)
+  // Responsive: smaller on mobile
   return (
     <div
-      className="w-[200px] cursor-pointer rounded-xl overflow-hidden shadow-lg bg-white"
+      className="w-[160px] sm:w-[180px] cursor-pointer rounded-xl overflow-hidden shadow-lg bg-white"
       onClick={() => onPopupClick(property.id)}
     >
       {/* Full-width image - no slider, just first image */}
-      <div className="relative h-[120px]">
-        <img
-          src={images[0]}
-          alt={property.address}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+      <div className="relative h-[90px] sm:h-[100px]">
+        {imageErrors.has(0) ? (
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+            <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+          </div>
+        ) : (
+          <img
+            src={images[0]}
+            alt={property.address}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => handleImageError(0)}
+          />
+        )}
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
         {/* Property type */}
-        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/90 text-neutral-700 capitalize">
+        <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-white/90 text-neutral-700 capitalize">
           {property.propertyType}
         </span>
         {/* Price on image */}
-        <div className="absolute bottom-2 left-2 right-2">
-          <p className="font-bold text-white text-lg drop-shadow-md">
+        <div className="absolute bottom-1.5 left-1.5 right-1.5">
+          <p className="font-bold text-white text-sm sm:text-base drop-shadow-md">
             {formatPrice(priceInfo.currentPrice, property.country)}
           </p>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-3">
+      <div className="p-2">
         {/* Title */}
         {property.title && (
-          <p className="font-semibold text-sm text-neutral-800 line-clamp-1 mb-1">
+          <p className="font-semibold text-xs text-neutral-800 line-clamp-1 mb-0.5">
             {property.title}
           </p>
         )}
 
         {/* Location */}
-        <p className="text-[11px] text-neutral-500 mb-2">
+        <p className="text-[10px] text-neutral-500 mb-1.5">
           {property.city}, {property.country}
         </p>
 
         {/* Specs row */}
         {property.propertyType === 'land' ? (
-          <div className="flex items-center gap-2 text-[11px] text-neutral-600 mb-2">
+          <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
             <span className="font-semibold">{property.sqft?.toLocaleString()} m²</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 text-[11px] text-neutral-600 mb-2">
+          <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
             <span><span className="font-semibold">{property.beds}</span> bed</span>
             <span><span className="font-semibold">{property.baths}</span> bath</span>
             <span><span className="font-semibold">{property.sqft}</span> m²</span>
@@ -665,8 +674,8 @@ const PropertyPopup: React.FC<{
         )}
 
         {/* CTA */}
-        <div className="text-center py-2 rounded-lg bg-primary/10">
-          <span className="text-[11px] font-semibold text-primary">View details →</span>
+        <div className="text-center py-1.5 rounded-lg bg-primary/10">
+          <span className="text-[10px] font-semibold text-primary">View details →</span>
         </div>
       </div>
     </div>
@@ -734,12 +743,12 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup
-              maxWidth={isPromoted ? 280 : 200}
-              minWidth={isPromoted ? 240 : 180}
+              maxWidth={isPromoted ? 220 : 180}
+              minWidth={isPromoted ? 160 : 140}
               className={`property-popup ${isPromoted ? 'promoted-property-popup' : 'standard-property-popup'} ${isNightMode ? 'night-mode-popup' : ''}`}
               autoPan={true}
-              autoPanPadding={[40, 40]}
-              keepInView={false}
+              autoPanPadding={[50, 60]}
+              keepInView={true}
             >
               <PropertyPopup property={prop} onPopupClick={onPopupClick} />
             </Popup>

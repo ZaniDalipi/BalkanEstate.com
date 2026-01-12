@@ -72,19 +72,44 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         const formatCurrency = (val: number) => `€${new Intl.NumberFormat('de-DE').format(val)}`;
         const pills = [];
 
+        // Location and country
         if (query.location) pills.push(<FilterPill key="loc">📍 {query.location}</FilterPill>);
+        if (query.country) pills.push(<FilterPill key="country">🌍 {query.country}</FilterPill>);
+
+        // Property type
+        if (query.propertyType) {
+            const typeIcons: Record<string, string> = {
+                house: '🏠',
+                apartment: '🏢',
+                villa: '🏛️',
+                land: '🏞️',
+                commercial: '🏪',
+            };
+            pills.push(<FilterPill key="type">{typeIcons[query.propertyType] || '🏠'} {query.propertyType}</FilterPill>);
+        }
+
+        // Price range
         if (query.minPrice && query.maxPrice) pills.push(<FilterPill key="price">{formatCurrency(query.minPrice)} - {formatCurrency(query.maxPrice)}</FilterPill>);
         else if (query.minPrice) pills.push(<FilterPill key="price">≥ {formatCurrency(query.minPrice)}</FilterPill>);
         else if (query.maxPrice) pills.push(<FilterPill key="price">≤ {formatCurrency(query.maxPrice)}</FilterPill>);
-        
+
+        // Rooms
         if (query.beds) pills.push(<FilterPill key="beds">🛏️ {query.beds}+ {t('ai.beds')}</FilterPill>);
         if (query.baths) pills.push(<FilterPill key="baths">🛁 {query.baths}+ {t('ai.baths')}</FilterPill>);
         if (query.livingRooms) pills.push(<FilterPill key="lr">🛋️ {query.livingRooms}+ {t('ai.living')}</FilterPill>);
 
+        // Size
         if (query.minSqft && query.maxSqft) pills.push(<FilterPill key="sqft">{query.minSqft}-{query.maxSqft} m²</FilterPill>);
         else if (query.minSqft) pills.push(<FilterPill key="sqft">≥ {query.minSqft} m²</FilterPill>);
         else if (query.maxSqft) pills.push(<FilterPill key="sqft">≤ {query.maxSqft} m²</FilterPill>);
 
+        // Seller type
+        if (query.sellerType) {
+            const sellerLabel = query.sellerType === 'agent' ? '👔 Agent' : '👤 Private';
+            pills.push(<FilterPill key="seller">{sellerLabel}</FilterPill>);
+        }
+
+        // Features
         if (query.features && query.features.length > 0) {
             query.features.forEach(f => pills.push(<FilterPill key={f}>✨ {f}</FilterPill>));
         }
