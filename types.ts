@@ -677,6 +677,7 @@ export type AppAction =
     | { type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: boolean, view?: AuthModalView } }
     | { type: 'SET_AUTH_MODAL_VIEW', payload: AuthModalView }
     | { type: 'SET_SELECTED_PROPERTY', payload: string | null }
+    | { type: 'SET_SELECTED_PROPERTY_OBJECT', payload: Property | null }
     | { type: 'SET_PROPERTY_TO_EDIT', payload: Property | null }
     | { type: 'SET_SELECTED_AGENT', payload: string | null }
     | { type: 'SET_SELECTED_AGENCY', payload: string | null }
