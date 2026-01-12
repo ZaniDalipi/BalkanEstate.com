@@ -107,7 +107,7 @@ const TermsOfServicePage: React.FC = () => {
               <li>{t('legal:terms.payments.recurring', 'Subscriptions are billed on a recurring basis (monthly or yearly)')}</li>
               <li>{t('legal:terms.payments.auto', 'Subscriptions auto-renew unless cancelled before the renewal date')}</li>
               <li>{t('legal:terms.payments.cancel', 'You can cancel your subscription at any time through your account settings')}</li>
-              <li>{t('legal:terms.payments.refund', 'Refunds are available within 30 days of purchase if you are not satisfied (see our Refund Policy)')}</li>
+              <li>{t('legal:terms.payments.refund', 'Refunds are available within 7 days (monthly) or 30 days (yearly) of purchase if you are not satisfied (see our Refund Policy)')}</li>
               <li>{t('legal:terms.payments.price', 'We may change subscription prices with 30 days notice')}</li>
             </ul>
             <div className="bg-gray-50 rounded-lg p-4 mt-4">

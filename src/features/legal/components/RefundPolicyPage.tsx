@@ -43,22 +43,29 @@ const RefundPolicyPage: React.FC = () => {
               {t('legal:refund.intro.title', 'Our Commitment')}
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              {t('legal:refund.intro.text', 'At BalkanEstate AI, we want you to be completely satisfied with your subscription. If you are not satisfied with our services, we offer a 30-day money-back guarantee on all subscription plans. This policy outlines the terms and conditions for requesting a refund.')}
+              {t('legal:refund.intro.text', 'At BalkanEstate AI, we want you to be completely satisfied with your subscription. If you are not satisfied with our services, we offer refunds based on your subscription type. This policy outlines the terms and conditions for requesting a refund.')}
             </p>
           </section>
 
-          {/* 30-Day Guarantee */}
+          {/* Refund Periods */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              {t('legal:refund.guarantee.title', '30-Day Money-Back Guarantee')}
+              {t('legal:refund.guarantee.title', 'Refund Periods')}
             </h2>
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
-              <p className="text-green-800 font-medium">
-                {t('legal:refund.guarantee.highlight', 'We offer a full refund within 30 days of your initial purchase, no questions asked.')}
-              </p>
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <h4 className="text-green-800 font-semibold mb-1">Monthly Subscriptions</h4>
+                <p className="text-green-700 text-2xl font-bold">7 Days</p>
+                <p className="text-green-600 text-sm">Full refund within 7 days of purchase</p>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <h4 className="text-blue-800 font-semibold mb-1">Yearly Subscriptions</h4>
+                <p className="text-blue-700 text-2xl font-bold">30 Days</p>
+                <p className="text-blue-600 text-sm">Full refund within 30 days of purchase</p>
+              </div>
             </div>
             <p className="text-gray-700 leading-relaxed mb-4">
-              {t('legal:refund.guarantee.text', 'If you are not satisfied with your subscription for any reason, you can request a full refund within 30 days of your original purchase date. This guarantee applies to:')}
+              {t('legal:refund.guarantee.text', 'If you are not satisfied with your subscription for any reason, you can request a full refund within the applicable refund period. This guarantee applies to:')}
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
               <li>{t('legal:refund.guarantee.newSub', 'New subscription purchases')}</li>
@@ -76,7 +83,7 @@ const RefundPolicyPage: React.FC = () => {
               {t('legal:refund.eligibility.text', 'You are eligible for a refund if:')}
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
-              <li>{t('legal:refund.eligibility.within30', 'Your request is made within 30 days of the original purchase')}</li>
+              <li>{t('legal:refund.eligibility.withinPeriod', 'Your request is made within 7 days (monthly) or 30 days (yearly) of the original purchase')}</li>
               <li>{t('legal:refund.eligibility.firstPurchase', 'It is your first subscription with BalkanEstate AI')}</li>
               <li>{t('legal:refund.eligibility.notAbused', 'The refund policy has not been previously used by you')}</li>
               <li>{t('legal:refund.eligibility.goodFaith', 'You have used the service in good faith')}</li>
@@ -92,11 +99,11 @@ const RefundPolicyPage: React.FC = () => {
               {t('legal:refund.nonRefundable.text', 'Refunds are not available in the following cases:')}
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
-              <li>{t('legal:refund.nonRefundable.after30', 'Requests made more than 30 days after purchase')}</li>
+              <li>{t('legal:refund.nonRefundable.afterPeriod', 'Requests made after the refund period (7 days for monthly, 30 days for yearly)')}</li>
               <li>{t('legal:refund.nonRefundable.renewal', 'Automatic subscription renewals (you should cancel before renewal date)')}</li>
               <li>{t('legal:refund.nonRefundable.abuse', 'Accounts terminated due to Terms of Service violations')}</li>
               <li>{t('legal:refund.nonRefundable.repeat', 'Repeat refund requests (one refund per user)')}</li>
-              <li>{t('legal:refund.nonRefundable.partial', 'Partial month usage after the 30-day window')}</li>
+              <li>{t('legal:refund.nonRefundable.partial', 'Partial usage after the refund window has expired')}</li>
             </ul>
           </section>
 
