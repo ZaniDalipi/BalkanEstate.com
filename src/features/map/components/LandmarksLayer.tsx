@@ -193,11 +193,11 @@ const saveCacheToStorage = (): void => {
 // Initialize cache from storage
 loadCacheFromStorage();
 
-// Alternative Overpass API endpoints for fallback
+// Alternative Overpass API endpoints for fallback (ordered by reliability)
 const OVERPASS_ENDPOINTS = [
-  'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
   'https://overpass.openstreetmap.ru/api/interpreter',
 ];
 
@@ -259,7 +259,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
 
     // Query for various POI types
     return `
-      [out:json][timeout:25];
+      [out:json][timeout:10];
       (
         node["tourism"~"museum|attraction|viewpoint"]["name"](${bbox});
         node["historic"~"monument|castle|memorial"]["name"](${bbox});
@@ -319,7 +319,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       console.debug(`[POI] Fetching from endpoint ${currentEndpointIndex + 1}/${OVERPASS_ENDPOINTS.length}`);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s client timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s client timeout - fail fast, try next endpoint
 
       const response = await fetch(endpoint, {
         method: 'POST',
