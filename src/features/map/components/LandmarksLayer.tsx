@@ -133,11 +133,65 @@ const createLandmarkIcon = (type: LandmarkType, isNightMode: boolean): L.DivIcon
  */
 // Global cache to persist across component remounts
 const landmarksCache = new Map<string, { landmarks: Landmark[]; timestamp: number }>();
-const CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes for in-memory cache
+const STORAGE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours for localStorage cache
+const STORAGE_KEY = 'balkanestate_poi_cache';
 const MIN_REQUEST_INTERVAL = 10000; // Minimum 10 seconds between API requests
 const MIN_ZOOM_FOR_FETCH = 12; // Show POIs at zoom 12+
 const DEBOUNCE_DELAY = 2000; // 2 second debounce
 const MAX_CACHE_SIZE = 15; // Maximum cache entries
+const MAX_STORAGE_ENTRIES = 50; // Maximum localStorage cache entries
+
+// Load cache from localStorage on startup
+const loadCacheFromStorage = (): void => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Record<string, { landmarks: Landmark[]; timestamp: number }>;
+      const now = Date.now();
+      let loadedCount = 0;
+
+      for (const [key, value] of Object.entries(parsed)) {
+        // Only load entries that haven't expired
+        if (now - value.timestamp < STORAGE_CACHE_TTL) {
+          landmarksCache.set(key, value);
+          loadedCount++;
+        }
+      }
+
+      if (loadedCount > 0) {
+        console.debug(`[POI] Loaded ${loadedCount} cached areas from storage`);
+      }
+    }
+  } catch (e) {
+    // Silently ignore storage errors
+  }
+};
+
+// Save cache to localStorage
+const saveCacheToStorage = (): void => {
+  try {
+    const entries = Array.from(landmarksCache.entries());
+    const now = Date.now();
+
+    // Only save recent entries, limit size
+    const validEntries = entries
+      .filter(([_, v]) => now - v.timestamp < STORAGE_CACHE_TTL)
+      .slice(-MAX_STORAGE_ENTRIES);
+
+    const obj: Record<string, { landmarks: Landmark[]; timestamp: number }> = {};
+    for (const [key, value] of validEntries) {
+      obj[key] = value;
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  } catch (e) {
+    // Silently ignore storage errors (quota exceeded, etc.)
+  }
+};
+
+// Initialize cache from storage
+loadCacheFromStorage();
 
 // Alternative Overpass API endpoints for fallback
 const OVERPASS_ENDPOINTS = [
@@ -224,9 +278,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     // Skip if bounds haven't changed significantly
     if (boundsKey === lastBoundsKeyRef.current) return;
 
-    // Check cache first
+    // Check cache first (includes localStorage cache loaded on startup)
     const cached = landmarksCache.get(boundsKey);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    if (cached && Date.now() - cached.timestamp < STORAGE_CACHE_TTL) {
+      console.debug(`[POI] Cache hit: ${cached.landmarks.length} landmarks`);
       setLandmarks(cached.landmarks);
       lastBoundsKeyRef.current = boundsKey;
       return;
@@ -319,6 +374,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         timestamp: Date.now(),
       });
       cleanupCache();
+      saveCacheToStorage(); // Persist to localStorage
 
       setLandmarks(limitedLandmarks);
       lastBoundsKeyRef.current = boundsKey;
