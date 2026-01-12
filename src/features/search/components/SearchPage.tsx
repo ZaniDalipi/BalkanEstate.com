@@ -438,6 +438,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
     const baseFilteredProperties = useMemo(() => {
         const filtered = filterProperties(properties, activeFilters);
+        console.log('[Filter Debug] Total properties:', properties.length, '| After filter:', filtered.length, '| Active filters:', activeFilters);
         const now = Date.now();
 
         // Helper to calculate promotion priority score
@@ -608,10 +609,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // If a specific area is drawn/searched by the user, filter to that area
         if (drawnBounds) {
             const withinDrawn = baseFilteredProperties.filter(p => drawnBounds.contains([p.lat, p.lng]));
+            console.log('[List Debug] Drawn bounds active | Within bounds:', withinDrawn.length, '| Total filtered:', baseFilteredProperties.length);
             // Only filter by drawn bounds if there are results, otherwise show all
             if (withinDrawn.length > 0) {
                 return { listProperties: withinDrawn, fallbackLocationValue: null };
             }
+            console.log('[List Debug] No properties in drawn bounds, using fallback');
             // No properties in drawn area - fall through to mapBounds check or show all
         }
 
@@ -623,11 +626,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // Filter to show only properties visible in the current map view
         if (mapBounds) {
             const withinView = baseFilteredProperties.filter(p => mapBounds.contains([p.lat, p.lng]));
+            console.log('[List Debug] Map bounds active | Within view:', withinView.length, '| Total filtered:', baseFilteredProperties.length);
 
             // If properties in view, show them
             if (withinView.length > 0) {
                 return { listProperties: withinView, fallbackLocationValue: null };
             }
+            console.log('[List Debug] No properties in map view, using smart fallback');
 
             // No properties in view - use smart fallback
             if (baseFilteredProperties.length > 0) {
@@ -819,6 +824,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     };
 
     const handleApplyAiFilters = useCallback(async (aiQuery: AiSearchQuery) => {
+        console.log('[AI Search] Applying filters:', aiQuery);
+
         const newFilters: Partial<Filters> = {
             query: aiQuery.location || '',
             minPrice: aiQuery.minPrice || null,
@@ -830,26 +837,37 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             maxSqft: aiQuery.maxSqft || null,
         };
         const updatedFilters = { ...initialFilters, ...newFilters };
+        console.log('[AI Search] Updated filters:', updatedFilters);
+
         updateSearchPageState({ filters: updatedFilters, activeFilters: updatedFilters, searchMode: 'manual', isAiChatModalOpen: false });
         updateSearchPageState({ isFiltersOpen: false });
 
         // Navigate map to the AI-provided location if available
         if (aiQuery.location) {
             try {
+                console.log('[AI Search] Searching for location:', aiQuery.location);
                 const results = await searchLocation(aiQuery.location);
+                console.log('[AI Search] Location search results:', results);
+
                 if (results.length > 0) {
                     const [south, north, west, east] = results[0].boundingbox.map(Number);
                     const searchBounds = L.latLngBounds([
                         [south, west],
                         [north, east],
                     ]);
+                    console.log('[AI Search] Setting map bounds:', { south, north, west, east });
+
+                    // Set drawn bounds instead of just map bounds to ensure the area is used for filtering
                     updateSearchPageState({
                         mapBoundsJSON: serializeBounds(searchBounds),
+                        drawnBoundsJSON: serializeBounds(searchBounds), // Also set drawn bounds for filtering
                     });
                     setFlyToTarget({ center: [Number(results[0].lat), Number(results[0].lon)], zoom: 12 });
+                } else {
+                    console.warn('[AI Search] No location results found for:', aiQuery.location);
                 }
             } catch (error) {
-                console.error("Error searching location:", error);
+                console.error("[AI Search] Error searching location:", error);
             }
         }
     }, [updateSearchPageState]);
