@@ -608,7 +608,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         // If a specific area is drawn/searched by the user, filter to that area
         if (drawnBounds) {
             const withinDrawn = baseFilteredProperties.filter(p => drawnBounds.contains([p.lat, p.lng]));
-            return { listProperties: withinDrawn, fallbackLocationValue: null };
+            // Only filter by drawn bounds if there are results, otherwise show all
+            if (withinDrawn.length > 0) {
+                return { listProperties: withinDrawn, fallbackLocationValue: null };
+            }
+            // No properties in drawn area - fall through to mapBounds check or show all
         }
 
         // On mobile, show ALL properties only when filters were explicitly reset
@@ -629,6 +633,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             if (baseFilteredProperties.length > 0) {
                 const center = mapBounds.getCenter();
                 const fallback = getSmartFallback(center.lat, center.lng);
+
+                // Safety: never return empty if we have properties
+                if (fallback.properties.length === 0) {
+                    return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
+                }
+
                 return { listProperties: fallback.properties, fallbackLocationValue: fallback.location };
             }
 
