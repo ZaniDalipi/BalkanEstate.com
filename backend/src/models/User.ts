@@ -827,11 +827,27 @@ UserSchema.pre('save', function (next) {
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
-  // Add pepper to candidate password for comparison
-  const pepper = process.env.PASSWORD_PEPPER || '';
-  const pepperedCandidate = candidatePassword + pepper;
   const password = this.get('password') as string;
-  return bcrypt.compare(pepperedCandidate, password);
+  const pepper = process.env.PASSWORD_PEPPER || '';
+
+  // Try with pepper first (new secure method)
+  if (pepper) {
+    const pepperedCandidate = candidatePassword + pepper;
+    const matchWithPepper = await bcrypt.compare(pepperedCandidate, password);
+    if (matchWithPepper) return true;
+  }
+
+  // Fallback: try without pepper (for legacy passwords or migration)
+  // This allows login even if password was created before pepper was added
+  const matchWithoutPepper = await bcrypt.compare(candidatePassword, password);
+  if (matchWithoutPepper) {
+    // Password matched without pepper - this is a legacy password
+    // Optionally log this for tracking migration
+    console.log('Legacy password match (no pepper) - consider prompting password update');
+    return true;
+  }
+
+  return false;
 };
 
 // Check if user has an active subscription
