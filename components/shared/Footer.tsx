@@ -92,11 +92,11 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
             }} />
 
             {/* Main Footer Content */}
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 lg:pt-12 pb-6 sm:pb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12">
 
                     {/* Brand Section */}
-                    <div className="lg:col-span-4 space-y-5">
+                    <div className="sm:col-span-2 lg:col-span-4 space-y-4 sm:space-y-5">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-gradient-to-br from-primary to-blue-600 rounded-xl shadow-lg shadow-primary/20">
                                 <LogoIcon className="w-6 h-6 text-white" />
@@ -106,18 +106,18 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             </h2>
                         </div>
 
-                        <p className="text-slate-400 leading-relaxed text-sm">
+                        <p className="text-slate-400 leading-relaxed text-xs sm:text-sm">
                             {t('footer:tagline', 'Your AI-powered real estate platform for the Balkans. Find your dream property across 10 countries with intelligent search and personalized recommendations.')}
                         </p>
 
                         {/* AI Badge */}
-                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/30 rounded-full px-4 py-2">
-                            <SparklesIcon className="w-4 h-4 text-primary animate-pulse" />
-                            <span className="text-sm font-medium text-slate-300">{t('footer:ai.poweredBy', 'Powered by AI')}</span>
+                        <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/30 rounded-full px-3 sm:px-4 py-1.5 sm:py-2">
+                            <SparklesIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary animate-pulse" />
+                            <span className="text-xs sm:text-sm font-medium text-slate-300">{t('footer:ai.poweredBy', 'Powered by AI')}</span>
                         </div>
 
                         {/* Social Media Links */}
-                        <div className="flex gap-3 pt-2">
+                        <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
                             {[
                                 { icon: FacebookIcon, href: 'https://facebook.com/balkanestateai', label: 'Facebook', color: 'hover:bg-blue-600' },
                                 { icon: TwitterIcon, href: 'https://twitter.com/balkanestateai', label: 'Twitter', color: 'hover:bg-sky-500' },
@@ -128,10 +128,10 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                                     href={href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`p-2.5 bg-slate-700/50 ${color} rounded-xl transition-all duration-300 group hover:scale-110 hover:shadow-lg`}
+                                    className={`p-2 sm:p-2.5 bg-slate-700/50 ${color} rounded-lg sm:rounded-xl transition-all duration-300 group hover:scale-110 hover:shadow-lg`}
                                     aria-label={label}
                                 >
-                                    <Icon className="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" />
+                                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-300 group-hover:text-white transition-colors" />
                                 </a>
                             ))}
                         </div>
@@ -139,19 +139,19 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
 
                     {/* For Buyers */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
                             <span className="w-8 h-0.5 bg-gradient-to-r from-primary to-blue-500 rounded-full" />
                             {t('footer:sections.forBuyers', 'For Buyers')}
                         </h3>
-                        <ul className="space-y-3">
+                        <ul className="space-y-2 sm:space-y-3">
                             {buyerLinks.map(({ icon: Icon, labelKey, view }) => (
                                 <li key={labelKey}>
                                     <button
                                         onClick={() => handleNavigation(view as any)}
-                                        className="group flex items-center gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
+                                        className="group flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
                                     >
-                                        <Icon className="w-4 h-4 text-primary/70 group-hover:text-primary transition-colors" />
-                                        <span className="text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
+                                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/70 group-hover:text-primary transition-colors flex-shrink-0" />
+                                        <span className="text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
                                     </button>
                                 </li>
                             ))}
@@ -160,19 +160,19 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
 
                     {/* For Sellers */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
                             <span className="w-8 h-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" />
                             {t('footer:sections.forSellers', 'For Sellers')}
                         </h3>
-                        <ul className="space-y-3">
+                        <ul className="space-y-2 sm:space-y-3">
                             {sellerLinks.map(({ icon: Icon, labelKey, view }) => (
                                 <li key={labelKey}>
                                     <button
                                         onClick={() => handleNavigation(view as any)}
-                                        className="group flex items-center gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
+                                        className="group flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
                                     >
-                                        <Icon className="w-4 h-4 text-green-500/70 group-hover:text-green-500 transition-colors" />
-                                        <span className="text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
+                                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500/70 group-hover:text-green-500 transition-colors flex-shrink-0" />
+                                        <span className="text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
                                     </button>
                                 </li>
                             ))}
@@ -180,46 +180,46 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                     </div>
 
                     {/* Contact & Countries */}
-                    <div className="lg:col-span-4">
-                        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                    <div className="sm:col-span-2 lg:col-span-4">
+                        <h3 className="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
                             <span className="w-8 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
                             {t('footer:sections.contact', 'Get In Touch')}
                         </h3>
-                        <ul className="space-y-3 mb-6">
+                        <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                             <li>
                                 <a
                                     href="mailto:contact@balkanestateai.com"
-                                    className="flex items-center gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
+                                    className="flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
-                                    <EnvelopeIcon className="w-4 h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors" />
-                                    <span className="text-sm">contact@balkanestateai.com</span>
+                                    <EnvelopeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors flex-shrink-0" />
+                                    <span className="text-xs sm:text-sm break-all sm:break-normal">contact@balkanestateai.com</span>
                                 </a>
                             </li>
                             <li>
                                 <a
                                     href="tel:+38971967915"
-                                    className="flex items-center gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
+                                    className="flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 group"
                                 >
-                                    <PhoneIcon className="w-4 h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors" />
-                                    <span className="text-sm">+389 71 967 915</span>
+                                    <PhoneIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500/70 group-hover:text-purple-500 transition-colors flex-shrink-0" />
+                                    <span className="text-xs sm:text-sm">+389 71 967 915</span>
                                 </a>
                             </li>
                         </ul>
 
                         {/* Countries We Serve */}
                         <div>
-                            <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                <GlobeAltIcon className="w-3.5 h-3.5" />
+                            <h4 className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center gap-2">
+                                <GlobeAltIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                 {t('footer:sections.countriesWeServe', 'Countries We Serve')}
                             </h4>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-1.5 sm:gap-2">
                                 {balkanCountries.map((country) => (
                                     <span
                                         key={country.code}
-                                        className="inline-flex items-center gap-1 bg-slate-700/50 hover:bg-slate-700 px-2 py-1 rounded-md text-xs text-slate-400 hover:text-white transition-colors cursor-default"
+                                        className="inline-flex items-center justify-center sm:justify-start gap-1 bg-slate-700/50 hover:bg-slate-700 px-1.5 sm:px-2 py-1 rounded-md text-[10px] sm:text-xs text-slate-400 hover:text-white transition-colors cursor-default"
                                         title={country.name}
                                     >
-                                        <span>{country.flag}</span>
+                                        <span className="text-sm sm:text-base">{country.flag}</span>
                                         <span className="hidden sm:inline">{country.code}</span>
                                     </span>
                                 ))}
@@ -229,14 +229,14 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                 </div>
 
                 {/* Divider */}
-                <div className="my-8 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+                <div className="my-6 sm:my-8 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
 
                 {/* Partners Section */}
-                <div className="mb-8">
-                    <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-4 text-center">
+                <div className="mb-6 sm:mb-8">
+                    <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3 sm:mb-4 text-center">
                         {t('footer:partners.title', 'Our Partners')}
                     </h4>
-                    <div className="flex flex-wrap gap-6 justify-center items-center">
+                    <div className="flex flex-wrap gap-4 sm:gap-6 justify-center items-center">
                         {/* Z360 Virtual Tours Partner */}
                         <a
                             href="https://z360-virtual-tour.vercel.app/"
@@ -248,48 +248,48 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
                             <img
                                 src="/images/partners/z360-logo.svg"
                                 alt="Z360 Virtual Tours - 360° Property Tours"
-                                className="h-16 w-auto"
+                                className="h-12 sm:h-16 w-auto"
                             />
                         </a>
                     </div>
                 </div>
 
                 {/* Divider */}
-                <div className="mb-8 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+                <div className="mb-6 sm:mb-8 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
 
                 {/* Bottom Bar */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-slate-500 text-sm text-center md:text-left">
+                <div className="flex flex-col lg:flex-row justify-between items-center gap-4 sm:gap-6">
+                    <p className="text-slate-500 text-xs sm:text-sm text-center lg:text-left">
                         © {currentYear} <span className="font-semibold text-slate-400">BalkanEstate<sup className="text-xs">AI</sup></span>. {t('footer:legal.allRightsReserved', 'All rights reserved.')}
                     </p>
-                    <div className="flex flex-wrap gap-4 sm:gap-6 justify-center text-sm">
+                    <div className="flex flex-wrap gap-x-3 gap-y-2 sm:gap-x-4 md:gap-x-6 justify-center text-xs sm:text-sm">
                         <button
                             onClick={() => handleNavigation('how-it-works')}
-                            className="text-slate-500 hover:text-primary transition-colors"
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:links.howItWorks', 'How It Works')}
                         </button>
                         <button
                             onClick={() => handleNavigation('privacy')}
-                            className="text-slate-500 hover:text-primary transition-colors"
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.privacyPolicy', 'Privacy Policy')}
                         </button>
                         <button
                             onClick={() => handleNavigation('terms')}
-                            className="text-slate-500 hover:text-primary transition-colors"
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.termsOfService', 'Terms of Service')}
                         </button>
                         <button
                             onClick={() => handleNavigation('cookies')}
-                            className="text-slate-500 hover:text-primary transition-colors"
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.cookiePolicy', 'Cookie Policy')}
                         </button>
                         <button
                             onClick={() => handleNavigation('refund')}
-                            className="text-slate-500 hover:text-primary transition-colors"
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.refundPolicy', 'Refund Policy')}
                         </button>

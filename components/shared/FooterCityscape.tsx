@@ -16,7 +16,7 @@ const balkanFlags = [
 
 const FooterCityscape: React.FC = () => {
     return (
-        <div className="relative w-full h-[140px] overflow-hidden">
+        <div className="relative w-full h-[100px] sm:h-[120px] md:h-[140px] overflow-hidden">
             {/* Gradient sky */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-indigo-950 to-transparent" />
 
