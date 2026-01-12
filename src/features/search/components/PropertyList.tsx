@@ -6,7 +6,6 @@ import { SearchIcon, SparklesIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, Che
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import { useAppContext } from '@/context/AppContext';
-import Footer from '@/components/shared/Footer';
 
 interface PropertyListProps {
   properties: Property[];
@@ -783,11 +782,6 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             ) : (
                                 <div className="text-center py-16 px-4"><h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3></div>
                             )}
-
-                            {/* Footer - Integrated at bottom of property list */}
-                            <div className="mt-8">
-                                <Footer />
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -924,8 +918,6 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     </div>
                                 )}
 
-                                {/* Footer - Integrated at bottom of property list */}
-                                <Footer />
                             </div>
                         </div>
                     )}
