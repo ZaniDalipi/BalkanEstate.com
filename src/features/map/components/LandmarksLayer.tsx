@@ -234,16 +234,23 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
 
     // Rate limiting: check if we can make a request
     const now = Date.now();
-    if (requestInFlight || now - lastRequestTime < MIN_REQUEST_INTERVAL) {
+    if (requestInFlight) {
+      console.debug('[POI] Request already in flight, skipping');
+      return;
+    }
+    if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
+      console.debug(`[POI] Rate limited, wait ${Math.ceil((MIN_REQUEST_INTERVAL - (now - lastRequestTime)) / 1000)}s`);
       return;
     }
 
     // Stop trying if too many consecutive failures
-    if (consecutiveFailures >= 3) {
+    if (consecutiveFailures >= OVERPASS_ENDPOINTS.length) {
       // Reset after 5 minutes
       if (now - lastRequestTime > 5 * 60 * 1000) {
+        console.debug('[POI] Resetting failure counter after 5 min cooldown');
         consecutiveFailures = 0;
       } else {
+        console.debug(`[POI] All endpoints failed (${consecutiveFailures}x), waiting for cooldown`);
         return;
       }
     }
@@ -254,6 +261,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
     try {
       const query = buildOverpassQuery(bounds);
       const endpoint = OVERPASS_ENDPOINTS[currentEndpointIndex];
+      console.debug(`[POI] Fetching from endpoint ${currentEndpointIndex + 1}/${OVERPASS_ENDPOINTS.length}`);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s client timeout
@@ -303,6 +311,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       );
 
       const limitedLandmarks = uniqueLandmarks.slice(0, 40); // Limit to 40 landmarks
+      console.debug(`[POI] Found ${limitedLandmarks.length} landmarks`);
 
       // Cache the result and cleanup old entries
       landmarksCache.set(boundsKey, {
@@ -317,12 +326,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
       consecutiveFailures++;
       // Rotate to next endpoint on any failure
       currentEndpointIndex = (currentEndpointIndex + 1) % OVERPASS_ENDPOINTS.length;
-
-      // Silently handle errors - just rotate to next endpoint
-      // Only log in development if really needed
-      if (process.env.NODE_ENV === 'development' && consecutiveFailures >= OVERPASS_ENDPOINTS.length) {
-        console.debug('[Landmarks] All endpoints failed, will retry later');
-      }
+      console.debug(`[POI] Endpoint failed (${consecutiveFailures}/${OVERPASS_ENDPOINTS.length}), trying next...`);
     } finally {
       requestInFlight = false;
     }
@@ -343,8 +347,10 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
         clearTimeout(fetchTimeoutRef.current);
       }
 
-      // Only fetch at zoom level 14+ to reduce API calls
-      if (map.getZoom() < MIN_ZOOM_FOR_FETCH) {
+      const currentZoom = map.getZoom();
+      // Only fetch at zoom level 12+ to reduce API calls
+      if (currentZoom < MIN_ZOOM_FOR_FETCH) {
+        console.debug(`[POI] Zoom ${currentZoom} < ${MIN_ZOOM_FOR_FETCH}, need to zoom in more`);
         clearLandmarks();
         return;
       }
