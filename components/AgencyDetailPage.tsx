@@ -610,9 +610,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const getRankBadge = (index: number) => {
-    if (index === 0) return { emoji: '🥇', color: 'from-yellow-400 to-yellow-600', text: t('teamMembers.topAgent') };
-    if (index === 1) return { emoji: '🥈', color: 'from-gray-300 to-gray-500', text: t('teamMembers.secondPlace') };
-    if (index === 2) return { emoji: '🥉', color: 'from-orange-400 to-orange-600', text: t('teamMembers.thirdPlace') };
+    if (index === 0) return { emoji: '🥇', color: 'bg-amber-500', text: t('teamMembers.topAgent') };
+    if (index === 1) return { emoji: '🥈', color: 'bg-gray-400', text: t('teamMembers.secondPlace') };
+    if (index === 2) return { emoji: '🥉', color: 'bg-orange-500', text: t('teamMembers.thirdPlace') };
     return null;
   };
 
@@ -888,27 +888,24 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {/* Sales Performance Card - Prominent Position */}
         {soldProperties.length > 0 && (
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100 overflow-hidden relative">
-            {/* Decorative gradient */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 via-blue-500/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/4"></div>
-
             <div className="relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg shadow-primary/25">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                   <ChartBarIcon className="w-5 h-5 text-white" />
                 </div>
                 <h2 className="text-xl font-bold text-slate-900">{t('salesPerformance.title')}</h2>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
                   <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.salesLast12Months')}</p>
                   <p className="text-2xl md:text-3xl font-bold text-slate-900">{salesLast12Months}</p>
                 </div>
-                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
                   <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.totalSales')}</p>
                   <p className="text-2xl md:text-3xl font-bold text-green-600">{totalSales}</p>
                 </div>
-                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
                   <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.priceRange')}</p>
                   <p className="text-sm md:text-base font-bold text-slate-700">
                     {minPrice > 0 && maxPrice > 0 ? (
@@ -920,7 +917,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     )}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-100">
+                <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
                   <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">{t('salesPerformance.averagePrice')}</p>
                   <p className="text-lg md:text-xl font-bold text-primary">
                     {averagePrice > 0 ? formatPrice(averagePrice, agencyData.country || 'Serbia') : t('stats.notAvailable')}
@@ -933,18 +930,23 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
         {/* About Section - Modern Engaging Layout */}
         <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden mb-8 border border-slate-100">
-          {/* Gradient Header */}
-          <div className="relative bg-gradient-to-r from-primary via-primary to-orange-500 px-6 md:px-8 py-6">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTZoLTJ2LTRoMnY0em0tNiA2aC0ydi00aDJ2NHptMC02aC0ydi00aDJ2NHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+          {/* Header - Liquid Glass */}
+          <div
+            className="relative px-6 md:px-8 py-6 border-b border-slate-100"
+            style={{
+              background: 'rgba(248, 250, 252, 0.8)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+            }}
+          >
             <div className="relative flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <BuildingOfficeIcon className="w-7 h-7 text-white" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <BuildingOfficeIcon className="w-7 h-7 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-white mb-1">About {agencyData.name}</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">About {agencyData.name}</h2>
                 {agencyData.yearsInBusiness && (
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-full text-primary text-xs font-medium">
                       <SparklesIcon className="w-3.5 h-3.5" />
                       {agencyData.yearsInBusiness}+ Years of Excellence
                     </span>
@@ -962,31 +964,43 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               </div>
             )}
 
-            {/* Quick Stats Row */}
+            {/* Quick Stats Row - Liquid Glass */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-              <div className="text-center p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/10">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/20 flex items-center justify-center">
+              <div
+                className="text-center p-4 rounded-xl border border-slate-200/60"
+                style={{ background: 'rgba(59, 130, 246, 0.05)' }}
+              >
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/15 flex items-center justify-center">
                   <HomeIcon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyProperties?.length || 0}</div>
                 <div className="text-xs text-slate-500 font-medium">Listings</div>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-100">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <div
+                className="text-center p-4 rounded-xl border border-slate-200/60"
+                style={{ background: 'rgba(16, 185, 129, 0.05)' }}
+              >
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/15 flex items-center justify-center">
                   <UserGroupIcon className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agents?.length || 0}</div>
                 <div className="text-xs text-slate-500 font-medium">Agents</div>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-xl border border-violet-100">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-violet-500/20 flex items-center justify-center">
+              <div
+                className="text-center p-4 rounded-xl border border-slate-200/60"
+                style={{ background: 'rgba(139, 92, 246, 0.05)' }}
+              >
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-violet-500/15 flex items-center justify-center">
                   <CalendarIcon className="w-5 h-5 text-violet-600" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyData.yearsInBusiness || 1}+</div>
                 <div className="text-xs text-slate-500 font-medium">Years</div>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl border border-amber-100">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              <div
+                className="text-center p-4 rounded-xl border border-slate-200/60"
+                style={{ background: 'rgba(245, 158, 11, 0.05)' }}
+              >
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-amber-500/15 flex items-center justify-center">
                   <StarIcon className="w-5 h-5 text-amber-500" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyData.rating?.toFixed(1) || '5.0'}</div>
@@ -998,9 +1012,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {/* Left Column - Contact */}
               <div className="space-y-5">
                 {/* Contact Card */}
-                <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-xl p-5 border border-slate-200 shadow-sm">
+                <div className="bg-slate-50/80 rounded-xl p-5 border border-slate-200/60">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-orange-500 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                       <PhoneIcon className="w-4 h-4 text-white" />
                     </div>
                     <h3 className="text-sm font-bold text-slate-900">Get in Touch</h3>
