@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useAppContext } from '../context/AppContext';
-import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon } from '../constants';
+import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon, SparklesIcon, UserGroupIcon, CalendarIcon, AcademicCapIcon, GlobeAltIcon } from '../constants';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '../src/features/property-details/components/PropertyCardSkeleton';
 import AgencyJoinRequestsModal from './AgencyJoinRequestsModal';
@@ -931,177 +931,251 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           </div>
         )}
 
-        {/* About Section - Clean Two-Column Layout */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
-          {/* Section Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-2">About {agencyData.name}</h2>
-              {agencyData.yearsInBusiness && (
-                <p className="text-sm text-slate-500">{agencyData.yearsInBusiness}+ years of excellence in real estate</p>
-              )}
+        {/* About Section - Modern Engaging Layout */}
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden mb-8 border border-slate-100">
+          {/* Gradient Header */}
+          <div className="relative bg-gradient-to-r from-primary via-primary to-orange-500 px-6 md:px-8 py-6">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTZoLTJ2LTRoMnY0em0tNiA2aC0ydi00aDJ2NHptMC02aC0ydi00aDJ2NHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+            <div className="relative flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <BuildingOfficeIcon className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-1">About {agencyData.name}</h2>
+                {agencyData.yearsInBusiness && (
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                      <SparklesIcon className="w-3.5 h-3.5" />
+                      {agencyData.yearsInBusiness}+ Years of Excellence
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {agencyData.description && (
-            <p className="text-slate-600 leading-relaxed mb-8 text-base">{agencyData.description}</p>
-          )}
+          <div className="p-6 md:p-8">
+            {/* Description with Quote Style */}
+            {agencyData.description && (
+              <div className="relative mb-8 pl-4 border-l-4 border-primary/30">
+                <p className="text-slate-600 leading-relaxed text-base italic">{agencyData.description}</p>
+              </div>
+            )}
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Left Column - Contact */}
-            <div className="space-y-6">
-              {/* Contact Card */}
-              <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-5 border border-slate-100">
-                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Contact Information</h3>
-                <div className="space-y-4">
-                  <a href={`tel:${agencyData.phone}`} className="flex items-center gap-3 text-slate-600 hover:text-primary transition-colors group">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
-                      <PhoneIcon className="w-4 h-4 text-primary" />
+            {/* Quick Stats Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+              <div className="text-center p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/10">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/20 flex items-center justify-center">
+                  <HomeIcon className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-2xl font-bold text-slate-900">{propertyCount || 0}</div>
+                <div className="text-xs text-slate-500 font-medium">Listings</div>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-100">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <UserGroupIcon className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div className="text-2xl font-bold text-slate-900">{agentCount || 0}</div>
+                <div className="text-xs text-slate-500 font-medium">Agents</div>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-xl border border-violet-100">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-violet-500/20 flex items-center justify-center">
+                  <CalendarIcon className="w-5 h-5 text-violet-600" />
+                </div>
+                <div className="text-2xl font-bold text-slate-900">{agencyData.yearsInBusiness || 1}+</div>
+                <div className="text-xs text-slate-500 font-medium">Years</div>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl border border-amber-100">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                  <StarIcon className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="text-2xl font-bold text-slate-900">{agencyData.rating?.toFixed(1) || '5.0'}</div>
+                <div className="text-xs text-slate-500 font-medium">Rating</div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Left Column - Contact */}
+              <div className="space-y-5">
+                {/* Contact Card */}
+                <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-xl p-5 border border-slate-200 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-orange-500 flex items-center justify-center">
+                      <PhoneIcon className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-medium text-sm">{agencyData.phone}</span>
-                  </a>
-                  <a href={`mailto:${agencyData.email}`} className="flex items-center gap-3 text-slate-600 hover:text-primary transition-colors group">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
-                      <EnvelopeIcon className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="font-medium text-sm">{agencyData.email}</span>
-                  </a>
-                  {agencyData.address && (
-                    <div className="flex items-center gap-3 text-slate-600">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <MapPinIcon className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-bold text-slate-900">Get in Touch</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <a href={`tel:${agencyData.phone}`} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-300">
+                        <PhoneIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
                       </div>
-                      <span className="font-medium text-sm">{agencyData.address}</span>
+                      <div>
+                        <div className="text-xs text-slate-400 font-medium">Phone</div>
+                        <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.phone}</span>
+                      </div>
+                    </a>
+                    <a href={`mailto:${agencyData.email}`} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-300">
+                        <EnvelopeIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-400 font-medium">Email</div>
+                        <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.email}</span>
+                      </div>
+                    </a>
+                    {agencyData.address && (
+                      <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-100">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <MapPinIcon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-400 font-medium">Address</div>
+                          <span className="font-medium text-slate-700 text-sm leading-snug">{agencyData.address}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Service Areas */}
+                {agencyData.serviceAreas && agencyData.serviceAreas.length > 0 && (
+                  <div className="bg-gradient-to-br from-emerald-50/50 to-white rounded-xl p-5 border border-emerald-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPinIcon className="w-5 h-5 text-emerald-600" />
+                      <h3 className="text-sm font-bold text-slate-900">Service Areas</h3>
                     </div>
-                  )}
-                </div>
+                    <div className="flex flex-wrap gap-2">
+                      {agencyData.serviceAreas.map((area, index) => (
+                        <span key={index} className="px-3 py-1.5 bg-white text-emerald-700 rounded-lg text-xs font-semibold border border-emerald-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-default">
+                          {area}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Service Areas */}
-              {agencyData.serviceAreas && agencyData.serviceAreas.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Service Areas</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {agencyData.serviceAreas.map((area, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium border border-emerald-100">
-                        {area}
-                      </span>
-                    ))}
+              {/* Right Column - Expertise */}
+              <div className="space-y-5">
+                {/* Specialties */}
+                {agencyData.specialties && agencyData.specialties.length > 0 && (
+                  <div className="bg-gradient-to-br from-primary/5 to-white rounded-xl p-5 border border-primary/10">
+                    <div className="flex items-center gap-2 mb-3">
+                      <SparklesIcon className="w-5 h-5 text-primary" />
+                      <h3 className="text-sm font-bold text-slate-900">What We Do Best</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {agencyData.specialties.map((specialty, index) => (
+                        <span key={index} className="px-3 py-1.5 bg-white text-primary rounded-lg text-xs font-semibold border border-primary/20 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-default">
+                          {specialty}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* Specializations */}
+                {agencyData.specializations && agencyData.specializations.length > 0 && (
+                  <div className="bg-gradient-to-br from-violet-50/50 to-white rounded-xl p-5 border border-violet-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AcademicCapIcon className="w-5 h-5 text-violet-600" />
+                      <h3 className="text-sm font-bold text-slate-900">Expertise Areas</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {agencyData.specializations.map((spec, index) => (
+                        <span key={index} className="px-3 py-1.5 bg-white text-violet-700 rounded-lg text-xs font-semibold border border-violet-200 shadow-sm hover:shadow-md hover:border-violet-300 transition-all cursor-default">
+                          {spec}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Languages */}
+                {agencyData.languages && agencyData.languages.length > 0 && (
+                  <div className="bg-gradient-to-br from-sky-50/50 to-white rounded-xl p-5 border border-sky-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <GlobeAltIcon className="w-5 h-5 text-sky-600" />
+                      <h3 className="text-sm font-bold text-slate-900">We Speak Your Language</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {agencyData.languages.map((lang, index) => (
+                        <span key={index} className="px-3 py-1.5 bg-white text-sky-700 rounded-lg text-xs font-semibold border border-sky-200 shadow-sm hover:shadow-md hover:border-sky-300 transition-all cursor-default">
+                          {lang}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Right Column - Expertise */}
-            <div className="space-y-6">
-              {/* Specialties */}
-              {agencyData.specialties && agencyData.specialties.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Specialties</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {agencyData.specialties.map((specialty, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-semibold">
-                        {specialty}
-                      </span>
-                    ))}
+            {/* Admin Section - Invitation Code */}
+            {isAdmin && agencyData.invitationCode && (
+              <div className="mt-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
+                    <ShieldCheckIcon className="w-5 h-5 text-white" />
                   </div>
-                </div>
-              )}
-
-              {/* Specializations */}
-              {agencyData.specializations && agencyData.specializations.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Specializations</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {agencyData.specializations.map((spec, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-violet-50 text-violet-700 rounded-lg text-xs font-medium border border-violet-100">
-                        {spec}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Languages */}
-              {agencyData.languages && agencyData.languages.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Languages</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {agencyData.languages.map((lang, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-sky-50 text-sky-700 rounded-lg text-xs font-medium border border-sky-100">
-                        {lang}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Admin Section - Invitation Code */}
-          {isAdmin && agencyData.invitationCode && (
-            <div className="mt-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
-                  <ShieldCheckIcon className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-slate-900 mb-1">Agency Invitation Code</h4>
-                  <p className="text-sm text-slate-600 mb-3">Share this code with agents you want to join your agency</p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <code className="px-4 py-2.5 bg-white border border-amber-200 rounded-lg font-mono text-base font-bold text-slate-900 tracking-widest shadow-sm">
-                      {agencyData.invitationCode}
-                    </code>
-                    <button
-                      onClick={async () => {
-                        navigator.clipboard.writeText(agencyData.invitationCode || '');
-                        await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
-                      }}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-all duration-300 shadow-md shadow-amber-500/25"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      Copy
-                    </button>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-slate-900 mb-1">Agency Invitation Code</h4>
+                    <p className="text-sm text-slate-600 mb-3">Share this code with agents you want to join your agency</p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <code className="px-4 py-2.5 bg-white border border-amber-200 rounded-lg font-mono text-base font-bold text-slate-900 tracking-widest shadow-sm">
+                        {agencyData.invitationCode}
+                      </code>
+                      <button
+                        onClick={async () => {
+                          navigator.clipboard.writeText(agencyData.invitationCode || '');
+                          await success(t('messages.copiedTitle', 'Copied!'), t('messages.invitationCodeCopied', 'Invitation code copied to clipboard!'));
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-all duration-300 shadow-md shadow-amber-500/25"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Copy
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={handleOpenEditModal}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-lg shadow-slate-900/25"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                    Edit Agency
+                  </button>
+                  <button
+                    onClick={() => setIsJoinRequestsModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
+                  >
+                    <BellIcon className="w-4 h-4" />
+                    Manage Join Requests
+                  </button>
+                </>
+              )}
+
+              {canRequestToJoin && (
+                <button
+                  onClick={handleRequestToJoin}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-600/25"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  Request to Join Agency
+                </button>
+              )}
             </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-3">
-            {isAdmin && (
-              <>
-                <button
-                  onClick={handleOpenEditModal}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-lg shadow-slate-900/25"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                  Edit Agency
-                </button>
-                <button
-                  onClick={() => setIsJoinRequestsModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
-                >
-                  <BellIcon className="w-4 h-4" />
-                  Manage Join Requests
-                </button>
-              </>
-            )}
-
-            {canRequestToJoin && (
-              <button
-                onClick={handleRequestToJoin}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-600/25"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                Request to Join Agency
-              </button>
-            )}
           </div>
         </div>
 
