@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef, useEffect, memo } from 'react';
 import { List } from 'react-window';
 import { Property } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
+import Footer from '@/components/shared/Footer';
 
 interface VirtualizedPropertyGridProps {
   properties: Property[];
@@ -9,6 +10,7 @@ interface VirtualizedPropertyGridProps {
   containerHeight: number;
   columns?: 1 | 2;
   gap?: number;
+  showFooter?: boolean;
 }
 
 // Memoized property item to prevent unnecessary re-renders
@@ -48,6 +50,8 @@ interface RowData {
   columns: number;
   gap: number;
   onPropertyHover?: (id: string | null) => void;
+  totalPropertyRows: number;
+  showFooter: boolean;
 }
 
 // Row component props type
@@ -63,10 +67,21 @@ interface RowProps {
   columns: number;
   gap: number;
   onPropertyHover?: (id: string | null) => void;
+  totalPropertyRows: number;
+  showFooter: boolean;
 }
 
 // Row component for the virtualized list
-const Row = ({ index, style, properties, columns, gap, onPropertyHover }: RowProps): React.ReactElement => {
+const Row = ({ index, style, properties, columns, gap, onPropertyHover, totalPropertyRows, showFooter }: RowProps): React.ReactElement => {
+  // Check if this is the footer row
+  if (showFooter && index === totalPropertyRows) {
+    return (
+      <div style={{ ...style, paddingTop: '32px' }}>
+        <Footer contained />
+      </div>
+    );
+  }
+
   const startIndex = index * columns;
   const items: Property[] = [];
 
@@ -104,13 +119,19 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
   containerHeight,
   columns = 1,
   gap = 20,
+  showFooter = true,
 }) => {
   const listRef = useRef<any>(null);
 
   // Calculate row count based on columns
-  const rowCount = useMemo(() => {
+  const propertyRowCount = useMemo(() => {
     return Math.ceil(properties.length / columns);
   }, [properties.length, columns]);
+
+  // Total rows including footer
+  const rowCount = useMemo(() => {
+    return propertyRowCount + (showFooter ? 1 : 0);
+  }, [propertyRowCount, showFooter]);
 
   // Estimated row height - card image + content
   // Card: image (~160px) + content (~200px) + gap
@@ -118,13 +139,24 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
     return 420 + gap;
   }, [gap]);
 
+  // Dynamic row height function for footer
+  const getRowHeight = useCallback((index: number) => {
+    // Footer row is taller
+    if (showFooter && index === propertyRowCount) {
+      return 350; // Footer height
+    }
+    return rowHeight;
+  }, [showFooter, propertyRowCount, rowHeight]);
+
   // Row props passed to each row
   const rowProps = useMemo((): RowData => ({
     properties,
     columns,
     gap,
     onPropertyHover,
-  }), [properties, columns, gap, onPropertyHover]);
+    totalPropertyRows: propertyRowCount,
+    showFooter,
+  }), [properties, columns, gap, onPropertyHover, propertyRowCount, showFooter]);
 
   // Reset scroll when properties change significantly
   useEffect(() => {
@@ -141,7 +173,7 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
     <List<RowData>
       listRef={listRef}
       rowCount={rowCount}
-      rowHeight={rowHeight}
+      rowHeight={getRowHeight}
       rowComponent={Row}
       rowProps={rowProps}
       overscanCount={2}
