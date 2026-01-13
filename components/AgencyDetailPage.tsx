@@ -107,7 +107,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const [isRequesting, setIsRequesting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
-  const [agencyData, setAgencyData] = useState<Agency>(agency);
+  const [agencyData, setAgencyData] = useState<ExtendedAgency>(agency);
   const [uploadError, setUploadError] = useState('');
   const [removingAgentId, setRemovingAgentId] = useState<string | null>(null);
   const [showAllMembers, setShowAllMembers] = useState(true);
@@ -1376,80 +1376,80 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           </a>
                         )}
 
-                          {/* Admin Actions - Only visible to owner */}
-                          {isOwner && !isAgentOwner && (
-                            <div className="flex gap-1.5 ml-auto">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleAdmin(agentId, agent.name, isAgentAdmin || false);
-                                }}
-                                className={`inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
-                                  isAgentAdmin
-                                    ? 'text-slate-500 bg-slate-100 hover:bg-slate-200'
-                                    : 'text-sky-600 bg-sky-50 hover:bg-sky-100'
-                                }`}
-                                title={isAgentAdmin ? 'Remove admin rights' : 'Make admin'}
-                              >
-                                <ShieldCheckIcon className="w-3 h-3" />
-                                {isAgentAdmin ? 'Remove Admin' : 'Make Admin'}
-                              </button>
+                        {/* Admin Actions - Only visible to owner */}
+                        {isOwner && !isAgentOwner && (
+                          <div className="flex gap-1.5 ml-auto">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleAdmin(agentId, agent.name, isAgentAdmin || false);
+                              }}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                                isAgentAdmin
+                                  ? 'text-slate-500 bg-slate-100 hover:bg-slate-200'
+                                  : 'text-sky-600 bg-sky-50 hover:bg-sky-100'
+                              }`}
+                              title={isAgentAdmin ? 'Remove admin rights' : 'Make admin'}
+                            >
+                              <ShieldCheckIcon className="w-3 h-3" />
+                              {isAgentAdmin ? 'Remove Admin' : 'Make Admin'}
+                            </button>
 
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveAgent(agentId, agent.name);
-                                }}
-                                disabled={removingAgentId === agentId}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                                title="Remove agent from agency"
-                              >
-                                {removingAgentId === agentId ? (
-                                  <>
-                                    <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
-                                    Removing...
-                                  </>
-                                ) : (
-                                  <>
-                                    <XMarkIcon className="w-3 h-3" />
-                                    Remove
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveAgent(agentId, agent.name);
+                              }}
+                              disabled={removingAgentId === agentId}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
+                              title="Remove agent from agency"
+                            >
+                              {removingAgentId === agentId ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
+                                  Removing...
+                                </>
+                              ) : (
+                                <>
+                                  <XMarkIcon className="w-3 h-3" />
+                                  Remove
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
 
-                          {/* Leave Agency Button - Only visible to current user who is not the owner */}
-                          {!isOwner && currentUser && agentId && (String(agentId) === String(currentUser.id) || String(agentId) === String(currentUser._id)) && !isAgentOwner && (
-                            <div className="flex gap-1.5 ml-auto">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleLeaveAgency();
-                                }}
-                                disabled={isLeavingAgency}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                                title="Leave this agency"
-                              >
-                                {isLeavingAgency ? (
-                                  <>
-                                    <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
-                                    Leaving...
-                                  </>
-                                ) : (
-                                  <>
-                                    <XMarkIcon className="w-3 h-3" />
-                                    Leave Agency
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                        {/* Leave Agency Button - Only visible to current user who is not the owner */}
+                        {!isOwner && currentUser && agentId && (String(agentId) === String(currentUser.id) || String(agentId) === String(currentUser._id)) && !isAgentOwner && (
+                          <div className="flex gap-1.5 ml-auto">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLeaveAgency();
+                              }}
+                              disabled={isLeavingAgency}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
+                              title="Leave this agency"
+                            >
+                              {isLeavingAgency ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-2.5 w-2.5 border-b border-red-600"></div>
+                                  Leaving...
+                                </>
+                              ) : (
+                                <>
+                                  <XMarkIcon className="w-3 h-3" />
+                                  Leave Agency
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                );
+                </div>
+              );
               })}
             </div>
           ) : (
