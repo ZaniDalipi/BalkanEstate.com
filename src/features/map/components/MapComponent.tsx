@@ -638,36 +638,34 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {isMobile && (
         <>
           {/* Mobile: Layers FAB with dropdown - positioned at bottom left */}
-          <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden transition-opacity duration-200 ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden transition-all duration-200 ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             {/* Dropdown menu - appears above the FAB */}
             {isLayerMenuOpen && (
-              <div className="absolute bottom-full left-0 mb-2 pointer-events-auto animate-fade-in">
-                <div
-                  className="flex flex-col gap-1 p-2 rounded-xl shadow-lg bg-white/95 backdrop-blur-md"
-                >
+              <div className="absolute bottom-full left-0 mb-3 pointer-events-auto animate-fade-in">
+                <div className="flex flex-col gap-1.5 p-2.5 rounded-2xl shadow-xl bg-white/98 backdrop-blur-lg border border-neutral-100">
                   {/* Legend Toggle */}
                   <button
                     onClick={() => {
                       setIsLegendOpen((p) => !p);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                      isLegendOpen ? 'bg-amber-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
+                      isLegendOpen ? 'bg-amber-500 text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
                     }`}
                   >
-                    <MapLegendIcon className="w-4 h-4" />
-                    <span className="text-xs font-medium">Legend</span>
+                    <MapLegendIcon className="w-5 h-5" />
+                    <span className="text-sm font-medium">Legend</span>
                   </button>
 
                   {/* Landmarks Toggle */}
                   <button
                     onClick={() => setShowLandmarks(!showLandmarks)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                      showLandmarks ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
+                      showLandmarks ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
                     }`}
                   >
-                    <span className="text-sm">🏛️</span>
-                    <span className="text-xs font-medium">POI</span>
+                    <span className="text-lg">🏛️</span>
+                    <span className="text-sm font-medium">Points of Interest</span>
                   </button>
 
                   {/* Measurement Tool Toggle */}
@@ -676,60 +674,69 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       setShowMeasurement(!showMeasurement);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                      showMeasurement ? 'bg-emerald-600 text-white' : 'text-neutral-600 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
+                      showMeasurement ? 'bg-emerald-600 text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
                     }`}
                   >
-                    <span className="text-sm">📏</span>
-                    <span className="text-xs font-medium">Measure</span>
+                    <span className="text-lg">📏</span>
+                    <span className="text-sm font-medium">Measure Distance</span>
                   </button>
 
                   {/* Cadastre Toggle - only in satellite */}
                   {mapType === 'satellite' && (
                     <button
                       onClick={() => setShowCadastre(!showCadastre)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                        showCadastre ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-100'
+                      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
+                        showCadastre ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
                       }`}
                     >
-                      <span className="text-sm">📐</span>
-                      <span className="text-xs font-medium">Parcels</span>
+                      <span className="text-lg">📐</span>
+                      <span className="text-sm font-medium">Land Parcels</span>
                     </button>
                   )}
 
                   {/* 3D Buildings Toggle */}
                   <button
                     onClick={() => setShow3DBuildings(!show3DBuildings)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                      show3DBuildings ? 'bg-slate-700 text-white' : 'text-neutral-600 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
+                      show3DBuildings ? 'bg-slate-700 text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
                     }`}
                   >
-                    <span className="text-sm">🏢</span>
-                    <span className="text-xs font-medium">3D</span>
+                    <span className="text-lg">🏢</span>
+                    <span className="text-sm font-medium">3D Buildings</span>
                   </button>
                 </div>
               </div>
             )}
 
-            {/* FAB Button */}
+            {/* FAB Button - larger and more prominent */}
             <button
               onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
-              className={`pointer-events-auto w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 ${
-                isLayerMenuOpen ? 'bg-primary text-white rotate-45' : 'bg-white text-neutral-700'
+              className={`pointer-events-auto w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 active:scale-90 ${
+                isLayerMenuOpen
+                  ? 'bg-primary text-white rotate-180 scale-110'
+                  : 'bg-white text-neutral-700 hover:scale-105'
               }`}
+              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
             >
               {isLayerMenuOpen ? (
-                <XCircleIcon className="w-5 h-5" />
+                <XCircleIcon className="w-7 h-7" />
               ) : (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0l4.179 2.25L12 21.75l-9.75-5.25 4.179-2.25" />
                 </svg>
+              )}
+              {/* Active layers badge */}
+              {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement) && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                  {[showLandmarks, show3DBuildings, showCadastre, showMeasurement].filter(Boolean).length}
+                </span>
               )}
             </button>
 
             {/* Legend popup */}
             {isLegendOpen && !isLayerMenuOpen && (
-              <div className="absolute bottom-0 left-full ml-2 pointer-events-auto animate-fade-in">
+              <div className="absolute bottom-0 left-full ml-3 pointer-events-auto animate-fade-in">
                 <Legend isNightMode={false} />
               </div>
             )}

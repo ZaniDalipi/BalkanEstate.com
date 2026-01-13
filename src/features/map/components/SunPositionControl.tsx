@@ -325,30 +325,30 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
 
   if (!enabled) return null;
 
-  // Compact mode for mobile - minimal UI
+  // Compact mode for mobile - larger UI for better touch interaction
   if (compact) {
     return (
       <div className={`
-        ${isNightMode ? 'bg-slate-900/95' : 'bg-white/95'}
-        backdrop-blur-sm rounded-xl shadow-lg border
+        ${isNightMode ? 'bg-slate-900/95' : 'bg-white/98'}
+        backdrop-blur-lg rounded-2xl shadow-xl border
         ${isNightMode ? 'border-cyan-500/30' : 'border-neutral-200'}
         transition-all duration-300
-        ${isExpanded ? 'p-2 w-[160px]' : 'p-1.5'}
+        ${isExpanded ? 'p-3 w-[200px]' : 'p-2'}
       `}>
         {/* Compact collapsed view */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className={`
-            flex items-center gap-1.5 w-full
+            flex items-center gap-2 w-full
             ${isNightMode ? 'text-white' : 'text-neutral-800'}
           `}
         >
-          <div className={`p-0.5 rounded bg-gradient-to-br ${getTimeGradient()} flex-shrink-0`}>
-            <span className="text-[10px]">{hour >= 6 && hour < 20 ? '☀️' : '🌙'}</span>
+          <div className={`p-1.5 rounded-lg bg-gradient-to-br ${getTimeGradient()} flex-shrink-0`}>
+            <span className="text-base">{hour >= 6 && hour < 20 ? '☀️' : '🌙'}</span>
           </div>
-          <span className="text-[10px] font-semibold">{formatHour(hour)}</span>
+          <span className="text-sm font-semibold">{formatHour(hour)}</span>
           <svg
-            className={`w-2.5 h-2.5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 flex-shrink-0 transition-transform ml-auto ${isExpanded ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -359,68 +359,73 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
 
         {/* Compact expanded view */}
         {isExpanded && (
-          <div className="mt-2 space-y-2">
-            {/* Time slider */}
-            <input
-              type="range"
-              min="0"
-              max="23"
-              value={hour}
-              onChange={(e) => {
-                setIsPlaying(false);
-                setHour(parseInt(e.target.value));
-              }}
-              className={`
-                w-full h-1 rounded-lg appearance-none cursor-pointer
-                ${isNightMode
-                  ? 'bg-slate-700 [&::-webkit-slider-thumb]:bg-cyan-400'
-                  : 'bg-neutral-200 [&::-webkit-slider-thumb]:bg-primary'
-                }
-                [&::-webkit-slider-thumb]:appearance-none
-                [&::-webkit-slider-thumb]:w-2.5
-                [&::-webkit-slider-thumb]:h-2.5
-                [&::-webkit-slider-thumb]:rounded-full
-                [&::-webkit-slider-thumb]:cursor-pointer
-              `}
-            />
+          <div className="mt-3 space-y-3">
+            {/* Time slider - larger for easier touch */}
+            <div className="px-1">
+              <input
+                type="range"
+                min="0"
+                max="23"
+                value={hour}
+                onChange={(e) => {
+                  setIsPlaying(false);
+                  setHour(parseInt(e.target.value));
+                }}
+                className={`
+                  w-full h-2 rounded-full appearance-none cursor-pointer
+                  ${isNightMode
+                    ? 'bg-slate-700 [&::-webkit-slider-thumb]:bg-cyan-400'
+                    : 'bg-neutral-200 [&::-webkit-slider-thumb]:bg-primary'
+                  }
+                  [&::-webkit-slider-thumb]:appearance-none
+                  [&::-webkit-slider-thumb]:w-5
+                  [&::-webkit-slider-thumb]:h-5
+                  [&::-webkit-slider-thumb]:rounded-full
+                  [&::-webkit-slider-thumb]:cursor-pointer
+                  [&::-webkit-slider-thumb]:shadow-md
+                  [&::-webkit-slider-thumb]:border-2
+                  [&::-webkit-slider-thumb]:border-white
+                `}
+              />
+            </div>
 
-            {/* Quick buttons row */}
-            <div className="flex items-center gap-0.5">
+            {/* Quick buttons row - larger touch targets */}
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setTime(Math.round(sunriseSunset.sunrise))}
-                className={`flex-1 p-1 rounded text-[9px] ${timePeriod === 'dawn' ? 'bg-orange-400 text-white' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
+                className={`flex-1 p-2.5 rounded-xl text-base transition-all active:scale-95 ${timePeriod === 'dawn' ? 'bg-orange-400 text-white shadow-md' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
               >
                 🌅
               </button>
               <button
                 onClick={() => setTime(12)}
-                className={`flex-1 p-1 rounded text-[9px] ${timePeriod === 'noon' ? 'bg-yellow-400 text-slate-800' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
+                className={`flex-1 p-2.5 rounded-xl text-base transition-all active:scale-95 ${timePeriod === 'noon' ? 'bg-yellow-400 text-slate-800 shadow-md' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
               >
                 ☀️
               </button>
               <button
                 onClick={() => setTime(Math.round(sunriseSunset.sunset))}
-                className={`flex-1 p-1 rounded text-[9px] ${timePeriod === 'sunset' ? 'bg-orange-500 text-white' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
+                className={`flex-1 p-2.5 rounded-xl text-base transition-all active:scale-95 ${timePeriod === 'sunset' ? 'bg-orange-500 text-white shadow-md' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
               >
                 🌇
               </button>
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className={`flex-1 p-1 rounded text-[9px] ${isPlaying ? 'bg-cyan-500 text-white' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
+                className={`flex-1 p-2.5 rounded-xl text-base transition-all active:scale-95 ${isPlaying ? 'bg-cyan-500 text-white shadow-md' : isNightMode ? 'bg-slate-800 text-slate-300' : 'bg-neutral-100'}`}
               >
-                {isPlaying ? '⏸' : '▶'}
+                {isPlaying ? '⏸️' : '▶️'}
               </button>
             </div>
 
-            {/* Season row */}
-            <div className="flex items-center gap-0.5">
+            {/* Season row - larger touch targets */}
+            <div className="flex items-center gap-1">
               {SEASONS.map((season) => (
                 <button
                   key={season.id}
                   onClick={() => setSelectedSeason(season.id)}
-                  className={`flex-1 p-1 rounded text-[9px] ${
+                  className={`flex-1 p-2 rounded-xl text-base transition-all active:scale-95 ${
                     selectedSeason === season.id
-                      ? isNightMode ? 'bg-cyan-500/30 border border-cyan-500/50' : 'bg-primary/20 border border-primary/50'
+                      ? isNightMode ? 'bg-cyan-500/30 border-2 border-cyan-500/50 shadow-md' : 'bg-primary/20 border-2 border-primary/50 shadow-md'
                       : isNightMode ? 'bg-slate-800' : 'bg-neutral-100'
                   }`}
                 >
