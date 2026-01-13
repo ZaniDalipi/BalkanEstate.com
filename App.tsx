@@ -271,13 +271,17 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
         }
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
+        // Redirect root to /search for cleaner URL
+        if (path === '/') {
+          window.history.replaceState({}, '', buildLocalizedPath('/search'));
+        }
       } else {
         // Unknown route - default to search and clear selections
         console.log('⚠️ Unknown route, defaulting to search');
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        window.history.replaceState({}, '', buildLocalizedPath('/'));
+        window.history.replaceState({}, '', buildLocalizedPath('/search'));
       }
     };
 
