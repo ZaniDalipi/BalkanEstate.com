@@ -888,6 +888,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         containerHeight={Math.max(400, window.innerHeight - 280)}
                                         columns={1}
                                         gap={20}
+                                        showFooter={false}
                                     />
                                 ) : (
                                     <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
