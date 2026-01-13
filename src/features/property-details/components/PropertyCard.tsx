@@ -109,9 +109,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   // Property type labels
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
-  // Determine card styles based on promotion tier
+  // Determine card styles based on promotion tier (memoized for performance)
   // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
-  const getCardStyles = () => {
+  const cardStyles = useMemo(() => {
     if (isSold) return 'border-neutral-300 opacity-80';
     if (isActivelyPromoted) {
       if (promotionTier === 'premium') return 'ring-2 ring-amber-400 border-amber-200 shadow-amber-100';
@@ -120,11 +120,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       return 'ring-1 ring-gray-400 border-gray-200';
     }
     return 'border-neutral-200 hover:border-primary/30';
-  };
+  }, [isSold, isActivelyPromoted, promotionTier]);
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-300 text-left w-full flex flex-col cursor-pointer ${getCardStyles()} ${
+      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-300 text-left w-full flex flex-col cursor-pointer ${cardStyles} ${
         isHovered && !isSold ? 'shadow-2xl -translate-y-1 scale-[1.01]' : 'hover:shadow-xl active:shadow-2xl active:-translate-y-1 active:scale-[1.01]'
       }`}
       onMouseEnter={() => setIsHovered(true)}
