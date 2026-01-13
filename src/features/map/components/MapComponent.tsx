@@ -716,14 +716,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             )}
 
-            {/* FAB Button - Plus icon that rotates to X */}
+            {/* FAB Button - liquid glass effect */}
             <button
               onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
-              className={`pointer-events-auto w-14 h-14 rounded-full shadow-xl flex items-center justify-center active:scale-95 ${
-                isLayerMenuOpen ? 'bg-neutral-800 text-white' : 'bg-white text-neutral-700'
+              className={`pointer-events-auto w-14 h-14 rounded-full shadow-xl flex items-center justify-center active:scale-95 border ${
+                isLayerMenuOpen ? 'bg-neutral-800 text-white border-neutral-700' : 'text-neutral-700 border-white/40'
               }`}
               style={{
-                boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+                ...(isLayerMenuOpen ? {} : {
+                  background: 'rgba(255, 255, 255, 0.85)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                }),
               }}
             >
               <svg
@@ -747,9 +752,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
               )}
             </button>
 
-            {/* Legend popup - positioned to right of FAB, above toggle */}
+            {/* Legend popup - positioned closer to FAB */}
             {isLegendOpen && !isLayerMenuOpen && (
-              <div className="absolute bottom-14 left-full ml-2 pointer-events-auto">
+              <div className="absolute bottom-14 left-0 pointer-events-auto">
                 <Legend isNightMode={false} />
               </div>
             )}
@@ -758,8 +763,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
           {/* Mobile: Top right compact controls */}
           <div className="absolute top-16 right-2 z-[999] md:hidden">
             <div className="flex flex-col gap-1.5 items-end">
-              {/* Main control bar */}
-              <div className="flex items-center gap-1 p-1 rounded-xl shadow-md bg-white/95 backdrop-blur-sm">
+              {/* Main control bar - liquid glass effect */}
+              <div
+                className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                }}
+              >
                 {/* Map type toggle */}
                 <div className="flex bg-neutral-100 rounded-lg p-0.5">
                   <button
@@ -813,9 +825,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 />
               )}
 
-              {/* Drawn bounds actions */}
+              {/* Drawn bounds actions - liquid glass effect */}
               {drawnBounds && !isDrawing && (
-                <div className="flex items-center gap-1 p-1 rounded-xl shadow-md bg-white/95 backdrop-blur-sm animate-fade-in">
+                <div
+                  className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30 animate-fade-in"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  }}
+                >
                   {isAuthenticated && (
                     <button
                       onClick={onSaveSearch}
