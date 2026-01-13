@@ -785,7 +785,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             )}
 
                             {/* Footer */}
-                            <div className="mt-8">
+                            <div className="mt-8 -mx-4 sm:-mx-6">
                                 <Footer contained />
                             </div>
                         </div>

@@ -301,7 +301,12 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
             </div>
 
             {/* Animated Cityscape - only show when not contained to prevent overflow */}
-            {!contained && <FooterCityscape />}
+            {!contained ? (
+                <FooterCityscape />
+            ) : (
+                /* Simple gradient bottom for contained footer */
+                <div className="h-8 bg-gradient-to-t from-slate-950 to-transparent" />
+            )}
         </footer>
     );
 };
