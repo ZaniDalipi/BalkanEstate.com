@@ -535,7 +535,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
         languages: user.languages || ['English'],
         specializations: user.specializations?.join(', ') || '',
         serviceAreas: user.serviceAreas || [],
-        yearsOfExperience: user.yearsOfExperience || 0,
+        yearsOfExperience: user.yearsOfExperience ?? '',
         city: user.city || '',
         country: user.country || '',
         streetAddress: user.address || '',
@@ -763,12 +763,13 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             };
 
             // Update UI immediately (optimistic update)
+            const yearsExp = agentData.yearsOfExperience === '' ? 0 : Number(agentData.yearsOfExperience) || 0;
             const optimisticData = {
                 ...formData,
                 languages: agentData.languages,
                 specializations: parsedSpecializations,
                 serviceAreas: agentData.serviceAreas,
-                yearsOfExperience: agentData.yearsOfExperience,
+                yearsOfExperience: yearsExp,
                 city: agentData.city,
                 country: agentData.country,
                 lat: agentData.lat,
@@ -785,7 +786,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 languages: agentData.languages,
                 specializations: parsedSpecializations,
                 serviceAreas: agentData.serviceAreas,
-                yearsOfExperience: agentData.yearsOfExperience,
+                yearsOfExperience: yearsExp,
                 lat: agentData.lat,
                 lng: agentData.lng,
             };
@@ -795,7 +796,7 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                     languages: agentData.languages,
                     specializations: parsedSpecializations,
                     serviceAreas: agentData.serviceAreas,
-                    yearsOfExperience: agentData.yearsOfExperience,
+                    yearsOfExperience: yearsExp,
                     lat: agentData.lat,
                     lng: agentData.lng,
                 };
@@ -1162,9 +1163,9 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                             type="number"
                             min="0"
                             max="99"
-                            value={agentData.yearsOfExperience}
-                            onChange={(e) => setAgentData(prev => ({ ...prev, yearsOfExperience: parseInt(e.target.value) || 0 }))}
-                            placeholder="e.g., 5"
+                            value={agentData.yearsOfExperience === '' || agentData.yearsOfExperience === 0 ? '' : agentData.yearsOfExperience}
+                            onChange={(e) => setAgentData(prev => ({ ...prev, yearsOfExperience: e.target.value === '' ? '' : parseInt(e.target.value) || 0 }))}
+                            placeholder="0"
                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                         />
                         <p className="text-xs text-neutral-500 mt-1">{t('agent.yearsOfExperienceHint')}</p>

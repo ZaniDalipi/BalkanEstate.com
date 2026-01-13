@@ -39,6 +39,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const streetLayerRef = useRef<L.TileLayer | null>(null);
   const satelliteLayerRef = useRef<L.TileLayer | null>(null);
@@ -348,6 +350,71 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     }
   };
 
+  // Get user's current location using browser geolocation
+  const handleGetCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      setLocationError(t('search:map.geolocationNotSupported'));
+      return;
+    }
+
+    setIsGettingLocation(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Update location
+        onLocationChange(latitude, longitude);
+
+        // Fly to the location
+        if (mapRef.current) {
+          mapRef.current.flyTo([latitude, longitude], 16, {
+            duration: 1.0,
+            easeLinearity: 0.4
+          });
+        }
+
+        // Reverse geocode to get address
+        if (onAddressChange) {
+          try {
+            const result = await reverseGeocode(latitude, longitude);
+            if (result) {
+              const locationName = result.display_name;
+              onAddressChange(locationName);
+              setSearchQuery(locationName);
+            }
+          } catch (error) {
+            console.error('Reverse geocoding error:', error);
+          }
+        }
+
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError(t('search:map.locationPermissionDenied'));
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError(t('search:map.locationUnavailable'));
+            break;
+          case error.TIMEOUT:
+            setLocationError(t('search:map.locationTimeout'));
+            break;
+          default:
+            setLocationError(t('search:map.locationError'));
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -355,22 +422,23 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         <p className="text-xs text-neutral-500">{t('search:map.searchNavigatePin')}</p>
       </div>
 
-      {/* Search box */}
-      <div className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          onFocus={() => searchResults.length > 0 && setShowResults(true)}
-          placeholder={t('search:map.searchPlaceholder')}
-          className="w-full px-4 py-2.5 pr-10 text-sm border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-          autoComplete="off"
-        />
-        {isSearching && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
+      {/* Search box with geolocation button */}
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => searchResults.length > 0 && setShowResults(true)}
+            placeholder={t('search:map.searchPlaceholder')}
+            className="w-full px-4 py-2.5 pr-10 text-sm border-2 border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+            autoComplete="off"
+          />
+          {isSearching && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
 
         {/* Search results dropdown */}
         {showResults && searchResults.length > 0 && (
@@ -395,7 +463,34 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
             ))}
           </div>
         )}
+        </div>
+
+        {/* Get current location button */}
+        <button
+          type="button"
+          onClick={handleGetCurrentLocation}
+          disabled={isGettingLocation}
+          className="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          title={t('search:map.useMyLocation')}
+        >
+          {isGettingLocation ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          )}
+          <span className="hidden sm:inline">{t('search:map.useMyLocation')}</span>
+        </button>
       </div>
+
+      {/* Location error message */}
+      {locationError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-xs text-red-800">{locationError}</p>
+        </div>
+      )}
 
       {/* Map */}
       <div className="relative">
