@@ -747,9 +747,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
               )}
             </button>
 
-            {/* Legend popup */}
+            {/* Legend popup - positioned above FAB to avoid toggle */}
             {isLegendOpen && !isLayerMenuOpen && (
-              <div className="absolute bottom-0 left-full ml-3 pointer-events-auto">
+              <div className="absolute bottom-full left-0 mb-16 pointer-events-auto">
                 <Legend isNightMode={false} />
               </div>
             )}
