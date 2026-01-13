@@ -236,25 +236,33 @@ const AgenciesListPage: React.FC = () => {
         <div className="border-t border-gray-100 pt-3">
           {/* Action Row */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {agency.phone && (
                 <a
                   href={`tel:${agency.phone}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-9 h-9 flex items-center justify-center bg-gray-50 hover:bg-primary/10 text-gray-500 hover:text-primary rounded-xl transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-primary transition-colors active:scale-95"
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.05)',
+                    backdropFilter: 'blur(8px)',
+                  }}
                   aria-label={t('agencies.call')}
                 >
-                  <PhoneIcon className="w-4 h-4" />
+                  <PhoneIcon className="w-3.5 h-3.5" />
                 </a>
               )}
               {agency.email && (
                 <a
                   href={`mailto:${agency.email}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-9 h-9 flex items-center justify-center bg-gray-50 hover:bg-primary/10 text-gray-500 hover:text-primary rounded-xl transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-primary transition-colors active:scale-95"
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.05)',
+                    backdropFilter: 'blur(8px)',
+                  }}
                   aria-label={t('agencies.email')}
                 >
-                  <EnvelopeIcon className="w-4 h-4" />
+                  <EnvelopeIcon className="w-3.5 h-3.5" />
                 </a>
               )}
             </div>
