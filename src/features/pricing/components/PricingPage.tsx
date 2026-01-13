@@ -4,6 +4,14 @@ import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
 import Footer from '@/components/shared/Footer';
 import {
+  FloatingSphere,
+  GlossyPill,
+  AbstractBlob,
+  GlassyDonut,
+  SoftCone,
+  Decorative3DStyles
+} from '@/components/shared/Decorative3D';
+import {
   BuildingOfficeIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
@@ -183,7 +191,52 @@ const PricingPage: React.FC = () => {
   const sellerProducts = [proYearlyProduct, proMonthlyProduct].filter(Boolean) as Product[];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 pb-safe">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 pb-safe relative overflow-hidden">
+      {/* 3D Decorative Background Elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Top right sphere */}
+        <div className="absolute -top-10 right-[5%] opacity-40 hidden lg:block">
+          <FloatingSphere size="xl" color="cyan" />
+        </div>
+
+        {/* Bottom left sphere */}
+        <div className="absolute bottom-[20%] -left-10 opacity-30 hidden lg:block">
+          <FloatingSphere size="lg" color="pink" animate={false} />
+        </div>
+
+        {/* Abstract blob - top left */}
+        <div className="absolute top-[15%] left-[8%] opacity-20 hidden xl:block">
+          <AbstractBlob variant={2} color="purple" />
+        </div>
+
+        {/* Glossy pill - right side */}
+        <div className="absolute top-[40%] -right-6 opacity-25 hidden lg:block rotate-[-15deg]">
+          <GlossyPill orientation="vertical" size="lg" color="blue" />
+        </div>
+
+        {/* Donut shape - bottom */}
+        <div className="absolute bottom-[10%] right-[20%] opacity-25 hidden xl:block">
+          <GlassyDonut size="lg" color="purple" />
+        </div>
+
+        {/* Soft cone - left */}
+        <div className="absolute bottom-[35%] left-[3%] opacity-30 hidden lg:block">
+          <SoftCone size="lg" color="peach" />
+        </div>
+
+        {/* Small accent spheres */}
+        <div className="absolute top-[60%] right-[30%] opacity-35 hidden md:block">
+          <FloatingSphere size="sm" color="purple" />
+        </div>
+
+        {/* Gradient overlays */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-blue-200/20 via-purple-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-pink-200/15 via-rose-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+      </div>
+
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">

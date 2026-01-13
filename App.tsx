@@ -61,16 +61,16 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 // Cookie Consent Banner
 import CookieConsent from './src/shared/components/CookieConsent';
 
+// 3D Decorative Elements
+import { Loader3D } from './components/shared/Decorative3D';
+
 // Microsoft Clarity - Heatmaps & Session Recordings
 import ClarityInit from './src/app/components/ClarityInit';
 
-// Loading fallback component
+// Loading fallback component with 3D animation
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-3"></div>
-      <p className="text-gray-500 text-sm">Loading...</p>
-    </div>
+    <Loader3D size="md" text="Loading..." />
   </div>
 );
 

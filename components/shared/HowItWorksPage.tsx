@@ -4,6 +4,14 @@ import { useAppContext } from '../../context/AppContext';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
+import {
+  FloatingSphere,
+  GlossyPill,
+  AbstractBlob,
+  WaveRibbon,
+  GlassyDonut,
+  Decorative3DStyles
+} from './Decorative3D';
 
 // Icons
 const BuildingIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -112,10 +120,37 @@ const HowItWorksPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white relative">
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-primary-darker text-white">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyem0wLTRoLTEydi0yaDEydjJ6bS0xMi0xMGgxMnYySDI0di0yem0xMiA2SDI0di0yaDEydjJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
+
+        {/* 3D Decorative Elements in Hero */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Floating sphere - top right */}
+          <div className="absolute -top-8 right-[8%] opacity-20 hidden lg:block">
+            <FloatingSphere size="lg" color="cyan" />
+          </div>
+
+          {/* Floating sphere - bottom left */}
+          <div className="absolute bottom-[20%] left-[5%] opacity-15 hidden lg:block">
+            <FloatingSphere size="md" color="pink" animate={false} />
+          </div>
+
+          {/* Abstract blob */}
+          <div className="absolute top-[30%] -right-20 opacity-10 hidden xl:block">
+            <AbstractBlob variant={3} color="blue" />
+          </div>
+
+          {/* Glossy pill */}
+          <div className="absolute bottom-[25%] right-[10%] opacity-15 hidden lg:block rotate-[20deg]">
+            <GlossyPill orientation="vertical" size="md" color="cyan" />
+          </div>
+        </div>
+
         <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 relative">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -825,8 +860,24 @@ const HowItWorksPage: React.FC = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary to-primary-dark py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center text-white">
+      <div className="bg-gradient-to-r from-primary to-primary-dark py-16 relative overflow-hidden">
+        {/* 3D Decorative Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-10 left-[10%] opacity-15 hidden md:block">
+            <FloatingSphere size="lg" color="cyan" />
+          </div>
+          <div className="absolute bottom-[10%] right-[8%] opacity-10 hidden md:block">
+            <FloatingSphere size="md" color="pink" animate={false} />
+          </div>
+          <div className="absolute top-1/2 -right-16 opacity-10 hidden lg:block">
+            <GlassyDonut size="lg" color="blue" />
+          </div>
+          <div className="absolute bottom-0 left-[20%] opacity-15 hidden lg:block">
+            <WaveRibbon color="purple-cyan" />
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 text-center text-white relative z-10">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-lg text-white/80 mb-8">
             Join thousands of users already finding and listing properties on Balkan Estate
