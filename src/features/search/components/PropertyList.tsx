@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { SparklesIcon, XMarkIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
@@ -873,23 +874,19 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             )}
 
-                            <div className="flex-1 min-h-0" style={{ height: 'calc(100vh - 280px)' }}>
+                            <div className="flex-1 overflow-y-auto px-4 pb-4">
                                 {isLoadingProperties ? (
-                                    <div className="grid grid-cols-1 gap-5 py-4 px-4">
+                                    <div className="flex flex-col gap-4 pt-4">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} />
                                         ))}
                                     </div>
                                 ) : properties.length > 0 ? (
-                                    <VirtualizedPropertyGrid
-                                        key={propertiesKey}
-                                        properties={properties}
-                                        onPropertyHover={onPropertyHover}
-                                        containerHeight={Math.max(400, window.innerHeight - 280)}
-                                        columns={1}
-                                        gap={16}
-                                        showFooter={false}
-                                    />
+                                    <div className="flex flex-col gap-4 pt-4">
+                                        {properties.map(property => (
+                                            <PropertyCard key={property.id} property={property} />
+                                        ))}
+                                    </div>
                                 ) : (
                                     <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
                                         <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
