@@ -125,117 +125,140 @@ const AgenciesListPage: React.FC = () => {
     window.history.pushState({}, '', `/agencies/${urlSlug}`);
   };
 
-  const getRankColor = (index: number) => {
-    if (index === 0) return 'bg-amber-500';
-    if (index === 1) return 'bg-gray-400';
-    if (index === 2) return 'bg-orange-500';
-    return 'bg-primary';
+  const getRankStyle = (index: number) => {
+    if (index === 0) return { bg: 'from-amber-400 to-amber-600', text: '1st', emoji: '🏆' };
+    if (index === 1) return { bg: 'from-slate-300 to-slate-500', text: '2nd', emoji: '🥈' };
+    if (index === 2) return { bg: 'from-orange-400 to-orange-600', text: '3rd', emoji: '🥉' };
+    return { bg: 'from-primary to-primary-dark', text: `${index + 1}`, emoji: '' };
   };
 
-  const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => (
-    <div
-      key={agency._id}
-      onClick={() => handleViewAgency(agency)}
-      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-primary/20 active:scale-[0.99]"
-    >
-      <div className="p-4">
-        {/* Top Row - Logo, Name, Featured Badge */}
-        <div className="flex items-start gap-3 mb-3">
-          {/* Logo with Rank */}
-          <div className="relative flex-shrink-0">
-            <div className={`${isCompact ? 'w-12 h-12' : 'w-14 h-14'} rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100`}>
-              {agency.logo ? (
-                <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
-              ) : (
-                <BuildingOfficeIcon className="w-7 h-7 text-primary" />
-              )}
-            </div>
-            {/* Rank badge */}
-            {index < 10 && (
-              <div className={`absolute -top-1.5 -left-1.5 w-5 h-5 ${getRankColor(index)} rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-sm`}>
-                {index + 1}
+  const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => {
+    const rankStyle = getRankStyle(index);
+
+    return (
+      <div
+        key={agency._id}
+        onClick={() => handleViewAgency(agency)}
+        className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-primary/30 active:scale-[0.98]"
+      >
+        {/* Accent gradient bar at top */}
+        <div className={`h-1.5 bg-gradient-to-r ${index < 3 ? rankStyle.bg : 'from-primary via-blue-500 to-violet-500'}`} />
+
+        <div className="p-5">
+          {/* Header Row */}
+          <div className="flex items-start gap-4 mb-4">
+            {/* Logo Container with glow effect */}
+            <div className="relative flex-shrink-0">
+              <div className={`${isCompact ? 'w-14 h-14' : 'w-16 h-16'} rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg group-hover:shadow-xl transition-shadow`}>
+                {agency.logo ? (
+                  <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <BuildingOfficeIcon className="w-8 h-8 text-primary" />
+                )}
               </div>
-            )}
-          </div>
-
-          {/* Name and Location */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className={`${isCompact ? 'text-sm' : 'text-base'} font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1`}>
-                {agency.name}
-              </h3>
-              {agency.isFeatured && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 text-amber-600 rounded text-[10px] font-medium flex-shrink-0">
-                  <SparklesIcon className="w-2.5 h-2.5" />
-                  <span className="hidden sm:inline">Featured</span>
-                </span>
+              {/* Rank badge */}
+              {index < 10 && (
+                <div className={`absolute -top-2 -right-2 px-2 py-1 bg-gradient-to-r ${rankStyle.bg} rounded-lg text-white text-[10px] font-bold shadow-lg flex items-center gap-1`}>
+                  {rankStyle.emoji && <span>{rankStyle.emoji}</span>}
+                  <span>#{index + 1}</span>
+                </div>
               )}
             </div>
-            <div className="flex items-center gap-1 text-gray-500 mt-0.5">
-              <MapPinIcon className="w-3 h-3 flex-shrink-0" />
-              <span className="text-xs truncate">
-                {agency.city}, {agency.country}
-              </span>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className={`${isCompact ? 'text-base' : 'text-lg'} font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1`}>
+                  {agency.name}
+                </h3>
+                {agency.isFeatured && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full text-[10px] font-bold shadow-sm">
+                    <SparklesIcon className="w-3 h-3" />
+                    <span className="hidden sm:inline">Featured</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <MapPinIcon className="w-3.5 h-3.5 text-primary/60" />
+                <span className="text-sm">{agency.city}, {agency.country}</span>
+              </div>
+
+              {/* Quick contact icons */}
+              <div className="flex items-center gap-2 mt-2">
+                {agency.phone && (
+                  <a
+                    href={`tel:${agency.phone}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
+                  >
+                    <PhoneIcon className="w-3 h-3" />
+                    <span className="hidden sm:inline">{agency.phone}</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <ChevronRightIcon className="w-5 h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 text-center group/stat hover:from-blue-100 hover:to-blue-200/50 transition-colors">
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-blue-200/30 rounded-full blur-xl" />
+              <HomeIcon className="w-5 h-5 text-primary mx-auto mb-1" />
+              <div className="text-xl font-bold text-gray-900">{agency.totalProperties || 0}</div>
+              <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.properties')}</div>
+            </div>
+
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-3 text-center group/stat hover:from-emerald-100 hover:to-emerald-200/50 transition-colors">
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-200/30 rounded-full blur-xl" />
+              <UsersIcon className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+              <div className="text-xl font-bold text-gray-900">{agency.totalAgents || 0}</div>
+              <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.agents')}</div>
+            </div>
+
+            <div className="relative overflow-hidden bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-xl p-3 text-center group/stat hover:from-violet-100 hover:to-violet-200/50 transition-colors">
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-violet-200/30 rounded-full blur-xl" />
+              <CalendarIcon className="w-5 h-5 text-violet-600 mx-auto mb-1" />
+              <div className="text-xl font-bold text-gray-900">{agency.yearsInBusiness || 0}+</div>
+              <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.years')}</div>
             </div>
           </div>
 
-          <ChevronRightIcon className="w-5 h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-        </div>
+          {/* Action Row */}
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-2">
+              {agency.phone && (
+                <a
+                  href={`tel:${agency.phone}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
+                  aria-label={t('agencies.call')}
+                >
+                  <PhoneIcon className="w-4 h-4" />
+                </a>
+              )}
+              {agency.email && (
+                <a
+                  href={`mailto:${agency.email}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
+                  aria-label={t('agencies.email')}
+                >
+                  <EnvelopeIcon className="w-4 h-4" />
+                </a>
+              )}
+            </div>
 
-        {/* Stats Row - Compact inline */}
-        <div className="flex items-center gap-4 py-2.5 px-3 bg-gray-50 rounded-xl mb-3">
-          <div className="flex items-center gap-1.5 flex-1">
-            <HomeIcon className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold text-gray-900">{agency.totalProperties || 0}</span>
-            <span className="text-[10px] text-gray-500">{t('agencies.properties')}</span>
+            <button className="px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95">
+              {t('agencies.view')}
+              <ChevronRightIcon className="w-4 h-4" />
+            </button>
           </div>
-          <div className="w-px h-4 bg-gray-200" />
-          <div className="flex items-center gap-1.5 flex-1">
-            <UsersIcon className="w-4 h-4 text-emerald-600" />
-            <span className="text-sm font-semibold text-gray-900">{agency.totalAgents || 0}</span>
-            <span className="text-[10px] text-gray-500">{t('agencies.agents')}</span>
-          </div>
-          <div className="w-px h-4 bg-gray-200" />
-          <div className="flex items-center gap-1.5 flex-1">
-            <CalendarIcon className="w-4 h-4 text-violet-600" />
-            <span className="text-sm font-semibold text-gray-900">{agency.yearsInBusiness || 0}+</span>
-            <span className="text-[10px] text-gray-500 hidden sm:inline">{t('agencies.years')}</span>
-          </div>
-        </div>
-
-        {/* Action Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {agency.phone && (
-              <a
-                href={`tel:${agency.phone}`}
-                onClick={(e) => e.stopPropagation()}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-primary/10 hover:text-primary transition-colors active:scale-95"
-                aria-label={t('agencies.call')}
-              >
-                <PhoneIcon className="w-3.5 h-3.5" />
-              </a>
-            )}
-            {agency.email && (
-              <a
-                href={`mailto:${agency.email}`}
-                onClick={(e) => e.stopPropagation()}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-primary/10 hover:text-primary transition-colors active:scale-95"
-                aria-label={t('agencies.email')}
-              >
-                <EnvelopeIcon className="w-3.5 h-3.5" />
-              </a>
-            )}
-          </div>
-
-          <button className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 active:scale-95">
-            {t('agencies.view')}
-            <ChevronRightIcon className="w-4 h-4" />
-          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Mouse position state for parallax effect
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
