@@ -2,6 +2,23 @@
 // Simple markdown parser for property descriptions
 
 /**
+ * Escape HTML entities to prevent XSS attacks
+ *
+ * @param text - Text to escape
+ * @returns Escaped text
+ */
+function escapeHtml(text: string): string {
+  const htmlEntities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEntities[char]);
+}
+
+/**
  * Parse markdown text to HTML
  *
  * Supports:
@@ -12,10 +29,13 @@
  * - Line breaks
  *
  * @param text - Markdown text
- * @returns HTML string
+ * @returns HTML string (sanitized)
  */
 export function parseMarkdown(text: string): string {
-  return text
+  // First, escape any HTML to prevent XSS
+  const escaped = escapeHtml(text);
+
+  return escaped
     // Headings
     .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mb-2">$1</h3>')
     .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mb-3">$1</h2>')
