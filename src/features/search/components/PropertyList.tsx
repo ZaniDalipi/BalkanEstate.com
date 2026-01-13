@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -7,6 +7,35 @@ import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
+
+// Memoized wrapper for PropertyCard to prevent re-renders during scroll
+const PropertyCardWrapper = memo(({
+  property,
+  onHover
+}: {
+  property: Property;
+  onHover?: (id: string | null) => void;
+}) => {
+  const handleMouseEnter = useCallback(() => {
+    onHover?.(property.id);
+  }, [onHover, property.id]);
+
+  const handleMouseLeave = useCallback(() => {
+    onHover?.(null);
+  }, [onHover]);
+
+  return (
+    <div
+      className="property-card-container"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <PropertyCard property={property} />
+    </div>
+  );
+});
+
+PropertyCardWrapper.displayName = 'PropertyCardWrapper';
 
 interface PropertyListProps {
   properties: Property[];
@@ -767,11 +796,13 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             ) : properties.length > 0 ? (
                                 <>
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5 property-grid">
                                         {properties.slice(0, visibleCount).map(prop => (
-                                            <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
-                                                <PropertyCard property={prop} />
-                                            </div>
+                                            <PropertyCardWrapper
+                                                key={prop.id}
+                                                property={prop}
+                                                onHover={onPropertyHover}
+                                            />
                                         ))}
                                     </div>
                                     {visibleCount < properties.length && (
@@ -898,11 +929,13 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     </div>
                                 ) : properties.length > 0 ? (
                                     <>
-                                        <div className="grid grid-cols-1 gap-5">
+                                        <div className="grid grid-cols-1 gap-5 property-grid">
                                             {properties.slice(0, visibleCount).map(prop => (
-                                                <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
-                                                    <PropertyCard property={prop} />
-                                                </div>
+                                                <PropertyCardWrapper
+                                                    key={prop.id}
+                                                    property={prop}
+                                                    onHover={onPropertyHover}
+                                                />
                                             ))}
                                         </div>
                                         {visibleCount < properties.length && (
@@ -935,4 +968,25 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     );
 };
 
-export default React.memo(PropertyList);
+// CSS optimization styles for better scroll performance
+const PropertyListStyles = () => (
+  <style>{`
+    .property-grid {
+      contain: layout style;
+    }
+    .property-card-container {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 400px;
+    }
+  `}</style>
+);
+
+// Wrap PropertyList with styles
+const PropertyListWithStyles: React.FC<PropertyListProps> = (props) => (
+  <>
+    <PropertyListStyles />
+    <PropertyList {...props} />
+  </>
+);
+
+export default React.memo(PropertyListWithStyles);
