@@ -1448,7 +1448,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       </div>
                     </div>
                   </div>
-                </div>
+                
               );
               })}
             </div>
