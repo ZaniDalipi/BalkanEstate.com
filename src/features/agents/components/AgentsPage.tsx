@@ -4,6 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Agent, Agency } from '@/types';
 import { getAllAgents, getAgencies } from '@/services/apiService';
+import { getAgent } from '../api/agentApi';
 import AgentCard from './AgentCard';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
@@ -29,6 +30,8 @@ const AgentsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [visibleAgentsCount, setVisibleAgentsCount] = useState(9);
+  const [fetchedAgent, setFetchedAgent] = useState<Agent | null>(null);
+  const [fetchingAgent, setFetchingAgent] = useState(false);
 
   // Advanced filters
   const [sortBy, setSortBy] = useState<SortOption>('rating');
@@ -96,6 +99,34 @@ const AgentsPage: React.FC = () => {
   useEffect(() => {
     setVisibleAgentsCount(9);
   }, [searchQuery, searchTab]);
+
+  // Fetch specific agent if selectedAgentId is set but not found in the list
+  useEffect(() => {
+    const fetchSpecificAgent = async () => {
+      if (!selectedAgentId || loading) return;
+
+      // Check if agent exists in the current list
+      const existsInList = agents.some(a => a.agentId === selectedAgentId || a.id === selectedAgentId);
+      if (existsInList) {
+        setFetchedAgent(null);
+        return;
+      }
+
+      // Agent not in list, fetch it directly
+      setFetchingAgent(true);
+      try {
+        const agent = await getAgent(selectedAgentId);
+        setFetchedAgent(agent);
+      } catch (error) {
+        console.error('Failed to fetch agent:', error);
+        setFetchedAgent(null);
+      } finally {
+        setFetchingAgent(false);
+      }
+    };
+
+    fetchSpecificAgent();
+  }, [selectedAgentId, agents, loading]);
 
   const fetchAgencies = async () => {
     try {
@@ -297,8 +328,10 @@ const AgentsPage: React.FC = () => {
 
   const selectedAgent = useMemo(() => {
     if (!selectedAgentId) return null;
-    return agents.find(a => a.agentId === selectedAgentId || a.id === selectedAgentId) || null;
-  }, [selectedAgentId, agents]);
+    // First check the agents list, then fall back to the fetched agent
+    const fromList = agents.find(a => a.agentId === selectedAgentId || a.id === selectedAgentId);
+    return fromList || fetchedAgent;
+  }, [selectedAgentId, agents, fetchedAgent]);
 
   // Calculate total active listings from all agents
   const totalActiveListings = useMemo(() => {
@@ -328,8 +361,21 @@ const AgentsPage: React.FC = () => {
     }
   ];
 
+  // Show agent profile if we have a selected agent
   if (selectedAgent) {
     return <AgentProfilePage agent={selectedAgent} />;
+  }
+
+  // Show loading if we're fetching a specific agent
+  if (selectedAgentId && fetchingAgent) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500">{t('common:loading')}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
