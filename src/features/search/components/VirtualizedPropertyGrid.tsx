@@ -76,8 +76,8 @@ const Row = ({ index, style, properties, columns, gap, onPropertyHover, totalPro
   // Check if this is the footer row
   if (showFooter && index === totalPropertyRows) {
     return (
-      <div style={{ ...style, paddingTop: '32px', overflow: 'hidden' }}>
-        <Footer />
+      <div style={{ ...style, paddingTop: '32px' }}>
+        <Footer contained />
       </div>
     );
   }
@@ -141,9 +141,9 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
 
   // Dynamic row height function for footer
   const getRowHeight = useCallback((index: number) => {
-    // Footer row is taller - full footer with cityscape
+    // Footer row is taller
     if (showFooter && index === propertyRowCount) {
-      return 550; // Full footer height
+      return 350; // Footer height
     }
     return rowHeight;
   }, [showFooter, propertyRowCount, rowHeight]);
