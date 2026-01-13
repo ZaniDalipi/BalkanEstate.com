@@ -803,7 +803,7 @@ export const Legend: React.FC<LegendProps> = ({ isNightMode = false }) => {
 
   return (
     <div
-      className="p-2 rounded-xl shadow-lg border border-white/30"
+      className="px-4 py-3 rounded-2xl shadow-xl border border-white/30"
       style={{
         background: isNightMode ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(16px) saturate(180%)',
@@ -811,14 +811,14 @@ export const Legend: React.FC<LegendProps> = ({ isNightMode = false }) => {
       }}
     >
       {/* Property Types - Single column for clarity */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         {Object.entries(PROPERTY_TYPE_COLORS).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-2">
+          <div key={type} className="flex items-center gap-2.5">
             <span
-              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+              className="w-3 h-3 rounded-full flex-shrink-0"
               style={{ backgroundColor: color }}
             />
-            <span className={`text-[11px] font-medium whitespace-nowrap ${isNightMode ? 'text-slate-200' : 'text-neutral-700'}`}>
+            <span className={`text-xs font-medium whitespace-nowrap ${isNightMode ? 'text-slate-200' : 'text-neutral-700'}`}>
               {t(`map.propertyTypes.${type}`)}
             </span>
           </div>
