@@ -136,10 +136,10 @@ const AgenciesListPage: React.FC = () => {
     <div
       key={agency._id}
       onClick={() => handleViewAgency(agency)}
-      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-primary/30 active:scale-[0.99]"
+      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-primary/20 active:scale-[0.995]"
     >
-      {/* Cover Image or Gradient */}
-      <div className={`relative ${isCompact ? 'h-24' : 'h-28 sm:h-32'}`}>
+      {/* Cover Image or Gradient - Shorter height */}
+      <div className={`relative ${isCompact ? 'h-20' : 'h-24 sm:h-28'}`}>
         {(agency as any).coverImage ? (
           <img
             src={(agency as any).coverImage}
@@ -150,138 +150,120 @@ const AgenciesListPage: React.FC = () => {
         ) : (agency as any).coverGradient ? (
           <div className={`w-full h-full bg-gradient-to-br ${(agency as any).coverGradient}`} />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/80 via-primary to-primary-dark" />
+          <div className="w-full h-full bg-gradient-to-r from-orange-500 via-rose-500 to-pink-500" />
         )}
 
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-
-        {/* Top badges */}
-        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1.5">
-          {agency.isFeatured && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-amber-500 text-white rounded-full text-[10px] sm:text-xs font-semibold shadow-lg">
-              <SparklesIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              <span className="hidden xs:inline">{t('agencies.featured')}</span>
+        {/* Featured badge */}
+        {agency.isFeatured && (
+          <div className="absolute top-2.5 right-2.5">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm text-amber-600 rounded-lg text-[10px] sm:text-xs font-semibold shadow-sm">
+              <SparklesIcon className="w-3 h-3" />
+              <span className="hidden sm:inline">{t('agencies.featured')}</span>
             </span>
-          )}
-        </div>
-
-        {/* Rank badge */}
-        {index < 10 && (
-          <div className={`absolute -bottom-3 sm:-bottom-4 left-3 sm:left-4 w-8 h-8 sm:w-10 sm:h-10 ${getRankColor(index)} rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-sm sm:text-lg shadow-lg ring-2 sm:ring-4 ring-white`}>
-            {index + 1}
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className={`p-3 sm:p-4 ${isCompact ? 'pt-4' : 'pt-5 sm:pt-6'}`}>
-        {/* Logo and Name row */}
-        <div className="flex items-start gap-2.5 sm:gap-3 mb-2.5 sm:mb-3">
-          {/* Logo */}
-          <div className={`${isCompact ? 'w-10 h-10' : 'w-11 h-11 sm:w-14 sm:h-14'} rounded-lg sm:rounded-xl bg-white flex items-center justify-center overflow-hidden border-2 border-gray-100 shadow-sm flex-shrink-0`}>
+      {/* Main Content */}
+      <div className="relative px-4 pb-4 pt-8">
+        {/* Logo - Floating above content */}
+        <div className="absolute -top-6 left-4">
+          <div className={`${isCompact ? 'w-12 h-12' : 'w-14 h-14'} rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-lg ring-4 ring-white`}>
             {agency.logo ? (
               <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
             ) : (
-              <BuildingOfficeIcon className={`${isCompact ? 'w-5 h-5' : 'w-5 h-5 sm:w-7 sm:h-7'} text-primary`} />
+              <BuildingOfficeIcon className="w-6 h-6 text-primary" />
             )}
           </div>
+          {/* Rank badge */}
+          {index < 10 && (
+            <div className={`absolute -top-1 -left-1 w-5 h-5 ${getRankColor(index)} rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-md`}>
+              {index + 1}
+            </div>
+          )}
+        </div>
 
-          {/* Name and Location */}
-          <div className="flex-1 min-w-0">
-            <h3 className={`${isCompact ? 'text-sm' : 'text-base sm:text-lg'} font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1 mb-0.5 sm:mb-1`}>
+        {/* Name and Location */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="min-w-0 pt-1">
+            <h3 className={`${isCompact ? 'text-base' : 'text-lg'} font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1`}>
               {agency.name}
             </h3>
-            <div className="flex items-center gap-1 sm:gap-1.5 text-gray-500">
-              <MapPinIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
-              <span className={`${isCompact ? 'text-xs' : 'text-xs sm:text-sm'} truncate`}>
-                {agency.city}, {agency.country}
+            <div className="flex items-center gap-1.5 text-gray-500 mt-0.5">
+              <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="text-sm truncate">
+                {agency.address ? `${agency.address.substring(0, 30)}...` : `${agency.city}, ${agency.country}`}
               </span>
             </div>
           </div>
-
-          {/* Arrow - hidden on very small screens */}
-          <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-0.5 sm:mt-1 hidden xs:block" />
+          <ChevronRightIcon className="w-5 h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
         </div>
 
-        {/* Stats Row - Responsive */}
-        <div className={`flex items-center justify-between py-2 sm:py-3 px-0.5 sm:px-1 mb-2.5 sm:mb-3 border-y border-gray-100 ${isCompact ? 'gap-2' : ''}`}>
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-            <div className={`${isCompact ? 'w-6 h-6' : 'w-7 h-7 sm:w-8 sm:h-8'} bg-blue-50 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0`}>
-              <HomeIcon className={`${isCompact ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-blue-600`} />
+        {/* Stats - Cleaner horizontal layout */}
+        <div className="flex items-center gap-6 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <HomeIcon className="w-4 h-4 text-primary" />
             </div>
-            <div className="min-w-0">
-              <div className={`font-bold text-gray-900 ${isCompact ? 'text-xs' : 'text-sm sm:text-base'}`}>{agency.totalProperties || 0}</div>
-              <div className={`${isCompact ? 'text-[8px]' : 'text-[9px] sm:text-[10px]'} text-gray-500 uppercase tracking-wide truncate`}>{t('agencies.properties')}</div>
-            </div>
-          </div>
-
-          <div className="w-px h-6 sm:h-8 bg-gray-200 flex-shrink-0" />
-
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 justify-center">
-            <div className={`${isCompact ? 'w-6 h-6' : 'w-7 h-7 sm:w-8 sm:h-8'} bg-green-50 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0`}>
-              <UsersIcon className={`${isCompact ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-green-600`} />
-            </div>
-            <div className="min-w-0">
-              <div className={`font-bold text-gray-900 ${isCompact ? 'text-xs' : 'text-sm sm:text-base'}`}>{agency.totalAgents || 0}</div>
-              <div className={`${isCompact ? 'text-[8px]' : 'text-[9px] sm:text-[10px]'} text-gray-500 uppercase tracking-wide truncate`}>{t('agencies.agents')}</div>
+            <div>
+              <div className="text-sm font-bold text-gray-900">{agency.totalProperties || 0}</div>
+              <div className="text-[10px] text-gray-500">{t('agencies.properties')}</div>
             </div>
           </div>
 
-          <div className="w-px h-6 sm:h-8 bg-gray-200 flex-shrink-0" />
-
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 justify-end">
-            <div className={`${isCompact ? 'w-6 h-6' : 'w-7 h-7 sm:w-8 sm:h-8'} bg-purple-50 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0`}>
-              <CalendarIcon className={`${isCompact ? 'w-3 h-3' : 'w-3.5 h-3.5 sm:w-4 sm:h-4'} text-purple-600`} />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+              <UsersIcon className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="min-w-0">
-              <div className={`font-bold text-gray-900 ${isCompact ? 'text-xs' : 'text-sm sm:text-base'}`}>{agency.yearsInBusiness || 0}+</div>
-              <div className={`${isCompact ? 'text-[8px]' : 'text-[9px] sm:text-[10px]'} text-gray-500 uppercase tracking-wide truncate`}>{t('agencies.years')}</div>
+            <div>
+              <div className="text-sm font-bold text-gray-900">{agency.totalAgents || 0}</div>
+              <div className="text-[10px] text-gray-500">{t('agencies.agents')}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-violet-500/10 rounded-lg flex items-center justify-center">
+              <CalendarIcon className="w-4 h-4 text-violet-600" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-gray-900">{agency.yearsInBusiness || 0}+</div>
+              <div className="text-[10px] text-gray-500">{t('agencies.years')}</div>
             </div>
           </div>
         </div>
 
-        {/* Action Row */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {agency.phone && (
-              <a
-                href={`tel:${agency.phone}`}
-                onClick={(e) => e.stopPropagation()}
-                className={`${isCompact ? 'w-8 h-8' : 'w-9 h-9 sm:w-10 sm:h-10'} flex items-center justify-center bg-gray-50 hover:bg-blue-50 active:bg-blue-100 text-gray-600 hover:text-blue-600 rounded-lg sm:rounded-xl transition-colors border border-gray-200 hover:border-blue-200`}
-                aria-label={t('agencies.call')}
-              >
-                <PhoneIcon className={`${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-              </a>
-            )}
-            {agency.email && (
-              <a
-                href={`mailto:${agency.email}`}
-                onClick={(e) => e.stopPropagation()}
-                className={`${isCompact ? 'w-8 h-8' : 'w-9 h-9 sm:w-10 sm:h-10'} flex items-center justify-center bg-gray-50 hover:bg-green-50 active:bg-green-100 text-gray-600 hover:text-green-600 rounded-lg sm:rounded-xl transition-colors border border-gray-200 hover:border-green-200`}
-                aria-label={t('agencies.email')}
-              >
-                <EnvelopeIcon className={`${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-              </a>
-            )}
-            {(agency as any).website && (
-              <a
-                href={(agency as any).website}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className={`${isCompact ? 'w-8 h-8' : 'w-9 h-9 sm:w-10 sm:h-10'} flex items-center justify-center bg-gray-50 hover:bg-purple-50 active:bg-purple-100 text-gray-600 hover:text-purple-600 rounded-lg sm:rounded-xl transition-colors border border-gray-200 hover:border-purple-200 hidden xs:flex`}
-                aria-label={t('agencies.website')}
-              >
-                <GlobeAltIcon className={`${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-              </a>
-            )}
-          </div>
+        {/* Divider */}
+        <div className="border-t border-gray-100 pt-3">
+          {/* Action Row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {agency.phone && (
+                <a
+                  href={`tel:${agency.phone}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-9 h-9 flex items-center justify-center bg-gray-50 hover:bg-primary/10 text-gray-500 hover:text-primary rounded-xl transition-colors"
+                  aria-label={t('agencies.call')}
+                >
+                  <PhoneIcon className="w-4 h-4" />
+                </a>
+              )}
+              {agency.email && (
+                <a
+                  href={`mailto:${agency.email}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-9 h-9 flex items-center justify-center bg-gray-50 hover:bg-primary/10 text-gray-500 hover:text-primary rounded-xl transition-colors"
+                  aria-label={t('agencies.email')}
+                >
+                  <EnvelopeIcon className="w-4 h-4" />
+                </a>
+              )}
+            </div>
 
-          <button className={`${isCompact ? 'px-3 py-2 text-xs' : 'px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm'} bg-primary hover:bg-primary-dark active:bg-primary-dark text-white rounded-lg sm:rounded-xl font-semibold transition-all flex items-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md`}>
-            {t('agencies.view')}
-            <ChevronRightIcon className={`${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-          </button>
+            <button className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow-sm hover:shadow-md active:scale-95">
+              {t('agencies.view')}
+              <ChevronRightIcon className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

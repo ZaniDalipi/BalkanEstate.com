@@ -968,14 +968,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/20 flex items-center justify-center">
                   <HomeIcon className="w-5 h-5 text-primary" />
                 </div>
-                <div className="text-2xl font-bold text-slate-900">{propertyCount || 0}</div>
+                <div className="text-2xl font-bold text-slate-900">{agencyProperties?.length || 0}</div>
                 <div className="text-xs text-slate-500 font-medium">Listings</div>
               </div>
               <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl border border-emerald-100">
                 <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                   <UserGroupIcon className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div className="text-2xl font-bold text-slate-900">{agentCount || 0}</div>
+                <div className="text-2xl font-bold text-slate-900">{agents?.length || 0}</div>
                 <div className="text-xs text-slate-500 font-medium">Agents</div>
               </div>
               <div className="text-center p-4 bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-xl border border-violet-100">
