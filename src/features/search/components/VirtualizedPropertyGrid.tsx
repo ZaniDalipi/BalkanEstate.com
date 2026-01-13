@@ -99,7 +99,6 @@ const Row = ({ index, style, properties, columns, gap, onPropertyHover, totalPro
         display: 'grid',
         gridTemplateColumns: columns === 2 ? '1fr 1fr' : '1fr',
         gap: `${gap}px`,
-        paddingBottom: `${gap}px`,
         paddingLeft: '16px',
         paddingRight: '16px',
       }}
@@ -136,10 +135,10 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
   }, [propertyRowCount, showFooter]);
 
   // Estimated row height - card image + content
-  // Card: image (~160px) + content (~200px) + gap
+  // Card: image (~200px) + content (~160px) + gap
   const rowHeight = useMemo(() => {
-    return 420 + gap;
-  }, [gap]);
+    return 380;
+  }, []);
 
   // Dynamic row height function for footer
   const getRowHeight = useCallback((index: number) => {
