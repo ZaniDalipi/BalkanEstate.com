@@ -1,41 +1,11 @@
-import React, { useCallback, useState, useRef, useEffect, useMemo, memo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
-import PropertyCard from '@/src/features/property-details/components/PropertyCard';
-import { SearchIcon, SparklesIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
+import { SparklesIcon, XMarkIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import { useAppContext } from '@/context/AppContext';
-import Footer from '@/components/shared/Footer';
-
-// Memoized wrapper for PropertyCard to prevent re-renders during scroll
-const PropertyCardWrapper = memo(({
-  property,
-  onHover
-}: {
-  property: Property;
-  onHover?: (id: string | null) => void;
-}) => {
-  const handleMouseEnter = useCallback(() => {
-    onHover?.(property.id);
-  }, [onHover, property.id]);
-
-  const handleMouseLeave = useCallback(() => {
-    onHover?.(null);
-  }, [onHover]);
-
-  return (
-    <div
-      className="property-card-container"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <PropertyCard property={property} />
-    </div>
-  );
-});
-
-PropertyCardWrapper.displayName = 'PropertyCardWrapper';
+import VirtualizedPropertyGrid from './VirtualizedPropertyGrid';
 
 interface PropertyListProps {
   properties: Property[];
@@ -661,8 +631,6 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 });
 
 
-const ITEMS_PER_PAGE = 20;
-
 const PropertyList: React.FC<PropertyListProps> = (props) => {
     const { t } = useTranslation(['search', 'common']);
     const { state, dispatch } = useAppContext();
@@ -670,44 +638,40 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
 
     const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, fallbackLocation } = props;
 
-    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-    const loadMoreRef = useRef(null);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    // Virtualized list state
+    const listContainerRef = useRef<HTMLDivElement>(null);
+    const [containerHeight, setContainerHeight] = useState(600);
+    const [columns, setColumns] = useState<1 | 2>(2);
 
-    // Create stable keys for filters and properties to avoid infinite loops
-    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
-    const propertiesKey = useMemo(() => properties.map(p => p.id).join(','), [properties]);
-
+    // Measure container and update dimensions
     useEffect(() => {
-      // Reset visible count when filters or properties actually change
-      setVisibleCount(ITEMS_PER_PAGE);
-    }, [filtersKey, propertiesKey]);
+        const updateDimensions = () => {
+            if (listContainerRef.current) {
+                const rect = listContainerRef.current.getBoundingClientRect();
+                // Account for header (approx 60px) and padding
+                setContainerHeight(rect.height - 20);
+            }
+            // Determine columns based on viewport width (lg breakpoint is 1024px)
+            setColumns(window.innerWidth >= 1024 ? 2 : 1);
+        };
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && !isLoadingMore && visibleCount < properties.length) {
-                    setIsLoadingMore(true);
-                    setTimeout(() => {
-                        setVisibleCount(prev => prev + ITEMS_PER_PAGE);
-                        setIsLoadingMore(false);
-                    }, 300); // Small delay to show loading and prevent rapid firing
-                }
-            },
-            { threshold: 1.0 }
-        );
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
 
-        const currentRef = loadMoreRef.current;
-        if (currentRef) {
-            observer.observe(currentRef);
+        // Use ResizeObserver for more accurate container measurements
+        const resizeObserver = new ResizeObserver(updateDimensions);
+        if (listContainerRef.current) {
+            resizeObserver.observe(listContainerRef.current);
         }
 
         return () => {
-            if (currentRef) {
-                observer.unobserve(currentRef);
-            }
+            window.removeEventListener('resize', updateDimensions);
+            resizeObserver.disconnect();
         };
-    }, [visibleCount, properties.length, isLoadingMore]);
+    }, []);
+
+    // Stable key for properties to detect changes
+    const propertiesKey = useMemo(() => properties.map(p => p.id).join(','), [properties]);
     
     const inputBaseClasses = "block w-full text-xs bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors";
     
@@ -778,10 +742,10 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             </div>
                         </div>
-                        <div className="p-4 md:p-3">
+                        <div ref={listContainerRef} className="flex-1 min-h-0" style={{ height: 'calc(100% - 60px)' }}>
                             {/* Fallback location message */}
                             {fallbackLocation && !isLoadingProperties && properties.length > 0 && (
-                                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
+                                <div className="mx-4 mb-2 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
                                     <MapPinIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
                                     <p className="text-xs text-amber-800">
                                         {t('search:showingNearbyProperties', { location: fallbackLocation })}
@@ -789,36 +753,25 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             )}
                             {isLoadingProperties ? (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5">
+                                <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} />
                                     ))}
                                 </div>
                             ) : properties.length > 0 ? (
-                                <>
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5 property-grid">
-                                        {properties.slice(0, visibleCount).map(prop => (
-                                            <PropertyCardWrapper
-                                                key={prop.id}
-                                                property={prop}
-                                                onHover={onPropertyHover}
-                                            />
-                                        ))}
-                                    </div>
-                                    {visibleCount < properties.length && (
-                                        <div ref={loadMoreRef} className="text-center p-8 md:p-4">
-                                            {isLoadingMore && <span>{t('common:loadingMore')}</span>}
-                                        </div>
-                                    )}
-                                </>
+                                <div className="px-4" style={{ height: containerHeight }}>
+                                    <VirtualizedPropertyGrid
+                                        key={propertiesKey}
+                                        properties={properties}
+                                        onPropertyHover={onPropertyHover}
+                                        containerHeight={containerHeight}
+                                        columns={columns}
+                                        gap={20}
+                                    />
+                                </div>
                             ) : (
                                 <div className="text-center py-16 px-4"><h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3></div>
                             )}
-
-                            {/* Footer */}
-                            <div className="mt-8 -mx-4 sm:-mx-6">
-                                <Footer contained />
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -920,35 +873,22 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             )}
 
-                            <div className="p-4 md:p-3">
+                            <div className="flex-1 min-h-0 px-4" style={{ height: 'calc(100vh - 280px)' }}>
                                 {isLoadingProperties ? (
-                                    <div className="grid grid-cols-1 gap-5">
+                                    <div className="grid grid-cols-1 gap-5 py-4">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} />
                                         ))}
                                     </div>
                                 ) : properties.length > 0 ? (
-                                    <>
-                                        <div className="grid grid-cols-1 gap-5 property-grid">
-                                            {properties.slice(0, visibleCount).map(prop => (
-                                                <PropertyCardWrapper
-                                                    key={prop.id}
-                                                    property={prop}
-                                                    onHover={onPropertyHover}
-                                                />
-                                            ))}
-                                        </div>
-                                        {visibleCount < properties.length && (
-                                            <div ref={loadMoreRef} className="text-center p-8">
-                                                {isLoadingMore ? (
-                                                    <div className="flex justify-center items-center space-x-2 text-neutral-500">
-                                                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                        <span>Loading more...</span>
-                                                    </div>
-                                                ) : <div className="h-1"></div>}
-                                            </div>
-                                        )}
-                                    </>
+                                    <VirtualizedPropertyGrid
+                                        key={propertiesKey}
+                                        properties={properties}
+                                        onPropertyHover={onPropertyHover}
+                                        containerHeight={Math.max(400, window.innerHeight - 280)}
+                                        columns={1}
+                                        gap={20}
+                                    />
                                 ) : (
                                     <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
                                         <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
@@ -956,9 +896,6 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         <p className="text-neutral-500 mt-2">{t('search:results.tryDifferent')}</p>
                                     </div>
                                 )}
-
-                                {/* Footer */}
-                                <Footer contained />
                             </div>
                         </div>
                     )}
@@ -968,15 +905,25 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     );
 };
 
-// CSS optimization styles for better scroll performance
-const PropertyListStyles = () => (
+// CSS styles for virtualized list scrollbar
+const VirtualizedListStyles = () => (
   <style>{`
-    .property-grid {
-      contain: layout style;
+    .virtualized-property-list {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,0,0,0.2) transparent;
     }
-    .property-card-container {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 400px;
+    .virtualized-property-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .virtualized-property-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .virtualized-property-list::-webkit-scrollbar-thumb {
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 3px;
+    }
+    .virtualized-property-list::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(0,0,0,0.3);
     }
   `}</style>
 );
@@ -984,7 +931,7 @@ const PropertyListStyles = () => (
 // Wrap PropertyList with styles
 const PropertyListWithStyles: React.FC<PropertyListProps> = (props) => (
   <>
-    <PropertyListStyles />
+    <VirtualizedListStyles />
     <PropertyList {...props} />
   </>
 );

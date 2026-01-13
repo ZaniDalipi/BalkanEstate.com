@@ -1,0 +1,154 @@
+import React, { useCallback, useMemo, useRef, useEffect, memo } from 'react';
+import { List } from 'react-window';
+import { Property } from '@/types';
+import PropertyCard from '@/src/features/property-details/components/PropertyCard';
+
+interface VirtualizedPropertyGridProps {
+  properties: Property[];
+  onPropertyHover?: (propertyId: string | null) => void;
+  containerHeight: number;
+  columns?: 1 | 2;
+  gap?: number;
+}
+
+// Memoized property item to prevent unnecessary re-renders
+const PropertyItem = memo(({
+  property,
+  onHover,
+}: {
+  property: Property;
+  onHover?: (id: string | null) => void;
+}) => {
+  const handleMouseEnter = useCallback(() => {
+    onHover?.(property.id);
+  }, [onHover, property.id]);
+
+  const handleMouseLeave = useCallback(() => {
+    onHover?.(null);
+  }, [onHover]);
+
+  return (
+    <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <PropertyCard property={property} />
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  return prevProps.property.id === nextProps.property.id &&
+         prevProps.onHover === nextProps.onHover;
+});
+
+PropertyItem.displayName = 'PropertyItem';
+
+// Row data interface for the row component props
+interface RowData {
+  properties: Property[];
+  columns: number;
+  gap: number;
+  onPropertyHover?: (id: string | null) => void;
+}
+
+// Row component props type
+interface RowProps {
+  ariaAttributes: {
+    'aria-posinset': number;
+    'aria-setsize': number;
+    role: 'listitem';
+  };
+  index: number;
+  style: React.CSSProperties;
+  properties: Property[];
+  columns: number;
+  gap: number;
+  onPropertyHover?: (id: string | null) => void;
+}
+
+// Row component for the virtualized list
+const Row = ({ index, style, properties, columns, gap, onPropertyHover }: RowProps): React.ReactElement => {
+  const startIndex = index * columns;
+  const items: Property[] = [];
+
+  for (let i = 0; i < columns; i++) {
+    const propertyIndex = startIndex + i;
+    if (propertyIndex < properties.length) {
+      items.push(properties[propertyIndex]);
+    }
+  }
+
+  return (
+    <div
+      style={{
+        ...style,
+        display: 'grid',
+        gridTemplateColumns: columns === 2 ? '1fr 1fr' : '1fr',
+        gap: `${gap}px`,
+        paddingBottom: `${gap}px`,
+      }}
+    >
+      {items.map((property) => (
+        <PropertyItem
+          key={property.id}
+          property={property}
+          onHover={onPropertyHover}
+        />
+      ))}
+    </div>
+  );
+};
+
+const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
+  properties,
+  onPropertyHover,
+  containerHeight,
+  columns = 1,
+  gap = 20,
+}) => {
+  const listRef = useRef<any>(null);
+
+  // Calculate row count based on columns
+  const rowCount = useMemo(() => {
+    return Math.ceil(properties.length / columns);
+  }, [properties.length, columns]);
+
+  // Estimated row height - card image + content
+  // Card: image (~160px) + content (~200px) + gap
+  const rowHeight = useMemo(() => {
+    return 420 + gap;
+  }, [gap]);
+
+  // Row props passed to each row
+  const rowProps = useMemo((): RowData => ({
+    properties,
+    columns,
+    gap,
+    onPropertyHover,
+  }), [properties, columns, gap, onPropertyHover]);
+
+  // Reset scroll when properties change significantly
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollToRow?.({ index: 0 });
+    }
+  }, [properties.length > 0 ? properties[0]?.id : null]);
+
+  if (properties.length === 0) {
+    return null;
+  }
+
+  return (
+    <List<RowData>
+      listRef={listRef}
+      rowCount={rowCount}
+      rowHeight={rowHeight}
+      rowComponent={Row}
+      rowProps={rowProps}
+      overscanCount={2}
+      className="virtualized-property-list"
+      style={{ height: containerHeight, width: '100%' }}
+    />
+  );
+};
+
+export default memo(VirtualizedPropertyGrid);
