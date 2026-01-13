@@ -100,6 +100,8 @@ const Row = ({ index, style, properties, columns, gap, onPropertyHover, totalPro
         gridTemplateColumns: columns === 2 ? '1fr 1fr' : '1fr',
         gap: `${gap}px`,
         paddingBottom: `${gap}px`,
+        paddingLeft: '16px',
+        paddingRight: '16px',
       }}
     >
       {items.map((property) => (

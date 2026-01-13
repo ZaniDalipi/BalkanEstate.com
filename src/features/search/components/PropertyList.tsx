@@ -873,9 +873,9 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             )}
 
-                            <div className="flex-1 min-h-0 px-4" style={{ height: 'calc(100vh - 280px)' }}>
+                            <div className="flex-1 min-h-0" style={{ height: 'calc(100vh - 280px)' }}>
                                 {isLoadingProperties ? (
-                                    <div className="grid grid-cols-1 gap-5 py-4">
+                                    <div className="grid grid-cols-1 gap-5 py-4 px-4">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} />
                                         ))}
@@ -887,7 +887,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         onPropertyHover={onPropertyHover}
                                         containerHeight={Math.max(400, window.innerHeight - 280)}
                                         columns={1}
-                                        gap={20}
+                                        gap={16}
                                         showFooter={false}
                                     />
                                 ) : (
