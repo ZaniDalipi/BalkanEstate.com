@@ -453,68 +453,64 @@ const AgenciesListPage: React.FC = () => {
 
           {/* Agencies Grid */}
           <div className="mb-8 sm:mb-12">
-            {/* Stats Header */}
-            <div className="mb-6 sm:mb-10">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
-                <div>
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 mb-1 sm:mb-2">
-                    {filter === 'myAgency' ? t('agencies.yourAgency') :
-                     filter === 'featured' ? t('agencies.featuredAgencies') :
-                     t('agencies.topRealEstateAgencies')}
-                  </h2>
-                  <p className="text-neutral-600 text-xs sm:text-sm md:text-base">
-                    {searchQuery
-                      ? t('agencies.showingMatching', { count: agencies.length, query: searchQuery })
-                      : t('agencies.browseAgencies')}
-                  </p>
-                </div>
-                <div className="text-xs sm:text-sm text-neutral-600 bg-gray-100 px-3 py-1.5 rounded-full">
-                  <span className="font-bold text-primary">{agencies.length}</span> {t('agencies.agenciesFound')}
-                </div>
+            {/* Header with inline count */}
+            <div className="mb-5 sm:mb-8">
+              <div className="flex items-center gap-3 mb-1.5 sm:mb-2">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900">
+                  {filter === 'myAgency' ? t('agencies.yourAgency') :
+                   filter === 'featured' ? t('agencies.featuredAgencies') :
+                   t('agencies.topRealEstateAgencies')}
+                </h2>
+                <span className="text-xs sm:text-sm text-white bg-primary px-2.5 py-1 rounded-full font-semibold">
+                  {agencies.length}
+                </span>
               </div>
+              <p className="text-neutral-500 text-xs sm:text-sm">
+                {searchQuery
+                  ? t('agencies.showingMatching', { count: agencies.length, query: searchQuery })
+                  : t('agencies.browseAgencies')}
+              </p>
 
-              {/* Stats Cards - Responsive horizontal scroll on mobile */}
+              {/* Stats Row - Compact horizontal */}
               {agencies.length > 0 && (
-                <div className="flex gap-3 sm:gap-4 md:gap-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 scrollbar-hide">
-                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex-shrink-0 w-[160px] sm:w-auto">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                <div className="flex items-center gap-4 sm:gap-6 mt-4 sm:mt-6 py-3 sm:py-4 px-4 sm:px-6 bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
+                        {Math.max(...agencies.map(a => a.totalProperties || 0))}
                       </div>
-                      <div>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
-                          {Math.max(...agencies.map(a => a.totalProperties || 0))}
-                        </div>
-                        <div className="text-[10px] sm:text-xs md:text-sm text-gray-600">{t('agencies.mostProperties')}</div>
-                      </div>
+                      <div className="text-[10px] sm:text-xs text-gray-500">{t('agencies.mostProperties')}</div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex-shrink-0 w-[160px] sm:w-auto">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                  <div className="w-px h-8 bg-gray-200" />
+
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-500 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
+                        {Math.max(...agencies.map(a => a.totalAgents || 0))}
                       </div>
-                      <div>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
-                          {Math.max(...agencies.map(a => a.totalAgents || 0))}
-                        </div>
-                        <div className="text-[10px] sm:text-xs md:text-sm text-gray-600">{t('agencies.mostAgents')}</div>
-                      </div>
+                      <div className="text-[10px] sm:text-xs text-gray-500">{t('agencies.mostAgents')}</div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex-shrink-0 w-[160px] sm:w-auto">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                        <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                  <div className="w-px h-8 bg-gray-200" />
+
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-500 rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
+                        {Math.max(...agencies.map(a => a.yearsInBusiness || 0))}+
                       </div>
-                      <div>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
-                          {Math.max(...agencies.map(a => a.yearsInBusiness || 0))}+
-                        </div>
-                        <div className="text-[10px] sm:text-xs md:text-sm text-gray-600">{t('agencies.mostExperience')}</div>
-                      </div>
+                      <div className="text-[10px] sm:text-xs text-gray-500">{t('agencies.mostExperience')}</div>
                     </div>
                   </div>
                 </div>

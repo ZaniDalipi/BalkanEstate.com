@@ -222,23 +222,20 @@ const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
               </div>
             )}
 
-            {/* Stats */}
-            <div className="pt-6 border-t border-neutral-200/50">
-              <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+            {/* Stats - Horizontal row */}
+            <div className="pt-5 border-t border-neutral-200/50">
+              <div className="flex items-center justify-center gap-6 sm:gap-8">
                 {stats.map((stat, index) => {
                   const IconComponent = iconMap[stat.icon];
                   const colors = colorMap[stat.color];
                   return (
-                    <div
-                      key={index}
-                      className={`flex items-center gap-3 ${colors.bg} px-5 py-4 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border ${colors.border}`}
-                    >
-                      <div className={`p-2.5 ${colors.iconBg} rounded-xl shadow-md`}>
-                        <IconComponent className="w-5 h-5 text-white" />
+                    <div key={index} className="flex items-center gap-2.5 sm:gap-3">
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 ${colors.iconBg} rounded-xl flex items-center justify-center shadow-sm`}>
+                        <IconComponent className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-white" />
                       </div>
                       <div>
-                        <div className="font-bold text-2xl sm:text-3xl text-neutral-900">{stat.count}</div>
-                        <div className={`${colors.text} text-xs sm:text-sm font-medium`}>{stat.label}</div>
+                        <div className="font-bold text-xl sm:text-2xl text-neutral-900 leading-none">{stat.count}</div>
+                        <div className={`${colors.text} text-[10px] sm:text-xs font-medium mt-0.5`}>{stat.label}</div>
                       </div>
                     </div>
                   );
