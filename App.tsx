@@ -159,6 +159,17 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return;
       }
 
+      // Agent profile route: /agents/:id
+      const agentMatch = path.match(/^\/agents\/(.+)$/);
+      if (agentMatch) {
+        const agentId = decodeURIComponent(agentMatch[1]);
+        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENT', payload: agentId });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
+        return;
+      }
+
       // Agency detail route: /agencies/:slug
       const agencyMatch = path.match(/^\/agencies\/(.+)$/);
       if (agencyMatch) {
@@ -246,6 +257,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/terms-of-service': 'terms',
         '/cookies': 'cookies',
         '/cookie-policy': 'cookies',
+        '/refund': 'refund',
+        '/refund-policy': 'refund',
       };
 
       const view = routeMap[path];
