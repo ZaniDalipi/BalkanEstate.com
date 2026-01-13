@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useAppContext } from '../context/AppContext';
-import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon, SparklesIcon, UserGroupIcon, CalendarIcon, AcademicCapIcon, GlobeAltIcon } from '../constants';
+import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon, SparklesIcon, UserGroupIcon, CalendarIcon, AcademicCapIcon, GlobeAltIcon, ChevronRightIcon } from '../constants';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '../src/features/property-details/components/PropertyCardSkeleton';
 import AgencyJoinRequestsModal from './AgencyJoinRequestsModal';
@@ -52,6 +52,8 @@ interface Agent {
   propertiesSold?: number;
   activeListings?: number;
   licenseNumber?: string;
+  city?: string;
+  country?: string;
   stats?: {
     totalSalesValue?: number;
     propertiesSold?: number;
@@ -60,9 +62,10 @@ interface Agent {
   };
 }
 
-// Extended Agency type to include optional id for compatibility
+// Extended Agency type to include optional id and rating for compatibility
 interface ExtendedAgency extends Agency {
   id?: string;
+  rating?: number;
 }
 
 interface AgencyDetailPageProps {
