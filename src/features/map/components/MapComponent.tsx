@@ -637,20 +637,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
       {/* Mobile Controls - hidden on desktop via CSS as fallback */}
       {isMobile && (
         <>
-          {/* Mobile: Layers FAB with dropdown - positioned at bottom left */}
-          <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden transition-all duration-200 ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-            {/* Dropdown menu - appears above the FAB */}
+          {/* Mobile: Layers FAB with liquid glass dropdown */}
+          <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            {/* Liquid glass dropdown - instant appearance */}
             {isLayerMenuOpen && (
-              <div className="absolute bottom-full left-0 mb-3 pointer-events-auto animate-fade-in">
-                <div className="flex flex-col gap-1.5 p-2.5 rounded-2xl shadow-xl bg-white/98 backdrop-blur-lg border border-neutral-100">
+              <div className="absolute bottom-full left-0 mb-3 pointer-events-auto">
+                <div
+                  className="flex flex-col gap-1.5 p-3 rounded-2xl shadow-2xl border border-white/30"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(24px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                  }}
+                >
                   {/* Legend Toggle */}
                   <button
                     onClick={() => {
                       setIsLegendOpen((p) => !p);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
-                      isLegendOpen ? 'bg-amber-500 text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
+                      isLegendOpen ? 'bg-amber-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
                     }`}
                   >
                     <MapLegendIcon className="w-5 h-5" />
@@ -660,8 +667,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   {/* Landmarks Toggle */}
                   <button
                     onClick={() => setShowLandmarks(!showLandmarks)}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
-                      showLandmarks ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
+                      showLandmarks ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
                     }`}
                   >
                     <span className="text-lg">🏛️</span>
@@ -674,8 +681,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       setShowMeasurement(!showMeasurement);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
-                      showMeasurement ? 'bg-emerald-600 text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
+                      showMeasurement ? 'bg-emerald-600 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
                     }`}
                   >
                     <span className="text-lg">📏</span>
@@ -686,8 +693,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   {mapType === 'satellite' && (
                     <button
                       onClick={() => setShowCadastre(!showCadastre)}
-                      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
-                        showCadastre ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
+                        showCadastre ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
                       }`}
                     >
                       <span className="text-lg">📐</span>
@@ -698,8 +705,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   {/* 3D Buildings Toggle */}
                   <button
                     onClick={() => setShow3DBuildings(!show3DBuildings)}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all active:scale-95 ${
-                      show3DBuildings ? 'bg-slate-700 text-white shadow-md' : 'text-neutral-700 hover:bg-neutral-100'
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
+                      show3DBuildings ? 'bg-slate-700 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
                     }`}
                   >
                     <span className="text-lg">🏢</span>
@@ -709,23 +716,29 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             )}
 
-            {/* FAB Button - larger and more prominent */}
+            {/* FAB Button - Plus icon that rotates to X */}
             <button
               onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
-              className={`pointer-events-auto w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 active:scale-90 ${
-                isLayerMenuOpen
-                  ? 'bg-primary text-white rotate-180 scale-110'
-                  : 'bg-white text-neutral-700 hover:scale-105'
+              className={`pointer-events-auto w-14 h-14 rounded-full shadow-xl flex items-center justify-center active:scale-95 ${
+                isLayerMenuOpen ? 'bg-neutral-800 text-white' : 'bg-white text-neutral-700'
               }`}
-              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+              style={{
+                boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+              }}
             >
-              {isLayerMenuOpen ? (
-                <XCircleIcon className="w-7 h-7" />
-              ) : (
-                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0l4.179 2.25L12 21.75l-9.75-5.25 4.179-2.25" />
-                </svg>
-              )}
+              <svg
+                className="w-7 h-7"
+                style={{
+                  transform: isLayerMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.15s ease-out',
+                }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
               {/* Active layers badge */}
               {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement) && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
@@ -736,7 +749,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
             {/* Legend popup */}
             {isLegendOpen && !isLayerMenuOpen && (
-              <div className="absolute bottom-0 left-full ml-3 pointer-events-auto animate-fade-in">
+              <div className="absolute bottom-0 left-full ml-3 pointer-events-auto">
                 <Legend isNightMode={false} />
               </div>
             )}
