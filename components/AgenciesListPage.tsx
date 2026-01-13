@@ -126,10 +126,10 @@ const AgenciesListPage: React.FC = () => {
   };
 
   const getRankColor = (index: number) => {
-    if (index === 0) return 'bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-600';
-    if (index === 1) return 'bg-gradient-to-br from-gray-400 via-gray-300 to-gray-500';
-    if (index === 2) return 'bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600';
-    return 'bg-gradient-to-br from-primary via-primary-light to-primary-dark';
+    if (index === 0) return 'bg-amber-500';
+    if (index === 1) return 'bg-gray-400';
+    if (index === 2) return 'bg-orange-500';
+    return 'bg-primary';
   };
 
   const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => (
@@ -147,10 +147,8 @@ const AgenciesListPage: React.FC = () => {
             className="w-full h-full object-cover"
             loading="lazy"
           />
-        ) : (agency as any).coverGradient ? (
-          <div className={`w-full h-full bg-gradient-to-br ${(agency as any).coverGradient}`} />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-orange-500 via-rose-500 to-pink-500" />
+          <div className="w-full h-full bg-primary" />
         )}
 
         {/* Featured badge */}
