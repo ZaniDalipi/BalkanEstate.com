@@ -118,6 +118,37 @@ const inject3DPerspectiveStyles = () => {
       pointer-events: none;
       z-index: -1;
     }
+
+    /* Mobile map tile optimizations */
+    @media (max-width: 768px) {
+      .leaflet-tile-container {
+        will-change: transform;
+      }
+      .leaflet-tile {
+        will-change: opacity;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      .leaflet-fade-anim .leaflet-tile {
+        transition: opacity 0.15s linear;
+      }
+      .leaflet-zoom-anim .leaflet-zoom-animated {
+        transition: transform 0.2s cubic-bezier(0,0,0.25,1);
+      }
+      .leaflet-container {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: pan-x pan-y;
+      }
+      .leaflet-marker-icon {
+        will-change: transform;
+      }
+    }
+
+    /* Cleaner tile rendering */
+    .map-tiles img {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
   `;
   document.head.appendChild(style);
 };
@@ -350,6 +381,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
+          // Mobile optimizations
+          fadeAnimation={!isMobile}
+          markerZoomAnimation={!isMobile}
+          zoomAnimation={!isMobile}
+          tap={isMobile}
+          touchZoom={isMobile ? 'center' : true}
+          bounceAtZoomLimits={false}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
@@ -375,10 +413,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={2}
+            keepBuffer={isMobile ? 1 : 2}
             updateWhenIdle={true}
             updateWhenZooming={false}
-            updateInterval={150}
+            updateInterval={isMobile ? 200 : 150}
+            className="map-tiles"
           />
           {/* 3D Buildings with time-based shadows */}
           <Buildings3DLayer
