@@ -810,15 +810,15 @@ export const Legend: React.FC<LegendProps> = ({ isNightMode = false }) => {
         WebkitBackdropFilter: 'blur(16px) saturate(180%)',
       }}
     >
-      {/* Property Types - Compact grid */}
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+      {/* Property Types - Single column for clarity */}
+      <div className="flex flex-col gap-1">
         {Object.entries(PROPERTY_TYPE_COLORS).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1.5">
+          <div key={type} className="flex items-center gap-2">
             <span
               className="w-2.5 h-2.5 rounded-full flex-shrink-0"
               style={{ backgroundColor: color }}
             />
-            <span className={`text-[11px] font-medium ${isNightMode ? 'text-slate-200' : 'text-neutral-700'}`}>
+            <span className={`text-[11px] font-medium whitespace-nowrap ${isNightMode ? 'text-slate-200' : 'text-neutral-700'}`}>
               {t(`map.propertyTypes.${type}`)}
             </span>
           </div>
