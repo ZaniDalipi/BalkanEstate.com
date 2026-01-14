@@ -356,6 +356,18 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     fetchAgency();
   }, [state.selectedAgencyId]);
 
+  // Scroll to top when active view changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [state.activeView]);
+
+  // Also scroll to top when selected property or agency changes
+  useEffect(() => {
+    if (state.selectedProperty || state.selectedAgencyId) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [state.selectedProperty, state.selectedAgencyId]);
+
   // Payment callback routes (highest priority)
   const path = window.location.pathname;
   if (path === '/payment/success') {
