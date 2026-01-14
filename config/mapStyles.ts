@@ -129,9 +129,9 @@ export const MAP_TILE_LAYERS: Record<string, MapTileLayer> = {
 };
 
 /**
- * Default map style for real estate - clean and minimal
+ * Default map style for real estate - Google Maps street view (Zillow-style)
  */
-export const DEFAULT_MAP_STYLE = 'voyager';
+export const DEFAULT_MAP_STYLE = 'street';
 
 /**
  * Map style categories for UI grouping

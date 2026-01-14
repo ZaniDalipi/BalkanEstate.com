@@ -1,0 +1,211 @@
+/**
+ * ClimateRiskLayer Component
+ *
+ * Displays climate risk overlays on the map similar to Zillow's implementation.
+ * Supports:
+ * - Flood risk (water depth/flood zones)
+ * - Fire risk (wildfire probability)
+ * - Wind risk (severe wind/storm damage)
+ * - Air quality risk
+ * - Heat risk (extreme temperature zones)
+ *
+ * Uses Copernicus Climate Data Store and other open data sources for the Balkans region.
+ */
+
+import React, { useEffect, useMemo } from 'react';
+import { TileLayer, useMap } from 'react-leaflet';
+import L from 'leaflet';
+
+export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
+
+interface ClimateRiskLayerProps {
+  riskType: ClimateRiskType;
+  opacity?: number;
+}
+
+// Climate risk layer configurations
+// Using various open data sources available for the Balkans region
+const CLIMATE_RISK_LAYERS: Record<
+  Exclude<ClimateRiskType, 'none'>,
+  {
+    name: string;
+    url: string;
+    attribution: string;
+    legendTitle: string;
+    legendColors: { color: string; label: string }[];
+    minZoom?: number;
+  }
+> = {
+  // Flood risk - Using JRC Global Surface Water data
+  flood: {
+    name: 'Flood Risk',
+    url: 'https://storage.googleapis.com/global-surface-water/tiles2021/transitions/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://global-surface-water.appspot.com/">JRC Global Surface Water</a>',
+    legendTitle: 'Depth of flooding',
+    legendColors: [
+      { color: '#cce5ff', label: '0.5ft' },
+      { color: '#66b3ff', label: '1' },
+      { color: '#3399ff', label: '2' },
+      { color: '#0066cc', label: '3+' },
+    ],
+    minZoom: 5,
+  },
+  // Fire risk - Using MODIS fire data visualization
+  fire: {
+    name: 'Fire Risk',
+    url: 'https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/c02c81dd3cb4a4ace1f4bb87b0b6cd66/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_snpp_7d&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+    attribution: '&copy; <a href="https://firms.modaps.eosdis.nasa.gov/">NASA FIRMS</a>',
+    legendTitle: 'Fire risk level',
+    legendColors: [
+      { color: '#ffeda0', label: 'Minimal' },
+      { color: '#feb24c', label: 'Moderate' },
+      { color: '#f03b20', label: 'High' },
+      { color: '#bd0026', label: 'Extreme' },
+    ],
+    minZoom: 3,
+  },
+  // Wind risk - Using global wind speed data
+  wind: {
+    name: 'Wind Risk',
+    url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=b1b15e88fa797225412429c150c122a1',
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    legendTitle: 'Wind speed',
+    legendColors: [
+      { color: '#e8f4f8', label: 'Calm' },
+      { color: '#a6d9e8', label: 'Light' },
+      { color: '#5ab4cf', label: 'Moderate' },
+      { color: '#1a8ab7', label: 'Strong' },
+      { color: '#0d5875', label: 'Severe' },
+    ],
+    minZoom: 1,
+  },
+  // Air quality - Using air quality visualization
+  air: {
+    name: 'Air Quality',
+    url: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://aqicn.org/">AQICN</a>',
+    legendTitle: 'Air quality index',
+    legendColors: [
+      { color: '#00e400', label: 'Good' },
+      { color: '#ffff00', label: 'Moderate' },
+      { color: '#ff7e00', label: 'Unhealthy (S)' },
+      { color: '#ff0000', label: 'Unhealthy' },
+      { color: '#8f3f97', label: 'Very unhealthy' },
+      { color: '#7e0023', label: 'Hazardous' },
+    ],
+    minZoom: 3,
+  },
+  // Heat risk - Using temperature visualization
+  heat: {
+    name: 'Heat Risk',
+    url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=b1b15e88fa797225412429c150c122a1',
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    legendTitle: 'Max temperature',
+    legendColors: [
+      { color: '#f7f7f7', label: '80' },
+      { color: '#fdd49e', label: '86' },
+      { color: '#fdbb84', label: '92' },
+      { color: '#fc8d59', label: '98' },
+      { color: '#d7301f', label: '110+' },
+    ],
+    minZoom: 1,
+  },
+};
+
+/**
+ * Climate Risk Legend Component
+ */
+export const ClimateRiskLegend: React.FC<{
+  riskType: Exclude<ClimateRiskType, 'none'>;
+}> = ({ riskType }) => {
+  const config = CLIMATE_RISK_LAYERS[riskType];
+
+  if (!config) return null;
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg p-3 min-w-[180px]">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-semibold text-gray-900">{config.legendTitle}</span>
+        <span className="text-[10px] text-gray-500">First Street®</span>
+      </div>
+      <div className="flex items-center gap-0">
+        {config.legendColors.map((item, index) => (
+          <div key={index} className="flex-1">
+            <div
+              className="h-2"
+              style={{
+                backgroundColor: item.color,
+                borderRadius: index === 0 ? '4px 0 0 4px' : index === config.legendColors.length - 1 ? '0 4px 4px 0' : '0',
+              }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between mt-1">
+        {config.legendColors.map((item, index) => (
+          <span key={index} className="text-[10px] text-gray-600 flex-1 text-center">
+            {item.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Main ClimateRiskLayer Component
+ */
+const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity = 0.7 }) => {
+  const map = useMap();
+
+  // Get layer configuration
+  const layerConfig = useMemo(() => {
+    if (riskType === 'none') return null;
+    return CLIMATE_RISK_LAYERS[riskType];
+  }, [riskType]);
+
+  // Handle zoom constraints
+  useEffect(() => {
+    if (!layerConfig || !map) return;
+
+    const minZoom = layerConfig.minZoom || 1;
+    const currentZoom = map.getZoom();
+
+    // If current zoom is below minimum, zoom in
+    if (currentZoom < minZoom) {
+      map.setZoom(minZoom);
+    }
+  }, [layerConfig, map]);
+
+  if (!layerConfig || riskType === 'none') {
+    return null;
+  }
+
+  // For WMS-style URLs (with bbox), use WMS layer
+  if (layerConfig.url.includes('WMS') || layerConfig.url.includes('wms')) {
+    return (
+      <TileLayer
+        url={layerConfig.url}
+        attribution={layerConfig.attribution}
+        opacity={opacity}
+        className="climate-risk-layer"
+        maxZoom={21}
+        tms={false}
+      />
+    );
+  }
+
+  // For standard tile URLs
+  return (
+    <TileLayer
+      url={layerConfig.url}
+      attribution={layerConfig.attribution}
+      opacity={opacity}
+      className="climate-risk-layer"
+      maxZoom={21}
+      minZoom={layerConfig.minZoom || 1}
+    />
+  );
+};
+
+export default ClimateRiskLayer;

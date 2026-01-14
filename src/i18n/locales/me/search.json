@@ -208,7 +208,23 @@
     "locationPermissionDenied": "Location permission denied. Please enable location access in your browser settings.",
     "locationUnavailable": "Location information is unavailable. Please try again.",
     "locationTimeout": "Location request timed out. Please try again.",
-    "locationError": "An error occurred while getting your location. Please try again."
+    "locationError": "An error occurred while getting your location. Please try again.",
+    "options": {
+      "title": "Opcije mape",
+      "mapButton": "Mapa",
+      "automatic": "Automatski",
+      "satellite": "Satelit",
+      "streetView": "Ulični prikaz"
+    },
+    "climateRisks": {
+      "title": "Klimatski rizici",
+      "none": "Ništa nije odabrano",
+      "flood": "Poplava",
+      "fire": "Požar",
+      "wind": "Vjetar",
+      "air": "Zrak",
+      "heat": "Vrućina"
+    }
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

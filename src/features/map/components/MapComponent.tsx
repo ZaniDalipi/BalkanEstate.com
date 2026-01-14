@@ -19,6 +19,8 @@ import SunArcAnimation, { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
 import PropertyAddressLabels from './PropertyAddressLabels';
 import MeasurementTool from './MeasurementTool';
+import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
+import ClimateRiskLayer, { ClimateRiskLegend } from './ClimateRiskLayer';
 import {
   FlyToController,
   MapEvents,
@@ -244,8 +246,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
-  // Default to 'positron' - clean style optimized for real estate (properties stand out)
-  const [mapType, setMapType] = useState<TileLayerType>(DEFAULT_MAP_STYLE as TileLayerType);
+  // Default to 'street' - Google Maps street view as per Zillow-style implementation
+  const [mapType, setMapType] = useState<TileLayerType>('street' as TileLayerType);
   const [isLegendOpen, setIsLegendOpen] = useState(false); // Legend closed by default, user can open it
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
@@ -259,6 +261,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
   const [showMeasurement, setShowMeasurement] = useState(false); // Toggle for measurement tool
   const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false); // Mobile FAB layer menu
+
+  // Zillow-style Map Options state
+  const [isMapOptionsOpen, setIsMapOptionsOpen] = useState(false); // Map options panel visibility
+  const [selectedMapOption, setSelectedMapOption] = useState<MapOptionType>('streetview'); // Default to Street view
+  const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none'); // No climate risk by default
 
   // Check URL params for measurementId to auto-enable measurement tool
   useEffect(() => {
@@ -278,6 +285,31 @@ const MapComponent: React.FC<MapComponentProps> = ({
       setMapType('satellite');
     }
   }, [showMeasurement]);
+
+  // Sync map option selection with actual tile layer type
+  useEffect(() => {
+    // Map the Zillow-style options to actual tile layer types
+    const mapOptionToTileLayer: Record<MapOptionType, TileLayerType> = {
+      automatic: 'voyager', // Automatic uses the colorful neighborhood view
+      satellite: 'satellite',
+      streetview: 'street', // Street view uses Google Maps street layer
+    };
+    setMapType(mapOptionToTileLayer[selectedMapOption]);
+  }, [selectedMapOption]);
+
+  // Handle map option change (from MapOptionsPanel)
+  const handleMapOptionChange = useCallback((option: MapOptionType) => {
+    setSelectedMapOption(option);
+    // Close the panel after selection on mobile
+    if (isMobile) {
+      setIsMapOptionsOpen(false);
+    }
+  }, [isMobile]);
+
+  // Handle climate risk change (from MapOptionsPanel)
+  const handleClimateRiskChange = useCallback((risk: ClimateRiskType) => {
+    setSelectedClimateRisk(risk);
+  }, []);
 
   // Use ref for onMapMove to prevent infinite loops when callback changes
   const onMapMoveRef = useRef(onMapMove);
@@ -408,6 +440,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
             updateInterval={isMobile ? 200 : 150}
             className="map-tiles"
           />
+          {/* Climate Risk Overlay Layer (Zillow-style) */}
+          <ClimateRiskLayer riskType={selectedClimateRisk} opacity={0.6} />
           {/* 3D Buildings with time-based shadows */}
           <Buildings3DLayer
             enabled={show3DBuildings}
@@ -600,6 +634,42 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <MapLegendIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('search:map.legend', 'Legend')}</span>
               </button>
+
+              {/* Zillow-style Map Options Button */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
+                  className={`flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                    isMapOptionsOpen || selectedClimateRisk !== 'none'
+                      ? 'bg-gray-100 text-gray-900 shadow-inner'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
+                  }`}
+                >
+                  <span>{t('search:map.options.mapButton', 'Map')}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {/* Map Options Panel - appears above the button */}
+                {isMapOptionsOpen && (
+                  <div className="absolute bottom-full right-0 mb-2 z-[1010]">
+                    <MapOptionsPanel
+                      selectedMapOption={selectedMapOption}
+                      selectedClimateRisk={selectedClimateRisk}
+                      onMapOptionChange={handleMapOptionChange}
+                      onClimateRiskChange={handleClimateRiskChange}
+                      isOpen={isMapOptionsOpen}
+                      onClose={() => setIsMapOptionsOpen(false)}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {drawnBounds && !isDrawing && (
@@ -630,6 +700,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
           {isLegendOpen && !showMeasurement && (
             <div className="absolute bottom-12 left-4 z-[1000] animate-fade-in">
               <Legend isNightMode={false} />
+            </div>
+          )}
+
+          {/* Climate Risk Legend - shows when a climate risk is selected (Zillow-style) */}
+          {selectedClimateRisk !== 'none' && (
+            <div className="absolute bottom-12 left-4 z-[1001] animate-fade-in">
+              <ClimateRiskLegend riskType={selectedClimateRisk} />
             </div>
           )}
 
@@ -771,6 +848,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <Legend isNightMode={false} />
               </div>
             )}
+
+            {/* Climate Risk Legend for mobile */}
+            {selectedClimateRisk !== 'none' && !isLayerMenuOpen && (
+              <div className="absolute bottom-14 left-0 pointer-events-auto">
+                <ClimateRiskLegend riskType={selectedClimateRisk} />
+              </div>
+            )}
           </div>
 
           {/* Mobile: Top right compact controls */}
@@ -785,40 +869,40 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                 }}
               >
-                {/* Map type toggle */}
-                <div className="flex bg-neutral-100 rounded-lg p-0.5">
+                {/* Zillow-style Map Options Button (Mobile) */}
+                <div className="relative">
                   <button
-                    onClick={() => setMapType('positron')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'positron' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
+                    onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
+                    className={`flex items-center gap-1 px-2 py-1 text-[10px] font-semibold rounded-lg transition-all ${
+                      isMapOptionsOpen || selectedClimateRisk !== 'none'
+                        ? 'bg-gray-200 text-gray-900'
+                        : 'bg-white text-gray-700 shadow-sm'
                     }`}
                   >
-                    Clean
+                    <span>{t('search:map.options.mapButton', 'Map')}</span>
+                    <svg
+                      className={`w-3 h-3 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
-                  <button
-                    onClick={() => setMapType('voyager')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'voyager' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
-                    }`}
-                  >
-                    Color
-                  </button>
-                  <button
-                    onClick={() => setMapType('street')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'street' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
-                    }`}
-                  >
-                    Map
-                  </button>
-                  <button
-                    onClick={() => setMapType('satellite')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'satellite' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
-                    }`}
-                  >
-                    Sat
-                  </button>
+                  {/* Mobile Map Options Panel */}
+                  {isMapOptionsOpen && (
+                    <div className="absolute top-full right-0 mt-2 z-[1010]">
+                      <MapOptionsPanel
+                        selectedMapOption={selectedMapOption}
+                        selectedClimateRisk={selectedClimateRisk}
+                        onMapOptionChange={handleMapOptionChange}
+                        onClimateRiskChange={handleClimateRiskChange}
+                        isOpen={isMapOptionsOpen}
+                        onClose={() => setIsMapOptionsOpen(false)}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Recenter */}
