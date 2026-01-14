@@ -491,6 +491,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   Color
                 </button>
                 <button
+                  onClick={() => setMapType('street')}
+                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                    mapType === 'street'
+                      ? 'bg-white shadow text-primary'
+                      : 'text-neutral-600 hover:bg-white/50'
+                  }`}
+                  title="Google Maps street view"
+                >
+                  {t('search:map.street')}
+                </button>
+                <button
                   onClick={() => setMapType('satellite')}
                   className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
                     mapType === 'satellite'
@@ -778,7 +789,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <div className="flex bg-neutral-100 rounded-lg p-0.5">
                   <button
                     onClick={() => setMapType('positron')}
-                    className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
                       mapType === 'positron' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
                     }`}
                   >
@@ -786,15 +797,23 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   </button>
                   <button
                     onClick={() => setMapType('voyager')}
-                    className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
                       mapType === 'voyager' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
                     }`}
                   >
                     Color
                   </button>
                   <button
+                    onClick={() => setMapType('street')}
+                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
+                      mapType === 'street' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
+                    }`}
+                  >
+                    Map
+                  </button>
+                  <button
                     onClick={() => setMapType('satellite')}
-                    className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
                       mapType === 'satellite' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
                     }`}
                   >
