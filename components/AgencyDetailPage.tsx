@@ -1300,7 +1300,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                             <span>{rank.text}</span>
                           </div>
                           {/* Rating badge */}
-                          {agent.stats?.rating && agent.stats.rating >= 4.0 && (
+                          {agent.stats?.rating != null && agent.stats.rating >= 4.0 && (
                             <div className="absolute -bottom-1.5 -right-1.5 bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[10px] font-bold shadow flex items-center gap-0.5">
                               <StarIcon className="w-2.5 h-2.5 fill-current" />
                               {agent.stats.rating.toFixed(1)}
