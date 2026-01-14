@@ -1,74 +1,74 @@
 {
-  "pageTitle": "Ценовни Планови",
-  "title": "Изберете Ваш План",
-  "subtitle": "Поставете го вашиот имот пред илјадници потенцијални купувачи со нашите флексибилни опции за цени.",
+  "pageTitle": "Ценовни планови",
+  "title": "Изберете го Вашиот план",
+  "subtitle": "Поставете го Вашиот имот пред илјадници потенцијални купувачи со нашите флексибилни ценовни опции.",
   "loading": "Вчитување на ценовни планови...",
   "noPlans": "Нема достапни ценовни планови во моментов.",
   "tabs": {
-    "forSellers": "За Продавачи",
-    "forBuyers": "За Купувачи"
+    "forSellers": "За продавачи",
+    "forBuyers": "За купувачи"
   },
   "error": {
     "loadFailed": "Неуспешно вчитување на ценовните планови"
   },
-  "limitedOffer": "Limited Time Offer Ends In:",
-  "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
-  "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
+  "limitedOffer": "Понудата со ограничено време завршува за:",
+  "offerTitle": "Честитки! Ги отклучивте ексклузивните попусти!",
+  "offerSubtitle": "Уживајте во оваа еднократна понуда на нашите планови за продажба како благодарност.",
   "plans": {
     "free": {
-      "name": "Free",
-      "description": "Perfect for getting started"
+      "name": "Бесплатно",
+      "description": "Совршено за да започнете"
     },
     "proMonthly": {
-      "name": "Pro Monthly",
-      "description": "Best for active sellers",
-      "badge": "Popular"
+      "name": "Pro месечно",
+      "description": "Најдобро за активни продавачи",
+      "badge": "Популарно"
     },
     "proYearly": {
-      "name": "Pro Yearly",
-      "description": "Save {{percent}}% with annual billing",
-      "badge": "MOST POPULAR"
+      "name": "Pro годишно",
+      "description": "Заштедете {{percent}}% со годишна наплата",
+      "badge": "НАЈПОПУЛАРНО"
     },
     "enterprise": {
-      "name": "Enterprise Plan",
-      "description": "For agencies and professionals"
+      "name": "Ентерпрајз план",
+      "description": "За агенции и професионалци"
     }
   },
   "features": {
-    "activeListings": "Up to {{count}} active property ads",
-    "promotedListings": "Promote {{count}} ads for {{days}} days",
-    "featuredListings": "{{count}} featured listings",
-    "prioritySupport": "Priority support",
-    "prioritySupportDesc": "Get help faster",
-    "analytics": "Advanced analytics dashboard",
-    "analyticsDesc": "Track your listing performance",
-    "premiumPlacement": "Premium listing placement",
-    "leadManagement": "Lead management system",
-    "teamMembers": "Up to {{count}} team members",
-    "apiAccess": "API access",
-    "customBranding": "Custom branding",
-    "dedicatedManager": "Dedicated account manager",
-    "mobileApp": "Mobile app access",
-    "mobileAppDesc": "Manage on the go",
-    "dedicatedAgencyPage": "Dedicated Agency Page",
-    "dedicatedAgencyPageDesc": "Your own branded page on our platform",
-    "displayAgents": "Display All Agents & Properties",
-    "displayAgentsDesc": "Showcase your team and listings",
-    "featuredAds": "Featured in Rotating Ads",
-    "featuredAdsDesc": "Monthly homepage advertising rotation",
-    "fullContact": "Full Contact Information",
-    "fullContactDesc": "Email, phone, and direct inquiries",
-    "perfectForActive": "Perfect for active sellers",
-    "featuredBoost": "Featured placement boost"
+    "activeListings": "До {{count}} активни огласи за имоти",
+    "promotedListings": "Промовирајте {{count}} огласи за {{days}} денови",
+    "featuredListings": "{{count}} истакнати огласи",
+    "prioritySupport": "Приоритетна поддршка",
+    "prioritySupportDesc": "Добијте помош побрзо",
+    "analytics": "Напредна табла за аналитика",
+    "analyticsDesc": "Следете ги перформансите на Вашите огласи",
+    "premiumPlacement": "Премиум позиција на огласот",
+    "leadManagement": "Систем за управување со контакти",
+    "teamMembers": "До {{count}} членови на тимот",
+    "apiAccess": "Пристап до API",
+    "customBranding": "Прилагодено брендирање",
+    "dedicatedManager": "Посветен менаџер на сметка",
+    "mobileApp": "Пристап до мобилна апликација",
+    "mobileAppDesc": "Управувајте во движење",
+    "dedicatedAgencyPage": "Посветена страница за агенција",
+    "dedicatedAgencyPageDesc": "Ваша сопствена брендирана страница на нашата платформа",
+    "displayAgents": "Прикажување на сите агенти и имоти",
+    "displayAgentsDesc": "Прикажете го Вашиот тим и огласи",
+    "featuredAds": "Истакнато во ротирачки огласи",
+    "featuredAdsDesc": "Месечна ротација на рекламирање на почетна страница",
+    "fullContact": "Целосни контакт информации",
+    "fullContactDesc": "Е-пошта, телефон и директни барања",
+    "perfectForActive": "Совршено за активни продавачи",
+    "featuredBoost": "Зголемување со истакнување"
   },
   "buttons": {
-    "getStarted": "Get Started",
-    "getPro": "Get Pro",
-    "getProAnnual": "Get Pro Annual",
-    "getProMonthly": "Get Pro Monthly",
-    "getEnterprise": "Get Enterprise",
-    "contactSales": "Contact Sales",
-    "currentPlan": "Current Plan"
+    "getStarted": "Започнете",
+    "getPro": "Земете Pro",
+    "getProAnnual": "Земете Pro годишно",
+    "getProMonthly": "Земете Pro месечно",
+    "getEnterprise": "Земете Ентерпрајз",
+    "contactSales": "Контактирајте продажба",
+    "currentPlan": "Тековен план"
   },
   "billing": {
     "monthly": "Месечно",
@@ -76,40 +76,40 @@
     "perMonth": "/месец",
     "perYear": "/година",
     "perWeek": "/недела",
-    "billedAnnually": "Наплата годишно",
-    "billedMonthly": "Наплата месечно",
+    "billedAnnually": "Наплатено годишно",
+    "billedMonthly": "Наплатено месечно",
     "youSave": "Заштедувате €{{amount}}!"
   },
   "discount": {
-    "off": "{{percent}}% OFF"
+    "off": "{{percent}}% попуст"
   },
   "benefits": {
-    "moneyBack": "30-Дневна Гаранција за Враќање",
-    "moneyBackDesc": "Целосен поврат ако не сте задоволни",
-    "moreViews": "3x Повеќе Прегледи",
-    "moreViewsDesc": "Премиум огласите добиваат поголема изложеност",
-    "instantActivation": "Моментална Активација",
-    "instantActivationDesc": "Започнете со продажба веднаш",
+    "moneyBack": "30-дневно враќање на пари",
+    "moneyBackDesc": "Целосен рефундирање ако не сте задоволни",
+    "moreViews": "3x повеќе прегледи",
+    "moreViewsDesc": "Премиум огласите добиваат повеќе изложеност",
+    "instantActivation": "Моментална активација",
+    "instantActivationDesc": "Започнете да продавате веднаш",
     "cancelAnytime": "Откажете во секое време"
   },
   "enterprise": {
-    "required": "Enterprise Plan Required",
-    "message": "Subscribe to Enterprise to create your agency and showcase your team",
-    "contactUs": "Contact us to learn more about our Enterprise plan."
+    "required": "Потребен е Ентерпрајз план",
+    "message": "Претплатете се на Ентерпрајз за да ја креирате Вашата агенција и да го прикажете Вашиот тим",
+    "contactUs": "Контактирајте нè за да дознаете повеќе за нашиот Ентерпрајз план."
   },
   "exitModal": {
-    "title": "Are you sure you want to exit?",
-    "agencyMessage": "If you exit now, all agency information you entered will be lost and you'll need to start over.",
-    "offerMessage": "This is a one-time offer. If you leave now, you won't see these amazing discounts again.",
-    "stay": "Stay & Save!",
-    "leave": "Yes, Leave",
-    "continueSetup": "Continue Setup"
+    "title": "Дали сте сигурни дека сакате да излезете?",
+    "agencyMessage": "Ако излезете сега, сите информации за агенцијата што ги внесовте ќе бидат изгубени и ќе треба да започнете одново.",
+    "offerMessage": "Ова е еднократна понуда. Ако заминете сега, нема повторно да ги видите овие неверојатни попусти.",
+    "stay": "Останете и заштедете!",
+    "leave": "Да, излези",
+    "continueSetup": "Продолжи со поставување"
   },
   "success": {
-    "title": "Congratulations!",
-    "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
-    "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
-    "subscriptionActivated": "Subscription activated successfully!",
-    "startListing": "Start Listing Properties"
+    "title": "Честитки!",
+    "message": "Вашата {{plan}} претплата е активирана. Сега имате пристап до сите премиум функции.",
+    "agencyMessage": "Вашата Ентерпрајз претплата е активирана и Вашата агенција е успешно креирана! Сега сте администратор на Вашата агенција.",
+    "subscriptionActivated": "Претплатата е успешно активирана!",
+    "startListing": "Започнете со ли стирање на имоти"
   }
 }

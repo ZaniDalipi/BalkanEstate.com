@@ -1,95 +1,103 @@
 {
   "navigation": {
-    "backToAgents": "Nazad na Agente",
-    "overview": "Pregled",
-    "listings": "Oglasi",
-    "reviews": "Recenzije"
+    "back": "Nazad na Agente"
   },
   "tabs": {
-    "about": "O Meni",
+    "overview": "Pregled",
     "listings": "Oglasi",
     "reviews": "Recenzije",
-    "contact": "Kontakt"
+    "about": "O Meni"
   },
   "badges": {
-    "verified": "Verificirani Agent",
-    "featured": "Istaknuto",
+    "premierAgent": "Premier Agent",
     "topRated": "Najbolje Ocijenjeno",
-    "superAgent": "Super Agent",
-    "newAgent": "Novi Agent"
+    "verified": "Verifikovano",
+    "superhost": "Superhost"
   },
   "contact": {
-    "title": "Kontakt Informacije",
+    "title": "Kontaktirajte Agenta",
     "phone": "Telefon",
     "email": "Email",
     "whatsapp": "WhatsApp",
-    "schedule": "Zakaži Poziv",
-    "message": "Pošalji Poruku",
-    "responseTime": "Obično odgovara u roku od"
+    "callNow": "Pozovite Sada",
+    "sendEmail": "Pošaljite Email",
+    "sendMessage": "Pošaljite Poruku",
+    "scheduleCall": "Zakažite Poziv"
   },
   "stats": {
+    "totalSales": "Ukupna Prodaja",
     "propertiesSold": "Prodatih Nekretnina",
     "activeListings": "Aktivnih Oglasa",
-    "totalReviews": "Ukupno Recenzija",
-    "avgRating": "Prosječna Ocjena",
-    "responseRate": "Stopa Odgovora",
-    "yearsExperience": "Godina Iskustva"
+    "yearsExperience": "Godina Iskustva",
+    "avgResponseTime": "Prosjek Vremena Odgovora",
+    "satisfactionRate": "Stopa Zadovoljstva",
+    "languages": "Jezici Kojima Govorim"
   },
   "overview": {
-    "about": "O Meni",
+    "aboutMe": "O Meni",
     "specializations": "Specijalizacije",
-    "areasServed": "Područja Djelovanja",
-    "languages": "Jezici koje Govorim",
+    "serviceAreas": "Područja Djelovanja",
     "certifications": "Certifikati",
-    "education": "Obrazovanje"
+    "languages": "Jezici"
   },
   "listings": {
-    "title": "Moji Oglasi",
-    "active": "Aktivno",
-    "sold": "Prodato",
-    "pending": "Na Čekanju",
-    "viewAll": "Pogledaj Sve",
-    "noListings": "Još nema oglasa"
+    "title": "Oglasi Agenta",
+    "activeListings": "Aktivni Oglasi",
+    "soldListings": "Prodati Oglasi",
+    "noListings": "Nema dostupnih oglasa",
+    "viewAll": "Pogledajte Sve Oglase"
   },
   "reviews": {
     "title": "Recenzije Klijenata",
     "writeReview": "Napišite Recenziju",
+    "averageRating": "Prosječna Ocjena",
+    "totalReviews": "Ukupno Recenzija",
     "noReviews": "Još nema recenzija",
-    "verifiedPurchase": "Verificirani Klijent",
+    "beFirst": "Budite prvi koji će ostaviti recenziju za ovog agenta",
+    "verifiedPurchase": "Verifikovana Kupovina",
     "helpful": "Korisno",
-    "report": "Prijavi"
+    "reportReview": "Prijavite Recenziju"
   },
   "consultation": {
-    "title": "Zakažite Besplatnu Konsultaciju",
-    "description": "Dobijte personalizovane savjete za vaše potrebe za nekretninama",
-    "button": "Zakaži Sada",
-    "duration": "30 minuta",
-    "free": "Besplatno"
+    "title": "Zakažite Konsultaciju",
+    "description": "Zakažite besplatnu konsultaciju sa ovim agentom da razgovarate o Vašim potrebama za nekretninama",
+    "selectDate": "Izaberite Datum",
+    "selectTime": "Izaberite Vrijeme",
+    "yourName": "Vaše Ime",
+    "yourEmail": "Vaš Email",
+    "yourPhone": "Vaš Telefon",
+    "message": "Poruka (opciono)",
+    "messagePlaceholder": "Recite nam o Vašim zahtjevima za nekretninama...",
+    "bookNow": "Zakažite Konsultaciju",
+    "confirmBooking": "Potvrdite Zakazivanje"
   },
   "appraisal": {
-    "title": "Procjena Nekretnine",
-    "description": "Saznajte vrijednost vaše nekretnine danas",
-    "button": "Zatraži Procjenu"
+    "title": "Zatražite Procjenu Nekretnine",
+    "description": "Dobijte besplatnu procjenu nekretnine od ovog stručnog agenta",
+    "propertyAddress": "Adresa Nekretnine",
+    "propertyType": "Tip Nekretnine",
+    "requestAppraisal": "Zatražite Procjenu"
   },
   "agency": {
-    "title": "Agencija",
-    "worksWith": "Radi sa",
-    "viewAgency": "Pogledaj Agenciju",
-    "independent": "Nezavisni Agent"
+    "partOf": "Dio",
+    "viewAgency": "Pogledajte Agenciju",
+    "independentAgent": "Nezavisni Agent"
   },
   "similarAgents": {
     "title": "Slični Agenti",
-    "viewAll": "Pogledaj Sve"
+    "inArea": "u {area}",
+    "viewAll": "Pogledajte Sve Agente"
   },
   "actions": {
-    "share": "Podijeli Profil",
-    "save": "Sačuvaj Agenta",
-    "report": "Prijavi Agenta"
+    "shareProfile": "Podijelite Profil",
+    "saveAgent": "Sačuvajte Agenta",
+    "reportAgent": "Prijavite Agenta"
   },
   "messages": {
-    "saved": "Agent sačuvan u favorite",
-    "removed": "Agent uklonjen iz favorita",
-    "messageSent": "Poruka uspješno poslana",
-    "error": "Došlo je do greške. Molimo pokušajte ponovo."
+    "consultationBooked": "Konsultacija uspješno zakazana!",
+    "appraisalRequested": "Zahtjev za procjenu uspješno poslat!",
+    "profileShared": "Link profila kopiran u clipboard!",
+    "agentSaved": "Agent sačuvan u Vaše favorite!",
+    "reviewSubmitted": "Recenzija uspješno poslata!"
   }
 }

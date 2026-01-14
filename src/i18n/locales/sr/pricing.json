@@ -1,115 +1,115 @@
 {
-  "pageTitle": "Cenovni Planovi",
-  "title": "Izaberite Vaš Plan",
-  "subtitle": "Postavite vašu nekretninu pred hiljade potencijalnih kupaca sa našim fleksibilnim opcijama cena.",
-  "loading": "Učitavanje cenovnih planova...",
-  "noPlans": "Nema dostupnih cenovnih planova trenutno.",
+  "pageTitle": "Ценовни Планови",
+  "title": "Изаберите Ваш План",
+  "subtitle": "Поставите вашу некретнину пред хиљаде потенцијалних купаца са нашим флексибилним опцијама цена.",
+  "loading": "Учитавање ценовних планова...",
+  "noPlans": "Нема доступних ценовних планова тренутно.",
   "tabs": {
-    "forSellers": "Za Prodavce",
-    "forBuyers": "Za Kupce"
+    "forSellers": "За Продавце",
+    "forBuyers": "За Купце"
   },
   "error": {
-    "loadFailed": "Učitavanje cenovnih planova nije uspelo"
+    "loadFailed": "Учитавање ценовних планова није успело"
   },
-  "limitedOffer": "Ograničena Ponuda Ističe Za:",
-  "offerTitle": "Čestitamo! Otključali Ste Ekskluzivne Popuste!",
-  "offerSubtitle": "Uživajte u ovoj jednokratnoj ponudi na naše planove prodaje kao znak zahvalnosti.",
+  "limitedOffer": "Ограничена Понуда Истиче За:",
+  "offerTitle": "Честитамо! Откључали Сте Ексклузивне Попусте!",
+  "offerSubtitle": "Уживајте у овој једнократној понуди на наше планове продаје као знак захвалности.",
   "plans": {
     "free": {
-      "name": "Besplatno",
-      "description": "Savršeno za početak"
+      "name": "Бесплатно",
+      "description": "Савршено за почетак"
     },
     "proMonthly": {
-      "name": "Pro Mesečno",
-      "description": "Najbolje za aktivne prodavce",
-      "badge": "Popularno"
+      "name": "Про Месечно",
+      "description": "Најбоље за активне продавце",
+      "badge": "Популарно"
     },
     "proYearly": {
-      "name": "Pro Godišnje",
-      "description": "Uštedite {{percent}}% sa godišnjim plaćanjem",
-      "badge": "NAJPOPULARNIJE"
+      "name": "Про Годишње",
+      "description": "Уштедите {{percent}}% са годишњим плаћањем",
+      "badge": "НАЈПОПУЛАРНИЈЕ"
     },
     "enterprise": {
-      "name": "Plan Preduzeća",
-      "description": "Za agencije i profesionalce"
+      "name": "План Предузећа",
+      "description": "За агенције и професионалце"
     }
   },
   "features": {
-    "activeListings": "Do {{count}} aktivnih oglasa",
-    "promotedListings": "Promoviši {{count}} oglasa za {{days}} dana",
-    "featuredListings": "{{count}} istaknutih oglasa",
-    "prioritySupport": "Prioritetna podrška",
-    "prioritySupportDesc": "Dobijte pomoć brže",
-    "analytics": "Napredna analitička tabla",
-    "analyticsDesc": "Pratite performanse vaših oglasa",
-    "premiumPlacement": "Premium pozicioniranje oglasa",
-    "leadManagement": "Sistem upravljanja potencijalnim klijentima",
-    "teamMembers": "Do {{count}} članova tima",
-    "apiAccess": "API pristup",
-    "customBranding": "Prilagođen brending",
-    "dedicatedManager": "Posvećen menadžer naloga",
-    "mobileApp": "Pristup mobilnoj aplikaciji",
-    "mobileAppDesc": "Upravljajte u pokretu",
-    "dedicatedAgencyPage": "Posvećena Stranica Agencije",
-    "dedicatedAgencyPageDesc": "Vaša brendirana stranica na našoj platformi",
-    "displayAgents": "Prikaži Sve Agente i Nekretnine",
-    "displayAgentsDesc": "Predstavite vaš tim i oglase",
-    "featuredAds": "Istaknuto u Rotirajućim Reklamama",
-    "featuredAdsDesc": "Mesečno reklamiranje na početnoj stranici",
-    "fullContact": "Potpune Kontakt Informacije",
-    "fullContactDesc": "Email, telefon i direktni upiti",
-    "perfectForActive": "Savršeno za aktivne prodavce",
-    "featuredBoost": "Pojačanje istaknutog pozicioniranja"
+    "activeListings": "До {{count}} активних огласа",
+    "promotedListings": "Промовиши {{count}} огласа за {{days}} дана",
+    "featuredListings": "{{count}} истакнутих огласа",
+    "prioritySupport": "Приоритетна подршка",
+    "prioritySupportDesc": "Добијте помоћ брже",
+    "analytics": "Напредна аналитичка табла",
+    "analyticsDesc": "Пратите перформансе ваших огласа",
+    "premiumPlacement": "Премијум позиционирање огласа",
+    "leadManagement": "Систем управљања потенцијалним клијентима",
+    "teamMembers": "До {{count}} чланова тима",
+    "apiAccess": "API приступ",
+    "customBranding": "Прилагођен брендинг",
+    "dedicatedManager": "Посвећен менаџер налога",
+    "mobileApp": "Приступ мобилној апликацији",
+    "mobileAppDesc": "Управљајте у покрету",
+    "dedicatedAgencyPage": "Посвећена Страница Агенције",
+    "dedicatedAgencyPageDesc": "Ваша брендирана страница на нашој платформи",
+    "displayAgents": "Прикажи Све Агенте и Некретнине",
+    "displayAgentsDesc": "Представите ваш тим и огласе",
+    "featuredAds": "Истакнуто у Ротирајућим Рекламама",
+    "featuredAdsDesc": "Месечно рекламирање на почетној страници",
+    "fullContact": "Потпуне Контакт Информације",
+    "fullContactDesc": "Е-пошта, телефон и директни упити",
+    "perfectForActive": "Савршено за активне продавце",
+    "featuredBoost": "Појачање истакнутог позиционирања"
   },
   "buttons": {
-    "getStarted": "Započni",
-    "getPro": "Preuzmi Pro",
-    "getProAnnual": "Preuzmi Pro Godišnji",
-    "getProMonthly": "Preuzmi Pro Mesečni",
-    "getEnterprise": "Preuzmi Preduzeće",
-    "contactSales": "Kontaktirajte Prodaju",
-    "currentPlan": "Trenutni Plan"
+    "getStarted": "Започни",
+    "getPro": "Преузми Про",
+    "getProAnnual": "Преузми Про Годишњи",
+    "getProMonthly": "Преузми Про Месечни",
+    "getEnterprise": "Преузми Предузеће",
+    "contactSales": "Контактирајте Продају",
+    "currentPlan": "Тренутни План"
   },
   "billing": {
-    "monthly": "Mesečno",
-    "yearly": "Godišnje",
-    "perMonth": "/mesečno",
-    "perYear": "/godišnje",
-    "perWeek": "/nedeljno",
-    "billedAnnually": "Naplaćuje se godišnje",
-    "billedMonthly": "Naplaćuje se mesečno",
-    "youSave": "Uštedite €{{amount}}!"
+    "monthly": "Месечно",
+    "yearly": "Годишње",
+    "perMonth": "/месечно",
+    "perYear": "/годишње",
+    "perWeek": "/недељно",
+    "billedAnnually": "Наплаћује се годишње",
+    "billedMonthly": "Наплаћује се месечно",
+    "youSave": "Уштедите €{{amount}}!"
   },
   "discount": {
-    "off": "{{percent}}% POPUST"
+    "off": "{{percent}}% ПОПУСТ"
   },
   "benefits": {
-    "moneyBack": "30-Dnevna Garancija Povrata",
-    "moneyBackDesc": "Pun povrat novca ako niste zadovoljni",
-    "moreViews": "3x Više Pregleda",
-    "moreViewsDesc": "Premium oglasi dobijaju više izloženosti",
-    "instantActivation": "Trenutna Aktivacija",
-    "instantActivationDesc": "Počnite da prodajete odmah",
-    "cancelAnytime": "Otkažite bilo kada"
+    "moneyBack": "30-Дневна Гаранција Повраћаја",
+    "moneyBackDesc": "Пун повраћај новца ако нисте задовољни",
+    "moreViews": "3x Више Прегледа",
+    "moreViewsDesc": "Премијум огласи добијају више изложености",
+    "instantActivation": "Тренутна Активација",
+    "instantActivationDesc": "Почните да продајете одмах",
+    "cancelAnytime": "Откажите било када"
   },
   "enterprise": {
-    "required": "Potreban Plan Preduzeća",
-    "message": "Pretplatite se na Preduzeće da kreirate vašu agenciju i predstavite vaš tim",
-    "contactUs": "Kontaktirajte nas da saznate više o našem planu Preduzeće."
+    "required": "Потребан План Предузећа",
+    "message": "Претплатите се на Предузеће да креирате вашу агенцију и представите ваш тим",
+    "contactUs": "Контактирајте нас да сазнате више о нашем плану Предузеће."
   },
   "exitModal": {
-    "title": "Da li ste sigurni da želite da izađete?",
-    "agencyMessage": "Ako sada izađete, sve informacije o agenciji koje ste uneli će biti izgubljene i moraćete ponovo početi.",
-    "offerMessage": "Ovo je jednokratna ponuda. Ako sada odete, nećete više videti ove neverovatne popuste.",
-    "stay": "Ostani i Sačuvaj!",
-    "leave": "Da, Izađi",
-    "continueSetup": "Nastavi Podešavanje"
+    "title": "Да ли сте сигурни да желите да изађете?",
+    "agencyMessage": "Ако сада изађете, све информације о агенцији које сте унели ће бити изгубљене и мораћете поново почети.",
+    "offerMessage": "Ово је једнократна понуда. Ако сада одете, нећете више видети ове невероватне попусте.",
+    "stay": "Остани и Сачувај!",
+    "leave": "Да, Изађи",
+    "continueSetup": "Настави Подешавање"
   },
   "success": {
-    "title": "Čestitamo!",
-    "message": "Vaša {{plan}} pretplata je aktivirana. Sada imate pristup svim premium funkcijama.",
-    "agencyMessage": "Vaša pretplata Preduzeće je aktivirana i vaša agencija je uspešno kreirana! Sada ste admin vaše agencije.",
-    "subscriptionActivated": "Pretplata uspešno aktivirana!",
-    "startListing": "Započnite Objavljivanje Nekretnina"
+    "title": "Честитамо!",
+    "message": "Ваша {{plan}} претплата је активирана. Сада имате приступ свим премијум функцијама.",
+    "agencyMessage": "Ваша претплата Предузеће је активирана и ваша агенција је успешно креирана! Сада сте администратор ваше агенције.",
+    "subscriptionActivated": "Претплата успешно активирана!",
+    "startListing": "Започните Објављивање Некретнина"
   }
 }

@@ -1,132 +1,158 @@
 {
   "navigation": {
-    "backToAgencies": "Nazad na Agencije",
-    "overview": "Pregled",
-    "properties": "Nekretnine",
-    "agents": "Agenti",
-    "reviews": "Recenzije"
+    "back": "Nazad",
+    "backToAgencies": "Nazad na Agencije"
   },
   "seo": {
     "title": "{{name}} - Agencija za Nekretnine",
     "description": "{{name}} je pouzdana agencija za nekretnine u {{city}}. Pregledajte {{properties}} oglasa i povežite se sa {{agents}} profesionalnih agenata."
   },
   "banner": {
-    "featured": "Istaknuta Agencija",
-    "verified": "Verificirano",
-    "memberSince": "Član od",
-    "contact": "Kontakt",
-    "website": "Posjetite Web Stranicu",
-    "share": "Podijeli"
+    "gradients": "Gradijenti",
+    "uploadImage": "Učitajte Sliku",
+    "uploading": "Učitavanje...",
+    "chooseGradient": "Izaberite Gradijent",
+    "customImageHint": "Ili učitajte prilagođenu sliku koristeći dugme iznad",
+    "changeLogo": "Promijenite Logo"
+  },
+  "gradientPresets": {
+    "oceanBlue": "Ocean Blue",
+    "sunset": "Sunset",
+    "forest": "Forest",
+    "royalPurple": "Royal Purple",
+    "fire": "Fire",
+    "nightSky": "Night Sky",
+    "mintFresh": "Mint Fresh",
+    "roseGold": "Rose Gold"
   },
   "stats": {
-    "totalProperties": "Ukupno Nekretnina",
-    "activeListings": "Aktivnih Oglasa",
-    "totalAgents": "Članova Tima",
-    "avgRating": "Prosječna Ocjena",
-    "propertiesSold": "Prodatih Nekretnina",
-    "yearsExperience": "Godina Iskustva"
+    "totalListings": "Ukupno Oglasa",
+    "totalAgents": "Ukupno Agenata",
+    "yearsInBusiness": "Godina u Poslovanju",
+    "rating": "Ocjena",
+    "notAvailable": "N/A"
   },
   "salesPerformance": {
-    "title": "Rezultati Prodaje",
-    "totalSales": "Ukupna Prodaja",
-    "thisMonth": "Ovaj Mjesec",
-    "thisYear": "Ova Godina",
-    "allTime": "Ukupno",
-    "chart": {
-      "sales": "Prodaja",
-      "listings": "Oglasi",
-      "views": "Pregledi"
-    }
+    "title": "Performanse Prodaje",
+    "salesLast12Months": "Prodaja zadnjih 12 mjeseci",
+    "totalSales": "Ukupna prodaja",
+    "priceRange": "Raspon cijena",
+    "averagePrice": "Prosječna cijena"
   },
   "about": {
-    "title": "O Nama",
-    "description": "Opis",
+    "title": "O {agencyName}",
+    "contactInfo": "Kontakt Informacije",
+    "specialties": "Specijalnosti",
     "specializations": "Specijalizacije",
-    "areasServed": "Područja Djelovanja",
-    "languages": "Jezici",
-    "established": "Osnovano"
+    "serviceAreas": "Područja Djelovanja",
+    "languagesSpoken": "Jezici Kojima Govorimo"
   },
   "invitationCode": {
-    "title": "Pozivni Kod Tima",
-    "description": "Podijelite ovaj kod sa agentima kako bi se pridružili vašoj agenciji",
-    "code": "Pozivni Kod",
-    "copy": "Kopiraj Kod",
-    "copied": "Kopirano!",
-    "generate": "Generiši Novi Kod",
-    "expires": "Ističe",
-    "never": "Nikad",
-    "uses": "Korištenja",
-    "unlimited": "Neograničeno"
+    "title": "Pozivni Kod Agencije",
+    "description": "Podijelite ovaj kod sa agentima koje želite da se pridruže Vašoj agenciji",
+    "copy": "Kopiraj"
   },
   "actions": {
-    "edit": "Uredi Agenciju",
-    "delete": "Obriši Agenciju",
-    "feature": "Istaknite Se",
-    "verify": "Zatraži Verifikaciju",
-    "message": "Pošalji Poruku",
-    "call": "Pozovi",
-    "email": "Pošalji Email"
+    "editAgency": "Uredite Agenciju",
+    "manageJoinRequests": "Upravljajte Zahtjevima za Pridruživanje",
+    "requestToJoin": "Zatražite Pridruživanje Agenciji"
+  },
+  "featuredSubscription": {
+    "title": "Istaknuta Pretplata",
+    "subtitle": "Povećajte Svoju Vidljivost",
+    "proTip": "Pro Savjet:",
+    "proTipMessage": "Istaknute agencije dobijaju do 5x više vidljivosti i pojavljuju se na vrhu rezultata pretrage!"
   },
   "teamMembers": {
     "title": "Članovi Tima",
-    "viewAll": "Pogledaj Sve",
-    "role": "Uloga",
-    "joined": "Pridružio se",
-    "properties": "Nekretnine",
-    "sales": "Prodaje",
-    "contact": "Kontakt",
+    "showTopPerformers": "Prikaži Najbolje Izvođače",
+    "showAllMembers": "Prikaži Sve Članove",
+    "rankedByPerformance": "Rangirano po Performansama",
+    "topAgent": "Top Agent",
+    "secondPlace": "2. Mjesto",
+    "thirdPlace": "3. Mjesto",
     "owner": "Vlasnik",
-    "admin": "Administrator",
-    "agent": "Agent"
+    "admin": "Admin",
+    "license": "Licenca",
+    "totalSales": "Ukupna Prodaja",
+    "propertiesSold": "Prodatih Nekretnina",
+    "activeListings": "Aktivnih Oglasa",
+    "removeAdmin": "Uklonite Admina",
+    "makeAdmin": "Postavite za Admina",
+    "remove": "Ukloni",
+    "removing": "Uklanjanje...",
+    "leaveAgency": "Napustite Agenciju",
+    "leaving": "Napuštanje...",
+    "noAgentsFound": "Nisu pronađeni agenti za ovu agenciju"
   },
   "properties": {
-    "title": "Oglasi Nekretnina",
-    "viewAll": "Pogledaj Sve Nekretnine",
-    "active": "Aktivno",
-    "pending": "Na Čekanju",
-    "sold": "Prodato",
-    "noProperties": "Još nema oglasa nekretnina",
-    "filters": {
-      "all": "Sve",
-      "forSale": "Na Prodaju",
-      "forRent": "Za Najam"
-    }
+    "activeListings": "AKTIVNI OGLASI",
+    "soldProperties": "PRODATE NEKRETNINE",
+    "activeListingsTitle": "Aktivni Oglasi",
+    "soldPropertiesTitle": "Prodate Nekretnine",
+    "propertiesCount": "{count} nekretnina",
+    "noActiveListings": "Trenutno nema aktivnih oglasa",
+    "noSoldProperties": "Još nema prodatih nekretnina",
+    "checkBackSoon": "Vratite se uskoro za nove nekretnine",
+    "soldWillAppear": "Prodate nekretnine će se pojaviti ovdje"
   },
   "editModal": {
-    "title": "Uredi Agenciju",
-    "name": "Naziv Agencije",
+    "title": "Uredite Agenciju",
+    "basicInfo": "Osnovne Informacije",
+    "agencyName": "Ime Agencije",
     "description": "Opis",
-    "phone": "Telefon",
     "email": "Email",
+    "phone": "Telefon",
     "website": "Web Stranica",
+    "yearsInBusiness": "Godina u Poslovanju",
+    "location": "Lokacija",
     "address": "Adresa",
     "city": "Grad",
     "country": "Država",
-    "logo": "Logo",
-    "cover": "Naslovna Slika",
-    "save": "Sačuvaj Promjene",
-    "cancel": "Odustani"
+    "zipCode": "Poštanski Broj",
+    "latitude": "Geografska Širina",
+    "longitude": "Geografska Dužina",
+    "socialMedia": "Društvene Mreže",
+    "facebookUrl": "Facebook URL",
+    "instagramUrl": "Instagram URL",
+    "linkedinUrl": "LinkedIn URL",
+    "twitterUrl": "Twitter URL",
+    "specialtiesCerts": "Specijalnosti i Certifikati",
+    "specialtiesLabel": "Specijalnosti (odvojene zarezom)",
+    "specialtiesPlaceholder": "Stambene, Komercijalne, Luksuzne Nekretnine",
+    "certificationsLabel": "Certifikati (odvojeni zarezom)",
+    "certificationsPlaceholder": "Licencirana Agencija za Nekretnine, ISO Certificirana",
+    "languagesLabel": "Jezici Kojima Govorimo (odvojeni zarezom)",
+    "languagesPlaceholder": "Engleski, Srpski, Hrvatski, Albanski",
+    "languagesHint": "Jezici se automatski sinhronizuju kada se agenti pridruže/napuste",
+    "businessHours": "Radno Vrijeme",
+    "businessHoursPlaceholder": "9:00 - 18:00",
+    "saveChanges": "Sačuvajte Promjene"
   },
   "confirmations": {
-    "delete": {
-      "title": "Obriši Agenciju",
-      "message": "Jeste li sigurni da želite obrisati ovu agenciju? Ova radnja se ne može poništiti.",
-      "confirm": "Da, Obriši",
-      "cancel": "Odustani"
-    },
-    "leave": {
-      "title": "Napusti Agenciju",
-      "message": "Jeste li sigurni da želite napustiti ovu agenciju?",
-      "confirm": "Da, Napusti",
-      "cancel": "Odustani"
-    }
+    "removeAgent": "Da li ste sigurni da želite ukloniti {name} iz {agency}?",
+    "removeAgentDetails": "Ovo će:\n- Ukloniti ih iz Vaše agencije\n- Očistiti njihovu pripadnost agenciji\n- Zadržati njihove nekretnine i recenzije netaknutim",
+    "leaveAgency": "Da li ste sigurni da želite napustiti {agency}?",
+    "leaveAgencyDetails": "Ovo će:\n- Ukloniti Vas iz ove agencije\n- Očistiti Vašu pripadnost agenciji\n- Zadržati Vaše nekretnine i recenzije netaknutim\n- Promijeniti Vaš status u Nezavisni Agent",
+    "toggleAdmin": "Da li ste sigurni da želite {action} {name}?",
+    "removeAdminRights": "ukloniti admin prava od",
+    "makeAdminRights": "postaviti za admina"
   },
   "messages": {
-    "updated": "Agencija uspješno ažurirana",
-    "deleted": "Agencija uspješno obrisana",
-    "codeCopied": "Pozivni kod kopiran",
-    "codeGenerated": "Novi pozivni kod generisan",
-    "error": "Došlo je do greške. Molimo pokušajte ponovo."
+    "logoUpdated": "Logo uspješno ažuriran!",
+    "coverUpdated": "Naslovna slika uspješno ažurirana!",
+    "gradientUpdated": "Gradijent banera uspješno ažuriran!",
+    "agencyUpdated": "Agencija uspješno ažurirana!",
+    "agentRemoved": "{name} je uspješno uklonjen iz agencije.",
+    "leftAgency": "Uspješno ste napustili {agency}",
+    "invitationCopied": "Pozivni kod kopiran u clipboard!",
+    "joinRequestSent": "Zahtjev za pridruživanje uspješno poslat! Admin agencije će pregledati Vaš zahtjev.",
+    "adminAdded": "{name} je sada admin!",
+    "adminRemoved": "{name} više nije admin.",
+    "onlyOwnerCanManage": "Samo vlasnik agencije može upravljati adminima",
+    "onlyAdminCanRemove": "Samo admini agencije mogu ukloniti agente",
+    "selectImageFile": "Molimo izaberite fajl slike",
+    "imageSizeLimit": "Veličina slike mora biti manja od 5MB"
   },
   "weekdays": {
     "monday": "Ponedjeljak",
@@ -145,6 +171,6 @@
   "labels": {
     "call": "Pozovi",
     "email": "Email",
-    "website": "Web stranica"
+    "website": "Web Stranica"
   }
 }

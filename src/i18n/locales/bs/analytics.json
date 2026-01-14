@@ -1,9 +1,9 @@
 {
-  "title": "Analitička Ploča",
-  "subtitle": "Pratite performanse vaših oglasa i dobijte uvide",
+  "title": "Analitika",
+  "subtitle": "Pratite performanse i uvide",
   "signInRequired": "Potrebna Prijava",
-  "signInMessage": "Molimo prijavite se da biste vidjeli vašu analitiku.",
-  "signIn": "Prijavi se",
+  "signInMessage": "Molimo prijavite se da vidite Vašu analitičku ploču.",
+  "signIn": "Prijavite se",
   "periods": {
     "7d": "7d",
     "30d": "30d",
@@ -12,7 +12,7 @@
   },
   "stats": {
     "today": "Danas",
-    "liveViews": "Uživo pregledi",
+    "liveViews": "Pregledi uživo",
     "weekly": "Sedmično",
     "monthly": "Mjesečno",
     "properties": "Nekretnine",
@@ -30,34 +30,34 @@
   "premium": {
     "unlockTitle": "Otključajte Premium Analitiku",
     "unlockMessage": "Nadogradite na Pro za pristup detaljnoj analitici, pametnim uvidima, izvorima saobraćaja, podjeli po uređajima i izvještajima za preuzimanje.",
-    "upgradeNow": "Nadogradi Sada",
-    "upgradeToPro": "Nadogradi na Pro",
-    "upgrade": "Nadogradi",
+    "upgradeNow": "Nadogradite Sada",
+    "upgradeToPro": "Nadogradite na Pro",
+    "upgrade": "Nadogradite",
     "premiumAccess": "Pun pristup svim funkcijama",
     "freeAccess": "Nadogradite za naprednu analitiku",
     "proActive": "Pro Aktivan",
     "freePlan": "Besplatan Plan"
   },
   "insights": {
-    "title": "Pametni Uvidi",
+    "title": "Uvidi",
     "promotionSuccess": "Uspjeh Promocije",
     "promotedPerformance": "Vaši promovirani oglasi dobijaju {{multiplier}}x više pregleda od običnih oglasa!",
     "topPerformer": "Najbolji Izvođač",
-    "topPerformerMessage": "\"{{title}}\" je vaš najbolji oglas sa {{views}} pregleda ovog mjeseca.",
+    "topPerformerMessage": "\"{{title}}\" je Vaš najbolji oglas sa {{views}} pregleda ovog mjeseca.",
     "underperforming": "Oglasi sa Slabim Performansama",
-    "underperformingMessage": "{{count}} oglasa ima manje od {{threshold}} pregleda. Razmislite o ažuriranju fotografija ili opisa.",
+    "underperformingMessage": "{{count}} oglasa ima manje od {{threshold}} pregleda. Razmotrite ažuriranje fotografija ili opisa.",
     "noViews": "Upozorenje o Nedostatku Pregleda",
     "noViewsMessage": "{{count}} oglasa nije dobilo nijedan pregled. Možda im je potrebna pažnja.",
     "priceCorrelation": "Korelacija Cijene i Pregleda",
-    "priceCorrelationMessage": "Nekretnine sa cijenom između {{min}} i {{max}} dobijaju najviše pregleda u vašim oglasima.",
+    "priceCorrelationMessage": "Nekretnine sa cijenom između {{min}} i {{max}} dobijaju najviše pregleda u Vašim oglasima.",
     "moreProperties": "+{{count}} više"
   },
   "properties": {
-    "title": "Performanse Nekretnina",
+    "title": "Nekretnine",
     "sortedBy": "Sortirano po pregledima ({{period}})",
     "noProperties": "Još nema nekretnina",
-    "listFirst": "Oglašite Vašu Prvu Nekretninu",
-    "addProperty": "Dodaj Nekretninu",
+    "listFirst": "Objavite Vašu Prvu Nekretninu",
+    "addProperty": "Dodajte Nekretninu",
     "active": "Aktivno",
     "sold": "Prodato",
     "pending": "Na Čekanju",
@@ -70,7 +70,7 @@
     "topPerformers": "Top 3",
     "needsAttention": "Malo Pregleda",
     "onlyViews": "Samo {{count}} pregleda ovog mjeseca",
-    "promote": "Promoviraj",
+    "promote": "Promovirajte",
     "recentActivity": "Nedavna Aktivnost",
     "subscription": "Vaša Pretplata",
     "devices": "Uređaji",
@@ -86,29 +86,29 @@
   },
   "devices": {
     "title": "Uređaji",
-    "desktop": "Računar",
-    "mobile": "Mobilni",
+    "desktop": "Desktop",
+    "mobile": "Mobitel",
     "tablet": "Tablet"
   },
   "traffic": {
     "title": "Saobraćaj",
-    "direct": "Direktan",
+    "direct": "Direktno",
     "search": "Pretraga",
     "social": "Društvene Mreže",
     "email": "Email",
     "other": "Ostalo"
   },
   "report": {
-    "exportCsv": "Izvezi CSV",
+    "exportCsv": "Izvezite CSV",
     "downloading": "Preuzimanje...",
     "generateReport": "Generiši Izvještaj"
   },
   "errors": {
-    "loadFailed": "Učitavanje analitike nije uspjelo. Molimo pokušajte kasnije.",
+    "loadFailed": "Neuspjelo učitavanje analitike. Molimo pokušajte kasnije.",
     "sessionExpired": "Sesija je istekla. Molimo prijavite se ponovo.",
-    "networkError": "Greška na mreži. Molimo provjerite vašu vezu.",
+    "networkError": "Greška na mreži. Molimo provjerite Vašu vezu.",
     "serverError": "Greška na serveru. Molimo pokušajte kasnije.",
-    "retry": "Pokušaj ponovo",
+    "retry": "Pokušajte Ponovo",
     "retrying": "Pokušavanje ponovo..."
   }
 }
