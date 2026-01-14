@@ -23,7 +23,7 @@ interface ClimateRiskLayerProps {
 }
 
 // Climate risk layer configurations
-// Using various open data sources available for the Balkans region
+// Using WMS services from Copernicus and other reliable open data sources
 const CLIMATE_RISK_LAYERS: Record<
   Exclude<ClimateRiskType, 'none'>,
   {
@@ -35,6 +35,7 @@ const CLIMATE_RISK_LAYERS: Record<
     minZoom?: number;
     isWMS?: boolean;
     wmsLayers?: string;
+    wmsFormat?: string;
   }
 > = {
   // Flood risk - Using JRC Global Surface Water data
@@ -42,19 +43,19 @@ const CLIMATE_RISK_LAYERS: Record<
     name: 'Flood Risk',
     url: 'https://storage.googleapis.com/global-surface-water/tiles2021/transitions/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://global-surface-water.appspot.com/">JRC Global Surface Water</a>',
-    legendTitle: 'Depth of flooding',
+    legendTitle: 'Flood zones',
     legendColors: [
-      { color: '#cce5ff', label: '0.5ft' },
-      { color: '#66b3ff', label: '1' },
-      { color: '#3399ff', label: '2' },
-      { color: '#0066cc', label: '3+' },
+      { color: '#cce5ff', label: 'Low' },
+      { color: '#66b3ff', label: 'Med' },
+      { color: '#3399ff', label: 'High' },
+      { color: '#0066cc', label: 'Severe' },
     ],
     minZoom: 5,
   },
-  // Fire risk - Using GWIS (Global Wildfire Information System) from Copernicus
+  // Fire risk - Using EFFIS (European Forest Fire Information System) WMS
   fire: {
     name: 'Fire Risk',
-    url: 'https://maps.wild.fire/styles/fire-spread/{z}/{x}/{y}.png',
+    url: 'https://ies-ows.jrc.ec.europa.eu/effis',
     attribution: '&copy; <a href="https://effis.jrc.ec.europa.eu/">EFFIS/Copernicus</a>',
     legendTitle: 'Fire risk level',
     legendColors: [
@@ -64,50 +65,52 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#bd0026', label: 'Extreme' },
     ],
     minZoom: 3,
+    isWMS: true,
+    wmsLayers: 'ecmwf.fwi',
+    wmsFormat: 'image/png',
   },
-  // Wind risk - Using global wind speed data
+  // Wind risk - Using Windy tiles (more reliable)
   wind: {
     name: 'Wind Risk',
-    url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=b1b15e88fa797225412429c150c122a1',
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    url: 'https://tiles.windy.com/tiles/v10.0/wind/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.windy.com/">Windy.com</a>',
     legendTitle: 'Wind speed',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
       { color: '#a6d9e8', label: 'Light' },
-      { color: '#5ab4cf', label: 'Moderate' },
+      { color: '#5ab4cf', label: 'Mod' },
       { color: '#1a8ab7', label: 'Strong' },
       { color: '#0d5875', label: 'Severe' },
     ],
     minZoom: 1,
   },
-  // Air quality - Using air quality visualization
+  // Air quality - Using AQICN tiles
   air: {
     name: 'Air Quality',
     url: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://aqicn.org/">AQICN</a>',
-    legendTitle: 'Air quality index',
+    legendTitle: 'Air quality',
     legendColors: [
       { color: '#00e400', label: 'Good' },
-      { color: '#ffff00', label: 'Moderate' },
-      { color: '#ff7e00', label: 'Unhealthy (S)' },
-      { color: '#ff0000', label: 'Unhealthy' },
-      { color: '#8f3f97', label: 'Very unhealthy' },
-      { color: '#7e0023', label: 'Hazardous' },
+      { color: '#ffff00', label: 'OK' },
+      { color: '#ff7e00', label: 'Poor' },
+      { color: '#ff0000', label: 'Bad' },
+      { color: '#7e0023', label: 'Hazard' },
     ],
     minZoom: 3,
   },
-  // Heat risk - Using temperature visualization
+  // Heat risk - Using Copernicus Climate Data Store visualization
   heat: {
     name: 'Heat Risk',
-    url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=b1b15e88fa797225412429c150c122a1',
+    url: 'https://maps.openweathermap.org/maps/2.0/weather/TA2/{z}/{x}/{y}?appid=9de243494c0b295cca9337e1e96b00e2',
     attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-    legendTitle: 'Max temperature',
+    legendTitle: 'Temperature',
     legendColors: [
-      { color: '#f7f7f7', label: '80' },
-      { color: '#fdd49e', label: '86' },
-      { color: '#fdbb84', label: '92' },
-      { color: '#fc8d59', label: '98' },
-      { color: '#d7301f', label: '110+' },
+      { color: '#313695', label: 'Cold' },
+      { color: '#74add1', label: 'Cool' },
+      { color: '#fee090', label: 'Warm' },
+      { color: '#f46d43', label: 'Hot' },
+      { color: '#a50026', label: 'Extreme' },
     ],
     minZoom: 1,
   },
@@ -194,10 +197,12 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
       <WMSTileLayer
         url={layerConfig.url}
         layers={layerConfig.wmsLayers}
-        format="image/png"
+        format={layerConfig.wmsFormat || 'image/png'}
         transparent={true}
         attribution={layerConfig.attribution}
         opacity={opacity}
+        maxZoom={21}
+        minZoom={layerConfig.minZoom || 1}
       />
     );
   }

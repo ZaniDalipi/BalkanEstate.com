@@ -852,7 +852,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
           </div>
 
-          {/* Mobile: Top right compact controls - only Draw and Recenter */}
+          {/* Mobile: Top right compact controls */}
           <div className="absolute top-16 right-2 z-[999] md:hidden">
             <div className="flex flex-col gap-1.5 items-end">
               {/* Main control bar - liquid glass effect */}
@@ -864,6 +864,43 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                 }}
               >
+                {/* Map Options Button */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
+                    className={`flex items-center justify-center gap-1 px-2.5 py-2 text-xs font-semibold rounded-xl transition-all active:scale-95 ${
+                      isMapOptionsOpen || selectedClimateRisk !== 'none'
+                        ? 'bg-blue-500 text-white'
+                        : 'text-gray-700 hover:bg-white/50'
+                    }`}
+                  >
+                    <span>{t('search:map.options.mapButton', 'Map')}</span>
+                    <svg
+                      className={`w-3 h-3 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {/* Map Options Panel dropdown */}
+                  {isMapOptionsOpen && (
+                    <div className="absolute top-full right-0 mt-2 z-[1010]">
+                      <MapOptionsPanel
+                        selectedMapOption={selectedMapOption}
+                        selectedClimateRisk={selectedClimateRisk}
+                        onMapOptionChange={handleMapOptionChange}
+                        onClimateRiskChange={handleClimateRiskChange}
+                        isOpen={isMapOptionsOpen}
+                        onClose={() => setIsMapOptionsOpen(false)}
+                        isMobile={true}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* Recenter */}
                 <button
                   onClick={onRecenter}
@@ -931,53 +968,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
             </div>
           </div>
 
-          {/* Mobile: Map Options Button - TOP LEFT, near search */}
-          <div className="absolute top-16 left-3 z-[999] md:hidden">
-            <div className="flex flex-col gap-1.5">
-              {/* Map button */}
-              <button
-                onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
-                className={`flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-2xl shadow-xl border transition-all active:scale-95 ${
-                  isMapOptionsOpen || selectedClimateRisk !== 'none'
-                    ? 'bg-blue-500 text-white border-blue-400'
-                    : 'bg-white/85 text-gray-700 border-white/30'
-                }`}
-                style={isMapOptionsOpen || selectedClimateRisk !== 'none' ? {} : {
-                  backdropFilter: 'blur(20px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                }}
-              >
-                <span>{t('search:map.options.mapButton', 'Map')}</span>
-                <svg
-                  className={`w-3.5 h-3.5 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Climate Risk Legend - inline below Map button when closed */}
-              {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
-                <ClimateRiskLegend riskType={selectedClimateRisk} />
-              )}
-
-              {/* Map Options Panel - below button when open */}
-              {isMapOptionsOpen && (
-                <MapOptionsPanel
-                  selectedMapOption={selectedMapOption}
-                  selectedClimateRisk={selectedClimateRisk}
-                  onMapOptionChange={handleMapOptionChange}
-                  onClimateRiskChange={handleClimateRiskChange}
-                  isOpen={isMapOptionsOpen}
-                  onClose={() => setIsMapOptionsOpen(false)}
-                  isMobile={true}
-                />
-              )}
+          {/* Mobile: Climate Risk Legend - TOP LEFT */}
+          {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
+            <div className="absolute top-16 left-3 z-[999] md:hidden">
+              <ClimateRiskLegend riskType={selectedClimateRisk} />
             </div>
-          </div>
+          )}
         </>
       )}
       </div>
