@@ -5,6 +5,7 @@
   },
   "tabs": {
     "gettingStarted": "Fillimi",
+    "premiumFeatures": "Veçoritë Premium",
     "forAgencies": "Për Agjencitë",
     "forAgents": "Për Agjentët",
     "forBuyers": "Për Blerësit",
@@ -197,6 +198,294 @@
         "title": "Aktivizoni Njoftimet",
         "desc": "Aktivizoni alarmet me email për të qenë të parët që mësojnë për ndryshimet e çmimeve."
       }
+    }
+  },
+  "premiumFeatures": {
+    "title": "Zhbllokoni Veçoritë Premium",
+    "subtitle": "Çoni përvojën tuaj të pasurive të paluajtshme në nivel të ri me mjete AI dhe veçori të avancuara",
+    "aiSearch": {
+      "title": "Kërkimi me AI",
+      "badge": "PRO",
+      "desc": "Përshkruani pronën tuaj të ëndrrave në gjuhë natyrale dhe lëreni AI të gjejë përputhje perfekte",
+      "example": "Shembull: 'Gjej një apartament me 3 dhoma gjumi afër qendrës së qytetit me parkim, nën 200,000€'",
+      "features": {
+        "natural": "Pyetje në gjuhë natyrale",
+        "smart": "Përputhje inteligjente pronash",
+        "learn": "Mëson preferencat tuaja",
+        "instant": "Rezultate të menjëhershme"
+      }
+    },
+    "aiDescription": {
+      "title": "Gjeneruesi Automatik i Përshkrimeve me AI",
+      "badge": "PRO",
+      "desc": "Krijoni përshkrime profesionale dhe tërheqëse të pronave automatikisht me një klik",
+      "features": {
+        "professional": "Shkrim profesional",
+        "seo": "Përmbajtje e optimizuar për SEO",
+        "multilingual": "Mbështetje shumëgjuhësore",
+        "customizable": "Plotësisht e personalizueshme"
+      },
+      "howItWorks": "Si Funksionon",
+      "step1": "Ngarkoni fotot tuaja",
+      "step2": "Vendosni detaje bazë",
+      "step3": "Klikoni 'Gjenero Përshkrim'",
+      "step4": "Editoni dhe publikoni"
+    },
+    "interactiveMap3D": {
+      "title": "Harta Interaktive 3D me Dritën e Diellit",
+      "badge": "PRO",
+      "desc": "Vizualizoni pronat në 3D me pozicionin e diellit në kohë reale për të parë ndriçimin natyral gjatë gjithë ditës",
+      "features": {
+        "sunPosition": "Pozicioni i diellit në kohë reale",
+        "shadows": "Vizualizimi i hijes",
+        "timeSlider": "Rrëshqitës i kohës së ditës",
+        "orientation": "Orientimi i ndërtesës"
+      },
+      "benefits": {
+        "title": "Pse Është e Rëndësishme",
+        "light": "Shihni sa dritë natyrale merr çdo dhomë",
+        "morning": "Kontrolloni ekspozimin ndaj diellit të mëngjesit kundrejt mbrëmjes",
+        "balcony": "Vizualizoni orët e diellit në ballkon",
+        "energy": "Vlerësoni efikasitetin energjetik"
+      }
+    },
+    "measurements": {
+      "title": "Mjeti i Matjeve në Hartë",
+      "badge": "PRO",
+      "desc": "Matni distancat dhe sipërfaqet drejtpërdrejt në hartë për të kuptuar madhësitë e pronave dhe rrethinat",
+      "features": {
+        "distance": "Matja e distancës",
+        "area": "Llogaritja e sipërfaqes",
+        "perimeter": "Mjete perimetri",
+        "save": "Ruani matjet"
+      },
+      "useCases": {
+        "title": "Raste Përdorimi",
+        "plot": "Matni kufijtë e parcelës",
+        "distance": "Llogaritni distancën deri te shërbimet",
+        "garden": "Planifikoni kopshtin ose vendin e parkimit",
+        "compare": "Krahasoni madhësitë e pronave"
+      }
+    },
+    "poi": {
+      "title": "Pikat e Interesit (POI)",
+      "badge": "PRO",
+      "desc": "Zbuloni shkolla, spitale, qendra tregtare, restorante, transport publik dhe më shumë në afërsi",
+      "categories": {
+        "education": "Shkolla & Universitete",
+        "health": "Spitale & Farmaci",
+        "shopping": "Tregtim & Supermarkete",
+        "transport": "Transporti Publik",
+        "dining": "Restorante & Kafene",
+        "parks": "Parqe & Rekreacion",
+        "banks": "Banka & Bankomate",
+        "services": "Shërbime Qeveritare"
+      },
+      "features": {
+        "walkTime": "Vlerësime kohe ecjeje",
+        "driveTime": "Distanca me makinë",
+        "ratings": "Vlerësimet e vendeve",
+        "filter": "Filtro sipas kategorisë"
+      }
+    },
+    "insights": {
+      "title": "Njohuri të Gjeneruara me AI",
+      "badge": "PRO",
+      "desc": "Merrni njohuri të personalizuara rreth pronave, lagjeve dhe tendencave të tregut",
+      "types": {
+        "priceAnalysis": {
+          "title": "Analiza e Çmimeve",
+          "desc": "A është ky çmim i pronës i drejtë? Krahasoni me shpallje të ngjashme në zonë"
+        },
+        "neighborhood": {
+          "title": "Rezultati i Lagjës",
+          "desc": "Siguria, ecuria, nivelet e zhurmës dhe metrikat e cilësisë së jetës"
+        },
+        "investment": {
+          "title": "Potenciali i Investimit",
+          "desc": "Vlerësime të të ardhurave nga qiraja, parashikime të vlerësimit dhe projeksione ROI"
+        },
+        "marketTrends": {
+          "title": "Tendencat e Tregut",
+          "desc": "Historia e çmimeve, tendencat e kërkesës dhe koha më e mirë për të blerë/shitur"
+        }
+      }
+    },
+    "calculators": {
+      "title": "Kalkulatorë Financiarë",
+      "subtitle": "Merrni vendime të informuara me mjetet tona të fuqishme financiare",
+      "mortgage": {
+        "title": "Kalkulatori i Hipotekës",
+        "badge": "PRO",
+        "desc": "Llogaritni pagesat mujore, interesin total dhe përballueshmërinë për çdo pronë",
+        "features": {
+          "monthly": "Ndarje e pagesës mujore",
+          "total": "Kostoja totale gjatë afatit të kredisë",
+          "comparison": "Krahasoni skenarë të ndryshëm",
+          "amortization": "Grafik i plotë amortizimi"
+        }
+      },
+      "rentVsBuy": {
+        "title": "Kalkulatori Qira kundrejt Blerjeje",
+        "badge": "PRO",
+        "desc": "Krahasoni kostot reale të qirasë kundrejt blerjes me kalimin e kohës për të marrë vendimin e duhur",
+        "features": {
+          "comparison": "Krahasim kosto krah për krah",
+          "breakeven": "Analiza e pikës së barazimit",
+          "wealth": "Projeksioni i grumbullimit të pasurisë",
+          "taxes": "Llogaritje përfitimesh tatimore"
+        }
+      },
+      "investment": {
+        "title": "Kalkulatori i Investimit",
+        "badge": "PRO",
+        "desc": "Analizoni të ardhurat e mundshme nga qiraja, ROI dhe rrjedhën e parasë për prona investimi",
+        "features": {
+          "roi": "Kthimi i investimit",
+          "cashflow": "Rrjedha mujore e parasë",
+          "capRate": "Llogaritja e normës kapitale",
+          "appreciation": "Vlerësimi i vlerës"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Paneli i Detajuar i Analitikave",
+      "badge": "PRO",
+      "desc": "Ndiqni performancën e shpalljes tuaj me analitika dhe njohuri gjithëpërfshirëse",
+      "metrics": {
+        "views": "Shikime totale & vizitorë unikë",
+        "inquiries": "Numri i pyetjeve & norma e konvertimit",
+        "favorites": "Herët e ruajtura në të preferuarat",
+        "shares": "Ndarja në rrjete sociale & arritja",
+        "demographics": "Demografitë e shikuesve",
+        "sources": "Burimet e trafikut"
+      },
+      "reports": {
+        "title": "Gjeneroni Raporte",
+        "weekly": "Përmbledhje javore e performancës",
+        "comparison": "Krahasoni me mesataren e tregut",
+        "recommendations": "Rekomandime të fuqizuara nga AI"
+      }
+    }
+  },
+  "listingPromotions": {
+    "title": "Si Funksionojnë Promomet e Shpalljeve",
+    "subtitle": "Rritni dukshmërinë e pronës suaj dhe shisni më shpejt me opsionet tona të promovimit",
+    "comparison": {
+      "title": "Krahasimi i Promovimeve",
+      "standard": {
+        "title": "Shpallje Standarde",
+        "features": {
+          "position": "Pozicion i rregullt në kërkim",
+          "visibility": "Dukshmëri bazë",
+          "views": "Shikime standarde"
+        }
+      },
+      "highlight": {
+        "title": "E Theksuar",
+        "price": "€10 / 7 ditë",
+        "features": {
+          "border": "Kufi theksimi blu",
+          "position": "Klasifikim më i mirë në kërkim",
+          "views": "2x më shumë shikime",
+          "badge": "Shenjë theksimi"
+        }
+      },
+      "featured": {
+        "title": "E Veçuar",
+        "price": "€15 / 7 ditë",
+        "features": {
+          "border": "Kufi i artë & shkëlqim",
+          "position": "Në krye të rezultateve të kërkimit",
+          "views": "3x më shumë shikime",
+          "badge": "Shenjë e veçuar",
+          "homepage": "Dukshmëri në faqen kryesore"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25 / 7 ditë",
+        "popular": "MË E POPULLARIZUAR",
+        "features": {
+          "border": "Efekt premium zjarri",
+          "position": "Pozicionim me prioritet",
+          "views": "5x më shumë shikime",
+          "badge": "Shenjë premium zjarri",
+          "homepage": "E veçuar në faqen kryesore",
+          "social": "Promovim në rrjete sociale"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Pse të Promovoni Shpalljen Tuaj?",
+      "faster": {
+        "title": "Shisni më Shpejt",
+        "desc": "Shpalljet e promovuara shiten mesatarisht 60% më shpejt se shpalljet standarde"
+      },
+      "visibility": {
+        "title": "Dukshmëri Maksimale",
+        "desc": "Shfaquni në krye të rezultateve të kërkimit ku shikojnë shumica e blerësve"
+      },
+      "standOut": {
+        "title": "Dallohuni",
+        "desc": "Shenjat dhe kufijtë tërheqës bëjnë shpalljen tuaj të pamundur për t'u humbur"
+      },
+      "analytics": {
+        "title": "Ndiqni Performancën",
+        "desc": "Shihni saktësisht se si promovimi rrit shikimet dhe pyetjet tuaja"
+      }
+    }
+  },
+  "featuredAgencies": {
+    "title": "Përfitimet e Agjencisë së Veçuar",
+    "subtitle": "Merrni më shumë dukshmëri dhe klientë potencialë me një shpallje Agjencie e Veçuar",
+    "benefits": {
+      "visibility": {
+        "title": "5x Më Shumë Dukshmëri",
+        "desc": "Agjencitë e veçuara shfaqen në mënyrë të spikatur në faqen e agjencive me vendosje të theksuar"
+      },
+      "badge": {
+        "title": "Shenjë Premium",
+        "desc": "Dallohuni me një shenjë të verifikuar të veçuar që krijon besim me klientët"
+      },
+      "priority": {
+        "title": "Shpallje me Prioritet",
+        "desc": "Agjencia juaj dhe të gjitha shpalljet e agjentëve marrin prioritet në rezultatet e kërkimit"
+      },
+      "leads": {
+        "title": "Më Shumë Klientë Potencialë të Kualifikuar",
+        "desc": "Blerësit kërkojnë aktivisht agjenci të veçuara për besueshmërinë e tyre"
+      },
+      "branding": {
+        "title": "Markë e Përmirësuar",
+        "desc": "Kartë profili më e madhe me logo, përshkrim dhe informacion kontakti të shfaqur në mënyrë të spikatur"
+      },
+      "analytics": {
+        "title": "Analitika të Agjencisë",
+        "desc": "Ndiqni performancën e ekipit, shikimet e shpalljeve dhe konvertimin e klientëve potencialë në të gjithë agjentët"
+      }
+    },
+    "howToBecome": {
+      "title": "Si të Bëheni të Veçuar",
+      "step1": {
+        "title": "Abonohuni në Enterprise",
+        "desc": "Zgjidhni planin Enterprise për agjencinë tuaj"
+      },
+      "step2": {
+        "title": "Plotësoni Profilin Tuaj",
+        "desc": "Shtoni logo, përshkrim, foto të ekipit dhe informacion kontakti"
+      },
+      "step3": {
+        "title": "Aktivizoni të Veçuar",
+        "desc": "Aktivizoni statusin e veçuar në panelin e agjencisë suaj"
+      }
+    },
+    "stats": {
+      "title": "Statistikat e Agjencisë së Veçuar",
+      "views": "5x më shumë shikime profili",
+      "inquiries": "3x më shumë pyetje",
+      "trust": "Rezultat më i lartë i besimit të klientit",
+      "retention": "Mbajtje më e mirë e agjentëve"
     }
   },
   "agencies": {

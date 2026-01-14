@@ -5,6 +5,7 @@
   },
   "tabs": {
     "gettingStarted": "Početak rada",
+    "premiumFeatures": "Premium funkcije",
     "forAgencies": "Za agencije",
     "forAgents": "Za agente",
     "forBuyers": "Za kupce",
@@ -197,6 +198,294 @@
         "title": "Omogućite obavještenja",
         "desc": "Uključite email upozorenja da budete prvi koji sazna o promjenama cijena."
       }
+    }
+  },
+  "premiumFeatures": {
+    "title": "Otključajte premium funkcije",
+    "subtitle": "Podignite svoje iskustvo sa nekretninama na viši nivo uz AI alate i napredne funkcije",
+    "aiSearch": {
+      "title": "AI pretraga",
+      "badge": "PRO",
+      "desc": "Opišite svoju nekretninu iz snova prirodnim jezikom i pustite AI da pronađe savršena poklapanja",
+      "example": "Primjer: 'Pronađi mi stan sa 3 spavaće sobe blizu centra grada sa parkingom, ispod 200.000 €'",
+      "features": {
+        "natural": "Upiti prirodnim jezikom",
+        "smart": "Pametno poklapanje nekretnina",
+        "learn": "Uči vaše preferencije",
+        "instant": "Trenutni rezultati"
+      }
+    },
+    "aiDescription": {
+      "title": "AI generator automatskih opisa",
+      "badge": "PRO",
+      "desc": "Generirajte profesionalne, privlačne opise nekretnina automatski sa jednim klikom",
+      "features": {
+        "professional": "Profesionalno pisanje",
+        "seo": "SEO-optimiziran sadržaj",
+        "multilingual": "Podrška za više jezika",
+        "customizable": "Potpuno prilagodljivo"
+      },
+      "howItWorks": "Kako funkcionira",
+      "step1": "Učitajte svoje fotografije",
+      "step2": "Unesite osnovne detalje",
+      "step3": "Kliknite 'Generiraj opis'",
+      "step4": "Uredite i objavite"
+    },
+    "interactiveMap3D": {
+      "title": "3D interaktivna mapa sa sunčevom svjetlošću",
+      "badge": "PRO",
+      "desc": "Vizualizirajte nekretnine u 3D sa pozicijom sunca u realnom vremenu da vidite prirodno osvjetljenje tokom dana",
+      "features": {
+        "sunPosition": "Pozicija sunca u realnom vremenu",
+        "shadows": "Vizualizacija sjenki",
+        "timeSlider": "Klizač vremena dana",
+        "orientation": "Orijentacija zgrade"
+      },
+      "benefits": {
+        "title": "Zašto je važno",
+        "light": "Vidite koliko prirodne svjetlosti dobija svaka prostorija",
+        "morning": "Provjerite jutarnju naspram večernje izloženosti suncu",
+        "balcony": "Vizualizirajte sate sunca na balkonu",
+        "energy": "Procijenite energetsku efikasnost"
+      }
+    },
+    "measurements": {
+      "title": "Alat za mjerenje na mapi",
+      "badge": "PRO",
+      "desc": "Mjerite udaljenosti i površine direktno na mapi da razumijete veličine nekretnina i okruženja",
+      "features": {
+        "distance": "Mjerenje udaljenosti",
+        "area": "Izračunavanje površine",
+        "perimeter": "Alati za obim",
+        "save": "Spremite mjerenja"
+      },
+      "useCases": {
+        "title": "Slučajevi upotrebe",
+        "plot": "Izmjerite granice parcele",
+        "distance": "Izračunajte udaljenost do sadržaja",
+        "garden": "Planirajte baštu ili parking prostor",
+        "compare": "Uporedite veličine nekretnina"
+      }
+    },
+    "poi": {
+      "title": "Zanimljive lokacije (POI)",
+      "badge": "PRO",
+      "desc": "Otkrijte obližnje škole, bolnice, trgovačke centre, restorane, javni prevoz i još mnogo toga",
+      "categories": {
+        "education": "Škole i univerziteti",
+        "health": "Bolnice i apoteke",
+        "shopping": "Trgovine i supermarketi",
+        "transport": "Javni prevoz",
+        "dining": "Restorani i kafići",
+        "parks": "Parkovi i rekreacija",
+        "banks": "Banke i bankomati",
+        "services": "Vladine službe"
+      },
+      "features": {
+        "walkTime": "Procjene vremena hoda",
+        "driveTime": "Udaljenosti vožnjom",
+        "ratings": "Ocjene mjesta",
+        "filter": "Filtriraj po kategoriji"
+      }
+    },
+    "insights": {
+      "title": "AI-generirani uvidi",
+      "badge": "PRO",
+      "desc": "Dobijte personalizirane uvide o nekretninama, naseljima i tržišnim trendovima",
+      "types": {
+        "priceAnalysis": {
+          "title": "Analiza cijena",
+          "desc": "Da li je ova nekretnina pravedno ocijenjena? Uporedite sa sličnim oglasima u oblasti"
+        },
+        "neighborhood": {
+          "title": "Ocjena naselja",
+          "desc": "Sigurnost, prohodnost, nivoi buke i metrike kvaliteta života"
+        },
+        "investment": {
+          "title": "Investicijski potencijal",
+          "desc": "Procjene prinosa od zakupa, prognoze rasta vrijednosti i projekcije ROI-ja"
+        },
+        "marketTrends": {
+          "title": "Tržišni trendovi",
+          "desc": "Historija cijena, trendovi potražnje i najbolje vrijeme za kupovinu/prodaju"
+        }
+      }
+    },
+    "calculators": {
+      "title": "Finansijski kalkulatori",
+      "subtitle": "Donosite informirane odluke uz naše moćne finansijske alate",
+      "mortgage": {
+        "title": "Kalkulator hipoteke",
+        "badge": "PRO",
+        "desc": "Izračunajte mjesečneRate, ukupnu kamatu i dostupnost za bilo koju nekretninu",
+        "features": {
+          "monthly": "Pregled mjesečne rate",
+          "total": "Ukupni trošak tokom perioda kredita",
+          "comparison": "Uporedite različite scenarije",
+          "amortization": "Kompletan raspored otplate"
+        }
+      },
+      "rentVsBuy": {
+        "title": "Kalkulator zakup vs kupovina",
+        "badge": "PRO",
+        "desc": "Uporedite prave troškove zakupa naspram kupovine tokom vremena da donesete pravu odluku",
+        "features": {
+          "comparison": "Uporedna analiza troškova",
+          "breakeven": "Analiza tačke pokrića",
+          "wealth": "Projekcija akumulacije bogatstva",
+          "taxes": "Izračunavanje poreskih beneficija"
+        }
+      },
+      "investment": {
+        "title": "Investicijski kalkulator",
+        "badge": "PRO",
+        "desc": "Analizirajte potencijalni prihod od zakupa, ROI i novčani tok za investicijske nekretnine",
+        "features": {
+          "roi": "Povrat investicije",
+          "cashflow": "Mjesečni novčani tok",
+          "capRate": "Izračunavanje stope kapitalizacije",
+          "appreciation": "Rast vrijednosti"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Detaljna kontrolna tabla analitike",
+      "badge": "PRO",
+      "desc": "Pratite performanse vašeg oglasa sa sveobuhvatnom analitikom i uvidima",
+      "metrics": {
+        "views": "Ukupni pregledi i jedinstveni posjetioci",
+        "inquiries": "Broj upita i stopa konverzije",
+        "favorites": "Broj dodavanja u favorite",
+        "shares": "Dijeljenja na društvenim mrežama i doseg",
+        "demographics": "Demografija posjetilaca",
+        "sources": "Izvori prometa"
+      },
+      "reports": {
+        "title": "Generiraj izvještaje",
+        "weekly": "Sedmični pregled performansi",
+        "comparison": "Uporedi sa tržišnim prosjekom",
+        "recommendations": "Preporuke pokrenute AI-jem"
+      }
+    }
+  },
+  "listingPromotions": {
+    "title": "Kako funkcioniraju promocije oglasa",
+    "subtitle": "Poboljšajte vidljivost vaše nekretnine i prodajte brže uz naše opcije promocije",
+    "comparison": {
+      "title": "Uporedba promocija",
+      "standard": {
+        "title": "Standardni oglas",
+        "features": {
+          "position": "Redovna pozicija u pretrazi",
+          "visibility": "Osnovna vidljivost",
+          "views": "Standardni pregledi"
+        }
+      },
+      "highlight": {
+        "title": "Istaknut",
+        "price": "10 € / 7 dana",
+        "features": {
+          "border": "Plavi okvir isticanja",
+          "position": "Bolje rangiranje u pretrazi",
+          "views": "2x više pregleda",
+          "badge": "Značka isticanja"
+        }
+      },
+      "featured": {
+        "title": "Istaknuto",
+        "price": "15 € / 7 dana",
+        "features": {
+          "border": "Zlatni okvir i sjaj",
+          "position": "Vrh rezultata pretrage",
+          "views": "3x više pregleda",
+          "badge": "Značka istaknutog",
+          "homepage": "Vidljivost na početnoj stranici"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "25 € / 7 dana",
+        "popular": "NAJPOPULARNIJE",
+        "features": {
+          "border": "Premium efekat plamena",
+          "position": "Prioritetno pozicioniranje",
+          "views": "5x više pregleda",
+          "badge": "Premium značka sa plamenom",
+          "homepage": "Istaknuto na početnoj stranici",
+          "social": "Promocija na društvenim mrežama"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Zašto promovirati vaš oglas?",
+      "faster": {
+        "title": "Prodajte brže",
+        "desc": "Promovisani oglasi se prodaju u prosjeku 60% brže od standardnih oglasa"
+      },
+      "visibility": {
+        "title": "Maksimalna vidljivost",
+        "desc": "Pojavljujte se na vrhu rezultata pretrage gdje većina kupaca gleda"
+      },
+      "standOut": {
+        "title": "Izdvojite se",
+        "desc": "Privlačne značke i okviri čine vaš oglas nemogućim za propustiti"
+      },
+      "analytics": {
+        "title": "Pratite performanse",
+        "desc": "Vidite tačno kako promocija povećava vaše preglede i upite"
+      }
+    }
+  },
+  "featuredAgencies": {
+    "title": "Prednosti istaknute agencije",
+    "subtitle": "Dobijte više vidljivosti i potencijalnih kupaca sa istaknutim oglasom agencije",
+    "benefits": {
+      "visibility": {
+        "title": "5x više vidljivosti",
+        "desc": "Istaknute agencije se ističu na stranici agencija sa prominentnim plasmаnom"
+      },
+      "badge": {
+        "title": "Premium značka",
+        "desc": "Izdvojite se sa verificiranom istaknutom značkom koja gradi povjerenje sa klijentima"
+      },
+      "priority": {
+        "title": "Prioritetno oglašavanje",
+        "desc": "Vaša agencija i svi oglasi agenata dobijaju prioritet u rezultatima pretrage"
+      },
+      "leads": {
+        "title": "Više kvalifikovanih potencijalnih kupaca",
+        "desc": "Kupci aktivno traže istaknute agencije zbog njihove pouzdanosti"
+      },
+      "branding": {
+        "title": "Poboljšan brending",
+        "desc": "Veća kartica profila sa logom, opisom i kontakt informacijama prominentno prikazanim"
+      },
+      "analytics": {
+        "title": "Analitika agencije",
+        "desc": "Pratite performanse tima, preglede oglasa i konverziju potencijalnih kupaca kroz sve agente"
+      }
+    },
+    "howToBecome": {
+      "title": "Kako postati istaknut",
+      "step1": {
+        "title": "Pretplatite se na Enterprise",
+        "desc": "Odaberite Enterprise plan za vašu agenciju"
+      },
+      "step2": {
+        "title": "Popunite svoj profil",
+        "desc": "Dodajte logo, opis, fotografije tima i kontakt informacije"
+      },
+      "step3": {
+        "title": "Aktivirajte istaknutost",
+        "desc": "Omogućite istaknut status u kontrolnoj tabli vaše agencije"
+      }
+    },
+    "stats": {
+      "title": "Statistike istaknute agencije",
+      "views": "5x više pregleda profila",
+      "inquiries": "3x više upita",
+      "trust": "Viši skor povjerenja klijenata",
+      "retention": "Bolje zadržavanje agenata"
     }
   },
   "agencies": {

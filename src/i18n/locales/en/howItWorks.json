@@ -5,6 +5,7 @@
   },
   "tabs": {
     "gettingStarted": "Getting Started",
+    "premiumFeatures": "Premium Features",
     "forAgencies": "For Agencies",
     "forAgents": "For Agents",
     "forBuyers": "For Buyers",
@@ -197,6 +198,294 @@
         "title": "Enable Notifications",
         "desc": "Turn on email alerts to be the first to know about price changes."
       }
+    }
+  },
+  "premiumFeatures": {
+    "title": "Unlock Premium Features",
+    "subtitle": "Take your real estate experience to the next level with AI-powered tools and advanced features",
+    "aiSearch": {
+      "title": "AI-Powered Search",
+      "badge": "PRO",
+      "desc": "Describe your dream property in natural language and let AI find perfect matches",
+      "example": "Example: 'Find me a 3-bedroom apartment near the city center with parking, under €200,000'",
+      "features": {
+        "natural": "Natural language queries",
+        "smart": "Smart property matching",
+        "learn": "Learns your preferences",
+        "instant": "Instant results"
+      }
+    },
+    "aiDescription": {
+      "title": "AI Auto-Description Generator",
+      "badge": "PRO",
+      "desc": "Generate professional, compelling property descriptions automatically with one click",
+      "features": {
+        "professional": "Professional copywriting",
+        "seo": "SEO-optimized content",
+        "multilingual": "Multi-language support",
+        "customizable": "Fully customizable"
+      },
+      "howItWorks": "How It Works",
+      "step1": "Upload your photos",
+      "step2": "Enter basic details",
+      "step3": "Click 'Generate Description'",
+      "step4": "Edit and publish"
+    },
+    "interactiveMap3D": {
+      "title": "3D Interactive Map with Sunlight",
+      "badge": "PRO",
+      "desc": "Visualize properties in 3D with real-time sun position to see natural lighting throughout the day",
+      "features": {
+        "sunPosition": "Real-time sun position",
+        "shadows": "Shadow visualization",
+        "timeSlider": "Time-of-day slider",
+        "orientation": "Building orientation"
+      },
+      "benefits": {
+        "title": "Why It Matters",
+        "light": "See how much natural light each room gets",
+        "morning": "Check morning vs evening sun exposure",
+        "balcony": "Visualize balcony sun hours",
+        "energy": "Estimate energy efficiency"
+      }
+    },
+    "measurements": {
+      "title": "Map Measurements Tool",
+      "badge": "PRO",
+      "desc": "Measure distances and areas directly on the map to understand property sizes and surroundings",
+      "features": {
+        "distance": "Distance measurement",
+        "area": "Area calculation",
+        "perimeter": "Perimeter tools",
+        "save": "Save measurements"
+      },
+      "useCases": {
+        "title": "Use Cases",
+        "plot": "Measure plot boundaries",
+        "distance": "Calculate distance to amenities",
+        "garden": "Plan garden or parking space",
+        "compare": "Compare property sizes"
+      }
+    },
+    "poi": {
+      "title": "Points of Interest (POI)",
+      "badge": "PRO",
+      "desc": "Discover nearby schools, hospitals, shopping centers, restaurants, public transport, and more",
+      "categories": {
+        "education": "Schools & Universities",
+        "health": "Hospitals & Pharmacies",
+        "shopping": "Shopping & Supermarkets",
+        "transport": "Public Transport",
+        "dining": "Restaurants & Cafes",
+        "parks": "Parks & Recreation",
+        "banks": "Banks & ATMs",
+        "services": "Government Services"
+      },
+      "features": {
+        "walkTime": "Walking time estimates",
+        "driveTime": "Driving distances",
+        "ratings": "Place ratings",
+        "filter": "Filter by category"
+      }
+    },
+    "insights": {
+      "title": "AI-Generated Insights",
+      "badge": "PRO",
+      "desc": "Get personalized insights about properties, neighborhoods, and market trends",
+      "types": {
+        "priceAnalysis": {
+          "title": "Price Analysis",
+          "desc": "Is this property priced fairly? Compare with similar listings in the area"
+        },
+        "neighborhood": {
+          "title": "Neighborhood Score",
+          "desc": "Safety, walkability, noise levels, and quality of life metrics"
+        },
+        "investment": {
+          "title": "Investment Potential",
+          "desc": "Rental yield estimates, appreciation forecasts, and ROI projections"
+        },
+        "marketTrends": {
+          "title": "Market Trends",
+          "desc": "Price history, demand trends, and best time to buy/sell"
+        }
+      }
+    },
+    "calculators": {
+      "title": "Financial Calculators",
+      "subtitle": "Make informed decisions with our powerful financial tools",
+      "mortgage": {
+        "title": "Mortgage Calculator",
+        "badge": "PRO",
+        "desc": "Calculate monthly payments, total interest, and affordability for any property",
+        "features": {
+          "monthly": "Monthly payment breakdown",
+          "total": "Total cost over loan term",
+          "comparison": "Compare different scenarios",
+          "amortization": "Full amortization schedule"
+        }
+      },
+      "rentVsBuy": {
+        "title": "Rent vs Buy Calculator",
+        "badge": "PRO",
+        "desc": "Compare the true costs of renting versus buying over time to make the right decision",
+        "features": {
+          "comparison": "Side-by-side cost comparison",
+          "breakeven": "Break-even point analysis",
+          "wealth": "Wealth accumulation projection",
+          "taxes": "Tax benefit calculations"
+        }
+      },
+      "investment": {
+        "title": "Investment Calculator",
+        "badge": "PRO",
+        "desc": "Analyze potential rental income, ROI, and cash flow for investment properties",
+        "features": {
+          "roi": "Return on investment",
+          "cashflow": "Monthly cash flow",
+          "capRate": "Cap rate calculation",
+          "appreciation": "Value appreciation"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Detailed Analytics Dashboard",
+      "badge": "PRO",
+      "desc": "Track your listing performance with comprehensive analytics and insights",
+      "metrics": {
+        "views": "Total views & unique visitors",
+        "inquiries": "Inquiry count & conversion rate",
+        "favorites": "Times saved to favorites",
+        "shares": "Social shares & reach",
+        "demographics": "Viewer demographics",
+        "sources": "Traffic sources"
+      },
+      "reports": {
+        "title": "Generate Reports",
+        "weekly": "Weekly performance summary",
+        "comparison": "Compare with market average",
+        "recommendations": "AI-powered recommendations"
+      }
+    }
+  },
+  "listingPromotions": {
+    "title": "How Listing Promotions Work",
+    "subtitle": "Boost your property visibility and sell faster with our promotion options",
+    "comparison": {
+      "title": "Promotion Comparison",
+      "standard": {
+        "title": "Standard Listing",
+        "features": {
+          "position": "Regular search position",
+          "visibility": "Basic visibility",
+          "views": "Standard views"
+        }
+      },
+      "highlight": {
+        "title": "Highlighted",
+        "price": "€10 / 7 days",
+        "features": {
+          "border": "Blue highlight border",
+          "position": "Better search ranking",
+          "views": "2x more views",
+          "badge": "Highlight badge"
+        }
+      },
+      "featured": {
+        "title": "Featured",
+        "price": "€15 / 7 days",
+        "features": {
+          "border": "Golden border & glow",
+          "position": "Top of search results",
+          "views": "3x more views",
+          "badge": "Featured badge",
+          "homepage": "Homepage visibility"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25 / 7 days",
+        "popular": "MOST POPULAR",
+        "features": {
+          "border": "Premium fire effect",
+          "position": "Priority positioning",
+          "views": "5x more views",
+          "badge": "Premium fire badge",
+          "homepage": "Featured on homepage",
+          "social": "Social media promotion"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Why Promote Your Listing?",
+      "faster": {
+        "title": "Sell Faster",
+        "desc": "Promoted listings sell on average 60% faster than standard listings"
+      },
+      "visibility": {
+        "title": "Maximum Visibility",
+        "desc": "Appear at the top of search results where most buyers look"
+      },
+      "standOut": {
+        "title": "Stand Out",
+        "desc": "Eye-catching badges and borders make your listing impossible to miss"
+      },
+      "analytics": {
+        "title": "Track Performance",
+        "desc": "See exactly how promotion boosts your views and inquiries"
+      }
+    }
+  },
+  "featuredAgencies": {
+    "title": "Featured Agency Benefits",
+    "subtitle": "Get more visibility and leads with a Featured Agency listing",
+    "benefits": {
+      "visibility": {
+        "title": "5x More Visibility",
+        "desc": "Featured agencies appear prominently on the agencies page with highlighted placement"
+      },
+      "badge": {
+        "title": "Premium Badge",
+        "desc": "Stand out with a verified featured badge that builds trust with clients"
+      },
+      "priority": {
+        "title": "Priority Listing",
+        "desc": "Your agency and all agent listings get priority in search results"
+      },
+      "leads": {
+        "title": "More Qualified Leads",
+        "desc": "Buyers actively seek out featured agencies for their reliability"
+      },
+      "branding": {
+        "title": "Enhanced Branding",
+        "desc": "Larger profile card with logo, description, and contact info prominently displayed"
+      },
+      "analytics": {
+        "title": "Agency Analytics",
+        "desc": "Track team performance, listing views, and lead conversion across all agents"
+      }
+    },
+    "howToBecome": {
+      "title": "How to Become Featured",
+      "step1": {
+        "title": "Subscribe to Enterprise",
+        "desc": "Choose the Enterprise plan for your agency"
+      },
+      "step2": {
+        "title": "Complete Your Profile",
+        "desc": "Add logo, description, team photos, and contact information"
+      },
+      "step3": {
+        "title": "Activate Featured",
+        "desc": "Enable featured status in your agency dashboard"
+      }
+    },
+    "stats": {
+      "title": "Featured Agency Stats",
+      "views": "5x more profile views",
+      "inquiries": "3x more inquiries",
+      "trust": "Higher client trust score",
+      "retention": "Better agent retention"
     }
   },
   "agencies": {

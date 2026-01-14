@@ -8,7 +8,8 @@
     "forAgencies": "Pentru Agenții",
     "forAgents": "Pentru Agenți",
     "forBuyers": "Pentru Cumpărători",
-    "forSellers": "Pentru Vânzători"
+    "forSellers": "Pentru Vânzători",
+    "premiumFeatures": "Funcții Premium"
   },
   "gettingStarted": {
     "welcome": {
@@ -197,6 +198,294 @@
         "title": "Activează Notificările",
         "desc": "Activează alertele prin email pentru a fi primul care află despre schimbările de preț."
       }
+    }
+  },
+  "premiumFeatures": {
+    "title": "Deblocați Funcții Premium",
+    "subtitle": "Duceți experiența imobiliară la următorul nivel cu instrumente bazate pe AI și funcții avansate",
+    "aiSearch": {
+      "title": "Căutare cu AI",
+      "badge": "PRO",
+      "desc": "Descrieți proprietatea visurilor în limbaj natural și lăsați AI-ul să găsească potriviri perfecte",
+      "example": "Exemplu: 'Găsește-mi un apartament cu 3 dormitoare aproape de centrul orașului cu parcare, sub 200.000 €'",
+      "features": {
+        "natural": "Interogări în limbaj natural",
+        "smart": "Potrivire inteligentă de proprietăți",
+        "learn": "Învață preferințele tale",
+        "instant": "Rezultate instantanee"
+      }
+    },
+    "aiDescription": {
+      "title": "Generator Automat de Descrieri AI",
+      "badge": "PRO",
+      "desc": "Generați descrieri profesionale și atractive ale proprietății automat cu un singur clic",
+      "features": {
+        "professional": "Copywriting profesional",
+        "seo": "Conținut optimizat pentru SEO",
+        "multilingual": "Suport multi-limbă",
+        "customizable": "Complet personalizabil"
+      },
+      "howItWorks": "Cum Funcționează",
+      "step1": "Încărcați fotografiile",
+      "step2": "Introduceți detalii de bază",
+      "step3": "Apăsați 'Generează Descriere'",
+      "step4": "Editați și publicați"
+    },
+    "interactiveMap3D": {
+      "title": "Hartă Interactivă 3D cu Lumină Solară",
+      "badge": "PRO",
+      "desc": "Vizualizați proprietățile în 3D cu poziția soarelui în timp real pentru a vedea iluminarea naturală pe parcursul zilei",
+      "features": {
+        "sunPosition": "Poziție soare în timp real",
+        "shadows": "Vizualizare umbre",
+        "timeSlider": "Cursor timp al zilei",
+        "orientation": "Orientare clădire"
+      },
+      "benefits": {
+        "title": "De Ce Contează",
+        "light": "Vezi câtă lumină naturală primește fiecare cameră",
+        "morning": "Verifică expunerea la soare dimineața vs seara",
+        "balcony": "Vizualizează orele de soare pe balcon",
+        "energy": "Estimează eficiența energetică"
+      }
+    },
+    "measurements": {
+      "title": "Instrument de Măsurare pe Hartă",
+      "badge": "PRO",
+      "desc": "Măsurați distanțe și suprafețe direct pe hartă pentru a înțelege dimensiunile proprietății și împrejurimile",
+      "features": {
+        "distance": "Măsurare distanță",
+        "area": "Calcul suprafață",
+        "perimeter": "Instrumente perimetru",
+        "save": "Salvare măsurători"
+      },
+      "useCases": {
+        "title": "Cazuri de Utilizare",
+        "plot": "Măsurați limitele terenului",
+        "distance": "Calculați distanța până la facilități",
+        "garden": "Planificați grădina sau locul de parcare",
+        "compare": "Comparați dimensiunile proprietăților"
+      }
+    },
+    "poi": {
+      "title": "Puncte de Interes (POI)",
+      "badge": "PRO",
+      "desc": "Descoperiți școli, spitale, centre comerciale, restaurante, transport public și multe altele din apropiere",
+      "categories": {
+        "education": "Școli și Universități",
+        "health": "Spitale și Farmacii",
+        "shopping": "Magazine și Supermarketuri",
+        "transport": "Transport Public",
+        "dining": "Restaurante și Cafenele",
+        "parks": "Parcuri și Recreere",
+        "banks": "Bănci și Bancomate",
+        "services": "Servicii Guvernamentale"
+      },
+      "features": {
+        "walkTime": "Estimări timp de mers pe jos",
+        "driveTime": "Distanțe cu mașina",
+        "ratings": "Evaluări locații",
+        "filter": "Filtrare după categorie"
+      }
+    },
+    "insights": {
+      "title": "Informații Generate de AI",
+      "badge": "PRO",
+      "desc": "Obțineți informații personalizate despre proprietăți, cartiere și tendințe de piață",
+      "types": {
+        "priceAnalysis": {
+          "title": "Analiză Preț",
+          "desc": "Este această proprietate cu preț corect? Comparați cu anunțuri similare din zonă"
+        },
+        "neighborhood": {
+          "title": "Scor Cartier",
+          "desc": "Siguranță, accesibilitate pietonală, niveluri de zgomot și indicatori de calitate a vieții"
+        },
+        "investment": {
+          "title": "Potențial de Investiție",
+          "desc": "Estimări randament închiriere, prognoze apreciere și proiecții ROI"
+        },
+        "marketTrends": {
+          "title": "Tendințe de Piață",
+          "desc": "Istoric prețuri, tendințe cerere și cel mai bun moment pentru cumpărare/vânzare"
+        }
+      }
+    },
+    "calculators": {
+      "title": "Calculatoare Financiare",
+      "subtitle": "Luați decizii informate cu instrumentele noastre financiare puternice",
+      "mortgage": {
+        "title": "Calculator Ipotecar",
+        "badge": "PRO",
+        "desc": "Calculați plăți lunare, dobândă totală și accesibilitate pentru orice proprietate",
+        "features": {
+          "monthly": "Detaliere plată lunară",
+          "total": "Cost total pe durata împrumutului",
+          "comparison": "Comparați scenarii diferite",
+          "amortization": "Program complet de amortizare"
+        }
+      },
+      "rentVsBuy": {
+        "title": "Calculator Închiriere vs Cumpărare",
+        "badge": "PRO",
+        "desc": "Comparați costurile reale ale închirierii versus cumpărării în timp pentru a lua decizia corectă",
+        "features": {
+          "comparison": "Comparație costuri alăturate",
+          "breakeven": "Analiză punct de echilibru",
+          "wealth": "Proiecție acumulare avere",
+          "taxes": "Calcule beneficii fiscale"
+        }
+      },
+      "investment": {
+        "title": "Calculator Investiții",
+        "badge": "PRO",
+        "desc": "Analizați potențialul venit din închiriere, ROI și flux de numerar pentru proprietăți de investiție",
+        "features": {
+          "roi": "Rentabilitatea investiției",
+          "cashflow": "Flux de numerar lunar",
+          "capRate": "Calcul rată capitalizare",
+          "appreciation": "Apreciere valoare"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Tablou de Bord Analitice Detaliat",
+      "badge": "PRO",
+      "desc": "Urmăriți performanța anunțului cu analize și informații complete",
+      "metrics": {
+        "views": "Total vizualizări și vizitatori unici",
+        "inquiries": "Număr întrebări și rată conversie",
+        "favorites": "Salvări la favorite",
+        "shares": "Distribuiri sociale și acoperire",
+        "demographics": "Date demografice vizitatori",
+        "sources": "Surse de trafic"
+      },
+      "reports": {
+        "title": "Generare Rapoarte",
+        "weekly": "Rezumat performanță săptămânală",
+        "comparison": "Comparație cu media pieței",
+        "recommendations": "Recomandări bazate pe AI"
+      }
+    }
+  },
+  "listingPromotions": {
+    "title": "Cum Funcționează Promovările Anunțurilor",
+    "subtitle": "Creșteți vizibilitatea proprietății și vindeți mai rapid cu opțiunile noastre de promovare",
+    "comparison": {
+      "title": "Comparație Promovări",
+      "standard": {
+        "title": "Anunț Standard",
+        "features": {
+          "position": "Poziție regulată în căutare",
+          "visibility": "Vizibilitate de bază",
+          "views": "Vizualizări standard"
+        }
+      },
+      "highlight": {
+        "title": "Evidențiat",
+        "price": "€10 / 7 zile",
+        "features": {
+          "border": "Margine evidențiată albastră",
+          "position": "Clasament mai bun în căutare",
+          "views": "De 2 ori mai multe vizualizări",
+          "badge": "Insignă evidențiere"
+        }
+      },
+      "featured": {
+        "title": "Recomandat",
+        "price": "€15 / 7 zile",
+        "features": {
+          "border": "Margine aurie și strălucire",
+          "position": "În vârful rezultatelor de căutare",
+          "views": "De 3 ori mai multe vizualizări",
+          "badge": "Insignă recomandat",
+          "homepage": "Vizibilitate pe pagina principală"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25 / 7 zile",
+        "popular": "CEL MAI POPULAR",
+        "features": {
+          "border": "Efect de flăcări premium",
+          "position": "Poziționare prioritară",
+          "views": "De 5 ori mai multe vizualizări",
+          "badge": "Insignă premium cu flăcări",
+          "homepage": "Recomandat pe pagina principală",
+          "social": "Promovare pe rețelele sociale"
+        }
+      }
+    },
+    "benefits": {
+      "title": "De Ce să Promovați Anunțul?",
+      "faster": {
+        "title": "Vindeți Mai Rapid",
+        "desc": "Anunțurile promovate se vând în medie cu 60% mai rapid decât anunțurile standard"
+      },
+      "visibility": {
+        "title": "Vizibilitate Maximă",
+        "desc": "Apăreți în vârful rezultatelor de căutare unde se uită cei mai mulți cumpărători"
+      },
+      "standOut": {
+        "title": "Ieșiți în Evidență",
+        "desc": "Insignele și marginile atrăgătoare fac anunțul imposibil de ratat"
+      },
+      "analytics": {
+        "title": "Urmăriți Performanța",
+        "desc": "Vedeți exact cum promovarea vă crește vizualizările și întrebările"
+      }
+    }
+  },
+  "featuredAgencies": {
+    "title": "Beneficii Agenție Evidențiată",
+    "subtitle": "Obțineți mai multă vizibilitate și clienți potențiali cu un anunț de Agenție Evidențiată",
+    "benefits": {
+      "visibility": {
+        "title": "De 5 Ori Mai Multă Vizibilitate",
+        "desc": "Agențiile evidențiate apar proeminent pe pagina agențiilor cu plasare evidențiată"
+      },
+      "badge": {
+        "title": "Insignă Premium",
+        "desc": "Ieșiți în evidență cu o insignă verificată de agenție evidențiată care construiește încredere cu clienții"
+      },
+      "priority": {
+        "title": "Anunț Prioritar",
+        "desc": "Agenția și toate anunțurile agenților primesc prioritate în rezultatele de căutare"
+      },
+      "leads": {
+        "title": "Mai Mulți Clienți Potențiali Calificați",
+        "desc": "Cumpărătorii caută activ agenții evidențiate pentru fiabilitatea lor"
+      },
+      "branding": {
+        "title": "Branding Îmbunătățit",
+        "desc": "Card de profil mai mare cu logo, descriere și informații de contact afișate proeminent"
+      },
+      "analytics": {
+        "title": "Analize Agenție",
+        "desc": "Urmăriți performanța echipei, vizualizările anunțurilor și conversia clienților potențiali pentru toți agenții"
+      }
+    },
+    "howToBecome": {
+      "title": "Cum să Deveniți Evidențiat",
+      "step1": {
+        "title": "Abonați-vă la Enterprise",
+        "desc": "Alegeți planul Enterprise pentru agenția dumneavoastră"
+      },
+      "step2": {
+        "title": "Completați Profilul",
+        "desc": "Adăugați logo, descriere, fotografii echipă și informații de contact"
+      },
+      "step3": {
+        "title": "Activați Evidențiat",
+        "desc": "Activați statutul de evidențiat în tabloul de bord al agenției"
+      }
+    },
+    "stats": {
+      "title": "Statistici Agenție Evidențiată",
+      "views": "De 5 ori mai multe vizualizări profil",
+      "inquiries": "De 3 ori mai multe întrebări",
+      "trust": "Scor de încredere clienți mai mare",
+      "retention": "Retenție mai bună agenți"
     }
   },
   "agencies": {

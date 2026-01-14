@@ -92,6 +92,50 @@ const BellIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  </svg>
+);
+
+const SunIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+  </svg>
+);
+
+const RulerIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 6l.707.707M6 6l-.707.707M6 6v12m0-12h12m0 12v.707M18 18h-.707M18 18l.707-.707M18 18l-.707.707M18 18V6m0 12H6m12-12h.707M18 6l-.707.707M18 6l.707-.707M6 18l.707-.707M6 18l-.707.707M6 18v-.707" />
+  </svg>
+);
+
+const LocationMarkerIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const LightBulbIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+  </svg>
+);
+
+const CalculatorIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+  </svg>
+);
+
+const FireIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+  </svg>
+);
+
 const HowItWorksPage: React.FC = () => {
   const { t } = useTranslation(['howItWorks']);
   const { state, dispatch } = useAppContext();
@@ -104,6 +148,7 @@ const HowItWorksPage: React.FC = () => {
 
   const tabs = [
     { id: 'getting-started' as HowItWorksTab, label: t('howItWorks:tabs.gettingStarted'), icon: StarIcon, color: 'cyan' },
+    { id: 'premium-features' as HowItWorksTab, label: t('howItWorks:tabs.premiumFeatures'), icon: SparklesIcon, color: 'amber' },
     { id: 'agencies' as HowItWorksTab, label: t('howItWorks:tabs.forAgencies'), icon: BuildingIcon, color: 'orange' },
     { id: 'agents' as HowItWorksTab, label: t('howItWorks:tabs.forAgents'), icon: UserGroupIcon, color: 'purple' },
     { id: 'buyers' as HowItWorksTab, label: t('howItWorks:tabs.forBuyers'), icon: SearchIcon, color: 'blue' },
@@ -113,6 +158,7 @@ const HowItWorksPage: React.FC = () => {
   const getTabColor = (tab: HowItWorksTab) => {
     const colors: Record<HowItWorksTab, string> = {
       'getting-started': 'cyan',
+      'premium-features': 'amber',
       agencies: 'orange',
       agents: 'purple',
       buyers: 'blue',
@@ -658,6 +704,390 @@ const HowItWorksPage: React.FC = () => {
                   <div>
                     <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.enableNotifications.title')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.enableNotifications.desc')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Premium Features */}
+        {activeTab === 'premium-features' && (
+          <div className="animate-fade-in">
+            {/* Main Value Prop */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
+                <SparklesIcon className="w-8 h-8 text-amber-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:premiumFeatures.title')}</h2>
+              <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+                {t('howItWorks:premiumFeatures.subtitle')}
+              </p>
+            </div>
+
+            {/* AI Search Section */}
+            <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-8 md:p-12 text-white mb-12 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                      <SearchIcon className="w-10 h-10" />
+                      <div>
+                        <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.aiSearch.badge')}</span>
+                        <h3 className="text-2xl font-bold mt-1">{t('howItWorks:premiumFeatures.aiSearch.title')}</h3>
+                      </div>
+                    </div>
+                    <p className="text-amber-100 mb-4">{t('howItWorks:premiumFeatures.aiSearch.desc')}</p>
+                    <div className="bg-white/10 rounded-xl p-4 mb-4">
+                      <p className="text-sm text-amber-100 italic">{t('howItWorks:premiumFeatures.aiSearch.example')}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['natural', 'smart', 'learn', 'instant'].map((key) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <CheckIcon className="w-4 h-4 text-amber-200" />
+                          <span className="text-sm">{t(`howItWorks:premiumFeatures.aiSearch.features.${key}`)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="w-full md:w-80 bg-white/20 rounded-2xl p-6">
+                    <div className="bg-white rounded-xl p-4 text-neutral-800">
+                      <div className="flex items-center gap-2 mb-3">
+                        <SparklesIcon className="w-5 h-5 text-amber-500" />
+                        <span className="font-medium text-sm">AI Search</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg p-3 mb-3">
+                        <p className="text-xs text-neutral-500">Find me a...</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-2 bg-neutral-200 rounded-full w-3/4"></div>
+                        <div className="h-2 bg-neutral-200 rounded-full w-1/2"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Auto Description */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold">
+                  <LightBulbIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.aiDescription.badge')}</span>
+                  <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:premiumFeatures.aiDescription.title')}</h3>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <p className="text-neutral-600 mb-6">{t('howItWorks:premiumFeatures.aiDescription.desc')}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {['professional', 'seo', 'multilingual', 'customizable'].map((key) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <CheckIcon className="w-4 h-4 text-amber-500" />
+                        <span className="text-sm text-neutral-600">{t(`howItWorks:premiumFeatures.aiDescription.features.${key}`)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-neutral-50 rounded-2xl p-6 border border-neutral-200">
+                  <h4 className="font-semibold text-neutral-800 mb-4">{t('howItWorks:premiumFeatures.aiDescription.howItWorks')}</h4>
+                  <div className="space-y-3">
+                    {['step1', 'step2', 'step3', 'step4'].map((step, idx) => (
+                      <div key={step} className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 text-xs font-bold">{idx + 1}</div>
+                        <span className="text-sm text-neutral-600">{t(`howItWorks:premiumFeatures.aiDescription.${step}`)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3D Map with Sunlight */}
+            <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl p-8 md:p-12 text-white mb-12 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-6">
+                  <SunIcon className="w-10 h-10" />
+                  <div>
+                    <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.interactiveMap3D.badge')}</span>
+                    <h3 className="text-2xl font-bold mt-1">{t('howItWorks:premiumFeatures.interactiveMap3D.title')}</h3>
+                  </div>
+                </div>
+                <p className="text-yellow-100 mb-6 max-w-2xl">{t('howItWorks:premiumFeatures.interactiveMap3D.desc')}</p>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="font-semibold mb-4">Features</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['sunPosition', 'shadows', 'timeSlider', 'orientation'].map((key) => (
+                        <div key={key} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                          <CheckIcon className="w-4 h-4 text-yellow-200" />
+                          <span className="text-sm">{t(`howItWorks:premiumFeatures.interactiveMap3D.features.${key}`)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-white/20 rounded-2xl p-6">
+                    <h4 className="font-semibold mb-3">{t('howItWorks:premiumFeatures.interactiveMap3D.benefits.title')}</h4>
+                    <ul className="space-y-2 text-sm text-yellow-100">
+                      {['light', 'morning', 'balcony', 'energy'].map((key) => (
+                        <li key={key} className="flex items-start gap-2">
+                          <CheckIcon className="w-4 h-4 text-yellow-200 flex-shrink-0 mt-0.5" />
+                          {t(`howItWorks:premiumFeatures.interactiveMap3D.benefits.${key}`)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Measurements & POI Grid */}
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              {/* Measurements Tool */}
+              <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <RulerIcon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.measurements.badge')}</span>
+                    <h4 className="font-semibold text-neutral-800">{t('howItWorks:premiumFeatures.measurements.title')}</h4>
+                  </div>
+                </div>
+                <p className="text-neutral-600 mb-4">{t('howItWorks:premiumFeatures.measurements.desc')}</p>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {['distance', 'area', 'perimeter', 'save'].map((key) => (
+                    <div key={key} className="flex items-center gap-2 text-sm text-neutral-600">
+                      <CheckIcon className="w-4 h-4 text-blue-500" />
+                      {t(`howItWorks:premiumFeatures.measurements.features.${key}`)}
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <h5 className="font-medium text-neutral-700 mb-2 text-sm">{t('howItWorks:premiumFeatures.measurements.useCases.title')}</h5>
+                  <ul className="text-xs text-neutral-600 space-y-1">
+                    {['plot', 'distance', 'garden', 'compare'].map((key) => (
+                      <li key={key}>• {t(`howItWorks:premiumFeatures.measurements.useCases.${key}`)}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* POI (Points of Interest) */}
+              <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <LocationMarkerIcon className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.poi.badge')}</span>
+                    <h4 className="font-semibold text-neutral-800">{t('howItWorks:premiumFeatures.poi.title')}</h4>
+                  </div>
+                </div>
+                <p className="text-neutral-600 mb-4">{t('howItWorks:premiumFeatures.poi.desc')}</p>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {['education', 'health', 'shopping', 'transport', 'dining', 'parks'].map((key) => (
+                    <div key={key} className="flex items-center gap-2 text-xs text-neutral-600 bg-neutral-50 rounded-lg px-2 py-1.5">
+                      <span className="text-green-500">●</span>
+                      {t(`howItWorks:premiumFeatures.poi.categories.${key}`)}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {['walkTime', 'driveTime', 'ratings', 'filter'].map((key) => (
+                    <span key={key} className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
+                      {t(`howItWorks:premiumFeatures.poi.features.${key}`)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* AI Insights */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center">
+                  <LightBulbIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.insights.badge')}</span>
+                  <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:premiumFeatures.insights.title')}</h3>
+                </div>
+              </div>
+              <p className="text-neutral-600 mb-6">{t('howItWorks:premiumFeatures.insights.desc')}</p>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {['priceAnalysis', 'neighborhood', 'investment', 'marketTrends'].map((key) => (
+                  <div key={key} className="bg-purple-50 border border-purple-100 rounded-xl p-5 hover:shadow-md transition-shadow">
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t(`howItWorks:premiumFeatures.insights.types.${key}.title`)}</h4>
+                    <p className="text-sm text-neutral-600">{t(`howItWorks:premiumFeatures.insights.types.${key}.desc`)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Financial Calculators */}
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 md:p-12 text-white mb-12 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-2">
+                  <CalculatorIcon className="w-8 h-8" />
+                  <h3 className="text-2xl font-bold">{t('howItWorks:premiumFeatures.calculators.title')}</h3>
+                </div>
+                <p className="text-indigo-200 mb-8">{t('howItWorks:premiumFeatures.calculators.subtitle')}</p>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {['mortgage', 'rentVsBuy', 'investment'].map((calc) => (
+                    <div key={calc} className="bg-white/10 backdrop-blur rounded-2xl p-6">
+                      <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">{t(`howItWorks:premiumFeatures.calculators.${calc}.badge`)}</span>
+                      <h4 className="font-semibold mt-3 mb-2">{t(`howItWorks:premiumFeatures.calculators.${calc}.title`)}</h4>
+                      <p className="text-sm text-indigo-200 mb-4">{t(`howItWorks:premiumFeatures.calculators.${calc}.desc`)}</p>
+                      <ul className="space-y-2">
+                        {['monthly', 'comparison', calc === 'mortgage' ? 'total' : calc === 'rentVsBuy' ? 'breakeven' : 'roi', calc === 'mortgage' ? 'amortization' : calc === 'rentVsBuy' ? 'wealth' : 'cashflow'].map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-2 text-sm text-indigo-100">
+                            <CheckIcon className="w-4 h-4 text-indigo-200" />
+                            {t(`howItWorks:premiumFeatures.calculators.${calc}.features.${feature}`)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Dashboard */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center">
+                  <ChartIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="bg-cyan-100 text-cyan-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.analytics.badge')}</span>
+                  <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:premiumFeatures.analytics.title')}</h3>
+                </div>
+              </div>
+              <p className="text-neutral-600 mb-6">{t('howItWorks:premiumFeatures.analytics.desc')}</p>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-2 gap-4">
+                  {['views', 'inquiries', 'favorites', 'shares', 'demographics', 'sources'].map((metric) => (
+                    <div key={metric} className="bg-cyan-50 border border-cyan-100 rounded-xl p-4">
+                      <p className="text-sm font-medium text-neutral-800">{t(`howItWorks:premiumFeatures.analytics.metrics.${metric}`)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-neutral-50 rounded-2xl p-6 border border-neutral-200">
+                  <h4 className="font-semibold text-neutral-800 mb-4">{t('howItWorks:premiumFeatures.analytics.reports.title')}</h4>
+                  <ul className="space-y-3">
+                    {['weekly', 'comparison', 'recommendations'].map((report) => (
+                      <li key={report} className="flex items-center gap-3 text-sm text-neutral-600">
+                        <CheckIcon className="w-4 h-4 text-cyan-500" />
+                        {t(`howItWorks:premiumFeatures.analytics.reports.${report}`)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Listing Promotions Comparison */}
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold text-neutral-800 mb-2">{t('howItWorks:listingPromotions.title')}</h3>
+              <p className="text-neutral-600 mb-8">{t('howItWorks:listingPromotions.subtitle')}</p>
+              <div className="grid md:grid-cols-4 gap-4">
+                {/* Standard */}
+                <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                  <h4 className="font-semibold text-neutral-800 mb-4">{t('howItWorks:listingPromotions.comparison.standard.title')}</h4>
+                  <ul className="space-y-2 text-sm text-neutral-600">
+                    {['position', 'visibility', 'views'].map((feature) => (
+                      <li key={feature}>• {t(`howItWorks:listingPromotions.comparison.standard.features.${feature}`)}</li>
+                    ))}
+                  </ul>
+                </div>
+                {/* Highlight */}
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
+                  <h4 className="font-semibold text-blue-800 mb-2">{t('howItWorks:listingPromotions.comparison.highlight.title')}</h4>
+                  <p className="text-blue-600 text-sm font-medium mb-4">{t('howItWorks:listingPromotions.comparison.highlight.price')}</p>
+                  <ul className="space-y-2 text-sm text-neutral-600">
+                    {['border', 'position', 'views', 'badge'].map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <CheckIcon className="w-4 h-4 text-blue-500" />
+                        {t(`howItWorks:listingPromotions.comparison.highlight.features.${feature}`)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {/* Featured */}
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 ring-2 ring-amber-200">
+                  <h4 className="font-semibold text-amber-800 mb-2">{t('howItWorks:listingPromotions.comparison.featured.title')}</h4>
+                  <p className="text-amber-600 text-sm font-medium mb-4">{t('howItWorks:listingPromotions.comparison.featured.price')}</p>
+                  <ul className="space-y-2 text-sm text-neutral-600">
+                    {['border', 'position', 'views', 'badge', 'homepage'].map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <CheckIcon className="w-4 h-4 text-amber-500" />
+                        {t(`howItWorks:listingPromotions.comparison.featured.features.${feature}`)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {/* Premium */}
+                <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-6 text-white relative">
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:listingPromotions.comparison.premium.popular')}</span>
+                  <h4 className="font-semibold mb-2">{t('howItWorks:listingPromotions.comparison.premium.title')}</h4>
+                  <p className="text-orange-100 text-sm font-medium mb-4">{t('howItWorks:listingPromotions.comparison.premium.price')}</p>
+                  <ul className="space-y-2 text-sm">
+                    {['border', 'position', 'views', 'badge', 'homepage', 'social'].map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <CheckIcon className="w-4 h-4 text-orange-200" />
+                        {t(`howItWorks:listingPromotions.comparison.premium.features.${feature}`)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              {/* Benefits */}
+              <div className="mt-8 grid md:grid-cols-4 gap-6">
+                {['faster', 'visibility', 'standOut', 'analytics'].map((benefit) => (
+                  <div key={benefit} className="text-center">
+                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      {benefit === 'faster' && <FireIcon className="w-6 h-6 text-amber-600" />}
+                      {benefit === 'visibility' && <SearchIcon className="w-6 h-6 text-amber-600" />}
+                      {benefit === 'standOut' && <StarIcon className="w-6 h-6 text-amber-600" />}
+                      {benefit === 'analytics' && <ChartIcon className="w-6 h-6 text-amber-600" />}
+                    </div>
+                    <h4 className="font-semibold text-neutral-800 mb-1">{t(`howItWorks:listingPromotions.benefits.${benefit}.title`)}</h4>
+                    <p className="text-sm text-neutral-600">{t(`howItWorks:listingPromotions.benefits.${benefit}.desc`)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Featured Agencies */}
+            <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative">
+                <h3 className="text-2xl font-bold mb-2">{t('howItWorks:featuredAgencies.title')}</h3>
+                <p className="text-purple-200 mb-8">{t('howItWorks:featuredAgencies.subtitle')}</p>
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  {['visibility', 'badge', 'priority', 'leads', 'branding', 'analytics'].map((benefit) => (
+                    <div key={benefit} className="bg-white/10 backdrop-blur rounded-xl p-5">
+                      <h4 className="font-semibold mb-2">{t(`howItWorks:featuredAgencies.benefits.${benefit}.title`)}</h4>
+                      <p className="text-sm text-purple-200">{t(`howItWorks:featuredAgencies.benefits.${benefit}.desc`)}</p>
+                    </div>
+                  ))}
+                </div>
+                {/* Stats */}
+                <div className="bg-white/20 rounded-2xl p-6">
+                  <h4 className="font-semibold mb-4">{t('howItWorks:featuredAgencies.stats.title')}</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {['views', 'inquiries', 'trust', 'retention'].map((stat) => (
+                      <div key={stat} className="text-center">
+                        <p className="text-2xl font-bold text-white">{t(`howItWorks:featuredAgencies.stats.${stat}`)}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
