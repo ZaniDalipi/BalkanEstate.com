@@ -211,9 +211,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       // How-it-works routes with tab support: /how-it-works/:tab
       const howItWorksMatch = path.match(/^\/how-it-works(?:\/(.+))?$/);
       if (howItWorksMatch) {
-        const tab = howItWorksMatch[1] || 'agencies'; // Default to agencies tab
-        const validTabs = ['agencies', 'agents', 'buyers', 'sellers'];
-        const validTab = validTabs.includes(tab) ? tab : 'agencies';
+        const tab = howItWorksMatch[1] || 'getting-started'; // Default to getting-started tab
+        const validTabs = ['getting-started', 'agencies', 'agents', 'buyers', 'sellers'];
+        const validTab = validTabs.includes(tab) ? tab : 'getting-started';
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: validTab });
