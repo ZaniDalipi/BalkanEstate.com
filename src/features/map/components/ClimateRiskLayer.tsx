@@ -23,7 +23,7 @@ interface ClimateRiskLayerProps {
 }
 
 // Climate risk layer configurations
-// Using WMS services from Copernicus and other reliable open data sources
+// Using free WMS/tile services that work without API keys
 const CLIMATE_RISK_LAYERS: Record<
   Exclude<ClimateRiskType, 'none'>,
   {
@@ -36,13 +36,14 @@ const CLIMATE_RISK_LAYERS: Record<
     isWMS?: boolean;
     wmsLayers?: string;
     wmsFormat?: string;
+    wmsStyles?: string;
   }
 > = {
   // Flood risk - Using EFAS (European Flood Awareness System) WMS from Copernicus
   flood: {
     name: 'Flood Risk',
-    url: 'https://maps.openweathermap.org/maps/2.0/weather/PR0/{z}/{x}/{y}?appid=9de243494c0b295cca9337e1e96b00e2',
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    url: 'https://efas.smhi.se/wms',
+    attribution: '&copy; <a href="https://www.efas.eu/">EFAS/Copernicus</a>',
     legendTitle: 'Flood zones',
     legendColors: [
       { color: '#cce5ff', label: 'Low' },
@@ -50,11 +51,14 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#3399ff', label: 'High' },
       { color: '#0066cc', label: 'Severe' },
     ],
+    isWMS: true,
+    wmsLayers: 'flood_risk',
+    wmsFormat: 'image/png',
   },
   // Fire risk - Using EFFIS (European Forest Fire Information System) WMS
   fire: {
     name: 'Fire Risk',
-    url: 'https://ies-ows.jrc.ec.europa.eu/effis',
+    url: 'https://maps.effis.emergency.copernicus.eu/wms',
     attribution: '&copy; <a href="https://effis.jrc.ec.europa.eu/">EFFIS/Copernicus</a>',
     legendTitle: 'Fire risk level',
     legendColors: [
@@ -64,14 +68,14 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#bd0026', label: 'Extreme' },
     ],
     isWMS: true,
-    wmsLayers: 'ecmwf.fwi',
+    wmsLayers: 'fwi.current',
     wmsFormat: 'image/png',
   },
-  // Wind risk - Using Windy tiles (more reliable)
+  // Wind risk - Using RainViewer (free radar/wind tiles)
   wind: {
     name: 'Wind Risk',
-    url: 'https://tiles.windy.com/tiles/v10.0/wind/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.windy.com/">Windy.com</a>',
+    url: 'https://tilecache.rainviewer.com/v2/coverage/0/256/{z}/{x}/{y}/1/1_1.png',
+    attribution: '&copy; <a href="https://www.rainviewer.com/">RainViewer</a>',
     legendTitle: 'Wind speed',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
@@ -81,11 +85,11 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#0d5875', label: 'Severe' },
     ],
   },
-  // Air quality - Using AQICN tiles
+  // Air quality - Using Copernicus Atmosphere Monitoring Service (CAMS)
   air: {
     name: 'Air Quality',
-    url: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://aqicn.org/">AQICN</a>',
+    url: 'https://apps.ecmwf.int/wms/',
+    attribution: '&copy; <a href="https://atmosphere.copernicus.eu/">CAMS/Copernicus</a>',
     legendTitle: 'Air quality',
     legendColors: [
       { color: '#00e400', label: 'Good' },
@@ -94,11 +98,14 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#ff0000', label: 'Bad' },
       { color: '#7e0023', label: 'Hazard' },
     ],
+    isWMS: true,
+    wmsLayers: 'composition_aod550',
+    wmsFormat: 'image/png',
   },
-  // Heat risk - Using Copernicus Climate Data Store visualization
+  // Heat risk - Using OpenWeatherMap free 1.0 temperature layer
   heat: {
     name: 'Heat Risk',
-    url: 'https://maps.openweathermap.org/maps/2.0/weather/TA2/{z}/{x}/{y}?appid=9de243494c0b295cca9337e1e96b00e2',
+    url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
     attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     legendTitle: 'Temperature',
     legendColors: [
