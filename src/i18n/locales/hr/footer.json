@@ -1,10 +1,10 @@
 {
-  "tagline": "Vaša AI platforma za nekretnine na Balkanu. Pronađite nekretninu iz snova u 10 zemalja uz inteligentno pretraživanje i personalizirane preporuke.",
+  "tagline": "Vaša AI platforma za nekretnine za Balkan. Pronađite svoju nekretninu iz snova širom 10 država s inteligentnom pretragom i personaliziranim preporukama.",
   "sections": {
     "forBuyers": "Za Kupce",
-    "forSellers": "Za Prodavatelje",
+    "forSellers": "Za Prodavače",
     "contact": "Kontaktirajte Nas",
-    "countriesWeServe": "Zemlje koje Pokrivamo"
+    "countriesWeServe": "Države Koje Opslužujemo"
   },
   "ai": {
     "poweredBy": "Pokreće AI"
@@ -13,7 +13,7 @@
     "searchProperties": "Pretraži Nekretnine",
     "exploreCities": "Istraži Gradove",
     "savedProperties": "Spremljene Nekretnine",
-    "savedSearches": "Spremljena Pretraživanja",
+    "savedSearches": "Spremljene Pretrage",
     "findAgents": "Pronađi Agente",
     "browseAgencies": "Pregledaj Agencije",
     "listProperty": "Objavi Nekretninu",
@@ -39,15 +39,15 @@
     "email": "info@balkanestateai.com"
   },
   "legal": {
-    "allRightsReserved": "All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "allRightsReserved": "Sva prava pridržana.",
+    "privacyPolicy": "Politika Privatnosti",
+    "termsOfService": "Uvjeti Korištenja",
+    "cookiePolicy": "Politika Kolačića",
+    "disclaimer": "Odricanje od Odgovornosti",
+    "accessibility": "Pristupačnost"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Pratite Nas",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -55,35 +55,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Preuzmite Našu Aplikaciju",
+    "availableOn": "Dostupno na",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Pretplatite se na Newsletter",
+    "placeholder": "Unesite vaš email",
+    "subscribe": "Pretplati se",
+    "subscribed": "Hvala vam na pretplati!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Podrška",
+    "helpCenter": "Centar za Pomoć",
+    "contactUs": "Kontaktirajte Nas",
+    "faq": "Često Postavljena Pitanja",
+    "feedback": "Dajte Povratnu Informaciju"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
+    "title": "Tvrtka",
+    "aboutUs": "O Nama",
+    "careers": "Karijere",
+    "press": "Mediji",
     "blog": "Blog"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Partneri",
+    "becomePartner": "Postanite Partner",
+    "affiliates": "Afilirani Partneri",
+    "developers": "Za Programere"
   }
 }

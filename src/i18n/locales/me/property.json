@@ -183,46 +183,46 @@
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
-    "new": "Novo",
-    "reduced": "Snižena Cijena",
-    "priceReduced": "Snižena Cijena",
-    "urgent": "Hitno",
-    "exclusive": "Ekskluzivno",
-    "underOffer": "U Pregovorima"
+    "new": "New",
+    "reduced": "Price Reduced",
+    "priceReduced": "Price Reduced",
+    "urgent": "Urgent",
+    "exclusive": "Exclusive",
+    "underOffer": "Under Offer"
   },
   "priceDiscount": {
-    "originalPrice": "Originalna Cijena",
-    "currentPrice": "Trenutna Cijena",
-    "discount": "Popust",
-    "savings": "Uštedite",
-    "reducedRecently": "Cijena nedavno snižena",
-    "limitedTime": "Ograničena Ponuda",
-    "saleEnds": "Akcija završava"
+    "originalPrice": "Original Price",
+    "currentPrice": "Current Price",
+    "discount": "Discount",
+    "savings": "You save",
+    "reducedRecently": "Price reduced recently",
+    "limitedTime": "Limited Time Offer",
+    "saleEnds": "Sale ends"
   },
   "noResults": "No properties found",
   "tryDifferentFilters": "Try adjusting your filters or search criteria",
   "saved": {
-    "title": "Sačuvane Stavke",
-    "subtitle": "Vaše omiljene nekretnine i agenti, sve na jednom mjestu",
-    "propertySaved": "Nekretnina Sačuvana",
-    "propertiesSaved": "Nekretnine Sačuvane",
-    "loginToView": "Prijavite se da vidite sačuvane stavke",
-    "saveDescription": "Sačuvajte omiljene nekretnine i agente i pristupite im bilo đe, bilo kad.",
-    "noSaved": "Još nijeste sačuvali nijednu nekretninu.",
-    "clickHeart": "Kliknite na ikonu srca na bilo kojoj nekretnini da je sačuvate ovdje.",
-    "popularProperties": "Evo nekih popularnih nekretnina",
-    "featuredAgencies": "Istaknute Agencije",
+    "title": "Saved Items",
+    "subtitle": "Your favorite properties and agents, all in one place",
+    "propertySaved": "Property Saved",
+    "propertiesSaved": "Properties Saved",
+    "loginToView": "Log in to view your saved items",
+    "saveDescription": "Save your favorite properties and agents and access them anytime, anywhere.",
+    "noSaved": "You haven't saved any homes yet.",
+    "clickHeart": "Click the heart icon on any property to save it here.",
+    "popularProperties": "Here are some popular properties",
+    "featuredAgencies": "Featured Agencies",
     "tabs": {
-      "properties": "Nekretnine",
-      "agents": "Agenti"
+      "properties": "Properties",
+      "agents": "Agents"
     },
     "agents": {
-      "title": "Sačuvani Agenti",
-      "noSaved": "Još nijeste sačuvali nijednog agenta.",
-      "clickHeart": "Kliknite na ikonu srca na bilo kojem profilu agenta da ga sačuvate ovdje.",
-      "browseAgents": "Pretraži Agente",
-      "agentSaved": "Agent Sačuvan",
-      "agentsSaved": "Agenti Sačuvani"
+      "title": "Saved Agents",
+      "noSaved": "You haven't saved any agents yet.",
+      "clickHeart": "Click the heart icon on any agent profile to save them here.",
+      "browseAgents": "Browse Agents",
+      "agentSaved": "Agent Saved",
+      "agentsSaved": "Agents Saved"
     }
   },
   "comparison": {
@@ -250,8 +250,39 @@
       "house": "House",
       "apartment": "Apartment",
       "villa": "Villa",
+      "land": "Land",
       "other": "Other"
-    }
+    },
+    "promotedListings": "Promoted Listings",
+    "agentHint": "Click for recommendations!",
+    "tiers": {
+      "premium": "Premium",
+      "highlight": "Highlight",
+      "featured": "Featured"
+    },
+    "agentRecommendations": {
+      "premium": {
+        "1": "This premium property is our top pick for you!",
+        "2": "Exclusive listing! Don't miss this premium opportunity.",
+        "3": "Our most recommended property in this area.",
+        "4": "Premium choice with exceptional value!"
+      },
+      "highlight": {
+        "1": "Highlighted for quick sale - worth a look!",
+        "2": "Popular choice! This property is getting lots of attention.",
+        "3": "Seller motivated - highlighted for visibility!",
+        "4": "Great opportunity - check this highlighted listing!"
+      },
+      "featured": {
+        "1": "Featured listing with special amenities.",
+        "2": "This property stands out in the neighborhood.",
+        "3": "Worth considering - featured by the owner.",
+        "4": "Take a closer look at this featured home!"
+      }
+    },
+    "heatMapLegend": "Property Density",
+    "low": "Low",
+    "high": "High"
   },
   "neighborhood": {
     "title": "Neighborhood Insights",
@@ -312,5 +343,10 @@
       "tips": "Click for tips!",
       "rightClick": "Right-click for actions"
     }
+  },
+  "sections": {
+    "highlighted": "Featured Properties",
+    "highlightedCount": "premium listings",
+    "moreListings": "More Listings"
   }
 }

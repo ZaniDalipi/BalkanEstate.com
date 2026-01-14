@@ -1,47 +1,47 @@
 {
   "page": {
-    "title": "Saved Searches",
-    "description": "Track your saved property searches and get updates on new listings that match your criteria."
+    "title": "Spremljene Pretrage",
+    "description": "Pratite svoje spremljene pretrage nekretnina i dobijte ažuriranja o novim oglasima koji odgovaraju vašim kriterijima."
   },
   "hero": {
-    "title": "Saved Searches",
-    "subtitle": "Track your favorite search criteria and get updates",
+    "title": "Spremljene Pretrage",
+    "subtitle": "Pratite svoje omiljene kriterije pretrage i dobijte ažuriranja",
     "searchCount": {
-      "singular": "Saved Search",
-      "plural": "Saved Searches"
+      "singular": "Spremljena Pretraga",
+      "plural": "Spremljene Pretrage"
     }
   },
   "loginRequired": {
-    "title": "Log in to view your saved searches",
-    "description": "Save your favorite search criteria and get notified about new listings.",
-    "button": "Login / Register"
+    "title": "Prijavite se da vidite svoje spremljene pretrage",
+    "description": "Spremite svoje omiljene kriterije pretrage i budite obaviješteni o novim oglasima.",
+    "button": "Prijavi se / Registriraj se"
   },
   "empty": {
-    "title": "You haven't saved any searches yet.",
-    "description": "Perform a search and click \"Save Search\" to get started, or save this example:",
-    "startSearch": "Or, Start a New Search"
+    "title": "Još niste spremili nijednu pretragu.",
+    "description": "Izvršite pretragu i kliknite \"Spremi Pretragu\" da započnete, ili spremite ovaj primjer:",
+    "startSearch": "Ili, Započnite Novu Pretragu"
   },
   "example": {
-    "label": "Example",
-    "name": "Belgrade, under €400k",
-    "save": "Save"
+    "label": "Primjer",
+    "name": "Beograd, ispod €400k",
+    "save": "Spremi"
   },
   "sort": {
-    "newest": "Newest",
-    "name": "Name",
-    "lastActive": "Last Active"
+    "newest": "Najnovije",
+    "name": "Naziv",
+    "lastActive": "Zadnje Aktivno"
   },
   "accordion": {
-    "new": "new",
-    "namePlaceholder": "Search name",
-    "save": "Save",
-    "cancel": "Cancel",
-    "rename": "Rename search",
-    "delete": "Delete search",
-    "noProperties": "No properties currently match this search.",
-    "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
-    "deleteFailed": "Failed to delete saved search. Please try again.",
-    "enterName": "Please enter a name",
-    "renameFailed": "Failed to rename saved search. Please try again."
+    "new": "novo",
+    "namePlaceholder": "Naziv pretrage",
+    "save": "Spremi",
+    "cancel": "Otkaži",
+    "rename": "Preimenuj pretragu",
+    "delete": "Obriši pretragu",
+    "noProperties": "Trenutno nema nekretnina koje odgovaraju ovoj pretrazi.",
+    "confirmDelete": "Jeste li sigurni da želite obrisati \"{{name}}\"?",
+    "deleteFailed": "Neuspjelo brisanje spremljene pretrage. Molimo pokušajte ponovno.",
+    "enterName": "Molimo unesite naziv",
+    "renameFailed": "Neuspjelo preimenovanje spremljene pretrage. Molimo pokušajte ponovno."
   }
 }

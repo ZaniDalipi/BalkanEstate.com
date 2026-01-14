@@ -1,57 +1,57 @@
 {
 "page": {
-"title": "Istražite Gradove Balkana",
-"description": "AI-om unapređeni uvid u tržište za {{count}} glavnih gradova u 10 zemalja"
+"title": "Истражи балканске градове",
+"description": "AI увиди о тржишту за {{count}} главних градова у 10 земаља"
 },
 "hero": {
-"title": "Istražite Gradove Balkana",
-"subtitle": "AI-om unapređeni uvid u tržište za {{count}} glavnih gradova u 10 zemalja",
-"discoverSubtitle": "Otkrijte najbolja tržišta nekretnina širom Balkana"
+"title": "Истражи балканске градове",
+"subtitle": "AI увиди о тржишту за {{count}} главних градова у 10 земаља",
+"discoverSubtitle": "Откријте најбоља тржишта некретнина широм Балкана"
 },
 "empty": {
-"title": "Nema dostupnih podataka o gradu",
-"message": "Podaci o tržištu će uskoro biti ažurirani. Proverite ponovo kasnije!"
+"title": "Нема доступних података о граду",
+"message": "Подаци о тржишту ће ускоро бити ажурирани. Проверите поново касније!"
 },
 "stats": {
-"totalCities": "Ukupno Gradova",
-"countries": "Zemlje",
-"avgGrowth": "Prosečan Rast",
-"totalListings": "Ukupno Oglasa"
+"totalCities": "Укупно градова",
+"countries": "Земље",
+"avgGrowth": "Просечан раст",
+"totalListings": "Укупно огласа"
 },
 "filters": {
-"allCountries": "Sve Zemlje"
+"allCountries": "Све земље"
 },
 "cityCard": {
-"demand": "Potražnja",
-"investment": "Investicija",
-"avgPricePerSqm": "Prosečna Cena/m²",
-"medianPrice": "Medijalna Cena",
-"yoyGrowth": "Godišnji Rast",
-"rentalYield": "Prinos od Izdavanja",
-"daysOnMarket": "Dana na Tržištu",
-"days": "dana"
+"demand": "Потражња",
+"investment": "Инвестиција",
+"avgPricePerSqm": "Просечна цена/m²",
+"medianPrice": "Медијална цена",
+"yoyGrowth": "Годишњи раст",
+"rentalYield": "Принос од издавања",
+"daysOnMarket": "Дана на тржишту",
+"days": "дана"
 },
 "sections": {
-"topNeighborhoods": "Najbolje Četvrti",
-"marketInsights": "Uvidi u Tržište"
+"topNeighborhoods": "Најбоље четврти",
+"marketInsights": "Увиди у тржиште"
 },
 "footer": {
-"listings": "oglasi",
-"soldPerMonth": "prodatih/mes."
+"listings": "огласи",
+"soldPerMonth": "продатих/мес."
 },
 "trends": {
-"rising": "u porastu",
-"declining": "u padu",
-"stable": "stabilno"
+"rising": "у порасту",
+"declining": "у паду",
+"stable": "стабилно"
 },
 "aiInsights": {
-"title": "Tržišna inteligencija na bazi AI",
-"description": "Naši podaci o tržištu pokreće Gemini AI i ažuriraju se dva puta mesečno (1. i 15.). Analiziramo trendove na tržištu u realnom vremenu, cene nekretnina, pokazatelje potražnje i lokalne uvide u {{count}} glavnih gradova na Balkanu.",
-"lastUpdated": "Poslednje ažuriranje: {{date}}",
-"dataSource": "Izvor podataka: Gemini AI + Lokalne Baze Podataka o Nekretninama"
+"title": "Тржишна интелигенција на бази AI",
+"description": "Наше податке о тржишту покреће Gemini AI и ажурирају се двапут месечно (1. и 15.). Анализирамо трендове на тржишту у реалном времену, цене некретнина, показатеље потражње и локалне увиде у {{count}} главних градова на Балкану.",
+"lastUpdated": "Последње ажурирање: {{date}}",
+"dataSource": "Извор података: Gemini AI + Локалне базе података о некретнинама"
 },
 "loading": {
-"title": "Učitavanje Gradova...",
-"message": "Preuzimanje podataka o tržištu za gradove Balkana"
+"title": "Учитавање градова...",
+"message": "Преузимање података о тржишту за градове Балкана"
 }
 }

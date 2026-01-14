@@ -1,25 +1,25 @@
 {
-  "title": "Nikad Ne Propustite Nekretninu",
-  "subtitle": "Budite u Toku",
-  "description": "Dobijte instant obaveštenja za nove oglase koji odgovaraju vašim kriterijumima",
+  "title": "Никад не пропустите некретнину",
+  "subtitle": "Будите у току",
+  "description": "Добијте инстант обавештења за нове огласе који одговарају вашим критеријумима",
   "features": {
-    "newListings": "Novi oglasi koji odgovaraju vašim kriterijumima",
-    "priceDrops": "Obaveštenja o sniženju cena sačuvanih nekretnina",
-    "marketInsights": "Nedeljni uvidi i trendovi na tržištu"
+    "newListings": "Нови огласи који одговарају вашим критеријумима",
+    "priceDrops": "Обавештења о снижењу цена сачуваних некретнина",
+    "marketInsights": "Недељни увиди и трендови на тржишту"
   },
   "form": {
-    "placeholder": "Unesite vaš email",
-    "submit": "Pretplati se",
-    "subscribing": "Pretplaćivanje..."
+    "placeholder": "Унесите ваш е-маил",
+    "submit": "Претплати се",
+    "subscribing": "Претплаћивање..."
   },
   "cta": {
-    "title": "Pretplatite se na Bilten",
-    "button": "Pretplatite se Besplatno"
+    "title": "Претплатите се на билтен",
+    "button": "Претплатите се бесплатно"
   },
   "messages": {
-    "success": "Hvala na pretplati! Proverite inbox za potvrdu.",
-    "error": "Nešto je pošlo naopako. Pokušajte ponovo.",
-    "invalidEmail": "Unesite važeću email adresu"
+    "success": "Хвала на претплати! Проверите пошту за потврду.",
+    "error": "Нешто је пошло наопако. Покушајте поново.",
+    "invalidEmail": "Унесите важећу е-адресу"
   },
-  "privacy": "Pretplatom se slažete sa Politikom Privatnosti. Možete se odjaviti u bilo kom trenutku."
+  "privacy": "Претплатом се слажете са политиком приватности. Можете се одјавити у било ком тренутку."
 }

@@ -1,47 +1,47 @@
 {
   "page": {
-    "title": "Sačuvane Pretrage",
-    "description": "Pratite sačuvane pretrage nekretnina i dobijajte obaveštenja o novim oglasima koji odgovaraju vašim kriterijumima."
+    "title": "Сачуване претраге",
+    "description": "Пратите сачуване претраге некретнина и добијајте обавештења о новим огласима који одговарају вашим критеријумима."
   },
   "hero": {
-    "title": "Sačuvane Pretrage",
-    "subtitle": "Pratite omiljene kriterijume pretrage i dobijajte ažuriranja",
+    "title": "Сачуване претраге",
+    "subtitle": "Пратите омиљене критеријуме претраге и добијајте ажурирања",
     "searchCount": {
-      "singular": "Sačuvana Pretraga",
-      "plural": "Sačuvane Pretrage"
+      "singular": "Сачувана претрага",
+      "plural": "Сачуване претраге"
     }
   },
   "loginRequired": {
-    "title": "Prijavite se da vidite sačuvane pretrage",
-    "description": "Sačuvajte omiljene kriterijume pretrage i primajte obaveštenja o novim oglasima.",
-    "button": "Prijava / Registracija"
+    "title": "Пријавите се да видите сачуване претраге",
+    "description": "Сачувајте омиљене критеријуме претраге и примајте обавештења о новим огласима.",
+    "button": "Пријава / Регистрација"
   },
   "empty": {
-    "title": "Još niste sačuvali nijednu pretragu.",
-    "description": "Izvršite pretragu i kliknite \"Sačuvaj Pretragu\" da počnete, ili sačuvajte ovaj primer:",
-    "startSearch": "Ili, Započnite Novu Pretragu"
+    "title": "Још нисте сачували ниједну претрагу.",
+    "description": "Извршите претрагу и кликните \"Сачувај претрагу\" да почнете, или сачувајте овај пример:",
+    "startSearch": "Или, започните нову претрагу"
   },
   "example": {
-    "label": "Primer",
-    "name": "Beograd, ispod €400k",
-    "save": "Sačuvaj"
+    "label": "Пример",
+    "name": "Београд, испод €400k",
+    "save": "Сачувај"
   },
   "sort": {
-    "newest": "Najnovije",
-    "name": "Ime",
-    "lastActive": "Poslednje Aktivno"
+    "newest": "Најновије",
+    "name": "Име",
+    "lastActive": "Последње активно"
   },
   "accordion": {
-    "new": "novo",
-    "namePlaceholder": "Naziv pretrage",
-    "save": "Sačuvaj",
-    "cancel": "Otkaži",
-    "rename": "Preimenuj pretragu",
-    "delete": "Obriši pretragu",
-    "noProperties": "Nijedna nekretnina trenutno ne odgovara ovoj pretrazi.",
-    "confirmDelete": "Da li ste sigurni da želite da obrišete \"{{name}}\"?",
-    "deleteFailed": "Brisanje pretrage nije uspelo. Molimo pokušajte ponovo.",
-    "enterName": "Molimo unesite naziv",
-    "renameFailed": "Preimenovanje pretrage nije uspelo. Molimo pokušajte ponovo."
+    "new": "ново",
+    "namePlaceholder": "Назив претраге",
+    "save": "Сачувај",
+    "cancel": "Откажи",
+    "rename": "Преименуј претрагу",
+    "delete": "Обриши претрагу",
+    "noProperties": "Ниједна некретнина тренутно не одговара овој претрази.",
+    "confirmDelete": "Да ли сте сигурни да желите да обришете \"{{name}}\"?",
+    "deleteFailed": "Брисање претраге није успело. Молимо покушајте поново.",
+    "enterName": "Молимо унесите назив",
+    "renameFailed": "Преименовање претраге није успело. Молимо покушајте поново."
   }
 }

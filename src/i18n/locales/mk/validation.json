@@ -1,44 +1,44 @@
 {
-  "imagesRequired": "Потребни Слики",
-  "locationRequired": "Потребна Локација",
-  "invalidFloorNumber": "Невалиден Број на Кат",
-  "invalidFloorCount": "Невалиден Број на Катови",
+  "imagesRequired": "Потребни се слики",
+  "locationRequired": "Потребна е локација",
+  "invalidFloorNumber": "Невалиден број на кат",
+  "invalidFloorCount": "Невалиден број на катови",
   "password": {
-    "minLength": "At least 8 characters",
-    "uppercase": "One uppercase letter",
-    "lowercase": "One lowercase letter",
-    "number": "One number",
-    "specialChar": "One special character (!@#$%...)",
-    "noSequential": "No sequential characters (123, abc, qwe)",
-    "notCommon": "Not a common password",
-    "mismatch": "Passwords do not match"
+    "minLength": "Најмалку 8 карактери",
+    "uppercase": "Една голема буква",
+    "lowercase": "Една мала буква",
+    "number": "Еден број",
+    "specialChar": "Еден специјален карактер (!@#$%...)",
+    "noSequential": "Без секвенцијални карактери (123, abc, qwe)",
+    "notCommon": "Не е вообичаена лозинка",
+    "mismatch": "Лозинките не се совпаѓаат"
   },
   "email": {
-    "required": "Email is required",
-    "invalid": "Please enter a valid email address"
+    "required": "Е-поштата е задолжителна",
+    "invalid": "Внесете валидна е-пошта"
   },
   "phone": {
-    "required": "Phone number is required",
-    "invalid": "Please enter a valid phone number"
+    "required": "Телефонскиот број е задолжителен",
+    "invalid": "Внесете валиден телефонски број"
   },
-  "required": "This field is required",
-  "minLength": "Must be at least {{count}} characters",
-  "maxLength": "Must be no more than {{count}} characters",
-  "numeric": "Must be a number",
-  "positive": "Must be a positive number",
-  "url": "Please enter a valid URL",
+  "required": "Ова поле е задолжително",
+  "minLength": "Мора да биде најмалку {{count}} карактери",
+  "maxLength": "Мора да биде најмногу {{count}} карактери",
+  "numeric": "Мора да биде број",
+  "positive": "Мора да биде позитивен број",
+  "url": "Внесете валиден URL",
   "date": {
-    "invalid": "Please enter a valid date",
-    "future": "Date must be in the future",
-    "past": "Date must be in the past"
+    "invalid": "Внесете валиден датум",
+    "future": "Датумот мора да биде во иднина",
+    "past": "Датумот мора да биде во минато"
   },
   "file": {
-    "required": "Please select a file",
-    "size": "File size must be less than {{size}}MB",
-    "type": "Invalid file type. Allowed: {{types}}"
+    "required": "Изберете датотека",
+    "size": "Големината на датотеката мора да биде помала од {{size}}MB",
+    "type": "Невалиден тип на датотека. Дозволени: {{types}}"
   },
   "form": {
-    "hasErrors": "Please fix the errors before submitting",
-    "submitError": "An error occurred. Please try again."
+    "hasErrors": "Поправете ги грешките пред да испратите",
+    "submitError": "Се случи грешка. Обидете се повторно."
   }
 }

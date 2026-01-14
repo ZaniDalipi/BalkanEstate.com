@@ -1,25 +1,25 @@
 {
-  "title": "Never Miss a Property",
-  "subtitle": "Stay Updated",
-  "description": "Get instant alerts for new listings matching your criteria",
+  "title": "Никогаш не пропуштајте имот",
+  "subtitle": "Останете Ажурирани",
+  "description": "Добивајте моментални известувања за нови огласи што одговараат на Вашите критериуми",
   "features": {
-    "newListings": "New listings matching your criteria",
-    "priceDrops": "Price drop alerts on saved properties",
-    "marketInsights": "Weekly market insights & trends"
+    "newListings": "Нови огласи што одговараат на Вашите критериуми",
+    "priceDrops": "Известувања за намалување на цени на зачувани имоти",
+    "marketInsights": "Неделни анализи и трендови на пазарот"
   },
   "form": {
-    "placeholder": "Enter your email",
-    "submit": "Subscribe",
-    "subscribing": "Subscribing..."
+    "placeholder": "Внесете ја вашата е-пошта",
+    "submit": "Претплати се",
+    "subscribing": "Се претплаќа..."
   },
   "cta": {
-    "title": "Subscribe to Newsletter",
-    "button": "Subscribe for Free"
+    "title": "Претплатете се на билтен",
+    "button": "Претплатете се бесплатно"
   },
   "messages": {
-    "success": "Thank you for subscribing! Check your inbox for confirmation.",
-    "error": "Something went wrong. Please try again.",
-    "invalidEmail": "Please enter a valid email address"
+    "success": "Ви благодариме за претплатата! Проверете ја Вашата е-пошта за потврда.",
+    "error": "Нешто тргна наопаку. Обидете се повторно.",
+    "invalidEmail": "Внесете валидна е-пошта"
   },
-  "privacy": "By subscribing, you agree to our Privacy Policy. Unsubscribe anytime."
+  "privacy": "Со претплаќањето, се согласувате со нашата Политика за приватност. Откажете претплата во секое време."
 }
