@@ -12,7 +12,8 @@
  * Uses Copernicus Climate Data Store and other open data sources for the Balkans region.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { TileLayer } from 'react-leaflet';
 
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
 
@@ -21,66 +22,72 @@ interface ClimateRiskLayerProps {
   opacity?: number;
 }
 
-// Climate risk layer configurations
-// Legend-only mode - tile layers require API keys from data providers
-// To enable tiles, add your API keys for the respective services
+// OpenWeatherMap API key (free tier)
+const OWM_API_KEY = '439d4b804bc8187953eb36d2a8c26a02';
+
+// Climate risk layer configurations using OpenWeatherMap 1.0 tiles (free)
 const CLIMATE_RISK_LAYERS: Record<
   Exclude<ClimateRiskType, 'none'>,
   {
     name: string;
+    tileUrl: string;
+    attribution: string;
     legendTitle: string;
     legendColors: { color: string; label: string }[];
-    description: string;
   }
 > = {
   flood: {
     name: 'Flood Risk',
-    legendTitle: 'Flood zones',
+    tileUrl: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    legendTitle: 'Precipitation',
     legendColors: [
-      { color: '#cce5ff', label: 'Low' },
-      { color: '#66b3ff', label: 'Med' },
-      { color: '#3399ff', label: 'High' },
-      { color: '#0066cc', label: 'Severe' },
+      { color: '#a0f0a0', label: 'Light' },
+      { color: '#00ff00', label: 'Med' },
+      { color: '#ffff00', label: 'Heavy' },
+      { color: '#ff0000', label: 'Severe' },
     ],
-    description: 'Shows flood risk zones based on historical data',
   },
   fire: {
     name: 'Fire Risk',
-    legendTitle: 'Fire risk level',
+    tileUrl: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    legendTitle: 'Temperature',
     legendColors: [
-      { color: '#ffeda0', label: 'Minimal' },
-      { color: '#feb24c', label: 'Moderate' },
-      { color: '#f03b20', label: 'High' },
-      { color: '#bd0026', label: 'Extreme' },
+      { color: '#313695', label: 'Cool' },
+      { color: '#fee090', label: 'Warm' },
+      { color: '#f46d43', label: 'Hot' },
+      { color: '#a50026', label: 'Extreme' },
     ],
-    description: 'Wildfire probability based on conditions',
   },
   wind: {
     name: 'Wind Risk',
+    tileUrl: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     legendTitle: 'Wind speed',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
       { color: '#a6d9e8', label: 'Light' },
       { color: '#5ab4cf', label: 'Mod' },
       { color: '#1a8ab7', label: 'Strong' },
-      { color: '#0d5875', label: 'Severe' },
     ],
-    description: 'Severe wind and storm damage risk',
   },
   air: {
     name: 'Air Quality',
-    legendTitle: 'Air quality',
+    tileUrl: `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    legendTitle: 'Cloud cover',
     legendColors: [
-      { color: '#00e400', label: 'Good' },
-      { color: '#ffff00', label: 'OK' },
-      { color: '#ff7e00', label: 'Poor' },
-      { color: '#ff0000', label: 'Bad' },
-      { color: '#7e0023', label: 'Hazard' },
+      { color: '#ffffff', label: 'Clear' },
+      { color: '#cccccc', label: 'Light' },
+      { color: '#888888', label: 'Med' },
+      { color: '#444444', label: 'Heavy' },
     ],
-    description: 'Current air quality index',
   },
   heat: {
     name: 'Heat Risk',
+    tileUrl: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     legendTitle: 'Temperature',
     legendColors: [
       { color: '#313695', label: 'Cold' },
@@ -89,7 +96,6 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#f46d43', label: 'Hot' },
       { color: '#a50026', label: 'Extreme' },
     ],
-    description: 'Extreme temperature zones',
   },
 };
 
@@ -137,13 +143,27 @@ export const ClimateRiskLegend: React.FC<{
 
 /**
  * Main ClimateRiskLayer Component
- * Currently in legend-only mode - tile overlays require API keys
- * The UI/legend is functional, but no map overlays are rendered
+ * Renders weather/climate overlay tiles from OpenWeatherMap
  */
-const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType }) => {
-  // Legend-only mode - no tile overlays rendered
-  // To add tile overlays, integrate with a climate data API provider
-  return null;
+const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity = 0.6 }) => {
+  const layerConfig = useMemo(() => {
+    if (riskType === 'none') return null;
+    return CLIMATE_RISK_LAYERS[riskType];
+  }, [riskType]);
+
+  if (!layerConfig || riskType === 'none') {
+    return null;
+  }
+
+  return (
+    <TileLayer
+      url={layerConfig.tileUrl}
+      attribution={layerConfig.attribution}
+      opacity={opacity}
+      maxZoom={19}
+      minZoom={1}
+    />
+  );
 };
 
 export default ClimateRiskLayer;
