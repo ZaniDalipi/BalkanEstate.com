@@ -490,7 +490,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
         {/* Climate Risk Legend - TOP LEFT, under zoom display (both mobile and desktop) */}
         {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
-          <div className={`absolute ${show3DBuildings ? 'top-12 right-4' : 'top-12 left-4'} z-[1000]`}>
+          <div className={`absolute ${show3DBuildings ? 'top-14 right-4' : 'top-14 left-4'} z-[1000]`}>
             <ClimateRiskLegend riskType={selectedClimateRisk} />
           </div>
         )}

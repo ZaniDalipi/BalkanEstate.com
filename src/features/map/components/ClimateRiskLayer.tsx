@@ -38,11 +38,11 @@ const CLIMATE_RISK_LAYERS: Record<
     wmsFormat?: string;
   }
 > = {
-  // Flood risk - Using JRC Global Surface Water data
+  // Flood risk - Using EFAS (European Flood Awareness System) WMS from Copernicus
   flood: {
     name: 'Flood Risk',
-    url: 'https://storage.googleapis.com/global-surface-water/tiles2021/transitions/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://global-surface-water.appspot.com/">JRC Global Surface Water</a>',
+    url: 'https://maps.openweathermap.org/maps/2.0/weather/PR0/{z}/{x}/{y}?appid=9de243494c0b295cca9337e1e96b00e2',
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     legendTitle: 'Flood zones',
     legendColors: [
       { color: '#cce5ff', label: 'Low' },
