@@ -933,7 +933,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
           {/* Mobile: Map Options Button - TOP LEFT, near search */}
           <div className="absolute top-16 left-3 z-[999] md:hidden">
-            <div className="relative">
+            <div className="flex flex-col gap-1.5">
+              {/* Map button */}
               <button
                 onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
                 className={`flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-2xl shadow-xl border transition-all active:scale-95 ${
@@ -957,27 +958,25 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              {/* Mobile Map Options Panel - positioned below button */}
+
+              {/* Climate Risk Legend - inline below Map button when closed */}
+              {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
+                <ClimateRiskLegend riskType={selectedClimateRisk} />
+              )}
+
+              {/* Map Options Panel - below button when open */}
               {isMapOptionsOpen && (
-                <div className="absolute top-full left-0 mt-2 z-[1010]">
-                  <MapOptionsPanel
-                    selectedMapOption={selectedMapOption}
-                    selectedClimateRisk={selectedClimateRisk}
-                    onMapOptionChange={handleMapOptionChange}
-                    onClimateRiskChange={handleClimateRiskChange}
-                    isOpen={isMapOptionsOpen}
-                    onClose={() => setIsMapOptionsOpen(false)}
-                    isMobile={true}
-                  />
-                </div>
+                <MapOptionsPanel
+                  selectedMapOption={selectedMapOption}
+                  selectedClimateRisk={selectedClimateRisk}
+                  onMapOptionChange={handleMapOptionChange}
+                  onClimateRiskChange={handleClimateRiskChange}
+                  isOpen={isMapOptionsOpen}
+                  onClose={() => setIsMapOptionsOpen(false)}
+                  isMobile={true}
+                />
               )}
             </div>
-            {/* Climate Risk Legend - below Map button (Mobile) */}
-            {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
-              <div className="mt-2 animate-fade-in">
-                <ClimateRiskLegend riskType={selectedClimateRisk} />
-              </div>
-            )}
           </div>
         </>
       )}

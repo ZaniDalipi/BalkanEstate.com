@@ -115,7 +115,7 @@ const CLIMATE_RISK_LAYERS: Record<
 
 /**
  * Climate Risk Legend Component
- * Compact design matching the control bar styling
+ * Simple inline bar - matches Zillow's compact design
  */
 export const ClimateRiskLegend: React.FC<{
   riskType: Exclude<ClimateRiskType, 'none'>;
@@ -126,33 +126,31 @@ export const ClimateRiskLegend: React.FC<{
 
   return (
     <div
-      className="rounded-2xl shadow-xl border border-white/30 px-3 py-2"
+      className="rounded-xl px-2.5 py-1.5 shadow-lg border border-white/30"
       style={{
-        background: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        background: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
       }}
     >
+      {/* Title row with gradient and attribution */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-medium text-gray-700 whitespace-nowrap">{config.legendTitle}</span>
-        <div className="flex items-center gap-0 flex-1 min-w-[80px]">
+        <span className="text-[10px] font-medium text-gray-700">{config.legendTitle}</span>
+        <div className="flex h-2 rounded-sm overflow-hidden" style={{ width: '80px' }}>
           {config.legendColors.map((item, index) => (
-            <div key={index} className="flex-1">
-              <div
-                className="h-1.5"
-                style={{
-                  backgroundColor: item.color,
-                  borderRadius: index === 0 ? '3px 0 0 3px' : index === config.legendColors.length - 1 ? '0 3px 3px 0' : '0',
-                }}
-              />
-            </div>
+            <div
+              key={index}
+              className="flex-1 h-full"
+              style={{ backgroundColor: item.color }}
+            />
           ))}
         </div>
         <span className="text-[8px] text-gray-400">First Street®</span>
       </div>
-      <div className="flex items-center mt-0.5 ml-[70px]">
+      {/* Labels row */}
+      <div className="flex items-center mt-0.5" style={{ marginLeft: '72px', width: '80px' }}>
         {config.legendColors.map((item, index) => (
-          <span key={index} className="text-[8px] text-gray-500 flex-1 text-center">
+          <span key={index} className="text-[7px] text-gray-500 flex-1 text-center leading-none">
             {item.label}
           </span>
         ))}
