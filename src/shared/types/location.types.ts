@@ -57,11 +57,6 @@ export const COUNTRY_BOUNDS: Record<string, CountryBounds> = {
     bounds: [[42.2322, 18.8142], [46.1900, 23.0063]],
     center: [44.0165, 21.0059]
   },
-  'slovenia': {
-    name: 'Slovenia',
-    bounds: [[45.4214, 13.3754], [46.8766, 16.5967]],
-    center: [46.1512, 14.9955]
-  },
   'turkey': {
     name: 'Turkey (European part)',
     bounds: [[40.8223, 26.0433], [42.1061, 29.4149]],

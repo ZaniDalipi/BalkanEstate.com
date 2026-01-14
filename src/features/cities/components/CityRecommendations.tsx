@@ -8,6 +8,7 @@ import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
+import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -196,17 +197,39 @@ const CityRecommendations: React.FC = () => {
   if (cities.length === 0) {
     return (
       <div className="p-8">
+        <Decorative3DStyles />
         <div className="max-w-7xl mx-auto text-center">
-          <HomeIcon className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-neutral-700 mb-2">{t('empty.title')}</h3>
-          <p className="text-neutral-500">{t('empty.message')}</p>
+          <div className="bg-white rounded-2xl shadow-md border p-12 relative overflow-hidden">
+            {/* 3D Decorative background */}
+            <div className="absolute inset-0 pointer-events-none opacity-40">
+              <div className="absolute top-4 right-8">
+                <FloatingSphere size="lg" color="cyan" />
+              </div>
+              <div className="absolute bottom-8 left-8">
+                <FloatingSphere size="md" color="pink" animate={false} />
+              </div>
+            </div>
+            <div className="relative z-10">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                <HomeIcon className="w-12 h-12 text-cyan-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-neutral-700 mb-2">{t('empty.title')}</h3>
+              <p className="text-neutral-500">{t('empty.message')}</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 relative">
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
+      {/* 3D Decorative Background Elements with Random City Images */}
+      <RandomCityBubbles count={8} />
+
       {/* SEO Meta Tags */}
       <SEO
         title={t('page.title')}
@@ -215,7 +238,7 @@ const CityRecommendations: React.FC = () => {
         type="website"
       />
 
-      <div className="p-4 sm:p-8">
+      <div className="p-4 sm:p-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Header with Stats */}
           <div className="mb-8">

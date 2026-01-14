@@ -10,6 +10,7 @@ import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { SEO } from '@/src/components/seo';
 import * as api from '@/services/apiService';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { FloatingSphere, GlossyPill, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 const initialFilters: Filters = {
     query: '',
@@ -144,20 +145,33 @@ const SavedSearchesPage: React.FC = () => {
   const renderContent = () => {
     if (!isAuthenticated) {
         return (
-            <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
-                <MagnifyingGlassPlusIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-neutral-800">{t('loginRequired.title')}</h3>
-                <p className="text-neutral-500 mt-2">{t('loginRequired.description')}</p>
-                <button
-                    onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
-                    className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
-                >
-                    {t('loginRequired.button')}
-                </button>
+            <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
+                {/* 3D Decorative background */}
+                <div className="absolute inset-0 pointer-events-none opacity-40">
+                  <div className="absolute top-4 right-8">
+                    <FloatingSphere size="md" color="blue" />
+                  </div>
+                  <div className="absolute bottom-8 left-8">
+                    <FloatingSphere size="sm" color="cyan" animate={false} />
+                  </div>
+                </div>
+                <div className="relative z-10">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                    <MagnifyingGlassPlusIcon className="w-10 h-10 text-blue-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-neutral-800">{t('loginRequired.title')}</h3>
+                  <p className="text-neutral-500 mt-2">{t('loginRequired.description')}</p>
+                  <button
+                      onClick={() => dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } })}
+                      className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+                  >
+                      {t('loginRequired.button')}
+                  </button>
+                </div>
             </div>
         );
     }
-    
+
     if (sortedSearches.length === 0) {
         const handleSaveExample = () => {
             const now = Date.now();
@@ -174,27 +188,40 @@ const SavedSearchesPage: React.FC = () => {
         };
 
         return (
-             <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
-                <MagnifyingGlassPlusIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-neutral-800">{t('empty.title')}</h3>
-                <p className="text-neutral-500 mt-2">{t('empty.description')}</p>
-
-                <div className="mt-6 bg-neutral-50 p-4 rounded-lg border max-w-md mx-auto flex items-center justify-between">
-                    <p className="font-semibold text-neutral-700">{t('example.label')}: {t('example.name')}</p>
-                    <button
-                        onClick={handleSaveExample}
-                        className="px-4 py-2 bg-secondary text-white font-bold rounded-lg shadow-sm hover:bg-opacity-90 transition-colors text-sm"
-                    >
-                        + {t('example.save')}
-                    </button>
+             <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
+                {/* 3D Decorative background */}
+                <div className="absolute inset-0 pointer-events-none opacity-40">
+                  <div className="absolute top-4 left-8">
+                    <FloatingSphere size="md" color="cyan" />
+                  </div>
+                  <div className="absolute bottom-8 right-8">
+                    <FloatingSphere size="sm" color="blue" animate={false} />
+                  </div>
                 </div>
+                <div className="relative z-10">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                    <MagnifyingGlassPlusIcon className="w-10 h-10 text-cyan-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-neutral-800">{t('empty.title')}</h3>
+                  <p className="text-neutral-500 mt-2">{t('empty.description')}</p>
 
-                 <button
-                    onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
-                    className="mt-8 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
-                >
-                    {t('empty.startSearch')}
-                </button>
+                  <div className="mt-6 bg-neutral-50 p-4 rounded-lg border max-w-md mx-auto flex items-center justify-between">
+                      <p className="font-semibold text-neutral-700">{t('example.label')}: {t('example.name')}</p>
+                      <button
+                          onClick={handleSaveExample}
+                          className="px-4 py-2 bg-secondary text-white font-bold rounded-lg shadow-sm hover:bg-opacity-90 transition-colors text-sm"
+                      >
+                          + {t('example.save')}
+                      </button>
+                  </div>
+
+                  <button
+                      onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
+                      className="mt-8 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+                  >
+                      {t('empty.startSearch')}
+                  </button>
+                </div>
             </div>
         );
     }
@@ -238,9 +265,24 @@ const SavedSearchesPage: React.FC = () => {
         noindex={true}
       />
 
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-primary via-primary-dark to-primary text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg">
-        <div className="max-w-7xl mx-auto text-center">
+      <div className="bg-gradient-to-r from-primary via-primary-dark to-primary text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg relative overflow-hidden">
+        {/* 3D Decorative elements in hero */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-6 right-[10%] opacity-15 hidden md:block">
+            <FloatingSphere size="lg" color="cyan" />
+          </div>
+          <div className="absolute bottom-4 left-[8%] opacity-10 hidden md:block">
+            <FloatingSphere size="md" color="pink" animate={false} />
+          </div>
+          <div className="absolute top-1/2 -right-8 opacity-10 hidden lg:block rotate-[15deg]">
+            <GlossyPill orientation="vertical" size="md" color="blue" />
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4">
             <MagnifyingGlassPlusIcon className="w-10 h-10 text-white" />
           </div>

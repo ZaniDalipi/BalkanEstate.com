@@ -131,12 +131,25 @@ export const getProperties = async (
       filter.sellerId = req.query.sellerId;
     }
 
+    // Handle query search - search only in address and city, NOT description
+    // Use $and to preserve other filters like status
     if (query) {
-      filter.$or = [
-        { address: new RegExp(query as string, 'i') },
-        { city: new RegExp(query as string, 'i') },
-        { description: new RegExp(query as string, 'i') },
+      const queryRegex = new RegExp(query as string, 'i');
+      const queryConditions = [
+        { address: queryRegex },
+        { city: queryRegex },
       ];
+
+      // If we already have $or (for status), use $and to combine them
+      if (filter.$or) {
+        filter.$and = [
+          { $or: filter.$or },
+          { $or: queryConditions }
+        ];
+        delete filter.$or;
+      } else {
+        filter.$or = queryConditions;
+      }
     }
 
     // Build sort object

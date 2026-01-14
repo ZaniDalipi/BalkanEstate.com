@@ -135,8 +135,6 @@ export const SUPPORTED_CITIES = [
   'sarajevo', 'banja-luka', 'mostar', 'tuzla', 'zenica', 'bijeljina',
   // Croatia
   'zagreb', 'split', 'rijeka', 'dubrovnik', 'osijek', 'zadar', 'pula',
-  // Slovenia
-  'ljubljana', 'maribor', 'celje', 'kranj', 'koper',
   // Greece
   'thessaloniki', 'athens', 'patras', 'larissa', 'volos',
   // Bulgaria

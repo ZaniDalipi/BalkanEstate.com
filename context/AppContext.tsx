@@ -58,7 +58,7 @@ const initialState: AppState = {
   pendingRedirect: null,
   alertDialog: null,
   accountTab: 'listings',
-  howItWorksTab: 'agencies',
+  howItWorksTab: 'getting-started',
   adminSection: 'dashboard',
 };
 

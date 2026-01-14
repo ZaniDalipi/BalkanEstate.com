@@ -4,6 +4,14 @@ import { useAppContext } from '../../context/AppContext';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
+import {
+  FloatingSphere,
+  GlossyPill,
+  AbstractBlob,
+  WaveRibbon,
+  GlassyDonut,
+  Decorative3DStyles
+} from './Decorative3D';
 
 // Icons
 const BuildingIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -95,6 +103,7 @@ const HowItWorksPage: React.FC = () => {
   };
 
   const tabs = [
+    { id: 'getting-started' as HowItWorksTab, label: 'Getting Started', icon: StarIcon, color: 'cyan' },
     { id: 'agencies' as HowItWorksTab, label: 'For Agencies', icon: BuildingIcon, color: 'orange' },
     { id: 'agents' as HowItWorksTab, label: 'For Agents', icon: UserGroupIcon, color: 'purple' },
     { id: 'buyers' as HowItWorksTab, label: 'For Buyers', icon: SearchIcon, color: 'blue' },
@@ -102,7 +111,8 @@ const HowItWorksPage: React.FC = () => {
   ];
 
   const getTabColor = (tab: HowItWorksTab) => {
-    const colors = {
+    const colors: Record<HowItWorksTab, string> = {
+      'getting-started': 'cyan',
       agencies: 'orange',
       agents: 'purple',
       buyers: 'blue',
@@ -112,10 +122,37 @@ const HowItWorksPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white relative">
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-primary-darker text-white">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyem0wLTRoLTEydi0yaDEydjJ6bS0xMi0xMGgxMnYySDI0di0yem0xMiA2SDI0di0yaDEydjJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
+
+        {/* 3D Decorative Elements in Hero */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Floating sphere - top right */}
+          <div className="absolute -top-8 right-[8%] opacity-20 hidden lg:block">
+            <FloatingSphere size="lg" color="cyan" />
+          </div>
+
+          {/* Floating sphere - bottom left */}
+          <div className="absolute bottom-[20%] left-[5%] opacity-15 hidden lg:block">
+            <FloatingSphere size="md" color="pink" animate={false} />
+          </div>
+
+          {/* Abstract blob */}
+          <div className="absolute top-[30%] -right-20 opacity-10 hidden xl:block">
+            <AbstractBlob variant={3} color="blue" />
+          </div>
+
+          {/* Glossy pill */}
+          <div className="absolute bottom-[25%] right-[10%] opacity-15 hidden lg:block rotate-[20deg]">
+            <GlossyPill orientation="vertical" size="md" color="cyan" />
+          </div>
+        </div>
+
         <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 relative">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -149,7 +186,7 @@ const HowItWorksPage: React.FC = () => {
                     ? `bg-${tab.color}-500 text-white shadow-md`
                     : `text-neutral-600 hover:bg-neutral-100`
                 }`}
-                style={isActive ? { backgroundColor: tab.color === 'orange' ? '#f97316' : tab.color === 'purple' ? '#a855f7' : tab.color === 'blue' ? '#3b82f6' : '#22c55e' } : {}}
+                style={isActive ? { backgroundColor: tab.color === 'cyan' ? '#06b6d4' : tab.color === 'orange' ? '#f97316' : tab.color === 'purple' ? '#a855f7' : tab.color === 'blue' ? '#3b82f6' : '#22c55e' } : {}}
               >
                 <Icon className="w-5 h-5" />
                 <span>{tab.label}</span>
@@ -161,6 +198,473 @@ const HowItWorksPage: React.FC = () => {
 
       {/* Content Sections */}
       <div className="max-w-6xl mx-auto px-4 py-12">
+        {/* Getting Started */}
+        {activeTab === 'getting-started' && (
+          <div className="animate-fade-in">
+            {/* Main Value Prop */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-cyan-100 rounded-full mb-4">
+                <StarIcon className="w-8 h-8 text-cyan-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-neutral-800 mb-3">Welcome to Balkan Estate</h2>
+              <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+                Your complete guide to navigating, searching, and using all features of the premier Balkan real estate platform
+              </p>
+            </div>
+
+            {/* Quick Navigation Overview */}
+            <div className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-3xl p-8 md:p-12 text-white mb-12 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+              <div className="relative">
+                <h3 className="text-2xl font-bold mb-6 text-center">Main Navigation</h3>
+                <div className="grid md:grid-cols-5 gap-4">
+                  {[
+                    { name: 'Home', desc: 'Browse all properties with map view', icon: HomeIcon },
+                    { name: 'Search', desc: 'Advanced filters and search tools', icon: SearchIcon },
+                    { name: 'Agents', desc: 'Find verified real estate agents', icon: UserGroupIcon },
+                    { name: 'Agencies', desc: 'Discover professional agencies', icon: BuildingIcon },
+                    { name: 'Explore', desc: 'Explore cities and neighborhoods', icon: MapIcon },
+                  ].map((nav) => {
+                    const NavIcon = nav.icon;
+                    return (
+                      <div key={nav.name} className="bg-white/20 backdrop-blur rounded-xl p-4 text-center hover:bg-white/30 transition-colors">
+                        <NavIcon className="w-8 h-8 mx-auto mb-2" />
+                        <h4 className="font-semibold">{nav.name}</h4>
+                        <p className="text-xs text-cyan-100 mt-1">{nav.desc}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Step 1: Creating an Account */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                <h3 className="text-2xl font-bold text-neutral-800">Creating Your Account</h3>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Screenshot placeholder */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-cyan-100 to-teal-50 flex items-center justify-center relative">
+                    <div className="text-center">
+                      <UserIcon className="w-16 h-16 text-cyan-300 mx-auto mb-2" />
+                      <p className="text-cyan-500 font-medium">Sign Up Modal</p>
+                      <p className="text-cyan-400 text-sm">Click "Sign Up" in header</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Steps */}
+                <div className="space-y-4">
+                  <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-cyan-600 font-semibold text-sm">1</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Click "Sign Up" Button</h4>
+                        <p className="text-sm text-neutral-600">Located in the top-right corner of the navigation bar</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-cyan-600 font-semibold text-sm">2</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Choose Your Account Type</h4>
+                        <p className="text-sm text-neutral-600">Select Buyer, Seller, or Agent based on your needs</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-cyan-600 font-semibold text-sm">3</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Fill in Your Details</h4>
+                        <p className="text-sm text-neutral-600">Enter email, password, name, and phone number</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-cyan-600 font-semibold text-sm">4</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Verify Your Email</h4>
+                        <p className="text-sm text-neutral-600">Check your inbox and click the verification link</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2: Using the Map Search */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                <h3 className="text-2xl font-bold text-neutral-800">Using the Interactive Map</h3>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Steps */}
+                <div className="space-y-4">
+                  <p className="text-neutral-600 mb-4">
+                    Our interactive map is the heart of Balkan Estate. Here's how to use it effectively:
+                  </p>
+                  <div className="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                    <div className="flex items-start gap-3">
+                      <MapIcon className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Pan & Zoom</h4>
+                        <p className="text-sm text-neutral-600">Click and drag to move around. Use scroll wheel or pinch to zoom in/out.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                    <div className="flex items-start gap-3">
+                      <SearchIcon className="w-6 h-6 text-purple-500 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Draw Custom Areas</h4>
+                        <p className="text-sm text-neutral-600">Use the drawing tool to select specific neighborhoods or regions you're interested in.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-green-50 rounded-xl p-5 border border-green-200">
+                    <div className="flex items-start gap-3">
+                      <HomeIcon className="w-6 h-6 text-green-500 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Click on Properties</h4>
+                        <p className="text-sm text-neutral-600">Click any marker to see property details, price, and photos in a quick preview.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-orange-50 rounded-xl p-5 border border-orange-200">
+                    <div className="flex items-start gap-3">
+                      <StarIcon className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-neutral-800 mb-1">Filter Results</h4>
+                        <p className="text-sm text-neutral-600">Use filters for price range, property type, bedrooms, and more features.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Screenshot placeholder */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-50 flex items-center justify-center relative">
+                    <div className="text-center">
+                      <MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />
+                      <p className="text-blue-500 font-medium">Interactive Map View</p>
+                      <p className="text-blue-400 text-sm">Full property map with markers</p>
+                    </div>
+                    {/* Map controls mock */}
+                    <div className="absolute top-4 left-4 space-y-2">
+                      <div className="w-8 h-8 bg-white rounded-lg shadow flex items-center justify-center text-neutral-400 text-xs">+</div>
+                      <div className="w-8 h-8 bg-white rounded-lg shadow flex items-center justify-center text-neutral-400 text-xs">-</div>
+                    </div>
+                    <div className="absolute top-4 right-4 bg-white rounded-lg shadow px-3 py-1.5 text-xs text-neutral-500">
+                      Draw Area
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Saving Properties */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                <h3 className="text-2xl font-bold text-neutral-800">Saving Properties & Searches</h3>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-gradient-to-br from-red-100 to-pink-50 flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <HeartIcon className="w-12 h-12 text-red-400 mx-auto mb-2" />
+                      <p className="text-red-500 font-semibold">Save to Favorites</p>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-semibold text-neutral-800 mb-2">Heart Icon</h4>
+                    <p className="text-sm text-neutral-600">Click the heart icon on any property card or detail page to save it to your favorites list.</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-gradient-to-br from-purple-100 to-indigo-50 flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <SearchIcon className="w-12 h-12 text-purple-400 mx-auto mb-2" />
+                      <p className="text-purple-500 font-semibold">Save Search</p>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-semibold text-neutral-800 mb-2">Search Criteria</h4>
+                    <p className="text-sm text-neutral-600">After filtering, click "Save Search" to get notified when new matching properties are listed.</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <BellIcon className="w-12 h-12 text-amber-400 mx-auto mb-2" />
+                      <p className="text-amber-500 font-semibold">Get Notified</p>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-semibold text-neutral-800 mb-2">Alerts & Updates</h4>
+                    <p className="text-sm text-neutral-600">Receive email notifications for price drops on favorites and new listings matching your searches.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4: Contacting Sellers/Agents */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">4</div>
+                <h3 className="text-2xl font-bold text-neutral-800">Contacting Sellers & Agents</h3>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-50 flex items-center justify-center relative">
+                    <div className="text-center">
+                      <ChatIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />
+                      <p className="text-green-500 font-medium">Contact Form</p>
+                      <p className="text-green-400 text-sm">On every property page</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-neutral-800">Multiple Ways to Connect</h4>
+                  <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                    <div className="flex items-center gap-3">
+                      <ChatIcon className="w-5 h-5 text-green-600" />
+                      <div>
+                        <span className="font-medium text-neutral-800">Direct Message</span>
+                        <p className="text-xs text-neutral-600">Send messages through our secure platform</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <div>
+                        <span className="font-medium text-neutral-800">Phone Call</span>
+                        <p className="text-xs text-neutral-600">Click to call on mobile devices</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <div>
+                        <span className="font-medium text-neutral-800">Email</span>
+                        <p className="text-xs text-neutral-600">Direct email to seller or agent</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                      <div>
+                        <span className="font-medium text-neutral-800">WhatsApp</span>
+                        <p className="text-xs text-neutral-600">Quick message via WhatsApp</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 5: Creating a Listing */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">5</div>
+                <h3 className="text-2xl font-bold text-neutral-800">Creating a Property Listing</h3>
+              </div>
+
+              <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-200">
+                <div className="grid md:grid-cols-5 gap-4 mb-8">
+                  {[
+                    { step: '1', title: 'Basic Info', desc: 'Title, type, price' },
+                    { step: '2', title: 'Location', desc: 'Address, map pin' },
+                    { step: '3', title: 'Details', desc: 'Rooms, size, features' },
+                    { step: '4', title: 'Photos', desc: 'Upload images' },
+                    { step: '5', title: 'Publish', desc: 'Review & post' },
+                  ].map((item, idx) => (
+                    <React.Fragment key={item.step}>
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-cyan-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
+                          {item.step}
+                        </div>
+                        <h4 className="font-semibold text-neutral-800 text-sm">{item.title}</h4>
+                        <p className="text-xs text-neutral-500">{item.desc}</p>
+                      </div>
+                      {idx < 4 && (
+                        <div className="hidden md:flex items-center justify-center text-cyan-300 text-xl">→</div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-xl p-5 border border-neutral-200">
+                    <h4 className="font-semibold text-neutral-800 mb-3 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Photo Tips
+                    </h4>
+                    <ul className="text-sm text-neutral-600 space-y-2">
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Use natural lighting for best results</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Include all rooms and outdoor spaces</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Declutter before taking photos</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>First photo appears as the thumbnail</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white rounded-xl p-5 border border-neutral-200">
+                    <h4 className="font-semibold text-neutral-800 mb-3 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Description Tips
+                    </h4>
+                    <ul className="text-sm text-neutral-600 space-y-2">
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Highlight unique features and upgrades</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Mention nearby amenities and transport</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Be honest about the property condition</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span>Include recent renovations or improvements</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 6: Account Settings */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">6</div>
+                <h3 className="text-2xl font-bold text-neutral-800">Managing Your Account</h3>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <UserIcon className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <h4 className="font-semibold text-neutral-800 mb-2">Profile Settings</h4>
+                  <p className="text-sm text-neutral-600 mb-3">Update your name, photo, phone number, and other personal details.</p>
+                  <p className="text-xs text-neutral-400">Access: Menu → Profile</p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                    <TicketIcon className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h4 className="font-semibold text-neutral-800 mb-2">Subscription</h4>
+                  <p className="text-sm text-neutral-600 mb-3">View your plan, upgrade to Pro, or manage billing and payment methods.</p>
+                  <p className="text-xs text-neutral-400">Access: Menu → Subscription</p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <BellIcon className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <h4 className="font-semibold text-neutral-800 mb-2">Notifications</h4>
+                  <p className="text-sm text-neutral-600 mb-3">Configure email alerts, price drop notifications, and new listing alerts.</p>
+                  <p className="text-xs text-neutral-400">Access: Menu → Settings</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Tips Section */}
+            <div className="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-2xl p-8 border border-cyan-100">
+              <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">Pro Tips for Best Experience</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 mb-1">Complete Your Profile</h4>
+                    <p className="text-sm text-neutral-600">Sellers and agents respond faster to complete profiles with photos.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 mb-1">Use Saved Searches</h4>
+                    <p className="text-sm text-neutral-600">Save your search criteria to get instant notifications for new matches.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 mb-1">Explore Cities Feature</h4>
+                    <p className="text-sm text-neutral-600">Use "Explore" to discover neighborhoods and get market insights.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 mb-1">Enable Notifications</h4>
+                    <p className="text-sm text-neutral-600">Turn on email alerts to be the first to know about price changes.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* For Agencies */}
         {activeTab === 'agencies' && (
           <div className="animate-fade-in">
@@ -825,8 +1329,24 @@ const HowItWorksPage: React.FC = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary to-primary-dark py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center text-white">
+      <div className="bg-gradient-to-r from-primary to-primary-dark py-16 relative overflow-hidden">
+        {/* 3D Decorative Elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-10 left-[10%] opacity-15 hidden md:block">
+            <FloatingSphere size="lg" color="cyan" />
+          </div>
+          <div className="absolute bottom-[10%] right-[8%] opacity-10 hidden md:block">
+            <FloatingSphere size="md" color="pink" animate={false} />
+          </div>
+          <div className="absolute top-1/2 -right-16 opacity-10 hidden lg:block">
+            <GlassyDonut size="lg" color="blue" />
+          </div>
+          <div className="absolute bottom-0 left-[20%] opacity-15 hidden lg:block">
+            <WaveRibbon color="purple-cyan" />
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 text-center text-white relative z-10">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-lg text-white/80 mb-8">
             Join thousands of users already finding and listing properties on Balkan Estate

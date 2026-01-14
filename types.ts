@@ -28,7 +28,7 @@ export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom
 
 export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'analytics' | 'reset-password' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies';
 
-export type HowItWorksTab = 'agencies' | 'agents' | 'buyers' | 'sellers';
+export type HowItWorksTab = 'getting-started' | 'agencies' | 'agents' | 'buyers' | 'sellers';
 
 export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
 
@@ -538,11 +538,6 @@ export const COUNTRY_BOUNDS: Record<string, CountryBounds> = {
         name: 'Serbia',
         bounds: [[42.2322, 18.8142], [46.1900, 23.0063]],
         center: [44.0165, 21.0059]
-    },
-    'slovenia': {
-        name: 'Slovenia',
-        bounds: [[45.4214, 13.3754], [46.8766, 16.5967]],
-        center: [46.1512, 14.9955]
     },
     'turkey': {
         name: 'Turkey (European part)',

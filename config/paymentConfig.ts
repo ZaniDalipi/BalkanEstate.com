@@ -36,7 +36,7 @@ export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
     description: 'Secure card payments for EU countries',
     fees: '~2.9% + €0.25',
     logo: 'stripe',
-    supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI'],
+    supportedCountries: ['GR', 'HR', 'BG', 'RO'],
     supportedMethods: ['card', 'sepa_debit', 'apple_pay', 'google_pay', 'klarna', 'ideal', 'bancontact', 'giropay', 'eps'],
   },
   paddle: {
@@ -68,7 +68,6 @@ export const COUNTRY_PAYMENT_MAP: Record<string, CountryPaymentInfo> = {
   HR: { countryCode: 'HR', countryName: 'Croatia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇭🇷' },
   BG: { countryCode: 'BG', countryName: 'Bulgaria', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇧🇬' },
   RO: { countryCode: 'RO', countryName: 'Romania', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇷🇴' },
-  SI: { countryCode: 'SI', countryName: 'Slovenia', provider: 'stripe', currency: 'EUR', isEU: true, isSEPA: true, flag: '🇸🇮' },
   // Non-EU Balkans - Use Paddle (Merchant of Record with VAT compliance)
   RS: { countryCode: 'RS', countryName: 'Serbia', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇷🇸' },
   AL: { countryCode: 'AL', countryName: 'Albania', provider: 'paddle', currency: 'EUR', isEU: false, isSEPA: true, flag: '🇦🇱' },

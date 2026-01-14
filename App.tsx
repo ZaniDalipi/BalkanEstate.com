@@ -61,16 +61,16 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 // Cookie Consent Banner
 import CookieConsent from './src/shared/components/CookieConsent';
 
+// 3D Decorative Elements
+import { Loader3D } from './components/shared/Decorative3D';
+
 // Microsoft Clarity - Heatmaps & Session Recordings
 import ClarityInit from './src/app/components/ClarityInit';
 
-// Loading fallback component
+// Loading fallback component with 3D animation
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-3"></div>
-      <p className="text-gray-500 text-sm">Loading...</p>
-    </div>
+    <Loader3D size="md" text="Loading..." />
   </div>
 );
 
@@ -211,9 +211,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       // How-it-works routes with tab support: /how-it-works/:tab
       const howItWorksMatch = path.match(/^\/how-it-works(?:\/(.+))?$/);
       if (howItWorksMatch) {
-        const tab = howItWorksMatch[1] || 'agencies'; // Default to agencies tab
-        const validTabs = ['agencies', 'agents', 'buyers', 'sellers'];
-        const validTab = validTabs.includes(tab) ? tab : 'agencies';
+        const tab = howItWorksMatch[1] || 'getting-started'; // Default to getting-started tab
+        const validTabs = ['getting-started', 'agencies', 'agents', 'buyers', 'sellers'];
+        const validTab = validTabs.includes(tab) ? tab : 'getting-started';
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: validTab });
@@ -359,6 +359,18 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     };
     fetchAgency();
   }, [state.selectedAgencyId]);
+
+  // Scroll to top when active view changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [state.activeView]);
+
+  // Also scroll to top when selected property or agency changes
+  useEffect(() => {
+    if (state.selectedProperty || state.selectedAgencyId) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [state.selectedProperty, state.selectedAgencyId]);
 
   // Payment callback routes (highest priority)
   const path = window.location.pathname;

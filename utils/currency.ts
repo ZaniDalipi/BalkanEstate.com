@@ -2,7 +2,6 @@ const countryCurrencyMap: { [key: string]: string } = {
   'Serbia': 'EUR',
   'Croatia': 'EUR',
   'Bosnia and Herzegovina': 'EUR',
-  'Slovenia': 'EUR',
   'North Macedonia': 'EUR',
   'Montenegro': 'EUR',
   'Albania': 'EUR',

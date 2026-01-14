@@ -12,6 +12,7 @@ import FeaturedAgencies from '@/components/FeaturedAgencies';
 import Footer from '@/components/shared/Footer';
 import { getSavedAgents } from '@/src/features/agents/api/agentApi';
 import StarRating from '@/components/shared/StarRating';
+import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 const SavedPropertiesPage: React.FC = () => {
   const { t } = useTranslation(['property', 'nav', 'agents']);
@@ -176,10 +177,23 @@ const SavedPropertiesPage: React.FC = () => {
     } else {
       return (
         <>
-          <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
-            <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.noSaved')}</h3>
-            <p className="text-neutral-500 mt-2">{t('property:saved.clickHeart')}</p>
+          <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
+            {/* 3D Decorative background */}
+            <div className="absolute inset-0 pointer-events-none opacity-40">
+              <div className="absolute top-4 right-8">
+                <FloatingSphere size="md" color="pink" />
+              </div>
+              <div className="absolute bottom-8 left-8">
+                <FloatingSphere size="sm" color="blue" animate={false} />
+              </div>
+            </div>
+            <div className="relative z-10">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center">
+                <HeartIcon className="w-10 h-10 text-pink-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.noSaved')}</h3>
+              <p className="text-neutral-500 mt-2">{t('property:saved.clickHeart')}</p>
+            </div>
           </div>
           <div className="mt-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-4 text-center">{t('property:saved.popularProperties')}</h2>
@@ -226,16 +240,29 @@ const SavedPropertiesPage: React.FC = () => {
       );
     } else {
       return (
-        <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
-          <UsersIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.agents.noSaved')}</h3>
-          <p className="text-neutral-500 mt-2">{t('property:saved.agents.clickHeart')}</p>
-          <button
-            onClick={handleBrowseAgents}
-            className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
-          >
-            {t('property:saved.agents.browseAgents')}
-          </button>
+        <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
+          {/* 3D Decorative background */}
+          <div className="absolute inset-0 pointer-events-none opacity-40">
+            <div className="absolute top-4 left-8">
+              <FloatingSphere size="md" color="purple" />
+            </div>
+            <div className="absolute bottom-8 right-8">
+              <FloatingSphere size="sm" color="cyan" animate={false} />
+            </div>
+          </div>
+          <div className="relative z-10">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
+              <UsersIcon className="w-10 h-10 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.agents.noSaved')}</h3>
+            <p className="text-neutral-500 mt-2">{t('property:saved.agents.clickHeart')}</p>
+            <button
+              onClick={handleBrowseAgents}
+              className="mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
+            >
+              {t('property:saved.agents.browseAgents')}
+            </button>
+          </div>
         </div>
       );
     }
@@ -323,9 +350,21 @@ const SavedPropertiesPage: React.FC = () => {
           properties={selectedForComparison}
       />
 
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-primary via-primary-dark to-primary text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg">
-        <div className="max-w-7xl mx-auto text-center">
+      <div className="bg-gradient-to-r from-primary via-primary-dark to-primary text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg relative overflow-hidden">
+        {/* 3D Decorative elements in hero */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-6 right-[10%] opacity-15 hidden md:block">
+            <FloatingSphere size="lg" color="cyan" />
+          </div>
+          <div className="absolute bottom-4 left-[8%] opacity-10 hidden md:block">
+            <FloatingSphere size="md" color="pink" animate={false} />
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4">
             <HeartIcon className="w-10 h-10 text-white fill-current" />
           </div>

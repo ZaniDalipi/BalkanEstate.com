@@ -1,5 +1,6 @@
 import React from 'react';
 import { MagnifyingGlassIcon, BuildingOfficeIcon, UsersIcon, HomeIcon } from '@/constants';
+import { FloatingSphere, GlossyPill, AbstractBlob, WaveRibbon, Decorative3DStyles } from './Decorative3D';
 
 interface StatItem {
   icon: 'users' | 'building' | 'home';
@@ -119,17 +120,84 @@ const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
 
       {/* Gradient orbs for depth */}
       <div
-        className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-br from-neutral-200/30 to-transparent rounded-full blur-3xl mesh-layer"
+        className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-200/20 via-purple-200/15 to-transparent rounded-full blur-3xl mesh-layer animate-pulse-glow"
         style={{
           transform: `translate3d(${mousePosition.x * 0.8}px, ${mousePosition.y * 0.8}px, 0)`,
         }}
       />
       <div
-        className="absolute bottom-20 right-1/4 w-80 h-80 bg-gradient-to-tl from-neutral-200/20 to-transparent rounded-full blur-3xl mesh-layer"
+        className="absolute bottom-20 right-1/4 w-80 h-80 bg-gradient-to-tl from-pink-200/20 via-rose-200/15 to-transparent rounded-full blur-3xl mesh-layer animate-pulse-glow"
         style={{
           transform: `translate3d(${-mousePosition.x * 0.6}px, ${-mousePosition.y * 0.6}px, 0)`,
+          animationDelay: '2s',
         }}
       />
+
+      {/* 3D Decorative Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Floating Sphere - Top Right */}
+        <div
+          className="absolute -top-8 right-[10%] opacity-50 hidden lg:block"
+          style={{
+            transform: `translate3d(${-mousePosition.x * 0.4}px, ${mousePosition.y * 0.3}px, 0)`,
+          }}
+        >
+          <FloatingSphere size="lg" color="blue" />
+        </div>
+
+        {/* Floating Sphere - Bottom Left */}
+        <div
+          className="absolute bottom-[15%] -left-8 opacity-40 hidden lg:block"
+          style={{
+            transform: `translate3d(${mousePosition.x * 0.3}px, ${-mousePosition.y * 0.4}px, 0)`,
+          }}
+        >
+          <FloatingSphere size="md" color="pink" animate={false} />
+        </div>
+
+        {/* Abstract Blob - Center Right */}
+        <div
+          className="absolute top-1/3 -right-16 opacity-25 hidden xl:block"
+          style={{
+            transform: `translate3d(${-mousePosition.x * 0.2}px, ${mousePosition.y * 0.2}px, 0)`,
+          }}
+        >
+          <AbstractBlob variant={1} color="purple" />
+        </div>
+
+        {/* Glossy Pill - Bottom Right */}
+        <div
+          className="absolute bottom-[20%] right-[15%] opacity-30 hidden lg:block rotate-[25deg]"
+          style={{
+            transform: `rotate(25deg) translate3d(${-mousePosition.x * 0.25}px, ${mousePosition.y * 0.25}px, 0)`,
+          }}
+        >
+          <GlossyPill orientation="vertical" size="md" color="cyan" />
+        </div>
+
+        {/* Wave Ribbon - Top Left */}
+        <div
+          className="absolute top-[20%] left-[5%] opacity-30 hidden xl:block rotate-[-10deg]"
+          style={{
+            transform: `rotate(-10deg) translate3d(${mousePosition.x * 0.2}px, ${-mousePosition.y * 0.3}px, 0)`,
+          }}
+        >
+          <WaveRibbon color="purple-cyan" />
+        </div>
+
+        {/* Small accent spheres */}
+        <div
+          className="absolute top-[40%] left-[20%] opacity-35 hidden md:block"
+          style={{
+            transform: `translate3d(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.4}px, 0)`,
+          }}
+        >
+          <FloatingSphere size="sm" color="peach" />
+        </div>
+      </div>
+
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
 
       {/* Hero Content */}
       <div className="relative w-full pt-8 pb-16 lg:pt-12 lg:pb-20">
