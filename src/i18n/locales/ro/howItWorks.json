@@ -1,0 +1,534 @@
+{
+  "hero": {
+    "title": "Cum Funcționează Balkan Estate",
+    "subtitle": "Platforma imobiliară de top care conectează cumpărători, vânzători, agenți și agenții în întreaga regiune Balcanică"
+  },
+  "tabs": {
+    "gettingStarted": "Început",
+    "forAgencies": "Pentru Agenții",
+    "forAgents": "Pentru Agenți",
+    "forBuyers": "Pentru Cumpărători",
+    "forSellers": "Pentru Vânzători"
+  },
+  "gettingStarted": {
+    "welcome": {
+      "title": "Bun venit la Balkan Estate",
+      "subtitle": "Ghidul tău complet pentru navigare, căutare și utilizarea tuturor funcțiilor platformei imobiliare de top din Balcani"
+    },
+    "mainNavigation": {
+      "title": "Navigare Principală",
+      "home": {
+        "name": "Acasă",
+        "desc": "Răsfoiește toate proprietățile cu vizualizare hartă"
+      },
+      "search": {
+        "name": "Căutare",
+        "desc": "Filtre avansate și instrumente de căutare"
+      },
+      "agents": {
+        "name": "Agenți",
+        "desc": "Găsește agenți imobiliari verificați"
+      },
+      "agencies": {
+        "name": "Agenții",
+        "desc": "Descoperă agenții profesionale"
+      },
+      "explore": {
+        "name": "Explorează",
+        "desc": "Explorează orașe și cartiere"
+      }
+    },
+    "createAccount": {
+      "title": "Crearea Contului Tău",
+      "signUpModal": "Fereastră Înregistrare",
+      "clickSignUp": "Apasă pe \"Înregistrare\" în antet",
+      "step1": {
+        "title": "Apasă pe Butonul \"Înregistrare\"",
+        "desc": "Situat în colțul din dreapta-sus al barei de navigare"
+      },
+      "step2": {
+        "title": "Alege Tipul de Cont",
+        "desc": "Selectează Cumpărător, Vânzător sau Agent în funcție de nevoile tale"
+      },
+      "step3": {
+        "title": "Completează Detaliile",
+        "desc": "Introdu email, parolă, nume și număr de telefon"
+      },
+      "step4": {
+        "title": "Verifică Email-ul",
+        "desc": "Verifică căsuța de email și apasă pe linkul de verificare"
+      }
+    },
+    "interactiveMap": {
+      "title": "Utilizarea Hărții Interactive",
+      "intro": "Harta noastră interactivă este inima Balkan Estate. Iată cum să o folosești eficient:",
+      "mapView": "Vizualizare Hartă Interactivă",
+      "mapViewDesc": "Hartă completă cu marcaje de proprietăți",
+      "drawArea": "Desenează Zonă",
+      "panZoom": {
+        "title": "Panoramă & Zoom",
+        "desc": "Apasă și trage pentru a te deplasa. Folosește rotița mouse-ului sau gesturi pentru a mări/micșora."
+      },
+      "drawCustomAreas": {
+        "title": "Desenează Zone Personalizate",
+        "desc": "Folosește instrumentul de desenare pentru a selecta cartiere sau regiuni specifice care te interesează."
+      },
+      "clickProperties": {
+        "title": "Apasă pe Proprietăți",
+        "desc": "Apasă pe orice marcaj pentru a vedea detaliile proprietății, prețul și fotografiile într-o previzualizare rapidă."
+      },
+      "filterResults": {
+        "title": "Filtrează Rezultatele",
+        "desc": "Folosește filtre pentru interval de preț, tip de proprietate, dormitoare și multe alte caracteristici."
+      }
+    },
+    "savingProperties": {
+      "title": "Salvarea Proprietăților și Căutărilor",
+      "saveToFavorites": {
+        "title": "Salvează la Favorite",
+        "heading": "Pictogramă Inimă",
+        "desc": "Apasă pe pictograma inimă pe orice card sau pagină de detalii pentru a o salva în lista ta de favorite."
+      },
+      "saveSearch": {
+        "title": "Salvează Căutarea",
+        "heading": "Criterii de Căutare",
+        "desc": "După filtrare, apasă pe \"Salvează Căutarea\" pentru a fi notificat când sunt listate proprietăți noi care se potrivesc."
+      },
+      "getNotified": {
+        "title": "Primește Notificări",
+        "heading": "Alerte și Actualizări",
+        "desc": "Primește notificări prin email pentru reduceri de preț la favorite și anunțuri noi care se potrivesc căutărilor tale."
+      }
+    },
+    "contactingSellers": {
+      "title": "Contactarea Vânzătorilor și Agenților",
+      "contactForm": "Formular de Contact",
+      "onEveryPage": "Pe fiecare pagină de proprietate",
+      "multipleWays": "Multiple Modalități de Conectare",
+      "directMessage": {
+        "title": "Mesaj Direct",
+        "desc": "Trimite mesaje prin platforma noastră securizată"
+      },
+      "phoneCall": {
+        "title": "Apel Telefonic",
+        "desc": "Apasă pentru a apela pe dispozitive mobile"
+      },
+      "email": {
+        "title": "Email",
+        "desc": "Email direct către vânzător sau agent"
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "desc": "Mesaj rapid prin WhatsApp"
+      }
+    },
+    "createListing": {
+      "title": "Crearea unui Anunț de Proprietate",
+      "steps": {
+        "step1": {
+          "title": "Informații de Bază",
+          "desc": "Titlu, tip, preț"
+        },
+        "step2": {
+          "title": "Locație",
+          "desc": "Adresă, pin pe hartă"
+        },
+        "step3": {
+          "title": "Detalii",
+          "desc": "Camere, dimensiune, caracteristici"
+        },
+        "step4": {
+          "title": "Fotografii",
+          "desc": "Încarcă imagini"
+        },
+        "step5": {
+          "title": "Publică",
+          "desc": "Revizuiește și postează"
+        }
+      },
+      "photoTips": {
+        "title": "Sfaturi pentru Fotografii",
+        "tip1": "Folosește iluminare naturală pentru cele mai bune rezultate",
+        "tip2": "Include toate camerele și spațiile exterioare",
+        "tip3": "Curăță spațiul înainte de a face fotografii",
+        "tip4": "Prima fotografie apare ca miniatură"
+      },
+      "descriptionTips": {
+        "title": "Sfaturi pentru Descriere",
+        "tip1": "Evidențiază caracteristicile unice și îmbunătățirile",
+        "tip2": "Menționează facilitățile și transportul din apropiere",
+        "tip3": "Fii onest despre starea proprietății",
+        "tip4": "Include renovările sau îmbunătățirile recente"
+      }
+    },
+    "managingAccount": {
+      "title": "Gestionarea Contului Tău",
+      "profileSettings": {
+        "title": "Setări Profil",
+        "desc": "Actualizează numele, fotografia, numărul de telefon și alte detalii personale.",
+        "access": "Acces: Meniu → Profil"
+      },
+      "subscription": {
+        "title": "Abonament",
+        "desc": "Vizualizează planul tău, actualizează la Pro sau gestionează facturarea și metodele de plată.",
+        "access": "Acces: Meniu → Abonament"
+      },
+      "notifications": {
+        "title": "Notificări",
+        "desc": "Configurează alertele prin email, notificările de reducere a prețului și alertele pentru anunțuri noi.",
+        "access": "Acces: Meniu → Setări"
+      }
+    },
+    "proTips": {
+      "title": "Sfaturi Pro pentru Cea Mai Bună Experiență",
+      "completeProfile": {
+        "title": "Completează-ți Profilul",
+        "desc": "Vânzătorii și agenții răspund mai rapid la profilele complete cu fotografii."
+      },
+      "useSavedSearches": {
+        "title": "Folosește Căutările Salvate",
+        "desc": "Salvează criteriile de căutare pentru a primi notificări instant pentru potriviri noi."
+      },
+      "exploreCities": {
+        "title": "Funcția Explorează Orașe",
+        "desc": "Folosește \"Explorează\" pentru a descoperi cartiere și a obține informații despre piață."
+      },
+      "enableNotifications": {
+        "title": "Activează Notificările",
+        "desc": "Activează alertele prin email pentru a fi primul care află despre schimbările de preț."
+      }
+    }
+  },
+  "agencies": {
+    "title": "Construiește-ți Imperiul Imobiliar",
+    "subtitle": "Creează-ți agenția, invită agenți și gestionează întreaga echipă dintr-o singură platformă puternică",
+    "pricing": {
+      "planName": "Plan Enterprise",
+      "price": "€1,000",
+      "period": "/an",
+      "tagline": "Tot ce ai nevoie pentru a conduce o agenție de succes",
+      "whatsIncluded": "Ce este Inclus",
+      "features": {
+        "listings": "500 anunțuri de proprietăți (extensibil)",
+        "teamMembers": "5 membri ai echipei incluși",
+        "promotions": "5 cupoane de promovare/lună",
+        "branding": "Pagină de branding pentru agenție",
+        "ai": "Utilizare AI nelimitată pentru toți agenții",
+        "accountManager": "Manager de cont dedicat",
+        "analytics": "Tablou de bord analitice echipă"
+      }
+    },
+    "howToGetStarted": "Cum să Începi",
+    "steps": {
+      "subscribe": {
+        "title": "Abonează-te",
+        "desc": "Alege planul Enterprise și finalizează abonamentul"
+      },
+      "createAgency": {
+        "title": "Creează Agenția",
+        "desc": "Configurează profilul agenției cu logo, descriere și locație"
+      },
+      "generateCoupons": {
+        "title": "Generează Cupoane",
+        "desc": "Creează până la 5 coduri de cupon pentru a invita agenți în echipa ta"
+      },
+      "growTogether": {
+        "title": "Crește Împreună",
+        "desc": "Agenții tăi încep să listeze proprietăți și agenția ta prosperă"
+      }
+    },
+    "agentInvitation": {
+      "title": "Sistem de Invitație pentru Agenți",
+      "invitationCodes": {
+        "title": "Coduri de Invitație",
+        "desc": "Distribuie codul unic de invitație al agenției tale cu agenții care doresc să se alăture. Aceștia îl pot folosi pentru a solicita intrarea în agenția ta.",
+        "example": "Exemplu cod de invitație"
+      },
+      "subscriptionCoupons": {
+        "title": "Cupoane de Abonament pentru Agenți",
+        "desc": "Generează coduri de cupon care oferă agenților un abonament Pro anual GRATUIT când se alătură agenției tale. Fiecare agent primește 20 anunțuri/lună."
+      }
+    }
+  },
+  "agents": {
+    "title": "Alătură-te unei Agenții sau Lucrează Independent",
+    "subtitle": "Alege-ți calea: lucrează independent cu abonament Pro sau alătură-te unei agenții gratuit",
+    "independent": {
+      "title": "Agent Independent",
+      "planType": "Abonament Pro",
+      "price": "€25",
+      "period": "/lună",
+      "yearlyNote": "sau €200/an (economisești 33%)",
+      "features": {
+        "listings": "20 anunțuri/lună sau 250/an",
+        "promotions": "3 cupoane de promovare/lună",
+        "profile": "Profil personal de agent",
+        "ai": "Chat și informații AI nelimitate",
+        "analytics": "Tablou de bord analitice avansate",
+        "support": "Suport prioritar"
+      }
+    },
+    "agency": {
+      "title": "Agent de Agenție",
+      "planType": "Alătură-te cu Cupon",
+      "free": "GRATUIT",
+      "price": "€0",
+      "period": "/an",
+      "features": {
+        "listings": "20 anunțuri active pe lună",
+        "promotions": "Împarte pool-ul de promovare al agenției",
+        "branding": "Branding agenție pe anunțuri",
+        "collaboration": "Colaborare în echipă",
+        "support": "Rețea de suport agenție"
+      },
+      "note": "* Obține un cod de cupon de la proprietarul agenției pentru a te alătura gratuit"
+    },
+    "howToJoin": {
+      "title": "Cum să te Alături unei Agenții",
+      "step1": {
+        "title": "Obține un Cod de Cupon",
+        "desc": "Cere proprietarului unei agenții codul de cupon pentru abonamentul de agent"
+      },
+      "step2": {
+        "title": "Valorifică Codul",
+        "desc": "Introdu codul de cupon în setările contului pentru a activa abonamentul gratuit"
+      },
+      "step3": {
+        "title": "Începe să Listezi",
+        "desc": "Începe să postezi proprietăți sub brandul agenției tale și colaborează cu echipa"
+      }
+    }
+  },
+  "buyers": {
+    "title": "Găsește-ți Proprietatea Visurilor",
+    "subtitle": "Caută, salvează și conectează-te cu vânzători în întreaga regiune Balcanică - funcții de bază gratuite cu opțiune de upgrade la Pro",
+    "freePlan": {
+      "title": "Funcții Gratuite",
+      "price": "€0",
+      "period": "pentru totdeauna",
+      "tagline": "Tot ce ai nevoie pentru a începe căutarea proprietății",
+      "features": {
+        "browse": "Răsfoiește toate anunțurile",
+        "mapSearch": "Căutare hartă interactivă",
+        "favorites": "Salvează favorite",
+        "contact": "Contactează vânzători și agenți",
+        "insights": "Informații de bază despre piață",
+        "profiles": "Profile agenți și agenții"
+      }
+    },
+    "proPlan": {
+      "title": "Cumpărător Pro",
+      "trial": "PROBĂ GRATUITĂ 7 ZILE",
+      "price": "€3",
+      "period": "/lună",
+      "tagline": "Fii înaintea altor cumpărători cu funcții premium",
+      "features": {
+        "notifications": "Notificări instant prin email și SMS",
+        "savedSearches": "Căutări salvate nelimitate",
+        "earlyAccess": "Acces anticipat la anunțuri noi",
+        "insights": "Informații avansate despre piață",
+        "priceDrops": "Notificări reduceri de preț",
+        "calculator": "Calculator investiții",
+        "mortgage": "Pre-calificare ipotecă",
+        "adFree": "Navigare fără reclame"
+      }
+    },
+    "searchTools": {
+      "title": "Instrumente Puternice de Căutare",
+      "interactiveMap": {
+        "title": "Căutare Hartă Interactivă",
+        "desc": "Desenează zone personalizate pe hartă pentru a găsi proprietăți exact unde le dorești"
+      },
+      "saveFavorites": {
+        "title": "Salvează Favorite",
+        "desc": "Ține evidența proprietăților care îți plac și primește notificări când prețurile se schimbă"
+      },
+      "savedSearches": {
+        "title": "Căutări Salvate",
+        "desc": "Creează căutări salvate și primește alerte când sunt listate proprietăți noi care se potrivesc"
+      },
+      "directMessaging": {
+        "title": "Mesagerie Directă",
+        "desc": "Contactează vânzătorii și agenții direct prin sistemul nostru securizat de mesagerie"
+      },
+      "marketInsights": {
+        "title": "Informații despre Piață",
+        "desc": "Vizualizează statistici despre cartiere, tendințe de preț și informații despre zonă"
+      },
+      "agentProfiles": {
+        "title": "Profile Agenți",
+        "desc": "Răsfoiește agenți și agenții verificate pentru a găsi profesioniști de încredere"
+      }
+    },
+    "journey": {
+      "title": "Călătoria ta în Căutarea Casei",
+      "search": {
+        "step": "Caută",
+        "desc": "Folosește filtre și hartă"
+      },
+      "save": {
+        "step": "Salvează",
+        "desc": "Marchează favorite"
+      },
+      "compare": {
+        "step": "Compară",
+        "desc": "Analizează opțiunile"
+      },
+      "contact": {
+        "step": "Contactează",
+        "desc": "Trimite mesaje vânzătorilor"
+      },
+      "visit": {
+        "step": "Vizitează",
+        "desc": "Programează vizionări"
+      }
+    },
+    "seeItInAction": {
+      "title": "Vezi în Acțiune",
+      "mapDemo": {
+        "title": "Demo Hartă Interactivă",
+        "coming": "Captură de ecran în curând",
+        "heading": "Desenează și Caută",
+        "desc": "Desenează zone personalizate pe hartă pentru a găsi proprietăți în cartierele preferate. Filtrează după preț, dimensiune și facilități în timp real."
+      },
+      "saveDemo": {
+        "title": "Vizualizare Proprietăți Salvate",
+        "coming": "Captură de ecran în curând",
+        "heading": "Salvează și Compară",
+        "desc": "Salvează proprietățile care îți plac și compară-le una lângă alta. Primește notificări instant când prețurile se schimbă sau când devin disponibile proprietăți similare."
+      }
+    }
+  },
+  "sellers": {
+    "title": "Vinde-ți Proprietatea",
+    "subtitle": "Listează-ți proprietatea și ajunge la mii de cumpărători potențiali din întreaga regiune",
+    "freePlan": {
+      "title": "Plan Gratuit",
+      "price": "€0",
+      "period": "/lună",
+      "tagline": "Perfect pentru vânzători privați cu doar câteva proprietăți",
+      "features": {
+        "listings": "3 anunțuri active",
+        "searches": "3 căutări salvate",
+        "ai": "3 mesaje chat AI",
+        "photos": "Galerie foto (până la 10 imagini)",
+        "messaging": "Mesagerie directă",
+        "analytics": "Analize de bază"
+      }
+    },
+    "proPlan": {
+      "title": "Plan Pro",
+      "popular": "CEL MAI POPULAR",
+      "price": "€25",
+      "period": "/lună",
+      "yearlyNote": "sau €200/an (economisești 33%)",
+      "tagline": "Pentru vânzători serioși care vor expunere maximă",
+      "features": {
+        "listings": "20 anunțuri/lună sau 250/an",
+        "promotions": "3 cupoane de promovare/lună",
+        "ai": "Chat și informații AI nelimitate",
+        "searches": "Căutări salvate nelimitate",
+        "analytics": "Tablou de bord analitice avansate",
+        "leads": "Instrumente de gestionare a clienților potențiali",
+        "support": "Suport prioritar"
+      }
+    },
+    "howToList": {
+      "title": "Cum să Listezi Proprietatea",
+      "step1": {
+        "title": "Creează Cont",
+        "desc": "Înregistrează-te ca vânzător privat sau agent"
+      },
+      "step2": {
+        "title": "Adaugă Detalii",
+        "desc": "Introdu informații despre proprietate, fotografii și stabilește prețul"
+      },
+      "step3": {
+        "title": "Publică",
+        "desc": "Publică și anunțul tău apare pe hartă"
+      },
+      "step4": {
+        "title": "Conectează-te",
+        "desc": "Primește întrebări și răspunde cumpărătorilor interesați"
+      }
+    },
+    "promotions": {
+      "title": "Crește Vizibilitatea Anunțului",
+      "featured": {
+        "title": "Evidențiat",
+        "price": "€15",
+        "duration": "7 zile",
+        "features": {
+          "border": "Margine aurie",
+          "position": "În vârful rezultatelor de căutare",
+          "views": "De 3 ori mai multe vizualizări"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25",
+        "duration": "7 zile",
+        "features": {
+          "badge": "Insignă flacără",
+          "position": "Poziționare premium",
+          "views": "De 5 ori mai multe vizualizări",
+          "social": "Promovare pe social media"
+        }
+      },
+      "highlight": {
+        "title": "Highlight",
+        "price": "€10",
+        "duration": "7 zile",
+        "features": {
+          "highlight": "Evidențiere albastră",
+          "position": "Iese în evidență în liste",
+          "views": "De 2 ori mai multe vizualizări"
+        }
+      }
+    },
+    "seeItInAction": {
+      "title": "Vezi în Acțiune",
+      "listingDemo": {
+        "title": "Creator de Anunțuri",
+        "coming": "Captură de ecran în curând",
+        "heading": "Creare Ușoară de Anunțuri",
+        "desc": "Creează anunțuri frumoase de proprietăți în câteva minute cu formularul nostru intuitiv. Adaugă fotografii, stabilește prețul și descrie cele mai bune caracteristici ale proprietății."
+      },
+      "analyticsDemo": {
+        "title": "Tablou de Bord Analitice",
+        "coming": "Captură de ecran în curând",
+        "heading": "Urmărește Performanța",
+        "desc": "Monitorizează vizualizările, întrebările și implicarea pentru toate anunțurile tale. Vezi care proprietăți performează cel mai bine și optimizează-ți strategia."
+      }
+    }
+  },
+  "cta": {
+    "title": "Gata să Începi?",
+    "subtitle": "Alătură-te miilor de utilizatori care deja găsesc și listează proprietăți pe Balkan Estate",
+    "browseProperties": "Răsfoiește Proprietăți",
+    "listProperty": "Listează-ți Proprietatea"
+  },
+  "faq": {
+    "title": "Întrebări Frecvente",
+    "q1": {
+      "question": "Este gratuit să răsfoiesc proprietățile?",
+      "answer": "Da! Răsfoirea, căutarea, salvarea favoritelor și contactarea vânzătorilor este complet gratuită pentru cumpărători."
+    },
+    "q2": {
+      "question": "Cum funcționează codurile de cupon pentru agenții?",
+      "answer": "Proprietarii de agenții pot genera până la 5 coduri de cupon. Când un agent valorifică un cod, primește un abonament Pro anual gratuit (20 anunțuri/lună) și se alătură acelei agenții."
+    },
+    "q3": {
+      "question": "Pot trece de la agent independent la agent de agenție?",
+      "answer": "Da! Dacă primești un cod de cupon de la o agenție, îl poți valorifica pentru a te alătura echipei lor. Anunțurile tale vor fi apoi asociate cu acea agenție."
+    },
+    "q4": {
+      "question": "Ce se întâmplă când abonamentul meu expiră?",
+      "answer": "Anunțurile tale existente rămân active, dar nu vei putea crea altele noi până când reînnoiești. Vei primi memento-uri înainte de expirare."
+    },
+    "q5": {
+      "question": "Cum funcționează creditele de promovare?",
+      "answer": "Creditele de promovare îți permit să crești vizibilitatea anunțurilor pentru a apărea mai sus în rezultatele de căutare. Utilizatorii Pro primesc 3 credite/lună, agențiile primesc 15 pentru a împărți între echipa lor."
+    }
+  }
+}

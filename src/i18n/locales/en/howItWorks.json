@@ -1,0 +1,534 @@
+{
+  "hero": {
+    "title": "How Balkan Estate Works",
+    "subtitle": "The premier real estate platform connecting buyers, sellers, agents, and agencies across the Balkans"
+  },
+  "tabs": {
+    "gettingStarted": "Getting Started",
+    "forAgencies": "For Agencies",
+    "forAgents": "For Agents",
+    "forBuyers": "For Buyers",
+    "forSellers": "For Sellers"
+  },
+  "gettingStarted": {
+    "welcome": {
+      "title": "Welcome to Balkan Estate",
+      "subtitle": "Your complete guide to navigating, searching, and using all features of the premier Balkan real estate platform"
+    },
+    "mainNavigation": {
+      "title": "Main Navigation",
+      "home": {
+        "name": "Home",
+        "desc": "Browse all properties with map view"
+      },
+      "search": {
+        "name": "Search",
+        "desc": "Advanced filters and search tools"
+      },
+      "agents": {
+        "name": "Agents",
+        "desc": "Find verified real estate agents"
+      },
+      "agencies": {
+        "name": "Agencies",
+        "desc": "Discover professional agencies"
+      },
+      "explore": {
+        "name": "Explore",
+        "desc": "Explore cities and neighborhoods"
+      }
+    },
+    "createAccount": {
+      "title": "Creating Your Account",
+      "signUpModal": "Sign Up Modal",
+      "clickSignUp": "Click \"Sign Up\" in header",
+      "step1": {
+        "title": "Click \"Sign Up\" Button",
+        "desc": "Located in the top-right corner of the navigation bar"
+      },
+      "step2": {
+        "title": "Choose Your Account Type",
+        "desc": "Select Buyer, Seller, or Agent based on your needs"
+      },
+      "step3": {
+        "title": "Fill in Your Details",
+        "desc": "Enter email, password, name, and phone number"
+      },
+      "step4": {
+        "title": "Verify Your Email",
+        "desc": "Check your inbox and click the verification link"
+      }
+    },
+    "interactiveMap": {
+      "title": "Using the Interactive Map",
+      "intro": "Our interactive map is the heart of Balkan Estate. Here's how to use it effectively:",
+      "mapView": "Interactive Map View",
+      "mapViewDesc": "Full property map with markers",
+      "drawArea": "Draw Area",
+      "panZoom": {
+        "title": "Pan & Zoom",
+        "desc": "Click and drag to move around. Use scroll wheel or pinch to zoom in/out."
+      },
+      "drawCustomAreas": {
+        "title": "Draw Custom Areas",
+        "desc": "Use the drawing tool to select specific neighborhoods or regions you're interested in."
+      },
+      "clickProperties": {
+        "title": "Click on Properties",
+        "desc": "Click any marker to see property details, price, and photos in a quick preview."
+      },
+      "filterResults": {
+        "title": "Filter Results",
+        "desc": "Use filters for price range, property type, bedrooms, and more features."
+      }
+    },
+    "savingProperties": {
+      "title": "Saving Properties & Searches",
+      "saveToFavorites": {
+        "title": "Save to Favorites",
+        "heading": "Heart Icon",
+        "desc": "Click the heart icon on any property card or detail page to save it to your favorites list."
+      },
+      "saveSearch": {
+        "title": "Save Search",
+        "heading": "Search Criteria",
+        "desc": "After filtering, click \"Save Search\" to get notified when new matching properties are listed."
+      },
+      "getNotified": {
+        "title": "Get Notified",
+        "heading": "Alerts & Updates",
+        "desc": "Receive email notifications for price drops on favorites and new listings matching your searches."
+      }
+    },
+    "contactingSellers": {
+      "title": "Contacting Sellers & Agents",
+      "contactForm": "Contact Form",
+      "onEveryPage": "On every property page",
+      "multipleWays": "Multiple Ways to Connect",
+      "directMessage": {
+        "title": "Direct Message",
+        "desc": "Send messages through our secure platform"
+      },
+      "phoneCall": {
+        "title": "Phone Call",
+        "desc": "Click to call on mobile devices"
+      },
+      "email": {
+        "title": "Email",
+        "desc": "Direct email to seller or agent"
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "desc": "Quick message via WhatsApp"
+      }
+    },
+    "createListing": {
+      "title": "Creating a Property Listing",
+      "steps": {
+        "step1": {
+          "title": "Basic Info",
+          "desc": "Title, type, price"
+        },
+        "step2": {
+          "title": "Location",
+          "desc": "Address, map pin"
+        },
+        "step3": {
+          "title": "Details",
+          "desc": "Rooms, size, features"
+        },
+        "step4": {
+          "title": "Photos",
+          "desc": "Upload images"
+        },
+        "step5": {
+          "title": "Publish",
+          "desc": "Review & post"
+        }
+      },
+      "photoTips": {
+        "title": "Photo Tips",
+        "tip1": "Use natural lighting for best results",
+        "tip2": "Include all rooms and outdoor spaces",
+        "tip3": "Declutter before taking photos",
+        "tip4": "First photo appears as the thumbnail"
+      },
+      "descriptionTips": {
+        "title": "Description Tips",
+        "tip1": "Highlight unique features and upgrades",
+        "tip2": "Mention nearby amenities and transport",
+        "tip3": "Be honest about the property condition",
+        "tip4": "Include recent renovations or improvements"
+      }
+    },
+    "managingAccount": {
+      "title": "Managing Your Account",
+      "profileSettings": {
+        "title": "Profile Settings",
+        "desc": "Update your name, photo, phone number, and other personal details.",
+        "access": "Access: Menu → Profile"
+      },
+      "subscription": {
+        "title": "Subscription",
+        "desc": "View your plan, upgrade to Pro, or manage billing and payment methods.",
+        "access": "Access: Menu → Subscription"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "desc": "Configure email alerts, price drop notifications, and new listing alerts.",
+        "access": "Access: Menu → Settings"
+      }
+    },
+    "proTips": {
+      "title": "Pro Tips for Best Experience",
+      "completeProfile": {
+        "title": "Complete Your Profile",
+        "desc": "Sellers and agents respond faster to complete profiles with photos."
+      },
+      "useSavedSearches": {
+        "title": "Use Saved Searches",
+        "desc": "Save your search criteria to get instant notifications for new matches."
+      },
+      "exploreCities": {
+        "title": "Explore Cities Feature",
+        "desc": "Use \"Explore\" to discover neighborhoods and get market insights."
+      },
+      "enableNotifications": {
+        "title": "Enable Notifications",
+        "desc": "Turn on email alerts to be the first to know about price changes."
+      }
+    }
+  },
+  "agencies": {
+    "title": "Build Your Real Estate Empire",
+    "subtitle": "Create your agency, invite agents, and manage your entire team from one powerful platform",
+    "pricing": {
+      "planName": "Enterprise Plan",
+      "price": "€1,000",
+      "period": "/year",
+      "tagline": "Everything you need to run a successful agency",
+      "whatsIncluded": "What's Included",
+      "features": {
+        "listings": "500 property listings (expandable)",
+        "teamMembers": "5 team members included",
+        "promotions": "5 promotion coupons/month",
+        "branding": "Agency branding page",
+        "ai": "Unlimited AI usage for all agents",
+        "accountManager": "Dedicated account manager",
+        "analytics": "Team analytics dashboard"
+      }
+    },
+    "howToGetStarted": "How to Get Started",
+    "steps": {
+      "subscribe": {
+        "title": "Subscribe",
+        "desc": "Choose the Enterprise plan and complete your subscription"
+      },
+      "createAgency": {
+        "title": "Create Agency",
+        "desc": "Set up your agency profile with logo, description, and location"
+      },
+      "generateCoupons": {
+        "title": "Generate Coupons",
+        "desc": "Create up to 5 coupon codes to invite agents to your team"
+      },
+      "growTogether": {
+        "title": "Grow Together",
+        "desc": "Your agents start listing properties and your agency thrives"
+      }
+    },
+    "agentInvitation": {
+      "title": "Agent Invitation System",
+      "invitationCodes": {
+        "title": "Invitation Codes",
+        "desc": "Share your unique agency invitation code with agents who want to join. They can use it to request membership to your agency.",
+        "example": "Example invitation code"
+      },
+      "subscriptionCoupons": {
+        "title": "Agent Subscription Coupons",
+        "desc": "Generate coupon codes that give agents a FREE yearly Pro subscription when they join your agency. Each agent gets 20 listings/month."
+      }
+    }
+  },
+  "agents": {
+    "title": "Join an Agency or Go Solo",
+    "subtitle": "Choose your path: work independently with Pro subscription or join an agency for free",
+    "independent": {
+      "title": "Independent Agent",
+      "planType": "Pro Subscription",
+      "price": "€25",
+      "period": "/month",
+      "yearlyNote": "or €200/year (save 33%)",
+      "features": {
+        "listings": "20 listings/month or 250/year",
+        "promotions": "3 promotion coupons/month",
+        "profile": "Personal agent profile",
+        "ai": "Unlimited AI chat & insights",
+        "analytics": "Advanced analytics dashboard",
+        "support": "Priority support"
+      }
+    },
+    "agency": {
+      "title": "Agency Agent",
+      "planType": "Join with Coupon",
+      "free": "FREE",
+      "price": "€0",
+      "period": "/year",
+      "features": {
+        "listings": "20 active listings per month",
+        "promotions": "Share agency promotion pool",
+        "branding": "Agency branding on listings",
+        "collaboration": "Team collaboration",
+        "support": "Agency support network"
+      },
+      "note": "* Get a coupon code from your agency owner to join for free"
+    },
+    "howToJoin": {
+      "title": "How to Join an Agency",
+      "step1": {
+        "title": "Get a Coupon Code",
+        "desc": "Ask an agency owner for their agent subscription coupon code"
+      },
+      "step2": {
+        "title": "Redeem the Code",
+        "desc": "Enter the coupon code in your account settings to activate your free subscription"
+      },
+      "step3": {
+        "title": "Start Listing",
+        "desc": "Begin posting properties under your agency's brand and collaborate with your team"
+      }
+    }
+  },
+  "buyers": {
+    "title": "Find Your Dream Property",
+    "subtitle": "Search, save, and connect with sellers across the Balkans - free basic features with optional Pro upgrade",
+    "freePlan": {
+      "title": "Free Features",
+      "price": "€0",
+      "period": "forever",
+      "tagline": "Everything you need to start your property search",
+      "features": {
+        "browse": "Browse all listings",
+        "mapSearch": "Interactive map search",
+        "favorites": "Save favorites",
+        "contact": "Contact sellers & agents",
+        "insights": "Basic market insights",
+        "profiles": "Agent & agency profiles"
+      }
+    },
+    "proPlan": {
+      "title": "Buyer Pro",
+      "trial": "7-DAY FREE TRIAL",
+      "price": "€3",
+      "period": "/month",
+      "tagline": "Get ahead of other buyers with premium features",
+      "features": {
+        "notifications": "Instant email & SMS notifications",
+        "savedSearches": "Unlimited saved searches",
+        "earlyAccess": "Early access to new listings",
+        "insights": "Advanced market insights",
+        "priceDrops": "Price drop notifications",
+        "calculator": "Investment calculator",
+        "mortgage": "Mortgage pre-qualification",
+        "adFree": "Ad-free browsing"
+      }
+    },
+    "searchTools": {
+      "title": "Powerful Search Tools",
+      "interactiveMap": {
+        "title": "Interactive Map Search",
+        "desc": "Draw custom areas on the map to find properties exactly where you want them"
+      },
+      "saveFavorites": {
+        "title": "Save Favorites",
+        "desc": "Keep track of properties you love and get notified when prices change"
+      },
+      "savedSearches": {
+        "title": "Saved Searches",
+        "desc": "Create saved searches and get alerts when new matching properties are listed"
+      },
+      "directMessaging": {
+        "title": "Direct Messaging",
+        "desc": "Contact sellers and agents directly through our secure messaging system"
+      },
+      "marketInsights": {
+        "title": "Market Insights",
+        "desc": "View neighborhood statistics, price trends, and area information"
+      },
+      "agentProfiles": {
+        "title": "Agent Profiles",
+        "desc": "Browse verified agents and agencies to find trusted professionals"
+      }
+    },
+    "journey": {
+      "title": "Your Home-Finding Journey",
+      "search": {
+        "step": "Search",
+        "desc": "Use filters & map"
+      },
+      "save": {
+        "step": "Save",
+        "desc": "Bookmark favorites"
+      },
+      "compare": {
+        "step": "Compare",
+        "desc": "Analyze options"
+      },
+      "contact": {
+        "step": "Contact",
+        "desc": "Message sellers"
+      },
+      "visit": {
+        "step": "Visit",
+        "desc": "Schedule viewings"
+      }
+    },
+    "seeItInAction": {
+      "title": "See It In Action",
+      "mapDemo": {
+        "title": "Interactive Map Demo",
+        "coming": "Screenshot coming soon",
+        "heading": "Draw & Search",
+        "desc": "Draw custom areas on the map to find properties in your preferred neighborhoods. Filter by price, size, and amenities in real-time."
+      },
+      "saveDemo": {
+        "title": "Saved Properties View",
+        "coming": "Screenshot coming soon",
+        "heading": "Save & Compare",
+        "desc": "Save properties you love and compare them side by side. Get instant notifications when prices change or similar properties become available."
+      }
+    }
+  },
+  "sellers": {
+    "title": "Sell Your Property",
+    "subtitle": "List your property and reach thousands of potential buyers across the region",
+    "freePlan": {
+      "title": "Free Plan",
+      "price": "€0",
+      "period": "/month",
+      "tagline": "Perfect for private sellers with just a few properties",
+      "features": {
+        "listings": "3 active listings",
+        "searches": "3 saved searches",
+        "ai": "3 AI chat messages",
+        "photos": "Photo gallery (up to 10 images)",
+        "messaging": "Direct messaging",
+        "analytics": "Basic analytics"
+      }
+    },
+    "proPlan": {
+      "title": "Pro Plan",
+      "popular": "MOST POPULAR",
+      "price": "€25",
+      "period": "/month",
+      "yearlyNote": "or €200/year (save 33%)",
+      "tagline": "For serious sellers who want maximum exposure",
+      "features": {
+        "listings": "20 listings/month or 250/year",
+        "promotions": "3 promotion coupons/month",
+        "ai": "Unlimited AI chat & insights",
+        "searches": "Unlimited saved searches",
+        "analytics": "Advanced analytics dashboard",
+        "leads": "Lead management tools",
+        "support": "Priority support"
+      }
+    },
+    "howToList": {
+      "title": "How to List Your Property",
+      "step1": {
+        "title": "Create Account",
+        "desc": "Sign up as a private seller or agent"
+      },
+      "step2": {
+        "title": "Add Details",
+        "desc": "Enter property info, photos, and set your price"
+      },
+      "step3": {
+        "title": "Go Live",
+        "desc": "Publish and your listing appears on the map"
+      },
+      "step4": {
+        "title": "Connect",
+        "desc": "Receive inquiries and respond to interested buyers"
+      }
+    },
+    "promotions": {
+      "title": "Boost Your Listing Visibility",
+      "featured": {
+        "title": "Featured",
+        "price": "€15",
+        "duration": "7 days",
+        "features": {
+          "border": "Golden border",
+          "position": "Top of search results",
+          "views": "3x more views"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25",
+        "duration": "7 days",
+        "features": {
+          "badge": "Fire badge",
+          "position": "Premium positioning",
+          "views": "5x more views",
+          "social": "Social media feature"
+        }
+      },
+      "highlight": {
+        "title": "Highlight",
+        "price": "€10",
+        "duration": "7 days",
+        "features": {
+          "highlight": "Blue highlight",
+          "position": "Stand out in lists",
+          "views": "2x more views"
+        }
+      }
+    },
+    "seeItInAction": {
+      "title": "See It In Action",
+      "listingDemo": {
+        "title": "Listing Creator",
+        "coming": "Screenshot coming soon",
+        "heading": "Easy Listing Creation",
+        "desc": "Create beautiful property listings in minutes with our intuitive form. Add photos, set your price, and describe your property's best features."
+      },
+      "analyticsDemo": {
+        "title": "Analytics Dashboard",
+        "coming": "Screenshot coming soon",
+        "heading": "Track Your Performance",
+        "desc": "Monitor views, inquiries, and engagement for all your listings. See which properties perform best and optimize your strategy."
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to Get Started?",
+    "subtitle": "Join thousands of users already finding and listing properties on Balkan Estate",
+    "browseProperties": "Browse Properties",
+    "listProperty": "List Your Property"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": {
+      "question": "Is it free to browse properties?",
+      "answer": "Yes! Browsing, searching, saving favorites, and contacting sellers is completely free for buyers."
+    },
+    "q2": {
+      "question": "How do agency coupon codes work?",
+      "answer": "Agency owners can generate up to 5 coupon codes. When an agent redeems a code, they get a free yearly Pro subscription (20 listings/month) and join that agency."
+    },
+    "q3": {
+      "question": "Can I switch from independent agent to agency agent?",
+      "answer": "Yes! If you receive a coupon code from an agency, you can redeem it to join their team. Your listings will then be associated with that agency."
+    },
+    "q4": {
+      "question": "What happens when my subscription expires?",
+      "answer": "Your existing listings remain active, but you won't be able to create new ones until you renew. You'll receive reminders before expiration."
+    },
+    "q5": {
+      "question": "How do promotion credits work?",
+      "answer": "Promotion credits let you boost your listings to appear higher in search results. Pro users get 3 credits/month, agencies get 15 to share among their team."
+    }
+  }
+}

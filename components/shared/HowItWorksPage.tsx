@@ -93,7 +93,7 @@ const BellIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 const HowItWorksPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['howItWorks']);
   const { state, dispatch } = useAppContext();
   const activeTab = state.howItWorksTab;
 
@@ -103,11 +103,11 @@ const HowItWorksPage: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'getting-started' as HowItWorksTab, label: 'Getting Started', icon: StarIcon, color: 'cyan' },
-    { id: 'agencies' as HowItWorksTab, label: 'For Agencies', icon: BuildingIcon, color: 'orange' },
-    { id: 'agents' as HowItWorksTab, label: 'For Agents', icon: UserGroupIcon, color: 'purple' },
-    { id: 'buyers' as HowItWorksTab, label: 'For Buyers', icon: SearchIcon, color: 'blue' },
-    { id: 'sellers' as HowItWorksTab, label: 'For Sellers', icon: HomeIcon, color: 'green' },
+    { id: 'getting-started' as HowItWorksTab, label: t('howItWorks:tabs.gettingStarted'), icon: StarIcon, color: 'cyan' },
+    { id: 'agencies' as HowItWorksTab, label: t('howItWorks:tabs.forAgencies'), icon: BuildingIcon, color: 'orange' },
+    { id: 'agents' as HowItWorksTab, label: t('howItWorks:tabs.forAgents'), icon: UserGroupIcon, color: 'purple' },
+    { id: 'buyers' as HowItWorksTab, label: t('howItWorks:tabs.forBuyers'), icon: SearchIcon, color: 'blue' },
+    { id: 'sellers' as HowItWorksTab, label: t('howItWorks:tabs.forSellers'), icon: HomeIcon, color: 'green' },
   ];
 
   const getTabColor = (tab: HowItWorksTab) => {
@@ -156,10 +156,10 @@ const HowItWorksPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 relative">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              How Balkan Estate Works
+              {t('howItWorks:hero.title')}
             </h1>
             <p className="text-xl text-white/80 max-w-2xl mx-auto">
-              The premier real estate platform connecting buyers, sellers, agents, and agencies across the Balkans
+              {t('howItWorks:hero.subtitle')}
             </p>
           </div>
         </div>
@@ -206,9 +206,9 @@ const HowItWorksPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-cyan-100 rounded-full mb-4">
                 <StarIcon className="w-8 h-8 text-cyan-600" />
               </div>
-              <h2 className="text-3xl font-bold text-neutral-800 mb-3">Welcome to Balkan Estate</h2>
+              <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:gettingStarted.welcome.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                Your complete guide to navigating, searching, and using all features of the premier Balkan real estate platform
+                {t('howItWorks:gettingStarted.welcome.subtitle')}
               </p>
             </div>
 
@@ -216,14 +216,14 @@ const HowItWorksPage: React.FC = () => {
             <div className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-3xl p-8 md:p-12 text-white mb-12 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
               <div className="relative">
-                <h3 className="text-2xl font-bold mb-6 text-center">Main Navigation</h3>
+                <h3 className="text-2xl font-bold mb-6 text-center">{t('howItWorks:gettingStarted.mainNavigation.title')}</h3>
                 <div className="grid md:grid-cols-5 gap-4">
                   {[
-                    { name: 'Home', desc: 'Browse all properties with map view', icon: HomeIcon },
-                    { name: 'Search', desc: 'Advanced filters and search tools', icon: SearchIcon },
-                    { name: 'Agents', desc: 'Find verified real estate agents', icon: UserGroupIcon },
-                    { name: 'Agencies', desc: 'Discover professional agencies', icon: BuildingIcon },
-                    { name: 'Explore', desc: 'Explore cities and neighborhoods', icon: MapIcon },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.home.name'), desc: t('howItWorks:gettingStarted.mainNavigation.home.desc'), icon: HomeIcon },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.search.name'), desc: t('howItWorks:gettingStarted.mainNavigation.search.desc'), icon: SearchIcon },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.agents.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agents.desc'), icon: UserGroupIcon },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.agencies.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agencies.desc'), icon: BuildingIcon },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.explore.name'), desc: t('howItWorks:gettingStarted.mainNavigation.explore.desc'), icon: MapIcon },
                   ].map((nav) => {
                     const NavIcon = nav.icon;
                     return (
@@ -242,7 +242,7 @@ const HowItWorksPage: React.FC = () => {
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">1</div>
-                <h3 className="text-2xl font-bold text-neutral-800">Creating Your Account</h3>
+                <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:gettingStarted.createAccount.title')}</h3>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
@@ -251,8 +251,8 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-video bg-gradient-to-br from-cyan-100 to-teal-50 flex items-center justify-center relative">
                     <div className="text-center">
                       <UserIcon className="w-16 h-16 text-cyan-300 mx-auto mb-2" />
-                      <p className="text-cyan-500 font-medium">Sign Up Modal</p>
-                      <p className="text-cyan-400 text-sm">Click "Sign Up" in header</p>
+                      <p className="text-cyan-500 font-medium">{t('howItWorks:gettingStarted.createAccount.signUpModal')}</p>
+                      <p className="text-cyan-400 text-sm">{t('howItWorks:gettingStarted.createAccount.clickSignUp')}</p>
                     </div>
                   </div>
                 </div>
@@ -265,8 +265,8 @@ const HowItWorksPage: React.FC = () => {
                         <span className="text-cyan-600 font-semibold text-sm">1</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Click "Sign Up" Button</h4>
-                        <p className="text-sm text-neutral-600">Located in the top-right corner of the navigation bar</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.createAccount.step1.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.createAccount.step1.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -276,8 +276,8 @@ const HowItWorksPage: React.FC = () => {
                         <span className="text-cyan-600 font-semibold text-sm">2</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Choose Your Account Type</h4>
-                        <p className="text-sm text-neutral-600">Select Buyer, Seller, or Agent based on your needs</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.createAccount.step2.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.createAccount.step2.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -287,8 +287,8 @@ const HowItWorksPage: React.FC = () => {
                         <span className="text-cyan-600 font-semibold text-sm">3</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Fill in Your Details</h4>
-                        <p className="text-sm text-neutral-600">Enter email, password, name, and phone number</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.createAccount.step3.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.createAccount.step3.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -298,8 +298,8 @@ const HowItWorksPage: React.FC = () => {
                         <span className="text-cyan-600 font-semibold text-sm">4</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Verify Your Email</h4>
-                        <p className="text-sm text-neutral-600">Check your inbox and click the verification link</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.createAccount.step4.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.createAccount.step4.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -311,21 +311,21 @@ const HowItWorksPage: React.FC = () => {
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">2</div>
-                <h3 className="text-2xl font-bold text-neutral-800">Using the Interactive Map</h3>
+                <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:gettingStarted.interactiveMap.title')}</h3>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Steps */}
                 <div className="space-y-4">
                   <p className="text-neutral-600 mb-4">
-                    Our interactive map is the heart of Balkan Estate. Here's how to use it effectively:
+                    {t('howItWorks:gettingStarted.interactiveMap.intro')}
                   </p>
                   <div className="bg-blue-50 rounded-xl p-5 border border-blue-200">
                     <div className="flex items-start gap-3">
                       <MapIcon className="w-6 h-6 text-blue-500 flex-shrink-0" />
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Pan & Zoom</h4>
-                        <p className="text-sm text-neutral-600">Click and drag to move around. Use scroll wheel or pinch to zoom in/out.</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.panZoom.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.panZoom.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -333,8 +333,8 @@ const HowItWorksPage: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <SearchIcon className="w-6 h-6 text-purple-500 flex-shrink-0" />
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Draw Custom Areas</h4>
-                        <p className="text-sm text-neutral-600">Use the drawing tool to select specific neighborhoods or regions you're interested in.</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.drawCustomAreas.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.drawCustomAreas.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -342,8 +342,8 @@ const HowItWorksPage: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <HomeIcon className="w-6 h-6 text-green-500 flex-shrink-0" />
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Click on Properties</h4>
-                        <p className="text-sm text-neutral-600">Click any marker to see property details, price, and photos in a quick preview.</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.clickProperties.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.clickProperties.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -351,8 +351,8 @@ const HowItWorksPage: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <StarIcon className="w-6 h-6 text-orange-500 flex-shrink-0" />
                       <div>
-                        <h4 className="font-semibold text-neutral-800 mb-1">Filter Results</h4>
-                        <p className="text-sm text-neutral-600">Use filters for price range, property type, bedrooms, and more features.</p>
+                        <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.filterResults.title')}</h4>
+                        <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.filterResults.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -363,8 +363,8 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-50 flex items-center justify-center relative">
                     <div className="text-center">
                       <MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />
-                      <p className="text-blue-500 font-medium">Interactive Map View</p>
-                      <p className="text-blue-400 text-sm">Full property map with markers</p>
+                      <p className="text-blue-500 font-medium">{t('howItWorks:gettingStarted.interactiveMap.mapView')}</p>
+                      <p className="text-blue-400 text-sm">{t('howItWorks:gettingStarted.interactiveMap.mapViewDesc')}</p>
                     </div>
                     {/* Map controls mock */}
                     <div className="absolute top-4 left-4 space-y-2">
@@ -372,7 +372,7 @@ const HowItWorksPage: React.FC = () => {
                       <div className="w-8 h-8 bg-white rounded-lg shadow flex items-center justify-center text-neutral-400 text-xs">-</div>
                     </div>
                     <div className="absolute top-4 right-4 bg-white rounded-lg shadow px-3 py-1.5 text-xs text-neutral-500">
-                      Draw Area
+                      {t('howItWorks:gettingStarted.interactiveMap.drawArea')}
                     </div>
                   </div>
                 </div>
@@ -383,7 +383,7 @@ const HowItWorksPage: React.FC = () => {
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">3</div>
-                <h3 className="text-2xl font-bold text-neutral-800">Saving Properties & Searches</h3>
+                <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:gettingStarted.savingProperties.title')}</h3>
               </div>
 
               <div className="grid md:grid-cols-3 gap-6">
@@ -391,12 +391,12 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-square bg-gradient-to-br from-red-100 to-pink-50 flex items-center justify-center">
                     <div className="text-center p-4">
                       <HeartIcon className="w-12 h-12 text-red-400 mx-auto mb-2" />
-                      <p className="text-red-500 font-semibold">Save to Favorites</p>
+                      <p className="text-red-500 font-semibold">{t('howItWorks:gettingStarted.savingProperties.saveToFavorites.title')}</p>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h4 className="font-semibold text-neutral-800 mb-2">Heart Icon</h4>
-                    <p className="text-sm text-neutral-600">Click the heart icon on any property card or detail page to save it to your favorites list.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.savingProperties.saveToFavorites.heading')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.savingProperties.saveToFavorites.desc')}</p>
                   </div>
                 </div>
 
@@ -404,12 +404,12 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-square bg-gradient-to-br from-purple-100 to-indigo-50 flex items-center justify-center">
                     <div className="text-center p-4">
                       <SearchIcon className="w-12 h-12 text-purple-400 mx-auto mb-2" />
-                      <p className="text-purple-500 font-semibold">Save Search</p>
+                      <p className="text-purple-500 font-semibold">{t('howItWorks:gettingStarted.savingProperties.saveSearch.title')}</p>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h4 className="font-semibold text-neutral-800 mb-2">Search Criteria</h4>
-                    <p className="text-sm text-neutral-600">After filtering, click "Save Search" to get notified when new matching properties are listed.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.savingProperties.saveSearch.heading')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.savingProperties.saveSearch.desc')}</p>
                   </div>
                 </div>
 
@@ -417,12 +417,12 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-square bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center">
                     <div className="text-center p-4">
                       <BellIcon className="w-12 h-12 text-amber-400 mx-auto mb-2" />
-                      <p className="text-amber-500 font-semibold">Get Notified</p>
+                      <p className="text-amber-500 font-semibold">{t('howItWorks:gettingStarted.savingProperties.getNotified.title')}</p>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h4 className="font-semibold text-neutral-800 mb-2">Alerts & Updates</h4>
-                    <p className="text-sm text-neutral-600">Receive email notifications for price drops on favorites and new listings matching your searches.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.savingProperties.getNotified.heading')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.savingProperties.getNotified.desc')}</p>
                   </div>
                 </div>
               </div>
@@ -432,7 +432,7 @@ const HowItWorksPage: React.FC = () => {
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">4</div>
-                <h3 className="text-2xl font-bold text-neutral-800">Contacting Sellers & Agents</h3>
+                <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.title')}</h3>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
@@ -440,20 +440,20 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-50 flex items-center justify-center relative">
                     <div className="text-center">
                       <ChatIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />
-                      <p className="text-green-500 font-medium">Contact Form</p>
-                      <p className="text-green-400 text-sm">On every property page</p>
+                      <p className="text-green-500 font-medium">{t('howItWorks:gettingStarted.contactingSellers.contactForm')}</p>
+                      <p className="text-green-400 text-sm">{t('howItWorks:gettingStarted.contactingSellers.onEveryPage')}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-neutral-800">Multiple Ways to Connect</h4>
+                  <h4 className="text-lg font-semibold text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.multipleWays')}</h4>
                   <div className="bg-green-50 rounded-xl p-4 border border-green-200">
                     <div className="flex items-center gap-3">
                       <ChatIcon className="w-5 h-5 text-green-600" />
                       <div>
-                        <span className="font-medium text-neutral-800">Direct Message</span>
-                        <p className="text-xs text-neutral-600">Send messages through our secure platform</p>
+                        <span className="font-medium text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.directMessage.title')}</span>
+                        <p className="text-xs text-neutral-600">{t('howItWorks:gettingStarted.contactingSellers.directMessage.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -463,8 +463,8 @@ const HowItWorksPage: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                       <div>
-                        <span className="font-medium text-neutral-800">Phone Call</span>
-                        <p className="text-xs text-neutral-600">Click to call on mobile devices</p>
+                        <span className="font-medium text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.phoneCall.title')}</span>
+                        <p className="text-xs text-neutral-600">{t('howItWorks:gettingStarted.contactingSellers.phoneCall.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -474,8 +474,8 @@ const HowItWorksPage: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                       <div>
-                        <span className="font-medium text-neutral-800">Email</span>
-                        <p className="text-xs text-neutral-600">Direct email to seller or agent</p>
+                        <span className="font-medium text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.email.title')}</span>
+                        <p className="text-xs text-neutral-600">{t('howItWorks:gettingStarted.contactingSellers.email.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -485,8 +485,8 @@ const HowItWorksPage: React.FC = () => {
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                       </svg>
                       <div>
-                        <span className="font-medium text-neutral-800">WhatsApp</span>
-                        <p className="text-xs text-neutral-600">Quick message via WhatsApp</p>
+                        <span className="font-medium text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.whatsapp.title')}</span>
+                        <p className="text-xs text-neutral-600">{t('howItWorks:gettingStarted.contactingSellers.whatsapp.desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -498,17 +498,17 @@ const HowItWorksPage: React.FC = () => {
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">5</div>
-                <h3 className="text-2xl font-bold text-neutral-800">Creating a Property Listing</h3>
+                <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:gettingStarted.createListing.title')}</h3>
               </div>
 
               <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-200">
                 <div className="grid md:grid-cols-5 gap-4 mb-8">
                   {[
-                    { step: '1', title: 'Basic Info', desc: 'Title, type, price' },
-                    { step: '2', title: 'Location', desc: 'Address, map pin' },
-                    { step: '3', title: 'Details', desc: 'Rooms, size, features' },
-                    { step: '4', title: 'Photos', desc: 'Upload images' },
-                    { step: '5', title: 'Publish', desc: 'Review & post' },
+                    { step: '1', title: t('howItWorks:gettingStarted.createListing.steps.step1.title'), desc: t('howItWorks:gettingStarted.createListing.steps.step1.desc') },
+                    { step: '2', title: t('howItWorks:gettingStarted.createListing.steps.step2.title'), desc: t('howItWorks:gettingStarted.createListing.steps.step2.desc') },
+                    { step: '3', title: t('howItWorks:gettingStarted.createListing.steps.step3.title'), desc: t('howItWorks:gettingStarted.createListing.steps.step3.desc') },
+                    { step: '4', title: t('howItWorks:gettingStarted.createListing.steps.step4.title'), desc: t('howItWorks:gettingStarted.createListing.steps.step4.desc') },
+                    { step: '5', title: t('howItWorks:gettingStarted.createListing.steps.step5.title'), desc: t('howItWorks:gettingStarted.createListing.steps.step5.desc') },
                   ].map((item, idx) => (
                     <React.Fragment key={item.step}>
                       <div className="text-center">
@@ -531,24 +531,24 @@ const HowItWorksPage: React.FC = () => {
                       <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      Photo Tips
+                      {t('howItWorks:gettingStarted.createListing.photoTips.title')}
                     </h4>
                     <ul className="text-sm text-neutral-600 space-y-2">
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>Use natural lighting for best results</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.photoTips.tip1')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>Include all rooms and outdoor spaces</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.photoTips.tip2')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>Declutter before taking photos</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.photoTips.tip3')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>First photo appears as the thumbnail</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.photoTips.tip4')}</span>
                       </li>
                     </ul>
                   </div>
@@ -558,24 +558,24 @@ const HowItWorksPage: React.FC = () => {
                       <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      Description Tips
+                      {t('howItWorks:gettingStarted.createListing.descriptionTips.title')}
                     </h4>
                     <ul className="text-sm text-neutral-600 space-y-2">
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>Highlight unique features and upgrades</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.descriptionTips.tip1')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>Mention nearby amenities and transport</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.descriptionTips.tip2')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>Be honest about the property condition</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.descriptionTips.tip3')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span>Include recent renovations or improvements</span>
+                        <span>{t('howItWorks:gettingStarted.createListing.descriptionTips.tip4')}</span>
                       </li>
                     </ul>
                   </div>
@@ -587,7 +587,7 @@ const HowItWorksPage: React.FC = () => {
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center font-bold">6</div>
-                <h3 className="text-2xl font-bold text-neutral-800">Managing Your Account</h3>
+                <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:gettingStarted.managingAccount.title')}</h3>
               </div>
 
               <div className="grid md:grid-cols-3 gap-6">
@@ -595,42 +595,42 @@ const HowItWorksPage: React.FC = () => {
                   <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
                     <UserIcon className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <h4 className="font-semibold text-neutral-800 mb-2">Profile Settings</h4>
-                  <p className="text-sm text-neutral-600 mb-3">Update your name, photo, phone number, and other personal details.</p>
-                  <p className="text-xs text-neutral-400">Access: Menu → Profile</p>
+                  <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.profileSettings.title')}</h4>
+                  <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.profileSettings.desc')}</p>
+                  <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.profileSettings.access')}</p>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
                     <TicketIcon className="w-6 h-6 text-green-600" />
                   </div>
-                  <h4 className="font-semibold text-neutral-800 mb-2">Subscription</h4>
-                  <p className="text-sm text-neutral-600 mb-3">View your plan, upgrade to Pro, or manage billing and payment methods.</p>
-                  <p className="text-xs text-neutral-400">Access: Menu → Subscription</p>
+                  <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.subscription.title')}</h4>
+                  <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.subscription.desc')}</p>
+                  <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.subscription.access')}</p>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
                   <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
                     <BellIcon className="w-6 h-6 text-amber-600" />
                   </div>
-                  <h4 className="font-semibold text-neutral-800 mb-2">Notifications</h4>
-                  <p className="text-sm text-neutral-600 mb-3">Configure email alerts, price drop notifications, and new listing alerts.</p>
-                  <p className="text-xs text-neutral-400">Access: Menu → Settings</p>
+                  <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.notifications.title')}</h4>
+                  <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.notifications.desc')}</p>
+                  <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.notifications.access')}</p>
                 </div>
               </div>
             </div>
 
             {/* Quick Tips Section */}
             <div className="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-2xl p-8 border border-cyan-100">
-              <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">Pro Tips for Best Experience</h3>
+              <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">{t('howItWorks:gettingStarted.proTips.title')}</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="flex gap-4">
                   <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
                     <CheckIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-neutral-800 mb-1">Complete Your Profile</h4>
-                    <p className="text-sm text-neutral-600">Sellers and agents respond faster to complete profiles with photos.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.completeProfile.title')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.completeProfile.desc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -638,8 +638,8 @@ const HowItWorksPage: React.FC = () => {
                     <CheckIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-neutral-800 mb-1">Use Saved Searches</h4>
-                    <p className="text-sm text-neutral-600">Save your search criteria to get instant notifications for new matches.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.useSavedSearches.title')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.useSavedSearches.desc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -647,8 +647,8 @@ const HowItWorksPage: React.FC = () => {
                     <CheckIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-neutral-800 mb-1">Explore Cities Feature</h4>
-                    <p className="text-sm text-neutral-600">Use "Explore" to discover neighborhoods and get market insights.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.exploreCities.title')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.exploreCities.desc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -656,8 +656,8 @@ const HowItWorksPage: React.FC = () => {
                     <CheckIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-neutral-800 mb-1">Enable Notifications</h4>
-                    <p className="text-sm text-neutral-600">Turn on email alerts to be the first to know about price changes.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.enableNotifications.title')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.enableNotifications.desc')}</p>
                   </div>
                 </div>
               </div>
@@ -673,9 +673,9 @@ const HowItWorksPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
                 <BuildingIcon className="w-8 h-8 text-orange-600" />
               </div>
-              <h2 className="text-3xl font-bold text-neutral-800 mb-3">Build Your Real Estate Empire</h2>
+              <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:agencies.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                Create your agency, invite agents, and manage your entire team from one powerful platform
+                {t('howItWorks:agencies.subtitle')}
               </p>
             </div>
 
@@ -685,24 +685,24 @@ const HowItWorksPage: React.FC = () => {
               <div className="relative">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                   <div>
-                    <span className="text-orange-200 font-medium">Enterprise Plan</span>
+                    <span className="text-orange-200 font-medium">{t('howItWorks:agencies.pricing.planName')}</span>
                     <div className="flex items-baseline gap-2 mt-2">
-                      <span className="text-5xl font-bold">€1,000</span>
-                      <span className="text-xl text-orange-200">/year</span>
+                      <span className="text-5xl font-bold">{t('howItWorks:agencies.pricing.price')}</span>
+                      <span className="text-xl text-orange-200">{t('howItWorks:agencies.pricing.period')}</span>
                     </div>
-                    <p className="text-orange-100 mt-2">Everything you need to run a successful agency</p>
+                    <p className="text-orange-100 mt-2">{t('howItWorks:agencies.pricing.tagline')}</p>
                   </div>
                   <div className="bg-white/20 backdrop-blur rounded-2xl p-6 w-full md:w-auto">
-                    <h4 className="font-semibold mb-4 text-center">What's Included</h4>
+                    <h4 className="font-semibold mb-4 text-center">{t('howItWorks:agencies.pricing.whatsIncluded')}</h4>
                     <ul className="space-y-3">
                       {[
-                        '500 property listings (expandable)',
-                        '5 team members included',
-                        '5 promotion coupons/month',
-                        'Agency branding page',
-                        'Unlimited AI usage for all agents',
-                        'Dedicated account manager',
-                        'Team analytics dashboard',
+                        t('howItWorks:agencies.pricing.features.listings'),
+                        t('howItWorks:agencies.pricing.features.teamMembers'),
+                        t('howItWorks:agencies.pricing.features.promotions'),
+                        t('howItWorks:agencies.pricing.features.branding'),
+                        t('howItWorks:agencies.pricing.features.ai'),
+                        t('howItWorks:agencies.pricing.features.accountManager'),
+                        t('howItWorks:agencies.pricing.features.analytics'),
                       ].map((feature, idx) => (
                         <li key={idx} className="flex items-center gap-2">
                           <CheckIcon className="w-5 h-5 text-orange-200 flex-shrink-0" />
@@ -716,31 +716,31 @@ const HowItWorksPage: React.FC = () => {
             </div>
 
             {/* How It Works Steps */}
-            <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">How to Get Started</h3>
+            <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">{t('howItWorks:agencies.howToGetStarted')}</h3>
             <div className="grid md:grid-cols-4 gap-6 mb-12">
               {[
                 {
                   step: '1',
-                  title: 'Subscribe',
-                  description: 'Choose the Enterprise plan and complete your subscription',
+                  title: t('howItWorks:agencies.steps.subscribe.title'),
+                  description: t('howItWorks:agencies.steps.subscribe.desc'),
                   icon: TicketIcon,
                 },
                 {
                   step: '2',
-                  title: 'Create Agency',
-                  description: 'Set up your agency profile with logo, description, and location',
+                  title: t('howItWorks:agencies.steps.createAgency.title'),
+                  description: t('howItWorks:agencies.steps.createAgency.desc'),
                   icon: BuildingIcon,
                 },
                 {
                   step: '3',
-                  title: 'Generate Coupons',
-                  description: 'Create up to 5 coupon codes to invite agents to your team',
+                  title: t('howItWorks:agencies.steps.generateCoupons.title'),
+                  description: t('howItWorks:agencies.steps.generateCoupons.desc'),
                   icon: UserGroupIcon,
                 },
                 {
                   step: '4',
-                  title: 'Grow Together',
-                  description: 'Your agents start listing properties and your agency thrives',
+                  title: t('howItWorks:agencies.steps.growTogether.title'),
+                  description: t('howItWorks:agencies.steps.growTogether.desc'),
                   icon: ChartIcon,
                 },
               ].map((item) => {
@@ -764,24 +764,22 @@ const HowItWorksPage: React.FC = () => {
 
             {/* Agent Invitation System */}
             <div className="bg-neutral-50 rounded-2xl p-8 mb-8">
-              <h3 className="text-xl font-bold text-neutral-800 mb-6">Agent Invitation System</h3>
+              <h3 className="text-xl font-bold text-neutral-800 mb-6">{t('howItWorks:agencies.agentInvitation.title')}</h3>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="font-semibold text-neutral-700 mb-3">Invitation Codes</h4>
+                  <h4 className="font-semibold text-neutral-700 mb-3">{t('howItWorks:agencies.agentInvitation.invitationCodes.title')}</h4>
                   <p className="text-neutral-600 mb-4">
-                    Share your unique agency invitation code with agents who want to join. They can use it
-                    to request membership to your agency.
+                    {t('howItWorks:agencies.agentInvitation.invitationCodes.desc')}
                   </p>
                   <div className="bg-white rounded-lg border border-neutral-200 p-4">
                     <code className="text-sm text-orange-600">AGENCY-ABC123</code>
-                    <p className="text-xs text-neutral-500 mt-1">Example invitation code</p>
+                    <p className="text-xs text-neutral-500 mt-1">{t('howItWorks:agencies.agentInvitation.invitationCodes.example')}</p>
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-neutral-700 mb-3">Agent Subscription Coupons</h4>
+                  <h4 className="font-semibold text-neutral-700 mb-3">{t('howItWorks:agencies.agentInvitation.subscriptionCoupons.title')}</h4>
                   <p className="text-neutral-600 mb-4">
-                    Generate coupon codes that give agents a FREE yearly Pro subscription when they join
-                    your agency. Each agent gets 20 listings/month.
+                    {t('howItWorks:agencies.agentInvitation.subscriptionCoupons.desc')}
                   </p>
                   <div className="flex gap-2">
                     {['AGENT-XYZ1', 'AGENT-XYZ2', 'AGENT-XYZ3'].map((code, idx) => (
@@ -803,9 +801,9 @@ const HowItWorksPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
                 <UserGroupIcon className="w-8 h-8 text-purple-600" />
               </div>
-              <h2 className="text-3xl font-bold text-neutral-800 mb-3">Join an Agency or Go Solo</h2>
+              <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:agents.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                Choose your path: work independently with Pro subscription or join an agency for free
+                {t('howItWorks:agents.subtitle')}
               </p>
             </div>
 
@@ -818,25 +816,25 @@ const HowItWorksPage: React.FC = () => {
                     <UserIcon className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-neutral-800">Independent Agent</h3>
-                    <span className="text-sm text-purple-600">Pro Subscription</span>
+                    <h3 className="font-bold text-neutral-800">{t('howItWorks:agents.independent.title')}</h3>
+                    <span className="text-sm text-purple-600">{t('howItWorks:agents.independent.planType')}</span>
                   </div>
                 </div>
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-neutral-800">€25</span>
-                    <span className="text-neutral-500">/month</span>
+                    <span className="text-4xl font-bold text-neutral-800">{t('howItWorks:agents.independent.price')}</span>
+                    <span className="text-neutral-500">{t('howItWorks:agents.independent.period')}</span>
                   </div>
-                  <p className="text-sm text-purple-600 mt-1">or €200/year (save 33%)</p>
+                  <p className="text-sm text-purple-600 mt-1">{t('howItWorks:agents.independent.yearlyNote')}</p>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {[
-                    '20 listings/month or 250/year',
-                    '3 promotion coupons/month',
-                    'Personal agent profile',
-                    'Unlimited AI chat & insights',
-                    'Advanced analytics dashboard',
-                    'Priority support',
+                    t('howItWorks:agents.independent.features.listings'),
+                    t('howItWorks:agents.independent.features.promotions'),
+                    t('howItWorks:agents.independent.features.profile'),
+                    t('howItWorks:agents.independent.features.ai'),
+                    t('howItWorks:agents.independent.features.analytics'),
+                    t('howItWorks:agents.independent.features.support'),
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-purple-500" />
@@ -849,28 +847,28 @@ const HowItWorksPage: React.FC = () => {
               {/* Agency Agent */}
               <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-8 text-white relative overflow-hidden">
                 <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
-                  FREE
+                  {t('howItWorks:agents.agency.free')}
                 </div>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
                     <BuildingIcon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold">Agency Agent</h3>
-                    <span className="text-sm text-purple-200">Join with Coupon</span>
+                    <h3 className="font-bold">{t('howItWorks:agents.agency.title')}</h3>
+                    <span className="text-sm text-purple-200">{t('howItWorks:agents.agency.planType')}</span>
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-4xl font-bold">€0</span>
-                  <span className="text-purple-200">/year</span>
+                  <span className="text-4xl font-bold">{t('howItWorks:agents.agency.price')}</span>
+                  <span className="text-purple-200">{t('howItWorks:agents.agency.period')}</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {[
-                    '20 active listings per month',
-                    'Share agency promotion pool',
-                    'Agency branding on listings',
-                    'Team collaboration',
-                    'Agency support network',
+                    t('howItWorks:agents.agency.features.listings'),
+                    t('howItWorks:agents.agency.features.promotions'),
+                    t('howItWorks:agents.agency.features.branding'),
+                    t('howItWorks:agents.agency.features.collaboration'),
+                    t('howItWorks:agents.agency.features.support'),
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-purple-100">
                       <CheckIcon className="w-5 h-5 text-purple-200" />
@@ -879,30 +877,30 @@ const HowItWorksPage: React.FC = () => {
                   ))}
                 </ul>
                 <p className="text-sm text-purple-200">
-                  * Get a coupon code from your agency owner to join for free
+                  {t('howItWorks:agents.agency.note')}
                 </p>
               </div>
             </div>
 
             {/* How to Join an Agency */}
             <div className="bg-purple-50 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-neutral-800 mb-6">How to Join an Agency</h3>
+              <h3 className="text-xl font-bold text-neutral-800 mb-6">{t('howItWorks:agents.howToJoin.title')}</h3>
               <div className="grid md:grid-cols-3 gap-6">
                 {[
                   {
                     step: '1',
-                    title: 'Get a Coupon Code',
-                    description: 'Ask an agency owner for their agent subscription coupon code',
+                    title: t('howItWorks:agents.howToJoin.step1.title'),
+                    description: t('howItWorks:agents.howToJoin.step1.desc'),
                   },
                   {
                     step: '2',
-                    title: 'Redeem the Code',
-                    description: 'Enter the coupon code in your account settings to activate your free subscription',
+                    title: t('howItWorks:agents.howToJoin.step2.title'),
+                    description: t('howItWorks:agents.howToJoin.step2.desc'),
                   },
                   {
                     step: '3',
-                    title: 'Start Listing',
-                    description: 'Begin posting properties under your agency\'s brand and collaborate with your team',
+                    title: t('howItWorks:agents.howToJoin.step3.title'),
+                    description: t('howItWorks:agents.howToJoin.step3.desc'),
                   },
                 ].map((item) => (
                   <div key={item.step} className="flex gap-4">
@@ -927,9 +925,9 @@ const HowItWorksPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                 <SearchIcon className="w-8 h-8 text-blue-600" />
               </div>
-              <h2 className="text-3xl font-bold text-neutral-800 mb-3">Find Your Dream Property</h2>
+              <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:buyers.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                Search, save, and connect with sellers across the Balkans - free basic features with optional Pro upgrade
+                {t('howItWorks:buyers.subtitle')}
               </p>
             </div>
 
@@ -937,22 +935,22 @@ const HowItWorksPage: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-8 mb-12">
               {/* Free Plan */}
               <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
-                <span className="text-blue-600 font-medium text-sm">Free Features</span>
+                <span className="text-blue-600 font-medium text-sm">{t('howItWorks:buyers.freePlan.title')}</span>
                 <div className="flex items-baseline gap-2 mt-2 mb-6">
-                  <span className="text-4xl font-bold text-neutral-800">€0</span>
-                  <span className="text-neutral-500">forever</span>
+                  <span className="text-4xl font-bold text-neutral-800">{t('howItWorks:buyers.freePlan.price')}</span>
+                  <span className="text-neutral-500">{t('howItWorks:buyers.freePlan.period')}</span>
                 </div>
                 <p className="text-neutral-600 mb-6">
-                  Everything you need to start your property search
+                  {t('howItWorks:buyers.freePlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    'Browse all listings',
-                    'Interactive map search',
-                    'Save favorites',
-                    'Contact sellers & agents',
-                    'Basic market insights',
-                    'Agent & agency profiles',
+                    t('howItWorks:buyers.freePlan.features.browse'),
+                    t('howItWorks:buyers.freePlan.features.mapSearch'),
+                    t('howItWorks:buyers.freePlan.features.favorites'),
+                    t('howItWorks:buyers.freePlan.features.contact'),
+                    t('howItWorks:buyers.freePlan.features.insights'),
+                    t('howItWorks:buyers.freePlan.features.profiles'),
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-blue-500" />
@@ -965,26 +963,26 @@ const HowItWorksPage: React.FC = () => {
               {/* Buyer Pro Plan */}
               <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
                 <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
-                  7-DAY FREE TRIAL
+                  {t('howItWorks:buyers.proPlan.trial')}
                 </div>
-                <span className="text-blue-200 font-medium text-sm">Buyer Pro</span>
+                <span className="text-blue-200 font-medium text-sm">{t('howItWorks:buyers.proPlan.title')}</span>
                 <div className="flex items-baseline gap-2 mt-2 mb-6">
-                  <span className="text-4xl font-bold">€3</span>
-                  <span className="text-blue-200">/month</span>
+                  <span className="text-4xl font-bold">{t('howItWorks:buyers.proPlan.price')}</span>
+                  <span className="text-blue-200">{t('howItWorks:buyers.proPlan.period')}</span>
                 </div>
                 <p className="text-blue-100 mb-6">
-                  Get ahead of other buyers with premium features
+                  {t('howItWorks:buyers.proPlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    'Instant email & SMS notifications',
-                    'Unlimited saved searches',
-                    'Early access to new listings',
-                    'Advanced market insights',
-                    'Price drop notifications',
-                    'Investment calculator',
-                    'Mortgage pre-qualification',
-                    'Ad-free browsing',
+                    t('howItWorks:buyers.proPlan.features.notifications'),
+                    t('howItWorks:buyers.proPlan.features.savedSearches'),
+                    t('howItWorks:buyers.proPlan.features.earlyAccess'),
+                    t('howItWorks:buyers.proPlan.features.insights'),
+                    t('howItWorks:buyers.proPlan.features.priceDrops'),
+                    t('howItWorks:buyers.proPlan.features.calculator'),
+                    t('howItWorks:buyers.proPlan.features.mortgage'),
+                    t('howItWorks:buyers.proPlan.features.adFree'),
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-blue-100">
                       <CheckIcon className="w-5 h-5 text-blue-200" />
@@ -996,43 +994,43 @@ const HowItWorksPage: React.FC = () => {
             </div>
 
             {/* Features Grid */}
-            <h3 className="text-2xl font-bold text-neutral-800 mb-6 text-center">Powerful Search Tools</h3>
+            <h3 className="text-2xl font-bold text-neutral-800 mb-6 text-center">{t('howItWorks:buyers.searchTools.title')}</h3>
             <div className="grid md:grid-cols-3 gap-6 mb-12">
               {[
                 {
                   icon: MapIcon,
-                  title: 'Interactive Map Search',
-                  description: 'Draw custom areas on the map to find properties exactly where you want them',
+                  title: t('howItWorks:buyers.searchTools.interactiveMap.title'),
+                  description: t('howItWorks:buyers.searchTools.interactiveMap.desc'),
                   color: 'blue',
                 },
                 {
                   icon: HeartIcon,
-                  title: 'Save Favorites',
-                  description: 'Keep track of properties you love and get notified when prices change',
+                  title: t('howItWorks:buyers.searchTools.saveFavorites.title'),
+                  description: t('howItWorks:buyers.searchTools.saveFavorites.desc'),
                   color: 'red',
                 },
                 {
                   icon: BellIcon,
-                  title: 'Saved Searches',
-                  description: 'Create saved searches and get alerts when new matching properties are listed',
+                  title: t('howItWorks:buyers.searchTools.savedSearches.title'),
+                  description: t('howItWorks:buyers.searchTools.savedSearches.desc'),
                   color: 'purple',
                 },
                 {
                   icon: ChatIcon,
-                  title: 'Direct Messaging',
-                  description: 'Contact sellers and agents directly through our secure messaging system',
+                  title: t('howItWorks:buyers.searchTools.directMessaging.title'),
+                  description: t('howItWorks:buyers.searchTools.directMessaging.desc'),
                   color: 'green',
                 },
                 {
                   icon: ChartIcon,
-                  title: 'Market Insights',
-                  description: 'View neighborhood statistics, price trends, and area information',
+                  title: t('howItWorks:buyers.searchTools.marketInsights.title'),
+                  description: t('howItWorks:buyers.searchTools.marketInsights.desc'),
                   color: 'orange',
                 },
                 {
                   icon: UserIcon,
-                  title: 'Agent Profiles',
-                  description: 'Browse verified agents and agencies to find trusted professionals',
+                  title: t('howItWorks:buyers.searchTools.agentProfiles.title'),
+                  description: t('howItWorks:buyers.searchTools.agentProfiles.desc'),
                   color: 'indigo',
                 },
               ].map((feature, idx) => {
@@ -1052,14 +1050,14 @@ const HowItWorksPage: React.FC = () => {
 
             {/* Search Process */}
             <div className="bg-blue-50 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">Your Home-Finding Journey</h3>
+              <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">{t('howItWorks:buyers.journey.title')}</h3>
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 {[
-                  { step: 'Search', icon: SearchIcon, desc: 'Use filters & map' },
-                  { step: 'Save', icon: HeartIcon, desc: 'Bookmark favorites' },
-                  { step: 'Compare', icon: ChartIcon, desc: 'Analyze options' },
-                  { step: 'Contact', icon: ChatIcon, desc: 'Message sellers' },
-                  { step: 'Visit', icon: HomeIcon, desc: 'Schedule viewings' },
+                  { step: t('howItWorks:buyers.journey.search.step'), icon: SearchIcon, desc: t('howItWorks:buyers.journey.search.desc') },
+                  { step: t('howItWorks:buyers.journey.save.step'), icon: HeartIcon, desc: t('howItWorks:buyers.journey.save.desc') },
+                  { step: t('howItWorks:buyers.journey.compare.step'), icon: ChartIcon, desc: t('howItWorks:buyers.journey.compare.desc') },
+                  { step: t('howItWorks:buyers.journey.contact.step'), icon: ChatIcon, desc: t('howItWorks:buyers.journey.contact.desc') },
+                  { step: t('howItWorks:buyers.journey.visit.step'), icon: HomeIcon, desc: t('howItWorks:buyers.journey.visit.desc') },
                 ].map((item, idx) => {
                   const Icon = item.icon;
                   return (
@@ -1082,7 +1080,7 @@ const HowItWorksPage: React.FC = () => {
 
             {/* See It In Action - Buyers */}
             <div className="mt-12">
-              <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">See It In Action</h3>
+              <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">{t('howItWorks:buyers.seeItInAction.title')}</h3>
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Map Search Demo */}
                 <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
@@ -1090,14 +1088,14 @@ const HowItWorksPage: React.FC = () => {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />
-                        <p className="text-blue-400 font-medium">Interactive Map Demo</p>
-                        <p className="text-blue-300 text-sm">Screenshot coming soon</p>
+                        <p className="text-blue-400 font-medium">{t('howItWorks:buyers.seeItInAction.mapDemo.title')}</p>
+                        <p className="text-blue-300 text-sm">{t('howItWorks:buyers.seeItInAction.mapDemo.coming')}</p>
                       </div>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h4 className="font-semibold text-neutral-800 mb-2">Draw & Search</h4>
-                    <p className="text-sm text-neutral-600">Draw custom areas on the map to find properties in your preferred neighborhoods. Filter by price, size, and amenities in real-time.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:buyers.seeItInAction.mapDemo.heading')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:buyers.seeItInAction.mapDemo.desc')}</p>
                   </div>
                 </div>
 
@@ -1107,14 +1105,14 @@ const HowItWorksPage: React.FC = () => {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <HeartIcon className="w-16 h-16 text-red-300 mx-auto mb-2" />
-                        <p className="text-red-400 font-medium">Saved Properties View</p>
-                        <p className="text-red-300 text-sm">Screenshot coming soon</p>
+                        <p className="text-red-400 font-medium">{t('howItWorks:buyers.seeItInAction.saveDemo.title')}</p>
+                        <p className="text-red-300 text-sm">{t('howItWorks:buyers.seeItInAction.saveDemo.coming')}</p>
                       </div>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h4 className="font-semibold text-neutral-800 mb-2">Save & Compare</h4>
-                    <p className="text-sm text-neutral-600">Save properties you love and compare them side by side. Get instant notifications when prices change or similar properties become available.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:buyers.seeItInAction.saveDemo.heading')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:buyers.seeItInAction.saveDemo.desc')}</p>
                   </div>
                 </div>
               </div>
@@ -1129,9 +1127,9 @@ const HowItWorksPage: React.FC = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                 <HomeIcon className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-3xl font-bold text-neutral-800 mb-3">Sell Your Property</h2>
+              <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:sellers.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                List your property and reach thousands of potential buyers across the region
+                {t('howItWorks:sellers.subtitle')}
               </p>
             </div>
 
@@ -1139,22 +1137,22 @@ const HowItWorksPage: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-8 mb-12">
               {/* Free Plan */}
               <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
-                <span className="text-green-600 font-medium text-sm">Free Plan</span>
+                <span className="text-green-600 font-medium text-sm">{t('howItWorks:sellers.freePlan.title')}</span>
                 <div className="flex items-baseline gap-2 mt-2 mb-6">
-                  <span className="text-4xl font-bold text-neutral-800">€0</span>
-                  <span className="text-neutral-500">/month</span>
+                  <span className="text-4xl font-bold text-neutral-800">{t('howItWorks:sellers.freePlan.price')}</span>
+                  <span className="text-neutral-500">{t('howItWorks:sellers.freePlan.period')}</span>
                 </div>
                 <p className="text-neutral-600 mb-6">
-                  Perfect for private sellers with just a few properties
+                  {t('howItWorks:sellers.freePlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    '3 active listings',
-                    '3 saved searches',
-                    '3 AI chat messages',
-                    'Photo gallery (up to 10 images)',
-                    'Direct messaging',
-                    'Basic analytics',
+                    t('howItWorks:sellers.freePlan.features.listings'),
+                    t('howItWorks:sellers.freePlan.features.searches'),
+                    t('howItWorks:sellers.freePlan.features.ai'),
+                    t('howItWorks:sellers.freePlan.features.photos'),
+                    t('howItWorks:sellers.freePlan.features.messaging'),
+                    t('howItWorks:sellers.freePlan.features.analytics'),
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-neutral-600">
                       <CheckIcon className="w-5 h-5 text-green-500" />
@@ -1167,28 +1165,28 @@ const HowItWorksPage: React.FC = () => {
               {/* Pro Plan */}
               <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white relative overflow-hidden">
                 <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
-                  MOST POPULAR
+                  {t('howItWorks:sellers.proPlan.popular')}
                 </div>
-                <span className="text-green-200 font-medium text-sm">Pro Plan</span>
+                <span className="text-green-200 font-medium text-sm">{t('howItWorks:sellers.proPlan.title')}</span>
                 <div className="mt-2 mb-6">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold">€25</span>
-                    <span className="text-green-200">/month</span>
+                    <span className="text-4xl font-bold">{t('howItWorks:sellers.proPlan.price')}</span>
+                    <span className="text-green-200">{t('howItWorks:sellers.proPlan.period')}</span>
                   </div>
-                  <p className="text-sm text-green-200 mt-1">or €200/year (save 33%)</p>
+                  <p className="text-sm text-green-200 mt-1">{t('howItWorks:sellers.proPlan.yearlyNote')}</p>
                 </div>
                 <p className="text-green-100 mb-6">
-                  For serious sellers who want maximum exposure
+                  {t('howItWorks:sellers.proPlan.tagline')}
                 </p>
                 <ul className="space-y-3 mb-6">
                   {[
-                    '20 listings/month or 250/year',
-                    '3 promotion coupons/month',
-                    'Unlimited AI chat & insights',
-                    'Unlimited saved searches',
-                    'Advanced analytics dashboard',
-                    'Lead management tools',
-                    'Priority support',
+                    t('howItWorks:sellers.proPlan.features.listings'),
+                    t('howItWorks:sellers.proPlan.features.promotions'),
+                    t('howItWorks:sellers.proPlan.features.ai'),
+                    t('howItWorks:sellers.proPlan.features.searches'),
+                    t('howItWorks:sellers.proPlan.features.analytics'),
+                    t('howItWorks:sellers.proPlan.features.leads'),
+                    t('howItWorks:sellers.proPlan.features.support'),
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2 text-sm text-green-100">
                       <CheckIcon className="w-5 h-5 text-green-200" />
@@ -1201,28 +1199,28 @@ const HowItWorksPage: React.FC = () => {
 
             {/* Listing Process */}
             <div className="bg-green-50 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">How to List Your Property</h3>
+              <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">{t('howItWorks:sellers.howToList.title')}</h3>
               <div className="grid md:grid-cols-4 gap-6">
                 {[
                   {
                     step: '1',
-                    title: 'Create Account',
-                    description: 'Sign up as a private seller or agent',
+                    title: t('howItWorks:sellers.howToList.step1.title'),
+                    description: t('howItWorks:sellers.howToList.step1.desc'),
                   },
                   {
                     step: '2',
-                    title: 'Add Details',
-                    description: 'Enter property info, photos, and set your price',
+                    title: t('howItWorks:sellers.howToList.step2.title'),
+                    description: t('howItWorks:sellers.howToList.step2.desc'),
                   },
                   {
                     step: '3',
-                    title: 'Go Live',
-                    description: 'Publish and your listing appears on the map',
+                    title: t('howItWorks:sellers.howToList.step3.title'),
+                    description: t('howItWorks:sellers.howToList.step3.desc'),
                   },
                   {
                     step: '4',
-                    title: 'Connect',
-                    description: 'Receive inquiries and respond to interested buyers',
+                    title: t('howItWorks:sellers.howToList.step4.title'),
+                    description: t('howItWorks:sellers.howToList.step4.desc'),
                   },
                 ].map((item) => (
                   <div key={item.step} className="text-center">
@@ -1238,29 +1236,42 @@ const HowItWorksPage: React.FC = () => {
 
             {/* Promotion Options */}
             <div className="mt-8 bg-white rounded-2xl border border-neutral-200 p-8">
-              <h3 className="text-xl font-bold text-neutral-800 mb-6">Boost Your Listing Visibility</h3>
+              <h3 className="text-xl font-bold text-neutral-800 mb-6">{t('howItWorks:sellers.promotions.title')}</h3>
               <div className="grid md:grid-cols-3 gap-6">
                 {[
                   {
-                    title: 'Featured',
-                    price: '€15',
-                    duration: '7 days',
+                    title: t('howItWorks:sellers.promotions.featured.title'),
+                    price: t('howItWorks:sellers.promotions.featured.price'),
+                    duration: t('howItWorks:sellers.promotions.featured.duration'),
                     color: 'amber',
-                    features: ['Golden border', 'Top of search results', '3x more views'],
+                    features: [
+                      t('howItWorks:sellers.promotions.featured.features.border'),
+                      t('howItWorks:sellers.promotions.featured.features.position'),
+                      t('howItWorks:sellers.promotions.featured.features.views'),
+                    ],
                   },
                   {
-                    title: 'Premium',
-                    price: '€25',
-                    duration: '7 days',
+                    title: t('howItWorks:sellers.promotions.premium.title'),
+                    price: t('howItWorks:sellers.promotions.premium.price'),
+                    duration: t('howItWorks:sellers.promotions.premium.duration'),
                     color: 'orange',
-                    features: ['Fire badge', 'Premium positioning', '5x more views', 'Social media feature'],
+                    features: [
+                      t('howItWorks:sellers.promotions.premium.features.badge'),
+                      t('howItWorks:sellers.promotions.premium.features.position'),
+                      t('howItWorks:sellers.promotions.premium.features.views'),
+                      t('howItWorks:sellers.promotions.premium.features.social'),
+                    ],
                   },
                   {
-                    title: 'Highlight',
-                    price: '€10',
-                    duration: '7 days',
+                    title: t('howItWorks:sellers.promotions.highlight.title'),
+                    price: t('howItWorks:sellers.promotions.highlight.price'),
+                    duration: t('howItWorks:sellers.promotions.highlight.duration'),
                     color: 'blue',
-                    features: ['Blue highlight', 'Stand out in lists', '2x more views'],
+                    features: [
+                      t('howItWorks:sellers.promotions.highlight.features.highlight'),
+                      t('howItWorks:sellers.promotions.highlight.features.position'),
+                      t('howItWorks:sellers.promotions.highlight.features.views'),
+                    ],
                   },
                 ].map((promo) => (
                   <div key={promo.title} className="border border-neutral-200 rounded-xl p-5 hover:border-green-300 transition-colors">
@@ -1287,7 +1298,7 @@ const HowItWorksPage: React.FC = () => {
 
             {/* See It In Action - Sellers */}
             <div className="mt-12">
-              <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">See It In Action</h3>
+              <h3 className="text-2xl font-bold text-neutral-800 mb-8 text-center">{t('howItWorks:sellers.seeItInAction.title')}</h3>
               <div className="grid md:grid-cols-2 gap-8">
                 {/* Create Listing Demo */}
                 <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
@@ -1295,14 +1306,14 @@ const HowItWorksPage: React.FC = () => {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <HomeIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />
-                        <p className="text-green-400 font-medium">Listing Creator</p>
-                        <p className="text-green-300 text-sm">Screenshot coming soon</p>
+                        <p className="text-green-400 font-medium">{t('howItWorks:sellers.seeItInAction.listingDemo.title')}</p>
+                        <p className="text-green-300 text-sm">{t('howItWorks:sellers.seeItInAction.listingDemo.coming')}</p>
                       </div>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h4 className="font-semibold text-neutral-800 mb-2">Easy Listing Creation</h4>
-                    <p className="text-sm text-neutral-600">Create beautiful property listings in minutes with our intuitive form. Add photos, set your price, and describe your property's best features.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:sellers.seeItInAction.listingDemo.heading')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:sellers.seeItInAction.listingDemo.desc')}</p>
                   </div>
                 </div>
 
@@ -1312,14 +1323,14 @@ const HowItWorksPage: React.FC = () => {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <ChartIcon className="w-16 h-16 text-emerald-300 mx-auto mb-2" />
-                        <p className="text-emerald-400 font-medium">Analytics Dashboard</p>
-                        <p className="text-emerald-300 text-sm">Screenshot coming soon</p>
+                        <p className="text-emerald-400 font-medium">{t('howItWorks:sellers.seeItInAction.analyticsDemo.title')}</p>
+                        <p className="text-emerald-300 text-sm">{t('howItWorks:sellers.seeItInAction.analyticsDemo.coming')}</p>
                       </div>
                     </div>
                   </div>
                   <div className="p-5">
-                    <h4 className="font-semibold text-neutral-800 mb-2">Track Your Performance</h4>
-                    <p className="text-sm text-neutral-600">Monitor views, inquiries, and engagement for all your listings. See which properties perform best and optimize your strategy.</p>
+                    <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:sellers.seeItInAction.analyticsDemo.heading')}</h4>
+                    <p className="text-sm text-neutral-600">{t('howItWorks:sellers.seeItInAction.analyticsDemo.desc')}</p>
                   </div>
                 </div>
               </div>
@@ -1347,22 +1358,22 @@ const HowItWorksPage: React.FC = () => {
         </div>
 
         <div className="max-w-4xl mx-auto px-4 text-center text-white relative z-10">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('howItWorks:cta.title')}</h2>
           <p className="text-lg text-white/80 mb-8">
-            Join thousands of users already finding and listing properties on Balkan Estate
+            {t('howItWorks:cta.subtitle')}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <a
               href="/"
               className="px-8 py-3 bg-white text-primary font-semibold rounded-xl hover:bg-neutral-100 transition-colors"
             >
-              Browse Properties
+              {t('howItWorks:cta.browseProperties')}
             </a>
             <a
               href="/create-listing"
               className="px-8 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-colors border border-white/30"
             >
-              List Your Property
+              {t('howItWorks:cta.listProperty')}
             </a>
           </div>
         </div>
@@ -1370,28 +1381,28 @@ const HowItWorksPage: React.FC = () => {
 
       {/* FAQ Section */}
       <div className="max-w-4xl mx-auto px-4 py-16">
-        <h2 className="text-2xl font-bold text-neutral-800 mb-8 text-center">Frequently Asked Questions</h2>
+        <h2 className="text-2xl font-bold text-neutral-800 mb-8 text-center">{t('howItWorks:faq.title')}</h2>
         <div className="space-y-4">
           {[
             {
-              q: 'Is it free to browse properties?',
-              a: 'Yes! Browsing, searching, saving favorites, and contacting sellers is completely free for buyers.',
+              q: t('howItWorks:faq.q1.question'),
+              a: t('howItWorks:faq.q1.answer'),
             },
             {
-              q: 'How do agency coupon codes work?',
-              a: 'Agency owners can generate up to 5 coupon codes. When an agent redeems a code, they get a free yearly Pro subscription (20 listings/month) and join that agency.',
+              q: t('howItWorks:faq.q2.question'),
+              a: t('howItWorks:faq.q2.answer'),
             },
             {
-              q: 'Can I switch from independent agent to agency agent?',
-              a: 'Yes! If you receive a coupon code from an agency, you can redeem it to join their team. Your listings will then be associated with that agency.',
+              q: t('howItWorks:faq.q3.question'),
+              a: t('howItWorks:faq.q3.answer'),
             },
             {
-              q: 'What happens when my subscription expires?',
-              a: 'Your existing listings remain active, but you won\'t be able to create new ones until you renew. You\'ll receive reminders before expiration.',
+              q: t('howItWorks:faq.q4.question'),
+              a: t('howItWorks:faq.q4.answer'),
             },
             {
-              q: 'How do promotion credits work?',
-              a: 'Promotion credits let you boost your listings to appear higher in search results. Pro users get 3 credits/month, agencies get 15 to share among their team.',
+              q: t('howItWorks:faq.q5.question'),
+              a: t('howItWorks:faq.q5.answer'),
             },
           ].map((faq, idx) => (
             <details key={idx} className="bg-white rounded-xl border border-neutral-200 group">
