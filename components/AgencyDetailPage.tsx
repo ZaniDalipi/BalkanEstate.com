@@ -269,6 +269,8 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     // Use agentId if available, fallback to database id
     const agentIdentifier = agent?.agentId || agentDatabaseId;
     console.log('🔍 Viewing agent profile:', agentIdentifier);
+    // Clear selected agency first so App.tsx renders the agents view instead of agency detail
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
     dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
     window.history.pushState({}, '', `/agents/${agentIdentifier}`);
