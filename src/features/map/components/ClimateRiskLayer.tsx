@@ -13,8 +13,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { TileLayer, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import { TileLayer, WMSTileLayer, useMap } from 'react-leaflet';
 
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
 
@@ -34,6 +33,8 @@ const CLIMATE_RISK_LAYERS: Record<
     legendTitle: string;
     legendColors: { color: string; label: string }[];
     minZoom?: number;
+    isWMS?: boolean;
+    wmsLayers?: string;
   }
 > = {
   // Flood risk - Using JRC Global Surface Water data
@@ -50,11 +51,11 @@ const CLIMATE_RISK_LAYERS: Record<
     ],
     minZoom: 5,
   },
-  // Fire risk - Using MODIS fire data visualization
+  // Fire risk - Using GWIS (Global Wildfire Information System) from Copernicus
   fire: {
     name: 'Fire Risk',
-    url: 'https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/c02c81dd3cb4a4ace1f4bb87b0b6cd66/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_snpp_7d&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
-    attribution: '&copy; <a href="https://firms.modaps.eosdis.nasa.gov/">NASA FIRMS</a>',
+    url: 'https://maps.wild.fire/styles/fire-spread/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://effis.jrc.ec.europa.eu/">EFFIS/Copernicus</a>',
     legendTitle: 'Fire risk level',
     legendColors: [
       { color: '#ffeda0', label: 'Minimal' },
@@ -181,16 +182,16 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
     return null;
   }
 
-  // For WMS-style URLs (with bbox), use WMS layer
-  if (layerConfig.url.includes('WMS') || layerConfig.url.includes('wms')) {
+  // For WMS layers
+  if (layerConfig.isWMS && layerConfig.wmsLayers) {
     return (
-      <TileLayer
+      <WMSTileLayer
         url={layerConfig.url}
+        layers={layerConfig.wmsLayers}
+        format="image/png"
+        transparent={true}
         attribution={layerConfig.attribution}
         opacity={opacity}
-        className="climate-risk-layer"
-        maxZoom={21}
-        tms={false}
       />
     );
   }
@@ -204,6 +205,12 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
       className="climate-risk-layer"
       maxZoom={21}
       minZoom={layerConfig.minZoom || 1}
+      // Add error handling for tiles that fail to load
+      eventHandlers={{
+        tileerror: (e) => {
+          console.warn(`Climate risk tile failed to load for ${riskType}:`, e);
+        },
+      }}
     />
   );
 };
