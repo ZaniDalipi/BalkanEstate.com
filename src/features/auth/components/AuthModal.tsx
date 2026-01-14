@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { AppleIcon, DevicePhoneMobileIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
-import { User, UserRole, AuthModalView } from '@/types';
+import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
 
-type Method = 'email' | 'phone';
 type SocialProvider = 'google' | 'apple';
 
 const EyeSlashIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -147,22 +145,17 @@ const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequiremen
 
 const AuthPage: React.FC = () => {
     const { t } = useTranslation(['auth', 'common']);
-    const { state, dispatch, login, signup, requestPasswordReset, loginWithSocial, sendPhoneCode, verifyPhoneCode, completePhoneSignup } = useAppContext();
+    const { state, dispatch, login, signup, requestPasswordReset, loginWithSocial } = useAppContext();
 
-    const [method, setMethod] = useState<Method>('email');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [infoMessage, setInfoMessage] = useState<string | null>(null);
     const [socialLoginProvider, setSocialLoginProvider] = useState<SocialProvider | null>(null);
     const [availableProviders, setAvailableProviders] = useState<{ google: boolean; apple: boolean }>({ google: false, apple: false });
 
     // Form fields state
     const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [code, setCode] = useState('');
-    const [name, setName] = useState('');
 
     // Password requirements state for real-time feedback
     const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
@@ -187,7 +180,7 @@ const AuthPage: React.FC = () => {
                 const providers = await getAvailableOAuthProviders();
                 setAvailableProviders(providers);
             } catch (error) {
-                // Failed to fetch OAuth providers - continue with email/phone only
+                // Failed to fetch OAuth providers - continue with email only
             }
         };
         fetchProviders();
@@ -196,7 +189,6 @@ const AuthPage: React.FC = () => {
     useEffect(() => {
         // Reset state when modal opens or view changes
         setError(null);
-        setInfoMessage(null);
         setIsLoading(false);
     }, [state.isAuthModalOpen, state.authModalView]);
 
@@ -218,7 +210,7 @@ const AuthPage: React.FC = () => {
             setError(null);
         }
     };
-    
+
     // --- Social Login Handlers ---
     const handleSocialLoginClick = (provider: SocialProvider) => {
         setIsLoading(true); // Disable buttons on main modal
@@ -230,7 +222,7 @@ const AuthPage: React.FC = () => {
         loginWithSocial(provider);
         // No need to close modal or handle success here - the OAuth callback page will handle it
     };
-    
+
     const handleEmailSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -265,21 +257,6 @@ const AuthPage: React.FC = () => {
         }
     };
 
-    const handlePhoneLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            await login(phone, password);
-            handleClose();
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
-        } finally{
-            setIsLoading(false);
-        }
-    };
-
     const handlePasswordResetRequest = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -287,52 +264,6 @@ const AuthPage: React.FC = () => {
         try {
             await requestPasswordReset(email);
             dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPasswordSuccess' });
-        } catch(err) {
-            setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handlePhoneSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-        try {
-            await sendPhoneCode(phone);
-            dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'phoneCode' });
-        } catch(err) {
-            setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleCodeSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-        try {
-            const result = await verifyPhoneCode(phone, code);
-            if (result.isNew) {
-                dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'phoneDetails' });
-            } else {
-                handleClose();
-            }
-        } catch(err) {
-            setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handlePhoneDetailsSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-        try {
-            await completePhoneSignup(phone, name, email);
-            handleClose();
         } catch(err) {
             setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
         } finally {
@@ -353,87 +284,22 @@ const AuthPage: React.FC = () => {
                             <button onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })} className={`w-1/2 px-4 py-2 rounded-full text-base font-semibold transition-all duration-300 ${state.authModalView === 'login' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('auth:login.title')}</button>
                             <button onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'signup' })} className={`w-1/2 px-4 py-2 rounded-full text-base font-semibold transition-all duration-300 ${state.authModalView === 'signup' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('auth:signup.title')}</button>
                         </div>
-                        <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm mb-4 sm:mb-6 max-w-xs mx-auto">
-                            <button onClick={() => setMethod('email')} className={`w-1/2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${method === 'email' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}><EnvelopeIcon className="w-5 h-5"/>{t('auth:login.email')}</button>
-                            <button onClick={() => setMethod('phone')} className={`w-1/2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${method === 'phone' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}><DevicePhoneMobileIcon className="w-5 h-5"/>{t('auth:signup.phone')}</button>
-                        </div>
                         {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
-                        
-                        {method === 'email' ? (
-                            <form onSubmit={handleEmailSubmit} className="space-y-4">
-                                <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
-                                <div>
-                                    <div className="relative">
-                                        <input
-                                            type={showPassword ? "text" : "password"}
-                                            id="password"
-                                            value={password}
-                                            onChange={state.authModalView === 'signup' ? handlePasswordChange : (e => setPassword(e.target.value))}
-                                            className={floatingInputClasses}
-                                            placeholder=" "
-                                            required
-                                        />
-                                        <label htmlFor="password" className={floatingLabelClasses}>{t('auth:login.password')}</label>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                                            aria-label={showPassword ? "Hide password" : "Show password"}
-                                        >
-                                            {showPassword ? (
-                                                <EyeSlashIcon className="w-5 h-5" />
-                                            ) : (
-                                                <EyeIcon className="w-5 h-5" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    {state.authModalView === 'signup' && password && (
-                                        <PasswordRequirementsIndicator requirements={passwordRequirements} />
-                                    )}
-                                </div>
-                                {state.authModalView === 'login' && <div className="text-right"><button type="button" onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPassword'})} className="text-sm font-semibold text-primary hover:underline">{t('auth:login.forgotPassword')}</button></div>}
-                                {state.authModalView === 'signup' && (
-                                    <div className="relative">
-                                        <input
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            id="confirmPassword"
-                                            value={confirmPassword}
-                                            onChange={e => setConfirmPassword(e.target.value)}
-                                            className={floatingInputClasses}
-                                            placeholder=" "
-                                            required
-                                        />
-                                        <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('auth:signup.confirmPassword')}</label>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                                        >
-                                            {showConfirmPassword ? (
-                                                <EyeSlashIcon className="w-5 h-5" />
-                                            ) : (
-                                                <EyeIcon className="w-5 h-5" />
-                                            )}
-                                        </button>
-                                    </div>
-                                )}
-                                <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm text-base sm:text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? t('common:loading') : (state.authModalView === 'login' ? t('auth:login.submit') : t('auth:signup.submit'))}</button>
-                            </form>
-                        ) : state.authModalView === 'login' ? (
-                            <form onSubmit={handlePhoneLogin} className="space-y-4">
-                                <div className="relative"><input type="tel" id="phone" value={phone} onChange={e => setPhone(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="phone" className={floatingLabelClasses}>{t('auth:signup.phone')}</label></div>
+
+                        <form onSubmit={handleEmailSubmit} className="space-y-4">
+                            <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
+                            <div>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
-                                        id="phonePassword"
+                                        id="password"
                                         value={password}
-                                        onChange={e => setPassword(e.target.value)}
+                                        onChange={state.authModalView === 'signup' ? handlePasswordChange : (e => setPassword(e.target.value))}
                                         className={floatingInputClasses}
                                         placeholder=" "
                                         required
                                     />
-                                    <label htmlFor="phonePassword" className={floatingLabelClasses}>Password</label>
+                                    <label htmlFor="password" className={floatingLabelClasses}>{t('auth:login.password')}</label>
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
@@ -447,15 +313,40 @@ const AuthPage: React.FC = () => {
                                         )}
                                     </button>
                                 </div>
-                                <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm text-base sm:text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? 'Processing...' : 'Log In'}</button>
-                            </form>
-                        ) : (
-                             <form onSubmit={handlePhoneSubmit} className="space-y-4">
-                                <div className="relative"><input type="tel" id="phone" value={phone} onChange={e => setPhone(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="phone" className={floatingLabelClasses}>Phone Number</label></div>
-                                <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm text-base sm:text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? 'Sending...' : 'Send Code'}</button>
-                            </form>
-                        )}
-                        
+                                {state.authModalView === 'signup' && password && (
+                                    <PasswordRequirementsIndicator requirements={passwordRequirements} />
+                                )}
+                            </div>
+                            {state.authModalView === 'login' && <div className="text-right"><button type="button" onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPassword'})} className="text-sm font-semibold text-primary hover:underline">{t('auth:login.forgotPassword')}</button></div>}
+                            {state.authModalView === 'signup' && (
+                                <div className="relative">
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        id="confirmPassword"
+                                        value={confirmPassword}
+                                        onChange={e => setConfirmPassword(e.target.value)}
+                                        className={floatingInputClasses}
+                                        placeholder=" "
+                                        required
+                                    />
+                                    <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('auth:signup.confirmPassword')}</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeSlashIcon className="w-5 h-5" />
+                                        ) : (
+                                            <EyeIcon className="w-5 h-5" />
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                            <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm text-base sm:text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? t('common:loading') : (state.authModalView === 'login' ? t('auth:login.submit') : t('auth:signup.submit'))}</button>
+                        </form>
+
                         {(availableProviders.google || availableProviders.apple) && (
                             <>
                                 <div className="my-4 sm:my-6 flex items-center"><div className="flex-grow border-t border-neutral-300"></div><span className="flex-shrink mx-4 text-neutral-500 font-medium text-sm">{t('auth:login.orContinueWith')}</span><div className="flex-grow border-t border-neutral-300"></div></div>
@@ -488,37 +379,11 @@ const AuthPage: React.FC = () => {
                         <button onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })} className="w-full py-3 px-4 rounded-lg font-bold text-white bg-primary hover:bg-primary-dark">{t('auth:forgotPassword.backToLogin')}</button>
                     </div>
                 );
-            case 'phoneCode':
-                 return (
-                    <>
-                        <h3 className="text-lg font-bold text-center mb-4">Enter Code</h3>
-                        <p className="text-sm text-neutral-600 text-center mb-6">We've sent a 6-digit code to <span className="font-semibold">{phone}</span>.</p>
-                        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
-                        <form onSubmit={handleCodeSubmit} className="space-y-4">
-                             <div className="relative"><input type="text" id="code" value={code} onChange={e => setCode(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="code" className={floatingLabelClasses}>6-Digit Code</label></div>
-                            <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? 'Verifying...' : 'Verify'}</button>
-                            <button type="button" onClick={() => { setMethod('phone'); dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' }); }} className="w-full text-sm font-semibold text-primary hover:underline mt-2">Back</button>
-                        </form>
-                    </>
-                );
-            case 'phoneDetails':
-                 return (
-                     <>
-                        <h3 className="text-lg font-bold text-center mb-4">Complete Your Profile</h3>
-                        <p className="text-sm text-neutral-600 text-center mb-6">Just a few more details to create your account.</p>
-                        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
-                        <form onSubmit={handlePhoneDetailsSubmit} className="space-y-4">
-                            <div className="relative"><input type="text" id="name" value={name} onChange={e => setName(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="name" className={floatingLabelClasses}>Full Name</label></div>
-                            <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="email" className={floatingLabelClasses}>Email Address</label></div>
-                            <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? 'Creating Account...' : 'Complete Sign Up'}</button>
-                        </form>
-                    </>
-                );
             default:
                 return null;
         }
     };
-    
+
 
     return (
         <>

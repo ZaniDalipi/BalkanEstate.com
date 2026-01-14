@@ -30,7 +30,7 @@ export type AppView = 'search' | 'explore-cities' | 'saved-searches' | 'saved-pr
 
 export type HowItWorksTab = 'getting-started' | 'agencies' | 'agents' | 'buyers' | 'sellers';
 
-export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess' | 'phoneCode' | 'phoneDetails';
+export type AuthModalView = 'login' | 'signup' | 'forgotPassword' | 'forgotPasswordSuccess';
 
 export type SellerType = 'any' | 'agent' | 'private';
 

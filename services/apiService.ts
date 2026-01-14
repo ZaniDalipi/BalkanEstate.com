@@ -394,21 +394,6 @@ export const loginWithSocial = (provider: 'google' | 'apple'): void => {
   window.location.href = getOAuthUrl(provider);
 };
 
-export const sendPhoneCode = async (phone: string): Promise<void> => {
-  // TODO: Implement phone verification on backend
-  console.log(`Sending code to ${phone}`);
-};
-
-export const verifyPhoneCode = async (phone: string, code: string): Promise<{ user: User | null; isNew: boolean }> => {
-  // TODO: Implement phone verification on backend
-  throw new Error('Phone verification not yet implemented');
-};
-
-export const completePhoneSignup = async (phone: string, name: string, email: string): Promise<User> => {
-  // TODO: Implement phone signup on backend
-  throw new Error('Phone signup not yet implemented');
-};
-
 // Email Verification Functions
 export const verifyEmail = async (token: string): Promise<{ success: boolean; message: string; user?: User }> => {
   const response = await apiRequest<{ success: boolean; message: string; user?: User; accessToken?: string; refreshToken?: string }>('/auth/verify-email', {
