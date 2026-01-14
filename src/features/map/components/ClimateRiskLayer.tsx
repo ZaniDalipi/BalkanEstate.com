@@ -12,8 +12,7 @@
  * Uses Copernicus Climate Data Store and other open data sources for the Balkans region.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { TileLayer, WMSTileLayer, useMap } from 'react-leaflet';
+import React from 'react';
 
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
 
@@ -23,27 +22,19 @@ interface ClimateRiskLayerProps {
 }
 
 // Climate risk layer configurations
-// Using free WMS/tile services that work without API keys
+// Legend-only mode - tile layers require API keys from data providers
+// To enable tiles, add your API keys for the respective services
 const CLIMATE_RISK_LAYERS: Record<
   Exclude<ClimateRiskType, 'none'>,
   {
     name: string;
-    url: string;
-    attribution: string;
     legendTitle: string;
     legendColors: { color: string; label: string }[];
-    minZoom?: number;
-    isWMS?: boolean;
-    wmsLayers?: string;
-    wmsFormat?: string;
-    wmsStyles?: string;
+    description: string;
   }
 > = {
-  // Flood risk - Using EFAS (European Flood Awareness System) WMS from Copernicus
   flood: {
     name: 'Flood Risk',
-    url: 'https://efas.smhi.se/wms',
-    attribution: '&copy; <a href="https://www.efas.eu/">EFAS/Copernicus</a>',
     legendTitle: 'Flood zones',
     legendColors: [
       { color: '#cce5ff', label: 'Low' },
@@ -51,15 +42,10 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#3399ff', label: 'High' },
       { color: '#0066cc', label: 'Severe' },
     ],
-    isWMS: true,
-    wmsLayers: 'flood_risk',
-    wmsFormat: 'image/png',
+    description: 'Shows flood risk zones based on historical data',
   },
-  // Fire risk - Using EFFIS (European Forest Fire Information System) WMS
   fire: {
     name: 'Fire Risk',
-    url: 'https://maps.effis.emergency.copernicus.eu/wms',
-    attribution: '&copy; <a href="https://effis.jrc.ec.europa.eu/">EFFIS/Copernicus</a>',
     legendTitle: 'Fire risk level',
     legendColors: [
       { color: '#ffeda0', label: 'Minimal' },
@@ -67,15 +53,10 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#f03b20', label: 'High' },
       { color: '#bd0026', label: 'Extreme' },
     ],
-    isWMS: true,
-    wmsLayers: 'fwi.current',
-    wmsFormat: 'image/png',
+    description: 'Wildfire probability based on conditions',
   },
-  // Wind risk - Using RainViewer (free radar/wind tiles)
   wind: {
     name: 'Wind Risk',
-    url: 'https://tilecache.rainviewer.com/v2/coverage/0/256/{z}/{x}/{y}/1/1_1.png',
-    attribution: '&copy; <a href="https://www.rainviewer.com/">RainViewer</a>',
     legendTitle: 'Wind speed',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
@@ -84,12 +65,10 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#1a8ab7', label: 'Strong' },
       { color: '#0d5875', label: 'Severe' },
     ],
+    description: 'Severe wind and storm damage risk',
   },
-  // Air quality - Using Copernicus Atmosphere Monitoring Service (CAMS)
   air: {
     name: 'Air Quality',
-    url: 'https://apps.ecmwf.int/wms/',
-    attribution: '&copy; <a href="https://atmosphere.copernicus.eu/">CAMS/Copernicus</a>',
     legendTitle: 'Air quality',
     legendColors: [
       { color: '#00e400', label: 'Good' },
@@ -98,15 +77,10 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#ff0000', label: 'Bad' },
       { color: '#7e0023', label: 'Hazard' },
     ],
-    isWMS: true,
-    wmsLayers: 'composition_aod550',
-    wmsFormat: 'image/png',
+    description: 'Current air quality index',
   },
-  // Heat risk - Using OpenWeatherMap free 1.0 temperature layer
   heat: {
     name: 'Heat Risk',
-    url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     legendTitle: 'Temperature',
     legendColors: [
       { color: '#313695', label: 'Cold' },
@@ -115,6 +89,7 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#f46d43', label: 'Hot' },
       { color: '#a50026', label: 'Extreme' },
     ],
+    description: 'Extreme temperature zones',
   },
 };
 
@@ -162,55 +137,13 @@ export const ClimateRiskLegend: React.FC<{
 
 /**
  * Main ClimateRiskLayer Component
+ * Currently in legend-only mode - tile overlays require API keys
+ * The UI/legend is functional, but no map overlays are rendered
  */
-const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity = 0.7 }) => {
-  const map = useMap();
-
-  // Get layer configuration
-  const layerConfig = useMemo(() => {
-    if (riskType === 'none') return null;
-    return CLIMATE_RISK_LAYERS[riskType];
-  }, [riskType]);
-
-  // Layer is available at all zoom levels - no constraints
-
-  if (!layerConfig || riskType === 'none') {
-    return null;
-  }
-
-  // For WMS layers
-  if (layerConfig.isWMS && layerConfig.wmsLayers) {
-    return (
-      <WMSTileLayer
-        url={layerConfig.url}
-        layers={layerConfig.wmsLayers}
-        format={layerConfig.wmsFormat || 'image/png'}
-        transparent={true}
-        attribution={layerConfig.attribution}
-        opacity={opacity}
-        maxZoom={21}
-        minZoom={1}
-      />
-    );
-  }
-
-  // For standard tile URLs
-  return (
-    <TileLayer
-      url={layerConfig.url}
-      attribution={layerConfig.attribution}
-      opacity={opacity}
-      className="climate-risk-layer"
-      maxZoom={21}
-      minZoom={1}
-      // Add error handling for tiles that fail to load
-      eventHandlers={{
-        tileerror: (e) => {
-          console.warn(`Climate risk tile failed to load for ${riskType}:`, e);
-        },
-      }}
-    />
-  );
+const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType }) => {
+  // Legend-only mode - no tile overlays rendered
+  // To add tile overlays, integrate with a climate data API provider
+  return null;
 };
 
 export default ClimateRiskLayer;
