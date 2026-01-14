@@ -106,17 +106,17 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
 
   return (
     <div
-      className="rounded-2xl shadow-xl border border-white/30 overflow-hidden"
+      className="rounded-xl shadow-lg border border-white/30 overflow-hidden max-w-[200px]"
       style={{
-        background: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
       }}
     >
       {/* Map Options Section - only shown on mobile or when explicitly enabled */}
       {showMapOptions && (
-        <div className="px-2 pt-2 pb-1.5 border-b border-gray-200/50">
-          <h3 className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1">
+        <div className="px-2.5 pt-2 pb-1.5 border-b border-gray-200/40">
+          <h3 className="text-[9px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
             {t('search:map.options.title', 'Map Options')}
           </h3>
           <div className="flex flex-wrap gap-1">
@@ -124,10 +124,10 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
               <button
                 key={option.value}
                 onClick={() => onMapOptionChange(option.value)}
-                className={`px-2 py-1 text-[11px] font-medium rounded-lg transition-all ${
+                className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${
                   selectedMapOption === option.value
-                    ? 'bg-blue-500 text-white shadow-sm'
-                    : 'bg-white/60 text-gray-700 hover:bg-white'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 {option.label}
@@ -138,19 +138,19 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
       )}
 
       {/* Climate Risks Section */}
-      <div className="px-2 pt-1.5 pb-2">
-        <h3 className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1">
+      <div className="px-2.5 pt-1.5 pb-2">
+        <h3 className="text-[9px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
           {t('search:map.climateRisks.title', 'Climate Risks')}
         </h3>
-        <div className="flex flex-wrap gap-1">
+        <div className="grid grid-cols-3 gap-1">
           {climateRisks.map((risk) => (
             <button
               key={risk.value}
               onClick={() => onClimateRiskChange(risk.value)}
-              className={`px-2 py-1 text-[11px] font-medium rounded-lg transition-all ${
+              className={`px-1.5 py-1 text-[10px] font-medium rounded-md transition-all text-center ${
                 selectedClimateRisk === risk.value
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-white/60 text-gray-700 hover:bg-white'
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               {risk.label}
