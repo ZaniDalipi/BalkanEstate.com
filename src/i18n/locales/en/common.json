@@ -306,6 +306,7 @@
     "submitFailed": "Failed to submit request. Please try again.",
     "genericError": "An error occurred. Please try again later."
   },
+  "tryAgain": "Try Again",
   "actions": {
     "cancel": "Cancel",
     "close": "Close",

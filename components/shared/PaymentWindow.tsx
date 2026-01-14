@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
 import {
   CreditCardIcon,
@@ -6,9 +7,76 @@ import {
   ClockIcon,
   LockClosedIcon,
   ArrowTopRightOnSquareIcon,
+  ExclamationTriangleIcon,
 } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
+
+// Country code mapping from language to country code
+const LANGUAGE_TO_COUNTRY: Record<string, string> = {
+  'sq': 'AL', // Albanian -> Albania
+  'sr': 'RS', // Serbian -> Serbia
+  'mk': 'MK', // Macedonian -> North Macedonia
+  'bs': 'BA', // Bosnian -> Bosnia and Herzegovina
+  'hr': 'HR', // Croatian -> Croatia
+  'me': 'ME', // Montenegrin -> Montenegro
+  'bg': 'BG', // Bulgarian -> Bulgaria
+  'ro': 'RO', // Romanian -> Romania
+  'el': 'GR', // Greek -> Greece
+  'en': 'GR', // Default to Greece for English in Balkans
+};
+
+// Helper function to detect user's country
+const detectUserCountry = (userProfileCountry?: string): string => {
+  // 1. Use user profile country if available
+  if (userProfileCountry) {
+    // Convert country name to code
+    const countryNameToCode: Record<string, string> = {
+      'Albania': 'AL',
+      'Serbia': 'RS',
+      'North Macedonia': 'MK',
+      'Macedonia': 'MK',
+      'Bosnia and Herzegovina': 'BA',
+      'Bosnia': 'BA',
+      'Croatia': 'HR',
+      'Montenegro': 'ME',
+      'Bulgaria': 'BG',
+      'Romania': 'RO',
+      'Greece': 'GR',
+      'Kosovo': 'XK',
+    };
+    if (countryNameToCode[userProfileCountry]) {
+      return countryNameToCode[userProfileCountry];
+    }
+    // If already a code, return it
+    if (userProfileCountry.length === 2) {
+      return userProfileCountry.toUpperCase();
+    }
+  }
+
+  // 2. Try to detect from browser language/locale
+  const browserLang = navigator.language?.split('-')[0]?.toLowerCase();
+  if (browserLang && LANGUAGE_TO_COUNTRY[browserLang]) {
+    return LANGUAGE_TO_COUNTRY[browserLang];
+  }
+
+  // 3. Try to get from navigator.languages
+  const languages = navigator.languages || [];
+  for (const lang of languages) {
+    const langCode = lang.split('-')[0].toLowerCase();
+    if (LANGUAGE_TO_COUNTRY[langCode]) {
+      return LANGUAGE_TO_COUNTRY[langCode];
+    }
+    // Check if it includes a country code like 'en-MK'
+    const countryPart = lang.split('-')[1]?.toUpperCase();
+    if (countryPart && ['AL', 'RS', 'MK', 'BA', 'HR', 'ME', 'BG', 'RO', 'GR', 'XK'].includes(countryPart)) {
+      return countryPart;
+    }
+  }
+
+  // 4. Default to Greece (EU country, supports Stripe)
+  return 'GR';
+};
 
 // ============================================
 // COMING SOON FLAG - Set to false when ready to launch payments
@@ -40,16 +108,19 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   planInterval,
   userRole,
   userEmail,
-  userCountry = 'RS',
+  userCountry: propUserCountry,
   onSuccess,
   onError,
   discountPercent = 0,
   productId,
   onEnterpriseSelected,
 }) => {
+  const { t } = useTranslation(['payment', 'common']);
   const { state } = useAppContext();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [discountCode, setDiscountCode] = useState('');
   const [validatingCode, setValidatingCode] = useState(false);
   const [codeValidation, setCodeValidation] = useState<{
@@ -60,6 +131,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   } | null>(null);
 
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(null);
+
+  // Dynamically detect user country
+  const userCountry = propUserCountry || detectUserCountry(state.currentUser?.country);
 
   // Calculate price with discounts
   let finalPrice = planPrice;
@@ -83,18 +157,20 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       // Validate user is authenticated when opening payment modal
       const token = localStorage.getItem('balkan_estate_token');
       if (!state.isAuthenticated || !token) {
-        onError('Please log in to complete your purchase');
+        onError(t('payment:errors.loginRequired', 'Please log in to complete your purchase'));
         onClose();
         return;
       }
     } else {
       // Reset state when modal closes
       setShowSuccess(false);
+      setShowError(false);
+      setErrorMessage('');
       setDiscountCode('');
       setCodeValidation(null);
       setAppliedDiscountCode(null);
     }
-  }, [isOpen, state.isAuthenticated, onError, onClose]);
+  }, [isOpen, state.isAuthenticated, onError, onClose, t]);
 
   const handleValidateDiscountCode = async () => {
     if (!discountCode.trim()) {
@@ -278,7 +354,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
     } catch (error) {
       console.error('❌ Payment error:', error);
-      onError(error instanceof Error ? error.message : 'Failed to initialize payment');
+      const message = error instanceof Error ? error.message : t('payment:errors.paymentFailed', 'Failed to initialize payment');
+      setErrorMessage(message);
+      setShowError(true);
+      onError(message);
       setIsProcessing(false);
     }
   };
@@ -375,11 +454,51 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
       <div className="max-w-md mx-auto">
-        {showSuccess ? (
+        {showError ? (
+          <div className="text-center py-6 sm:py-8">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ExclamationTriangleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2">
+              {t('payment:errors.title', 'Payment Error')}
+            </h2>
+            <p className="text-sm sm:text-base text-neutral-600 mb-4 px-4">
+              {errorMessage}
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-4 mx-4 text-left">
+              <p className="text-xs sm:text-sm text-amber-800">
+                <strong>{t('payment:errors.whatToDo', 'What you can do:')}</strong>
+              </p>
+              <ul className="text-xs sm:text-sm text-amber-700 mt-2 space-y-1 list-disc list-inside">
+                <li>{t('payment:errors.checkConnection', 'Check your internet connection')}</li>
+                <li>{t('payment:errors.tryAgain', 'Try again in a few moments')}</li>
+                <li>{t('payment:errors.contactSupport', 'Contact support if the issue persists')}</li>
+              </ul>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowError(false)}
+                className="px-6 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark transition-colors"
+              >
+                {t('common:tryAgain', 'Try Again')}
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-2.5 border border-neutral-300 text-neutral-700 rounded-lg font-medium text-sm hover:bg-neutral-50 transition-colors"
+              >
+                {t('common:close', 'Close')}
+              </button>
+            </div>
+          </div>
+        ) : showSuccess ? (
           <div className="text-center py-6 sm:py-8">
             <CheckCircleIcon className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 mx-auto mb-3 sm:mb-4" />
-            <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-1.5 sm:mb-2">Payment Successful!</h2>
-            <p className="text-sm sm:text-base text-neutral-600">Your subscription has been activated.</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-1.5 sm:mb-2">
+              {t('payment:success.title', 'Payment Successful!')}
+            </h2>
+            <p className="text-sm sm:text-base text-neutral-600">
+              {t('payment:success.message', 'Your subscription has been activated.')}
+            </p>
           </div>
         ) : (
           <div className="space-y-4 sm:space-y-6">

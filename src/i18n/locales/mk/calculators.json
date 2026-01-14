@@ -8,12 +8,17 @@
     },
     "calculating": "Calculating...",
     "results": {
-      "estimatedValue": "Estimated Value"
+      "estimatedValue": "Проценета Вредност",
+      "lowEstimate": "Ниска",
+      "highEstimate": "Висока",
+      "pricePerSqm": "Цена/м²",
+      "valueRange": "Опсег на Вредност"
     },
     "errors": {
-      "selectLocation": "Please select a valid location from the suggestions.",
-      "locationNotDetermined": "Could not determine city and country from selected location.",
-      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate."
+      "selectLocation": "Ве молиме изберете валидна локација од предлозите.",
+      "locationNotDetermined": "Не можеше да се одреди градот и државата од избраната локација.",
+      "insufficientData": "Жал ни е, немаме доволно податоци за {{city}} за да дадеме сигурна проценка.",
+      "calculationFailed": "Не успеа пресметката на вредноста на имотот. Ве молиме обидете се повторно."
     }
   },
   "mortgage": {

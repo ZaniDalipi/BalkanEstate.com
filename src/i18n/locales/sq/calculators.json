@@ -8,12 +8,17 @@
     },
     "calculating": "Duke llogaritur...",
     "results": {
-      "estimatedValue": "Vlera e Vlerësuar"
+      "estimatedValue": "Vlera e Vlerësuar",
+      "lowEstimate": "E Ulët",
+      "highEstimate": "E Lartë",
+      "pricePerSqm": "Çmimi/m²",
+      "valueRange": "Gama e Vlerës"
     },
     "errors": {
       "selectLocation": "Ju lutemi zgjidhni një vendndodhje të vlefshme nga sugjerimet.",
       "locationNotDetermined": "Nuk u arrit të përcaktohet qyteti dhe shteti nga vendndodhja e zgjedhur.",
-      "insufficientData": "Na vjen keq, nuk kemi të dhëna të mjaftueshme për {{city}} për të ofruar një vlerësim të besueshëm."
+      "insufficientData": "Na vjen keq, nuk kemi të dhëna të mjaftueshme për {{city}} për të ofruar një vlerësim të besueshëm.",
+      "calculationFailed": "Dështoi llogaritja e vlerës së pronës. Ju lutemi provoni përsëri."
     }
   },
   "mortgage": {

@@ -8,12 +8,17 @@
     },
     "calculating": "Izračunavanje...",
     "results": {
-      "estimatedValue": "Procenjena Vrednost"
+      "estimatedValue": "Procenjena Vrednost",
+      "lowEstimate": "Niska",
+      "highEstimate": "Visoka",
+      "pricePerSqm": "Cena/m²",
+      "valueRange": "Opseg Vrednosti"
     },
     "errors": {
       "selectLocation": "Molimo izaberite validnu lokaciju iz predloga.",
       "locationNotDetermined": "Nije moguće odrediti grad i državu iz izabrane lokacije.",
-      "insufficientData": "Žao nam je, nemamo dovoljno podataka za {{city}} da pružimo pouzdanu procenu."
+      "insufficientData": "Žao nam je, nemamo dovoljno podataka za {{city}} da pružimo pouzdanu procenu.",
+      "calculationFailed": "Nije uspelo izračunavanje vrednosti nekretnine. Molimo pokušajte ponovo."
     }
   },
   "mortgage": {
