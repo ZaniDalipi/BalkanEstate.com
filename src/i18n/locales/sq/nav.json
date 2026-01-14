@@ -48,37 +48,37 @@
     "listProperty": "Listo Pronën Time"
   },
   "mobile": {
-    "menu": "Menu",
-    "close": "Close Menu",
-    "back": "Back"
+    "menu": "Menuja",
+    "close": "Mbyll Menunë",
+    "back": "Prapa"
   },
   "user": {
-    "greeting": "Hello, {{name}}",
-    "viewProfile": "View Profile",
-    "accountSettings": "Account Settings",
-    "myProperties": "My Properties",
-    "myFavorites": "My Favorites",
-    "myMessages": "My Messages",
-    "notifications": "Notifications",
-    "helpCenter": "Help Center",
-    "logout": "Log Out"
+    "greeting": "Përshëndetje, {{name}}",
+    "viewProfile": "Shiko Profilin",
+    "accountSettings": "Cilësimet e Llogarisë",
+    "myProperties": "Pronat e Mia",
+    "myFavorites": "Të Preferuarat e Mia",
+    "myMessages": "Mesazhet e Mia",
+    "notifications": "Njoftimet",
+    "helpCenter": "Qendra e Ndihmës",
+    "logout": "Dil"
   },
   "breadcrumbs": {
-    "home": "Home",
-    "search": "Search",
-    "property": "Property",
-    "agents": "Agents",
-    "agencies": "Agencies",
-    "account": "My Account",
-    "messages": "Messages",
-    "savedSearches": "Saved Searches",
-    "savedProperties": "Saved Properties",
-    "createListing": "Create Listing",
-    "editListing": "Edit Listing"
+    "home": "Shtepi",
+    "search": "Kërko",
+    "property": "Prona",
+    "agents": "Agjentë",
+    "agencies": "Agjenci",
+    "account": "Llogaria Ime",
+    "messages": "Mesazhet",
+    "savedSearches": "Kërkime të Ruajtura",
+    "savedProperties": "Prona të Ruajtura",
+    "createListing": "Krijo Njoftim",
+    "editListing": "Redakto Njoftimin"
   },
   "skipLinks": {
-    "mainContent": "Skip to main content",
-    "navigation": "Skip to navigation",
-    "footer": "Skip to footer"
+    "mainContent": "Kalo te përmbajtja kryesore",
+    "navigation": "Kalo te navigimi",
+    "footer": "Kalo te fundi"
   }
 }

@@ -131,7 +131,7 @@ export const MAP_TILE_LAYERS: Record<string, MapTileLayer> = {
 /**
  * Default map style for real estate - clean and minimal
  */
-export const DEFAULT_MAP_STYLE = 'positron';
+export const DEFAULT_MAP_STYLE = 'voyager';
 
 /**
  * Map style categories for UI grouping
