@@ -1,4 +1,69 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+
+// City Image Orb - displays city photos inside 3D bubbles
+export const CityImageOrb: React.FC<{
+  cityName: string;
+  country: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
+  animate?: boolean;
+}> = ({ cityName, country, size = 'md', className = '', animate = true }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const sizeMap = {
+    sm: { container: 'w-16 h-16', imageSize: 64 },
+    md: { container: 'w-24 h-24', imageSize: 96 },
+    lg: { container: 'w-32 h-32', imageSize: 128 },
+    xl: { container: 'w-48 h-48', imageSize: 192 },
+  };
+
+  const { container, imageSize } = sizeMap[size];
+  const imageUrl = getCityImageUrl(cityName, { country, width: imageSize * 2, height: imageSize * 2 });
+  const fallbackGradient = getCityFallbackGradient(cityName);
+
+  return (
+    <div
+      className={`${container} rounded-full overflow-hidden relative ${
+        animate ? 'animate-float' : ''
+      } ${className}`}
+      style={{
+        boxShadow: `
+          inset -8px -8px 20px rgba(255, 255, 255, 0.4),
+          inset 8px 8px 20px rgba(0, 0, 0, 0.15),
+          0 20px 40px rgba(0, 0, 0, 0.2)
+        `,
+      }}
+    >
+      {!imageError ? (
+        <img
+          src={imageUrl}
+          alt={cityName}
+          className="w-full h-full object-cover"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div
+          className="w-full h-full"
+          style={{ background: fallbackGradient }}
+        />
+      )}
+      {/* Glossy overlay effect */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)',
+        }}
+      />
+      {/* City name label */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1">
+        <p className="text-white text-[8px] font-medium text-center truncate leading-tight">
+          {cityName}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 // Real Estate Icons for use in decorative elements
 const HouseIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -659,6 +724,7 @@ export const Decorative3DStyles: React.FC = () => (
 );
 
 export default {
+  CityImageOrb,
   RealEstateOrb,
   FloatingSphere,
   GlossyPill,
