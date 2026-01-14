@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/shared/Modal';
 import PaymentWindow from '@/components/shared/PaymentWindow';
@@ -6,6 +6,7 @@ import { AtSymbolIcon, UserIcon, BuildingOfficeIcon, CheckCircleIcon } from '@/c
 import { useAppContext } from '@/context/AppContext';
 import { fetchBuyerProducts, Product } from '@/utils/api';
 import { useNotification } from '@/shared/hooks/useNotification';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   const { t } = useTranslation(['modals']);
   const { state, dispatch } = useAppContext();
   const { success, warning } = useNotification();
+  const { getLocalizedPath } = useLocalizedNavigation();
   const [activeTab, setActiveTab] = useState<'buyer' | 'seller'>('buyer');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [email, setEmail] = useState(initialEmail || state.currentUser?.email || '');
@@ -47,16 +49,11 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   // Update URL when modal opens
   useEffect(() => {
     if (isOpen) {
-      const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      const subscribePath = `/${lang}/subscribe`;
-
       if (!window.location.pathname.includes('/subscribe') && !window.location.pathname.includes('/pricing')) {
-        window.history.pushState({ modal: 'subscribe' }, '', subscribePath);
+        window.history.pushState({ modal: 'subscribe' }, '', getLocalizedPath('/subscribe'));
       }
     }
-  }, [isOpen]);
+  }, [isOpen, getLocalizedPath]);
 
   // Handle browser back button
   useEffect(() => {
@@ -82,7 +79,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     setShowPromotionGuide(tier);
   };
 
-  const handleGoToMyListings = () => {
+  const handleGoToMyListings = useCallback(() => {
     if (!state.isAuthenticated) {
       onClose();
       dispatch({
@@ -91,20 +88,16 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
       });
       return;
     }
-    // Close modal first
+    // Close modal and navigate to account/listings
     onClose();
-    // Navigate to account/listings - dispatch in correct order (tab first, then view)
-    const currentLang = window.location.pathname.split('/')[1] || 'en';
-    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
     dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'listings' });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-    window.history.pushState({ view: 'account' }, '', `/${lang}/account/listings`);
-  };
+    window.history.pushState({ view: 'account' }, '', getLocalizedPath('/account/listings'));
+  }, [state.isAuthenticated, onClose, dispatch, getLocalizedPath]);
 
-  const handleCreateNewListing = () => {
+  const handleCreateNewListing = useCallback(() => {
     if (!state.isAuthenticated) {
       onClose();
       dispatch({
@@ -113,18 +106,14 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
       });
       return;
     }
-    // Close modal first
+    // Close modal and navigate to create-listing
     onClose();
-    // Navigate to create-listing view
-    const currentLang = window.location.pathname.split('/')[1] || 'en';
-    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
     dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-    window.history.pushState({ view: 'create-listing' }, '', `/${lang}/create-listing`);
-  };
+    window.history.pushState({ view: 'create-listing' }, '', getLocalizedPath('/create-listing'));
+  }, [state.isAuthenticated, onClose, dispatch, getLocalizedPath]);
 
   const handleSubscribeClick = async (e: React.FormEvent) => {
     e.preventDefault();
