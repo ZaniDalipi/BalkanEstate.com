@@ -9,6 +9,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { API_URL } from '@/shared/api/config';
+import { isCurrentDomainApproved, getPaddleEnvironmentForDomain, PADDLE_REQUIRED_LEGAL_PAGES } from '@/config/paddleConfig';
 
 // Paddle environment types
 type PaddleEnvironment = 'sandbox' | 'production';
@@ -192,6 +193,19 @@ export function usePaddle(config: UsePaddleConfig = {}): UsePaddleReturn {
 
     const initializePaddle = async () => {
       try {
+        // Check if current domain is approved for Paddle checkout
+        if (!isCurrentDomainApproved()) {
+          console.warn(
+            '⚠️ Paddle Domain Warning: Current domain may not be approved for Paddle checkout.\n' +
+            'Please ensure your domain is submitted and approved in the Paddle dashboard:\n' +
+            'https://vendors.paddle.com/checkout-settings\n\n' +
+            'Required legal pages for approval:\n' +
+            `- Terms of Service: ${PADDLE_REQUIRED_LEGAL_PAGES.termsOfService.path}\n` +
+            `- Privacy Policy: ${PADDLE_REQUIRED_LEGAL_PAGES.privacyPolicy.path}\n` +
+            `- Refund Policy: ${PADDLE_REQUIRED_LEGAL_PAGES.refundPolicy.path}`
+          );
+        }
+
         // Load the script
         await loadPaddleScript();
 
@@ -211,9 +225,11 @@ export function usePaddle(config: UsePaddleConfig = {}): UsePaddleReturn {
           throw new Error('Paddle SDK not available');
         }
 
-        // Set environment
-        const environment = data.environment || 'sandbox';
+        // Set environment - use domain config as fallback, backend config takes priority
+        const domainEnv = getPaddleEnvironmentForDomain();
+        const environment = data.environment || domainEnv || 'sandbox';
         window.Paddle.Environment.set(environment);
+        console.log(`🏦 Paddle initialized with ${environment} environment for domain: ${window.location.host}`);
 
         // Initialize Paddle
         window.Paddle.Initialize({
