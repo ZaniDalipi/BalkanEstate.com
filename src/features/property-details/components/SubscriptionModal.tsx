@@ -91,19 +91,17 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
       });
       return;
     }
-    // Use history.back() to go back, then navigate
+    // Close modal first
     onClose();
-    // Go back in history first to clear the subscribe URL
-    if (window.history.state?.modal === 'subscribe') {
-      window.history.back();
-    }
-    setTimeout(() => {
-      const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      window.history.pushState({ view: 'my-listings' }, '', `/${lang}/my-listings`);
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' });
-    }, 150);
+    // Navigate to account/listings - dispatch in correct order (tab first, then view)
+    const currentLang = window.location.pathname.split('/')[1] || 'en';
+    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'listings' });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+    window.history.pushState({ view: 'account' }, '', `/${lang}/account/listings`);
   };
 
   const handleCreateNewListing = () => {
@@ -115,19 +113,17 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
       });
       return;
     }
-    // Use history.back() to go back, then open modal
+    // Close modal first
     onClose();
-    // Go back in history first to clear the subscribe URL
-    if (window.history.state?.modal === 'subscribe') {
-      window.history.back();
-    }
-    setTimeout(() => {
-      const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      window.history.pushState({ modal: 'create-listing' }, '', `/${lang}/create-listing`);
-      dispatch({ type: 'TOGGLE_LIST_MODAL', payload: true });
-    }, 150);
+    // Navigate to create-listing view
+    const currentLang = window.location.pathname.split('/')[1] || 'en';
+    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+    dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+    window.history.pushState({ view: 'create-listing' }, '', `/${lang}/create-listing`);
   };
 
   const handleSubscribeClick = async (e: React.FormEvent) => {
