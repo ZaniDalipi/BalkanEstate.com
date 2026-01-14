@@ -11,6 +11,7 @@ import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, Pho
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
+import { FloatingSphere, GlossyPill, AbstractBlob, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -333,7 +334,7 @@ const AgentsPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 flex flex-col">
+    <div className="bg-neutral-50 flex flex-col relative">
       {/* SEO Meta Tags */}
       <SEO
         title={t('agents:page.title')}
@@ -341,6 +342,34 @@ const AgentsPage: React.FC = () => {
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/agents`}
         type="website"
       />
+
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
+      {/* 3D Decorative Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-10 right-[8%] opacity-20 hidden lg:block">
+          <FloatingSphere size="xl" color="cyan" />
+        </div>
+        <div className="absolute bottom-[35%] -left-10 opacity-15 hidden lg:block">
+          <FloatingSphere size="lg" color="blue" animate={false} />
+        </div>
+        <div className="absolute top-[30%] left-[5%] opacity-10 hidden xl:block">
+          <AbstractBlob variant={2} color="pink" />
+        </div>
+        <div className="absolute top-[45%] -right-6 opacity-15 hidden lg:block rotate-[-10deg]">
+          <GlossyPill orientation="vertical" size="lg" color="purple" />
+        </div>
+        <div className="absolute bottom-[25%] right-[12%] opacity-20 hidden md:block">
+          <FloatingSphere size="sm" color="peach" />
+        </div>
+        <div className="absolute top-[70%] left-[15%] opacity-15 hidden lg:block">
+          <FloatingSphere size="md" color="purple" />
+        </div>
+        {/* Gradient overlays */}
+        <div className="absolute top-0 left-1/3 w-[450px] h-[450px] bg-gradient-to-br from-cyan-200/10 via-blue-200/5 to-transparent rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute bottom-0 right-1/3 w-[350px] h-[350px] bg-gradient-to-tl from-purple-200/10 via-pink-200/5 to-transparent rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+      </div>
 
       {/* Add CSS animations */}
       <style>{`
