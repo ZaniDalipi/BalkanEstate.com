@@ -656,7 +656,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                {/* Map Options Panel - appears above the button */}
+                {/* Map Options Panel - appears above the button (Desktop: only Climate Risks) */}
                 {isMapOptionsOpen && (
                   <div className="absolute bottom-full right-0 mb-2 z-[1010]">
                     <MapOptionsPanel
@@ -666,6 +666,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       onClimateRiskChange={handleClimateRiskChange}
                       isOpen={isMapOptionsOpen}
                       onClose={() => setIsMapOptionsOpen(false)}
+                      showMapOptions={false}
                     />
                   </div>
                 )}

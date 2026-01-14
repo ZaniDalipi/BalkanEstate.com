@@ -26,6 +26,7 @@ interface MapOptionsPanelProps {
   isOpen: boolean;
   onClose?: () => void;
   isMobile?: boolean;
+  showMapOptions?: boolean; // Whether to show map type options (hide on desktop where buttons exist)
 }
 
 /**
@@ -84,6 +85,7 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
   onClimateRiskChange,
   isOpen,
   isMobile = false,
+  showMapOptions = true, // Default to showing map options
 }) => {
   const { t } = useTranslation(['search']);
 
@@ -107,33 +109,35 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
   return (
     <div
       className={`bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ${
-        isMobile ? 'w-[280px] max-w-[90vw]' : 'min-w-[280px]'
+        isMobile ? 'w-[280px] max-w-[90vw]' : 'min-w-[240px]'
       }`}
       style={isMobile ? {
         maxHeight: 'calc(100vh - 200px)',
         overflowY: 'auto',
       } : undefined}
     >
-      {/* Map Options Section */}
-      <div className={`${isMobile ? 'p-3' : 'p-4'} border-b border-gray-100`}>
-        <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold text-gray-900 mb-2`}>
-          {t('search:map.options.title', 'Map Options')}
-        </h3>
-        <div className="space-y-0">
-          {mapOptions.map((option) => (
-            <RadioOption
-              key={option.value}
-              id={`map-option-${option.value}`}
-              name="mapOption"
-              value={option.value}
-              checked={selectedMapOption === option.value}
-              onChange={() => onMapOptionChange(option.value)}
-              label={option.label}
-              isMobile={isMobile}
-            />
-          ))}
+      {/* Map Options Section - only shown on mobile or when explicitly enabled */}
+      {showMapOptions && (
+        <div className={`${isMobile ? 'p-3' : 'p-4'} border-b border-gray-100`}>
+          <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold text-gray-900 mb-2`}>
+            {t('search:map.options.title', 'Map Options')}
+          </h3>
+          <div className="space-y-0">
+            {mapOptions.map((option) => (
+              <RadioOption
+                key={option.value}
+                id={`map-option-${option.value}`}
+                name="mapOption"
+                value={option.value}
+                checked={selectedMapOption === option.value}
+                onChange={() => onMapOptionChange(option.value)}
+                label={option.label}
+                isMobile={isMobile}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Climate Risks Section */}
       <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
