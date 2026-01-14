@@ -672,6 +672,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             </div>
 
+            {/* Climate Risk Legend - positioned below controls (Desktop) */}
+            {selectedClimateRisk !== 'none' && (
+              <div className="animate-fade-in">
+                <ClimateRiskLegend riskType={selectedClimateRisk} />
+              </div>
+            )}
+
             {drawnBounds && !isDrawing && (
               <div className="flex items-center gap-1.5 animate-fade-in">
                 {isAuthenticated && (
@@ -700,13 +707,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           {isLegendOpen && !showMeasurement && (
             <div className="absolute bottom-12 left-4 z-[1000] animate-fade-in">
               <Legend isNightMode={false} />
-            </div>
-          )}
-
-          {/* Climate Risk Legend - shows when a climate risk is selected (Zillow-style) */}
-          {selectedClimateRisk !== 'none' && (
-            <div className="absolute bottom-12 left-4 z-[1001] animate-fade-in">
-              <ClimateRiskLegend riskType={selectedClimateRisk} />
             </div>
           )}
 
@@ -849,12 +849,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             )}
 
-            {/* Climate Risk Legend for mobile */}
-            {selectedClimateRisk !== 'none' && !isLayerMenuOpen && (
-              <div className="absolute bottom-14 left-0 pointer-events-auto">
-                <ClimateRiskLegend riskType={selectedClimateRisk} />
-              </div>
-            )}
           </div>
 
           {/* Mobile: Top right compact controls */}
@@ -927,6 +921,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   <span className="text-[10px] font-semibold">{isDrawing ? t('search:map.cancel') : t('search:map.draw', 'Draw')}</span>
                 </button>
               </div>
+
+              {/* Climate Risk Legend - positioned below controls (Mobile) */}
+              {selectedClimateRisk !== 'none' && (
+                <div className="animate-fade-in">
+                  <ClimateRiskLegend riskType={selectedClimateRisk} />
+                </div>
+              )}
 
               {/* Sun Position Control - compact version for mobile */}
               {show3DBuildings && (
