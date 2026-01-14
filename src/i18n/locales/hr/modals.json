@@ -16,6 +16,16 @@
     "continueToPayment": "Nastavi na Plaćanje",
     "securePayment": "Sigurno plaćanje putem Stripea",
     "loadingPlans": "Učitavanje planova...",
+    "buyerPro": {
+      "name": "Buyer Pro",
+      "description": "Nikada ne propustite novi oglas! Budite obaviješteni trenutak kada nekretnina koja odgovara vašim kriterijima dođe na tržište.",
+      "features": {
+        "notifications": "Trenutne e-mail i SMS obavijesti",
+        "unlimitedSearches": "Spremite neograničen broj pretraživanja",
+        "earlyAccess": "Rani pristup novim oglasima",
+        "marketInsights": "Napredni uvidi u tržište"
+      }
+    },
     "sellerPromotion": {
       "title": "Planovi Promocije Oglasa",
       "description": "Povećajte vidljivost svojih oglasa za nekretnine i dobijte više upita",
