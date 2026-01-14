@@ -115,6 +115,7 @@ const CLIMATE_RISK_LAYERS: Record<
 
 /**
  * Climate Risk Legend Component
+ * Compact design matching the control bar styling
  */
 export const ClimateRiskLegend: React.FC<{
   riskType: Exclude<ClimateRiskType, 'none'>;
@@ -124,27 +125,34 @@ export const ClimateRiskLegend: React.FC<{
   if (!config) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-3 min-w-[180px]">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-gray-900">{config.legendTitle}</span>
-        <span className="text-[10px] text-gray-500">First Street®</span>
+    <div
+      className="rounded-2xl shadow-xl border border-white/30 px-3 py-2"
+      style={{
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-medium text-gray-700 whitespace-nowrap">{config.legendTitle}</span>
+        <div className="flex items-center gap-0 flex-1 min-w-[80px]">
+          {config.legendColors.map((item, index) => (
+            <div key={index} className="flex-1">
+              <div
+                className="h-1.5"
+                style={{
+                  backgroundColor: item.color,
+                  borderRadius: index === 0 ? '3px 0 0 3px' : index === config.legendColors.length - 1 ? '0 3px 3px 0' : '0',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+        <span className="text-[8px] text-gray-400">First Street®</span>
       </div>
-      <div className="flex items-center gap-0">
+      <div className="flex items-center mt-0.5 ml-[70px]">
         {config.legendColors.map((item, index) => (
-          <div key={index} className="flex-1">
-            <div
-              className="h-2"
-              style={{
-                backgroundColor: item.color,
-                borderRadius: index === 0 ? '4px 0 0 4px' : index === config.legendColors.length - 1 ? '0 4px 4px 0' : '0',
-              }}
-            />
-          </div>
-        ))}
-      </div>
-      <div className="flex items-center justify-between mt-1">
-        {config.legendColors.map((item, index) => (
-          <span key={index} className="text-[10px] text-gray-600 flex-1 text-center">
+          <span key={index} className="text-[8px] text-gray-500 flex-1 text-center">
             {item.label}
           </span>
         ))}
