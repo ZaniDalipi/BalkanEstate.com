@@ -563,6 +563,47 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
             {/* Layer toggles - compact row with glass effect */}
             <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
+              {/* Zillow-style Map Options Button - FIRST on desktop */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                    isMapOptionsOpen || selectedClimateRisk !== 'none'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
+                  }`}
+                >
+                  <span>{t('search:map.options.mapButton', 'Map')}</span>
+                  <svg
+                    className={`w-3.5 h-3.5 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {/* Map Options Panel - appears above the button (Desktop: only Climate Risks) */}
+                {isMapOptionsOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 z-[1010]">
+                    <MapOptionsPanel
+                      selectedMapOption={selectedMapOption}
+                      selectedClimateRisk={selectedClimateRisk}
+                      onMapOptionChange={handleMapOptionChange}
+                      onClimateRiskChange={handleClimateRiskChange}
+                      isOpen={isMapOptionsOpen}
+                      onClose={() => setIsMapOptionsOpen(false)}
+                      showMapOptions={false}
+                      isMobile={false}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Separator */}
+              <div className="w-px h-5 bg-gray-300/50" />
+
               {/* 3D Buildings Toggle */}
               <button
                 onClick={() => setShow3DBuildings(!show3DBuildings)}
@@ -634,43 +675,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <MapLegendIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('search:map.legend', 'Legend')}</span>
               </button>
-
-              {/* Zillow-style Map Options Button */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
-                  className={`flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                    isMapOptionsOpen || selectedClimateRisk !== 'none'
-                      ? 'bg-gray-100 text-gray-900 shadow-inner'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
-                  }`}
-                >
-                  <span>{t('search:map.options.mapButton', 'Map')}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {/* Map Options Panel - appears above the button (Desktop: only Climate Risks) */}
-                {isMapOptionsOpen && (
-                  <div className="absolute bottom-full right-0 mb-2 z-[1010]">
-                    <MapOptionsPanel
-                      selectedMapOption={selectedMapOption}
-                      selectedClimateRisk={selectedClimateRisk}
-                      onMapOptionChange={handleMapOptionChange}
-                      onClimateRiskChange={handleClimateRiskChange}
-                      isOpen={isMapOptionsOpen}
-                      onClose={() => setIsMapOptionsOpen(false)}
-                      showMapOptions={false}
-                    />
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Climate Risk Legend - positioned below controls (Desktop) */}
