@@ -111,63 +111,52 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
         background: 'rgba(255, 255, 255, 0.85)',
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        maxWidth: isMobile ? '200px' : '220px',
+        minWidth: isMobile ? '160px' : '180px',
       }}
     >
       {/* Map Options Section - only shown on mobile or when explicitly enabled */}
       {showMapOptions && (
-        <div className="px-2.5 pt-2.5 pb-2 border-b border-gray-200/50">
-          <h3 className="text-xs font-semibold text-gray-800 mb-1">
+        <div className="px-2 pt-2 pb-1.5 border-b border-gray-200/50">
+          <h3 className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1">
             {t('search:map.options.title', 'Map Options')}
           </h3>
-          <div className="space-y-0">
+          <div className="flex flex-wrap gap-1">
             {mapOptions.map((option) => (
-              <RadioOption
+              <button
                 key={option.value}
-                id={`map-option-${option.value}`}
-                name="mapOption"
-                value={option.value}
-                checked={selectedMapOption === option.value}
-                onChange={() => onMapOptionChange(option.value)}
-                label={option.label}
-              />
+                onClick={() => onMapOptionChange(option.value)}
+                className={`px-2 py-1 text-[11px] font-medium rounded-lg transition-all ${
+                  selectedMapOption === option.value
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'bg-white/60 text-gray-700 hover:bg-white'
+                }`}
+              >
+                {option.label}
+              </button>
             ))}
           </div>
         </div>
       )}
 
       {/* Climate Risks Section */}
-      <div className="px-2.5 pt-2 pb-2.5">
-        <h3 className="text-xs font-semibold text-gray-800 mb-1">
+      <div className="px-2 pt-1.5 pb-2">
+        <h3 className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1">
           {t('search:map.climateRisks.title', 'Climate Risks')}
         </h3>
-        <div className="grid grid-cols-2 gap-x-1">
-          <div className="space-y-0">
-            {climateRisks.slice(0, 3).map((risk) => (
-              <RadioOption
-                key={risk.value}
-                id={`climate-risk-${risk.value}`}
-                name="climateRisk"
-                value={risk.value}
-                checked={selectedClimateRisk === risk.value}
-                onChange={() => onClimateRiskChange(risk.value)}
-                label={risk.label}
-              />
-            ))}
-          </div>
-          <div className="space-y-0">
-            {climateRisks.slice(3).map((risk) => (
-              <RadioOption
-                key={risk.value}
-                id={`climate-risk-${risk.value}`}
-                name="climateRisk"
-                value={risk.value}
-                checked={selectedClimateRisk === risk.value}
-                onChange={() => onClimateRiskChange(risk.value)}
-                label={risk.label}
-              />
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-1">
+          {climateRisks.map((risk) => (
+            <button
+              key={risk.value}
+              onClick={() => onClimateRiskChange(risk.value)}
+              className={`px-2 py-1 text-[11px] font-medium rounded-lg transition-all ${
+                selectedClimateRisk === risk.value
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'bg-white/60 text-gray-700 hover:bg-white'
+              }`}
+            >
+              {risk.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
