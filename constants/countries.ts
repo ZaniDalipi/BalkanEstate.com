@@ -79,13 +79,6 @@ export const BALKAN_COUNTRIES: Record<string, CountryData> = {
         center: [44.2, 20.9],
         zoom: 7,
     },
-    slovenia: {
-        name: 'Slovenia',
-        code: 'SI',
-        bounds: [[45.4, 13.4], [46.9, 16.6]],
-        center: [46.1, 15.0],
-        zoom: 8,
-    },
 };
 
 export const COUNTRY_OPTIONS = [

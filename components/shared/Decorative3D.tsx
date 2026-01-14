@@ -33,11 +33,11 @@ const BALKAN_CITIES = [
   { cityName: 'Kotor', country: 'Montenegro' },
   { cityName: 'Sarajevo', country: 'Bosnia and Herzegovina' },
   { cityName: 'Split', country: 'Croatia' },
-  { cityName: 'Ljubljana', country: 'Slovenia' },
   { cityName: 'Podgorica', country: 'Montenegro' },
   { cityName: 'Skopje', country: 'North Macedonia' },
   { cityName: 'Pristina', country: 'Kosovo' },
   { cityName: 'Zagreb', country: 'Croatia' },
+  { cityName: 'Bucharest', country: 'Romania' },
 ];
 
 // Random City Bubbles - displays city bubbles at random positions with split animation

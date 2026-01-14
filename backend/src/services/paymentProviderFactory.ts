@@ -65,14 +65,6 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
     isEU: true,
     isSEPA: true,
   },
-  SI: {
-    countryCode: 'SI',
-    countryName: 'Slovenia',
-    provider: 'paddle',
-    currency: 'EUR',
-    isEU: true,
-    isSEPA: true,
-  },
 
   // Non-EU Balkans
   RS: {

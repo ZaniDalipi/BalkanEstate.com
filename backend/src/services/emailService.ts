@@ -1641,7 +1641,7 @@ class EmailService {
       <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
         <p style="color: #1e40af; font-weight: 600; font-size: 14px; margin: 0 0 12px 0;">🌍 Properties across 8 Balkan countries</p>
         <p style="color: #374151; font-size: 13px; margin: 0; line-height: 1.6;">
-          Croatia · Slovenia · Serbia · Montenegro · Bosnia · Albania · Kosovo · North Macedonia
+          Croatia · Serbia · Montenegro · Bosnia · Albania · Kosovo · North Macedonia · Romania
         </p>
       </div>
 
@@ -1887,7 +1887,7 @@ Your account is verified and ready to explore.
 Thank you for joining BalkanEstateᴬᴵ — the premier real estate platform connecting buyers, sellers, and agents across the Balkans.
 
 🌍 Properties across 8 Balkan countries:
-Croatia, Slovenia, Serbia, Montenegro, Bosnia, Albania, Kosovo, North Macedonia
+Croatia, Serbia, Montenegro, Bosnia, Albania, Kosovo, North Macedonia, Romania
 
 FOR PROPERTY SEEKERS:
 • Advanced Property Search — Filter by location, price, property type, bedrooms, amenities

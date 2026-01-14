@@ -43,15 +43,6 @@ export const MUNICIPALITY_DATA: Record<string, MunicipalityData[]> = {
             ]
         }
     ],
-    "Slovenia": [
-        {
-            name: "Ljubljana",
-            settlements: [
-                { name: "Center", lat: 46.05, lng: 14.50 },
-                { name: "Šiška", lat: 46.07, lng: 14.48 },
-            ]
-        }
-    ],
     "North Macedonia": [
         {
             name: "Skopje",

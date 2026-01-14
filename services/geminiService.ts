@@ -340,7 +340,7 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
 
         Your main goal is to understand the user's needs and convert their conversational request into a structured search query. Be concise and helpful. Never be salesy.
 
-        **IMPORTANT - Balkan Countries:** The platform covers these countries: Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania, Serbia, Slovenia. When a user mentions a country, extract it to the "country" field.
+        **IMPORTANT - Balkan Countries:** The platform covers these countries: Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania, Serbia. When a user mentions a country, extract it to the "country" field.
 
         **Your instructions are:**
         1.  **Engage Naturally:** Start with a friendly greeting if it's the beginning of the conversation.
