@@ -11,7 +11,7 @@ import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, Pho
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { FloatingSphere, GlossyPill, AbstractBlob, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -346,29 +346,43 @@ const AgentsPage: React.FC = () => {
       {/* Include 3D animation styles */}
       <Decorative3DStyles />
 
-      {/* 3D Decorative Background Elements */}
+      {/* 3D Decorative Background Elements with Real Estate Icons */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-10 right-[8%] opacity-20 hidden lg:block">
-          <FloatingSphere size="xl" color="cyan" />
+        {/* Top right - House icon */}
+        <div className="absolute -top-10 right-[8%] opacity-30 hidden lg:block">
+          <RealEstateOrb size="xl" color="cyan" icon="house" />
         </div>
-        <div className="absolute bottom-[35%] -left-10 opacity-15 hidden lg:block">
-          <FloatingSphere size="lg" color="blue" animate={false} />
+        {/* Left side - Key icon */}
+        <div className="absolute bottom-[35%] -left-10 opacity-25 hidden lg:block">
+          <RealEstateOrb size="lg" color="blue" icon="key" animate={false} />
         </div>
-        <div className="absolute top-[30%] left-[5%] opacity-10 hidden xl:block">
+        {/* Abstract blob */}
+        <div className="absolute top-[30%] left-[5%] opacity-15 hidden xl:block">
           <AbstractBlob variant={2} color="pink" />
         </div>
-        <div className="absolute top-[45%] -right-6 opacity-15 hidden lg:block rotate-[-10deg]">
+        {/* Right side pill */}
+        <div className="absolute top-[45%] -right-6 opacity-25 hidden lg:block rotate-[-10deg]">
           <GlossyPill orientation="vertical" size="lg" color="purple" />
         </div>
-        <div className="absolute bottom-[25%] right-[12%] opacity-20 hidden md:block">
-          <FloatingSphere size="sm" color="peach" />
+        {/* Building icon */}
+        <div className="absolute bottom-[25%] right-[12%] opacity-30 hidden md:block">
+          <RealEstateOrb size="md" color="purple" icon="building" />
         </div>
-        <div className="absolute top-[70%] left-[15%] opacity-15 hidden lg:block">
-          <FloatingSphere size="md" color="purple" />
+        {/* Map pin */}
+        <div className="absolute top-[70%] left-[15%] opacity-25 hidden lg:block">
+          <RealEstateOrb size="md" color="peach" icon="pin" />
+        </div>
+        {/* Heart home */}
+        <div className="absolute bottom-[50%] right-[3%] opacity-20 hidden xl:block">
+          <RealEstateOrb size="sm" color="pink" icon="heart" />
+        </div>
+        {/* Door icon */}
+        <div className="absolute top-[15%] left-[12%] opacity-25 hidden lg:block">
+          <RealEstateOrb size="sm" color="green" icon="door" />
         </div>
         {/* Gradient overlays */}
-        <div className="absolute top-0 left-1/3 w-[450px] h-[450px] bg-gradient-to-br from-cyan-200/10 via-blue-200/5 to-transparent rounded-full blur-3xl animate-pulse-glow" />
-        <div className="absolute bottom-0 right-1/3 w-[350px] h-[350px] bg-gradient-to-tl from-purple-200/10 via-pink-200/5 to-transparent rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-0 left-1/3 w-[450px] h-[450px] bg-gradient-to-br from-cyan-200/15 via-blue-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute bottom-0 right-1/3 w-[350px] h-[350px] bg-gradient-to-tl from-purple-200/15 via-pink-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Add CSS animations */}

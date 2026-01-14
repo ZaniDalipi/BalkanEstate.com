@@ -1,5 +1,96 @@
 import React from 'react';
 
+// Real Estate Icons for use in decorative elements
+const HouseIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+  </svg>
+);
+
+const KeyIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+  </svg>
+);
+
+const BuildingIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z" />
+  </svg>
+);
+
+const MapPinIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+  </svg>
+);
+
+const HeartHomeIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+  </svg>
+);
+
+const DoorIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M19 19V5c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v14H3v2h18v-2h-2zm-6 0H7V5h10v14h-4zm-2-8h2v2h-2z" />
+  </svg>
+);
+
+// Floating Sphere with Real Estate Icon inside
+export const RealEstateOrb: React.FC<{
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  color?: 'blue' | 'pink' | 'purple' | 'cyan' | 'peach' | 'green';
+  icon?: 'house' | 'key' | 'building' | 'pin' | 'heart' | 'door';
+  className?: string;
+  animate?: boolean;
+}> = ({ size = 'md', color = 'blue', icon = 'house', className = '', animate = true }) => {
+  const sizeMap = {
+    sm: { container: 'w-16 h-16', icon: 'w-6 h-6' },
+    md: { container: 'w-24 h-24', icon: 'w-10 h-10' },
+    lg: { container: 'w-32 h-32', icon: 'w-14 h-14' },
+    xl: { container: 'w-48 h-48', icon: 'w-20 h-20' },
+  };
+
+  const gradientMap = {
+    blue: { bg: 'from-blue-200 via-blue-300 to-indigo-400', iconColor: 'text-blue-600/60' },
+    pink: { bg: 'from-pink-200 via-rose-300 to-pink-400', iconColor: 'text-pink-600/60' },
+    purple: { bg: 'from-purple-200 via-violet-300 to-purple-400', iconColor: 'text-purple-600/60' },
+    cyan: { bg: 'from-cyan-200 via-sky-300 to-blue-400', iconColor: 'text-cyan-600/60' },
+    peach: { bg: 'from-orange-100 via-pink-200 to-rose-300', iconColor: 'text-orange-600/60' },
+    green: { bg: 'from-green-200 via-emerald-300 to-teal-400', iconColor: 'text-green-600/60' },
+  };
+
+  const IconComponent = {
+    house: HouseIcon,
+    key: KeyIcon,
+    building: BuildingIcon,
+    pin: MapPinIcon,
+    heart: HeartHomeIcon,
+    door: DoorIcon,
+  }[icon];
+
+  const { container, icon: iconSize } = sizeMap[size];
+  const { bg, iconColor } = gradientMap[color];
+
+  return (
+    <div
+      className={`${container} rounded-full bg-gradient-to-br ${bg} shadow-2xl relative flex items-center justify-center ${
+        animate ? 'animate-float' : ''
+      } ${className}`}
+      style={{
+        boxShadow: `
+          inset -8px -8px 20px rgba(255, 255, 255, 0.6),
+          inset 8px 8px 20px rgba(0, 0, 0, 0.1),
+          0 20px 40px rgba(0, 0, 0, 0.15)
+        `,
+      }}
+    >
+      <IconComponent className={`${iconSize} ${iconColor}`} />
+    </div>
+  );
+};
+
 // Floating 3D Sphere with gradient
 export const FloatingSphere: React.FC<{
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -568,6 +659,7 @@ export const Decorative3DStyles: React.FC = () => (
 );
 
 export default {
+  RealEstateOrb,
   FloatingSphere,
   GlossyPill,
   SoftCone,

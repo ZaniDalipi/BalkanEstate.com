@@ -29,7 +29,7 @@ import { useAppContext } from '../context/AppContext';
 import Footer from './shared/Footer';
 import { SEO } from '../src/components/seo';
 import HeroSearchSection from './shared/HeroSearchSection';
-import { FloatingSphere, GlossyPill, AbstractBlob, Decorative3DStyles } from './shared/Decorative3D';
+import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from './shared/Decorative3D';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -408,22 +408,35 @@ const AgenciesListPage: React.FC = () => {
       {/* Include 3D animation styles */}
       <Decorative3DStyles />
 
-      {/* 3D Decorative Background Elements */}
+      {/* 3D Decorative Background Elements with Real Estate Icons */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-10 right-[5%] opacity-25 hidden lg:block">
-          <FloatingSphere size="xl" color="blue" />
+        {/* Top right - Building icon */}
+        <div className="absolute -top-10 right-[5%] opacity-30 hidden lg:block">
+          <RealEstateOrb size="xl" color="blue" icon="building" />
         </div>
-        <div className="absolute bottom-[30%] -left-12 opacity-20 hidden lg:block">
-          <FloatingSphere size="lg" color="pink" animate={false} />
+        {/* Left side - House icon */}
+        <div className="absolute bottom-[30%] -left-12 opacity-25 hidden lg:block">
+          <RealEstateOrb size="lg" color="pink" icon="house" animate={false} />
         </div>
+        {/* Abstract blob */}
         <div className="absolute top-[25%] left-[3%] opacity-15 hidden xl:block">
           <AbstractBlob variant={1} color="purple" />
         </div>
-        <div className="absolute top-[50%] -right-8 opacity-20 hidden lg:block rotate-[15deg]">
+        {/* Right side pill */}
+        <div className="absolute top-[50%] -right-8 opacity-25 hidden lg:block rotate-[15deg]">
           <GlossyPill orientation="vertical" size="lg" color="cyan" />
         </div>
-        <div className="absolute bottom-[20%] right-[15%] opacity-25 hidden md:block">
-          <FloatingSphere size="sm" color="purple" />
+        {/* Key icon */}
+        <div className="absolute bottom-[20%] right-[15%] opacity-30 hidden md:block">
+          <RealEstateOrb size="md" color="purple" icon="key" />
+        </div>
+        {/* Map pin */}
+        <div className="absolute top-[60%] left-[10%] opacity-25 hidden lg:block">
+          <RealEstateOrb size="sm" color="cyan" icon="pin" />
+        </div>
+        {/* Heart home */}
+        <div className="absolute bottom-[45%] right-[3%] opacity-20 hidden xl:block">
+          <RealEstateOrb size="md" color="peach" icon="heart" />
         </div>
         {/* Gradient overlays */}
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-blue-200/15 via-purple-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" />
