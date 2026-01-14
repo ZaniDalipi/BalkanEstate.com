@@ -39,15 +39,15 @@
     "email": "info@balkanestateai.com"
   },
   "legal": {
-    "allRightsReserved": "All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "allRightsReserved": "Sva prava zadržana.",
+    "privacyPolicy": "Politika privatnosti",
+    "termsOfService": "Uslovi korištenja",
+    "cookiePolicy": "Politika kolačića",
+    "disclaimer": "Odricanje odgovornosti",
+    "accessibility": "Pristupačnost"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Pratite nas",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -55,35 +55,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Preuzmite našu aplikaciju",
+    "availableOn": "Dostupno na",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Pretplatite se na bilten",
+    "placeholder": "Unesite Vaš e-mail",
+    "subscribe": "Pretplati se",
+    "subscribed": "Hvala na pretplati!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Podrška",
+    "helpCenter": "Centar za pomoć",
+    "contactUs": "Kontaktirajte nas",
+    "faq": "Često postavljana pitanja",
+    "feedback": "Dajte povratnu informaciju"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
+    "title": "Kompanija",
+    "aboutUs": "O nama",
+    "careers": "Karijere",
+    "press": "Štampa",
     "blog": "Blog"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Partneri",
+    "becomePartner": "Postanite partner",
+    "affiliates": "Affiliate",
+    "developers": "Za programere"
   }
 }

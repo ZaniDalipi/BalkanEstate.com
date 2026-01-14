@@ -1,44 +1,44 @@
 {
-  "imagesRequired": "Potrebne Slike",
-  "locationRequired": "Potrebna Lokacija",
+  "imagesRequired": "Slike su Obavezne",
+  "locationRequired": "Lokacija je Obavezna",
   "invalidFloorNumber": "Nevažeći Broj Kata",
   "invalidFloorCount": "Nevažeći Broj Katova",
   "password": {
-    "minLength": "At least 8 characters",
-    "uppercase": "One uppercase letter",
-    "lowercase": "One lowercase letter",
-    "number": "One number",
-    "specialChar": "One special character (!@#$%...)",
-    "noSequential": "No sequential characters (123, abc, qwe)",
-    "notCommon": "Not a common password",
-    "mismatch": "Passwords do not match"
+    "minLength": "Najmanje 8 znakova",
+    "uppercase": "Jedno veliko slovo",
+    "lowercase": "Jedno malo slovo",
+    "number": "Jedan broj",
+    "specialChar": "Jedan posebni znak (!@#$%...)",
+    "noSequential": "Bez uzastopnih znakova (123, abc, qwe)",
+    "notCommon": "Ne smije biti uobičajena lozinka",
+    "mismatch": "Lozinke se ne podudaraju"
   },
   "email": {
-    "required": "Email is required",
-    "invalid": "Please enter a valid email address"
+    "required": "Email je obavezan",
+    "invalid": "Molimo unesite valjanu email adresu"
   },
   "phone": {
-    "required": "Phone number is required",
-    "invalid": "Please enter a valid phone number"
+    "required": "Telefonski broj je obavezan",
+    "invalid": "Molimo unesite valjan telefonski broj"
   },
-  "required": "This field is required",
-  "minLength": "Must be at least {{count}} characters",
-  "maxLength": "Must be no more than {{count}} characters",
-  "numeric": "Must be a number",
-  "positive": "Must be a positive number",
-  "url": "Please enter a valid URL",
+  "required": "Ovo polje je obavezno",
+  "minLength": "Mora imati najmanje {{count}} znakova",
+  "maxLength": "Mora imati najviše {{count}} znakova",
+  "numeric": "Mora biti broj",
+  "positive": "Mora biti pozitivan broj",
+  "url": "Molimo unesite valjan URL",
   "date": {
-    "invalid": "Please enter a valid date",
-    "future": "Date must be in the future",
-    "past": "Date must be in the past"
+    "invalid": "Molimo unesite valjan datum",
+    "future": "Datum mora biti u budućnosti",
+    "past": "Datum mora biti u prošlosti"
   },
   "file": {
-    "required": "Please select a file",
-    "size": "File size must be less than {{size}}MB",
-    "type": "Invalid file type. Allowed: {{types}}"
+    "required": "Molimo odaberite datoteku",
+    "size": "Veličina datoteke mora biti manja od {{size}}MB",
+    "type": "Nevažeći tip datoteke. Dozvoljeno: {{types}}"
   },
   "form": {
-    "hasErrors": "Please fix the errors before submitting",
-    "submitError": "An error occurred. Please try again."
+    "hasErrors": "Molimo ispravite greške prije slanja",
+    "submitError": "Došlo je do greške. Molimo pokušajte ponovno."
   }
 }

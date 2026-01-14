@@ -1,0 +1,823 @@
+{
+  "hero": {
+    "title": "Kako Balkan Estate funkcioniše",
+    "subtitle": "Vodeća platforma za nekretnine koja povezuje kupce, prodavce, agente i agencije širom Balkana"
+  },
+  "tabs": {
+    "gettingStarted": "Početak",
+    "premiumFeatures": "Premium Funkcije",
+    "forAgencies": "Za agencije",
+    "forAgents": "Za agente",
+    "forBuyers": "Za kupce",
+    "forSellers": "Za prodavce"
+  },
+  "gettingStarted": {
+    "welcome": {
+      "title": "Dobrodošli na Balkan Estate",
+      "subtitle": "Vaš kompletan vodič za navigaciju, pretragu i korišćenje svih funkcija vodeće balkanske platforme za nekretnine"
+    },
+    "mainNavigation": {
+      "title": "Glavna navigacija",
+      "home": {
+        "name": "Početna",
+        "desc": "Pregledajte sve nekretnine sa prikazom na mapi"
+      },
+      "search": {
+        "name": "Pretraga",
+        "desc": "Napredni filteri i alati za pretragu"
+      },
+      "agents": {
+        "name": "Agenti",
+        "desc": "PronađiteVerifikovane agente za nekretnine"
+      },
+      "agencies": {
+        "name": "Agencije",
+        "desc": "Otkrijte profesionalne agencije"
+      },
+      "explore": {
+        "name": "Istraži",
+        "desc": "Istražite gradove i kvartove"
+      }
+    },
+    "createAccount": {
+      "title": "Kreiranje vašeg naloga",
+      "signUpModal": "Modal za registraciju",
+      "clickSignUp": "Kliknite \"Registruj se\" u zaglavlju",
+      "step1": {
+        "title": "Kliknite dugme \"Registruj se\"",
+        "desc": "Nalazi se u gornjem desnom uglu navigacione trake"
+      },
+      "step2": {
+        "title": "Izaberite tip naloga",
+        "desc": "Odaberite Kupac, Prodavac ili Agent u zavisnosti od vaših potreba"
+      },
+      "step3": {
+        "title": "Popunite svoje podatke",
+        "desc": "Unesite email, lozinku, ime i broj telefona"
+      },
+      "step4": {
+        "title": "Verifikujte svoj email",
+        "desc": "Provjerite sandučić i kliknite na link za verifikaciju"
+      }
+    },
+    "interactiveMap": {
+      "title": "Korišćenje interaktivne mape",
+      "intro": "Naša interaktivna mapa je srce Balkan Estate platforme. Evo kako da je efikasno koristite:",
+      "mapView": "Prikaz interaktivne mape",
+      "mapViewDesc": "Kompletna mapa nekretnina sa markererima",
+      "drawArea": "Nacrtajte oblast",
+      "panZoom": {
+        "title": "Pomjeraj i zum",
+        "desc": "Kliknite i prevucite da se krećete po mapi. Koristite točkić miša ili prstima da zumirate."
+      },
+      "drawCustomAreas": {
+        "title": "Nacrtajte prilagođene oblasti",
+        "desc": "Koristite alat za crtanje da odaberete specifične kvartove ili regije koje vas interesuju."
+      },
+      "clickProperties": {
+        "title": "Kliknite na nekretnine",
+        "desc": "Kliknite bilo koji marker da vidite detalje nekretnine, cijenu i fotografije u brzom pregledu."
+      },
+      "filterResults": {
+        "title": "Filtrirajte rezultate",
+        "desc": "Koristite filtere za raspon cijena, tip nekretnine, broj spavaćih soba i još dodatnih karakteristika."
+      }
+    },
+    "savingProperties": {
+      "title": "Čuvanje nekretnina i pretraga",
+      "saveToFavorites": {
+        "title": "Sačuvaj u favorite",
+        "heading": "Ikona srca",
+        "desc": "Kliknite ikonu srca na bilo kojoj kartici nekretnine ili stranici sa detaljima da je sačuvate u listu favorita."
+      },
+      "saveSearch": {
+        "title": "Sačuvaj pretragu",
+        "heading": "Kriterijumi pretrage",
+        "desc": "Nakon filtriranja, kliknite \"Sačuvaj pretragu\" da budete obaviješteni kada se objave nove nekretnine koje odgovaraju vašim kriterijima."
+      },
+      "getNotified": {
+        "title": "Primajte obavještenja",
+        "heading": "Upozorenja i ažuriranja",
+        "desc": "Primajte email obavještenja o padovima cijena na favoritima i novim oglasima koji odgovaraju vašim pretragama."
+      }
+    },
+    "contactingSellers": {
+      "title": "Kontaktiranje prodavaca i agenata",
+      "contactForm": "Kontakt forma",
+      "onEveryPage": "Na svakoj stranici nekretnine",
+      "multipleWays": "Različiti načini povezivanja",
+      "directMessage": {
+        "title": "Direktna poruka",
+        "desc": "Šaljite poruke preko naše sigurne platforme"
+      },
+      "phoneCall": {
+        "title": "Telefonski poziv",
+        "desc": "Kliknite da pozovete na mobilnim uređajima"
+      },
+      "email": {
+        "title": "Email",
+        "desc": "Direktan email prodavcu ili agentu"
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "desc": "Brza poruka preko WhatsApp-a"
+      }
+    },
+    "createListing": {
+      "title": "Kreiranje oglasa za nekretninu",
+      "steps": {
+        "step1": {
+          "title": "Osnovne informacije",
+          "desc": "Naslov, tip, cijena"
+        },
+        "step2": {
+          "title": "Lokacija",
+          "desc": "Adresa, pin na mapi"
+        },
+        "step3": {
+          "title": "Detalji",
+          "desc": "Sobe, veličina, karakteristike"
+        },
+        "step4": {
+          "title": "Fotografije",
+          "desc": "Otpremite slike"
+        },
+        "step5": {
+          "title": "Objavi",
+          "desc": "Pregledajte i postavite"
+        }
+      },
+      "photoTips": {
+        "title": "Savjeti za fotografije",
+        "tip1": "Koristite prirodno osvjetljenje za najbolje rezultate",
+        "tip2": "Uključite sve prostorije i spoljašnje prostore",
+        "tip3": "Počistite prostor prije snimanja fotografija",
+        "tip4": "Prva fotografija se pojavljuje kao sličica"
+      },
+      "descriptionTips": {
+        "title": "Savjeti za opis",
+        "tip1": "Istaknite jedinstvene karakteristike i unapređenja",
+        "tip2": "Spomenite obližnje sadržaje i prevoz",
+        "tip3": "Budite iskreni o stanju nekretnine",
+        "tip4": "Uključite nedavne renovacije ili poboljšanja"
+      }
+    },
+    "managingAccount": {
+      "title": "Upravljanje vašim nalogom",
+      "profileSettings": {
+        "title": "Podešavanja profila",
+        "desc": "Ažurirajte svoje ime, fotografiju, broj telefona i druge lične detalje.",
+        "access": "Pristup: Meni → Profil"
+      },
+      "subscription": {
+        "title": "Pretplata",
+        "desc": "Pogledajte svoj plan, nadogradite na Pro ili upravljajte naplatom i načinima plaćanja.",
+        "access": "Pristup: Meni → Pretplata"
+      },
+      "notifications": {
+        "title": "Obavještenja",
+        "desc": "Konfigurišite email upozorenja, obavještenja o padovima cijena i upozorenja o novim oglasima.",
+        "access": "Pristup: Meni → Podešavanja"
+      }
+    },
+    "proTips": {
+      "title": "Pro savjeti za najbolje iskustvo",
+      "completeProfile": {
+        "title": "Popunite svoj profil",
+        "desc": "Prodavci i agenti brže odgovaraju kompletnim profilima sa fotografijama."
+      },
+      "useSavedSearches": {
+        "title": "Koristite sačuvane pretrage",
+        "desc": "Sačuvajte svoje kriterijume pretrage da dobijete trenutna obavještenja za nova poklapanja."
+      },
+      "exploreCities": {
+        "title": "Funkcija Istraži gradove",
+        "desc": "Koristite \"Istraži\" da otkrijete kvartove i dobijete uvid u tržište."
+      },
+      "enableNotifications": {
+        "title": "Omogućite obavještenja",
+        "desc": "Uključite email upozorenja da budete prvi koji će saznati za promjene cijena."
+      }
+    }
+  },
+  "premiumFeatures": {
+    "title": "Otključajte Premium Funkcije",
+    "subtitle": "Podignite vaše iskustvo sa nekretninama na viši nivo uz AI alate i napredne funkcije",
+    "aiSearch": {
+      "title": "AI Pretraga",
+      "badge": "PRO",
+      "desc": "Opišite vašu nekretninu iz snova prirodnim jezikom i pustite AI da pronađe savršena poklapanja",
+      "example": "Primjer: 'Pronađi mi stan sa 3 spavaće sobe blizu centra grada sa parkingom, do 200.000€'",
+      "features": {
+        "natural": "Upiti prirodnim jezikom",
+        "smart": "Pametno poklapanje nekretnina",
+        "learn": "Uči vaše preferencije",
+        "instant": "Trenutni rezultati"
+      }
+    },
+    "aiDescription": {
+      "title": "AI Generator Automatskih Opisa",
+      "badge": "PRO",
+      "desc": "Generišite profesionalne, privlačne opise nekretnina automatski jednim klikom",
+      "features": {
+        "professional": "Profesionalno pisanje",
+        "seo": "SEO optimizovan sadržaj",
+        "multilingual": "Višejezička podrška",
+        "customizable": "Potpuno prilagodljivo"
+      },
+      "howItWorks": "Kako Funkcioniše",
+      "step1": "Otpremite vaše fotografije",
+      "step2": "Unesite osnovne detalje",
+      "step3": "Kliknite 'Generiši Opis'",
+      "step4": "Uredite i objavite"
+    },
+    "interactiveMap3D": {
+      "title": "3D Interaktivna Mapa sa Sunčevom Svjetlošću",
+      "badge": "PRO",
+      "desc": "Vizualizujte nekretnine u 3D sa pozicijom sunca u realnom vremenu da vidite prirodno osvjetljenje tokom dana",
+      "features": {
+        "sunPosition": "Pozicija sunca u realnom vremenu",
+        "shadows": "Vizualizacija sjenki",
+        "timeSlider": "Klizač za doba dana",
+        "orientation": "Orijentacija zgrade"
+      },
+      "benefits": {
+        "title": "Zašto Je Važno",
+        "light": "Vidite koliko prirodne svjetlosti svaka prostorija dobija",
+        "morning": "Provjerite izloženost suncu ujutru nasuprot večeri",
+        "balcony": "Vizualizujte sate sunca na balkonu",
+        "energy": "Procijenite energetsku efikasnost"
+      }
+    },
+    "measurements": {
+      "title": "Alat za Mjerenje na Mapi",
+      "badge": "PRO",
+      "desc": "Mjerite udaljenosti i površine direktno na mapi da razumijete veličinu nekretnine i okruženje",
+      "features": {
+        "distance": "Mjerenje udaljenosti",
+        "area": "Izračunavanje površine",
+        "perimeter": "Alati za perimetar",
+        "save": "Sačuvaj mjerenja"
+      },
+      "useCases": {
+        "title": "Slučajevi Upotrebe",
+        "plot": "Izmjerite granice parcele",
+        "distance": "Izračunajte udaljenost do sadržaja",
+        "garden": "Planirajte baštu ili parking prostor",
+        "compare": "Uporedite veličine nekretnina"
+      }
+    },
+    "poi": {
+      "title": "Tačke od Interesa (POI)",
+      "badge": "PRO",
+      "desc": "Otkrijte obližnje škole, bolnice, trgovačke centre, restorane, javni prevoz i još mnogo toga",
+      "categories": {
+        "education": "Škole i Univerziteti",
+        "health": "Bolnice i Apoteke",
+        "shopping": "Kupovina i Supermarketi",
+        "transport": "Javni Prevoz",
+        "dining": "Restorani i Kafići",
+        "parks": "Parkovi i Rekreacija",
+        "banks": "Banke i Bankomati",
+        "services": "Državne Službe"
+      },
+      "features": {
+        "walkTime": "Procjene vremena hodanja",
+        "driveTime": "Udaljenosti vožnjom",
+        "ratings": "Ocjene mjesta",
+        "filter": "Filtrirajte po kategoriji"
+      }
+    },
+    "insights": {
+      "title": "AI Generirani Uvidi",
+      "badge": "PRO",
+      "desc": "Dobijte personalizovane uvide o nekretninama, kvartovima i trendovima na tržištu",
+      "types": {
+        "priceAnalysis": {
+          "title": "Analiza Cijene",
+          "desc": "Da li je ova nekretnina pošteno cijenjena? Uporedite sa sličnim oglasima u oblasti"
+        },
+        "neighborhood": {
+          "title": "Ocjena Kvarta",
+          "desc": "Sigurnost, prohodnost, nivo buke i metrike kvaliteta života"
+        },
+        "investment": {
+          "title": "Investicioni Potencijal",
+          "desc": "Procjene prinosa od iznajmljivanja, prognoze porasta vrijednosti i projekcije ROI"
+        },
+        "marketTrends": {
+          "title": "Tržišni Trendovi",
+          "desc": "Istorija cijena, trendovi potražnje i najbolje vrijeme za kupovinu/prodaju"
+        }
+      }
+    },
+    "calculators": {
+      "title": "Finansijski Kalkulatori",
+      "subtitle": "Donosite informisane odluke sa našim moćnim finansijskim alatima",
+      "mortgage": {
+        "title": "Kalkulator Hipoteke",
+        "badge": "PRO",
+        "desc": "Izračunajte mjesečne rate, ukupnu kamatu i mogućnost kupovine za bilo koju nekretninu",
+        "features": {
+          "monthly": "Raščlanjivanje mjesečne rate",
+          "total": "Ukupna cijena tokom perioda kredita",
+          "comparison": "Uporedite različite scenarije",
+          "amortization": "Potpuni raspored otplate"
+        }
+      },
+      "rentVsBuy": {
+        "title": "Kalkulator Iznajmljivanje vs Kupovina",
+        "badge": "PRO",
+        "desc": "Uporedite prave troškove iznajmljivanja nasuprot kupovini tokom vremena da donesete pravu odluku",
+        "features": {
+          "comparison": "Uporedna analiza troškova",
+          "breakeven": "Analiza tačke poravnanja",
+          "wealth": "Projekcija akumulacije bogatstva",
+          "taxes": "Izračunavanja poreskih pogodnosti"
+        }
+      },
+      "investment": {
+        "title": "Investicioni Kalkulator",
+        "badge": "PRO",
+        "desc": "Analizirajte potencijalni prihod od iznajmljivanja, ROI i novčani tok za investicione nekretnine",
+        "features": {
+          "roi": "Povrat investicije",
+          "cashflow": "Mjesečni novčani tok",
+          "capRate": "Izračunavanje kapitalizacione stope",
+          "appreciation": "Porast vrijednosti"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Detaljna Analitička Kontrolna Tabla",
+      "badge": "PRO",
+      "desc": "Pratite performanse vašeg oglasa sa sveobuhvatnom analitikom i uvidima",
+      "metrics": {
+        "views": "Ukupni pregledi i jedinstveni posjetioci",
+        "inquiries": "Broj upita i stopa konverzije",
+        "favorites": "Broj dodavanja u favorite",
+        "shares": "Dijeljenja na društvenim mrežama i doseg",
+        "demographics": "Demografija gledalaca",
+        "sources": "Izvori saobraćaja"
+      },
+      "reports": {
+        "title": "Generiši Izvještaje",
+        "weekly": "Sedmični pregled performansi",
+        "comparison": "Uporedi sa prosječnim tržištem",
+        "recommendations": "AI preporuke"
+      }
+    }
+  },
+  "listingPromotions": {
+    "title": "Kako Promocije Oglasa Funkcionišu",
+    "subtitle": "Povećajte vidljivost vaše nekretnine i prodajte brže sa našim opcijama promocije",
+    "comparison": {
+      "title": "Poređenje Promocija",
+      "standard": {
+        "title": "Standardni Oglas",
+        "features": {
+          "position": "Redovna pozicija u pretrazi",
+          "visibility": "Osnovna vidljivost",
+          "views": "Standardni pregledi"
+        }
+      },
+      "highlight": {
+        "title": "Naglašeno",
+        "price": "€10 / 7 dana",
+        "features": {
+          "border": "Plavi okvir naglašavanja",
+          "position": "Bolji rang u pretrazi",
+          "views": "2x više pregleda",
+          "badge": "Značka naglašavanja"
+        }
+      },
+      "featured": {
+        "title": "Istaknuto",
+        "price": "€15 / 7 dana",
+        "features": {
+          "border": "Zlatni okvir i sjaj",
+          "position": "Vrh rezultata pretrage",
+          "views": "3x više pregleda",
+          "badge": "Značka istaknutog",
+          "homepage": "Vidljivost na početnoj stranici"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25 / 7 dana",
+        "popular": "NAJPOPULARNIJE",
+        "features": {
+          "border": "Premium vatreni efekat",
+          "position": "Prioritetno pozicioniranje",
+          "views": "5x više pregleda",
+          "badge": "Premium vatrena značka",
+          "homepage": "Istaknuto na početnoj stranici",
+          "social": "Promocija na društvenim mrežama"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Zašto Promovisati Vaš Oglas?",
+      "faster": {
+        "title": "Prodajte Brže",
+        "desc": "Promovisani oglasi se prodaju u prosjeku 60% brže od standardnih oglasa"
+      },
+      "visibility": {
+        "title": "Maksimalna Vidljivost",
+        "desc": "Pojavite se na vrhu rezultata pretrage gdje većina kupaca gleda"
+      },
+      "standOut": {
+        "title": "Izdvojite Se",
+        "desc": "Privlačne značke i okviri čine vaš oglas nemogućim za propustiti"
+      },
+      "analytics": {
+        "title": "Pratite Performanse",
+        "desc": "Vidite tačno kako promocija povećava vaše preglede i upite"
+      }
+    }
+  },
+  "featuredAgencies": {
+    "title": "Prednosti Istaknute Agencije",
+    "subtitle": "Dobijte više vidljivosti i potencijalnih klijenata sa istaknutom agencijom",
+    "benefits": {
+      "visibility": {
+        "title": "5x Više Vidljivosti",
+        "desc": "Istaknute agencije se prominentno pojavljuju na stranici agencija sa naglašenim plasmanom"
+      },
+      "badge": {
+        "title": "Premium Značka",
+        "desc": "Izdvojite se sa verifikovanom istaknutom značkom koja gradi povjerenje sa klijentima"
+      },
+      "priority": {
+        "title": "Prioritetni Oglas",
+        "desc": "Vaša agencija i svi oglasi agenata dobijaju prioritet u rezultatima pretrage"
+      },
+      "leads": {
+        "title": "Više Kvalifikovanih Potencijalnih Klijenata",
+        "desc": "Kupci aktivno traže istaknute agencije zbog njihove pouzdanosti"
+      },
+      "branding": {
+        "title": "Poboljšan Brending",
+        "desc": "Veća kartica profila sa logom, opisom i kontakt informacijama prominentno prikazanim"
+      },
+      "analytics": {
+        "title": "Analitika Agencije",
+        "desc": "Pratite performanse tima, preglede oglasa i konverziju potencijalnih klijenata za sve agente"
+      }
+    },
+    "howToBecome": {
+      "title": "Kako Postati Istaknut",
+      "step1": {
+        "title": "Pretplatite se na Enterprise",
+        "desc": "Izaberite Enterprise plan za vašu agenciju"
+      },
+      "step2": {
+        "title": "Popunite Vaš Profil",
+        "desc": "Dodajte logo, opis, fotografije tima i kontakt informacije"
+      },
+      "step3": {
+        "title": "Aktivirajte Istaknuto",
+        "desc": "Omogućite status istaknutog u kontrolnoj tabli vaše agencije"
+      }
+    },
+    "stats": {
+      "title": "Statistike Istaknute Agencije",
+      "views": "5x više pregleda profila",
+      "inquiries": "3x više upita",
+      "trust": "Viša ocjena povjerenja klijenata",
+      "retention": "Bolje zadržavanje agenata"
+    }
+  },
+  "agencies": {
+    "title": "Izgradite vaše poslovno carstvo u nekretninama",
+    "subtitle": "Kreirajte vašu agenciju, pozovite agente i upravljajte cijelim timom sa jedne moćne platforme",
+    "pricing": {
+      "planName": "Enterprise plan",
+      "price": "€1,000",
+      "period": "/godišnje",
+      "tagline": "Sve što vam treba da vodite uspješnu agenciju",
+      "whatsIncluded": "Šta je uključeno",
+      "features": {
+        "listings": "500 oglasa za nekretnine (proširivo)",
+        "teamMembers": "5 članova tima uključeno",
+        "promotions": "5 promocijskih kupona/mjesečno",
+        "branding": "Stranica za branding agencije",
+        "ai": "Neograničeno korišćenje AI za sve agente",
+        "accountManager": "Posvećeni account manager",
+        "analytics": "Tim analytics kontrolna tabla"
+      }
+    },
+    "howToGetStarted": "Kako započeti",
+    "steps": {
+      "subscribe": {
+        "title": "Pretplatite se",
+        "desc": "Izaberite Enterprise plan i završite pretplatu"
+      },
+      "createAgency": {
+        "title": "Kreirajte agenciju",
+        "desc": "Podesite profil vaše agencije sa logom, opisom i lokacijom"
+      },
+      "generateCoupons": {
+        "title": "Generišite kupone",
+        "desc": "Kreirajte do 5 kuponskih kodova da pozovete agente u vaš tim"
+      },
+      "growTogether": {
+        "title": "Rastite zajedno",
+        "desc": "Vaši agenti počinju da postavljaju nekretnine i vaša agencija napreduje"
+      }
+    },
+    "agentInvitation": {
+      "title": "Sistem pozivanja agenata",
+      "invitationCodes": {
+        "title": "Pozivni kodovi",
+        "desc": "Podijelite vaš jedinstveni pozivni kod agencije sa agentima koji žele da se pridruže. Mogu ga koristiti da zatraže članstvo u vašoj agenciji.",
+        "example": "Primjer pozivnog koda"
+      },
+      "subscriptionCoupons": {
+        "title": "Kuponi za pretplatu agenata",
+        "desc": "Generišite kuponske kodove koji agentima daju BESPLATNU godišnju Pro pretplatu kada se pridruže vašoj agenciji. Svaki agent dobija 20 oglasa/mjesečno."
+      }
+    }
+  },
+  "agents": {
+    "title": "Pridružite se agenciji ili radite samostalno",
+    "subtitle": "Izaberite svoj put: radite nezavisno sa Pro pretplatom ili se pridružite agenciji besplatno",
+    "independent": {
+      "title": "Nezavisni agent",
+      "planType": "Pro pretplata",
+      "price": "€25",
+      "period": "/mjesečno",
+      "yearlyNote": "ili €200/godišnje (uštedite 33%)",
+      "features": {
+        "listings": "20 oglasa/mjesečno ili 250/godišnje",
+        "promotions": "3 promocijska kupona/mjesečno",
+        "profile": "Lični profil agenta",
+        "ai": "Neograničen AI chat i uvidi",
+        "analytics": "Napredna analytics kontrolna tabla",
+        "support": "Prioritetna podrška"
+      }
+    },
+    "agency": {
+      "title": "Agent u agenciji",
+      "planType": "Pridruži se sa kuponom",
+      "free": "BESPLATNO",
+      "price": "€0",
+      "period": "/godišnje",
+      "features": {
+        "listings": "20 aktivnih oglasa mjesečno",
+        "promotions": "Dijeli fond promocija agencije",
+        "branding": "Branding agencije na oglasima",
+        "collaboration": "Timska saradnja",
+        "support": "Mreža podrške agencije"
+      },
+      "note": "* Nabavite kuponski kod od vlasnika agencije da se pridružite besplatno"
+    },
+    "howToJoin": {
+      "title": "Kako se pridružiti agenciji",
+      "step1": {
+        "title": "Nabavite kuponski kod",
+        "desc": "Zatražite od vlasnika agencije njihov kuponski kod za pretplatu agenata"
+      },
+      "step2": {
+        "title": "Iskoristite kod",
+        "desc": "Unesite kuponski kod u podešavanjima naloga da aktivirate besplatnu pretplatu"
+      },
+      "step3": {
+        "title": "Počnite sa oglasima",
+        "desc": "Počnite da postavljate nekretnine pod brendom vaše agencije i sarađujte sa timom"
+      }
+    }
+  },
+  "buyers": {
+    "title": "Pronađite nekretninu svojih snova",
+    "subtitle": "Pretražujte, čuvajte i povezujte se sa prodavcima širom Balkana - besplatne osnovne funkcije sa opcijom Pro nadogradnje",
+    "freePlan": {
+      "title": "Besplatne funkcije",
+      "price": "€0",
+      "period": "zauvijek",
+      "tagline": "Sve što vam treba da započnete pretragu nekretnina",
+      "features": {
+        "browse": "Pregledajte sve oglase",
+        "mapSearch": "Interaktivna pretraga na mapi",
+        "favorites": "Čuvajte favorite",
+        "contact": "Kontaktirajte prodavce i agente",
+        "insights": "Osnovni uvidi u tržište",
+        "profiles": "Profili agenata i agencija"
+      }
+    },
+    "proPlan": {
+      "title": "Buyer Pro",
+      "trial": "7-DNEVNI BESPLATNI PROBNI PERIOD",
+      "price": "€3",
+      "period": "/mjesečno",
+      "tagline": "Budite ispred ostalih kupaca sa premium funkcijama",
+      "features": {
+        "notifications": "Trenutna email i SMS obavještenja",
+        "savedSearches": "Neograničene sačuvane pretrage",
+        "earlyAccess": "Rani pristup novim oglasima",
+        "insights": "Napredni uvidi u tržište",
+        "priceDrops": "Obavještenja o padu cijena",
+        "calculator": "Investicioni kalkulator",
+        "mortgage": "Predkvalifikacija za hipoteku",
+        "adFree": "Pregledanje bez reklama"
+      }
+    },
+    "searchTools": {
+      "title": "Moćni alati za pretragu",
+      "interactiveMap": {
+        "title": "Interaktivna pretraga na mapi",
+        "desc": "Nacrtajte prilagođene oblasti na mapi da pronađete nekretnine tačno tamo gdje ih želite"
+      },
+      "saveFavorites": {
+        "title": "Čuvajte favorite",
+        "desc": "Pratite nekretnine koje volite i budite obaviješteni kada se cijene promijene"
+      },
+      "savedSearches": {
+        "title": "Sačuvane pretrage",
+        "desc": "Kreirajte sačuvane pretrage i primajte upozorenja kada se objave nove nekretnine koje odgovaraju"
+      },
+      "directMessaging": {
+        "title": "Direktno slanje poruka",
+        "desc": "Kontaktirajte prodavce i agente direktno preko našeg sigurnog sistema za razmjenu poruka"
+      },
+      "marketInsights": {
+        "title": "Uvidi u tržište",
+        "desc": "Pogledajte statistike kvartova, trendove cijena i informacije o oblasti"
+      },
+      "agentProfiles": {
+        "title": "Profili agenata",
+        "desc": "Pregledajte verifikovane agente i agencije da pronađete pouzdane profesionalce"
+      }
+    },
+    "journey": {
+      "title": "Vaše putovanje do pronalaska doma",
+      "search": {
+        "step": "Pretraga",
+        "desc": "Koristite filtere i mapu"
+      },
+      "save": {
+        "step": "Čuvanje",
+        "desc": "Označite favorite"
+      },
+      "compare": {
+        "step": "Uporedi",
+        "desc": "Analizirajte opcije"
+      },
+      "contact": {
+        "step": "Kontakt",
+        "desc": "Pošaljite poruku prodavcima"
+      },
+      "visit": {
+        "step": "Posjeta",
+        "desc": "Zakažite razgledanje"
+      }
+    },
+    "seeItInAction": {
+      "title": "Pogledajte u akciji",
+      "mapDemo": {
+        "title": "Demo interaktivne mape",
+        "coming": "Slika dolazi uskoro",
+        "heading": "Crtajte i pretražujte",
+        "desc": "Nacrtajte prilagođene oblasti na mapi da pronađete nekretnine u vašim omiljenim kvartovima. Filtrirajte po cijeni, veličini i sadržajima u realnom vremenu."
+      },
+      "saveDemo": {
+        "title": "Prikaz sačuvanih nekretnina",
+        "coming": "Slika dolazi uskoro",
+        "heading": "Čuvajte i uporedite",
+        "desc": "Sačuvajte nekretnine koje volite i uporedite ih jednu pored druge. Primajte trenutna obavještenja kada se cijene promijene ili postanu dostupne slične nekretnine."
+      }
+    }
+  },
+  "sellers": {
+    "title": "Prodajte vašu nekretninu",
+    "subtitle": "Objavite vašu nekretninu i dosegnite hiljade potencijalnih kupaca širom regije",
+    "freePlan": {
+      "title": "Besplatni plan",
+      "price": "€0",
+      "period": "/mjesečno",
+      "tagline": "Savršen za privatne prodavce sa samo nekoliko nekretnina",
+      "features": {
+        "listings": "3 aktivna oglasa",
+        "searches": "3 sačuvane pretrage",
+        "ai": "3 AI chat poruke",
+        "photos": "Foto galerija (do 10 slika)",
+        "messaging": "Direktno slanje poruka",
+        "analytics": "Osnovna analitika"
+      }
+    },
+    "proPlan": {
+      "title": "Pro plan",
+      "popular": "NAJPOPULARNIJI",
+      "price": "€25",
+      "period": "/mjesečno",
+      "yearlyNote": "ili €200/godišnje (uštedite 33%)",
+      "tagline": "Za ozbiljne prodavce koji žele maksimalnu vidljivost",
+      "features": {
+        "listings": "20 oglasa/mjesečno ili 250/godišnje",
+        "promotions": "3 promocijska kupona/mjesečno",
+        "ai": "Neograničen AI chat i uvidi",
+        "searches": "Neograničene sačuvane pretrage",
+        "analytics": "Napredna analytics kontrolna tabla",
+        "leads": "Alati za upravljanje potencijalnim klijentima",
+        "support": "Prioritetna podrška"
+      }
+    },
+    "howToList": {
+      "title": "Kako da objavite vašu nekretninu",
+      "step1": {
+        "title": "Kreirajte nalog",
+        "desc": "Registrujte se kao privatni prodavac ili agent"
+      },
+      "step2": {
+        "title": "Dodajte detalje",
+        "desc": "Unesite informacije o nekretnini, fotografije i postavite cijenu"
+      },
+      "step3": {
+        "title": "Idite uživo",
+        "desc": "Objavite i vaš oglas se pojavljuje na mapi"
+      },
+      "step4": {
+        "title": "Povežite se",
+        "desc": "Primajte upite i odgovarajte zainteresovanim kupcima"
+      }
+    },
+    "promotions": {
+      "title": "Poboljšajte vidljivost vašeg oglasa",
+      "featured": {
+        "title": "Istaknuto",
+        "price": "€15",
+        "duration": "7 dana",
+        "features": {
+          "border": "Zlatni okvir",
+          "position": "Vrh rezultata pretrage",
+          "views": "3x više pregleda"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25",
+        "duration": "7 dana",
+        "features": {
+          "badge": "Vatrena značka",
+          "position": "Premium pozicioniranje",
+          "views": "5x više pregleda",
+          "social": "Istaknuto na društvenim mrežama"
+        }
+      },
+      "highlight": {
+        "title": "Naglašeno",
+        "price": "€10",
+        "duration": "7 dana",
+        "features": {
+          "highlight": "Plavo naglašavanje",
+          "position": "Izdvaja se u listama",
+          "views": "2x više pregleda"
+        }
+      }
+    },
+    "seeItInAction": {
+      "title": "Pogledajte u akciji",
+      "listingDemo": {
+        "title": "Kreator oglasa",
+        "coming": "Slika dolazi uskoro",
+        "heading": "Lako kreiranje oglasa",
+        "desc": "Kreirajte predivne oglase za nekretnine za nekoliko minuta sa našom intuitivnom formom. Dodajte fotografije, postavite cijenu i opišite najbolje karakteristike vaše nekretnine."
+      },
+      "analyticsDemo": {
+        "title": "Analytics kontrolna tabla",
+        "coming": "Slika dolazi uskoro",
+        "heading": "Pratite vaše performanse",
+        "desc": "Pratite preglede, upite i angažovanje za sve vaše oglase. Vidite koje nekretnine imaju najbolje performanse i optimizujte vašu strategiju."
+      }
+    }
+  },
+  "cta": {
+    "title": "Spremni da započnete?",
+    "subtitle": "Pridružite se hiljadama korisnika koji već pronalaze i objavljuju nekretnine na Balkan Estate",
+    "browseProperties": "Pregledajte nekretnine",
+    "listProperty": "Objavite vašu nekretninu"
+  },
+  "faq": {
+    "title": "Često postavljana pitanja",
+    "q1": {
+      "question": "Da li je besplatno pregledati nekretnine?",
+      "answer": "Da! Pregledanje, pretraga, čuvanje favorita i kontaktiranje prodavaca je potpuno besplatno za kupce."
+    },
+    "q2": {
+      "question": "Kako funkcionišu kuponski kodovi agencije?",
+      "answer": "Vlasnici agencija mogu da generišu do 5 kuponskih kodova. Kada agent iskoristi kod, dobija besplatnu godišnju Pro pretplatu (20 oglasa/mjesečno) i pridružuje se toj agenciji."
+    },
+    "q3": {
+      "question": "Mogu li da promijenim status sa nezavisnog agenta na agenta u agenciji?",
+      "answer": "Da! Ako dobijete kuponski kod od agencije, možete ga iskoristiti da se pridružite njihovom timu. Vaši oglasi će tada biti povezani sa tom agencijom."
+    },
+    "q4": {
+      "question": "Šta se dešava kada mi pretplata istekne?",
+      "answer": "Vaši postojeći oglasi ostaju aktivni, ali nećete moći da kreirate nove dok ne obnovite pretplatu. Dobićete podsjetnike prije isteka."
+    },
+    "q5": {
+      "question": "Kako funkcionišu promocijski krediti?",
+      "answer": "Promocijski krediti vam omogućavaju da podignete vaše oglase da se pojavljuju više u rezultatima pretrage. Pro korisnici dobijaju 3 kredita/mjesečno, agencije dobijaju 15 za dijeljenje među timom."
+    }
+  }
+}

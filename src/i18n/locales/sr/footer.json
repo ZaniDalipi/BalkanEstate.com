@@ -1,53 +1,53 @@
 {
-  "tagline": "Vaša AI platforma za nekretnine na Balkanu. Pronađite nekretninu iz snova u 10 zemalja uz inteligentnu pretragu i personalizovane preporuke.",
+  "tagline": "Ваша AI платформа за некретнине на Балкану. Пронађите некретнину из снова у 10 земаља уз интелигентну претрагу и персонализоване препоруке.",
   "sections": {
-    "forBuyers": "Za Kupce",
-    "forSellers": "Za Prodavce",
-    "contact": "Kontaktirajte Nas",
-    "countriesWeServe": "Zemlje koje Pokrivamo"
+    "forBuyers": "За купце",
+    "forSellers": "За продавце",
+    "contact": "Контактирајте нас",
+    "countriesWeServe": "Земље које покривамо"
   },
   "ai": {
-    "poweredBy": "Pokreće AI"
+    "poweredBy": "Покреће AI"
   },
   "links": {
-    "searchProperties": "Pretraži Nekretnine",
-    "exploreCities": "Istraži Gradove",
-    "savedProperties": "Sačuvane Nekretnine",
-    "savedSearches": "Sačuvane Pretrage",
-    "findAgents": "Pronađi Agente",
-    "browseAgencies": "Pregledaj Agencije",
-    "listProperty": "Objavi Nekretninu",
-    "analytics": "Analitika",
-    "messages": "Poruke",
-    "myAccount": "Moj Nalog",
-    "howItWorks": "Kako Funkcioniše"
+    "searchProperties": "Претражи некретнине",
+    "exploreCities": "Истражи градове",
+    "savedProperties": "Сачуване некретнине",
+    "savedSearches": "Сачуване претраге",
+    "findAgents": "Пронађи агенте",
+    "browseAgencies": "Прегледај агенције",
+    "listProperty": "Објави некретнину",
+    "analytics": "Аналитика",
+    "messages": "Поруке",
+    "myAccount": "Мој налог",
+    "howItWorks": "Како функционише"
   },
   "countries": {
-    "AL": "Albanija",
-    "BA": "Bosna",
-    "BG": "Bugarska",
-    "HR": "Hrvatska",
-    "GR": "Grčka",
-    "XK": "Kosovo",
-    "ME": "Crna Gora",
-    "MK": "S. Makedonija",
-    "RO": "Rumunija",
-    "RS": "Srbija"
+    "AL": "Албанија",
+    "BA": "Босна",
+    "BG": "Бугарска",
+    "HR": "Хрватска",
+    "GR": "Грчка",
+    "XK": "Косово",
+    "ME": "Црна Гора",
+    "MK": "С. Македонија",
+    "RO": "Румунија",
+    "RS": "Србија"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",
     "email": "info@balkanestateai.com"
   },
   "legal": {
-    "allRightsReserved": "Sva prava zadržana.",
-    "privacyPolicy": "Politika Privatnosti",
-    "termsOfService": "Uslovi Korišćenja",
-    "cookiePolicy": "Politika Kolačića",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "allRightsReserved": "Сва права задржана.",
+    "privacyPolicy": "Политика приватности",
+    "termsOfService": "Услови коришћења",
+    "cookiePolicy": "Политика колачића",
+    "disclaimer": "Одрицање одговорности",
+    "accessibility": "Приступачност"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Пратите нас",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -55,35 +55,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Преузмите нашу апликацију",
+    "availableOn": "Доступно на",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Претплатите се на билтен",
+    "placeholder": "Унесите вашу е-адресу",
+    "subscribe": "Претплати се",
+    "subscribed": "Хвала на претплати!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Подршка",
+    "helpCenter": "Центар за помоћ",
+    "contactUs": "Контактирајте нас",
+    "faq": "Честа питања",
+    "feedback": "Пошаљите повратне информације"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
-    "blog": "Blog"
+    "title": "Компанија",
+    "aboutUs": "О нама",
+    "careers": "Каријере",
+    "press": "Штампа",
+    "blog": "Блог"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Партнери",
+    "becomePartner": "Постаните партнер",
+    "affiliates": "Афилијације",
+    "developers": "За програмере"
   }
 }

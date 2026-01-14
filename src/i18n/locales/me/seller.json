@@ -1,34 +1,34 @@
 {
   "roleSelector": {
-    "title": "Objavi oglas kao",
-    "description": "Odaberite koju ulogu želite koristiti pri kreiranju ovog oglasa. Svaka uloga ima zasebne limite oglasa i pretplate.",
+    "title": "Post Listing As",
+    "description": "Choose which role to use when creating this listing. Each role has separate listing limits and subscriptions.",
     "agent": "Agent",
-    "privateSeller": "Privatni prodavac",
-    "sharedLimit": "Dijeljeni limit: {{used}}/{{limit}} ukupno oglasa",
-    "asRole": "({{count}} kao {{role}})",
-    "listings": "Oglasi",
-    "limitReachedShared": "Dijeljeni limit dostignut za obje uloge.",
-    "limitReachedUpgrade": "Limit oglasa dostignut. Nadogradite na Pro za 25 oglasa!",
-    "remainingListings": "{{count}} preostalih oglasa",
-    "availableListings": "{{count}} dostupnih oglasa",
-    "shared": "(dijeljeno)",
-    "highlightCoupons": "🎟️ Kuponi za isticanje: {{available}}/{{total}}",
-    "couponsDescription": "Koristite za promociju vaših oglasa",
-    "noSubscriptionData": "Nema podataka o pretplati",
+    "privateSeller": "Private Seller",
+    "sharedLimit": "Shared Limit: {{used}}/{{limit}} total listings",
+    "asRole": "({{count}} as {{role}})",
+    "listings": "Listings",
+    "limitReachedShared": "Shared limit reached across both roles.",
+    "limitReachedUpgrade": "Listing limit reached. Upgrade to Pro for 25 listings!",
+    "remainingListings": "{{count}} listing(s) remaining",
+    "availableListings": "{{count}} listing(s) available",
+    "shared": "(shared)",
+    "highlightCoupons": "🎟️ Highlight Coupons: {{available}}/{{total}}",
+    "couponsDescription": "Use to promote your listings",
+    "noSubscriptionData": "No subscription data",
     "proRequired": {
-      "title": "Potrebna Pro pretplata",
-      "description": "Za objavu oglasa kao agent, morate se pretplatiti na Pro plan.",
-      "button": "Pretplatite se na Pro"
+      "title": "Pro Subscription Required",
+      "description": "To post listings as an agent, you need to subscribe to the Pro plan.",
+      "button": "Subscribe to Pro"
     },
     "badges": {
-      "trial": "Probni",
+      "trial": "Trial",
       "pro": "Pro",
       "enterprise": "Enterprise",
-      "agencyOwner": "Vlasnik agencije",
-      "agencyAgent": "Agent agencije",
-      "buyer": "Kupac",
-      "free": "Besplatno",
-      "proRequired": "Potreban Pro"
+      "agencyOwner": "Agency Owner",
+      "agencyAgent": "Agency Agent",
+      "buyer": "Buyer",
+      "free": "Free",
+      "proRequired": "Pro Required"
     }
   },
   "createListing": {
@@ -119,7 +119,7 @@
       "amenitiesHint": "Add hashtag-style amenities that buyers can search for",
       "amenitiesPlaceholder": "e.g., #gym, #pool, #parking, #wifi",
       "description": "Description",
-      "addTags": "Dodaj oznake..."
+      "addTags": "Add tags..."
     },
     "propertyFeatures": {
       "title": "Property Features",
@@ -190,36 +190,37 @@
       }
     },
     "landDetails": {
-      "title": "Detalji Zemljišta",
-      "hint": "Navedite detalje zemljišta kako biste pomogli kupcima da razumiju šta kupuju",
+      "title": "Land Details",
+      "hint": "Provide land details to help buyers understand what they're purchasing",
       "condition": {
-        "label": "Stanje Zemljišta",
-        "notSpecified": "Nije Navedeno",
-        "readyToBuild": "Spremno za Gradnju",
-        "cleared": "Očišćeno",
-        "partiallyCleared": "Djelimično Očišćeno",
-        "needsClearing": "Potrebno Čišćenje"
+        "label": "Land Condition",
+        "notSpecified": "Not Specified",
+        "readyToBuild": "Ready to Build",
+        "cleared": "Cleared",
+        "partiallyCleared": "Partially Cleared",
+        "needsClearing": "Needs Clearing"
       },
       "viewAccess": {
-        "label": "Pogled/Pristup",
-        "notSpecified": "Nije Navedeno",
-        "seaView": "Pogled na More",
-        "mountainView": "Pogled na Planinu",
-        "cityView": "Pogled na Grad",
-        "parkView": "Pogled na Park",
-        "natureView": "Pogled na Prirodu",
-        "roadAccess": "Pristup Putu"
+        "label": "View/Access",
+        "notSpecified": "Not Specified",
+        "seaView": "Sea View",
+        "mountainView": "Mountain View",
+        "cityView": "City View",
+        "parkView": "Park View",
+        "natureView": "Nature View",
+        "roadAccess": "Road Access"
       }
     },
     "floorPlan": {
-      "title": "Tlocrt (Opcionalno)"
+      "title": "Floor Plan (Optional)"
     },
     "virtualTour": {
-      "title": "360° Virtualna Tura (Opcionalno)",
-      "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
+      "title": "360° Virtual Tour (Optional)",
+      "description": "Add an immersive 360° virtual tour to help buyers explore your property remotely. Supports Z360, Matterport, Kuula, Zillow 3D Home, and other 360 tour providers.",
       "label": "360° Tour URL",
-      "placeholder": "https://my.matterport.com/show/?m=... or https://kuula.co/share/...",
-      "hint": "Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing."
+      "placeholder": "https://z360-virtual-tour.vercel.app/tour/... or other 360 tour URL",
+      "hint": "Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing.",
+      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
     },
     "progress": {
       "compressing": "Compressing images...",
@@ -265,63 +266,63 @@
     }
   },
   "myListings": {
-    "title": "Moji Oglasi",
-    "titleWithCount": "Moji Oglasi ({{count}})",
-    "noListings": "Još nijeste kreirali nijedan oglas.",
-    "createFirst": "Kreirajte svoj prvi oglas",
-    "addNewListing": "Dodaj Novi Oglas",
-    "active": "Aktivno",
-    "pending": "Na Čekanju",
-    "sold": "Prodato",
-    "draft": "Nacrt",
-    "rented": "Iznajmljeno",
-    "expired": "Isteklo",
-    "rejected": "Odbijeno",
-    "edit": "Uredi",
-    "delete": "Obriši",
-    "view": "Pogledaj",
-    "promote": "Promoviši",
-    "extendPromotion": "Produži Promociju",
-    "statistics": "Statistika",
-    "duplicate": "Dupliciraj",
-    "markAsSold": "Označi kao Prodato",
-    "markAsRented": "Označi kao Iznajmljeno",
-    "renew": "Obnovi",
-    "renewListing": "Obnovi Oglas",
-    "deactivate": "Deaktiviraj",
-    "activate": "Aktiviraj",
-    "deleteConfirm": "Jeste li sigurni da želite obrisati ovaj oglas?",
-    "deleteWarning": "Jeste li sigurni da želite obrisati ovaj oglas? Ova radnja se ne može poništiti i nekretnina će biti trajno uklonjena.",
-    "soldConfirm": "Označiti ovu nekretninu kao prodatu?",
-    "soldWarning": "Jeste li sigurni da želite označiti ovu nekretninu kao prodatu? Ova radnja se ne može poništiti.",
-    "confirmAction": "Potvrdi Radnju",
-    "deleteListing": "Obriši Oglas",
+    "title": "My Listings",
+    "titleWithCount": "My Listings ({{count}})",
+    "noListings": "You haven't created any listings yet.",
+    "createFirst": "Create your first listing",
+    "addNewListing": "Add New Listing",
+    "active": "Active",
+    "pending": "Pending",
+    "sold": "Sold",
+    "draft": "Draft",
+    "rented": "Rented",
+    "expired": "Expired",
+    "rejected": "Rejected",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "promote": "Promote",
+    "extendPromotion": "Extend Promotion",
+    "statistics": "Statistics",
+    "duplicate": "Duplicate",
+    "markAsSold": "Mark as Sold",
+    "markAsRented": "Mark as Rented",
+    "renew": "Renew",
+    "renewListing": "Renew Listing",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "deleteConfirm": "Are you sure you want to delete this listing?",
+    "deleteWarning": "Are you sure you want to delete this listing? This action cannot be undone and the property will be permanently removed.",
+    "soldConfirm": "Mark this property as sold?",
+    "soldWarning": "Are you sure you want to mark this property as sold? This action cannot be undone.",
+    "confirmAction": "Confirm Action",
+    "deleteListing": "Delete Listing",
     "postingRole": {
-      "label": "Filtriraj po ulozi objave:",
-      "all": "Svi Oglasi",
+      "label": "Filter by posting role:",
+      "all": "All Listings",
       "agent": "Agent",
-      "privateSeller": "Privatni Prodavač"
+      "privateSeller": "Private Seller"
     },
     "stats": {
-      "views": "Pregleda",
-      "inquiries": "Upita",
-      "saves": "Sačuvano",
-      "shares": "Podijeljeno"
+      "views": "Views",
+      "inquiries": "Inquiries",
+      "saves": "Saves",
+      "shares": "Shares"
     },
     "filters": {
-      "all": "Sve",
-      "active": "Aktivno",
-      "pending": "Na Čekanju",
-      "draft": "Nacrti",
-      "sold": "Prodato",
-      "rented": "Iznajmljeno"
+      "all": "All",
+      "active": "Active",
+      "pending": "Pending",
+      "draft": "Drafts",
+      "sold": "Sold",
+      "rented": "Rented"
     },
     "sort": {
-      "newest": "Najnovije Prvo",
-      "oldest": "Najstarije Prvo",
-      "priceHigh": "Cijena: Opadajuće",
-      "priceLow": "Cijena: Rastuće",
-      "mostViews": "Najviše Pregleda"
+      "newest": "Newest First",
+      "oldest": "Oldest First",
+      "priceHigh": "Price: High to Low",
+      "priceLow": "Price: Low to High",
+      "mostViews": "Most Views"
     }
   },
   "form": {
@@ -452,10 +453,19 @@
     "premium": "Premium",
     "duration": "Duration",
     "days": "days",
+    "day": "day",
     "week": "1 week",
     "twoWeeks": "2 weeks",
     "month": "1 month",
     "threeMonths": "3 months",
+    "selectTier": "Please select a promotion tier",
+    "extendedSuccess": "Promotion extended successfully! New end date: {{date}}",
+    "activatedSuccess": "Promotion activated successfully!",
+    "activatedFree": "Promotion activated (free with coupon)!",
+    "loadFailed": "Failed to load promotion options",
+    "freeWithCoupon": "(Free with coupon)",
+    "skipForNow": "Skip for Now",
+    "postWithoutPromotion": "Post Without Promotion",
     "benefits": {
       "featured": {
         "title": "Featured Listing",
@@ -581,19 +591,19 @@
     "deleteFailed": "Failed to delete listing",
     "uploadFailed": "Failed to upload photos",
     "invalidData": "Please check your input",
-    "listingLimitReached": "Dostignut Limit Oglasa",
-    "listingLimitMessage": "Dostigli ste svoj {{tierName}} limit od {{limit}} oglasa.",
-    "freeListingLimitReached": "Dostignut Limit Besplatnih Oglasa",
-    "freeListingLimitMessage": "Dostigli ste besplatni limit od 3 aktivna oglasa. Pretplatite se na Pro za 25 aktivnih oglasa!",
-    "proListingLimitReached": "Dostignut Pro Limit Oglasa",
-    "proSubscriptionRequired": "Potrebna Pro Pretplata",
-    "agentProRequiredMessage": "Agenti moraju imati aktivnu Pro pretplatu za objavljivanje oglasa. Pretplatite se sada za 25 aktivnih oglasa!",
-    "switchRoleRequired": "Potrebna Promjena Uloge",
-    "buyerCannotCreateListing": "Kupci ne mogu kreirati oglase za nekretnine. Molimo prebacite se na ulogu Privatnog Prodavca ili Agenta."
+    "listingLimitReached": "Listing Limit Reached",
+    "listingLimitMessage": "You've reached your {{tierName}} listing limit of {{limit}}.",
+    "freeListingLimitReached": "Free Listing Limit Reached",
+    "freeListingLimitMessage": "You have reached your free limit of 3 active listings. Subscribe to Pro for 25 active listings!",
+    "proListingLimitReached": "Pro Listing Limit Reached",
+    "proSubscriptionRequired": "Pro Subscription Required",
+    "agentProRequiredMessage": "Agents must have an active Pro subscription to post listings. Subscribe now to get 25 active listings!",
+    "switchRoleRequired": "Switch Role Required",
+    "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings."
   },
   "actions": {
-    "subscribeToPro": "Pretplati se na Pro",
-    "viewMyListings": "Pogledaj Moje Oglase",
-    "switchRole": "Promijeni Ulogu"
+    "subscribeToPro": "Subscribe to Pro",
+    "viewMyListings": "View My Listings",
+    "switchRole": "Switch Role"
   }
 }

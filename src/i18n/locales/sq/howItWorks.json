@@ -1,0 +1,823 @@
+{
+  "hero": {
+    "title": "Si Funksionon Balkan Estate",
+    "subtitle": "Platforma kryesore e pasurive të paluajtshme që lidh blerësit, shitësit, agjentët dhe agjencinë në të gjithë Ballkanin"
+  },
+  "tabs": {
+    "gettingStarted": "Fillimi",
+    "premiumFeatures": "Veçoritë Premium",
+    "forAgencies": "Për Agjencitë",
+    "forAgents": "Për Agjentët",
+    "forBuyers": "Për Blerësit",
+    "forSellers": "Për Shitësit"
+  },
+  "gettingStarted": {
+    "welcome": {
+      "title": "Mirë se vini në Balkan Estate",
+      "subtitle": "Udhëzuesi juaj i plotë për të naviguar, kërkuar dhe përdorur të gjitha veçoritë e platformës kryesore të pasurive të paluajtshme të Ballkanit"
+    },
+    "mainNavigation": {
+      "title": "Navigimi Kryesor",
+      "home": {
+        "name": "Ballina",
+        "desc": "Shfletoni të gjitha pronat me pamje harte"
+      },
+      "search": {
+        "name": "Kërko",
+        "desc": "Filtra të avancuar dhe mjete kërkimi"
+      },
+      "agents": {
+        "name": "Agjentët",
+        "desc": "Gjeni agjentë të verifikuar të pasurive të paluajtshme"
+      },
+      "agencies": {
+        "name": "Agjencitë",
+        "desc": "Zbuloni agjenci profesionale"
+      },
+      "explore": {
+        "name": "Eksploro",
+        "desc": "Eksploroni qytete dhe lagje"
+      }
+    },
+    "createAccount": {
+      "title": "Krijimi i Llogarisë Tuaj",
+      "signUpModal": "Modali i Regjistrimit",
+      "clickSignUp": "Klikoni \"Regjistrohu\" në kokë",
+      "step1": {
+        "title": "Klikoni Butonin \"Regjistrohu\"",
+        "desc": "Ndodhet në këndin e sipërm djathtas të shiritit të navigimit"
+      },
+      "step2": {
+        "title": "Zgjidhni Llojin e Llogarisë Tuaj",
+        "desc": "Zgjidhni Blerës, Shitës ose Agjent bazuar në nevojat tuaja"
+      },
+      "step3": {
+        "title": "Plotësoni Detajet Tuaja",
+        "desc": "Vendosni email, fjalëkalim, emër dhe numër telefoni"
+      },
+      "step4": {
+        "title": "Verifikoni Email-in Tuaj",
+        "desc": "Kontrolloni mesazhet tuaja dhe klikoni lidhjen e verifikimit"
+      }
+    },
+    "interactiveMap": {
+      "title": "Përdorimi i Hartës Interaktive",
+      "intro": "Harta jonë interaktive është zemra e Balkan Estate. Ja si ta përdorni në mënyrë efektive:",
+      "mapView": "Pamja e Hartës Interaktive",
+      "mapViewDesc": "Harta e plotë e pronave me shënues",
+      "drawArea": "Vizato Zonë",
+      "panZoom": {
+        "title": "Lëviz & Zmadho",
+        "desc": "Klikoni dhe tërhiqni për të lëvizur. Përdorni rrotën e miut ose shtrydhjeni për të zmadhuar/zvogëluar."
+      },
+      "drawCustomAreas": {
+        "title": "Vizatoni Zona të Personalizuara",
+        "desc": "Përdorni mjetin e vizatimit për të zgjedhur lagje ose rajone specifike që ju interesojnë."
+      },
+      "clickProperties": {
+        "title": "Klikoni mbi Pronat",
+        "desc": "Klikoni në çdo shënues për të parë detajet e pronës, çmimin dhe fotot në një pamje të shpejtë."
+      },
+      "filterResults": {
+        "title": "Filtro Rezultatet",
+        "desc": "Përdorni filtra për gamën e çmimeve, llojin e pronës, dhomat e gjumit dhe veçori të tjera."
+      }
+    },
+    "savingProperties": {
+      "title": "Ruajtja e Pronave & Kërkimeve",
+      "saveToFavorites": {
+        "title": "Ruaj në të Preferuarat",
+        "heading": "Ikona e Zemrës",
+        "desc": "Klikoni ikonën e zemrës në çdo kartë prone ose faqe detajesh për ta ruajtur në listën tuaj të të preferuarave."
+      },
+      "saveSearch": {
+        "title": "Ruaj Kërkimin",
+        "heading": "Kriteret e Kërkimit",
+        "desc": "Pas filtrimit, klikoni \"Ruaj Kërkimin\" për të marrë njoftime kur të shfaqen prona të reja përkatëse."
+      },
+      "getNotified": {
+        "title": "Merrni Njoftime",
+        "heading": "Alarme & Përditësime",
+        "desc": "Merrni njoftime me email për uljen e çmimeve në të preferuarat dhe shpallje të reja që përputhen me kërkesat tuaja."
+      }
+    },
+    "contactingSellers": {
+      "title": "Kontaktimi i Shitësve & Agjentëve",
+      "contactForm": "Formulari i Kontaktit",
+      "onEveryPage": "Në çdo faqe prone",
+      "multipleWays": "Mënyra të Shumta për t'u Lidhur",
+      "directMessage": {
+        "title": "Mesazh i Drejtpërdrejtë",
+        "desc": "Dërgoni mesazhe përmes platformës sonë të sigurt"
+      },
+      "phoneCall": {
+        "title": "Telefonatë",
+        "desc": "Klikoni për të telefonuar në pajisje celulare"
+      },
+      "email": {
+        "title": "Email",
+        "desc": "Email i drejtpërdrejtë tek shitësi ose agjenti"
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "desc": "Mesazh i shpejtë përmes WhatsApp"
+      }
+    },
+    "createListing": {
+      "title": "Krijimi i një Shpalljeje Prone",
+      "steps": {
+        "step1": {
+          "title": "Info Bazë",
+          "desc": "Titulli, lloji, çmimi"
+        },
+        "step2": {
+          "title": "Vendndodhja",
+          "desc": "Adresa, pika në hartë"
+        },
+        "step3": {
+          "title": "Detajet",
+          "desc": "Dhomat, madhësia, veçoritë"
+        },
+        "step4": {
+          "title": "Fotot",
+          "desc": "Ngarko imazhe"
+        },
+        "step5": {
+          "title": "Publiko",
+          "desc": "Shqyrto & posto"
+        }
+      },
+      "photoTips": {
+        "title": "Këshilla për Fotot",
+        "tip1": "Përdorni dritë natyrale për rezultate më të mira",
+        "tip2": "Përfshini të gjitha dhomat dhe hapësirat e jashtme",
+        "tip3": "Pastroni para se të bëni foto",
+        "tip4": "Fotoja e parë shfaqet si imazh i vogël"
+      },
+      "descriptionTips": {
+        "title": "Këshilla për Përshkrimin",
+        "tip1": "Theksoni veçoritë unike dhe përmirësimet",
+        "tip2": "Përmendni shërbimet dhe transportin në afërsi",
+        "tip3": "Jini të sinqertë për gjendjen e pronës",
+        "tip4": "Përfshini rinovimet ose përmirësimet e fundit"
+      }
+    },
+    "managingAccount": {
+      "title": "Menaxhimi i Llogarisë Tuaj",
+      "profileSettings": {
+        "title": "Cilësimet e Profilit",
+        "desc": "Përditësoni emrin, foton, numrin e telefonit dhe detaje të tjera personale.",
+        "access": "Qasja: Menu → Profili"
+      },
+      "subscription": {
+        "title": "Abonamenti",
+        "desc": "Shikoni planin tuaj, përmirësoni në Pro ose menaxhoni faturimin dhe metodat e pagesës.",
+        "access": "Qasja: Menu → Abonamenti"
+      },
+      "notifications": {
+        "title": "Njoftimet",
+        "desc": "Konfiguroni alarmet me email, njoftimet e uljes së çmimit dhe alarmet e shpalljeve të reja.",
+        "access": "Qasja: Menu → Cilësimet"
+      }
+    },
+    "proTips": {
+      "title": "Këshilla Pro për Përvojë më të Mirë",
+      "completeProfile": {
+        "title": "Plotësoni Profilin Tuaj",
+        "desc": "Shitësit dhe agjentët përgjigjen më shpejt në profile të plota me foto."
+      },
+      "useSavedSearches": {
+        "title": "Përdorni Kërkesat e Ruajtura",
+        "desc": "Ruani kriteret tuaja të kërkimit për të marrë njoftime të menjëhershme për përputhje të reja."
+      },
+      "exploreCities": {
+        "title": "Veçoria Eksploro Qytetet",
+        "desc": "Përdorni \"Eksploro\" për të zbuluar lagje dhe për të marrë njohuri të tregut."
+      },
+      "enableNotifications": {
+        "title": "Aktivizoni Njoftimet",
+        "desc": "Aktivizoni alarmet me email për të qenë të parët që mësojnë për ndryshimet e çmimeve."
+      }
+    }
+  },
+  "premiumFeatures": {
+    "title": "Zhbllokoni Veçoritë Premium",
+    "subtitle": "Çoni përvojën tuaj të pasurive të paluajtshme në nivel të ri me mjete AI dhe veçori të avancuara",
+    "aiSearch": {
+      "title": "Kërkimi me AI",
+      "badge": "PRO",
+      "desc": "Përshkruani pronën tuaj të ëndrrave në gjuhë natyrale dhe lëreni AI të gjejë përputhje perfekte",
+      "example": "Shembull: 'Gjej një apartament me 3 dhoma gjumi afër qendrës së qytetit me parkim, nën 200,000€'",
+      "features": {
+        "natural": "Pyetje në gjuhë natyrale",
+        "smart": "Përputhje inteligjente pronash",
+        "learn": "Mëson preferencat tuaja",
+        "instant": "Rezultate të menjëhershme"
+      }
+    },
+    "aiDescription": {
+      "title": "Gjeneruesi Automatik i Përshkrimeve me AI",
+      "badge": "PRO",
+      "desc": "Krijoni përshkrime profesionale dhe tërheqëse të pronave automatikisht me një klik",
+      "features": {
+        "professional": "Shkrim profesional",
+        "seo": "Përmbajtje e optimizuar për SEO",
+        "multilingual": "Mbështetje shumëgjuhësore",
+        "customizable": "Plotësisht e personalizueshme"
+      },
+      "howItWorks": "Si Funksionon",
+      "step1": "Ngarkoni fotot tuaja",
+      "step2": "Vendosni detaje bazë",
+      "step3": "Klikoni 'Gjenero Përshkrim'",
+      "step4": "Editoni dhe publikoni"
+    },
+    "interactiveMap3D": {
+      "title": "Harta Interaktive 3D me Dritën e Diellit",
+      "badge": "PRO",
+      "desc": "Vizualizoni pronat në 3D me pozicionin e diellit në kohë reale për të parë ndriçimin natyral gjatë gjithë ditës",
+      "features": {
+        "sunPosition": "Pozicioni i diellit në kohë reale",
+        "shadows": "Vizualizimi i hijes",
+        "timeSlider": "Rrëshqitës i kohës së ditës",
+        "orientation": "Orientimi i ndërtesës"
+      },
+      "benefits": {
+        "title": "Pse Është e Rëndësishme",
+        "light": "Shihni sa dritë natyrale merr çdo dhomë",
+        "morning": "Kontrolloni ekspozimin ndaj diellit të mëngjesit kundrejt mbrëmjes",
+        "balcony": "Vizualizoni orët e diellit në ballkon",
+        "energy": "Vlerësoni efikasitetin energjetik"
+      }
+    },
+    "measurements": {
+      "title": "Mjeti i Matjeve në Hartë",
+      "badge": "PRO",
+      "desc": "Matni distancat dhe sipërfaqet drejtpërdrejt në hartë për të kuptuar madhësitë e pronave dhe rrethinat",
+      "features": {
+        "distance": "Matja e distancës",
+        "area": "Llogaritja e sipërfaqes",
+        "perimeter": "Mjete perimetri",
+        "save": "Ruani matjet"
+      },
+      "useCases": {
+        "title": "Raste Përdorimi",
+        "plot": "Matni kufijtë e parcelës",
+        "distance": "Llogaritni distancën deri te shërbimet",
+        "garden": "Planifikoni kopshtin ose vendin e parkimit",
+        "compare": "Krahasoni madhësitë e pronave"
+      }
+    },
+    "poi": {
+      "title": "Pikat e Interesit (POI)",
+      "badge": "PRO",
+      "desc": "Zbuloni shkolla, spitale, qendra tregtare, restorante, transport publik dhe më shumë në afërsi",
+      "categories": {
+        "education": "Shkolla & Universitete",
+        "health": "Spitale & Farmaci",
+        "shopping": "Tregtim & Supermarkete",
+        "transport": "Transporti Publik",
+        "dining": "Restorante & Kafene",
+        "parks": "Parqe & Rekreacion",
+        "banks": "Banka & Bankomate",
+        "services": "Shërbime Qeveritare"
+      },
+      "features": {
+        "walkTime": "Vlerësime kohe ecjeje",
+        "driveTime": "Distanca me makinë",
+        "ratings": "Vlerësimet e vendeve",
+        "filter": "Filtro sipas kategorisë"
+      }
+    },
+    "insights": {
+      "title": "Njohuri të Gjeneruara me AI",
+      "badge": "PRO",
+      "desc": "Merrni njohuri të personalizuara rreth pronave, lagjeve dhe tendencave të tregut",
+      "types": {
+        "priceAnalysis": {
+          "title": "Analiza e Çmimeve",
+          "desc": "A është ky çmim i pronës i drejtë? Krahasoni me shpallje të ngjashme në zonë"
+        },
+        "neighborhood": {
+          "title": "Rezultati i Lagjës",
+          "desc": "Siguria, ecuria, nivelet e zhurmës dhe metrikat e cilësisë së jetës"
+        },
+        "investment": {
+          "title": "Potenciali i Investimit",
+          "desc": "Vlerësime të të ardhurave nga qiraja, parashikime të vlerësimit dhe projeksione ROI"
+        },
+        "marketTrends": {
+          "title": "Tendencat e Tregut",
+          "desc": "Historia e çmimeve, tendencat e kërkesës dhe koha më e mirë për të blerë/shitur"
+        }
+      }
+    },
+    "calculators": {
+      "title": "Kalkulatorë Financiarë",
+      "subtitle": "Merrni vendime të informuara me mjetet tona të fuqishme financiare",
+      "mortgage": {
+        "title": "Kalkulatori i Hipotekës",
+        "badge": "PRO",
+        "desc": "Llogaritni pagesat mujore, interesin total dhe përballueshmërinë për çdo pronë",
+        "features": {
+          "monthly": "Ndarje e pagesës mujore",
+          "total": "Kostoja totale gjatë afatit të kredisë",
+          "comparison": "Krahasoni skenarë të ndryshëm",
+          "amortization": "Grafik i plotë amortizimi"
+        }
+      },
+      "rentVsBuy": {
+        "title": "Kalkulatori Qira kundrejt Blerjeje",
+        "badge": "PRO",
+        "desc": "Krahasoni kostot reale të qirasë kundrejt blerjes me kalimin e kohës për të marrë vendimin e duhur",
+        "features": {
+          "comparison": "Krahasim kosto krah për krah",
+          "breakeven": "Analiza e pikës së barazimit",
+          "wealth": "Projeksioni i grumbullimit të pasurisë",
+          "taxes": "Llogaritje përfitimesh tatimore"
+        }
+      },
+      "investment": {
+        "title": "Kalkulatori i Investimit",
+        "badge": "PRO",
+        "desc": "Analizoni të ardhurat e mundshme nga qiraja, ROI dhe rrjedhën e parasë për prona investimi",
+        "features": {
+          "roi": "Kthimi i investimit",
+          "cashflow": "Rrjedha mujore e parasë",
+          "capRate": "Llogaritja e normës kapitale",
+          "appreciation": "Vlerësimi i vlerës"
+        }
+      }
+    },
+    "analytics": {
+      "title": "Paneli i Detajuar i Analitikave",
+      "badge": "PRO",
+      "desc": "Ndiqni performancën e shpalljes tuaj me analitika dhe njohuri gjithëpërfshirëse",
+      "metrics": {
+        "views": "Shikime totale & vizitorë unikë",
+        "inquiries": "Numri i pyetjeve & norma e konvertimit",
+        "favorites": "Herët e ruajtura në të preferuarat",
+        "shares": "Ndarja në rrjete sociale & arritja",
+        "demographics": "Demografitë e shikuesve",
+        "sources": "Burimet e trafikut"
+      },
+      "reports": {
+        "title": "Gjeneroni Raporte",
+        "weekly": "Përmbledhje javore e performancës",
+        "comparison": "Krahasoni me mesataren e tregut",
+        "recommendations": "Rekomandime të fuqizuara nga AI"
+      }
+    }
+  },
+  "listingPromotions": {
+    "title": "Si Funksionojnë Promomet e Shpalljeve",
+    "subtitle": "Rritni dukshmërinë e pronës suaj dhe shisni më shpejt me opsionet tona të promovimit",
+    "comparison": {
+      "title": "Krahasimi i Promovimeve",
+      "standard": {
+        "title": "Shpallje Standarde",
+        "features": {
+          "position": "Pozicion i rregullt në kërkim",
+          "visibility": "Dukshmëri bazë",
+          "views": "Shikime standarde"
+        }
+      },
+      "highlight": {
+        "title": "E Theksuar",
+        "price": "€10 / 7 ditë",
+        "features": {
+          "border": "Kufi theksimi blu",
+          "position": "Klasifikim më i mirë në kërkim",
+          "views": "2x më shumë shikime",
+          "badge": "Shenjë theksimi"
+        }
+      },
+      "featured": {
+        "title": "E Veçuar",
+        "price": "€15 / 7 ditë",
+        "features": {
+          "border": "Kufi i artë & shkëlqim",
+          "position": "Në krye të rezultateve të kërkimit",
+          "views": "3x më shumë shikime",
+          "badge": "Shenjë e veçuar",
+          "homepage": "Dukshmëri në faqen kryesore"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25 / 7 ditë",
+        "popular": "MË E POPULLARIZUAR",
+        "features": {
+          "border": "Efekt premium zjarri",
+          "position": "Pozicionim me prioritet",
+          "views": "5x më shumë shikime",
+          "badge": "Shenjë premium zjarri",
+          "homepage": "E veçuar në faqen kryesore",
+          "social": "Promovim në rrjete sociale"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Pse të Promovoni Shpalljen Tuaj?",
+      "faster": {
+        "title": "Shisni më Shpejt",
+        "desc": "Shpalljet e promovuara shiten mesatarisht 60% më shpejt se shpalljet standarde"
+      },
+      "visibility": {
+        "title": "Dukshmëri Maksimale",
+        "desc": "Shfaquni në krye të rezultateve të kërkimit ku shikojnë shumica e blerësve"
+      },
+      "standOut": {
+        "title": "Dallohuni",
+        "desc": "Shenjat dhe kufijtë tërheqës bëjnë shpalljen tuaj të pamundur për t'u humbur"
+      },
+      "analytics": {
+        "title": "Ndiqni Performancën",
+        "desc": "Shihni saktësisht se si promovimi rrit shikimet dhe pyetjet tuaja"
+      }
+    }
+  },
+  "featuredAgencies": {
+    "title": "Përfitimet e Agjencisë së Veçuar",
+    "subtitle": "Merrni më shumë dukshmëri dhe klientë potencialë me një shpallje Agjencie e Veçuar",
+    "benefits": {
+      "visibility": {
+        "title": "5x Më Shumë Dukshmëri",
+        "desc": "Agjencitë e veçuara shfaqen në mënyrë të spikatur në faqen e agjencive me vendosje të theksuar"
+      },
+      "badge": {
+        "title": "Shenjë Premium",
+        "desc": "Dallohuni me një shenjë të verifikuar të veçuar që krijon besim me klientët"
+      },
+      "priority": {
+        "title": "Shpallje me Prioritet",
+        "desc": "Agjencia juaj dhe të gjitha shpalljet e agjentëve marrin prioritet në rezultatet e kërkimit"
+      },
+      "leads": {
+        "title": "Më Shumë Klientë Potencialë të Kualifikuar",
+        "desc": "Blerësit kërkojnë aktivisht agjenci të veçuara për besueshmërinë e tyre"
+      },
+      "branding": {
+        "title": "Markë e Përmirësuar",
+        "desc": "Kartë profili më e madhe me logo, përshkrim dhe informacion kontakti të shfaqur në mënyrë të spikatur"
+      },
+      "analytics": {
+        "title": "Analitika të Agjencisë",
+        "desc": "Ndiqni performancën e ekipit, shikimet e shpalljeve dhe konvertimin e klientëve potencialë në të gjithë agjentët"
+      }
+    },
+    "howToBecome": {
+      "title": "Si të Bëheni të Veçuar",
+      "step1": {
+        "title": "Abonohuni në Enterprise",
+        "desc": "Zgjidhni planin Enterprise për agjencinë tuaj"
+      },
+      "step2": {
+        "title": "Plotësoni Profilin Tuaj",
+        "desc": "Shtoni logo, përshkrim, foto të ekipit dhe informacion kontakti"
+      },
+      "step3": {
+        "title": "Aktivizoni të Veçuar",
+        "desc": "Aktivizoni statusin e veçuar në panelin e agjencisë suaj"
+      }
+    },
+    "stats": {
+      "title": "Statistikat e Agjencisë së Veçuar",
+      "views": "5x më shumë shikime profili",
+      "inquiries": "3x më shumë pyetje",
+      "trust": "Rezultat më i lartë i besimit të klientit",
+      "retention": "Mbajtje më e mirë e agjentëve"
+    }
+  },
+  "agencies": {
+    "title": "Ndërtoni Perandorinë Tuaj të Pasurive të Paluajtshme",
+    "subtitle": "Krijoni agjencinë tuaj, ftoni agjentë dhe menaxhoni të gjithë ekipin tuaj nga një platformë e fuqishme",
+    "pricing": {
+      "planName": "Plani i Ndërmarrjes",
+      "price": "€1,000",
+      "period": "/vit",
+      "tagline": "Gjithçka që ju nevojitet për të drejtuar një agjenci të suksesshme",
+      "whatsIncluded": "Çfarë Përfshihet",
+      "features": {
+        "listings": "500 shpallje pronash (të zgjerohem)",
+        "teamMembers": "5 anëtarë ekipi të përfshirë",
+        "promotions": "5 kupona promovimi/muaj",
+        "branding": "Faqe e markës së agjencisë",
+        "ai": "Përdorim i pakufizuar AI për të gjithë agjentët",
+        "accountManager": "Menaxher i dedikuar llogarie",
+        "analytics": "Dashboard analitik i ekipit"
+      }
+    },
+    "howToGetStarted": "Si të Filloni",
+    "steps": {
+      "subscribe": {
+        "title": "Abonohuni",
+        "desc": "Zgjidhni planin e Ndërmarrjes dhe përfundoni abonimin tuaj"
+      },
+      "createAgency": {
+        "title": "Krijoni Agjencinë",
+        "desc": "Krijoni profilin e agjencisë tuaj me logo, përshkrim dhe vendndodhje"
+      },
+      "generateCoupons": {
+        "title": "Gjeneroni Kupona",
+        "desc": "Krijoni deri në 5 kode kuponash për të ftuar agjentë në ekipin tuaj"
+      },
+      "growTogether": {
+        "title": "Rritet Së Bashku",
+        "desc": "Agjentët tuaj fillojnë të shpallin prona dhe agjencia juaj lulëzon"
+      }
+    },
+    "agentInvitation": {
+      "title": "Sistemi i Ftesës së Agjentëve",
+      "invitationCodes": {
+        "title": "Kodet e Ftesës",
+        "desc": "Ndani kodin tuaj unik të ftesës së agjencisë me agjentët që dëshirojnë të bashkohen. Ata mund ta përdorin për të kërkuar anëtarësim në agjencinë tuaj.",
+        "example": "Shembull kodi ftese"
+      },
+      "subscriptionCoupons": {
+        "title": "Kuponat e Abonimit të Agjentëve",
+        "desc": "Gjeneroni kode kuponash që u japin agjentëve një abonim FALAS vjetor Pro kur bashkohen me agjencinë tuaj. Çdo agjent merr 20 shpallje/muaj."
+      }
+    }
+  },
+  "agents": {
+    "title": "Bashkohuni me një Agjenci ose Punoni Vetë",
+    "subtitle": "Zgjidhni rrugën tuaj: punoni në mënyrë të pavarur me abonimin Pro ose bashkohuni me një agjenci falas",
+    "independent": {
+      "title": "Agjent i Pavarur",
+      "planType": "Abonimin Pro",
+      "price": "€25",
+      "period": "/muaj",
+      "yearlyNote": "ose €200/vit (kurseni 33%)",
+      "features": {
+        "listings": "20 shpallje/muaj ose 250/vit",
+        "promotions": "3 kupona promovimi/muaj",
+        "profile": "Profil personal i agjentit",
+        "ai": "Chat & njohuri AI të pakufizuara",
+        "analytics": "Dashboard analitik i avancuar",
+        "support": "Mbështetje me prioritet"
+      }
+    },
+    "agency": {
+      "title": "Agjent i Agjencisë",
+      "planType": "Bashkohuni me Kupon",
+      "free": "FALAS",
+      "price": "€0",
+      "period": "/vit",
+      "features": {
+        "listings": "20 shpallje aktive në muaj",
+        "promotions": "Ndani grupin e promovimit të agjencisë",
+        "branding": "Marka e agjencisë në shpallje",
+        "collaboration": "Bashkëpunim i ekipit",
+        "support": "Rrjeti i mbështetjes së agjencisë"
+      },
+      "note": "* Merrni një kod kuponi nga pronari i agjencisë tuaj për t'u bashkuar falas"
+    },
+    "howToJoin": {
+      "title": "Si të Bashkoheni me një Agjenci",
+      "step1": {
+        "title": "Merrni një Kod Kuponi",
+        "desc": "Kërkoni një kod kuponi abonamenti agjenti nga pronari i agjencisë"
+      },
+      "step2": {
+        "title": "Shpërbleni Kodin",
+        "desc": "Vendosni kodin e kuponit në cilësimet e llogarisë tuaj për të aktivizuar abonimin tuaj falas"
+      },
+      "step3": {
+        "title": "Filloni të Shpallni",
+        "desc": "Filloni të postoni prona nën markën e agjencisë tuaj dhe bashkëpunoni me ekipin tuaj"
+      }
+    }
+  },
+  "buyers": {
+    "title": "Gjeni Pronën Tuaj të Ëndrrave",
+    "subtitle": "Kërkoni, ruani dhe lidhuni me shitësit në të gjithë Ballkanin - veçori bazë falas me përmirësim opsional Pro",
+    "freePlan": {
+      "title": "Veçoritë Falas",
+      "price": "€0",
+      "period": "përgjithmonë",
+      "tagline": "Gjithçka që ju nevojitet për të filluar kërkimin tuaj të pronës",
+      "features": {
+        "browse": "Shfletoni të gjitha shpalljet",
+        "mapSearch": "Kërkimi me hartë interaktive",
+        "favorites": "Ruani të preferuarat",
+        "contact": "Kontaktoni shitësit & agjentët",
+        "insights": "Njohuri bazë të tregut",
+        "profiles": "Profile agjentësh & agjencish"
+      }
+    },
+    "proPlan": {
+      "title": "Blerës Pro",
+      "trial": "PROVO FALAS 7 DITË",
+      "price": "€3",
+      "period": "/muaj",
+      "tagline": "Jini para blerësve të tjerë me veçori premium",
+      "features": {
+        "notifications": "Njoftime të menjëhershme me email & SMS",
+        "savedSearches": "Kërkime të ruajtura të pakufizuara",
+        "earlyAccess": "Qasje e hershme në shpallje të reja",
+        "insights": "Njohuri të avancuara të tregut",
+        "priceDrops": "Njoftime për uljen e çmimeve",
+        "calculator": "Kalkulator investimi",
+        "mortgage": "Parakualifikim hipoteke",
+        "adFree": "Shfletim pa reklama"
+      }
+    },
+    "searchTools": {
+      "title": "Mjete të Fuqishme Kërkimi",
+      "interactiveMap": {
+        "title": "Kërkimi me Hartë Interaktive",
+        "desc": "Vizatoni zona të personalizuara në hartë për të gjetur prona pikërisht aty ku i dëshironi"
+      },
+      "saveFavorites": {
+        "title": "Ruani të Preferuarat",
+        "desc": "Ndiqni pronat që ju pëlqejnë dhe merrni njoftime kur çmimet ndryshojnë"
+      },
+      "savedSearches": {
+        "title": "Kërkime të Ruajtura",
+        "desc": "Krijoni kërkime të ruajtura dhe merrni alarme kur shpallen prona të reja përkatëse"
+      },
+      "directMessaging": {
+        "title": "Mesazhe të Drejtpërdrejta",
+        "desc": "Kontaktoni shitësit dhe agjentët drejtpërdrejt përmes sistemit tonë të sigurt të mesazheve"
+      },
+      "marketInsights": {
+        "title": "Njohuri të Tregut",
+        "desc": "Shikoni statistika të lagjeve, tendencat e çmimeve dhe informacione të zonës"
+      },
+      "agentProfiles": {
+        "title": "Profile Agjentësh",
+        "desc": "Shfletoni agjentë dhe agjenci të verifikuar për të gjetur profesionistë të besueshëm"
+      }
+    },
+    "journey": {
+      "title": "Udhëtimi Juaj për Gjetjen e Shtëpisë",
+      "search": {
+        "step": "Kërko",
+        "desc": "Përdorni filtra & hartë"
+      },
+      "save": {
+        "step": "Ruaj",
+        "desc": "Shëno të preferuarat"
+      },
+      "compare": {
+        "step": "Krahaso",
+        "desc": "Analizoni opsionet"
+      },
+      "contact": {
+        "step": "Kontakto",
+        "desc": "Mesazh shitësve"
+      },
+      "visit": {
+        "step": "Vizito",
+        "desc": "Cakto shikime"
+      }
+    },
+    "seeItInAction": {
+      "title": "Shiheni në Veprim",
+      "mapDemo": {
+        "title": "Demo e Hartës Interaktive",
+        "coming": "Screenshot së shpejti",
+        "heading": "Vizato & Kërko",
+        "desc": "Vizatoni zona të personalizuara në hartë për të gjetur prona në lagjet tuaja të preferuara. Filtroni sipas çmimit, madhësisë dhe shërbimeve në kohë reale."
+      },
+      "saveDemo": {
+        "title": "Pamja e Pronave të Ruajtura",
+        "coming": "Screenshot së shpejti",
+        "heading": "Ruaj & Krahaso",
+        "desc": "Ruani pronat që doni dhe krahasojini ato njëra me tjetrën. Merrni njoftime të menjëhershme kur çmimet ndryshojnë ose kur bëhen të disponueshme prona të ngjashme."
+      }
+    }
+  },
+  "sellers": {
+    "title": "Shisni Pronën Tuaj",
+    "subtitle": "Shpallni pronën tuaj dhe arrini në mijëra blerës të mundshëm në të gjithë rajonin",
+    "freePlan": {
+      "title": "Plani Falas",
+      "price": "€0",
+      "period": "/muaj",
+      "tagline": "Perfekt për shitës privatë me vetëm disa prona",
+      "features": {
+        "listings": "3 shpallje aktive",
+        "searches": "3 kërkime të ruajtura",
+        "ai": "3 mesazhe chat AI",
+        "photos": "Galeri fotosh (deri në 10 imazhe)",
+        "messaging": "Mesazhe të drejtpërdrejta",
+        "analytics": "Analitikë bazë"
+      }
+    },
+    "proPlan": {
+      "title": "Plani Pro",
+      "popular": "MË I POPULLARIZUAR",
+      "price": "€25",
+      "period": "/muaj",
+      "yearlyNote": "ose €200/vit (kurseni 33%)",
+      "tagline": "Për shitës seriozë që dëshirojnë ekspozim maksimal",
+      "features": {
+        "listings": "20 shpallje/muaj ose 250/vit",
+        "promotions": "3 kupona promovimi/muaj",
+        "ai": "Chat & njohuri AI të pakufizuara",
+        "searches": "Kërkime të ruajtura të pakufizuara",
+        "analytics": "Dashboard analitik i avancuar",
+        "leads": "Mjete menaxhimi të klientëve potencialë",
+        "support": "Mbështetje me prioritet"
+      }
+    },
+    "howToList": {
+      "title": "Si të Shpallni Pronën Tuaj",
+      "step1": {
+        "title": "Krijoni Llogari",
+        "desc": "Regjistrohuni si shitës privat ose agjent"
+      },
+      "step2": {
+        "title": "Shtoni Detajet",
+        "desc": "Vendosni informacionin e pronës, fotot dhe vendosni çmimin tuaj"
+      },
+      "step3": {
+        "title": "Shkoni Live",
+        "desc": "Publikoni dhe shpallja juaj shfaqet në hartë"
+      },
+      "step4": {
+        "title": "Lidhuni",
+        "desc": "Merrni pyetje dhe përgjigjuni blerësve të interesuar"
+      }
+    },
+    "promotions": {
+      "title": "Rrisni Dukshmërinë e Shpalljes Tuaj",
+      "featured": {
+        "title": "E Veçuar",
+        "price": "€15",
+        "duration": "7 ditë",
+        "features": {
+          "border": "Kufi i artë",
+          "position": "Në krye të rezultateve të kërkimit",
+          "views": "3x më shumë shikime"
+        }
+      },
+      "premium": {
+        "title": "Premium",
+        "price": "€25",
+        "duration": "7 ditë",
+        "features": {
+          "badge": "Shenjë zjarri",
+          "position": "Pozicionim premium",
+          "views": "5x më shumë shikime",
+          "social": "Veçori në mediat sociale"
+        }
+      },
+      "highlight": {
+        "title": "Theksuar",
+        "price": "€10",
+        "duration": "7 ditë",
+        "features": {
+          "highlight": "Theksim blu",
+          "position": "Dallohu në lista",
+          "views": "2x më shumë shikime"
+        }
+      }
+    },
+    "seeItInAction": {
+      "title": "Shiheni në Veprim",
+      "listingDemo": {
+        "title": "Krijuesi i Shpalljes",
+        "coming": "Screenshot së shpejti",
+        "heading": "Krijim i Lehtë i Shpalljes",
+        "desc": "Krijoni shpallje të bukura pronash në minuta me formularin tonë intuitiv. Shtoni foto, vendosni çmimin tuaj dhe përshkruani veçoritë më të mira të pronës suaj."
+      },
+      "analyticsDemo": {
+        "title": "Dashboard Analitik",
+        "coming": "Screenshot së shpejti",
+        "heading": "Ndiqni Performancën Tuaj",
+        "desc": "Monitoroni shikimet, pyetjet dhe angazhimin për të gjitha shpalljet tuaja. Shikoni cilat prona performojnë më mirë dhe optimizoni strategjinë tuaj."
+      }
+    }
+  },
+  "cta": {
+    "title": "Gati për të Filluar?",
+    "subtitle": "Bashkohuni me mijëra përdorues që tashmë po gjejnë dhe shpallin prona në Balkan Estate",
+    "browseProperties": "Shfletoni Pronat",
+    "listProperty": "Shpallni Pronën Tuaj"
+  },
+  "faq": {
+    "title": "Pyetje të Shpeshta",
+    "q1": {
+      "question": "A është falas të shfletoni pronat?",
+      "answer": "Po! Shfletimi, kërkimi, ruajtja e të preferuarave dhe kontaktimi i shitësve është plotësisht falas për blerësit."
+    },
+    "q2": {
+      "question": "Si funksionojnë kodet e kuponave të agjencisë?",
+      "answer": "Pronarët e agjencive mund të gjenerojnë deri në 5 kode kuponash. Kur një agjent shpërblen një kod, ata marrin një abonim vjetor Pro falas (20 shpallje/muaj) dhe bashkohen me atë agjenci."
+    },
+    "q3": {
+      "question": "A mund të kaloj nga agjent i pavarur në agjent të agjencisë?",
+      "answer": "Po! Nëse merrni një kod kuponi nga një agjenci, mund ta shpërbleni atë për t'u bashkuar me ekipin e tyre. Shpalljet tuaja atëherë do të shoqërohen me atë agjenci."
+    },
+    "q4": {
+      "question": "Çfarë ndodh kur skadon abonamenti im?",
+      "answer": "Shpalljet tuaja ekzistuese mbeten aktive, por nuk do të jeni në gjendje të krijoni të reja derisa të rinovoni. Do të merrni kujtesa para skadimit."
+    },
+    "q5": {
+      "question": "Si funksionojnë kreditë e promovimit?",
+      "answer": "Kreditë e promovimit ju lejojnë të rrisni shpalljet tuaja për t'u shfaqur më lart në rezultatet e kërkimit. Përdoruesit Pro marrin 3 kredite/muaj, agjencitë marrin 15 për t'i ndarë mes ekipit të tyre."
+    }
+  }
+}

@@ -8,7 +8,7 @@ import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from './src/components/seo';
 import { Analytics } from './src/components/marketing/Analytics';
-import { UserRole } from './types';
+import { UserRole, HowItWorksTab, AdminSection } from './types';
 import { LogoIcon } from './constants';
 
 // Initialize i18n
@@ -212,8 +212,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       const howItWorksMatch = path.match(/^\/how-it-works(?:\/(.+))?$/);
       if (howItWorksMatch) {
         const tab = howItWorksMatch[1] || 'getting-started'; // Default to getting-started tab
-        const validTabs = ['getting-started', 'agencies', 'agents', 'buyers', 'sellers'];
-        const validTab = validTabs.includes(tab) ? tab : 'getting-started';
+        const validTabs: HowItWorksTab[] = ['getting-started', 'premium-features', 'agencies', 'agents', 'buyers', 'sellers'];
+        const validTab: HowItWorksTab = validTabs.includes(tab as HowItWorksTab) ? tab as HowItWorksTab : 'getting-started';
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: validTab });
@@ -225,8 +225,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       const adminMatch = path.match(/^\/admin(?:\/(.+))?$/);
       if (adminMatch) {
         const section = adminMatch[1] || 'dashboard'; // Default to dashboard
-        const validSections = ['dashboard', 'users', 'inquiries', 'discounts', 'promotions', 'properties', 'agencies', 'pricing', 'activity', 'settings'];
-        const validSection = validSections.includes(section) ? section : 'dashboard';
+        const validSections: AdminSection[] = ['dashboard', 'users', 'inquiries', 'agent-requests', 'discounts', 'promotions', 'properties', 'agencies', 'pricing', 'activity', 'settings'];
+        const validSection: AdminSection = validSections.includes(section as AdminSection) ? section as AdminSection : 'dashboard';
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ADMIN_SECTION', payload: validSection });

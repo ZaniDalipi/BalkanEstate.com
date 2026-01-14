@@ -27,41 +27,40 @@
       }
     },
     "sellerPromotion": {
-      "title": "Planet e Promovimit të Shpalljeve",
-      "description": "Rritni dukshmërinë e shpalljeve tuaja për më shumë vizibilitet dhe kërkesa",
+      "title": "Listing Promotion Plans",
+      "description": "Boost your property listings to get more visibility and inquiries",
       "featured": {
-        "title": "E Veçantë",
-        "description": "Prioritet në rezultatet e kërkimit",
-        "features": [
-          "Në krye të rezultateve",
-          "Distinktiv i veçantë",
-          "2x rritje vizibiliteti"
-        ]
+        "title": "Featured",
+        "subtitle": "Priority in search",
+        "feature1": "Top of search",
+        "feature2": "Featured badge",
+        "feature3": "2x visibility"
       },
       "highlight": {
-        "title": "E Theksuar",
-        "description": "Dallohuni me ngjyrë",
-        "popular": "Popullore",
-        "features": [
-          "Të gjitha përfitimet e Veçantë",
-          "Sfond me ngjyrë",
-          "3x rritje vizibiliteti"
-        ]
+        "title": "Highlight",
+        "subtitle": "Stand out",
+        "popular": "Popular",
+        "feature1": "Featured benefits",
+        "feature2": "Colored highlight",
+        "feature3": "3x visibility"
       },
       "premium": {
         "title": "Premium",
-        "description": "Paraqitje në faqen kryesore",
-        "features": [
-          "Të gjitha përfitimet e Theksuar",
-          "Karusel në faqen kryesore",
-          "5x rritje vizibiliteti"
-        ]
+        "subtitle": "Homepage featured",
+        "feature1": "Highlight benefits",
+        "feature2": "Homepage carousel",
+        "feature3": "5x visibility"
       },
-      "duration": "7-90 ditë",
-      "howItWorks": "Si funksionon:",
-      "howItWorksDescription": "Kur krijoni një shpallje, zgjidhni nivelin e promovimit dhe kohëzgjatjen. Pagesa përpunohet para publikimit. Kuponat e zbritjes pranohen!",
-      "viewSubscriptionPlans": "Shiko Planet e Abonimit",
-      "startCreatingListing": "Fillo Krijimin e Shpalljes"
+      "duration": "7-90 days",
+      "howItWorks": "How it works:",
+      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "promotionGuide": {
+        "title": "{{tier}} Promotion",
+        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
+        "goToListings": "Go to My Listings",
+        "createListing": "Create New Listing",
+        "backToOptions": "Back to promotion options"
+      }
     }
   },
   "listingLimit": {

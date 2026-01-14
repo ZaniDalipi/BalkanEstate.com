@@ -22,16 +22,25 @@
     "dashboard": "Dashboard",
     "properties": "Properties",
     "users": "Users",
+    "usersAndAgents": "Users & Agents",
     "agencies": "Agencies",
     "discountCodes": "Discount Codes",
     "promotions": "Promotions",
+    "promotionCoupons": "Promotion Coupons",
     "analytics": "Analytics",
     "settings": "Settings",
     "reports": "Reports",
     "support": "Support",
     "logs": "Activity Logs",
+    "activityLog": "Activity Log",
     "notifications": "Notifications",
-    "backToSite": "Back to Site"
+    "backToSite": "Back to Site",
+    "overview": "Overview",
+    "contentManagement": "Content Management",
+    "marketing": "Marketing & Sales",
+    "system": "System",
+    "inquiries": "Inquiries",
+    "pricing": "Pricing & Plans"
   },
   "properties": {
     "title": "Property Manager",
@@ -40,15 +49,29 @@
     "addNew": "Add New Property",
     "edit": "Edit Property",
     "delete": "Delete Property",
+    "deleteTitle": "Delete Property",
     "deleteConfirm": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
     "updateSuccess": "Property updated successfully",
     "deleteSuccess": "Property deleted successfully",
     "loadError": "Failed to load properties",
+    "details": "Property Details",
+    "specifications": "Specifications",
+    "features": "Features",
+    "promoted": "Promoted",
+    "notPromoted": "Not Promoted",
     "status": {
       "active": "Active",
       "pending": "Pending",
       "sold": "Sold",
       "inactive": "Inactive"
+    },
+    "types": {
+      "house": "House",
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "land": "Land",
+      "commercial": "Commercial",
+      "other": "Other"
     }
   },
   "users": {

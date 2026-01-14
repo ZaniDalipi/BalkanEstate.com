@@ -1,347 +1,347 @@
 {
   "privacy": {
-    "title": "Politika privatnosti",
-    "lastUpdated": "Posljednje ažuriranje",
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated",
     "intro": {
-      "title": "Uvod",
-      "text": "Dobrodošli na BalkanEstate (\"mi\", \"naša\" ili \"nas\"). Posvećeni smo zaštiti vaših ličnih podataka i vašeg prava na privatnost. Ova Politika privatnosti objašnjava kako prikupljamo, koristimo, otkrivamo i štitimo vaše podatke kada posjetite našu web stranicu i koristite naše usluge."
+      "title": "Introduction",
+      "text": "Welcome to BalkanEstate (\"we,\" \"our,\" or \"us\"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services."
     },
     "collect": {
-      "title": "Podaci koje prikupljamo",
-      "text": "Prikupljamo podatke koje nam direktno dajete, kao i podatke automatski prikupljene kada koristite naše usluge.",
+      "title": "Information We Collect",
+      "text": "We collect information that you provide directly to us, as well as information collected automatically when you use our services.",
       "personal": {
-        "title": "Lični podaci",
-        "name": "Ime i kontakt podaci (email, broj telefona)",
-        "account": "Akreditivi računa (korisničko ime, lozinka)",
-        "profile": "Podaci o profilu (fotografija, biografija, preferencije)",
-        "payment": "Podaci o plaćanju (sigurno obrađeni putem Stripe)",
-        "communication": "Komunikacije i poruke koje šaljete putem naše platforme"
+        "title": "Personal Information",
+        "name": "Name and contact information (email, phone number)",
+        "account": "Account credentials (username, password)",
+        "profile": "Profile information (photo, bio, preferences)",
+        "payment": "Payment information (processed securely via Stripe)",
+        "communication": "Communications and messages you send through our platform"
       },
       "auto": {
-        "title": "Automatski prikupljeni podaci",
-        "device": "Podaci o uređaju (tip pretraživača, operativni sistem)",
-        "ip": "IP adresa i približna lokacija",
-        "usage": "Podaci o korištenju (posjećene stranice, provedeno vrijeme, upiti pretrage)",
-        "cookies": "Kolačići i slične tehnologije praćenja"
+        "title": "Automatically Collected Information",
+        "device": "Device information (browser type, operating system)",
+        "ip": "IP address and approximate location",
+        "usage": "Usage data (pages visited, time spent, search queries)",
+        "cookies": "Cookies and similar tracking technologies"
       }
     },
     "use": {
-      "title": "Kako koristimo vaše podatke",
-      "provide": "Za pružanje i održavanje naših usluga",
-      "account": "Za kreiranje i upravljanje vašim računom",
-      "communicate": "Za komunikaciju s vama o nekretninama, upitima i ažuriranjima",
-      "process": "Za obradu transakcija i pretplata",
-      "improve": "Za analizu i poboljšanje naših usluga",
-      "personalize": "Za personalizaciju vašeg iskustva i prikazivanje relevantnih nekretnina",
-      "protect": "Za otkrivanje i sprečavanje prevare i zloupotrebe",
-      "legal": "Za ispunjavanje zakonskih obaveza"
+      "title": "How We Use Your Information",
+      "provide": "To provide and maintain our services",
+      "account": "To create and manage your account",
+      "communicate": "To communicate with you about properties, inquiries, and updates",
+      "process": "To process transactions and subscriptions",
+      "improve": "To analyze and improve our services",
+      "personalize": "To personalize your experience and show relevant properties",
+      "protect": "To detect and prevent fraud and abuse",
+      "legal": "To comply with legal obligations"
     },
     "share": {
-      "title": "Dijeljenje vaših podataka",
-      "text": "Možemo dijeliti vaše podatke u sljedećim okolnostima:",
-      "agents": "Sa agentima za nekretnine:",
-      "agentsDesc": "Kada se raspitujete o nekretnini, vaši kontakt podaci dijele se s agentom oglasa.",
-      "providers": "Pružaoci usluga:",
-      "providersDesc": "Radimo s trećim stranama za obradu plaćanja (Stripe), email usluge i analitiku.",
-      "legal": "Zakonski zahtjevi:",
-      "legalDesc": "Kada je to zakonom propisano ili radi zaštite naših prava.",
-      "business": "Poslovni transferi:",
-      "businessDesc": "U vezi sa spajanjem, akvizicijom ili prodajom imovine."
+      "title": "Sharing Your Information",
+      "text": "We may share your information in the following circumstances:",
+      "agents": "With Property Agents:",
+      "agentsDesc": "When you inquire about a property, your contact information is shared with the listing agent.",
+      "providers": "Service Providers:",
+      "providersDesc": "We work with third parties for payment processing (Stripe), email services, and analytics.",
+      "legal": "Legal Requirements:",
+      "legalDesc": "When required by law or to protect our rights.",
+      "business": "Business Transfers:",
+      "businessDesc": "In connection with a merger, acquisition, or sale of assets."
     },
     "legalBasis": {
-      "title": "Pravna osnova za obradu (GDPR)",
-      "text": "Prema Opštoj uredbi o zaštiti podataka (GDPR), obrađujemo vaše lične podatke na osnovu sljedećih pravnih osnova:",
-      "consent": "Pristanak:",
-      "consentDesc": "Kada izričito pristanete na primanje marketinških komunikacija ili dozvolite nebitne kolačiće.",
-      "contract": "Ugovor:",
-      "contractDesc": "Za izvršenje našeg ugovora s vama, uključujući pružanje naših usluga, upravljanje vašim računom i obradu plaćanja.",
-      "legitimate": "Legitimni interesi:",
-      "legitimateDesc": "Za poboljšanje naših usluga, sprečavanje prevare, osiguranje sigurnosti i komunikaciju o našoj platformi.",
-      "legal": "Zakonska obaveza:",
-      "legalDesc": "Za poštovanje primjenjivih zakona, propisa i pravnih procesa."
+      "title": "Legal Basis for Processing (GDPR)",
+      "text": "Under the General Data Protection Regulation (GDPR), we process your personal data based on the following legal grounds:",
+      "consent": "Consent:",
+      "consentDesc": "When you explicitly agree to receive marketing communications or allow non-essential cookies.",
+      "contract": "Contract:",
+      "contractDesc": "To perform our contract with you, including providing our services, managing your account, and processing payments.",
+      "legitimate": "Legitimate Interests:",
+      "legitimateDesc": "To improve our services, prevent fraud, ensure security, and communicate about our platform. We balance our interests against your rights and freedoms.",
+      "legal": "Legal Obligation:",
+      "legalDesc": "To comply with applicable laws, regulations, and legal processes."
     },
     "security": {
-      "title": "Sigurnost podataka",
-      "text": "Implementiramo odgovarajuće tehničke i organizacijske sigurnosne mjere za zaštitu vaših ličnih podataka."
+      "title": "Data Security",
+      "text": "We implement appropriate technical and organizational security measures to protect your personal information. This includes encryption of data in transit and at rest, secure authentication, and regular security audits. However, no method of transmission over the Internet is 100% secure."
     },
     "rights": {
-      "title": "Vaša prava",
-      "text": "Zavisno od vaše lokacije, možete imati sljedeća prava:",
-      "access": "Pristup i dobijanje kopije vaših ličnih podataka",
-      "correct": "Ispravka netačnih ili nepotpunih podataka",
-      "delete": "Zahtjev za brisanje vaših ličnih podataka",
-      "restrict": "Ograničavanje ili prigovor na obradu",
-      "portability": "Prenosivost podataka",
-      "withdraw": "Povlačenje pristanka u bilo kojem trenutku",
-      "contact": "Za ostvarivanje ovih prava, kontaktirajte nas na privacy@balkanestateai.com",
-      "complaint": "Takođe imate pravo podnijeti žalbu nadzornom tijelu u vašoj zemlji prebivališta."
+      "title": "Your Rights",
+      "text": "Depending on your location, you may have the following rights:",
+      "access": "Access and receive a copy of your personal data",
+      "correct": "Correct inaccurate or incomplete data",
+      "delete": "Request deletion of your personal data",
+      "restrict": "Restrict or object to processing",
+      "portability": "Data portability",
+      "withdraw": "Withdraw consent at any time",
+      "contact": "To exercise these rights, please contact us at privacy@balkanestateai.com",
+      "complaint": "You also have the right to lodge a complaint with a supervisory authority in your country of residence if you believe your data protection rights have been violated."
     },
     "automated": {
-      "title": "Automatizovano donošenje odluka",
-      "text": "Možemo koristiti automatizovane sisteme za personalizaciju preporuka nekretnina."
+      "title": "Automated Decision-Making",
+      "text": "We may use automated systems to personalize property recommendations based on your search history and preferences. These recommendations are suggestions only and do not have legal or significant effects on you. You can request human review of any automated decision by contacting us."
     },
     "retention": {
-      "title": "Zadržavanje podataka",
-      "text": "Zadržavamo vaše lične podatke onoliko dugo koliko je potrebno za pružanje naših usluga.",
-      "periods": "Specifični rokovi zadržavanja:",
-      "account": "Podaci o računu: Trajanje računa + 30 dana nakon brisanja",
-      "transactions": "Zapisi o transakcijama: 7 godina",
-      "messages": "Poruke i komunikacije: 3 godine",
-      "analytics": "Analitički podaci: 26 mjeseci",
-      "logs": "Sigurnosni logovi: 12 mjeseci"
+      "title": "Data Retention",
+      "text": "We retain your personal information for as long as necessary to provide our services, comply with legal obligations, resolve disputes, and enforce our agreements. When you delete your account, we will delete or anonymize your personal data within 30 days, unless retention is required by law.",
+      "periods": "Specific Retention Periods:",
+      "account": "Account data: Duration of account + 30 days after deletion",
+      "transactions": "Transaction records: 7 years (legal requirement)",
+      "messages": "Messages and communications: 3 years",
+      "analytics": "Analytics data: 26 months",
+      "logs": "Security logs: 12 months"
     },
     "thirdParty": {
-      "title": "Usluge trećih strana",
-      "text": "Koristimo sljedeće usluge trećih strana:",
-      "stripe": "Obrada plaćanja putem Stripe.",
-      "analytics": "Web analitika za razumijevanje ponašanja korisnika.",
-      "cloudflare": "Sigurnosne i performansne usluge.",
-      "aws": "Cloud hosting i usluge pohrane."
+      "title": "Third-Party Services",
+      "text": "We use the following third-party services that may process your data:",
+      "stripe": "Payment processing. Stripe processes your payment information securely. We do not store your full credit card details.",
+      "analytics": "Website analytics to understand user behavior and improve our services. We use IP anonymization.",
+      "cloudflare": "Security and performance services including DDoS protection and content delivery.",
+      "aws": "Cloud hosting and storage services. Data is stored in EU data centers."
     },
     "transfers": {
-      "title": "Međunarodni transferi podataka",
-      "text": "Vaši podaci mogu biti preneseni i obrađeni u drugim zemljama."
+      "title": "International Data Transfers",
+      "text": "Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place for such transfers in accordance with applicable data protection laws."
     },
     "children": {
-      "title": "Privatnost djece",
-      "text": "Naše usluge nijesu namijenjene osobama mlađim od 18 godina."
+      "title": "Children's Privacy",
+      "text": "Our services are not intended for individuals under 18 years of age. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately."
     },
     "changes": {
-      "title": "Izmjene ove politike",
-      "text": "Možemo ažurirati ovu Politiku privatnosti s vremena na vrijeme."
+      "title": "Changes to This Policy",
+      "text": "We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the \"Last Updated\" date. Your continued use of our services after any changes constitutes acceptance of the updated policy."
     },
     "dpo": {
-      "title": "Službenik za zaštitu podataka",
-      "text": "Imenovali smo Službenika za zaštitu podataka (DPO).",
-      "role": "Službenik za zaštitu podataka"
+      "title": "Data Protection Officer",
+      "text": "We have appointed a Data Protection Officer (DPO) to oversee our data protection practices and ensure compliance with applicable laws. You can contact our DPO for any data protection related inquiries:",
+      "role": "Data Protection Officer"
     },
     "contact": {
-      "title": "Kontaktirajte nas",
-      "text": "Ako imate pitanja o ovoj Politici privatnosti, kontaktirajte nas:",
-      "address": "Adresa: Skoplje, Sjeverna Makedonija"
+      "title": "Contact Us",
+      "text": "If you have questions about this Privacy Policy or our data practices, please contact us:",
+      "address": "Address: Skopje, North Macedonia"
     }
   },
   "terms": {
-    "title": "Uslovi korištenja",
-    "lastUpdated": "Posljednje ažuriranje",
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated",
     "intro": {
-      "title": "Prihvatanje uslova",
-      "text": "Pristupanjem ili korištenjem BalkanEstate (\"Usluga\"), prihvatate da ćete biti vezani ovim Uslovima korištenja."
+      "title": "Agreement to Terms",
+      "text": "By accessing or using BalkanEstate (\"the Service\"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our Service. We reserve the right to modify these terms at any time, and your continued use constitutes acceptance of any changes."
     },
     "eligibility": {
-      "title": "Podobnost",
-      "text": "Morate imati najmanje 18 godina za korištenje naše Usluge."
+      "title": "Eligibility",
+      "text": "You must be at least 18 years old to use our Service. By using BalkanEstate, you represent that you are of legal age and have the legal capacity to enter into a binding agreement. If you are using the Service on behalf of a company or organization, you represent that you have the authority to bind that entity to these terms."
     },
     "account": {
-      "title": "Registracija računa",
-      "text": "Za pristup određenim funkcijama morate kreirati račun.",
-      "accurate": "Pružiti tačne i potpune podatke za registraciju",
-      "update": "Održavati podatke o svom računu ažuriranim",
-      "secure": "Održavati sigurnost svoje lozinke i računa",
-      "notify": "Odmah nas obavijestiti o bilo kakvom neovlaštenom pristupu",
-      "responsible": "Biti odgovorni za sve aktivnosti pod vašim računom"
+      "title": "Account Registration",
+      "text": "To access certain features, you must create an account. You agree to:",
+      "accurate": "Provide accurate and complete registration information",
+      "update": "Keep your account information updated",
+      "secure": "Maintain the security of your password and account",
+      "notify": "Notify us immediately of any unauthorized access",
+      "responsible": "Be responsible for all activities under your account"
     },
     "listings": {
-      "title": "Oglasi nekretnina",
-      "text": "Kada oglašavate nekretninu na BalkanEstate, slažete se da:",
-      "ownership": "Ste vlasnik ili ovlašćeni agent nekretnine",
-      "accurate": "Svi pruženi podaci su tačni i nijesu obmanjujući",
-      "photos": "Fotografije tačno prikazuju nekretninu",
-      "legal": "Oglas ne krši nikakve zakone ili propise",
-      "update": "Ćete odmah ažurirati ili ukloniti oglase kada su prodani ili nedostupni",
-      "respond": "Ćete odgovarati na upite pravovremeno i profesionalno",
-      "remove": "Zadržavamo pravo ukloniti bilo koji oglas koji krši ove uslove."
+      "title": "Property Listings",
+      "text": "When listing a property on BalkanEstate, you agree that:",
+      "ownership": "You are the owner or authorized agent of the property",
+      "accurate": "All information provided is accurate and not misleading",
+      "photos": "Photos accurately represent the property",
+      "legal": "The listing does not violate any laws or regulations",
+      "update": "You will promptly update or remove listings when sold or unavailable",
+      "respond": "You will respond to inquiries in a timely and professional manner",
+      "remove": "We reserve the right to remove any listing that violates these terms or is reported as fraudulent."
     },
     "payments": {
-      "title": "Pretplate i plaćanja",
-      "text": "Određene funkcije zahtijevaju plaćenu pretplatu:",
-      "recurring": "Pretplate se naplaćuju na ponavljajućoj osnovi",
-      "auto": "Pretplate se automatski obnavljaju",
-      "cancel": "Možete otkazati pretplatu u bilo kojem trenutku",
-      "refund": "Povrati su dostupni u roku od 30 dana od kupovine",
-      "price": "Možemo promijeniti cijene pretplate uz obavijest od 30 dana"
+      "title": "Subscriptions and Payments",
+      "text": "Certain features require a paid subscription:",
+      "recurring": "Subscriptions are billed on a recurring basis (monthly or yearly)",
+      "auto": "Subscriptions auto-renew unless cancelled before the renewal date",
+      "cancel": "You can cancel your subscription at any time through your account settings",
+      "refund": "Refunds are available within 30 days of purchase if you are not satisfied",
+      "price": "We may change subscription prices with 30 days notice"
     },
     "prohibited": {
-      "title": "Zabranjeno ponašanje",
-      "text": "Slažete se da nećete:",
-      "false": "Objavljivati lažne ili obmanjujuće oglase",
-      "spam": "Slati spam ili neželjene komunikacije",
-      "harass": "Uznemiravati ili prijetiti drugim korisnicima",
-      "impersonate": "Lažno se predstavljati kao drugi",
-      "scrape": "Prikupljati podatke iz naše Usluge",
-      "interfere": "Ometati pravilno funkcionisanje Usluge",
-      "circumvent": "Pokušavati zaobići sigurnosne mjere",
-      "illegal": "Koristiti Uslugu za nezakonite svrhe"
+      "title": "Prohibited Conduct",
+      "text": "You agree not to:",
+      "false": "Post false, misleading, or fraudulent listings",
+      "spam": "Send spam or unsolicited communications",
+      "harass": "Harass, abuse, or threaten other users",
+      "impersonate": "Impersonate others or misrepresent your identity",
+      "scrape": "Scrape, crawl, or harvest data from our Service",
+      "interfere": "Interfere with the proper functioning of the Service",
+      "circumvent": "Attempt to bypass security measures",
+      "illegal": "Use the Service for any illegal purpose"
     },
     "ip": {
-      "title": "Intelektualno vlasništvo",
-      "text": "Ime BalkanEstate, logo i sav povezani sadržaj su u našem vlasništvu."
+      "title": "Intellectual Property",
+      "text": "The BalkanEstate name, logo, and all related trademarks, service marks, and content are owned by us. You may not use our intellectual property without prior written consent. You retain ownership of content you post but grant us a license to display and distribute it on our platform."
     },
     "disclaimer": {
-      "title": "Odricanje jamstava",
-      "text": "USLUGA SE PRUŽA \"KAKVA JEST\" BEZ JAMSTAVA BILO KOJE VRSTE."
+      "title": "Disclaimer of Warranties",
+      "text": "THE SERVICE IS PROVIDED \"AS IS\" WITHOUT WARRANTIES OF ANY KIND. WE DO NOT GUARANTEE THE ACCURACY OF PROPERTY LISTINGS OR THE CONDUCT OF OTHER USERS. WE ARE NOT A REAL ESTATE AGENCY AND DO NOT PROVIDE REAL ESTATE ADVICE. ALL TRANSACTIONS ARE BETWEEN BUYERS AND SELLERS DIRECTLY."
     },
     "liability": {
-      "title": "Ograničenje odgovornosti",
-      "text": "U NAJVEĆOJ MJERI DOZVOLJENOJ ZAKONOM, BALKANESTATE NEĆE BITI ODGOVORAN ZA BILO KAKVU INDIREKTNU ŠTETU."
+      "title": "Limitation of Liability",
+      "text": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, BALKANESTATE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID US IN THE PAST 12 MONTHS."
     },
     "indemnity": {
-      "title": "Obeštećenje",
-      "text": "Slažete se da ćete obeštetiti i zaštititi BalkanEstate od svih potraživanja."
+      "title": "Indemnification",
+      "text": "You agree to indemnify and hold harmless BalkanEstate and its officers, directors, employees, and agents from any claims, damages, losses, or expenses arising from your use of the Service or violation of these terms."
     },
     "termination": {
-      "title": "Raskid",
-      "text": "Možemo suspendirati ili raskinuti vaš račun u bilo kojem trenutku."
+      "title": "Termination",
+      "text": "We may suspend or terminate your account at any time for violation of these terms or for any other reason at our discretion. You may also delete your account at any time. Upon termination, your right to use the Service will cease immediately, and your listings will be removed."
     },
     "userContent": {
-      "title": "Licenca za korisnički sadržaj",
-      "text": "Objavljivanjem sadržaja na BalkanEstate, vi:",
-      "own": "Izjavljujete da posjedujete ili imate pravo koristiti ovaj sadržaj",
-      "license": "Nam dajete licencu za korištenje vašeg sadržaja na našoj platformi",
-      "sublicense": "Dozvoljavate da podlicenciramo ovaj sadržaj",
-      "retain": "Zadržavate sva vlasnička prava nad vašim sadržajem",
-      "remove": "Možete ukloniti svoj sadržaj u bilo kojem trenutku",
-      "responsibility": "Vi ste odgovorni za svoj sadržaj i posljedice njegovog objavljivanja."
+      "title": "User Content License",
+      "text": "By posting content (including property listings, photos, descriptions, and reviews) on BalkanEstate, you:",
+      "own": "Represent that you own or have the right to use and share this content",
+      "license": "Grant us a non-exclusive, worldwide, royalty-free license to use, display, reproduce, and distribute your content on our platform",
+      "sublicense": "Allow us to sublicense this content to our partners and affiliates for platform purposes",
+      "retain": "Retain all ownership rights in your content",
+      "remove": "May remove your content at any time by deleting it or your account",
+      "responsibility": "You are solely responsible for your content and the consequences of posting it. We do not endorse user content and reserve the right to remove content that violates these terms."
     },
     "api": {
-      "title": "API i automatizovani pristup",
-      "text": "Automatizovani pristup našoj Usluzi je strogo regulisan:",
-      "prohibited": "Prikupljanje podataka je zabranjeno bez naše pisane saglasnosti",
-      "rate": "Prekomjerni zahtjevi mogu rezultirati blokiranjem IP adrese",
-      "partnership": "Za API pristup kontaktirajte nas na partners@balkanestateai.com",
-      "robots": "Morate se pridržavati naše robots.txt datoteke"
+      "title": "API and Automated Access",
+      "text": "Automated access to our Service is strictly regulated:",
+      "prohibited": "Scraping, crawling, or automated data collection is prohibited without our written consent",
+      "rate": "Excessive requests that burden our servers may result in IP blocking",
+      "partnership": "For API access or data partnerships, contact us at partners@balkanestateai.com",
+      "robots": "You must comply with our robots.txt file and any access restrictions"
     },
     "professional": {
-      "title": "Odricanje profesionalnih usluga",
-      "text": "BalkanEstate je platforma koja povezuje kupce i prodavce nekretnina. NIJESMO agencija za nekretnine."
+      "title": "Professional Services Disclaimer",
+      "text": "BalkanEstate is a platform that connects property buyers and sellers. WE ARE NOT a real estate agency, brokerage, legal firm, or financial advisor. We do not provide legal, financial, tax, or real estate advice. All property transactions are conducted directly between users. We strongly recommend consulting with licensed professionals (real estate agents, lawyers, notaries) before making any property decisions. Property valuations, descriptions, and information are provided by users and have not been independently verified by BalkanEstate."
     },
     "forceMajeure": {
-      "title": "Viša sila",
-      "text": "BalkanEstate neće biti odgovoran za propuste zbog okolnosti izvan naše kontrole."
+      "title": "Force Majeure",
+      "text": "BalkanEstate shall not be liable for any failure or delay in performing our obligations due to circumstances beyond our reasonable control, including but not limited to: natural disasters, wars, terrorism, riots, pandemics, government actions, power outages, internet failures, or third-party service provider failures. During such events, our obligations will be suspended for the duration of the event."
     },
     "disputes": {
-      "title": "Rješavanje sporova",
-      "text": "U slučaju spora:",
-      "informal": "Neformalno rješavanje:",
-      "informalDesc": "Kontaktirajte nas na legal@balkanestateai.com.",
-      "mediation": "Medijacija:",
-      "mediationDesc": "Obje strane se slažu da će pokušati medijaciju.",
-      "jurisdiction": "Nadležnost:",
-      "jurisdictionDesc": "Svi pravni postupci vodit će se pred sudovima u Skoplju.",
-      "time": "Vremensko ograničenje:",
-      "timeDesc": "Svaki zahtjev mora biti podnesen u roku od jedne godine."
+      "title": "Dispute Resolution",
+      "text": "In the event of any dispute arising from these Terms or your use of the Service:",
+      "informal": "Informal Resolution:",
+      "informalDesc": "We encourage you to contact us first at legal@balkanestateai.com to attempt informal resolution. We commit to responding within 15 business days.",
+      "mediation": "Mediation:",
+      "mediationDesc": "If informal resolution fails, both parties agree to attempt mediation before any formal proceedings.",
+      "jurisdiction": "Jurisdiction:",
+      "jurisdictionDesc": "Any legal proceedings shall be conducted in the courts of Skopje, North Macedonia.",
+      "time": "Time Limitation:",
+      "timeDesc": "Any claim must be filed within one (1) year of the event giving rise to the claim, or it will be permanently barred."
     },
     "law": {
-      "title": "Mjerodavno pravo",
-      "text": "Ovi Uslovi regulišu se zakonima Sjeverne Makedonije."
+      "title": "Governing Law",
+      "text": "These Terms shall be governed by the laws of North Macedonia. Any disputes shall be resolved in the courts of Skopje, North Macedonia. If any provision of these terms is found to be unenforceable, the remaining provisions shall continue in effect."
     },
     "severability": {
-      "title": "Odvojivost",
-      "text": "Ako bilo koja odredba bude nevažeća, preostale odredbe ostaju na snazi."
+      "title": "Severability",
+      "text": "If any provision of these Terms is held to be invalid, illegal, or unenforceable by a court of competent jurisdiction, that provision shall be modified to the minimum extent necessary to make it enforceable, or if modification is not possible, severed from these Terms. The invalidity of any provision shall not affect the validity of the remaining provisions, which shall continue in full force and effect."
     },
     "entireAgreement": {
-      "title": "Cjelokupni sporazum",
-      "text": "Ovi Uslovi čine cjelokupni sporazum između vas i BalkanEstate."
+      "title": "Entire Agreement",
+      "text": "These Terms of Service, together with our Privacy Policy and Cookie Policy, constitute the entire agreement between you and BalkanEstate regarding your use of the Service. These Terms supersede all prior agreements, communications, and understandings, whether written or oral, relating to the subject matter hereof."
     },
     "waiver": {
-      "title": "Odricanje",
-      "text": "Naš propust da provedemo bilo koje pravo neće predstavljati odricanje."
+      "title": "Waiver",
+      "text": "Our failure to enforce any right or provision of these Terms shall not constitute a waiver of such right or provision. Any waiver of any provision of these Terms will be effective only if in writing and signed by BalkanEstate."
     },
     "assignment": {
-      "title": "Ustupanje",
-      "text": "Ne možete ustupiti ove Uslove bez naše pisane saglasnosti."
+      "title": "Assignment",
+      "text": "You may not assign or transfer these Terms or your rights under them without our prior written consent. We may assign these Terms without restriction. Any attempted assignment in violation of this section shall be void."
     },
     "modifications": {
-      "title": "Izmjene usluge",
-      "text": "Zadržavamo pravo izmijeniti Uslugu u bilo kojem trenutku."
+      "title": "Modifications to Service",
+      "text": "We reserve the right to modify, suspend, or discontinue any part of the Service at any time without notice. We shall not be liable to you or any third party for any modification, suspension, or discontinuation of the Service."
     },
     "contact": {
-      "title": "Kontaktirajte nas",
-      "text": "Ako imate pitanja, kontaktirajte nas:"
+      "title": "Contact Us",
+      "text": "If you have questions about these Terms of Service, please contact us:"
     }
   },
   "cookies": {
-    "title": "Politika kolačića",
-    "lastUpdated": "Posljednje ažuriranje",
+    "title": "Cookie Policy",
+    "lastUpdated": "Last updated",
     "intro": {
-      "title": "Šta su kolačići?",
-      "text": "Kolačići su male tekstualne datoteke koje se pohranjuju na vašem uređaju kada posjetite web stranicu."
+      "title": "What Are Cookies?",
+      "text": "Cookies are small text files that are stored on your device when you visit a website. They help websites remember your preferences, understand how you use the site, and improve your experience. This Cookie Policy explains how BalkanEstate uses cookies and similar technologies."
     },
     "why": {
-      "title": "Zašto koristimo kolačiće",
-      "text": "Koristimo kolačiće kako bismo:",
-      "essential": "Vas održavali prijavljenim na vašem računu",
-      "preferences": "Zapamtili vaše preferencije za jezik i valutu",
-      "searches": "Spremili vaše nedavne pretrage",
-      "analytics": "Razumjeli kako koristite našu stranicu",
-      "security": "Zaštitili vaš račun",
-      "ads": "Vam prikazali relevantne reklame"
+      "title": "Why We Use Cookies",
+      "text": "We use cookies to:",
+      "essential": "Keep you signed in to your account",
+      "preferences": "Remember your language and currency preferences",
+      "searches": "Save your recent searches and viewed properties",
+      "analytics": "Understand how you use our site to improve it",
+      "security": "Protect your account and prevent fraud",
+      "ads": "Show you relevant advertisements (if you consent)"
     },
     "types": {
-      "title": "Vrste kolačića koje koristimo",
+      "title": "Types of Cookies We Use",
       "essential": {
-        "title": "Neophodni kolačići",
-        "required": "Obavezno",
-        "desc": "Ovi kolačići su neophodni za pravilno funkcionisanje web stranice.",
-        "auth": "Održava vas prijavljenim",
-        "session": "Održava vašu sesiju",
-        "csrf": "Sigurnosna zaštita",
-        "consent": "Vaše preferencije kolačića"
+        "title": "Essential Cookies",
+        "required": "Required",
+        "desc": "These cookies are necessary for the website to function properly. They enable basic features like authentication, security, and accessibility. You cannot disable these cookies.",
+        "auth": "Keeps you logged in",
+        "session": "Maintains your session",
+        "csrf": "Security protection",
+        "consent": "Your cookie preferences"
       },
       "functional": {
-        "title": "Funkcionalni kolačići",
-        "optional": "Opciono",
-        "desc": "Ovi kolačići pamte vaše preferencije i postavke.",
-        "language": "Vaša preferencija za jezik",
-        "currency": "Vaša preferencija za valutu",
-        "searches": "Vaše nedavne pretrage",
-        "viewed": "Nedavno pregledani oglasi"
+        "title": "Functional Cookies",
+        "optional": "Optional",
+        "desc": "These cookies remember your preferences and settings to provide a better experience. Disabling them may affect some website features.",
+        "language": "Your language preference",
+        "currency": "Your currency preference",
+        "searches": "Your recent searches",
+        "viewed": "Recently viewed listings"
       },
       "analytics": {
-        "title": "Analitički kolačići",
-        "optional": "Opciono",
-        "desc": "Ovi kolačići nam pomažu razumjeti kako posjetioci koriste našu web stranicu.",
+        "title": "Analytics Cookies",
+        "optional": "Optional",
+        "desc": "These cookies help us understand how visitors use our website. They collect anonymous data about page views, traffic sources, and user behavior.",
         "ga": "Google Analytics",
-        "gid": "Google Analytics sesija",
-        "gat": "Ograničavanje stope zahtjeva"
+        "gid": "Google Analytics session",
+        "gat": "Throttle request rate"
       },
       "marketing": {
-        "title": "Marketing kolačići",
-        "optional": "Opciono",
-        "desc": "Ovi kolačići prate vašu aktivnost za prikazivanje relevantnih reklama.",
+        "title": "Marketing Cookies",
+        "optional": "Optional",
+        "desc": "These cookies track your activity across websites to show you relevant advertisements. They are set by our advertising partners.",
         "fb": "Facebook Pixel",
-        "ads": "Praćenje reklamnih kampanja"
+        "ads": "Ad campaign tracking"
       }
     },
     "duration": {
-      "session": "Sesija",
-      "1minute": "1 minuta",
-      "24hours": "24 sata",
-      "30days": "30 dana",
-      "3months": "3 mjeseca",
-      "1year": "1 godina",
-      "2years": "2 godine"
+      "session": "Session",
+      "1minute": "1 minute",
+      "24hours": "24 hours",
+      "30days": "30 days",
+      "3months": "3 months",
+      "1year": "1 year",
+      "2years": "2 years"
     },
     "manage": {
-      "title": "Upravljanje preferencijama kolačića",
-      "text": "Možete upravljati svojim preferencijama kolačića u bilo kojem trenutku.",
-      "button": "Upravljanje preferencijama kolačića"
+      "title": "Managing Your Cookie Preferences",
+      "text": "You can manage your cookie preferences at any time. Click the button below to update your settings or use your browser settings to control cookies.",
+      "button": "Manage Cookie Preferences"
     },
     "browser": {
-      "title": "Postavke kolačića u pretraživaču",
-      "text": "Većina pretraživača vam omogućuje kontrolu kolačića putem svojih postavki."
+      "title": "Browser Cookie Settings",
+      "text": "Most browsers allow you to control cookies through their settings. Here are links to manage cookies in popular browsers:"
     },
     "thirdParty": {
-      "title": "Kolačići trećih strana",
-      "text": "Neki kolačići na našoj stranici postavljeni su od strane usluga trećih strana."
+      "title": "Third-Party Cookies",
+      "text": "Some cookies on our site are set by third-party services we use, such as Google Analytics for website analytics and Stripe for payment processing. These services have their own privacy policies governing how they use your data."
     },
     "updates": {
-      "title": "Ažuriranja ove politike",
-      "text": "Možemo ažurirati ovu Politiku kolačića s vremena na vrijeme."
+      "title": "Updates to This Policy",
+      "text": "We may update this Cookie Policy from time to time to reflect changes in our practices or for legal reasons. We will notify you of significant changes by posting a notice on our website."
     },
     "contact": {
-      "title": "Kontaktirajte nas",
-      "text": "Ako imate pitanja o našem korištenju kolačića, kontaktirajte nas:"
+      "title": "Contact Us",
+      "text": "If you have questions about our use of cookies, please contact us:"
     }
   }
 }

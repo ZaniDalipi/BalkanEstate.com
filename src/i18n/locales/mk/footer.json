@@ -1,26 +1,26 @@
 {
-  "tagline": "Вашата AI платформа за недвижности на Балканот. Најдете го вашиот сон имот во 10 земји со интелигентно пребарување и персонализирани препораки.",
+  "tagline": "Вашата AI-платформа за недвижности на Балканот. Најдете го Вашиот идеален имот низ 10 земји со интелигентно пребарување и персонализирани препораки.",
   "sections": {
     "forBuyers": "За Купувачи",
     "forSellers": "За Продавачи",
-    "contact": "Контактирајте Не",
-    "countriesWeServe": "Земји кои ги Покриваме"
+    "contact": "Контактирајте не",
+    "countriesWeServe": "Земји што ги опслужуваме"
   },
   "ai": {
     "poweredBy": "Овозможено од AI"
   },
   "links": {
-    "searchProperties": "Барај Имоти",
-    "exploreCities": "Истражи Градови",
-    "savedProperties": "Зачувани Имоти",
-    "savedSearches": "Зачувани Барања",
-    "findAgents": "Најди Агенти",
-    "browseAgencies": "Прелистај Агенции",
-    "listProperty": "Објави Имот",
+    "searchProperties": "Пребарај имоти",
+    "exploreCities": "Истражи градови",
+    "savedProperties": "Зачувани имоти",
+    "savedSearches": "Зачувани пребарувања",
+    "findAgents": "Најди агенти",
+    "browseAgencies": "Прелистај агенции",
+    "listProperty": "Објави имот",
     "analytics": "Аналитика",
     "messages": "Пораки",
-    "myAccount": "Мој Профил",
-    "howItWorks": "Како Функционира"
+    "myAccount": "Мојот Профил",
+    "howItWorks": "Како функционира"
   },
   "countries": {
     "AL": "Албанија",
@@ -39,15 +39,15 @@
     "email": "info@balkanestateai.com"
   },
   "legal": {
-    "allRightsReserved": "All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "cookiePolicy": "Cookie Policy",
-    "disclaimer": "Disclaimer",
-    "accessibility": "Accessibility"
+    "allRightsReserved": "Сите права задржани.",
+    "privacyPolicy": "Политика за приватност",
+    "termsOfService": "Услови за користење",
+    "cookiePolicy": "Политика за колачиња",
+    "disclaimer": "Одрекување",
+    "accessibility": "Пристапност"
   },
   "social": {
-    "followUs": "Follow Us",
+    "followUs": "Следете нè",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "instagram": "Instagram",
@@ -55,35 +55,35 @@
     "youtube": "YouTube"
   },
   "app": {
-    "downloadApp": "Download Our App",
-    "availableOn": "Available on",
+    "downloadApp": "Преземете ја нашата апликација",
+    "availableOn": "Достапна на",
     "appStore": "App Store",
     "playStore": "Google Play"
   },
   "newsletter": {
-    "title": "Subscribe to Newsletter",
-    "placeholder": "Enter your email",
-    "subscribe": "Subscribe",
-    "subscribed": "Thank you for subscribing!"
+    "title": "Претплатете се на билтен",
+    "placeholder": "Внесете ја вашата е-пошта",
+    "subscribe": "Претплати се",
+    "subscribed": "Ви благодариме за претплатата!"
   },
   "support": {
-    "title": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "faq": "FAQ",
-    "feedback": "Give Feedback"
+    "title": "Поддршка",
+    "helpCenter": "Центар за помош",
+    "contactUs": "Контактирајте нè",
+    "faq": "Често поставувани прашања",
+    "feedback": "Дајте повратна информација"
   },
   "company": {
-    "title": "Company",
-    "aboutUs": "About Us",
-    "careers": "Careers",
-    "press": "Press",
-    "blog": "Blog"
+    "title": "Компанија",
+    "aboutUs": "За нас",
+    "careers": "Кариера",
+    "press": "Медиуми",
+    "blog": "Блог"
   },
   "partners": {
-    "title": "Partners",
-    "becomePartner": "Become a Partner",
-    "affiliates": "Affiliates",
-    "developers": "For Developers"
+    "title": "Партнери",
+    "becomePartner": "Станете партнер",
+    "affiliates": "Соработници",
+    "developers": "За Развивачи"
   }
 }

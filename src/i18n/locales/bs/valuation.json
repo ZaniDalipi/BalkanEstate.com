@@ -1,16 +1,16 @@
 {
   "page": {
     "title": "Koliko Vrijedi Moja Nekretnina?",
-    "subtitle": "Dobijte trenutnu AI procjenu zasnovanu na stvarnim tržišnim podacima i uporedivim prodajama u vašem području.",
+    "subtitle": "Dobijte trenutnu AI procjenu zasnovanu na stvarnim tržišnim podacima i uporedivim prodajama u Vašem području.",
     "badge": "AI Tehnologija",
     "trust1": "Besplatno i Trenutno",
-    "trust2": "Bez Registracije",
+    "trust2": "Prijava Nije Potrebna",
     "trust3": "Zasnovano na Stvarnim Podacima"
   },
   "stats": {
     "valuations": "Procjena",
     "accuracy": "Tačnost",
-    "countries": "Balkanskih Zemalja"
+    "countries": "Balkanske Zemlje"
   },
   "form": {
     "locationSection": "Lokacija",
@@ -24,16 +24,16 @@
     "condition": "Stanje",
     "yearBuilt": "Godina Izgradnje",
     "yearBuiltPlaceholder": "npr. 2010",
-    "floorNumber": "Broj Sprata",
+    "floorNumber": "Sprat",
     "totalFloors": "Ukupno Spratova",
-    "viewType": "Tip Pogleda",
-    "furnishing": "Namještaj",
-    "amenities": "Pogodnosti",
+    "viewType": "Pogled",
+    "furnishing": "Namještenost",
+    "amenities": "Sadržaji",
     "showAdvanced": "Prikaži Više Opcija",
     "hideAdvanced": "Sakrij Opcije",
-    "getValuation": "Dobij Procjenu",
-    "calculating": "Analiziram...",
-    "disclaimer": "Ovo je automatska procjena samo u informativne svrhe. Stvarna tržišna vrijednost može varirati."
+    "getValuation": "Dobijte Moju Procjenu",
+    "calculating": "Analiza...",
+    "disclaimer": "Ovo je automatizovana procjena samo u informativne svrhe. Stvarna tržišna vrijednost može varirati."
   },
   "propertyTypes": {
     "apartment": "Stan",
@@ -44,9 +44,9 @@
   },
   "conditions": {
     "new": "Novo",
-    "excellent": "Odlično",
+    "excellent": "Izvrsno",
     "good": "Dobro",
-    "fair": "Prihvatljivo",
+    "fair": "Pristojno",
     "needsRenovation": "Potrebna Renovacija"
   },
   "views": {
@@ -54,17 +54,17 @@
     "mountain": "Planina",
     "city": "Grad",
     "park": "Park",
-    "garden": "Bašta",
+    "garden": "Vrt",
     "street": "Ulica"
   },
   "furnishing": {
     "furnished": "Namješteno",
-    "semiFurnished": "Djelimično Namješteno",
+    "semiFurnished": "Polunамješteno",
     "unfurnished": "Nenamješteno"
   },
   "amenities": {
     "balcony": "Balkon",
-    "garden": "Bašta",
+    "garden": "Vrt",
     "elevator": "Lift",
     "parking": "Parking",
     "pool": "Bazen"
@@ -77,8 +77,8 @@
     "demandScore": "Ocjena Potražnje",
     "avgDaysOnMarket": "Prosječno Dana na Tržištu",
     "days": "dana",
-    "aiInsights": "AI Tržišne Analize",
-    "valueBreakdown": "Razlaganje Vrijednosti",
+    "aiInsights": "AI Tržišni Uvidi",
+    "valueBreakdown": "Raspored Vrijednosti",
     "comparableProperties": "Slične Nekretnine",
     "propertySummary": "Sažetak Nekretnine",
     "location": "Lokacija",
@@ -87,19 +87,19 @@
     "bedrooms": "Spavaće Sobe",
     "bathrooms": "Kupatila",
     "condition": "Stanje",
-    "beds": "soba",
-    "baths": "kupatila",
+    "beds": "sobe",
+    "baths": "kupat.",
     "newValuation": "Nova Procjena",
     "readyToSell": "Spremni za Prodaju?",
-    "listPropertyCTA": "Objavite svoju nekretninu na BalkanEstate i doprite do hiljada kupaca širom Balkana.",
-    "listPropertyButton": "Objavi Nekretninu"
+    "listPropertyCTA": "Objavite svoju nekretninu na BalkanEstate i dosegnite hiljade kupaca širom Balkana.",
+    "listPropertyButton": "Objavite Moju Nekretninu"
   },
   "breakdown": {
     "baseValue": "Osnovna Vrijednost (iz uporedivih)",
-    "location": "Korekcija Lokacije",
-    "condition": "Korekcija Stanja",
-    "amenities": "Korekcija Pogodnosti",
-    "age": "Korekcija Starosti",
+    "location": "Prilagođavanje Lokacije",
+    "condition": "Prilagođavanje Stanja",
+    "amenities": "Prilagođavanje Sadržaja",
+    "age": "Prilagođavanje Starosti",
     "total": "Ukupna Procijenjena Vrijednost"
   },
   "confidence": {
@@ -108,29 +108,29 @@
     "low": "Niska"
   },
   "marketTrend": {
-    "rising": "U Porastu",
-    "stable": "Stabilan",
-    "declining": "U Padu"
+    "rising": "Raste",
+    "stable": "Stabilno",
+    "declining": "Opada"
   },
   "features": {
     "instant": {
       "title": "Trenutni Rezultati",
-      "description": "Dobijte procjenu nekretnine za sekunde, ne dane"
+      "description": "Dobijte procjenu Vaše nekretnine za sekunde, ne dane"
     },
     "ai": {
       "title": "AI Tehnologija",
       "description": "Napredni algoritmi analiziraju tržišne podatke i uporedive prodaje"
     },
     "market": {
-      "title": "Tržišne Analize",
-      "description": "Razumite lokalne trendove i potražnju u vašem području"
+      "title": "Tržišni Uvidi",
+      "description": "Razumijte lokalne trendove i potražnju u Vašem području"
     }
   },
   "howItWorks": {
     "title": "Kako Funkcionira",
     "step1": {
       "title": "Unesite Detalje",
-      "description": "Navedite lokaciju nekretnine i osnovne karakteristike"
+      "description": "Navedite lokaciju Vaše nekretnine i osnovne karakteristike"
     },
     "step2": {
       "title": "AI Analiza",
@@ -138,7 +138,7 @@
     },
     "step3": {
       "title": "Dobijte Rezultate",
-      "description": "Primite procjenu sa detaljnim razlaganjem i analizama"
+      "description": "Primite procjenu sa detaljnim rasporedoм i uvidima"
     }
   }
 }

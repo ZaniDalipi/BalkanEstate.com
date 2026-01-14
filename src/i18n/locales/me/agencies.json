@@ -1,89 +1,106 @@
 {
   "hero": {
-    "title": "Pronađite Vrhunske Agencije za Nekretnine",
-    "subtitle": "Povežite se s pouzdanim stručnjacima za nekretnine u vašem području",
-    "searchPlaceholder": "Pretraži agencije po imenu ili lokaciji..."
+    "badge": "Premier Real Estate Networks",
+    "title": "Top Real Estate",
+    "titleHighlight": "Agencies in Balkans",
+    "subtitle": "Connect with professional agencies that bring expertise, trust, and results to your property journey."
   },
   "search": {
-    "placeholder": "Pretraži agencije...",
-    "button": "Pretraži",
-    "clear": "Očisti"
+    "title": "Find Your Ideal Agency",
+    "subtitle": "Search {count}+ professional agencies across the Balkans",
+    "tabs": {
+      "city": "City",
+      "agencyName": "Agency Name"
+    },
+    "placeholder": {
+      "city": "Search by city or location...",
+      "name": "Search by agency name..."
+    },
+    "clearSearch": "Clear search",
+    "popularSearches": "Popular searches:"
   },
   "stats": {
-    "totalAgencies": "Ukupno Agencija",
-    "totalAgents": "Profesionalnih Agenata",
-    "propertiesListed": "Oglašenih Nekretnina",
-    "citiesCovered": "Pokrivenih Gradova"
+    "professionalAgencies": "Professional Agencies",
+    "expertAgents": "Expert Agents",
+    "listedProperties": "Listed Properties"
   },
   "filters": {
-    "title": "Filteri",
-    "location": "Lokacija",
-    "allLocations": "Sve Lokacije",
-    "specialization": "Specijalizacija",
-    "allSpecializations": "Sve Specijalizacije",
-    "rating": "Ocjena",
-    "anyRating": "Bilo koja Ocjena",
-    "reset": "Poništi Filtere"
+    "allAgencies": "All Agencies",
+    "featured": "Featured",
+    "myAgency": "My Agency"
   },
   "sort": {
-    "label": "Sortiraj po",
-    "nameAsc": "Naziv (A-Ž)",
-    "nameDesc": "Naziv (Ž-A)",
-    "ratingDesc": "Najviša Ocjena",
-    "propertiesDesc": "Najviše Nekretnina",
-    "newest": "Najnovije Prvo"
+    "mostProperties": "Most Properties",
+    "mostAgents": "Most Agents",
+    "mostExperienced": "Most Experienced",
+    "alphabetical": "Alphabetical"
   },
   "results": {
-    "showing": "Prikazuje se {{count}} agencija",
-    "of": "od",
-    "noResults": "Nijedna agencija nije pronađena",
-    "tryAdjusting": "Pokušajte prilagoditi filtere"
+    "title": "Top Real Estate Agencies",
+    "featuredTitle": "Featured Agencies",
+    "yourAgencyTitle": "Your Agency",
+    "showingMatching": "Showing {count} agencies matching \"{query}\"",
+    "browseAgencies": "Browse professional agencies with experienced teams",
+    "agenciesFound": "agencies found",
+    "moreAgencies": "More Agencies"
   },
   "card": {
-    "properties": "nekretnina",
-    "agents": "agenata",
-    "viewProfile": "Pogledaj Profil",
-    "contact": "Kontakt",
-    "featured": "Istaknuto",
-    "verified": "Verifikovano"
+    "featured": "Featured",
+    "certified": "Certified",
+    "properties": "Properties",
+    "agents": "Agents",
+    "years": "Years",
+    "certs": "Certs",
+    "viewProfile": "View Profile",
+    "view": "View",
+    "more": "+{count} more"
+  },
+  "statsCards": {
+    "mostProperties": "Most Properties",
+    "mostAgents": "Most Agents",
+    "mostExperience": "Most Experience"
   },
   "empty": {
-    "title": "Nijedna Agencija Nije Pronađena",
-    "description": "Nijedna agencija ne odgovara vašim kriterijumima",
-    "resetFilters": "Poništi Filtere"
+    "noAgenciesTitle": "No Agencies Found",
+    "noAgenciesYet": "No Agencies Yet",
+    "noMyAgency": "No Agency Found",
+    "adjustSearch": "Try adjusting your search criteria or browse all agencies.",
+    "noMyAgencyMessage": "You haven't created an agency yet. Start your journey today!",
+    "beFirst": "Be the first to create an agency and showcase your properties!"
   },
   "cta": {
-    "title": "Jeste li Stručnjak za Nekretnine?",
-    "description": "Pridružite se našoj mreži pouzdanih agencija i proširite svoje poslovanje",
-    "button": "Registrujte Svoju Agenciju"
+    "createAgency": "Create Agency",
+    "readyToGrow": "Ready to Grow Your Agency?",
+    "ctaDescription": "Join our network of premier real estate agencies and get featured to thousands of potential clients. Showcase your properties, connect with buyers, and expand your reach.",
+    "createToday": "Create Your Agency Today"
   },
   "loading": {
-    "text": "Učitavanje agencija..."
+    "title": "Finding Agencies...",
+    "message": "Searching through our network of professional real estate agencies"
   },
   "error": {
-    "title": "Greška pri Učitavanju Agencija",
-    "retry": "Pokušaj Ponovo"
+    "unableToLoad": "Unable to Load Agencies"
   },
   "featured": {
-    "title": "Izdvojene Agencije",
-    "subtitle": "Otkrijte nekretnine putem naše pouzdane mreže profesionalnih partnera za nekretnine",
-    "badge": "Izdvojeno",
-    "viewAgency": "Pogledaj Agenciju",
-    "exploreAll": "Istraži Sve Agencije",
-    "selectedByAlgorithm": "Svaka agencija je pažljivo odabrana za kvalitet i povjerenje",
-    "selectedByAlgorithmMobile": "Pažljivo odabrane agencije",
-    "properties": "Nekretnine",
-    "agents": "Agenti",
+    "title": "Featured Agencies",
+    "subtitle": "Discover properties through our trusted network of professional real estate partners",
+    "badge": "Featured",
+    "viewAgency": "View Agency",
+    "exploreAll": "Explore All Agencies",
+    "selectedByAlgorithm": "Each agency is carefully selected for quality and trust",
+    "selectedByAlgorithmMobile": "Carefully selected agencies",
+    "properties": "Properties",
+    "agents": "Agents",
     "agencyTypes": {
-      "luxury": "Luksuzne Nekretnine",
-      "commercial": "Komercijalne Nekretnine",
-      "boutique": "Butik Agencija",
-      "team": "Timska Agencija",
-      "default": "Nekretnine"
+      "luxury": "Luxury Properties",
+      "commercial": "Commercial Properties",
+      "boutique": "Boutique Agency",
+      "team": "Team Agency",
+      "default": "Real Estate"
     },
     "empty": {
-      "title": "Trenutno nema dostupnih izdvojenih agencija",
-      "message": "Provjerite uskoro za naše izdvojene partnere!"
+      "title": "No featured agencies available at the moment",
+      "message": "Check back soon for our featured partners!"
     }
   }
 }

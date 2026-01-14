@@ -8,12 +8,17 @@
     },
     "calculating": "Calculating...",
     "results": {
-      "estimatedValue": "Estimated Value"
+      "estimatedValue": "Estimated Value",
+      "lowEstimate": "Low",
+      "highEstimate": "High",
+      "pricePerSqm": "Price/m²",
+      "valueRange": "Value Range"
     },
     "errors": {
       "selectLocation": "Please select a valid location from the suggestions.",
       "locationNotDetermined": "Could not determine city and country from selected location.",
-      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate."
+      "insufficientData": "Sorry, we don't have enough data for {{city}} to provide a reliable estimate.",
+      "calculationFailed": "Failed to calculate property value. Please try again."
     }
   },
   "mortgage": {

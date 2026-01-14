@@ -1,57 +1,57 @@
 {
   "page": {
-    "title": "Explore Balkan Cities",
-    "description": "AI-powered market insights for {{count}} major cities across 10 countries"
+    "title": "Истражи градови на Балканот",
+    "description": "AI-овозможени анализи на пазарот за {{count}} големи градови низ 10 земји"
   },
   "hero": {
-    "title": "Explore Balkan Cities",
-    "subtitle": "AI-powered market insights for {{count}} major cities across 10 countries",
-    "discoverSubtitle": "Discover the best real estate markets across the Balkans"
+    "title": "Истражи градови на Балканот",
+    "subtitle": "AI-овозможени анализи на пазарот за {{count}} големи градови низ 10 земји",
+    "discoverSubtitle": "Откријте ги најдобрите пазари на недвижности низ Балканот"
   },
   "empty": {
-    "title": "No City Data Available",
-    "message": "Market data will be updated soon. Check back later!"
+    "title": "Нема достапни податоци за градовите",
+    "message": "Податоците за пазарот ќе бидат ажурирани наскоро. Проверете повторно подоцна!"
   },
   "stats": {
-    "totalCities": "Total Cities",
-    "countries": "Countries",
-    "avgGrowth": "Avg. Growth",
-    "totalListings": "Total Listings"
+    "totalCities": "Вкупно Градови",
+    "countries": "Земји",
+    "avgGrowth": "Просечен раст",
+    "totalListings": "Вкупно огласи"
   },
   "filters": {
-    "allCountries": "All Countries"
+    "allCountries": "Сите земји"
   },
   "cityCard": {
-    "demand": "Demand",
-    "investment": "Investment",
-    "avgPricePerSqm": "Avg. Price/m²",
-    "medianPrice": "Median Price",
-    "yoyGrowth": "YoY Growth",
-    "rentalYield": "Rental Yield",
-    "daysOnMarket": "Days on Market",
-    "days": "days"
+    "demand": "Побарувачка",
+    "investment": "Инвестиција",
+    "avgPricePerSqm": "Просечна цена/м²",
+    "medianPrice": "Медијана цена",
+    "yoyGrowth": "Годишен раст",
+    "rentalYield": "Приход од изнајмување",
+    "daysOnMarket": "Дена на пазар",
+    "days": "дена"
   },
   "sections": {
-    "topNeighborhoods": "Top Neighborhoods",
-    "marketInsights": "Market Insights"
+    "topNeighborhoods": "Најдобри четврти",
+    "marketInsights": "Анализи на пазарот"
   },
   "footer": {
-    "listings": "listings",
-    "soldPerMonth": "sold/mo"
+    "listings": "огласи",
+    "soldPerMonth": "продадени/месец"
   },
   "trends": {
-    "rising": "rising",
-    "declining": "declining",
-    "stable": "stable"
+    "rising": "расте",
+    "declining": "опаѓа",
+    "stable": "стабилен"
   },
   "aiInsights": {
-    "title": "AI-Powered Market Intelligence",
-    "description": "Our market data is powered by Gemini AI and updated twice monthly (1st and 15th). We analyze real-time market trends, property prices, demand indicators, and local insights across {{count}} major cities in the Balkans.",
-    "lastUpdated": "Last updated: {{date}}",
-    "dataSource": "Data source: Gemini AI + Local Property Databases"
+    "title": "AI-овозможена пазарна интелигенција",
+    "description": "Нашите податоци за пазарот се овозможени од Gemini AI и се ажурираат двапати месечно (1-ви и 15-ти). Ние анализираме трендови на пазарот во реално време, цени на имоти, индикатори за побарувачка и локални информации низ {{count}} големи градови на Балканот.",
+    "lastUpdated": "Последно ажурирано: {{date}}",
+    "dataSource": "Извор на податоци: Gemini AI + Локални бази на недвижности"
   },
   "loading": {
-    "title": "Loading Cities...",
-    "message": "Fetching market data for Balkan cities"
+    "title": "Се вчитуваат градовите...",
+    "message": "Се преземаат податоци за пазарот за балканските градови"
   }
 }

@@ -101,6 +101,7 @@ const Row = ({ index, style, properties, columns, gap, onPropertyHover, totalPro
         gap: `${gap}px`,
         paddingLeft: '16px',
         paddingRight: '16px',
+        paddingTop: index === 0 ? '16px' : '0px',
         paddingBottom: '16px',
       }}
     >

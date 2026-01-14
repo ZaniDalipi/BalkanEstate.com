@@ -1,32 +1,32 @@
 {
   "modal": {
-    "title": "Odaberite Svoj Plan",
+    "title": "Izaberite Svoj Plan",
     "tabs": {
       "forBuyers": "Za Kupce",
       "forSellers": "Za Prodavce"
     }
   },
   "buyerPlan": {
-    "title": "Kupac Pro",
+    "title": "Buyer Pro",
     "price": "€{price}",
     "perMonth": "/mjesec",
-    "description": "Nikada ne propustite novi oglas! Primite obavještenje čim nekretnina koja odgovara vašim kriterijima izađe na tržište.",
+    "description": "Nikada ne propustite novi oglas! Primite obavještenje čim nekretnina koja odgovara Vašim kriterijima bude objavljena.",
     "features": {
-      "notifications": "Trenutna obavještenja putem e-pošte i SMS-a",
-      "savedSearches": "Sačuvajte neograničene pretrage",
+      "notifications": "Trenutne obavijesti putem emaila i SMS-a",
+      "savedSearches": "Sačuvajte neograničen broj pretraga",
       "earlyAccess": "Rani pristup novim oglasima",
       "marketInsights": "Napredni uvidi u tržište"
     },
     "form": {
-      "emailLabel": "E-mail Adresa",
-      "emailPlaceholder": "vi@primjer.com",
-      "continueToPayment": "Nastavi na Plaćanje",
-      "securePayment": "Sigurno plaćanje putem Stripea"
+      "emailLabel": "Email Adresa",
+      "emailPlaceholder": "vas@primjer.com",
+      "continueToPayment": "Nastavite na Plaćanje",
+      "securePayment": "Sigurno plaćanje putem Stripe"
     }
   },
   "sellerPlan": {
-    "title": "Planovi Promocije Oglasa",
-    "description": "Povećajte vidljivost svojih oglasa nekretnina i dobijte više upita",
+    "title": "Planovi za Promociju Oglasa",
+    "description": "Povećajte vidljivost Vaših oglasa i dobijte više upita",
     "tiers": {
       "featured": {
         "title": "Istaknuto",
@@ -35,8 +35,8 @@
         "price": "€1.99+",
         "duration": "7-90 dana",
         "benefits": {
-          "topResults": "Na vrhu rezultata pretrage",
-          "badge": "Značka istaknutog",
+          "topResults": "Vrh rezultata pretrage",
+          "badge": "Oznaka istaknuto",
           "visibility": "2x povećanje vidljivosti"
         }
       },
@@ -48,7 +48,7 @@
         "duration": "7-90 dana",
         "popular": "Popularno",
         "benefits": {
-          "allFeatured": "Sve pogodnosti Istaknutog",
+          "allFeatured": "Sve prednosti Istaknutog",
           "coloredBg": "Obojena pozadina",
           "visibility": "3x povećanje vidljivosti"
         }
@@ -56,54 +56,54 @@
       "premium": {
         "title": "Premium",
         "emoji": "👑",
-        "description": "Prikazivanje na naslovnoj stranici",
+        "description": "Prikaz na početnoj stranici",
         "price": "€7.99+",
         "duration": "7-90 dana",
         "benefits": {
-          "allHighlight": "Sve pogodnosti Naglašenog",
-          "carousel": "Karusel na naslovnoj stranici",
+          "allHighlight": "Sve prednosti Naglašenog",
+          "carousel": "Karusel na početnoj stranici",
           "visibility": "5x povećanje vidljivosti"
         }
       }
     },
     "howItWorks": {
-      "title": "Kako funkcioniše:",
-      "description": "Prilikom kreiranja oglasa odaberite nivo i trajanje promocije. Plaćanje se obrađuje prije objavljivanja. Podržani su kuponi za popust!"
+      "title": "Kako funkcionira:",
+      "description": "Prilikom kreiranja oglasa, izaberite nivo promocije i trajanje. Plaćanje se obrađuje prije objavljivanja. Kuponi za popust su podržani!"
     },
     "actions": {
-      "viewSubscriptionPlans": "Pogledaj Planove Pretplate",
-      "startCreatingListing": "Počni Kreirati Oglas"
+      "viewSubscriptionPlans": "Pogledajte Planove Pretplate",
+      "startCreatingListing": "Započnite Kreiranje Oglasa"
     }
   },
   "management": {
     "title": "Upravljanje Pretplatom",
     "noActiveSubscription": "Nema Aktivne Pretplate",
-    "unlockFeatures": "Otključajte premium funkcije i podignite svoje iskustvo na viši nivo",
-    "viewPlans": "Pogledaj Planove i Cijene",
+    "unlockFeatures": "Otključajte premium funkcije i podignite Vaše iskustvo na viši nivo",
+    "viewPlans": "Pogledajte Planove i Cijene",
     "refresh": "Osvježi",
     "timeRemaining": "Preostalo Vrijeme",
-    "dayLeft": "dan preostalo",
+    "dayLeft": "dan preostao",
     "daysLeft": "dana preostalo",
     "listingLimit": "Limit Oglasa",
     "remaining": "preostalo",
-    "couponSubscription": "Pretplata Kuponom",
+    "couponSubscription": "Kupon Pretplata",
     "cancellationPending": "Otkazivanje Pretplate na Čekanju",
     "autoRenewal": "Automatsko Obnavljanje",
     "on": "Uključeno",
     "off": "Isključeno",
     "paymentSource": "Izvor Plaćanja",
     "web": "Web",
-    "cancelSubscription": "Otkaži Pretplatu",
-    "cancelPlan": "Otkaži Plan",
-    "upgradePlan": "Nadogradi Svoj Plan",
-    "upgradeNow": "Nadogradi Sada",
+    "cancelSubscription": "Otkažite Pretplatu",
+    "cancelPlan": "Otkažite Plan",
+    "upgradePlan": "Nadogradite Svoj Plan",
+    "upgradeNow": "Nadogradite Sada",
     "proRatedPricing": "Proporcionalna Cijena Nadogradnje",
-    "confirmUpgrade": "Potvrdi Nadogradnju",
-    "upgradingTo": "Nadogradnja na:",
+    "confirmUpgrade": "Potvrdite Nadogradnju",
+    "upgradingTo": "Nadograđujete na:",
     "originalPrice": "Originalna Cijena",
     "proRatedCredit": "Proporcionalni Kredit",
-    "totalDue": "Ukupno za Plaćanje",
-    "cancelling": "OTKAZUJE SE",
+    "totalDue": "Ukupno za Naplatu",
+    "cancelling": "OTKAZIVANJE",
     "features": {
       "prioritySupport": "Prioritetna Podrška",
       "advancedAnalytics": "Napredna Analitika",
@@ -111,34 +111,75 @@
       "premiumPlacement": "Premium Pozicija"
     },
     "cancelModal": {
-      "cancellingTrial": "Otkazivanje vašeg besplatnog probnog perioda:",
+      "cancellingTrial": "Otkazivanje Vašeg probnog perioda:",
       "whatHappens": "Šta se dešava kada otkažete:",
       "loseAccess": "Izgubićete pristup premium funkcijama",
       "listingsDeactivated": "Vaši oglasi mogu biti deaktivirani",
-      "canResubscribe": "Možete se ponovo pretplatiti u bilo kojem trenutku",
-      "cancelAtEnd": "Otkaži na kraju obračunskog perioda",
-      "cancelNowRefund": "Otkaži sada i dobij €{{amount}} povrat",
-      "keepSubscription": "Zadrži {{subscription}}"
+      "canResubscribe": "Možete se ponovo pretplatiti bilo kada",
+      "cancelAtEnd": "Otkažite na kraju perioda naplate",
+      "cancelNowRefund": "Otkažite sada i dobijte €{{amount}} povrat",
+      "keepSubscription": "Zadržite {{subscription}}"
+    },
+    "whatsIncluded": {
+      "title": "Šta je Uključeno u Vaš {{plan}} Plan",
+      "activeListings": "{{count}} Aktivnih Oglasa",
+      "activeListingsDesc": "Kreirajte i upravljajte sa do {{count}} oglasa nekretnina",
+      "savedSearches": "{{count}} Sačuvana Pretraga",
+      "savedSearches_plural": "{{count}} Sačuvanih Pretraga",
+      "savedSearchesDesc": "Sačuvajte i primajte obavještenja za Vaše pretrage nekretnina",
+      "promotionCoupons": "3 Kupona za Promociju/Mjesečno",
+      "noPromotionCoupons": "Nema Kupona za Promociju",
+      "promotionCouponsDesc": "Povećajte vidljivost Vaših oglasa istaknutim pozicioniranjem",
+      "upgradeForPromotion": "Nadogradite na Pro za funkcije promocije",
+      "advancedAnalytics": "Napredna Analitika",
+      "basicAnalytics": "Osnovna Analitika",
+      "advancedAnalyticsDesc": "Detaljni uvidi o pregledima, čuvanjima i upitima",
+      "basicAnalyticsDesc": "Samo osnovni brojač pregleda",
+      "prioritySupport": "Prioritetna Podrška",
+      "emailSupport": "Email Podrška",
+      "prioritySupportDesc": "Brzo vrijeme odgovora i posvećena pomoć",
+      "emailSupportDesc": "Standardna email podrška",
+      "verifiedBadge": "Verifikovana Pro Oznaka",
+      "noBadge": "Bez Oznake",
+      "verifiedBadgeDesc": "Pokažite kupcima da ste pouzdan prodavac",
+      "noBadgeDesc": "Nadogradite da dobijete Pro oznaku",
+      "wantMoreFeatures": "Želite više funkcija?",
+      "upgradeToProDesc": "Nadogradite na Pro za 25 oglasa, promocije i još mnogo toga!"
+    },
+    "validation": {
+      "confirmCancel": "Da li ste sigurni da želite otkazati svoju pretplatu?",
+      "confirmRestore": "Da li želite da vratite automatsko obnavljanje za Vašu pretplatu?",
+      "confirmToggleAutoRenewal": "Da li želite da {{action}} automatsko obnavljanje?",
+      "enableAutoRenewal": "uključite",
+      "disableAutoRenewal": "isključite",
+      "cancelSuccess": "Otkazivanje pretplate uspješno zakazano",
+      "cancelError": "Neuspjelo otkazivanje pretplate. Molimo pokušajte ponovo.",
+      "restoreSuccess": "Pretplata uspješno vraćena",
+      "restoreError": "Neuspjelo vraćanje pretplate. Molimo pokušajte ponovo.",
+      "toggleAutoRenewalSuccess": "Automatsko obnavljanje uspješno {{status}}",
+      "toggleAutoRenewalError": "Neuspjelo ažuriranje automatskog obnavljanja. Molimo pokušajte ponovo.",
+      "enabled": "uključeno",
+      "disabled": "isključeno"
     }
   },
   "featuredAgency": {
     "title": "Istaknuta Agencija",
-    "featureYourAgency": "Istaknite Svoju Agenciju",
-    "description": "Dobijte veću vidljivost s istaknutim oglasom. Vaša agencija će se pojavljivati na vrhu rezultata pretrage i u karuselu istaknutih agencija.",
-    "startPlan": "Započni Plan od €10/sedmično",
+    "featureYourAgency": "Istaknite Vašu Agenciju",
+    "description": "Dobijte više vidljivosti sa istaknutim oglasom. Vaša agencija će se pojavljivati na vrhu rezultata pretrage i u karuselu istaknutih agencija.",
+    "startPlan": "Započnite Plan €10/sedmično",
     "currentlyFeatured": "Agencija Trenutno Istaknuta ✨",
     "featuredDescription": "Vaša agencija je trenutno istaknuta i prima poboljšanu vidljivost.",
     "timeRemaining": "Preostalo Vrijeme",
     "expires": "Ističe:",
     "boostVisibility": "Povećajte Svoju Vidljivost",
     "status": {
-      "active": "Aktivna",
-      "trial": "Probni period",
-      "expired": "Istekla",
-      "canceled": "Otkazana"
+      "active": "Aktivno",
+      "trial": "Probno",
+      "expired": "Isteklo",
+      "canceled": "Otkazano"
     },
     "progress": {
-      "freeTrialProgress": "Napredak Besplatnog Probnog Perioda",
+      "freeTrialProgress": "Napredak Probnog Perioda",
       "subscriptionPeriod": "Period Pretplate",
       "daysLeft": "preostalo"
     },
@@ -150,8 +191,8 @@
       "endedOn": "Završeno"
     },
     "trial": {
-      "title": "Besplatni Probni Period Aktivan",
-      "description": "Vaš besplatni probni period završava {date}"
+      "title": "Probni Period Aktivan",
+      "description": "Vaš probni period završava {date}"
     },
     "coupon": {
       "applied": "Kupon {code} primijenjen"
@@ -159,27 +200,27 @@
     "cancelNotice": "Pretplata će biti otkazana na kraju trenutnog perioda",
     "renewStatus": {
       "title": "Obnovite Svoj Istaknuti Status",
-      "description": "Nastavite uživati u poboljšanoj vidljivosti i vrhu rezultata pretrage.",
-      "renewNow": "Obnovi Sada"
+      "description": "Nastavite uživati u poboljšanoj vidljivosti i vrhunskoj poziciji u rezultatima pretrage.",
+      "renewNow": "Obnovite Sada"
     },
-    "visibilityTip": "Istaknute agencije dobijaju do 5x veću vidljivost i pojavljuju se na vrhu rezultata pretrage!"
+    "visibilityTip": "Istaknute agencije dobijaju do 5x više vidljivosti i pojavljuju se na vrhu rezultata pretrage!"
   },
   "featuredDialog": {
-    "title": "Pretplata Istaknute Agencije",
+    "title": "Pretplata za Istaknutu Agenciju",
     "subscriptionCreated": "Pretplata Kreirana!",
     "agencyFeatured": "Vaša agencija je sada istaknuta. Preusmjeravanje...",
-    "getFeatured": "Postanite Istaknuti!",
-    "boostAgency": "Povećajte vidljivost svoje agencije i dobijte više kontakata s istaknutim oglasom",
-    "choosePlan": "Odaberite Svoj Plan",
+    "getFeatured": "Budite Istaknuti!",
+    "boostAgency": "Povećajte vidljivost Vaše agencije i dobijte više upita sa istaknutim oglasom",
+    "choosePlan": "Izaberite Svoj Plan",
     "perPeriod": "po {{period}}",
     "savingsPercent": "Uštedite {{savings}}%",
     "whatsIncluded": "Šta je Uključeno:",
     "benefits": {
-      "topPlacement": "Vrhunska pozicija u rezultatima pretrage",
+      "topPlacement": "Vrhunsko pozicioniranje u rezultatima pretrage",
       "featuredCarousel": "Istaknuto u karuselu agencija",
-      "premiumBadge": "Premium značka na vašem profilu",
-      "monthlyRotation": "Mjesečna rotacija za svježinu",
-      "cancelAnytime": "Otkažite u bilo kojem trenutku"
+      "premiumBadge": "Premium oznaka na Vašem profilu",
+      "monthlyRotation": "Mjesečna rotacija radi održavanja svježine",
+      "cancelAnytime": "Otkažite bilo kada"
     },
     "coupon": {
       "haveCoupon": "Imate kupon kod?",
@@ -193,38 +234,38 @@
       "finalPrice": "Konačna Cijena:"
     },
     "buttons": {
-      "cancel": "Odustani",
+      "cancel": "Otkaži",
       "processing": "Obrada...",
-      "activateFree": "Aktiviraj BESPLATNO",
-      "subscribe": "Pretplati se - €{{price}}"
+      "activateFree": "Aktivirajte BESPLATNO",
+      "subscribe": "Pretplatite se - €{{price}}"
     },
-    "terms": "Pretplatom prihvatate naše uslove korištenja.",
+    "terms": "Pretplatom se slažete sa našim uslovima i odredbama.",
     "noPaymentRequired": "Nije potrebno plaćanje - 100% popust primijenjen!",
-    "chargeNotice": "Bit će vam naplaćeno €{{price}} po {{period}}.",
+    "chargeNotice": "Biće Vam naplaćeno €{{price}} po {{period}}.",
     "errors": {
       "enterCoupon": "Molimo unesite kupon kod",
       "invalidCoupon": "Nevažeći kupon",
-      "createFailed": "Kreiranje pretplate nije uspjelo"
+      "createFailed": "Neuspjelo kreiranje pretplate"
     }
   },
   "payment": {
-    "title": "Dovršite Plaćanje",
+    "title": "Završite Plaćanje",
     "processing": "Obrada plaćanja...",
     "success": "Plaćanje uspješno!",
-    "error": "Plaćanje neuspješno",
-    "securePayment": "Sigurno plaćanje putem Stripea",
-    "cardDetails": "Podaci o Kartici",
-    "payNow": "Plati Sada",
-    "cancel": "Odustani"
+    "error": "Plaćanje neuspjelo",
+    "securePayment": "Sigurno plaćanje putem Stripe",
+    "cardDetails": "Detalji Kartice",
+    "payNow": "Platite Sada",
+    "cancel": "Otkaži"
   },
   "validation": {
-    "invalidEmail": "Molimo unesite validnu e-mail adresu",
-    "emailRequired": "E-mail je obavezan"
+    "invalidEmail": "Molimo unesite validnu email adresu",
+    "emailRequired": "Email je obavezan"
   },
   "messages": {
     "subscriptionActivated": "Pretplata uspješno aktivirana!",
     "subscriptionCanceled": "Pretplata uspješno otkazana",
-    "paymentFailed": "Plaćanje neuspješno. Molimo pokušajte ponovo."
+    "paymentFailed": "Plaćanje neuspjelo. Molimo pokušajte ponovo."
   },
   "coupons": {
     "haveCoupon": "Imate kupon?",
@@ -238,8 +279,8 @@
     "weekly": "Sedmično",
     "monthly": "Mjesečno",
     "yearly": "Godišnje",
-    "perWeek": "sedmično",
-    "perMonth": "mjesečno",
-    "perYear": "godišnje"
+    "perWeek": "po sedmici",
+    "perMonth": "po mjesecu",
+    "perYear": "po godini"
   }
 }

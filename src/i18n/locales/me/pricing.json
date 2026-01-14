@@ -1,7 +1,16 @@
 {
-  "title": "Choose Your Selling Plan",
-  "subtitle": "Get your property in front of thousands of potential buyers",
-  "loading": "Loading plans...",
+  "pageTitle": "Pricing Plans",
+  "title": "Choose Your Plan",
+  "subtitle": "Get your property in front of thousands of potential buyers with our flexible pricing options.",
+  "loading": "Loading pricing plans...",
+  "noPlans": "No pricing plans available at the moment.",
+  "tabs": {
+    "forSellers": "For Sellers",
+    "forBuyers": "For Buyers"
+  },
+  "error": {
+    "loadFailed": "Failed to load pricing plans"
+  },
   "limitedOffer": "Limited Time Offer Ends In:",
   "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
   "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
@@ -66,6 +75,7 @@
     "yearly": "Yearly",
     "perMonth": "/month",
     "perYear": "/year",
+    "perWeek": "/week",
     "billedAnnually": "Billed annually",
     "billedMonthly": "Billed monthly",
     "youSave": "You save €{{amount}}!"
@@ -74,9 +84,12 @@
     "off": "{{percent}}% OFF"
   },
   "benefits": {
-    "moneyBack": "30-day money-back guarantee",
-    "moreViews": "{{multiplier}}x more views than free listings",
-    "instantActivation": "Instant activation",
+    "moneyBack": "30-Day Money Back",
+    "moneyBackDesc": "Full refund if not satisfied",
+    "moreViews": "3x More Views",
+    "moreViewsDesc": "Premium listings get more exposure",
+    "instantActivation": "Instant Activation",
+    "instantActivationDesc": "Start selling immediately",
     "cancelAnytime": "Cancel anytime"
   },
   "enterprise": {

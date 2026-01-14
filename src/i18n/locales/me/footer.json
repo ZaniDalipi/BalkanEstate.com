@@ -1,38 +1,38 @@
 {
-  "tagline": "Vaša AI platforma za nekretnine na Balkanu. Pronađite nekretninu iz snova u 10 zemalja uz inteligentnu pretragu i personalizovane preporuke.",
+  "tagline": "Your AI-powered real estate platform for the Balkans. Find your dream property across 10 countries with intelligent search and personalized recommendations.",
   "sections": {
-    "forBuyers": "Za Kupce",
-    "forSellers": "Za Prodavce",
-    "contact": "Kontaktirajte Nas",
-    "countriesWeServe": "Zemlje koje Pokrivamo"
+    "forBuyers": "For Buyers",
+    "forSellers": "For Sellers",
+    "contact": "Get In Touch",
+    "countriesWeServe": "Countries We Serve"
   },
   "ai": {
-    "poweredBy": "Pokreće AI"
+    "poweredBy": "Powered by AI"
   },
   "links": {
-    "searchProperties": "Pretraži Nekretnine",
-    "exploreCities": "Istraži Gradove",
-    "savedProperties": "Sačuvane Nekretnine",
-    "savedSearches": "Sačuvane Pretrage",
-    "findAgents": "Pronađi Agente",
-    "browseAgencies": "Pregledaj Agencije",
-    "listProperty": "Objavi Nekretninu",
-    "analytics": "Analitika",
-    "messages": "Poruke",
-    "myAccount": "Moj Nalog",
-    "howItWorks": "Kako Funkcioniše"
+    "searchProperties": "Search Properties",
+    "exploreCities": "Explore Cities",
+    "savedProperties": "Saved Properties",
+    "savedSearches": "Saved Searches",
+    "findAgents": "Find Agents",
+    "browseAgencies": "Browse Agencies",
+    "listProperty": "List Property",
+    "analytics": "Analytics",
+    "messages": "Messages",
+    "myAccount": "My Account",
+    "howItWorks": "How It Works"
   },
   "countries": {
-    "AL": "Albanija",
-    "BA": "Bosna",
-    "BG": "Bugarska",
-    "HR": "Hrvatska",
-    "GR": "Grčka",
+    "AL": "Albania",
+    "BA": "Bosnia",
+    "BG": "Bulgaria",
+    "HR": "Croatia",
+    "GR": "Greece",
     "XK": "Kosovo",
-    "ME": "Crna Gora",
-    "MK": "S. Makedonija",
-    "RO": "Rumunija",
-    "RS": "Srbija"
+    "ME": "Montenegro",
+    "MK": "N. Macedonia",
+    "RO": "Romania",
+    "RS": "Serbia"
   },
   "contact": {
     "phone": "+383 XX XXX XXX",

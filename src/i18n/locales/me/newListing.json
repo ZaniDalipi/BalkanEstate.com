@@ -1,198 +1,256 @@
 {
-  "pageTitle": "Kreiraj Novi Oglas",
+  "pageTitle": "Create New Listing",
+  "editTitle": "Edit Listing",
   "steps": {
-    "basicInfo": "Osnovne Informacije",
-    "location": "Lokacija",
-    "details": "Detalji",
-    "media": "Mediji",
-    "pricing": "Cijena",
-    "review": "Pregled"
+    "init": "Get Started",
+    "loading": "Analyzing...",
+    "form": "Property Details",
+    "floorplan": "Floor Plan",
+    "payment": "Payment",
+    "success": "Published!"
   },
   "modes": {
-    "sale": "Na Prodaju",
-    "rent": "Za Najam",
-    "both": "Prodaja i Najam"
+    "ai": "AI-Powered",
+    "aiDescription": "Upload photos and let AI generate your listing",
+    "manual": "Manual Entry",
+    "manualDescription": "Fill in all property details yourself"
   },
   "imageUpload": {
-    "title": "Slike Nekretnine",
-    "dragDrop": "Povucite i ispustite slike ovdje",
-    "or": "ili",
-    "browse": "Pregledaj Fajlove",
-    "maxSize": "Maksimalna veličina: 10MB po slici",
-    "formats": "Podržani formati: JPG, PNG, WebP",
-    "mainImage": "Glavna Slika",
-    "setAsMain": "Postavi kao Glavnu",
-    "remove": "Ukloni",
-    "uploading": "Učitavanje...",
-    "maxImages": "Maksimalno {{count}} slika"
+    "title": "Upload Property Photos",
+    "subtitle": "Drag and drop images or click to browse",
+    "hint": "Upload at least 3 photos for best results",
+    "maxImages": "Maximum {count} images",
+    "dragDrop": "Drag & drop images here",
+    "orClick": "or click to browse",
+    "supportedFormats": "Supported formats: JPG, PNG, WebP",
+    "compressing": "Compressing images...",
+    "uploading": "Uploading images...",
+    "uploadProgress": "Upload Progress"
   },
   "imageTags": {
-    "title": "Oznaka Slike",
-    "exterior": "Eksterijer",
-    "interior": "Enterijer",
-    "kitchen": "Kuhinja",
-    "bedroom": "Spavaća Soba",
-    "bathroom": "Kupatilo",
-    "livingRoom": "Dnevni Boravak",
-    "garden": "Bašta",
-    "pool": "Bazen",
-    "view": "Pogled",
-    "other": "Ostalo"
+    "title": "Image Tags",
+    "selectTag": "Select Tag",
+    "exterior": "Exterior",
+    "livingRoom": "Living Room",
+    "kitchen": "Kitchen",
+    "bedroom": "Bedroom",
+    "bathroom": "Bathroom",
+    "other": "Other"
   },
   "propertyDetails": {
-    "title": "Detalji Nekretnine",
-    "propertyType": "Vrsta Nekretnine",
-    "propertyTitle": "Naslov Nekretnine",
-    "titlePlaceholder": "Unesite privlačan naslov",
-    "propertyStatus": "Status Nekretnine",
-    "yearBuilt": "Godina Izgradnje",
-    "condition": "Stanje",
-    "types": {
-      "apartment": "Stan",
-      "house": "Kuća",
-      "villa": "Vila",
-      "land": "Zemljište",
-      "commercial": "Poslovni Prostor",
-      "office": "Kancelarija"
+    "title": "Property Details",
+    "basicInfo": "Basic Information",
+    "propertyTitle": "Title",
+    "propertyTitlePlaceholder": "Enter a descriptive title for your property",
+    "streetAddress": "Street Address",
+    "streetAddressPlaceholder": "Enter the street address",
+    "price": "Price",
+    "pricePlaceholder": "Enter the asking price",
+    "propertyType": "Property Type",
+    "propertyTypes": {
+      "house": "House",
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "other": "Other"
     }
   },
   "location": {
-    "title": "Lokacija",
-    "address": "Adresa",
-    "addressPlaceholder": "Unesite adresu nekretnine",
-    "city": "Grad",
-    "cityPlaceholder": "Odaberite grad",
-    "area": "Područje/Četvrt",
-    "areaPlaceholder": "Unesite područje",
-    "postalCode": "Poštanski Broj",
-    "country": "Država",
-    "mapPin": "Postavite Pin na Mapu",
-    "mapInstructions": "Kliknite na mapu za postavljanje tačne lokacije"
+    "title": "Location",
+    "selectCountry": "Select Country",
+    "selectCity": "Select City",
+    "searchAddress": "Search for address",
+    "dragPin": "Drag the pin to set exact location",
+    "coordinates": "Coordinates"
   },
   "roomDetails": {
-    "title": "Sobe i Raspored",
-    "bedrooms": "Spavaće Sobe",
-    "bathrooms": "Kupatila",
-    "totalRooms": "Ukupno Soba",
-    "floor": "Sprat",
-    "totalFloors": "Ukupno Spratova",
-    "parkingSpaces": "Parking Mjesta"
+    "title": "Room Details",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "livingRooms": "Living Rooms",
+    "floorNumber": "Floor Number",
+    "totalFloors": "Total Floors"
   },
   "sizeAndAge": {
-    "title": "Veličina i Starost",
-    "totalArea": "Ukupna Površina",
-    "livingArea": "Stambena Površina",
-    "plotSize": "Veličina Parcele",
-    "sqm": "m²",
-    "yearBuilt": "Godina Izgradnje",
-    "renovated": "Renovirano"
+    "title": "Size & Age",
+    "sqMeters": "Square Meters",
+    "yearBuilt": "Year Built",
+    "parkingSpots": "Parking Spots"
   },
   "amenities": {
-    "title": "Pogodnosti",
-    "airConditioning": "Klima",
-    "heating": "Grijanje",
-    "parking": "Parking",
-    "garage": "Garaža",
-    "pool": "Bazen",
-    "garden": "Bašta",
-    "balcony": "Balkon",
-    "terrace": "Terasa",
-    "elevator": "Lift",
-    "security": "Sigurnosni Sistem",
-    "storage": "Ostava",
-    "furnished": "Namješteno"
+    "title": "Amenities",
+    "hasBalcony": "Balcony",
+    "hasGarden": "Garden",
+    "hasElevator": "Elevator",
+    "hasSecurity": "Security",
+    "hasAirConditioning": "Air Conditioning",
+    "hasPool": "Pool",
+    "petsAllowed": "Pets Allowed",
+    "states": {
+      "no": "No",
+      "any": "Any",
+      "yes": "Yes"
+    }
   },
   "advancedFeatures": {
-    "title": "Napredne Karakteristike",
-    "energyRating": "Energetski Sertifikat",
-    "heatingType": "Vrsta Grijanja",
-    "windowType": "Vrsta Prozora",
-    "flooringType": "Vrsta Poda",
-    "orientation": "Orijentacija",
-    "view": "Pogled"
+    "title": "Advanced Features",
+    "furnishing": "Furnishing Status",
+    "furnishingOptions": {
+      "any": "Any",
+      "unfurnished": "Unfurnished",
+      "partlyFurnished": "Partly Furnished",
+      "fullyFurnished": "Fully Furnished"
+    },
+    "heatingType": "Heating Type",
+    "heatingOptions": {
+      "any": "Any",
+      "central": "Central Heating",
+      "electric": "Electric",
+      "gas": "Gas",
+      "wood": "Wood",
+      "solar": "Solar",
+      "geothermal": "Geothermal",
+      "none": "None"
+    },
+    "condition": "Property Condition",
+    "conditionOptions": {
+      "any": "Any",
+      "new": "New",
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "needsRenovation": "Needs Renovation"
+    },
+    "viewType": "View Type",
+    "viewOptions": {
+      "any": "Any",
+      "sea": "Sea View",
+      "mountain": "Mountain View",
+      "city": "City View",
+      "garden": "Garden View",
+      "park": "Park View",
+      "lake": "Lake View",
+      "river": "River View",
+      "none": "No Special View"
+    },
+    "energyRating": "Energy Rating",
+    "energyOptions": {
+      "any": "Any",
+      "aPlus": "A+",
+      "a": "A",
+      "b": "B",
+      "c": "C",
+      "d": "D",
+      "e": "E",
+      "f": "F",
+      "g": "G"
+    }
   },
   "description": {
-    "title": "Opis",
-    "placeholder": "Detaljno opišite svoju nekretninu...",
-    "minLength": "Minimalno 100 karaktera",
-    "charCount": "{{count}} karaktera"
+    "title": "Description",
+    "descriptionLabel": "Property Description",
+    "descriptionPlaceholder": "Describe your property in detail...",
+    "specialFeatures": "Special Features",
+    "specialFeaturesPlaceholder": "Add special features...",
+    "materials": "Building Materials",
+    "materialsPlaceholder": "Add materials...",
+    "additionalAmenities": "Additional Amenities",
+    "additionalAmenitiesPlaceholder": "Add amenities...",
+    "addTagHint": "Press Enter or comma to add"
   },
   "virtualTour": {
-    "title": "Virtuelna Tura",
-    "url": "URL Virtuelne Ture",
-    "urlPlaceholder": "Unesite link virtuelne ture",
-    "preview": "Pregled"
+    "title": "Virtual Tour",
+    "tourUrl": "Video Tour URL",
+    "tourUrlPlaceholder": "Enter YouTube or Vimeo URL",
+    "virtualTour360": "360° Virtual Tour URL",
+    "virtualTour360Placeholder": "Enter Z360, Matterport, Kuula, or other 360 tour URL",
+    "z360Hint": "Create tours at z360-virtual-tour.vercel.app"
   },
   "floorplan": {
-    "title": "Tlocrt",
-    "upload": "Učitaj Tlocrt",
-    "formats": "PDF, JPG, ili PNG"
+    "title": "Floor Plan",
+    "uploadFloorplan": "Upload Floor Plan",
+    "optional": "Optional - Add a floor plan image",
+    "skip": "Skip Floor Plan"
   },
   "language": {
-    "title": "Jezik Oglasa",
-    "primary": "Primarni Jezik",
-    "additional": "Dodatni Jezici"
+    "title": "Listing Language",
+    "selectLanguage": "Select Language",
+    "languages": {
+      "english": "English",
+      "albanian": "Albanian",
+      "macedonian": "Macedonian",
+      "serbian": "Serbian",
+      "bosnian": "Bosnian",
+      "croatian": "Croatian",
+      "montenegrin": "Montenegrin",
+      "greek": "Greek",
+      "bulgarian": "Bulgarian",
+      "romanian": "Romanian"
+    }
   },
   "role": {
-    "title": "Oglašavate kao",
-    "owner": "Vlasnik Nekretnine",
-    "agent": "Agent za Nekretnine"
+    "title": "Listing As",
+    "selectRole": "Select your role for this listing",
+    "privateSeller": "Private Seller",
+    "agent": "Real Estate Agent"
   },
   "promotion": {
-    "title": "Promocija Oglasa",
-    "featured": "Istaknuti Oglas",
-    "featuredDesc": "Pojavite se na vrhu rezultata pretrage",
-    "highlighted": "Označeni Oglas",
-    "highlightedDesc": "Istaknite se sa naglašenim okvirom",
-    "premium": "Premium Pozicioniranje",
-    "premiumDesc": "Maksimalna vidljivost u svim sekcijama"
+    "title": "Promote Your Listing",
+    "wantToPromote": "I want to promote my listing",
+    "selectPromotion": "Select Promotion Type"
   },
   "actions": {
-    "saveDraft": "Sačuvaj Nacrt",
-    "preview": "Pregled",
-    "publish": "Objavi Oglas",
-    "next": "Dalje",
-    "previous": "Prethodno",
-    "cancel": "Odustani"
+    "generateWithAi": "Generate with AI",
+    "analyzing": "Analyzing images...",
+    "saveDraft": "Save Draft",
+    "preview": "Preview",
+    "publish": "Publish Listing",
+    "update": "Update Listing",
+    "publishing": "Publishing...",
+    "goBack": "Go Back"
   },
   "validation": {
-    "titleRequired": "Naslov je obavezan",
-    "titleMinLength": "Naslov mora imati najmanje 10 karaktera",
-    "descriptionRequired": "Opis je obavezan",
-    "descriptionMinLength": "Opis mora imati najmanje 100 karaktera",
-    "priceRequired": "Cijena je obavezna",
-    "pricePositive": "Cijena mora biti pozitivan broj",
-    "locationRequired": "Lokacija je obavezna",
-    "propertyTypeRequired": "Vrsta nekretnine je obavezna",
-    "imagesRequired": "Molimo učitajte bar jednu sliku.",
-    "selectCountryCity": "Molimo odaberite državu i grad.",
-    "selectValidCity": "Molimo odaberite važeći grad.",
-    "apartmentFloorNumber": "Za stanove, molimo unesite važeći broj sprata (1 ili više).",
-    "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj spratova (1 ili više)."
+    "required": "This field is required",
+    "minImages": "Please upload at least {count} images",
+    "selectCountry": "Please select a country",
+    "selectCity": "Please select a city",
+    "setLocation": "Please set the property location on the map",
+    "invalidPrice": "Please enter a valid price"
   },
   "success": {
-    "title": "Oglas Objavljen!",
-    "message": "Vaša nekretnina je sada aktivna",
-    "viewListing": "Pogledaj Oglas",
-    "createAnother": "Kreiraj Drugi"
+    "title": "Listing Published!",
+    "message": "Your property listing has been successfully published.",
+    "viewListing": "View Listing",
+    "createAnother": "Create Another Listing"
   },
   "errors": {
-    "saveFailed": "Čuvanje neuspješno. Molimo pokušajte ponovo.",
-    "generic": "Došlo je do greške. Molimo pokušajte ponovo.",
-    "aiGenerationFailed": "AI Generisanje Nije Uspjelo",
-    "aiTemporarilyUnavailable": "AI Privremeno Nedostupan",
-    "continueManualEntry": "Možete nastaviti sa ručnim unosom.",
-    "uploadFailed": "Učitavanje Nije Uspjelo",
-    "uploadFailedMessage": "Učitavanje slika nije uspjelo: {{error}}. Molimo pokušajte ponovo.",
-    "imageProcessingFailed": "Obrada Slika Nije Uspjela",
-    "failedToProcessImages": "Obrada slika nije uspjela. Molimo pokušajte ponovo.",
-    "noNewImages": "Nema Novih Slika",
-    "noNewImagesMessage": "Nijesu učitane nove slike za analizu. Molimo dodajte nove fajlove slika.",
-    "mustBeLoggedIn": "Morate biti prijavljeni za kreiranje oglasa.",
-    "failedToSubmit": "Slanje Oglasa Nije Uspjelo",
-    "failedToCreate": "Kreiranje Oglasa Nije Uspjelo",
-    "failedToCreateMessage": "Kreiranje oglasa nije uspjelo. Molimo pokušajte ponovo.",
-    "removeImagesFirst": "Molimo uklonite neke slike prije dodavanja novih.",
-    "onlyMoreImages": "Može se dodati samo još {{count}} slika."
+    "aiGenerationFailed": "AI Generation Failed",
+    "aiTemporarilyUnavailable": "AI Temporarily Unavailable",
+    "continueManualEntry": "You can continue with manual entry instead.",
+    "uploadFailed": "Upload Failed",
+    "uploadFailedMessage": "Failed to upload images: {{error}}. Please try again.",
+    "publishFailed": "Failed to publish listing. Please try again.",
+    "imageProcessingFailed": "Image Processing Failed",
+    "failedToProcessImages": "Failed to process images. Please try again.",
+    "noNewImages": "No New Images",
+    "noNewImagesMessage": "No new images were uploaded to analyze. Please add new image files.",
+    "mustBeLoggedIn": "You must be logged in to create a listing.",
+    "failedToSubmit": "Failed to Submit Listing",
+    "failedToCreate": "Failed to Create Listing",
+    "failedToCreateMessage": "Failed to create listing. Please try again.",
+    "removeImagesFirst": "Please remove some images before adding more.",
+    "onlyMoreImages": "Only {{count}} more image(s) can be added."
+  },
+  "validation": {
+    "required": "This field is required",
+    "minImages": "Please upload at least {{count}} images",
+    "selectCountry": "Please select a country",
+    "selectCity": "Please select a city",
+    "setLocation": "Please set the property location on the map",
+    "invalidPrice": "Please enter a valid price",
+    "imagesRequired": "Please upload at least one image.",
+    "selectCountryCity": "Please select both country and city.",
+    "selectValidCity": "Please select a valid city to set the location.",
+    "apartmentFloorNumber": "For apartments, please enter a valid floor number (1 or greater).",
+    "houseTotalFloors": "For houses and villas, please enter the total number of floors (1 or greater)."
   }
 }

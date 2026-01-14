@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/shared/Modal';
 import PaymentWindow from '@/components/shared/PaymentWindow';
@@ -6,6 +6,7 @@ import { AtSymbolIcon, UserIcon, BuildingOfficeIcon, CheckCircleIcon } from '@/c
 import { useAppContext } from '@/context/AppContext';
 import { fetchBuyerProducts, Product } from '@/utils/api';
 import { useNotification } from '@/shared/hooks/useNotification';
+import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   const { t } = useTranslation(['modals']);
   const { state, dispatch } = useAppContext();
   const { success, warning } = useNotification();
+  const { getLocalizedPath } = useLocalizedNavigation();
   const [activeTab, setActiveTab] = useState<'buyer' | 'seller'>('buyer');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [email, setEmail] = useState(initialEmail || state.currentUser?.email || '');
@@ -47,16 +49,11 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   // Update URL when modal opens
   useEffect(() => {
     if (isOpen) {
-      const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      const subscribePath = `/${lang}/subscribe`;
-
       if (!window.location.pathname.includes('/subscribe') && !window.location.pathname.includes('/pricing')) {
-        window.history.pushState({ modal: 'subscribe' }, '', subscribePath);
+        window.history.pushState({ modal: 'subscribe' }, '', getLocalizedPath('/subscribe'));
       }
     }
-  }, [isOpen]);
+  }, [isOpen, getLocalizedPath]);
 
   // Handle browser back button
   useEffect(() => {
@@ -82,7 +79,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
     setShowPromotionGuide(tier);
   };
 
-  const handleGoToMyListings = () => {
+  const handleGoToMyListings = useCallback(() => {
     if (!state.isAuthenticated) {
       onClose();
       dispatch({
@@ -91,13 +88,16 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
       });
       return;
     }
+    // Close modal and navigate to account/listings
     onClose();
-    setTimeout(() => {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' });
-    }, 150);
-  };
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'listings' });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+    window.history.pushState({ view: 'account' }, '', getLocalizedPath('/account/listings'));
+  }, [state.isAuthenticated, onClose, dispatch, getLocalizedPath]);
 
-  const handleCreateNewListing = () => {
+  const handleCreateNewListing = useCallback(() => {
     if (!state.isAuthenticated) {
       onClose();
       dispatch({
@@ -106,11 +106,14 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
       });
       return;
     }
+    // Close modal and navigate to create-listing
     onClose();
-    setTimeout(() => {
-      dispatch({ type: 'TOGGLE_LIST_MODAL', payload: true });
-    }, 150);
-  };
+    dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+    window.history.pushState({ view: 'create-listing' }, '', getLocalizedPath('/create-listing'));
+  }, [state.isAuthenticated, onClose, dispatch, getLocalizedPath]);
 
   const handleSubscribeClick = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -340,47 +343,65 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
             </div>
         </div>
 
-        {/* Promotion Guide Overlay */}
+        {/* Promotion Guide Overlay - Improved Design */}
         {showPromotionGuide && (
-            <div className="bg-gradient-to-br from-primary/5 to-indigo-50 border-2 border-primary/20 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6 animate-fade-in">
-                <div className="text-center mb-4">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-indigo-600 rounded-xl shadow-lg mb-3">
-                        <span className="text-2xl">
+            <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 border border-slate-200 rounded-2xl p-5 sm:p-6 mb-4 sm:mb-6 animate-fade-in shadow-sm">
+                {/* Header with icon */}
+                <div className="text-center mb-5">
+                    <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shadow-lg mb-4 transform hover:scale-105 transition-transform"
+                        style={{
+                            background: showPromotionGuide === 'featured'
+                                ? 'linear-gradient(135deg, #8B5CF6, #A855F7)'
+                                : showPromotionGuide === 'highlight'
+                                    ? 'linear-gradient(135deg, #0EA5E9, #06B6D4)'
+                                    : 'linear-gradient(135deg, #F59E0B, #FBBF24)'
+                        }}
+                    >
+                        <span className="text-2xl sm:text-3xl filter drop-shadow-sm">
                             {showPromotionGuide === 'featured' && '⭐'}
                             {showPromotionGuide === 'highlight' && '💎'}
                             {showPromotionGuide === 'premium' && '👑'}
                         </span>
                     </div>
-                    <h4 className="text-lg font-bold text-gray-900 capitalize">{showPromotionGuide} Promotion</h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                        To promote a listing, go to your My Listings page and click "Promote" on any listing, or select a promotion when creating a new listing.
+                    <h4 className="text-xl sm:text-2xl font-bold text-gray-900 capitalize mb-2">
+                        {showPromotionGuide} Promotion
+                    </h4>
+                    <p className="text-sm sm:text-base text-gray-600 max-w-sm mx-auto leading-relaxed">
+                        To promote a listing, go to your <strong className="text-gray-800">My Listings</strong> page and click "Promote" on any listing, or select a promotion when creating a new listing.
                     </p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+
+                {/* Action Buttons - Improved styling */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
                     <button
                         onClick={handleGoToMyListings}
-                        className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:border-primary hover:text-primary transition-all shadow-sm text-sm flex items-center justify-center gap-2"
+                        className="flex-1 px-5 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-primary hover:text-primary hover:shadow-md transition-all shadow-sm text-sm sm:text-base flex items-center justify-center gap-2.5 group"
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-gray-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                         Go to My Listings
                     </button>
                     <button
                         onClick={handleCreateNewListing}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all shadow-sm text-sm flex items-center justify-center gap-2"
+                        className="flex-1 px-5 py-3.5 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all shadow-md text-sm sm:text-base flex items-center justify-center gap-2.5"
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                         Create New Listing
                     </button>
                 </div>
+
+                {/* Back button */}
                 <button
                     onClick={() => setShowPromotionGuide(null)}
-                    className="w-full mt-3 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                    className="w-full mt-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center gap-1.5 group"
                 >
-                    ← Back to promotion options
+                    <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to promotion options
                 </button>
             </div>
         )}
