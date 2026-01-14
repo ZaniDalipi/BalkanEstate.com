@@ -27,40 +27,42 @@
       }
     },
     "sellerPromotion": {
-      "title": "Listing Promotion Plans",
-      "description": "Boost your property listings to get more visibility and inquiries",
+      "title": "Планови за Промоција на Огласи",
+      "description": "Зголемете ја видливоста на вашите огласи и добијте повеќе прашања",
       "featured": {
-        "title": "Featured",
-        "subtitle": "Priority in search",
-        "feature1": "Top of search",
-        "feature2": "Featured badge",
-        "feature3": "2x visibility"
+        "title": "Истакнат",
+        "subtitle": "Приоритет во пребарување",
+        "feature1": "На врвот на пребарување",
+        "feature2": "Истакната ознака",
+        "feature3": "2x видливост"
       },
       "highlight": {
-        "title": "Highlight",
-        "subtitle": "Stand out",
-        "popular": "Popular",
-        "feature1": "Featured benefits",
-        "feature2": "Colored highlight",
-        "feature3": "3x visibility"
+        "title": "Нагласен",
+        "subtitle": "Истакнете се",
+        "popular": "Популарно",
+        "feature1": "Бенефити на истакнат",
+        "feature2": "Обоено нагласување",
+        "feature3": "3x видливост"
       },
       "premium": {
-        "title": "Premium",
-        "subtitle": "Homepage featured",
-        "feature1": "Highlight benefits",
-        "feature2": "Homepage carousel",
-        "feature3": "5x visibility"
+        "title": "Премиум",
+        "subtitle": "На почетна страна",
+        "feature1": "Бенефити на нагласен",
+        "feature2": "Каросел на почетна",
+        "feature3": "5x видливост"
       },
-      "duration": "7-90 days",
-      "howItWorks": "How it works:",
-      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "duration": "7-90 дена",
+      "howItWorks": "Како функционира:",
+      "howItWorksDescription": "Кликнете на ниво на промоција погоре за да започнете, или прво креирајте оглас.",
       "promotionGuide": {
-        "title": "{{tier}} Promotion",
-        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
-        "goToListings": "Go to My Listings",
-        "createListing": "Create New Listing",
-        "backToOptions": "Back to promotion options"
-      }
+        "title": "{{tier}} Промоција",
+        "description": "За да промовирате оглас, одете на страницата <strong>Мои Огласи</strong> и кликнете \"Промовирај\" на било кој оглас, или изберете промоција кога креирате нов оглас.",
+        "goToListings": "Оди на Мои Огласи",
+        "createListing": "Креирај Нов Оглас",
+        "backToOptions": "Назад кон опциите за промоција"
+      },
+      "viewSubscriptionPlans": "Погледај Планови за Претплата",
+      "startCreatingListing": "Започни Креирање на Оглас"
     }
   },
   "listingLimit": {

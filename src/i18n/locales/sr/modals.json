@@ -17,40 +17,42 @@
     "securePayment": "Sigurno plaćanje putem Stripe",
     "loadingPlans": "Učitavanje planova...",
     "sellerPromotion": {
-      "title": "Listing Promotion Plans",
-      "description": "Boost your property listings to get more visibility and inquiries",
+      "title": "Planovi za Promociju Oglasa",
+      "description": "Povećajte vidljivost vaših oglasa i dobijte više upita",
       "featured": {
-        "title": "Featured",
-        "subtitle": "Priority in search",
-        "feature1": "Top of search",
-        "feature2": "Featured badge",
-        "feature3": "2x visibility"
+        "title": "Istaknuto",
+        "subtitle": "Prioritet u pretrazi",
+        "feature1": "Na vrhu pretrage",
+        "feature2": "Oznaka istaknutog",
+        "feature3": "2x vidljivost"
       },
       "highlight": {
-        "title": "Highlight",
-        "subtitle": "Stand out",
-        "popular": "Popular",
-        "feature1": "Featured benefits",
-        "feature2": "Colored highlight",
-        "feature3": "3x visibility"
+        "title": "Naglašeno",
+        "subtitle": "Istaknite se",
+        "popular": "Popularno",
+        "feature1": "Prednosti istaknutog",
+        "feature2": "Označeno bojom",
+        "feature3": "3x vidljivost"
       },
       "premium": {
         "title": "Premium",
-        "subtitle": "Homepage featured",
-        "feature1": "Highlight benefits",
-        "feature2": "Homepage carousel",
-        "feature3": "5x visibility"
+        "subtitle": "Na naslovnoj strani",
+        "feature1": "Prednosti naglašenog",
+        "feature2": "Karusel na naslovnoj",
+        "feature3": "5x vidljivost"
       },
-      "duration": "7-90 days",
-      "howItWorks": "How it works:",
-      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "duration": "7-90 dana",
+      "howItWorks": "Kako funkcioniše:",
+      "howItWorksDescription": "Kliknite na nivo promocije iznad da započnete, ili prvo kreirajte oglas.",
       "promotionGuide": {
-        "title": "{{tier}} Promotion",
-        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
-        "goToListings": "Go to My Listings",
-        "createListing": "Create New Listing",
-        "backToOptions": "Back to promotion options"
-      }
+        "title": "{{tier}} Promocija",
+        "description": "Da promovišete oglas, idite na stranicu <strong>Moji Oglasi</strong> i kliknite \"Promoviši\" na bilo kom oglasu, ili izaberite promociju kada kreirate novi oglas.",
+        "goToListings": "Idi na Moje Oglase",
+        "createListing": "Kreiraj Novi Oglas",
+        "backToOptions": "Nazad na opcije promocije"
+      },
+      "viewSubscriptionPlans": "Pogledaj Planove Pretplate",
+      "startCreatingListing": "Počni Kreiranje Oglasa"
     }
   },
   "listingLimit": {
