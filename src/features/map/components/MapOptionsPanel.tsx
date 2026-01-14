@@ -111,7 +111,6 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
         background: 'rgba(255, 255, 255, 0.85)',
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        minWidth: isMobile ? '160px' : '180px',
       }}
     >
       {/* Map Options Section - only shown on mobile or when explicitly enabled */}

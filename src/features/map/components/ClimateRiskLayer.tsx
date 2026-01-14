@@ -118,7 +118,7 @@ const CLIMATE_RISK_LAYERS: Record<
 
 /**
  * Climate Risk Legend Component
- * Simple inline bar - matches Zillow's compact design
+ * Compact responsive design - no fixed sizes
  */
 export const ClimateRiskLegend: React.FC<{
   riskType: Exclude<ClimateRiskType, 'none'>;
@@ -129,34 +129,30 @@ export const ClimateRiskLegend: React.FC<{
 
   return (
     <div
-      className="rounded-xl px-2.5 py-1.5 shadow-lg border border-white/30"
+      className="rounded-lg px-2 py-1 shadow-md border border-white/20 inline-flex flex-col"
       style={{
-        background: 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
       }}
     >
-      {/* Title row with gradient and attribution */}
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-medium text-gray-700">{config.legendTitle}</span>
-        <div className="flex h-2 rounded-sm overflow-hidden" style={{ width: '80px' }}>
+      {/* Single row: title + gradient + labels */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[9px] font-medium text-gray-600 whitespace-nowrap">{config.legendTitle}</span>
+        <div className="flex items-center">
           {config.legendColors.map((item, index) => (
-            <div
-              key={index}
-              className="flex-1 h-full"
-              style={{ backgroundColor: item.color }}
-            />
+            <div key={index} className="flex flex-col items-center">
+              <div
+                className="w-4 h-1.5"
+                style={{
+                  backgroundColor: item.color,
+                  borderRadius: index === 0 ? '2px 0 0 2px' : index === config.legendColors.length - 1 ? '0 2px 2px 0' : '0',
+                }}
+              />
+              <span className="text-[6px] text-gray-500 leading-tight mt-0.5">{item.label}</span>
+            </div>
           ))}
         </div>
-        <span className="text-[8px] text-gray-400">First Street®</span>
-      </div>
-      {/* Labels row */}
-      <div className="flex items-center mt-0.5" style={{ marginLeft: '72px', width: '80px' }}>
-        {config.legendColors.map((item, index) => (
-          <span key={index} className="text-[7px] text-gray-500 flex-1 text-center leading-none">
-            {item.label}
-          </span>
-        ))}
       </div>
     </div>
   );
