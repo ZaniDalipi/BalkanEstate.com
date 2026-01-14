@@ -50,7 +50,6 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#3399ff', label: 'High' },
       { color: '#0066cc', label: 'Severe' },
     ],
-    minZoom: 5,
   },
   // Fire risk - Using EFFIS (European Forest Fire Information System) WMS
   fire: {
@@ -64,7 +63,6 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#f03b20', label: 'High' },
       { color: '#bd0026', label: 'Extreme' },
     ],
-    minZoom: 3,
     isWMS: true,
     wmsLayers: 'ecmwf.fwi',
     wmsFormat: 'image/png',
@@ -82,7 +80,6 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#1a8ab7', label: 'Strong' },
       { color: '#0d5875', label: 'Severe' },
     ],
-    minZoom: 1,
   },
   // Air quality - Using AQICN tiles
   air: {
@@ -97,7 +94,6 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#ff0000', label: 'Bad' },
       { color: '#7e0023', label: 'Hazard' },
     ],
-    minZoom: 3,
   },
   // Heat risk - Using Copernicus Climate Data Store visualization
   heat: {
@@ -112,7 +108,6 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#f46d43', label: 'Hot' },
       { color: '#a50026', label: 'Extreme' },
     ],
-    minZoom: 1,
   },
 };
 
@@ -170,18 +165,7 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
     return CLIMATE_RISK_LAYERS[riskType];
   }, [riskType]);
 
-  // Handle zoom constraints
-  useEffect(() => {
-    if (!layerConfig || !map) return;
-
-    const minZoom = layerConfig.minZoom || 1;
-    const currentZoom = map.getZoom();
-
-    // If current zoom is below minimum, zoom in
-    if (currentZoom < minZoom) {
-      map.setZoom(minZoom);
-    }
-  }, [layerConfig, map]);
+  // Layer is available at all zoom levels - no constraints
 
   if (!layerConfig || riskType === 'none') {
     return null;
@@ -198,7 +182,7 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
         attribution={layerConfig.attribution}
         opacity={opacity}
         maxZoom={21}
-        minZoom={layerConfig.minZoom || 1}
+        minZoom={1}
       />
     );
   }
@@ -211,7 +195,7 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
       opacity={opacity}
       className="climate-risk-layer"
       maxZoom={21}
-      minZoom={layerConfig.minZoom || 1}
+      minZoom={1}
       // Add error handling for tiles that fail to load
       eventHandlers={{
         tileerror: (e) => {

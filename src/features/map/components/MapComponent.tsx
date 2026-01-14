@@ -488,6 +488,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <span>🔍{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} 📍{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
         </div>
 
+        {/* Climate Risk Legend - TOP LEFT, under zoom display (both mobile and desktop) */}
+        {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
+          <div className={`absolute ${show3DBuildings ? 'top-12 right-4' : 'top-12 left-4'} z-[1000]`}>
+            <ClimateRiskLegend riskType={selectedClimateRisk} />
+          </div>
+        )}
+
       {/* Desktop Controls - positioned above the newsletter bar (bottom-12 = ~112px) */}
       {!isMobile && (
         <>
@@ -563,7 +570,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
             {/* Layer toggles - compact row with glass effect */}
             <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
-              {/* Zillow-style Map Options Button - FIRST on desktop */}
+              {/* Climate Risks Button - FIRST on desktop */}
               <div className="relative">
                 <button
                   onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
@@ -573,7 +580,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
                   }`}
                 >
-                  <span>{t('search:map.options.mapButton', 'Map')}</span>
+                  <span>{t('search:map.climateRisks.title', 'Climate Risks')}</span>
                   <svg
                     className={`w-3.5 h-3.5 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
                     fill="none"
@@ -584,7 +591,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                {/* Map Options Panel - appears above the button (Desktop: only Climate Risks) */}
+                {/* Climate Risks Panel - appears above the button */}
                 {isMapOptionsOpen && (
                   <div className="absolute bottom-full left-0 mb-2 z-[1010]">
                     <MapOptionsPanel
@@ -677,12 +684,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </button>
             </div>
 
-            {/* Climate Risk Legend - positioned below controls (Desktop) */}
-            {selectedClimateRisk !== 'none' && (
-              <div className="animate-fade-in">
-                <ClimateRiskLegend riskType={selectedClimateRisk} />
-              </div>
-            )}
 
             {drawnBounds && !isDrawing && (
               <div className="flex items-center gap-1.5 animate-fade-in">
@@ -972,12 +973,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
             </div>
           </div>
 
-          {/* Mobile: Climate Risk Legend - TOP LEFT */}
-          {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
-            <div className="absolute top-16 left-3 z-[999] md:hidden">
-              <ClimateRiskLegend riskType={selectedClimateRisk} />
-            </div>
-          )}
         </>
       )}
       </div>
