@@ -191,9 +191,9 @@ const PricingPage: React.FC = () => {
   const sellerProducts = [proYearlyProduct, proMonthlyProduct].filter(Boolean) as Product[];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 pb-safe relative overflow-hidden">
-      {/* 3D Decorative Background Elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 pb-safe relative">
+      {/* 3D Decorative Background Elements - fixed positioning so they don't block scroll */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         {/* Top right sphere */}
         <div className="absolute -top-10 right-[5%] opacity-40 hidden lg:block">
           <FloatingSphere size="xl" color="cyan" />
@@ -238,7 +238,7 @@ const PricingPage: React.FC = () => {
       <Decorative3DStyles />
 
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10">
+      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10 relative">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <button

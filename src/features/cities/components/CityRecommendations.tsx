@@ -8,6 +8,7 @@ import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
+import { FloatingSphere, GlossyPill, AbstractBlob, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -196,17 +197,58 @@ const CityRecommendations: React.FC = () => {
   if (cities.length === 0) {
     return (
       <div className="p-8">
+        <Decorative3DStyles />
         <div className="max-w-7xl mx-auto text-center">
-          <HomeIcon className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-neutral-700 mb-2">{t('empty.title')}</h3>
-          <p className="text-neutral-500">{t('empty.message')}</p>
+          <div className="bg-white rounded-2xl shadow-md border p-12 relative overflow-hidden">
+            {/* 3D Decorative background */}
+            <div className="absolute inset-0 pointer-events-none opacity-40">
+              <div className="absolute top-4 right-8">
+                <FloatingSphere size="lg" color="cyan" />
+              </div>
+              <div className="absolute bottom-8 left-8">
+                <FloatingSphere size="md" color="pink" animate={false} />
+              </div>
+            </div>
+            <div className="relative z-10">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                <HomeIcon className="w-12 h-12 text-cyan-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-neutral-700 mb-2">{t('empty.title')}</h3>
+              <p className="text-neutral-500">{t('empty.message')}</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 relative">
+      {/* Include 3D animation styles */}
+      <Decorative3DStyles />
+
+      {/* 3D Decorative Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-10 right-[8%] opacity-30 hidden lg:block">
+          <FloatingSphere size="xl" color="cyan" />
+        </div>
+        <div className="absolute bottom-[25%] -left-10 opacity-25 hidden lg:block">
+          <FloatingSphere size="lg" color="pink" animate={false} />
+        </div>
+        <div className="absolute top-[20%] left-[5%] opacity-15 hidden xl:block">
+          <AbstractBlob variant={2} color="purple" />
+        </div>
+        <div className="absolute top-[45%] -right-8 opacity-20 hidden lg:block rotate-[-20deg]">
+          <GlossyPill orientation="vertical" size="lg" color="blue" />
+        </div>
+        <div className="absolute bottom-[15%] right-[25%] opacity-25 hidden md:block">
+          <FloatingSphere size="sm" color="purple" />
+        </div>
+        {/* Gradient overlays */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-blue-200/15 via-purple-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-pink-200/10 via-rose-200/5 to-transparent rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+      </div>
+
       {/* SEO Meta Tags */}
       <SEO
         title={t('page.title')}
@@ -215,7 +257,7 @@ const CityRecommendations: React.FC = () => {
         type="website"
       />
 
-      <div className="p-4 sm:p-8">
+      <div className="p-4 sm:p-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Header with Stats */}
           <div className="mb-8">
