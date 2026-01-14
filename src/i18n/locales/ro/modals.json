@@ -17,29 +17,40 @@
     "securePayment": "Plată securizată prin Stripe",
     "loadingPlans": "Se încarcă planurile...",
     "sellerPromotion": {
-      "title": "Planuri de Promovare Anunțuri",
-      "description": "Promovați anunțurile pentru mai multă vizibilitate și întrebări",
+      "title": "Listing Promotion Plans",
+      "description": "Boost your property listings to get more visibility and inquiries",
       "featured": {
-        "title": "Recomandat",
-        "description": "Prioritate în rezultatele căutării",
-        "features": ["Primul în rezultatele căutării", "Insignă recomandat", "2x creștere vizibilitate"]
+        "title": "Featured",
+        "subtitle": "Priority in search",
+        "feature1": "Top of search",
+        "feature2": "Featured badge",
+        "feature3": "2x visibility"
       },
       "highlight": {
-        "title": "Evidențiat",
-        "description": "Ieșiți în evidență cu culoare",
+        "title": "Highlight",
+        "subtitle": "Stand out",
         "popular": "Popular",
-        "features": ["Toate beneficiile Recomandat", "Fundal colorat", "3x creștere vizibilitate"]
+        "feature1": "Featured benefits",
+        "feature2": "Colored highlight",
+        "feature3": "3x visibility"
       },
       "premium": {
         "title": "Premium",
-        "description": "Afișare pe pagina principală",
-        "features": ["Toate beneficiile Evidențiat", "Carusel pagină principală", "5x creștere vizibilitate"]
+        "subtitle": "Homepage featured",
+        "feature1": "Highlight benefits",
+        "feature2": "Homepage carousel",
+        "feature3": "5x visibility"
       },
-      "duration": "7-90 zile",
-      "howItWorks": "Cum funcționează:",
-      "howItWorksDescription": "La crearea anunțului, selectați nivelul și durata promoției. Plata se procesează înainte de publicare. Cupoanele de reducere sunt acceptate!",
-      "viewSubscriptionPlans": "Vezi Planurile de Abonament",
-      "startCreatingListing": "Începe Crearea Anunțului"
+      "duration": "7-90 days",
+      "howItWorks": "How it works:",
+      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "promotionGuide": {
+        "title": "{{tier}} Promotion",
+        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
+        "goToListings": "Go to My Listings",
+        "createListing": "Create New Listing",
+        "backToOptions": "Back to promotion options"
+      }
     }
   },
   "listingLimit": {

@@ -27,29 +27,40 @@
       }
     },
     "sellerPromotion": {
-      "title": "Planovi Promocije Oglasa",
-      "description": "Povećajte vidljivost svojih oglasa za nekretnine i dobijte više upita",
+      "title": "Listing Promotion Plans",
+      "description": "Boost your property listings to get more visibility and inquiries",
       "featured": {
-        "title": "Izdvojeno",
-        "description": "Prioritet u rezultatima pretraživanja",
-        "features": ["Vrh rezultata pretraživanja", "Izdvojena značka", "2x povećana vidljivost"]
+        "title": "Featured",
+        "subtitle": "Priority in search",
+        "feature1": "Top of search",
+        "feature2": "Featured badge",
+        "feature3": "2x visibility"
       },
       "highlight": {
-        "title": "Istaknuto",
-        "description": "Istaknite se bojom",
-        "popular": "Popularno",
-        "features": ["Sve pogodnosti Izdvojenog", "Obojena pozadina", "3x povećana vidljivost"]
+        "title": "Highlight",
+        "subtitle": "Stand out",
+        "popular": "Popular",
+        "feature1": "Featured benefits",
+        "feature2": "Colored highlight",
+        "feature3": "3x visibility"
       },
       "premium": {
         "title": "Premium",
-        "description": "Prikaz na početnoj stranici",
-        "features": ["Sve pogodnosti Istaknutog", "Karusel na početnoj stranici", "5x povećana vidljivost"]
+        "subtitle": "Homepage featured",
+        "feature1": "Highlight benefits",
+        "feature2": "Homepage carousel",
+        "feature3": "5x visibility"
       },
-      "duration": "7-90 dana",
-      "howItWorks": "Kako funkcionira:",
-      "howItWorksDescription": "Pri kreiranju oglasa odaberite razinu promocije i trajanje. Plaćanje se obrađuje prije objavljivanja. Podržani su kuponi za popust!",
-      "viewSubscriptionPlans": "Pogledaj Planove Pretplate",
-      "startCreatingListing": "Počnite Kreirati Oglas"
+      "duration": "7-90 days",
+      "howItWorks": "How it works:",
+      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "promotionGuide": {
+        "title": "{{tier}} Promotion",
+        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
+        "goToListings": "Go to My Listings",
+        "createListing": "Create New Listing",
+        "backToOptions": "Back to promotion options"
+      }
     }
   },
   "listingLimit": {

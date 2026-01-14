@@ -17,41 +17,40 @@
     "securePayment": "Sigurno plaćanje putem Stripe",
     "loadingPlans": "Učitavanje planova...",
     "sellerPromotion": {
-      "title": "Planovi Promocije Oglasa",
-      "description": "Povećajte vidljivost vaših oglasa za više poseta i upita",
+      "title": "Listing Promotion Plans",
+      "description": "Boost your property listings to get more visibility and inquiries",
       "featured": {
-        "title": "Istaknuto",
-        "description": "Prioritet u rezultatima pretrage",
-        "features": [
-          "Na vrhu rezultata pretrage",
-          "Istaknuta značka",
-          "2x povećanje vidljivosti"
-        ]
+        "title": "Featured",
+        "subtitle": "Priority in search",
+        "feature1": "Top of search",
+        "feature2": "Featured badge",
+        "feature3": "2x visibility"
       },
       "highlight": {
-        "title": "Naglašeno",
-        "description": "Istaknite se bojom",
-        "popular": "Popularno",
-        "features": [
-          "Sve prednosti Istaknutog",
-          "Obojena pozadina",
-          "3x povećanje vidljivosti"
-        ]
+        "title": "Highlight",
+        "subtitle": "Stand out",
+        "popular": "Popular",
+        "feature1": "Featured benefits",
+        "feature2": "Colored highlight",
+        "feature3": "3x visibility"
       },
       "premium": {
         "title": "Premium",
-        "description": "Prikazivanje na početnoj",
-        "features": [
-          "Sve prednosti Naglašenog",
-          "Karusel na početnoj",
-          "5x povećanje vidljivosti"
-        ]
+        "subtitle": "Homepage featured",
+        "feature1": "Highlight benefits",
+        "feature2": "Homepage carousel",
+        "feature3": "5x visibility"
       },
-      "duration": "7-90 dana",
-      "howItWorks": "Kako funkcioniše:",
-      "howItWorksDescription": "Prilikom kreiranja oglasa, izaberite nivo promocije i trajanje. Plaćanje se obrađuje pre objavljivanja. Kuponi za popust su podržani!",
-      "viewSubscriptionPlans": "Pogledaj Planove Pretplate",
-      "startCreatingListing": "Započni Kreiranje Oglasa"
+      "duration": "7-90 days",
+      "howItWorks": "How it works:",
+      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "promotionGuide": {
+        "title": "{{tier}} Promotion",
+        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
+        "goToListings": "Go to My Listings",
+        "createListing": "Create New Listing",
+        "backToOptions": "Back to promotion options"
+      }
     }
   },
   "listingLimit": {

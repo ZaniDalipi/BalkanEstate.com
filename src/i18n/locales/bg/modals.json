@@ -17,41 +17,40 @@
     "securePayment": "Сигурно плащане чрез Stripe",
     "loadingPlans": "Зареждане на планове...",
     "sellerPromotion": {
-      "title": "Планове за Промотиране на Обяви",
-      "description": "Насърчете вашите обяви за имоти, за да получите по-голяма видимост и запитвания",
+      "title": "Listing Promotion Plans",
+      "description": "Boost your property listings to get more visibility and inquiries",
       "featured": {
-        "title": "Препоръчан",
-        "description": "Приоритет в резултатите от търсенето",
-        "features": [
-          "Горе в резултатите от търсенето",
-          "Значка \"Препоръчан\"",
-          "2x увеличение на видимостта"
-        ]
+        "title": "Featured",
+        "subtitle": "Priority in search",
+        "feature1": "Top of search",
+        "feature2": "Featured badge",
+        "feature3": "2x visibility"
       },
       "highlight": {
-        "title": "Подчертан",
-        "description": "Изпъкнете с цвят",
-        "popular": "Популярен",
-        "features": [
-          "Всички ползи от \"Препоръчан\"",
-          "Цветен фон",
-          "3x увеличение на видимостта"
-        ]
+        "title": "Highlight",
+        "subtitle": "Stand out",
+        "popular": "Popular",
+        "feature1": "Featured benefits",
+        "feature2": "Colored highlight",
+        "feature3": "3x visibility"
       },
       "premium": {
-        "title": "Премиум",
-        "description": "Представяне на начална страница",
-        "features": [
-          "Всички ползи от \"Подчертан\"",
-          "Карусел на началната страница",
-          "5x увеличение на видимостта"
-        ]
+        "title": "Premium",
+        "subtitle": "Homepage featured",
+        "feature1": "Highlight benefits",
+        "feature2": "Homepage carousel",
+        "feature3": "5x visibility"
       },
-      "duration": "7-90 дни",
-      "howItWorks": "Как работи:",
-      "howItWorksDescription": "При създаване на обява изберете вашия промоционален пакет и продължителност. Плащането се обработва преди публикуване. Поддържат се кодове за отстъпка!",
-      "viewSubscriptionPlans": "Преглед на Абонаментни Планове",
-      "startCreatingListing": "Започнете Създаването на Обява"
+      "duration": "7-90 days",
+      "howItWorks": "How it works:",
+      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "promotionGuide": {
+        "title": "{{tier}} Promotion",
+        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
+        "goToListings": "Go to My Listings",
+        "createListing": "Create New Listing",
+        "backToOptions": "Back to promotion options"
+      }
     }
   },
   "listingLimit": {

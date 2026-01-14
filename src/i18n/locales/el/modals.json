@@ -17,29 +17,40 @@
     "securePayment": "Ασφαλής πληρωμή μέσω Stripe",
     "loadingPlans": "Φόρτωση πλάνων...",
     "sellerPromotion": {
-      "title": "Πλάνα Προώθησης Αγγελιών",
-      "description": "Ενισχύστε τις αγγελίες σας για περισσότερη ορατότητα και ενδιαφέρον",
+      "title": "Listing Promotion Plans",
+      "description": "Boost your property listings to get more visibility and inquiries",
       "featured": {
-        "title": "Προτεινόμενο",
-        "description": "Προτεραιότητα στα αποτελέσματα αναζήτησης",
-        "features": ["Κορυφή αποτελεσμάτων αναζήτησης", "Σήμα προτεινόμενου", "2x αύξηση ορατότητας"]
+        "title": "Featured",
+        "subtitle": "Priority in search",
+        "feature1": "Top of search",
+        "feature2": "Featured badge",
+        "feature3": "2x visibility"
       },
       "highlight": {
-        "title": "Τονισμένο",
-        "description": "Ξεχωρίστε με χρώμα",
-        "popular": "Δημοφιλές",
-        "features": ["Όλα τα οφέλη Προτεινόμενου", "Έγχρωμο φόντο", "3x αύξηση ορατότητας"]
+        "title": "Highlight",
+        "subtitle": "Stand out",
+        "popular": "Popular",
+        "feature1": "Featured benefits",
+        "feature2": "Colored highlight",
+        "feature3": "3x visibility"
       },
       "premium": {
         "title": "Premium",
-        "description": "Προβολή στην αρχική σελίδα",
-        "features": ["Όλα τα οφέλη Τονισμένου", "Καρουζέλ αρχικής σελίδας", "5x αύξηση ορατότητας"]
+        "subtitle": "Homepage featured",
+        "feature1": "Highlight benefits",
+        "feature2": "Homepage carousel",
+        "feature3": "5x visibility"
       },
-      "duration": "7-90 ημέρες",
-      "howItWorks": "Πώς λειτουργεί:",
-      "howItWorksDescription": "Κατά τη δημιουργία αγγελίας, επιλέξτε το επίπεδο και τη διάρκεια προώθησης. Η πληρωμή γίνεται πριν τη δημοσίευση. Υποστηρίζονται κουπόνια έκπτωσης!",
-      "viewSubscriptionPlans": "Δείτε τα Πλάνα Συνδρομής",
-      "startCreatingListing": "Ξεκινήστε τη Δημιουργία Αγγελίας"
+      "duration": "7-90 days",
+      "howItWorks": "How it works:",
+      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "promotionGuide": {
+        "title": "{{tier}} Promotion",
+        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
+        "goToListings": "Go to My Listings",
+        "createListing": "Create New Listing",
+        "backToOptions": "Back to promotion options"
+      }
     }
   },
   "listingLimit": {

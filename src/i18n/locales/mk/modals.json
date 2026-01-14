@@ -27,29 +27,40 @@
       }
     },
     "sellerPromotion": {
-      "title": "Планови за промоција на огласи",
-      "description": "Зајакнете ги вашите огласи за недвижности за да добиете повеќе видливост и барања",
+      "title": "Listing Promotion Plans",
+      "description": "Boost your property listings to get more visibility and inquiries",
       "featured": {
-        "title": "Препорачано",
-        "description": "Приоритет во резултатите од пребарување",
-        "features": ["Врв на резултатите од пребарување", "Ознака за препорачано", "2х зголемување на видливоста"]
+        "title": "Featured",
+        "subtitle": "Priority in search",
+        "feature1": "Top of search",
+        "feature2": "Featured badge",
+        "feature3": "2x visibility"
       },
       "highlight": {
-        "title": "Истакнато",
-        "description": "Истакнете се со боја",
-        "popular": "Популарно",
-        "features": ["Сите предности на Препорачано", "Обоена позадина", "3х зголемување на видливоста"]
+        "title": "Highlight",
+        "subtitle": "Stand out",
+        "popular": "Popular",
+        "feature1": "Featured benefits",
+        "feature2": "Colored highlight",
+        "feature3": "3x visibility"
       },
       "premium": {
-        "title": "Премиум",
-        "description": "Истакнување на насловната страница",
-        "features": ["Сите предности на Истакнато", "Карусел на насловната страница", "5х зголемување на видливоста"]
+        "title": "Premium",
+        "subtitle": "Homepage featured",
+        "feature1": "Highlight benefits",
+        "feature2": "Homepage carousel",
+        "feature3": "5x visibility"
       },
-      "duration": "7-90 дена",
-      "howItWorks": "Како функционира:",
-      "howItWorksDescription": "Кога креирате оглас, изберете го вашиот ниво на промоција и траење. Плаќањето се обработува пред објавување. Купони со попуст се поддржани!",
-      "viewSubscriptionPlans": "Видете планови за претплата",
-      "startCreatingListing": "Започнете со креирање оглас"
+      "duration": "7-90 days",
+      "howItWorks": "How it works:",
+      "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+      "promotionGuide": {
+        "title": "{{tier}} Promotion",
+        "description": "To promote a listing, go to your <strong>My Listings</strong> page and click \"Promote\" on any listing, or select a promotion when creating a new listing.",
+        "goToListings": "Go to My Listings",
+        "createListing": "Create New Listing",
+        "backToOptions": "Back to promotion options"
+      }
     }
   },
   "listingLimit": {
