@@ -20,7 +20,9 @@ import {
   ArrowLeftIcon,
   SparklesIcon,
   UserGroupIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  DocumentTextIcon,
+  LockClosedIcon
 } from '@/constants';
 
 // Helper to build localized path
@@ -105,6 +107,11 @@ const PricingPage: React.FC = () => {
   const handleBack = () => {
     window.history.pushState({}, '', buildLocalizedPath('/'));
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+  };
+
+  const handleLegalNavigation = (page: 'terms' | 'privacy' | 'refund') => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: page });
+    window.history.pushState({}, '', buildLocalizedPath(`/${page}`));
   };
 
   const handlePlanSelection = (product: Product) => {
@@ -605,6 +612,53 @@ const PricingPage: React.FC = () => {
               <h4 className="font-bold text-gray-900">{t('pricing:benefits.instantActivation', 'Instant Activation')}</h4>
               <p className="text-sm text-gray-600 mt-1">Start selling immediately</p>
             </div>
+          </div>
+        </div>
+
+        {/* Legal Links - Required for Paddle Domain Approval */}
+        <div className="mt-12 sm:mt-16">
+          <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 rounded-2xl border border-gray-200 p-6 sm:p-8 max-w-3xl mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <LockClosedIcon className="w-5 h-5 text-gray-500" />
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                {t('pricing:legal.title', 'Secure Payments & Policies')}
+              </h4>
+            </div>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              {t('pricing:legal.description', 'All payments are processed securely by Paddle. By subscribing, you agree to our policies:')}
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+              <button
+                onClick={() => handleLegalNavigation('terms')}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all duration-200 group"
+              >
+                <DocumentTextIcon className="w-5 h-5 text-gray-400 group-hover:text-primary" />
+                <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
+                  {t('pricing:legal.termsOfService', 'Terms of Service')}
+                </span>
+              </button>
+              <button
+                onClick={() => handleLegalNavigation('privacy')}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all duration-200 group"
+              >
+                <LockClosedIcon className="w-5 h-5 text-gray-400 group-hover:text-primary" />
+                <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
+                  {t('pricing:legal.privacyPolicy', 'Privacy Policy')}
+                </span>
+              </button>
+              <button
+                onClick={() => handleLegalNavigation('refund')}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all duration-200 group"
+              >
+                <ShieldCheckIcon className="w-5 h-5 text-gray-400 group-hover:text-primary" />
+                <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
+                  {t('pricing:legal.refundPolicy', 'Refund Policy')}
+                </span>
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 text-center mt-4">
+              {t('pricing:legal.paddleNote', 'Payments handled by Paddle.com as Merchant of Record. VAT/taxes included where applicable.')}
+            </p>
           </div>
         </div>
 
