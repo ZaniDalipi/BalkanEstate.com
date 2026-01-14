@@ -30,8 +30,7 @@ interface MapOptionsPanelProps {
 }
 
 /**
- * Radio button component for consistent styling
- * Touch-optimized with minimum 44px touch targets
+ * Compact radio button for FAB-style panel
  */
 const RadioOption: React.FC<{
   id: string;
@@ -40,13 +39,12 @@ const RadioOption: React.FC<{
   checked: boolean;
   onChange: () => void;
   label: string;
-  isMobile?: boolean;
-}> = ({ id, name, value, checked, onChange, label, isMobile }) => (
+}> = ({ id, name, value, checked, onChange, label }) => (
   <label
     htmlFor={id}
-    className={`flex items-center gap-3 cursor-pointer rounded-lg transition-colors active:bg-gray-100 ${
-      isMobile ? 'py-3 px-2 min-h-[44px]' : 'py-2 px-1'
-    } hover:bg-gray-50`}
+    className={`flex items-center gap-2 cursor-pointer rounded-md py-1.5 px-1.5 transition-colors active:bg-white/50 ${
+      checked ? 'bg-white/40' : 'hover:bg-white/30'
+    }`}
   >
     <div className="relative flex items-center justify-center">
       <input
@@ -59,20 +57,20 @@ const RadioOption: React.FC<{
         className="sr-only"
       />
       <div
-        className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} rounded-full border-2 transition-all ${
+        className={`w-4 h-4 rounded-full border-2 transition-all ${
           checked
             ? 'border-blue-500 bg-white'
-            : 'border-gray-300 bg-white hover:border-gray-400'
+            : 'border-gray-400 bg-white/80'
         }`}
       >
         {checked && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`${isMobile ? 'w-3 h-3' : 'w-2.5 h-2.5'} rounded-full bg-blue-500`} />
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
           </div>
         )}
       </div>
     </div>
-    <span className={`${isMobile ? 'text-base' : 'text-sm'} ${checked ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
+    <span className={`text-xs ${checked ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
       {label}
     </span>
   </label>
@@ -108,18 +106,18 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ${
-        isMobile ? 'w-[280px] max-w-[90vw]' : 'min-w-[240px]'
-      }`}
-      style={isMobile ? {
-        maxHeight: 'calc(100vh - 200px)',
-        overflowY: 'auto',
-      } : undefined}
+      className="rounded-2xl shadow-xl border border-white/30 overflow-hidden"
+      style={{
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        maxWidth: isMobile ? '200px' : '220px',
+      }}
     >
       {/* Map Options Section - only shown on mobile or when explicitly enabled */}
       {showMapOptions && (
-        <div className={`${isMobile ? 'p-3' : 'p-4'} border-b border-gray-100`}>
-          <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold text-gray-900 mb-2`}>
+        <div className="px-2.5 pt-2.5 pb-2 border-b border-gray-200/50">
+          <h3 className="text-xs font-semibold text-gray-800 mb-1">
             {t('search:map.options.title', 'Map Options')}
           </h3>
           <div className="space-y-0">
@@ -132,7 +130,6 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
                 checked={selectedMapOption === option.value}
                 onChange={() => onMapOptionChange(option.value)}
                 label={option.label}
-                isMobile={isMobile}
               />
             ))}
           </div>
@@ -140,58 +137,37 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
       )}
 
       {/* Climate Risks Section */}
-      <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
-        <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold text-gray-900 mb-2`}>
+      <div className="px-2.5 pt-2 pb-2.5">
+        <h3 className="text-xs font-semibold text-gray-800 mb-1">
           {t('search:map.climateRisks.title', 'Climate Risks')}
         </h3>
-        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-x-4`}>
-          {isMobile ? (
-            // Single column for mobile - better touch targets
-            <div className="space-y-0">
-              {climateRisks.map((risk) => (
-                <RadioOption
-                  key={risk.value}
-                  id={`climate-risk-${risk.value}`}
-                  name="climateRisk"
-                  value={risk.value}
-                  checked={selectedClimateRisk === risk.value}
-                  onChange={() => onClimateRiskChange(risk.value)}
-                  label={risk.label}
-                  isMobile={isMobile}
-                />
-              ))}
-            </div>
-          ) : (
-            // Two columns for desktop
-            <>
-              <div className="space-y-1">
-                {climateRisks.slice(0, 3).map((risk) => (
-                  <RadioOption
-                    key={risk.value}
-                    id={`climate-risk-${risk.value}`}
-                    name="climateRisk"
-                    value={risk.value}
-                    checked={selectedClimateRisk === risk.value}
-                    onChange={() => onClimateRiskChange(risk.value)}
-                    label={risk.label}
-                  />
-                ))}
-              </div>
-              <div className="space-y-1">
-                {climateRisks.slice(3).map((risk) => (
-                  <RadioOption
-                    key={risk.value}
-                    id={`climate-risk-${risk.value}`}
-                    name="climateRisk"
-                    value={risk.value}
-                    checked={selectedClimateRisk === risk.value}
-                    onChange={() => onClimateRiskChange(risk.value)}
-                    label={risk.label}
-                  />
-                ))}
-              </div>
-            </>
-          )}
+        <div className="grid grid-cols-2 gap-x-1">
+          <div className="space-y-0">
+            {climateRisks.slice(0, 3).map((risk) => (
+              <RadioOption
+                key={risk.value}
+                id={`climate-risk-${risk.value}`}
+                name="climateRisk"
+                value={risk.value}
+                checked={selectedClimateRisk === risk.value}
+                onChange={() => onClimateRiskChange(risk.value)}
+                label={risk.label}
+              />
+            ))}
+          </div>
+          <div className="space-y-0">
+            {climateRisks.slice(3).map((risk) => (
+              <RadioOption
+                key={risk.value}
+                id={`climate-risk-${risk.value}`}
+                name="climateRisk"
+                value={risk.value}
+                checked={selectedClimateRisk === risk.value}
+                onChange={() => onClimateRiskChange(risk.value)}
+                label={risk.label}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
