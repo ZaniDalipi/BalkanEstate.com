@@ -8,7 +8,7 @@ import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
-import { FloatingSphere, GlossyPill, AbstractBlob, CityImageOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -227,44 +227,8 @@ const CityRecommendations: React.FC = () => {
       {/* Include 3D animation styles */}
       <Decorative3DStyles />
 
-      {/* 3D Decorative Background Elements with City Images */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Top right - Dubrovnik */}
-        <div className="absolute -top-6 right-[5%] opacity-50 hidden lg:block">
-          <CityImageOrb cityName="Dubrovnik" country="Croatia" size="xl" />
-        </div>
-        {/* Left side - Tirana */}
-        <div className="absolute bottom-[30%] -left-8 opacity-45 hidden lg:block">
-          <CityImageOrb cityName="Tirana" country="Albania" size="lg" animate={false} />
-        </div>
-        {/* Top left - Ohrid */}
-        <div className="absolute top-[18%] left-[8%] opacity-40 hidden xl:block">
-          <CityImageOrb cityName="Ohrid" country="North Macedonia" size="md" />
-        </div>
-        {/* Right side pill */}
-        <div className="absolute top-[45%] -right-8 opacity-25 hidden lg:block rotate-[-20deg]">
-          <GlossyPill orientation="vertical" size="lg" color="blue" />
-        </div>
-        {/* Bottom right - Belgrade */}
-        <div className="absolute bottom-[15%] right-[8%] opacity-45 hidden md:block">
-          <CityImageOrb cityName="Belgrade" country="Serbia" size="md" />
-        </div>
-        {/* Middle left - Kotor */}
-        <div className="absolute top-[55%] left-[3%] opacity-40 hidden lg:block">
-          <CityImageOrb cityName="Kotor" country="Montenegro" size="sm" />
-        </div>
-        {/* Top center - Sarajevo */}
-        <div className="absolute top-[8%] left-[35%] opacity-35 hidden xl:block">
-          <CityImageOrb cityName="Sarajevo" country="Bosnia and Herzegovina" size="sm" animate={false} />
-        </div>
-        {/* Bottom left - Split */}
-        <div className="absolute bottom-[40%] left-[12%] opacity-35 hidden xl:block">
-          <CityImageOrb cityName="Split" country="Croatia" size="sm" />
-        </div>
-        {/* Gradient overlays */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-blue-200/15 via-purple-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-pink-200/10 via-rose-200/5 to-transparent rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
-      </div>
+      {/* 3D Decorative Background Elements with Random City Images */}
+      <RandomCityBubbles count={8} />
 
       {/* SEO Meta Tags */}
       <SEO

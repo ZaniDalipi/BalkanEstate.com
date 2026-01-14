@@ -1,5 +1,222 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+
+// Types for random bubble positioning
+interface BubblePosition {
+  id: string;
+  cityName: string;
+  country: string;
+  x: number;
+  y: number;
+  size: 'sm' | 'md' | 'lg' | 'xl';
+  opacity: number;
+  delay: number;
+  isSplitting?: boolean;
+  splitBubbles?: SplitBubble[];
+}
+
+interface SplitBubble {
+  id: string;
+  x: number;
+  y: number;
+  size: 'sm' | 'md';
+  opacity: number;
+  direction: { x: number; y: number };
+}
+
+// City data for random bubbles
+const BALKAN_CITIES = [
+  { cityName: 'Dubrovnik', country: 'Croatia' },
+  { cityName: 'Tirana', country: 'Albania' },
+  { cityName: 'Ohrid', country: 'North Macedonia' },
+  { cityName: 'Belgrade', country: 'Serbia' },
+  { cityName: 'Kotor', country: 'Montenegro' },
+  { cityName: 'Sarajevo', country: 'Bosnia and Herzegovina' },
+  { cityName: 'Split', country: 'Croatia' },
+  { cityName: 'Ljubljana', country: 'Slovenia' },
+  { cityName: 'Podgorica', country: 'Montenegro' },
+  { cityName: 'Skopje', country: 'North Macedonia' },
+  { cityName: 'Pristina', country: 'Kosovo' },
+  { cityName: 'Zagreb', country: 'Croatia' },
+];
+
+// Random City Bubbles - displays city bubbles at random positions with split animation
+export const RandomCityBubbles: React.FC<{
+  count?: number;
+  className?: string;
+}> = ({ count = 8, className = '' }) => {
+  const [bubbles, setBubbles] = useState<BubblePosition[]>([]);
+  const [splitAnimations, setSplitAnimations] = useState<Map<string, SplitBubble[]>>(new Map());
+
+  // Generate random positions ensuring no overlap
+  const generateRandomPosition = useCallback((existingPositions: { x: number; y: number }[]) => {
+    let attempts = 0;
+    let x: number, y: number;
+
+    do {
+      x = 5 + Math.random() * 85; // 5% to 90% of screen width
+      y = 5 + Math.random() * 85; // 5% to 90% of screen height
+      attempts++;
+    } while (
+      attempts < 50 &&
+      existingPositions.some(
+        pos => Math.abs(pos.x - x) < 15 && Math.abs(pos.y - y) < 15
+      )
+    );
+
+    return { x, y };
+  }, []);
+
+  // Initialize bubbles
+  useEffect(() => {
+    const sizes: Array<'sm' | 'md' | 'lg' | 'xl'> = ['sm', 'md', 'lg', 'xl'];
+    const positions: { x: number; y: number }[] = [];
+    const shuffledCities = [...BALKAN_CITIES].sort(() => Math.random() - 0.5);
+
+    const initialBubbles: BubblePosition[] = shuffledCities.slice(0, count).map((city, index) => {
+      const pos = generateRandomPosition(positions);
+      positions.push(pos);
+
+      // Larger bubbles are less common
+      const sizeIndex = Math.floor(Math.random() * 10);
+      const size = sizeIndex < 3 ? 'xl' : sizeIndex < 6 ? 'lg' : sizeIndex < 8 ? 'md' : 'sm';
+
+      return {
+        id: `bubble-${index}-${Date.now()}`,
+        cityName: city.cityName,
+        country: city.country,
+        x: pos.x,
+        y: pos.y,
+        size,
+        opacity: 0.25 + Math.random() * 0.25, // 0.25 to 0.5
+        delay: Math.random() * 2,
+      };
+    });
+
+    setBubbles(initialBubbles);
+  }, [count, generateRandomPosition]);
+
+  // Split animation effect - randomly split a bubble every 4-8 seconds
+  useEffect(() => {
+    const splitInterval = setInterval(() => {
+      if (bubbles.length === 0) return;
+
+      // Pick a random bubble to split
+      const randomIndex = Math.floor(Math.random() * bubbles.length);
+      const bubbleToSplit = bubbles[randomIndex];
+
+      if (!bubbleToSplit || bubbleToSplit.isSplitting) return;
+
+      // Create 2-3 small split bubbles
+      const splitCount = 2 + Math.floor(Math.random() * 2);
+      const newSplitBubbles: SplitBubble[] = Array.from({ length: splitCount }, (_, i) => ({
+        id: `split-${bubbleToSplit.id}-${i}-${Date.now()}`,
+        x: bubbleToSplit.x,
+        y: bubbleToSplit.y,
+        size: Math.random() > 0.5 ? 'sm' : 'md',
+        opacity: 0.4,
+        direction: {
+          x: (Math.random() - 0.5) * 30,
+          y: (Math.random() - 0.5) * 30,
+        },
+      }));
+
+      setSplitAnimations(prev => {
+        const newMap = new Map(prev);
+        newMap.set(bubbleToSplit.id, newSplitBubbles);
+        return newMap;
+      });
+
+      // Remove split animations after animation completes
+      setTimeout(() => {
+        setSplitAnimations(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(bubbleToSplit.id);
+          return newMap;
+        });
+      }, 2000);
+    }, 4000 + Math.random() * 4000);
+
+    return () => clearInterval(splitInterval);
+  }, [bubbles]);
+
+  // Periodically reposition a random bubble
+  useEffect(() => {
+    const repositionInterval = setInterval(() => {
+      setBubbles(prev => {
+        if (prev.length === 0) return prev;
+
+        const randomIndex = Math.floor(Math.random() * prev.length);
+        const newBubbles = [...prev];
+        const existingPositions = prev.filter((_, i) => i !== randomIndex).map(b => ({ x: b.x, y: b.y }));
+        const newPos = generateRandomPosition(existingPositions);
+
+        newBubbles[randomIndex] = {
+          ...newBubbles[randomIndex],
+          x: newPos.x,
+          y: newPos.y,
+        };
+
+        return newBubbles;
+      });
+    }, 8000 + Math.random() * 4000);
+
+    return () => clearInterval(repositionInterval);
+  }, [generateRandomPosition]);
+
+  return (
+    <div className={`fixed inset-0 pointer-events-none overflow-hidden z-0 ${className}`}>
+      {/* Main bubbles */}
+      {bubbles.map((bubble) => (
+        <div
+          key={bubble.id}
+          className="absolute transition-all duration-[3000ms] ease-in-out hidden lg:block"
+          style={{
+            left: `${bubble.x}%`,
+            top: `${bubble.y}%`,
+            opacity: bubble.opacity,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <CityImageOrb
+            cityName={bubble.cityName}
+            country={bubble.country}
+            size={bubble.size}
+            className={`animate-float`}
+            animate={true}
+          />
+
+          {/* Split bubbles animation */}
+          {splitAnimations.has(bubble.id) && (
+            <>
+              {splitAnimations.get(bubble.id)?.map((splitBubble) => (
+                <div
+                  key={splitBubble.id}
+                  className="absolute animate-split-bubble"
+                  style={{
+                    '--split-x': `${splitBubble.direction.x}vw`,
+                    '--split-y': `${splitBubble.direction.y}vh`,
+                  } as React.CSSProperties}
+                >
+                  <CityImageOrb
+                    cityName={bubble.cityName}
+                    country={bubble.country}
+                    size={splitBubble.size}
+                    animate={false}
+                  />
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      ))}
+
+      {/* Gradient overlays */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-blue-200/15 via-purple-200/10 to-transparent rounded-full blur-3xl animate-pulse-glow" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-tl from-pink-200/10 via-rose-200/5 to-transparent rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+    </div>
+  );
+};
 
 // City Image Orb - displays city photos inside 3D bubbles
 export const CityImageOrb: React.FC<{
@@ -702,6 +919,26 @@ export const Decorative3DStyles: React.FC = () => (
       animation: pulse-glow 4s ease-in-out infinite;
     }
 
+    /* Split bubble animation */
+    @keyframes split-bubble {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+      }
+      20% {
+        transform: translate(calc(var(--split-x) * 0.2), calc(var(--split-y) * 0.2)) scale(1.1);
+        opacity: 0.5;
+      }
+      100% {
+        transform: translate(var(--split-x), var(--split-y)) scale(0.3);
+        opacity: 0;
+      }
+    }
+
+    .animate-split-bubble {
+      animation: split-bubble 2s ease-out forwards;
+    }
+
     /* Gradient text animation */
     @keyframes gradient-shift {
       0%, 100% {
@@ -724,6 +961,7 @@ export const Decorative3DStyles: React.FC = () => (
 );
 
 export default {
+  RandomCityBubbles,
   CityImageOrb,
   RealEstateOrb,
   FloatingSphere,
