@@ -28,6 +28,7 @@ import {
 import { Markers, Legend, HighlightedPropertyMarkers } from '@/src/components/map/MapPropertyMarker';
 import MapAgentAvatar, { MapAgentAvatarInner } from '@/src/components/map/MapAgentAvatar';
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
+import { MAP_TILE_LAYERS, DEFAULT_MAP_STYLE, getTileLayer } from '@/config/mapStyles';
 
 // Fix for default icon issue with bundlers
 let DefaultIcon = L.icon({
@@ -40,24 +41,11 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const TILE_LAYERS = {
-  street: {
-    // Google Maps Street - clean labels and roads, max zoom 21, English labels
-    url: 'https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
-    attribution: '&copy; Google Maps',
-    maxZoom: 21,
-    maxNativeZoom: 21,
-  },
-  satellite: {
-    // Google Maps Satellite - high quality aerial imagery, max zoom 21
-    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-    attribution: '&copy; Google Maps',
-    maxZoom: 21,
-    maxNativeZoom: 21,
-  },
-};
+// Use the centralized map styles config
+const TILE_LAYERS = MAP_TILE_LAYERS;
 
-type TileLayerType = keyof typeof TILE_LAYERS | 'night';
+// Available tile layer types from config
+type TileLayerType = keyof typeof MAP_TILE_LAYERS;
 
 // Bounding box for the Balkan region
 const BALKAN_BOUNDS = L.latLngBounds(
@@ -256,7 +244,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
-  const [mapType, setMapType] = useState<TileLayerType>('street');
+  // Default to 'positron' - clean style optimized for real estate (properties stand out)
+  const [mapType, setMapType] = useState<TileLayerType>(DEFAULT_MAP_STYLE as TileLayerType);
   const [isLegendOpen, setIsLegendOpen] = useState(false); // Legend closed by default, user can open it
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
@@ -435,7 +424,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             enabled={showLandmarks}
             isNightMode={false}
           />
-          <CadastreLayer enabled={showCadastre && mapType === 'satellite'} opacity={0.7} />
+          <CadastreLayer enabled={showCadastre && (mapType === 'satellite' || mapType === 'hybrid')} opacity={0.7} />
           <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
           <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={false} />
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
@@ -480,14 +469,26 @@ const MapComponent: React.FC<MapComponentProps> = ({
               </button>
               <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full">
                 <button
-                  onClick={() => setMapType('street')}
+                  onClick={() => setMapType('positron')}
                   className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                    mapType === 'street'
+                    mapType === 'positron'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
+                  title="Clean, minimal - properties stand out"
                 >
-                  {t('search:map.street')}
+                  Clean
+                </button>
+                <button
+                  onClick={() => setMapType('voyager')}
+                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                    mapType === 'voyager'
+                      ? 'bg-white shadow text-primary'
+                      : 'text-neutral-600 hover:bg-white/50'
+                  }`}
+                  title="Shows neighborhoods, parks, amenities"
+                >
+                  Color
                 </button>
                 <button
                   onClick={() => setMapType('satellite')}
@@ -496,6 +497,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
+                  title="Aerial/satellite imagery"
                 >
                   {t('search:map.satellite')}
                 </button>
@@ -544,8 +546,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <span className="hidden sm:inline">POI</span>
               </button>
 
-              {/* Cadastre Toggle - only in satellite */}
-              {mapType === 'satellite' && (
+              {/* Cadastre Toggle - only in satellite/hybrid views */}
+              {(mapType === 'satellite' || mapType === 'hybrid') && (
                 <button
                   onClick={() => setShowCadastre(!showCadastre)}
                   className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
@@ -689,8 +691,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     <span className="text-sm font-medium">Measure Distance</span>
                   </button>
 
-                  {/* Cadastre Toggle - only in satellite */}
-                  {mapType === 'satellite' && (
+                  {/* Cadastre Toggle - only in satellite/hybrid views */}
+                  {(mapType === 'satellite' || mapType === 'hybrid') && (
                     <button
                       onClick={() => setShowCadastre(!showCadastre)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
@@ -775,12 +777,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 {/* Map type toggle */}
                 <div className="flex bg-neutral-100 rounded-lg p-0.5">
                   <button
-                    onClick={() => setMapType('street')}
+                    onClick={() => setMapType('positron')}
                     className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${
-                      mapType === 'street' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
+                      mapType === 'positron' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
                     }`}
                   >
-                    {t('search:map.street')}
+                    Clean
+                  </button>
+                  <button
+                    onClick={() => setMapType('voyager')}
+                    className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                      mapType === 'voyager' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
+                    }`}
+                  >
+                    Color
                   </button>
                   <button
                     onClick={() => setMapType('satellite')}
@@ -788,7 +798,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       mapType === 'satellite' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
                     }`}
                   >
-                    {t('search:map.satellite')}
+                    Sat
                   </button>
                 </div>
 
