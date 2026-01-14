@@ -26,48 +26,29 @@ export interface PaddleDomainConfig {
 /**
  * List of domains configured for Paddle checkout
  *
+ * IMPORTANT: Paddle only accepts bare domain names!
+ * Format: "domain.com" (NO https://, NO www.)
+ *
+ * For www subdomains, submit them separately as "www.domain.com"
+ * Each subdomain needs individual approval.
+ *
  * Add your domains here and submit them for approval in the Paddle dashboard.
  * Mark approved: true once Paddle has approved the domain.
  */
 export const PADDLE_APPROVED_DOMAINS: PaddleDomainConfig[] = [
-  // Production domains
+  // Production domains - Submit to Paddle as: balkanestate.com
   {
     domain: 'balkanestate.com',
     environment: 'production',
     approved: false, // Update to true once approved by Paddle
-    description: 'Main production domain',
+    description: 'Main production domain - submit as: balkanestate.com',
   },
-  {
-    domain: 'www.balkanestate.com',
-    environment: 'production',
-    approved: false, // Update to true once approved by Paddle
-    description: 'WWW production subdomain',
-  },
+  // Production domains - Submit to Paddle as: balkanestateai.com
   {
     domain: 'balkanestateai.com',
     environment: 'production',
     approved: false, // Update to true once approved by Paddle
-    description: 'AI branded production domain',
-  },
-  {
-    domain: 'www.balkanestateai.com',
-    environment: 'production',
-    approved: false, // Update to true once approved by Paddle
-    description: 'WWW AI branded subdomain',
-  },
-
-  // Staging/Preview domains
-  {
-    domain: 'staging.balkanestate.com',
-    environment: 'sandbox',
-    approved: false,
-    description: 'Staging environment',
-  },
-  {
-    domain: 'preview.balkanestate.com',
-    environment: 'sandbox',
-    approved: false,
-    description: 'Preview deployments',
+    description: 'AI branded production domain - submit as: balkanestateai.com',
   },
 
   // Development domains (sandbox only)
@@ -88,14 +69,6 @@ export const PADDLE_APPROVED_DOMAINS: PaddleDomainConfig[] = [
     environment: 'sandbox',
     approved: true,
     description: 'Vite dev server',
-  },
-
-  // Vercel preview domains (if using Vercel)
-  {
-    domain: '*.vercel.app',
-    environment: 'sandbox',
-    approved: false, // Wildcard domains need special handling
-    description: 'Vercel preview deployments - submit specific preview URLs',
   },
 ];
 
@@ -158,19 +131,23 @@ export function getLegalPageUrls(baseUrl: string = ''): Record<string, string> {
 /**
  * Domains to submit to Paddle for approval
  *
+ * IMPORTANT FORMAT: Just the domain name, no https:// or www.
+ *
  * Instructions:
  * 1. Go to https://vendors.paddle.com/checkout-settings
  * 2. Click "Add domain"
- * 3. Enter each domain below
- * 4. Ensure your legal pages are accessible before submitting
+ * 3. Enter domain exactly as shown below (e.g., "balkanestate.com")
+ * 4. Ensure your legal pages are accessible before submitting:
+ *    - Terms of Service: /terms
+ *    - Privacy Policy: /privacy
+ *    - Refund Policy: /refund
  * 5. Wait for Paddle approval (usually 1-2 business days)
+ *
+ * NOTE: If you use www, you need to submit it separately as a subdomain
  */
 export const DOMAINS_TO_SUBMIT = [
-  'balkanestate.com',
-  'www.balkanestate.com',
-  'balkanestateai.com',
-  'www.balkanestateai.com',
-  // Add any staging/preview domains you need for testing
+  'balkanestate.com',      // Submit exactly like this
+  'balkanestateai.com',    // Submit exactly like this
 ];
 
 export default {
