@@ -7,100 +7,110 @@
     "loading": "Učitavanje..."
   },
   "subscription": {
-    "title": "Odaberite Svoj Plan",
+    "title": "Odaberite Vaš Paket",
     "forBuyers": "Za Kupce",
-    "forSellers": "Za Prodavače",
+    "forSellers": "Za Prodavce",
     "perMonth": "/mjesec",
-    "emailAddress": "E-mail Adresa",
+    "emailAddress": "Email Adresa",
     "emailPlaceholder": "vi@primjer.com",
-    "continueToPayment": "Nastavi na Plaćanje",
-    "securePayment": "Sigurno plaćanje putem Stripea",
-    "loadingPlans": "Učitavanje planova...",
+    "continueToPayment": "Nastavite na Plaćanje",
+    "securePayment": "Sigurno plaćanje putem Stripe-a",
+    "loadingPlans": "Učitavanje paketa...",
+    "buyerPro": {
+      "name": "Kupac Pro",
+      "description": "Nikada ne propustite novu ponudu! Budite obaviješteni čim nekretnina koja odgovara Vašim kriterijima bude dostupna na tržištu.",
+      "features": {
+        "notifications": "Trenutna email i SMS obavještenja",
+        "unlimitedSearches": "Sačuvajte neograničen broj pretraga",
+        "earlyAccess": "Rani pristup novim ponudama",
+        "marketInsights": "Napredni uvidi u tržište"
+      }
+    },
     "sellerPromotion": {
-      "title": "Planovi Promocije Oglasa",
-      "description": "Povećajte vidljivost svojih oglasa za nekretnine i dobijte više upita",
+      "title": "Paketi za Promociju Oglasa",
+      "description": "Povećajte vidljivost Vaših oglasa za nekretnine i dobijte više upita",
       "featured": {
-        "title": "Izdvojeno",
-        "description": "Prioritet u rezultatima pretraživanja",
-        "features": ["Vrh rezultata pretraživanja", "Izdvojena značka", "2x povećana vidljivost"]
+        "title": "Istaknuto",
+        "description": "Prioritet u rezultatima pretrage",
+        "features": ["Na vrhu rezultata pretrage", "Oznaka istaknuto", "2x povećanje vidljivosti"]
       },
       "highlight": {
-        "title": "Istaknuto",
-        "description": "Istaknite se bojom",
+        "title": "Označeno",
+        "description": "Istakните se bojom",
         "popular": "Popularno",
-        "features": ["Sve pogodnosti Izdvojenog", "Obojena pozadina", "3x povećana vidljivost"]
+        "features": ["Svi benefiti istaknutog", "Obojena pozadina", "3x povećanje vidljivosti"]
       },
       "premium": {
         "title": "Premium",
-        "description": "Prikaz na početnoj stranici",
-        "features": ["Sve pogodnosti Istaknutog", "Karusel na početnoj stranici", "5x povećana vidljivost"]
+        "description": "Prikazivanje na početnoj",
+        "features": ["Svi benefiti označenog", "Karusel na početnoj", "5x povećanje vidljivosti"]
       },
       "duration": "7-90 dana",
       "howItWorks": "Kako funkcioniše:",
-      "howItWorksDescription": "Pri kreiranju oglasa odaberite nivo promocije i trajanje. Plaćanje se obrađuje prije objavljivanja. Podržani su kuponi za popust!",
-      "viewSubscriptionPlans": "Pogledaj Planove Pretplate",
+      "howItWorksDescription": "Prilikom kreiranja oglasa, odaberite nivo promocije i trajanje. Plaćanje se obrađuje prije objavljivanja. Kupon kodovi za popust su podržani!",
+      "viewSubscriptionPlans": "Pogledajte Pretplatničke Pakete",
       "startCreatingListing": "Počnite Kreirati Oglas"
     }
   },
   "listingLimit": {
-    "title": "Dosegnut Limit Besplatnih Oglasa",
-    "message": "Iskoristili ste sve besplatne oglase! Za objavljivanje više, morate se pretplatiti.",
-    "discountOffer": "Ali prvo, igrajte brzu igru za priliku da osvojite veliki popust na svoju prvu pretplatu!",
+    "title": "Dostignut Limit Besplatnih Oglasa",
+    "message": "Iskoristili ste sve besplatne oglase! Za objavljivanje više oglasa, potrebna Vam je pretplata.",
+    "discountOffer": "Ali prvo, igrajte brzu igru za šansu da osvojite veliki popust na Vašu prvu pretplatu!",
     "playForDiscount": "Igrajte za Popust!"
   },
   "agentLicense": {
     "title": "Verifikacija Licence Agenta",
-    "joinAgencyTitle": "Pridruži se/Promijeni Agenciju",
-    "newAgentDescription": "Da biste postali agent, trebate dati svoje važeće informacije o licenci za nekretnine. Možete se pridružiti postojećoj agenciji unosom njihovog pozivnog koda ili se registrovati kao nezavisni agent.",
-    "joinAgencyDescription": "Unesite pozivni kod svoje agencije za pridruživanje. Vaša licenca i ID agenta su potvrđeni i ne mogu se promijeniti.",
+    "joinAgencyTitle": "Pridružite se/Promijenite Agenciju",
+    "newAgentDescription": "Da postanete agent, morate pružiti informacije o važećoj licenci za nekretnine. Možete se pridružiti postojećoj agenciji unosom pozivnog koda ili se registrovati kao nezavisni agent.",
+    "joinAgencyDescription": "Unesite pozivni kod Vaše agencije da se pridružite. Vaša licenca i ID agenta su potvrđeni i ne mogu se promijeniti.",
     "licenseNumber": "Broj Licence",
     "licenseNumberPlaceholder": "npr., RS-LIC-12345",
     "licenseRequired": "Broj licence je obavezan",
-    "verifiedLicense": "Vaš potvrđeni broj licence (ne može se promijeniti)",
-    "officialLicense": "Vaš službeni broj licence za nekretnine",
+    "verifiedLicense": "Vaš verificirani broj licence (ne može se promijeniti)",
+    "officialLicense": "Vaš zvanični broj licence za nekretnine",
     "agentId": "ID Agenta",
     "agentIdPlaceholder": "npr., AG-12345",
-    "optional": "Opcionalno",
+    "optional": "Opciono",
     "verifiedAgentId": "Vaš identifikator agenta (ne može se promijeniti)",
-    "autoGeneratedAgentId": "Vaš jedinstveni identifikator agenta (generisat će se ako nije naveden)",
-    "languagesSpoken": "Jezici koje Govorite",
-    "selectLanguages": "Odaberite jezike na kojima možete komunicirati",
+    "autoGeneratedAgentId": "Vaš jedinstveni identifikator agenta (biće generisan ako nije naveden)",
+    "languagesSpoken": "Jezici Kojima Govorite",
+    "selectLanguages": "Odaberite jezike kojima možete komunicirati",
     "selectAgency": "Odaberite Agenciju",
     "loadingAgencies": "Učitavanje agencija...",
     "independentAgent": "-- Nezavisni Agent (Bez Agencije) --",
     "selectAnAgency": "-- Odaberite agenciju --",
-    "chooseAgency": "Odaberite agenciju kojoj se želite pridružiti",
+    "chooseAgency": "Odaberite agenciju kojoj želite da se pridružite",
     "selectAgencyOrIndependent": "Odaberite agenciju za pridruživanje ili ostanite nezavisni",
     "invitationCode": "Pozivni Kod Agencije",
     "invitationCodePlaceholder": "npr., AGY-BELGRAD-A1B2C3",
-    "invitationCodeRequired": "Unesite pozivni kod za odabranu agenciju",
-    "selectAgencyRequired": "Odaberite agenciju za korištenje pozivnog koda",
-    "enterInvitationCode": "Unesite pozivni kod koji vam je dala vaša agencija",
+    "invitationCodeRequired": "Molimo unesite pozivni kod za odabranu agenciju",
+    "selectAgencyRequired": "Molimo odaberite agenciju za korištenje pozivnog koda",
+    "enterInvitationCode": "Unesite pozivni kod koji Vam je dala agencija",
     "leaveEmptyForIndependent": "Ostavite prazno za registraciju kao nezavisni agent",
     "verifying": "Verifikacija...",
     "joining": "Pridruživanje...",
-    "verifyAndBecomeAgent": "Verificiraj i Postani Agent",
+    "verifyAndBecomeAgent": "Verifikuj i Postani Agent",
     "joinAgency": "Pridruži se Agenciji"
   },
   "invitationCode": {
     "title": "Unesite Pozivni Kod",
-    "description": "Za pridruživanje {{agencyName}}, trebate pozivni kod od administratora agencije.",
+    "description": "Da se pridružite agenciji {{agencyName}}, potreban Vam je pozivni kod od administratora agencije.",
     "label": "Pozivni Kod",
     "placeholder": "AGY-XXXXXX-XXXXXX",
     "formatHint": "Format pozivnog koda: AGY-XXXXXX-XXXXXX",
-    "enterCode": "Unesite pozivni kod",
-    "verifyFailed": "Neuspješna verifikacija pozivnog koda",
+    "enterCode": "Molimo unesite pozivni kod",
+    "verifyFailed": "Neuspjela verifikacija pozivnog koda",
     "verifying": "Verifikacija...",
-    "submit": "Podnesi Zahtjev"
+    "submit": "Pošaljite Zahtjev"
   },
   "imageEditor": {
-    "download": "Preuzmi",
+    "download": "Preuzmite",
     "sending": "Slanje...",
     "sendToAgent": "Pošalji Agentu",
-    "sentSuccessTitle": "Uspješno Poslano!",
-    "sentSuccessMessage": "Vaša anotirana slika je poslana agentu. Odgovorit će uskoro.",
-    "goToChat": "Idi na Razgovor",
-    "failedToSend": "Neuspješno slanje anotirane slike. Pokušajte ponovo.",
+    "sentSuccessTitle": "Uspješno Poslato!",
+    "sentSuccessMessage": "Vaša označena slika je poslata agentu. Odgovoriće uskoro.",
+    "goToChat": "Idite na Razgovor",
+    "failedToSend": "Neuspjelo slanje označene slike. Molimo pokušajte ponovo.",
     "tools": {
       "draw": "Crtaj",
       "text": "Dodaj Tekst",
@@ -109,11 +119,11 @@
       "circle": "Krug",
       "highlight": "Istakni",
       "blur": "Zamuti",
-      "crop": "Izreži",
+      "crop": "Isiječi",
       "rotate": "Rotiraj",
       "undo": "Poništi",
       "redo": "Ponovi",
-      "clear": "Očisti Sve"
+      "clear": "Obriši Sve"
     },
     "colors": {
       "red": "Crvena",
@@ -126,15 +136,15 @@
   },
   "confirmation": {
     "deleteProperty": {
-      "title": "Izbriši Nekretninu",
-      "message": "Jeste li sigurni da želite izbrisati ovu nekretninu? Ova radnja se ne može poništiti.",
-      "confirm": "Izbriši",
+      "title": "Obriši Nekretninu",
+      "message": "Jeste li sigurni da želite obrisati ovu nekretninu? Ova radnja se ne može poništiti.",
+      "confirm": "Obriši",
       "cancel": "Otkaži"
     },
     "deleteAccount": {
-      "title": "Izbriši Račun",
-      "message": "Ovo će trajno izbrisati vaš račun i sve povezane podatke. Ova radnja se ne može poništiti.",
-      "confirm": "Izbriši Račun",
+      "title": "Obriši Nalog",
+      "message": "Ovo će trajno obrisati Vaš nalog i sve povezane podatke. Ova radnja se ne može poništiti.",
+      "confirm": "Obriši Nalog",
       "cancel": "Otkaži"
     },
     "logout": {
@@ -144,62 +154,62 @@
       "cancel": "Otkaži"
     },
     "unsavedChanges": {
-      "title": "Nespašene Promjene",
-      "message": "Imate nespašene promjene. Jeste li sigurni da želite otići?",
-      "confirm": "Otiđi",
+      "title": "Nesačuvane Promjene",
+      "message": "Imate nesačuvane promjene. Jeste li sigurni da želite napustiti?",
+      "confirm": "Napusti",
       "cancel": "Ostani"
     },
     "cancelSubscription": {
       "title": "Otkaži Pretplatu",
-      "message": "Jeste li sigurni da želite otkazati pretplatu? Izgubit ćete pristup premium funkcijama.",
+      "message": "Jeste li sigurni da želite otkazati Vašu pretplatu? Izgubit ćete pristup premium funkcijama.",
       "confirm": "Otkaži Pretplatu",
       "cancel": "Zadrži Pretplatu"
     }
   },
   "share": {
-    "title": "Podijeli Nekretninu",
+    "title": "Podijelite Nekretninu",
     "copyLink": "Kopiraj Link",
     "linkCopied": "Link kopiran u međuspremnik!",
-    "shareVia": "Podijeli putem",
+    "shareVia": "Podijelite putem",
     "facebook": "Facebook",
     "twitter": "Twitter",
     "linkedin": "LinkedIn",
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
-    "email": "E-pošta",
+    "email": "Email",
     "embedCode": "Kod za Ugradnju",
     "copyEmbed": "Kopiraj Kod za Ugradnju"
   },
   "report": {
-    "title": "Prijavi Oglas",
-    "reason": "Razlog prijave",
+    "title": "Prijavite Oglas",
+    "reason": "Razlog prijavljivanja",
     "reasons": {
-      "spam": "Spam ili Obmana",
-      "scam": "Prevara ili Obmana",
-      "inappropriate": "Neprimjeren Sadržaj",
-      "duplicate": "Duplikat Oglasa",
+      "spam": "Spam ili Obmanjujuće",
+      "scam": "Prevara ili Fraud",
+      "inappropriate": "Neprikladan Sadržaj",
+      "duplicate": "Duplirani Oglas",
       "wrongInfo": "Netačne Informacije",
-      "soldRented": "Već Prodano/Iznajmljeno",
+      "soldRented": "Već Prodato/Iznajmljeno",
       "other": "Ostalo"
     },
     "details": "Dodatni detalji",
-    "detailsPlaceholder": "Navedite više informacija...",
-    "submit": "Podnesi Prijavu",
-    "submitting": "Podnošenje...",
-    "submitted": "Prijava uspješno podnesena",
-    "thankYou": "Hvala što pomažete održati našu platformu sigurnom!"
+    "detailsPlaceholder": "Molimo navedite više informacija...",
+    "submit": "Pošaljite Prijavu",
+    "submitting": "Slanje...",
+    "submitted": "Prijava uspješno poslata",
+    "thankYou": "Hvala Vam što pomažete u održavanju naše platforme sigurnom!"
   },
   "contact": {
-    "title": "Kontaktirajte Prodavača",
+    "title": "Kontaktirajte Prodavca",
     "name": "Vaše Ime",
-    "email": "Vaša E-pošta",
+    "email": "Vaš Email",
     "phone": "Vaš Telefon",
     "message": "Vaša Poruka",
-    "messagePlaceholder": "Zdravo, zainteresiran sam za ovu nekretninu...",
+    "messagePlaceholder": "Zdravo, zanima me ova nekretnina...",
     "send": "Pošalji Poruku",
     "sending": "Slanje...",
-    "sent": "Poruka uspješno poslana!",
-    "scheduleViewing": "Zakaži Obilazak",
+    "sent": "Poruka uspješno poslata!",
+    "scheduleViewing": "Zakažite Obilazak",
     "selectDate": "Odaberite Datum",
     "selectTime": "Odaberite Vrijeme",
     "notes": "Dodatne Napomene"
@@ -207,38 +217,38 @@
   "gallery": {
     "title": "Foto Galerija",
     "of": "od",
-    "previous": "Prethodna",
-    "next": "Sljedeća",
+    "previous": "Prethodno",
+    "next": "Sljedeće",
     "close": "Zatvori",
     "fullscreen": "Puni Ekran",
-    "exitFullscreen": "Izađi iz Punog Ekrana",
-    "download": "Preuzmi",
+    "exitFullscreen": "Napusti Puni Ekran",
+    "download": "Preuzmite",
     "zoom": "Zumiraj",
-    "thumbnails": "Prikaži Minijature"
+    "thumbnails": "Prikaži Sličice"
   },
   "virtualTour": {
     "title": "Virtuelna Tura",
     "loading": "Učitavanje virtuelne ture...",
     "controls": {
-      "moveForward": "Kreni Naprijed",
-      "moveBackward": "Kreni Nazad",
+      "moveForward": "Pomjeri Naprijed",
+      "moveBackward": "Pomjeri Nazad",
       "lookAround": "Pogledaj Okolo",
       "zoomIn": "Zumiraj",
-      "zoomOut": "Odmaknuj",
+      "zoomOut": "Odzumiraj",
       "fullscreen": "Puni Ekran",
-      "exitFullscreen": "Izađi iz Punog Ekrana"
+      "exitFullscreen": "Napusti Puni Ekran"
     },
     "hotspots": "Tačke Interesa",
     "rooms": "Sobe",
     "info": "Informacije"
   },
   "floorPlan": {
-    "title": "Tlocrt",
-    "loading": "Učitavanje tlocrta...",
+    "title": "Osnova",
+    "loading": "Učitavanje osnove...",
     "zoomIn": "Zumiraj",
-    "zoomOut": "Odmaknuj",
+    "zoomOut": "Odzumiraj",
     "reset": "Resetuj Prikaz",
-    "download": "Preuzmi Tlocrt",
+    "download": "Preuzmite Osnovu",
     "interactive": "Kliknite na sobe za detalje"
   },
   "calculator": {
@@ -247,33 +257,33 @@
     "reset": "Resetuj",
     "results": "Rezultati",
     "monthlyPayment": "Mjesečna Rata",
-    "totalPayment": "Ukupno Plaćanje",
+    "totalPayment": "Ukupna Uplata",
     "totalInterest": "Ukupna Kamata",
-    "disclaimer": "Ovo je procjena. Konsultujte se s finansijskim savjetnikom za tačne izračune."
+    "disclaimer": "Ovo je procjena. Molimo konsultujte finansijskog savjetnika za tačne izračune."
   },
   "login": {
-    "title": "Prijava",
+    "title": "Prijavite se",
     "subtitle": "Dobrodošli nazad!",
-    "noAccount": "Nemate račun?",
+    "noAccount": "Nemate nalog?",
     "signUp": "Registrujte se",
-    "forgotPassword": "Zaboravljena Lozinka?"
+    "forgotPassword": "Zaboravili ste Lozinku?"
   },
   "signup": {
-    "title": "Kreiraj Račun",
+    "title": "Kreirajte Nalog",
     "subtitle": "Pridružite se BalkanEstate danas",
-    "haveAccount": "Već imate račun?",
+    "haveAccount": "Već imate nalog?",
     "logIn": "Prijavite se"
   },
   "cookie": {
-    "title": "Pristanak na Kolačiće",
-    "message": "Koristimo kolačiće za poboljšanje vašeg iskustva pregledanja i analizu prometa stranice. Klikom na 'Prihvati Sve', pristajete na našu upotrebu kolačića.",
+    "title": "Saglasnost za Kolačiće",
+    "message": "Koristimo kolačiće za poboljšanje Vašeg iskustva pregledanja i analizu prometa na sajtu. Klikom na 'Prihvati Sve', pristajete na našu upotrebu kolačića.",
     "acceptAll": "Prihvati Sve",
     "rejectAll": "Odbij Sve",
     "customize": "Prilagodi",
-    "necessary": "Neophodni (Obavezni)",
+    "necessary": "Neophodni (Obavezno)",
     "analytics": "Analitika",
     "marketing": "Marketing",
-    "savePreferences": "Spremi Postavke",
-    "learnMore": "Saznaj Više"
+    "savePreferences": "Sačuvaj Postavke",
+    "learnMore": "Saznajte Više"
   }
 }

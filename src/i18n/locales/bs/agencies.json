@@ -1,75 +1,92 @@
 {
   "hero": {
-    "title": "Pronađite Vrhunske Agencije za Nekretnine",
-    "subtitle": "Povežite se s pouzdanim stručnjacima za nekretnine u vašem području",
-    "searchPlaceholder": "Pretraži agencije po imenu ili lokaciji..."
+    "badge": "Vrhunske Mreže za Nekretnine",
+    "title": "Najbolje Agencije za",
+    "titleHighlight": "Nekretnine na Balkanu",
+    "subtitle": "Povežite se sa profesionalnim agencijama koje donose stručnost, povjerenje i rezultate u Vaše putovanje s nekretninama."
   },
   "search": {
-    "placeholder": "Pretraži agencije...",
-    "button": "Pretraži",
-    "clear": "Očisti"
+    "title": "Pronađite Vašu Idealnu Agenciju",
+    "subtitle": "Pretražite {count}+ profesionalnih agencija širom Balkana",
+    "tabs": {
+      "city": "Grad",
+      "agencyName": "Naziv Agencije"
+    },
+    "placeholder": {
+      "city": "Pretražite po gradu ili lokaciji...",
+      "name": "Pretražite po nazivu agencije..."
+    },
+    "clearSearch": "Očistite pretragu",
+    "popularSearches": "Popularne pretrage:"
   },
   "stats": {
-    "totalAgencies": "Ukupno Agencija",
-    "totalAgents": "Profesionalnih Agenata",
-    "propertiesListed": "Oglašenih Nekretnina",
-    "citiesCovered": "Pokrivenih Gradova"
+    "professionalAgencies": "Profesionalne Agencije",
+    "expertAgents": "Stručni Agenti",
+    "listedProperties": "Oglašene Nekretnine"
   },
   "filters": {
-    "title": "Filteri",
-    "location": "Lokacija",
-    "allLocations": "Sve Lokacije",
-    "specialization": "Specijalizacija",
-    "allSpecializations": "Sve Specijalizacije",
-    "rating": "Ocjena",
-    "anyRating": "Bilo koja Ocjena",
-    "reset": "Poništi Filtere"
+    "allAgencies": "Sve Agencije",
+    "featured": "Istaknute",
+    "myAgency": "Moja Agencija"
   },
   "sort": {
-    "label": "Sortiraj po",
-    "nameAsc": "Naziv (A-Ž)",
-    "nameDesc": "Naziv (Ž-A)",
-    "ratingDesc": "Najviša Ocjena",
-    "propertiesDesc": "Najviše Nekretnina",
-    "newest": "Najnovije Prvo"
+    "mostProperties": "Najviše Nekretnina",
+    "mostAgents": "Najviše Agenata",
+    "mostExperienced": "Najiskusnije",
+    "alphabetical": "Abecedno"
   },
   "results": {
-    "showing": "Prikazuje se {{count}} agencija",
-    "of": "od",
-    "noResults": "Nije pronađena nijedna agencija",
-    "tryAdjusting": "Pokušajte prilagoditi filtere"
+    "title": "Najbolje Agencije za Nekretnine",
+    "featuredTitle": "Istaknute Agencije",
+    "yourAgencyTitle": "Vaša Agencija",
+    "showingMatching": "Prikazuje se {count} agencija koje odgovaraju \"{query}\"",
+    "browseAgencies": "Pregledajte profesionalne agencije sa iskusnim timovima",
+    "agenciesFound": "agencija pronađeno",
+    "moreAgencies": "Više Agencija"
   },
   "card": {
-    "properties": "nekretnina",
-    "agents": "agenata",
-    "viewProfile": "Pogledaj Profil",
-    "contact": "Kontakt",
     "featured": "Istaknuto",
-    "verified": "Verificirano"
+    "certified": "Certificirano",
+    "properties": "Nekretnine",
+    "agents": "Agenti",
+    "years": "Godine",
+    "certs": "Certifikati",
+    "viewProfile": "Pogledaj Profil",
+    "view": "Pogledaj",
+    "more": "+{count} više"
+  },
+  "statsCards": {
+    "mostProperties": "Najviše Nekretnina",
+    "mostAgents": "Najviše Agenata",
+    "mostExperience": "Najviše Iskustva"
   },
   "empty": {
-    "title": "Nije Pronađena Nijedna Agencija",
-    "description": "Nije pronađena nijedna agencija koja odgovara vašim kriterijima",
-    "resetFilters": "Poništi Filtere"
+    "noAgenciesTitle": "Nije Pronađena Nijedna Agencija",
+    "noAgenciesYet": "Još Nema Agencija",
+    "noMyAgency": "Nije Pronađena Agencija",
+    "adjustSearch": "Pokušajte prilagoditi kriterije pretrage ili pregledajte sve agencije.",
+    "noMyAgencyMessage": "Još niste kreirali agenciju. Započnite svoje putovanje danas!",
+    "beFirst": "Budite prvi koji će kreirati agenciju i prikazati svoje nekretnine!"
   },
   "cta": {
-    "title": "Jeste li Stručnjak za Nekretnine?",
-    "description": "Pridružite se našoj mreži pouzdanih agencija i proširite svoje poslovanje",
-    "button": "Registrujte Svoju Agenciju"
+    "createAgency": "Kreirajte Agenciju",
+    "readyToGrow": "Spremni da Razvijete Vašu Agenciju?",
+    "ctaDescription": "Pridružite se našoj mreži vrhunskih agencija za nekretnine i budite prikazani tisućama potencijalnih klijenata. Prikažite svoje nekretnine, povežite se sa kupcima i proširite svoj domet.",
+    "createToday": "Kreirajte Vašu Agenciju Danas"
   },
   "loading": {
-    "text": "Učitavanje agencija..."
+    "title": "Pronalaženje Agencija...",
+    "message": "Pretražujemo našu mrežu profesionalnih agencija za nekretnine"
   },
   "error": {
-    "title": "Greška pri Učitavanju Agencija",
-    "retry": "Pokušaj Ponovo"
+    "unableToLoad": "Nije Moguće Učitati Agencije"
   },
   "featured": {
     "title": "Istaknute Agencije",
     "subtitle": "Otkrijte nekretnine putem naše pouzdane mreže profesionalnih partnera za nekretnine",
     "badge": "Istaknuto",
-    "viewAgency": "Pogledaj Agenciju",
-    "exploreAll": "Istraži Sve Agencije",
+    "viewAgency": "Pogledajte Agenciju",
+    "exploreAll": "Istražite Sve Agencije",
     "selectedByAlgorithm": "Svaka agencija je pažljivo odabrana za kvalitet i povjerenje",
     "selectedByAlgorithmMobile": "Pažljivo odabrane agencije",
     "properties": "Nekretnine",
