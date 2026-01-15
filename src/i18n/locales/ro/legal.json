@@ -155,11 +155,17 @@
     "payments": {
       "title": "Abonamente și plăți",
       "text": "Anumite funcții necesită un abonament plătit:",
-      "recurring": "Abonamentele sunt facturate pe bază recurentă",
-      "auto": "Abonamentele se reînnoiesc automat",
-      "cancel": "Puteți anula abonamentul în orice moment",
-      "refund": "Rambursările sunt disponibile în termen de 30 de zile de la cumpărare",
-      "price": "Putem modifica prețurile abonamentelor cu preaviz de 30 de zile"
+      "recurring": "Abonamentele sunt facturate pe bază recurentă (lunar sau anual)",
+      "auto": "Abonamentele se reînnoiesc automat dacă nu sunt anulate înainte de data reînnoirii",
+      "cancel": "Puteți anula abonamentul în orice moment prin setările contului",
+      "refund": "Rambursările sunt disponibile în termen de 7 zile (lunar) sau 30 de zile (anual) de la cumpărare dacă nu sunteți mulțumit (consultați Politica noastră de rambursare)",
+      "price": "Putem modifica prețurile abonamentelor cu preaviz de 30 de zile",
+      "paddle": {
+        "title": "Comerciant înregistrat",
+        "morStatement": "Procesul nostru de comandă este gestionat de revânzătorul nostru online Paddle.com. Paddle.com este Comerciantul înregistrat pentru toate comenzile noastre. Paddle gestionează toate întrebările de asistență pentru clienți și retururile.",
+        "text": "Când faceți o achiziție, efectuați o tranzacție cu Paddle, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările. Plata dumneavoastră va apărea pe extrasul dvs. ca o taxă de la Paddle.",
+        "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii pentru cumpărători Paddle."
+      }
     },
     "prohibited": {
       "title": "Conduită interzisă",

@@ -32,7 +32,15 @@
     "noCharges": "Your payment information was not saved and no charges were made. You can try again whenever you're ready.",
     "tryAgain": "Try Again",
     "returnHome": "Return to Home",
-    "havingTrouble": "Having trouble?",
-    "contactSupport": "Contact Support"
+    "havingTrouble": "Αντιμετωπίζετε πρόβλημα;",
+    "contactSupport": "Επικοινωνήστε με την υποστήριξη"
+  },
+  "termsAcceptance": {
+    "text": "Αποδέχομαι",
+    "terms": "τους Όρους Χρήσης",
+    "privacy": "την Πολιτική Απορρήτου",
+    "refund": "την Πολιτική Επιστροφών",
+    "and": "και",
+    "paddle": "Οι πληρωμές επεξεργάζονται από την Paddle.com ως Έμπορος Καταγραφής."
   }
 }

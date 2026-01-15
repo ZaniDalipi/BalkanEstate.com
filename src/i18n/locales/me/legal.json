@@ -153,13 +153,19 @@
       "remove": "We reserve the right to remove any listing that violates these terms or is reported as fraudulent."
     },
     "payments": {
-      "title": "Subscriptions and Payments",
-      "text": "Certain features require a paid subscription:",
-      "recurring": "Subscriptions are billed on a recurring basis (monthly or yearly)",
-      "auto": "Subscriptions auto-renew unless cancelled before the renewal date",
-      "cancel": "You can cancel your subscription at any time through your account settings",
-      "refund": "Refunds are available within 30 days of purchase if you are not satisfied",
-      "price": "We may change subscription prices with 30 days notice"
+      "title": "Pretplate i plaćanja",
+      "text": "Određene funkcije zahtijevaju plaćenu pretplatu:",
+      "recurring": "Pretplate se naplaćuju na ponavljajućoj osnovi (mjesečno ili godišnje)",
+      "auto": "Pretplate se automatski obnavljaju osim ako se ne otkažu prije datuma obnavljanja",
+      "cancel": "Možete otkazati pretplatu u bilo kom trenutku putem podešavanja naloga",
+      "refund": "Povrati su dostupni u roku od 7 dana (mjesečno) ili 30 dana (godišnje) od kupovine ako nijeste zadovoljni (pogledajte našu Politiku povrata)",
+      "price": "Možemo promijeniti cijene pretplate uz obavještenje od 30 dana",
+      "paddle": {
+        "title": "Trgovac evidencije",
+        "morStatement": "Naš proces naručivanja vodi naš online preprodavač Paddle.com. Paddle.com je Trgovac evidencije za sve naše narudžbe. Paddle pruža sve upite korisničke podrške i upravlja povratima.",
+        "text": "Kada izvršite kupovinu, obavljate transakciju sa Paddle-om, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima. Vaše plaćanje će se pojaviti na vašem izvodu kao naplata od Paddle-a.",
+        "buyerTerms": "Kupovinom takođe prihvatate Paddle-ove Uslove za kupce."
+      }
     },
     "prohibited": {
       "title": "Prohibited Conduct",

@@ -110,12 +110,21 @@ const TermsOfServicePage: React.FC = () => {
               <li>{t('legal:terms.payments.refund', 'Refunds are available within 7 days (monthly) or 30 days (yearly) of purchase if you are not satisfied (see our Refund Policy)')}</li>
               <li>{t('legal:terms.payments.price', 'We may change subscription prices with 30 days notice')}</li>
             </ul>
-            <div className="bg-gray-50 rounded-lg p-4 mt-4">
-              <h4 className="font-semibold text-gray-800 mb-2">{t('legal:terms.payments.paddle.title', 'Payment Processing')}</h4>
-              <p className="text-gray-600 text-sm">
-                {t('legal:terms.payments.paddle.text', 'All payments are processed by Paddle.com, our Merchant of Record. Paddle handles payment processing, invoicing, VAT/tax compliance, and refunds on our behalf. When you make a purchase, you are transacting with Paddle, who then remits payment to us. Your payment will appear on your statement as a charge from Paddle.')}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+              <h4 className="font-semibold text-gray-800 mb-2">{t('legal:terms.payments.paddle.title', 'Merchant of Record')}</h4>
+              <p className="text-gray-700 text-sm mb-3">
+                {t('legal:terms.payments.paddle.morStatement', 'Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns.')}
               </p>
-              <a href="https://www.paddle.com/legal/terms" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline mt-2 inline-block">Paddle Terms of Service →</a>
+              <p className="text-gray-600 text-sm mb-3">
+                {t('legal:terms.payments.paddle.text', 'When you make a purchase, you are transacting with Paddle, who handles payment processing, invoicing, VAT/tax compliance, and refunds. Your payment will appear on your statement as a charge from Paddle.')}
+              </p>
+              <p className="text-gray-600 text-sm mb-3">
+                {t('legal:terms.payments.paddle.buyerTerms', 'By making a purchase, you also agree to Paddle\'s Buyer Terms and Conditions.')}
+              </p>
+              <div className="flex flex-wrap gap-3 mt-3">
+                <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Paddle Buyer Terms →</a>
+                <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Paddle Privacy Policy →</a>
+              </div>
             </div>
           </section>
 

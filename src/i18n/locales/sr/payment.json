@@ -75,5 +75,13 @@
     "sslSecured": "SSL Osigurano",
     "pciCompliant": "PCI Usklađeno",
     "securePayment": "Sigurno Plaćanje"
+  },
+  "termsAcceptance": {
+    "text": "Prihvatam",
+    "terms": "Uslove korišćenja",
+    "privacy": "Politiku privatnosti",
+    "refund": "Politiku povraćaja",
+    "and": "i",
+    "paddle": "Plaćanja obrađuje Paddle.com kao Trgovac evidencije."
   }
 }

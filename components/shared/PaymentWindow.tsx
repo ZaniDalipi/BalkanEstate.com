@@ -131,6 +131,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   } | null>(null);
 
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Dynamically detect user country
   const userCountry = propUserCountry || detectUserCountry(state.currentUser?.country);
@@ -169,6 +170,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       setDiscountCode('');
       setCodeValidation(null);
       setAppliedDiscountCode(null);
+      setTermsAccepted(false);
     }
   }, [isOpen, state.isAuthenticated, onError, onClose, t]);
 
@@ -627,6 +629,37 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               </div>
             )}
 
+            {/* Terms Acceptance Checkbox - Required by Paddle */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative flex-shrink-0 mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                  />
+                </div>
+                <span className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  {t('payment:termsAcceptance.text', 'I agree to the')}{' '}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+                    {t('payment:termsAcceptance.terms', 'Terms of Service')}
+                  </a>
+                  {', '}
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+                    {t('payment:termsAcceptance.privacy', 'Privacy Policy')}
+                  </a>
+                  {', '}
+                  {t('payment:termsAcceptance.and', 'and')}{' '}
+                  <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+                    {t('payment:termsAcceptance.refund', 'Refund Policy')}
+                  </a>
+                  {'. '}
+                  {t('payment:termsAcceptance.paddle', 'Payments are processed by Paddle.com as Merchant of Record.')}
+                </span>
+              </label>
+            </div>
+
             {/* Payment Button */}
             <button
               type="button"
@@ -636,7 +669,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 console.log('Button clicked event triggered');
                 handlePayment();
               }}
-              disabled={isProcessing}
+              disabled={isProcessing || !termsAccepted}
               className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-1.5 sm:gap-2 ${
                 finalPrice === 0 || finalPrice < 0.01
                   ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'

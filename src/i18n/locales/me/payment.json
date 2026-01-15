@@ -72,8 +72,16 @@
     "save": "Save €{{amount}}",
     "free": "FREE",
     "fullDiscount": "100% OFF!",
-    "sslSecured": "SSL Secured",
-    "pciCompliant": "PCI Compliant",
-    "securePayment": "Secure Payment"
+    "sslSecured": "SSL osigurano",
+    "pciCompliant": "PCI usklađeno",
+    "securePayment": "Sigurno plaćanje"
+  },
+  "termsAcceptance": {
+    "text": "Prihvatam",
+    "terms": "Uslove korišćenja",
+    "privacy": "Politiku privatnosti",
+    "refund": "Politiku povrata",
+    "and": "i",
+    "paddle": "Plaćanja obrađuje Paddle.com kao Trgovac evidencije."
   }
 }

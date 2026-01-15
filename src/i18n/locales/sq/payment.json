@@ -75,5 +75,13 @@
     "sslSecured": "SSL i Sigurt",
     "pciCompliant": "PCI Konform",
     "securePayment": "Pagesë e Sigurt"
+  },
+  "termsAcceptance": {
+    "text": "Pranoj",
+    "terms": "Kushtet e Shërbimit",
+    "privacy": "Politikën e Privatësisë",
+    "refund": "Politikën e Rimbursimit",
+    "and": "dhe",
+    "paddle": "Pagesat përpunohen nga Paddle.com si Tregtari i Regjistruar."
   }
 }

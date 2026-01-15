@@ -32,7 +32,15 @@
     "noCharges": "Your payment information was not saved and no charges were made. You can try again whenever you're ready.",
     "tryAgain": "Try Again",
     "returnHome": "Return to Home",
-    "havingTrouble": "Having trouble?",
-    "contactSupport": "Contact Support"
+    "havingTrouble": "Aveți probleme?",
+    "contactSupport": "Contactați suportul"
+  },
+  "termsAcceptance": {
+    "text": "Accept",
+    "terms": "Termenii și condițiile",
+    "privacy": "Politica de confidențialitate",
+    "refund": "Politica de rambursare",
+    "and": "și",
+    "paddle": "Plățile sunt procesate de Paddle.com ca Comerciant înregistrat."
   }
 }

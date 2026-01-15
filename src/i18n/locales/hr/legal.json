@@ -158,8 +158,14 @@
       "recurring": "Pretplate se naplaćuju na ponavljajućoj osnovi (mjesečno ili godišnje)",
       "auto": "Pretplate se automatski obnavljaju osim ako se ne otkažu prije datuma obnavljanja",
       "cancel": "Možete otkazati pretplatu u bilo kojem trenutku putem postavki računa",
-      "refund": "Povrati su dostupni u roku od 30 dana od kupnje ako niste zadovoljni",
-      "price": "Možemo promijeniti cijene pretplate uz obavijest od 30 dana"
+      "refund": "Povrati su dostupni u roku od 7 dana (mjesečno) ili 30 dana (godišnje) od kupnje ako niste zadovoljni (pogledajte našu Politiku povrata)",
+      "price": "Možemo promijeniti cijene pretplate uz obavijest od 30 dana",
+      "paddle": {
+        "title": "Trgovac evidencije",
+        "morStatement": "Naš proces naručivanja provodi naš online preprodavač Paddle.com. Paddle.com je Trgovac evidencije za sve naše narudžbe. Paddle pruža sve upite korisničke podrške i upravlja povratima.",
+        "text": "Kada izvršite kupnju, obavljate transakciju s Paddle-om, koji upravlja obradom plaćanja, fakturiranjem, usklađenošću s PDV-om/porezima i povratima. Vaše plaćanje će se pojaviti na vašem izvodu kao naplata od Paddle-a.",
+        "buyerTerms": "Kupnjom također prihvaćate Paddle-ove Uvjete za kupce."
+      }
     },
     "prohibited": {
       "title": "Zabranjeno ponašanje",
