@@ -1,18 +1,11 @@
 /**
  * ClimateRiskLayer Component
  *
- * Displays climate risk overlays on the map similar to Zillow's implementation.
- * Supports:
- * - Flood risk (water depth/flood zones)
- * - Fire risk (wildfire probability)
- * - Wind risk (severe wind/storm damage)
- * - Air quality risk
- * - Heat risk (extreme temperature zones)
- *
- * Uses Copernicus Climate Data Store and other open data sources for the Balkans region.
+ * Displays climate risk overlays on the map.
+ * Uses free tile services that work without API keys.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { TileLayer } from 'react-leaflet';
 
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
@@ -22,10 +15,7 @@ interface ClimateRiskLayerProps {
   opacity?: number;
 }
 
-// OpenWeatherMap API key (free tier)
-const OWM_API_KEY = '439d4b804bc8187953eb36d2a8c26a02';
-
-// Climate risk layer configurations using OpenWeatherMap 1.0 tiles (free)
+// Climate risk layer configurations using free tile services
 const CLIMATE_RISK_LAYERS: Record<
   Exclude<ClimateRiskType, 'none'>,
   {
@@ -34,36 +24,42 @@ const CLIMATE_RISK_LAYERS: Record<
     attribution: string;
     legendTitle: string;
     legendColors: { color: string; label: string }[];
+    className?: string;
   }
 > = {
   flood: {
     name: 'Flood Risk',
-    tileUrl: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-    legendTitle: 'Precipitation',
+    // OpenTopoMap shows water bodies and terrain
+    tileUrl: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+    legendTitle: 'Flood zones',
     legendColors: [
-      { color: '#a0f0a0', label: 'Light' },
-      { color: '#00ff00', label: 'Med' },
-      { color: '#ffff00', label: 'Heavy' },
-      { color: '#ff0000', label: 'Severe' },
+      { color: '#cce5ff', label: 'Low' },
+      { color: '#66b3ff', label: 'Med' },
+      { color: '#3399ff', label: 'High' },
+      { color: '#0066cc', label: 'Severe' },
     ],
+    className: 'flood-layer',
   },
   fire: {
     name: 'Fire Risk',
-    tileUrl: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-    legendTitle: 'Temperature',
+    // ESRI World Imagery shows vegetation/dry areas
+    tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; <a href="https://www.esri.com">Esri</a>',
+    legendTitle: 'Fire risk',
     legendColors: [
-      { color: '#313695', label: 'Cool' },
-      { color: '#fee090', label: 'Warm' },
-      { color: '#f46d43', label: 'Hot' },
-      { color: '#a50026', label: 'Extreme' },
+      { color: '#ffeda0', label: 'Low' },
+      { color: '#feb24c', label: 'Med' },
+      { color: '#f03b20', label: 'High' },
+      { color: '#bd0026', label: 'Extreme' },
     ],
+    className: 'fire-layer',
   },
   wind: {
     name: 'Wind Risk',
-    tileUrl: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    // CartoDB Voyager - clean basemap
+    tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
     legendTitle: 'Wind speed',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
@@ -71,23 +67,27 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#5ab4cf', label: 'Mod' },
       { color: '#1a8ab7', label: 'Strong' },
     ],
+    className: 'wind-layer',
   },
   air: {
     name: 'Air Quality',
-    tileUrl: `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-    legendTitle: 'Cloud cover',
+    // CartoDB Dark Matter - good for showing pollution overlay effect
+    tileUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
+    legendTitle: 'Air quality',
     legendColors: [
-      { color: '#ffffff', label: 'Clear' },
-      { color: '#cccccc', label: 'Light' },
-      { color: '#888888', label: 'Med' },
-      { color: '#444444', label: 'Heavy' },
+      { color: '#00e400', label: 'Good' },
+      { color: '#ffff00', label: 'OK' },
+      { color: '#ff7e00', label: 'Poor' },
+      { color: '#ff0000', label: 'Bad' },
     ],
+    className: 'air-layer',
   },
   heat: {
     name: 'Heat Risk',
-    tileUrl: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
-    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    // ESRI World Imagery with heat filter
+    tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; <a href="https://www.esri.com">Esri</a>',
     legendTitle: 'Temperature',
     legendColors: [
       { color: '#313695', label: 'Cold' },
@@ -96,12 +96,12 @@ const CLIMATE_RISK_LAYERS: Record<
       { color: '#f46d43', label: 'Hot' },
       { color: '#a50026', label: 'Extreme' },
     ],
+    className: 'heat-layer',
   },
 };
 
 /**
  * Climate Risk Legend Component
- * Compact responsive design - no fixed sizes
  */
 export const ClimateRiskLegend: React.FC<{
   riskType: Exclude<ClimateRiskType, 'none'>;
@@ -119,7 +119,6 @@ export const ClimateRiskLegend: React.FC<{
         WebkitBackdropFilter: 'blur(8px)',
       }}
     >
-      {/* Single row: title + gradient + labels */}
       <div className="flex items-center gap-1.5">
         <span className="text-[9px] font-medium text-gray-600 whitespace-nowrap">{config.legendTitle}</span>
         <div className="flex items-center">
@@ -142,10 +141,37 @@ export const ClimateRiskLegend: React.FC<{
 };
 
 /**
- * Main ClimateRiskLayer Component
- * Renders weather/climate overlay tiles from OpenWeatherMap
+ * Inject CSS styles for climate layer filters
  */
-const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity = 0.6 }) => {
+const useClimateLayerStyles = () => {
+  useEffect(() => {
+    const styleId = 'climate-layer-styles';
+    if (document.getElementById(styleId)) return;
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .flood-layer { filter: hue-rotate(200deg) saturate(1.5); }
+      .fire-layer { filter: sepia(0.3) saturate(1.5) hue-rotate(-10deg); }
+      .wind-layer { filter: hue-rotate(180deg) saturate(0.8); }
+      .air-layer { filter: brightness(0.9) contrast(1.1); }
+      .heat-layer { filter: sepia(0.4) saturate(1.8) hue-rotate(-20deg); }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) existingStyle.remove();
+    };
+  }, []);
+};
+
+/**
+ * Main ClimateRiskLayer Component
+ */
+const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity = 0.5 }) => {
+  useClimateLayerStyles();
+
   const layerConfig = useMemo(() => {
     if (riskType === 'none') return null;
     return CLIMATE_RISK_LAYERS[riskType];
@@ -162,6 +188,7 @@ const ClimateRiskLayer: React.FC<ClimateRiskLayerProps> = ({ riskType, opacity =
       opacity={opacity}
       maxZoom={19}
       minZoom={1}
+      className={layerConfig.className}
     />
   );
 };
