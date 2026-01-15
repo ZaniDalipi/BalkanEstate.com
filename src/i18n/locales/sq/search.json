@@ -207,7 +207,23 @@
     "locationPermissionDenied": "Leja e vendndodhjes u refuzua. Ju lutem aktivizoni qasjen në vendndodhje në cilësimet e shfletuesit tuaj.",
     "locationUnavailable": "Informacioni i vendndodhjes nuk është i disponueshëm. Ju lutem provoni përsëri.",
     "locationTimeout": "Kërkesa për vendndodhje skadoi. Ju lutem provoni përsëri.",
-    "locationError": "Ndodhi një gabim gjatë marrjes së vendndodhjes suaj. Ju lutem provoni përsëri."
+    "locationError": "Ndodhi një gabim gjatë marrjes së vendndodhjes suaj. Ju lutem provoni përsëri.",
+    "options": {
+      "title": "Opsionet e Hartës",
+      "mapButton": "Harta",
+      "automatic": "Automatike",
+      "satellite": "Satelitor",
+      "streetView": "Pamje rruge"
+    },
+    "climateRisks": {
+      "title": "Rreziqet Klimatike",
+      "none": "Asnjë e zgjedhur",
+      "flood": "Përmbytje",
+      "fire": "Zjarr",
+      "wind": "Erë",
+      "air": "Ajër",
+      "heat": "Nxehtësi"
+    }
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

@@ -19,6 +19,8 @@ import SunArcAnimation, { type Season } from './SunArcAnimation';
 import LandmarksLayer from './LandmarksLayer';
 import PropertyAddressLabels from './PropertyAddressLabels';
 import MeasurementTool from './MeasurementTool';
+import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
+import ClimateRiskLayer, { ClimateRiskLegend } from './ClimateRiskLayer';
 import {
   FlyToController,
   MapEvents,
@@ -182,6 +184,28 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
+ * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
+ * Far away: whole zoom levels (zoomSnap=1)
+ * Very close (18+): fractional zoom (zoomSnap=0.5)
+ */
+const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    // Enable fractional zoom only when zoomed in very close (>= 18)
+    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
+    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
+
+    if (map.options.zoomSnap !== newZoomSnap) {
+      map.options.zoomSnap = newZoomSnap;
+      map.options.zoomDelta = newZoomDelta;
+    }
+  }, [currentZoom, map]);
+
+  return null;
+};
+
+/**
  * ZoomAdjuster Component - adjusts zoom when switching map types
  * Ensures zoom level doesn't exceed the new layer's max zoom
  */
@@ -244,8 +268,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
-  // Default to 'positron' - clean style optimized for real estate (properties stand out)
-  const [mapType, setMapType] = useState<TileLayerType>(DEFAULT_MAP_STYLE as TileLayerType);
+  // Default to 'street' - Google Maps street view as per Zillow-style implementation
+  const [mapType, setMapType] = useState<TileLayerType>('street' as TileLayerType);
   const [isLegendOpen, setIsLegendOpen] = useState(false); // Legend closed by default, user can open it
   const [showCadastre, setShowCadastre] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
@@ -259,6 +283,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
   const [showMeasurement, setShowMeasurement] = useState(false); // Toggle for measurement tool
   const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false); // Mobile FAB layer menu
+
+  // Zillow-style Map Options state
+  const [isMapOptionsOpen, setIsMapOptionsOpen] = useState(false); // Map options panel visibility
+  const [selectedMapOption, setSelectedMapOption] = useState<MapOptionType>('streetview'); // Default to Street view
+  const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none'); // No climate risk by default
 
   // Check URL params for measurementId to auto-enable measurement tool
   useEffect(() => {
@@ -278,6 +307,31 @@ const MapComponent: React.FC<MapComponentProps> = ({
       setMapType('satellite');
     }
   }, [showMeasurement]);
+
+  // Sync map option selection with actual tile layer type
+  useEffect(() => {
+    // Map the Zillow-style options to actual tile layer types
+    const mapOptionToTileLayer: Record<MapOptionType, TileLayerType> = {
+      automatic: 'voyager', // Automatic uses the colorful neighborhood view
+      satellite: 'satellite',
+      streetview: 'street', // Street view uses Google Maps street layer
+    };
+    setMapType(mapOptionToTileLayer[selectedMapOption]);
+  }, [selectedMapOption]);
+
+  // Handle map option change (from MapOptionsPanel)
+  const handleMapOptionChange = useCallback((option: MapOptionType) => {
+    setSelectedMapOption(option);
+    // Close the panel after selection on mobile
+    if (isMobile) {
+      setIsMapOptionsOpen(false);
+    }
+  }, [isMobile]);
+
+  // Handle climate risk change (from MapOptionsPanel)
+  const handleClimateRiskChange = useCallback((risk: ClimateRiskType) => {
+    setSelectedClimateRisk(risk);
+  }, []);
 
   // Use ref for onMapMove to prevent infinite loops when callback changes
   const onMapMoveRef = useRef(onMapMove);
@@ -370,10 +424,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
+          // Smooth zoom settings (fractional zoom enabled dynamically when close)
+          zoomSnap={1}
+          zoomDelta={1}
+          wheelPxPerZoomLevel={100}
+          zoomAnimation={true}
+          fadeAnimation={true}
+          markerZoomAnimation={true}
           // Mobile optimizations
-          fadeAnimation={!isMobile}
-          markerZoomAnimation={!isMobile}
-          zoomAnimation={!isMobile}
           tap={isMobile}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
@@ -382,6 +440,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
           <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} />
+          <ZoomSnapAdjuster currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
@@ -408,6 +467,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
             updateInterval={isMobile ? 200 : 150}
             className="map-tiles"
           />
+          {/* Climate Risk Overlay Layer (Zillow-style) */}
+          <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
           {/* 3D Buildings with time-based shadows */}
           <Buildings3DLayer
             enabled={show3DBuildings}
@@ -453,6 +514,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
         <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-4 left-4'} z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md`}>
           <span>🔍{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} 📍{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
         </div>
+
+        {/* Climate Risk Legend - TOP LEFT, under zoom display (both mobile and desktop) */}
+        {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
+          <div className={`absolute ${show3DBuildings ? 'top-14 right-4' : 'top-14 left-4'} z-[1000]`}>
+            <ClimateRiskLegend riskType={selectedClimateRisk} />
+          </div>
+        )}
 
       {/* Desktop Controls - positioned above the newsletter bar (bottom-12 = ~112px) */}
       {!isMobile && (
@@ -529,6 +597,47 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
             {/* Layer toggles - compact row with glass effect */}
             <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
+              {/* Climate Risks Button - FIRST on desktop */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                    isMapOptionsOpen || selectedClimateRisk !== 'none'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
+                  }`}
+                >
+                  <span>{t('search:map.climateRisks.title', 'Climate Risks')}</span>
+                  <svg
+                    className={`w-3.5 h-3.5 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {/* Climate Risks Panel - appears above the button */}
+                {isMapOptionsOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 z-[1010]">
+                    <MapOptionsPanel
+                      selectedMapOption={selectedMapOption}
+                      selectedClimateRisk={selectedClimateRisk}
+                      onMapOptionChange={handleMapOptionChange}
+                      onClimateRiskChange={handleClimateRiskChange}
+                      isOpen={isMapOptionsOpen}
+                      onClose={() => setIsMapOptionsOpen(false)}
+                      showMapOptions={false}
+                      isMobile={false}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Separator */}
+              <div className="w-px h-5 bg-gray-300/50" />
+
               {/* 3D Buildings Toggle */}
               <button
                 onClick={() => setShow3DBuildings(!show3DBuildings)}
@@ -601,6 +710,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <span className="hidden sm:inline">{t('search:map.legend', 'Legend')}</span>
               </button>
             </div>
+
 
             {drawnBounds && !isDrawing && (
               <div className="flex items-center gap-1.5 animate-fade-in">
@@ -771,6 +881,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 <Legend isNightMode={false} />
               </div>
             )}
+
           </div>
 
           {/* Mobile: Top right compact controls */}
@@ -785,61 +896,62 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                 }}
               >
-                {/* Map type toggle */}
-                <div className="flex bg-neutral-100 rounded-lg p-0.5">
+                {/* Map Options Button */}
+                <div className="relative">
                   <button
-                    onClick={() => setMapType('positron')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'positron' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
+                    onClick={() => setIsMapOptionsOpen(!isMapOptionsOpen)}
+                    className={`flex items-center justify-center gap-1 px-2.5 py-2 text-xs font-semibold rounded-xl transition-all active:scale-95 ${
+                      isMapOptionsOpen || selectedClimateRisk !== 'none'
+                        ? 'bg-blue-500 text-white'
+                        : 'text-gray-700 hover:bg-white/50'
                     }`}
                   >
-                    Clean
+                    <span>{t('search:map.options.mapButton', 'Map')}</span>
+                    <svg
+                      className={`w-3 h-3 transition-transform ${isMapOptionsOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
-                  <button
-                    onClick={() => setMapType('voyager')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'voyager' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
-                    }`}
-                  >
-                    Color
-                  </button>
-                  <button
-                    onClick={() => setMapType('street')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'street' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
-                    }`}
-                  >
-                    Map
-                  </button>
-                  <button
-                    onClick={() => setMapType('satellite')}
-                    className={`px-1.5 py-1 rounded-md text-[9px] font-semibold transition-all ${
-                      mapType === 'satellite' ? 'bg-white shadow-sm text-primary' : 'text-neutral-500'
-                    }`}
-                  >
-                    Sat
-                  </button>
+                  {/* Map Options Panel dropdown */}
+                  {isMapOptionsOpen && (
+                    <div className="absolute top-full right-0 mt-2 z-[1010]">
+                      <MapOptionsPanel
+                        selectedMapOption={selectedMapOption}
+                        selectedClimateRisk={selectedClimateRisk}
+                        onMapOptionChange={handleMapOptionChange}
+                        onClimateRiskChange={handleClimateRiskChange}
+                        isOpen={isMapOptionsOpen}
+                        onClose={() => setIsMapOptionsOpen(false)}
+                        isMobile={true}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Recenter */}
                 <button
                   onClick={onRecenter}
-                  className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-600"
+                  className="p-2 rounded-xl hover:bg-white/50 text-neutral-600 active:scale-95"
                   title={t('search:map.centerOnLocation')}
                 >
-                  <CrosshairsIcon className="w-4 h-4" />
+                  <CrosshairsIcon className="w-5 h-5" />
                 </button>
 
                 {/* Draw */}
                 <button
                   onClick={onDrawStart}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all active:scale-95 ${
                     isDrawing ? 'bg-red-500 text-white' : 'bg-neutral-800 text-white'
                   }`}
                   title={isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}
                 >
-                  {isDrawing ? <XCircleIcon className="w-3.5 h-3.5" /> : <PencilIcon className="w-3.5 h-3.5" />}
-                  <span className="text-[10px] font-semibold">{isDrawing ? t('search:map.cancel') : t('search:map.draw', 'Draw')}</span>
+                  {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+                  <span className="text-xs font-semibold">{isDrawing ? t('search:map.cancel') : t('search:map.draw', 'Draw')}</span>
                 </button>
               </div>
 
@@ -887,6 +999,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               )}
             </div>
           </div>
+
         </>
       )}
       </div>

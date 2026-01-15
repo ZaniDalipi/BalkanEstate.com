@@ -193,7 +193,23 @@
     "tips": "💡 Sfaturi: Folosiți caseta de căutare pentru a găsi satul/orașul dvs., măriți cu butoanele +/- sau rotița mouse-ului, deplasați harta prin tragere și trageți marcatorul roșu la locația exactă a proprietății dvs.",
     "latitude": "Latitudine:",
     "longitude": "Longitudine:",
-    "location": "Locație"
+    "location": "Locație",
+    "options": {
+      "title": "Opțiuni hartă",
+      "mapButton": "Hartă",
+      "automatic": "Automat",
+      "satellite": "Satelit",
+      "streetView": "Vedere stradală"
+    },
+    "climateRisks": {
+      "title": "Riscuri climatice",
+      "none": "Nimic selectat",
+      "flood": "Inundație",
+      "fire": "Incendiu",
+      "wind": "Vânt",
+      "air": "Aer",
+      "heat": "Căldură"
+    }
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",

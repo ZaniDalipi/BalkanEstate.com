@@ -208,7 +208,23 @@
     "locationPermissionDenied": "Dopuštenje za lokaciju odbijeno. Molimo omogućite pristup lokaciji u postavkama preglednika.",
     "locationUnavailable": "Informacije o lokaciji nisu dostupne. Molimo pokušajte ponovno.",
     "locationTimeout": "Zahtjev za lokaciju je istekao. Molimo pokušajte ponovno.",
-    "locationError": "Došlo je do greške prilikom dohvaćanja vaše lokacije. Molimo pokušajte ponovno."
+    "locationError": "Došlo je do greške prilikom dohvaćanja vaše lokacije. Molimo pokušajte ponovno.",
+    "options": {
+      "title": "Opcije karte",
+      "mapButton": "Karta",
+      "automatic": "Automatski",
+      "satellite": "Satelit",
+      "streetView": "Ulični prikaz"
+    },
+    "climateRisks": {
+      "title": "Klimatski rizici",
+      "none": "Ništa nije odabrano",
+      "flood": "Poplava",
+      "fire": "Požar",
+      "wind": "Vjetar",
+      "air": "Zrak",
+      "heat": "Vrućina"
+    }
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",

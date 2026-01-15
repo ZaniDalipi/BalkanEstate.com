@@ -611,18 +611,20 @@ const PropertyPopup: React.FC<{
     );
   }
 
-  // Standard popup - clean minimal design (no slider, full-width image)
-  // Responsive: smaller on mobile
+  // Standard popup - modern clean design
   return (
     <div
-      className="w-[160px] sm:w-[180px] cursor-pointer rounded-xl overflow-hidden shadow-lg bg-white"
+      className="w-[200px] cursor-pointer rounded-2xl overflow-hidden bg-white"
+      style={{
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+      }}
       onClick={() => onPopupClick(property.id)}
     >
-      {/* Full-width image - no slider, just first image */}
-      <div className="relative h-[90px] sm:h-[100px]">
+      {/* Image section */}
+      <div className="relative h-[120px]">
         {imageErrors.has(0) ? (
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-            <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+            <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
           </div>
         ) : (
           <img
@@ -633,50 +635,72 @@ const PropertyPopup: React.FC<{
           />
         )}
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-        {/* Property type */}
-        <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-white/90 text-neutral-700 capitalize">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+
+        {/* Property type badge */}
+        <span className="absolute top-2.5 left-2.5 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/95 text-neutral-700 capitalize shadow-sm">
           {property.propertyType}
         </span>
+
         {/* Price on image */}
-        <div className="absolute bottom-1.5 left-1.5 right-1.5">
-          <p className="font-bold text-white text-sm sm:text-base drop-shadow-md">
+        <div className="absolute bottom-2.5 left-2.5">
+          <p className="font-bold text-white text-lg drop-shadow-lg">
             {formatPrice(priceInfo.currentPrice, property.country)}
           </p>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-2">
+      {/* Content section */}
+      <div className="p-3">
         {/* Title */}
-        {property.title && (
-          <p className="font-semibold text-xs text-neutral-800 line-clamp-1 mb-0.5">
-            {property.title}
-          </p>
-        )}
+        <h3 className="font-bold text-sm text-neutral-900 line-clamp-1 mb-1">
+          {property.title || property.address}
+        </h3>
 
         {/* Location */}
-        <p className="text-[10px] text-neutral-500 mb-1.5">
+        <p className="text-xs text-neutral-500 mb-2.5">
           {property.city}, {property.country}
         </p>
 
-        {/* Specs row */}
+        {/* Specs row with icons */}
         {property.propertyType === 'land' ? (
-          <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
-            <span className="font-semibold">{property.sqft?.toLocaleString()} m²</span>
+          <div className="flex items-center gap-1 text-xs text-neutral-600 mb-3">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <span className="font-semibold">{property.sqft?.toLocaleString()}</span>
+            <span>m²</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
-            <span><span className="font-semibold">{property.beds}</span> bed</span>
-            <span><span className="font-semibold">{property.baths}</span> bath</span>
-            <span><span className="font-semibold">{property.sqft}</span> m²</span>
+          <div className="flex items-center gap-3 text-xs text-neutral-600 mb-3">
+            <div className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span><span className="font-semibold">{property.beds}</span> bed</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+              </svg>
+              <span><span className="font-semibold">{property.baths}</span> bath</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+              <span><span className="font-semibold">{property.sqft}</span> m²</span>
+            </div>
           </div>
         )}
 
-        {/* CTA */}
-        <div className="text-center py-1.5 rounded-lg bg-primary/10">
-          <span className="text-[10px] font-semibold text-primary">View details →</span>
-        </div>
+        {/* CTA Button */}
+        <button className="w-full py-2 rounded-xl bg-primary hover:bg-primary-dark text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+          <span>View details</span>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
