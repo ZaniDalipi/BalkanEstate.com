@@ -510,7 +510,7 @@ async function generateEnterpriseAgentCoupons(
       agencyName: agency.name,
       coupons: newCoupons,
     });
-    console.log(`📧 Sent agent registration coupons email to ${ownerEmail}`);
+    // Sent agent registration coupons email
 
     // Send welcome/thank you email
     await sendEnterpriseWelcomeEmail({
@@ -518,7 +518,7 @@ async function generateEnterpriseAgentCoupons(
       ownerName,
       agencyName: agency.name,
     });
-    console.log(`📧 Sent Enterprise welcome email to ${ownerEmail}`);
+    // Sent Enterprise welcome email
   } catch (emailError) {
     console.error('⚠️ Failed to send Enterprise emails:', emailError);
     // Don't throw - coupons were still generated successfully

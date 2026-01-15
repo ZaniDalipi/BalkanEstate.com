@@ -175,9 +175,9 @@ export const sendProMemberWeeklyStats = async (): Promise<void> => {
         };
 
         await emailService.sendWeeklyStats(statsData);
-        console.log(`✅ Sent weekly stats to ${user.email}`);
+        // Sent weekly stats to user
       } catch (userError) {
-        console.error(`❌ Failed to send stats to ${user.email}:`, userError);
+        console.error('❌ Failed to send weekly stats to user:', userError);
       }
     }
 

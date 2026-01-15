@@ -517,7 +517,7 @@ export const processTrialManagement = async (): Promise<{
       await sendTrialExpirationReminder(user);
       remindersSent++;
     } catch (error) {
-      console.error(`Failed to send trial reminder to ${user.email}:`, error);
+      console.error('Failed to send trial reminder:', error);
     }
   }
 
@@ -528,7 +528,7 @@ export const processTrialManagement = async (): Promise<{
       await expireTrialAndDowngrade(user);
       trialsExpired++;
     } catch (error) {
-      console.error(`Failed to expire trial for ${user.email}:`, error);
+      console.error('Failed to expire trial:', error);
     }
   }
 

@@ -155,12 +155,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       onAgencyChange();
 
     } catch (err: any) {
-      console.error('❌ ERROR in handleSubmit:', err);
-      console.error('Error type:', typeof err);
-      console.error('Error message:', err.message);
-      console.error('Error stack:', err.stack);
-      console.error('Full error object:', JSON.stringify(err, null, 2));
-
+      console.error('Error processing agency join request');
       setError(err.message || 'Failed to process join request. Please check the invitation code and try again.');
     } finally {
       setLoading(false);

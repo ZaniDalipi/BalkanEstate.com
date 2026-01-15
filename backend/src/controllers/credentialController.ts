@@ -113,7 +113,7 @@ export const addCredential = async (req: Request, res: Response): Promise<void> 
 
     const addedCredential = agent.credentials[agent.credentials.length - 1];
 
-    console.log(`📜 Credential added for agent ${currentUser.email}: ${title} (${type})`);
+    // Credential added successfully
 
     res.status(201).json({
       success: true,
@@ -201,7 +201,7 @@ export const updateCredential = async (req: Request, res: Response): Promise<voi
 
     await agent.save();
 
-    console.log(`📝 Credential updated for agent ${currentUser.email}: ${agent.credentials[credentialIndex].title}`);
+    // Credential updated successfully
 
     res.json({
       success: true,
@@ -257,7 +257,7 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
     agent.credentials.splice(credentialIndex, 1);
     await agent.save();
 
-    console.log(`🗑️ Credential deleted for agent ${currentUser.email}: ${deletedCredential.title}`);
+    // Credential deleted successfully
 
     res.json({
       success: true,

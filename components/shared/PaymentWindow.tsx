@@ -229,10 +229,6 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   };
 
   const handlePayment = async () => {
-    console.log('💳 Payment button clicked');
-    console.log('Final price:', finalPrice);
-    console.log('Applied discount code:', appliedDiscountCode);
-
     setIsProcessing(true);
 
     try {
@@ -243,11 +239,8 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         throw new Error('Please log in to complete your purchase');
       }
 
-      console.log('✅ Token found, proceeding with payment');
-
       // Check if this is a 100% off coupon (free subscription)
       if (finalPrice === 0 || finalPrice < 0.01) {
-        console.log('🎁 Processing free subscription with discount code:', appliedDiscountCode);
 
         // Handle free subscription with 100% off coupon
         const response = await fetch(`${API_URL}/payments/apply-free-subscription`, {
@@ -265,14 +258,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         });
 
         const data = await response.json();
-        console.log('Free subscription API response:', data);
 
         if (!response.ok) {
-          console.error('❌ Free subscription error:', data);
           throw new Error(data.message || 'Failed to apply free subscription');
         }
-
-        console.log('✅ Free subscription activated successfully!');
 
         // Success! Call the success handler with a special ID for free subscriptions
         setShowSuccess(true);
@@ -304,11 +293,6 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }
       }
 
-      console.log('💰 Processing paid subscription');
-      console.log('Product ID:', finalProductId);
-      console.log('Amount:', finalPrice);
-      console.log('Country:', userCountry);
-
       // Create unified payment session with backend (routes to Stripe or Paddle based on country)
       const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
@@ -327,16 +311,13 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       });
 
       const data = await response.json();
-      console.log('Payment API response:', data);
 
       if (!response.ok) {
-        console.error('❌ Payment session error:', data);
         throw new Error(data.message || 'Failed to create payment session');
       }
 
       // Redirect to payment checkout page (Stripe or Paddle based on country)
       if (data.paymentUrl) {
-        console.log(`✅ Redirecting to ${data.provider}:`, data.paymentUrl);
 
         // Store payment info for callback
         sessionStorage.setItem('pending_payment', JSON.stringify({
@@ -666,7 +647,6 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Button clicked event triggered');
                 handlePayment();
               }}
               disabled={isProcessing || !termsAccepted}

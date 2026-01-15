@@ -239,10 +239,10 @@ export const sendHotHourRecommendations = async (): Promise<{
         },
       });
 
-      console.log(`[proBuyerEmailService] Sent hot hour recommendation to ${buyer.email}`);
+      // Sent hot hour recommendation
       stats.sent++;
     } catch (error) {
-      console.error(`[proBuyerEmailService] Error sending to ${buyer.email}:`, error);
+      console.error('[proBuyerEmailService] Error sending hot hour recommendation:', error);
       stats.errors++;
     }
   }
@@ -292,9 +292,9 @@ export const sendPriceDropAlerts = async (
         },
       });
 
-      console.log(`[proBuyerEmailService] Sent price drop alert to ${user.email} for ${property.title || 'a property'}`);
+      // Sent price drop alert
     } catch (error) {
-      console.error(`[proBuyerEmailService] Error sending price drop alert to ${user.email}:`, error);
+      console.error('[proBuyerEmailService] Error sending price drop alert:', error);
     }
   }
 };
@@ -433,7 +433,7 @@ export const processSavedSearchAlerts = async (): Promise<{
       });
 
       stats.alertsSent++;
-      console.log(`[proBuyerEmailService] Sent alert for saved search "${search.name}" to ${user.email}`);
+      // Sent saved search alert
     } catch (error) {
       console.error(`[proBuyerEmailService] Error processing saved search:`, error);
       stats.errors++;

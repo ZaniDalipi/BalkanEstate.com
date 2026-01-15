@@ -562,7 +562,7 @@ export const deleteConversation = async (
       const deletePromises = messagesWithImages.map(async (message) => {
         try {
           await cloudinary.uploader.destroy(message.imagePublicId!);
-          console.log(`✅ Deleted image: ${message.imagePublicId}`);
+          // Deleted image from Cloudinary
         } catch (error) {
           console.error(`❌ Failed to delete image ${message.imagePublicId}:`, error);
           // Continue even if some images fail to delete

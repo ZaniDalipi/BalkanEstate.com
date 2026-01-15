@@ -35,7 +35,7 @@ class SocketService {
       }
     }
 
-    console.log('🔌 Connecting to WebSocket server:', serverUrl);
+    // Connecting to WebSocket server
 
     this.socket = io(serverUrl, {
       auth: {
@@ -61,7 +61,7 @@ class SocketService {
 
     // Handle incoming messages
     this.socket.on('message-received', (data: { conversationId: string; message: Message }) => {
-      console.log('💬 Message received:', data);
+      // Message received
       const handlers = this.messageHandlers.get(data.conversationId);
       if (handlers) {
         handlers.forEach(handler => handler(data.message));
@@ -86,7 +86,7 @@ class SocketService {
 
     // Handle new conversations
     this.socket.on('new-conversation', (conversation: any) => {
-      console.log('📧 New conversation:', conversation);
+      // New conversation received
       this.conversationHandlers.forEach(handler => handler(conversation));
     });
 
@@ -99,7 +99,7 @@ class SocketService {
     // Handle user updates (agency joins, profile changes, etc.)
     if (this.currentUserId) {
       this.socket.on(`user-update-${this.currentUserId}`, (data: any) => {
-        console.log('👤 User update received:', data);
+        // User update received
         this.userUpdateHandlers.forEach(handler => handler(data));
       });
     }
@@ -221,7 +221,7 @@ class SocketService {
     // If already connected, start listening for user-specific events
     if (this.socket?.connected && userId) {
       this.socket.on(`user-update-${userId}`, (data: any) => {
-        console.log('👤 User update received:', data);
+        // User update received
         this.userUpdateHandlers.forEach(handler => handler(data));
       });
     }
@@ -235,7 +235,7 @@ class SocketService {
       // Start listening to this agency's events if socket is connected
       if (this.socket?.connected) {
         this.socket.on(`agency-update-${agencyId}`, (data: any) => {
-          console.log('🏢 Agency update received:', data);
+          // Agency update received
           const handlers = this.agencyUpdateHandlers.get(agencyId);
           if (handlers) {
             handlers.forEach(h => h(data));

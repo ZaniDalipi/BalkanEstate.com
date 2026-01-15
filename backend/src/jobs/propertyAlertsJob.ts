@@ -197,7 +197,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
 
       if (matchingProperties.length === 0) continue;
 
-      console.log(`   ${matchingProperties.length} matches for "${search.name}" (${user.email})`);
+      // Found matches for saved search
 
       // Create alerts and send notification
       const alertPromises = matchingProperties.map(property =>
@@ -276,7 +276,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
           );
         }
       } catch (emailError) {
-        console.error(`   Failed to send email to ${user.email}:`, emailError);
+        console.error('   Failed to send property alert email:', emailError);
       }
     }
 
@@ -394,7 +394,7 @@ export async function processPriceDropAlerts(): Promise<void> {
 
         alertsSent++;
       } catch (emailError) {
-        console.error(`   Failed to send price drop email to ${user.email}:`, emailError);
+        console.error('   Failed to send price drop email:', emailError);
       }
     }
 

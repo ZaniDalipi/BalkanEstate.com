@@ -148,7 +148,7 @@ export const createAgency = async (
       agentProfile.licenseNumber = licenseNumber;
       agentProfile.languages = agentLanguages;
       await agentProfile.save();
-      console.log(`✅ Updated existing agent profile for ${user.email}`);
+      // Updated existing agent profile
     } else {
       // Create new agent profile
       const agentId = generateAgentId();
@@ -161,14 +161,14 @@ export const createAgency = async (
         licenseVerified: false,
         languages: agentLanguages,
       });
-      console.log(`✅ Created new agent profile for ${user.email} with ID: ${agentId}`);
+      // Created new agent profile
     }
 
     // Update user with agent ID
     user.agentId = agentProfile.agentId;
     await user.save();
 
-    console.log(`✅ Agency created successfully. User ${user.email} is now admin of agency ${agency.name}`);
+    // Agency created successfully
 
     // Automatically start 7-day free trial for featured listing
     let trialStarted = false;
@@ -245,7 +245,7 @@ export const createAgency = async (
             agencyName: agency.name,
             coupons: generatedCoupons,
           });
-          console.log(`📧 Sent agent registration coupons email to ${user.email}`);
+          // Sent agent registration coupons email
 
           // Send welcome/thank you email
           await sendEnterpriseWelcomeEmail({
@@ -253,7 +253,7 @@ export const createAgency = async (
             ownerName: user.name || 'Agency Owner',
             agencyName: agency.name,
           });
-          console.log(`📧 Sent Enterprise welcome email to ${user.email}`);
+          // Sent Enterprise welcome email
         } catch (emailError) {
           console.error('⚠️ Failed to send Enterprise emails:', emailError);
         }
@@ -523,7 +523,7 @@ export const getAgency = async (
             agentProfile.agencyId = agency._id as mongoose.Types.ObjectId;
             agentProfile.agencyName = agency.name;
             await agentProfile.save();
-            console.log(`✅ Updated existing agent profile for ${user.email}`);
+            // Updated existing agent profile
           } else {
             // Create new agent profile
             const agentId = generateAgentId();
@@ -535,7 +535,7 @@ export const getAgency = async (
               licenseNumber,
               licenseVerified: false,
             });
-            console.log(`✅ Created new agent profile for ${user.email} with ID: ${agentId}`);
+            // Created new agent profile
           }
 
           // Update user with agent ID

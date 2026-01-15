@@ -77,7 +77,7 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
       },
     });
 
-    console.log(`✅ Checkout session created for user ${user.email}: ${session.id}`);
+    // Session created successfully
 
     res.status(200).json({
       success: true,
@@ -158,7 +158,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       return;
     }
 
-    console.log(`✅ Unified payment created for user ${user.email} via ${result.provider}`);
+    // Payment session created successfully
 
     res.status(200).json({
       success: true,
@@ -294,7 +294,7 @@ export const processPayment = async (req: Request, res: Response): Promise<void>
       currency: product.currency,
     });
 
-    console.log(`✅ Payment processed for user ${user.email}: ${productId}`);
+    // Payment processed successfully
 
     res.status(200).json({
       success: true,
@@ -381,7 +381,7 @@ export const cancelSubscription = async (req: Request, res: Response): Promise<v
     // Keep expiration date for reference
     await user.save();
 
-    console.log(`Subscription cancelled for user ${user.email}`);
+    // Subscription cancelled successfully
 
     res.status(200).json({
       message: 'Subscription cancelled successfully',
@@ -758,10 +758,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     const { planName, planInterval, productId, discountCode } = req.body;
     const userId = (req as any).user?._id;
 
-    console.log('🎁 Free subscription request received');
-    console.log('User ID:', userId);
-    console.log('Product ID:', productId);
-    console.log('Discount Code:', discountCode);
+    // Free subscription request received
 
     if (!userId) {
       console.error('❌ User not authenticated');
@@ -776,7 +773,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
       return;
     }
 
-    console.log('✅ User found:', user.email);
+    // User found
 
     // Verify discount code is valid and provides 100% off
     if (!discountCode) {
@@ -853,8 +850,7 @@ export const applyFreeSubscription = async (req: Request, res: Response): Promis
     discount.usedCount = (discount.usedCount || 0) + 1;
     await discount.save();
 
-    console.log(`✅ Free subscription activated for user ${user.email} with coupon ${discountCode}`);
-    console.log('📊 Discount code usage updated:', discount.usedCount);
+    // Free subscription activated successfully
 
     res.status(200).json({
       success: true,
@@ -948,7 +944,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
       transactionId: charge.id,
     });
 
-    console.log(`✅ Refund processed for user ${user.email}: ${currency} ${refundAmount}`);
+    // Refund processed successfully
   } catch (error) {
     console.error('❌ Error handling refund:', error);
   }
@@ -988,10 +984,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
       return;
     }
 
-    // Log the dispute
-    console.log(`⚠️ Dispute created for user ${user.email}: ${dispute.reason}`);
-    console.log(`   Amount: ${(dispute.amount / 100).toFixed(2)} ${dispute.currency.toUpperCase()}`);
-    console.log(`   Status: ${dispute.status}`);
+    // Dispute logged
 
     // Create subscription event for tracking
     if (paymentRecord.subscriptionId) {

@@ -143,7 +143,7 @@ export const syncStats = async (req: Request, res: Response): Promise<void> => {
 
       await user.save();
 
-      console.log(`📊 [syncStats] Updated subscription counters for ${user.email}: ${activeListingsCount} total (${privateSellerCount} private, ${agentCount} agent)`);
+      // Subscription counters updated
     }
 
     // Get current active listings count
@@ -262,9 +262,9 @@ export const syncAllSubscriptionCounters = async (req: Request, res: Response): 
         });
 
         syncedCount++;
-        console.log(`✅ Synced ${user.email}: ${activeListingsCount}/${listingsLimit} listings`);
+        // User synced successfully
       } catch (error) {
-        console.error(`❌ Error syncing ${user.email}:`, error);
+        console.error('❌ Error syncing user:', error);
         errorCount++;
         results.push({
           email: user.email,

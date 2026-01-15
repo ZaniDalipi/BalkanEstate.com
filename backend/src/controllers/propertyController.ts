@@ -348,13 +348,13 @@ export const createProperty = async (
       }).sort({ expirationDate: -1 });
 
       if (validSubscription) {
-        console.log(`⚠️ User ${user.email} has cancelled subscription, valid until ${validSubscription.expirationDate}`);
+        // User has cancelled subscription, still valid
       }
     }
 
     // **AUTO-DOWNGRADE: If NO valid subscription in DB but user thinks they have Pro, downgrade to free**
     if (!validSubscription && user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
-      console.log(`⚠️ User ${user.email} has no active subscription in DB but tier is ${user.subscription.tier}. Downgrading to free.`);
+      // User has no active subscription, downgrading to free
 
       // Preserve the listing counts but downgrade to free tier
       const currentActiveCount = user.subscription.activeListingsCount || 0;
@@ -379,12 +379,12 @@ export const createProperty = async (
       }
 
       await user.save();
-      console.log(`✅ User downgraded to free tier. Has ${currentActiveCount} listings (limit is now 3).`);
+      // User downgraded to free tier
     }
 
     // If user has valid subscription but proSubscription not set, sync it now
     if (validSubscription && (!user.proSubscription || !user.proSubscription.isActive)) {
-      console.log(`🔄 Auto-syncing Pro subscription for user ${user.email}`);
+      // Auto-syncing Pro subscription
 
       const Product = (await import('../models/Product')).default;
       const product = await Product.findOne({ productId: validSubscription.productId });
@@ -416,7 +416,7 @@ export const createProperty = async (
       user.subscriptionExpiresAt = validSubscription.expirationDate;
 
       await user.save();
-      console.log(`✅ Pro subscription auto-synced! User now has ${product?.listingsLimit || defaultListingLimit} active listings.`);
+      // Pro subscription auto-synced
     }
 
     // Initialize subscription object if doesn't exist (for existing users migration)
@@ -442,7 +442,7 @@ export const createProperty = async (
           };
         }
         savedSearchesLimit = -1; // Unlimited for Pro
-        console.log(`🔄 Migrating Pro subscription: ${listingsLimit} listings, tier: ${tier}`);
+        // Migrating Pro subscription
       }
 
       // Count existing active properties to initialize counters correctly
@@ -455,7 +455,7 @@ export const createProperty = async (
       const privateSellerCount = existingProperties.filter(p => p.createdAsRole === 'private_seller').length;
       const agentCount = existingProperties.filter(p => p.createdAsRole === 'agent').length;
 
-      console.log(`📊 Found ${activeListingsCount} existing properties: ${privateSellerCount} private, ${agentCount} agent`);
+      // Found existing properties
 
       user.subscription = {
         tier,
@@ -471,7 +471,7 @@ export const createProperty = async (
         expiresAt: user.proSubscription?.expiresAt,
       };
       await user.save();
-      console.log(`✅ Subscription initialized for ${user.email}: ${tier} tier with ${listingsLimit} listings (${activeListingsCount}/${listingsLimit} used)`);
+      // Subscription initialized
     }
 
     // Determine which role is being used to create this listing
@@ -479,26 +479,21 @@ export const createProperty = async (
     const validRoles = ['private_seller', 'agent'];
     let createdAsRole = 'private_seller'; // Default fallback
 
-    // Log incoming value for debugging
-    console.log(`📥 [createProperty] Received createdAsRole from request: "${req.body.createdAsRole}" (type: ${typeof req.body.createdAsRole})`);
+    // Determine role for listing
 
     if (req.body.createdAsRole && validRoles.includes(req.body.createdAsRole)) {
       // Use the explicitly selected role from the form
       createdAsRole = req.body.createdAsRole;
-      console.log(`✅ [createProperty] Using form-selected role: ${createdAsRole}`);
     } else if (user.activeRole && validRoles.includes(user.activeRole)) {
       // Fallback to user's active role if form value is invalid
       createdAsRole = user.activeRole;
-      console.log(`⚠️ [createProperty] Form role invalid/missing, using activeRole: ${createdAsRole}`);
     } else if (user.role && validRoles.includes(user.role)) {
       // Last fallback to user's primary role
       createdAsRole = user.role;
-      console.log(`⚠️ [createProperty] Using primary role: ${createdAsRole}`);
     }
 
     // Update user's activeRole to match what they selected (for future consistency)
     if (user.activeRole !== createdAsRole && validRoles.includes(createdAsRole)) {
-      console.log(`🔄 [createProperty] Updating user activeRole: ${user.activeRole} -> ${createdAsRole}`);
       user.activeRole = createdAsRole as 'private_seller' | 'agent';
     }
 
@@ -530,7 +525,7 @@ export const createProperty = async (
     const limit = user.subscription.listingsLimit || 3;
     const tier = user.subscription.tier || 'free';
 
-    console.log(`📊 ${tier.toUpperCase()} User ${user.email}: Creating listing as ${createdAsRole} (${currentCount + 1}/${limit} total, ${user.subscription.privateSellerCount || 0} private, ${user.subscription.agentCount || 0} agent)`);
+    // Creating listing
 
     if (currentCount >= limit) {
       res.status(403).json({
@@ -573,8 +568,7 @@ export const createProperty = async (
       }),
     };
 
-    console.log(`📍 Creating property with coordinates:`, coordinates.lat ? `${coordinates.lat}, ${coordinates.lng}` : 'No coordinates');
-    console.log(`👤 Property created by: ${user.name} (${user.email}) as ${createdAsRole}`);
+    // Property created with coordinates
 
     const property = await Property.create(propertyData);
 
@@ -583,10 +577,8 @@ export const createProperty = async (
 
     if (createdAsRole === 'private_seller') {
       user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) + 1;
-      console.log(`📊 Updated counters: ${user.subscription.activeListingsCount}/${limit} total (${user.subscription.privateSellerCount} private, ${user.subscription.agentCount || 0} agent)`);
     } else if (createdAsRole === 'agent') {
       user.subscription.agentCount = (user.subscription.agentCount || 0) + 1;
-      console.log(`📊 Updated counters: ${user.subscription.activeListingsCount}/${limit} total (${user.subscription.privateSellerCount || 0} private, ${user.subscription.agentCount} agent)`);
     }
 
     // Update user listing counts (legacy fields)
@@ -881,10 +873,8 @@ export const deleteProperty = async (
 
         if (property.createdAsRole === 'private_seller' && (user.subscription.privateSellerCount || 0) > 0) {
           user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) - 1;
-          console.log(`📊 ${tier.toUpperCase()} User: Deleted private seller listing. Remaining: ${user.subscription.activeListingsCount}/${limit} total (${user.subscription.privateSellerCount} private, ${user.subscription.agentCount || 0} agent)`);
         } else if (property.createdAsRole === 'agent' && (user.subscription.agentCount || 0) > 0) {
           user.subscription.agentCount = (user.subscription.agentCount || 0) - 1;
-          console.log(`📊 ${tier.toUpperCase()} User: Deleted agent listing. Remaining: ${user.subscription.activeListingsCount}/${limit} total (${user.subscription.privateSellerCount || 0} private, ${user.subscription.agentCount} agent)`);
         }
 
         await user.save();

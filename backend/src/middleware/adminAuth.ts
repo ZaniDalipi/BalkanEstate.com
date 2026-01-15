@@ -63,7 +63,7 @@ export const checkVPNAccess = (req: Request, res: Response, next: NextFunction):
   // Get request host/domain
   const host = (req.headers.host || '').toLowerCase().split(':')[0];
 
-  console.log(`🔐 Admin access attempt from IP: ${clientIP} (normalized: ${normalizedIP}), host: ${host}`);
+  // Admin access attempt
 
   // Check if domain is allowed
   const allowedDomains = getAllowedDomains();
@@ -82,7 +82,7 @@ export const checkVPNAccess = (req: Request, res: Response, next: NextFunction):
   });
 
   if (!isIPWhitelisted) {
-    console.error(`❌ Unauthorized access: IP=${clientIP}, host=${host}`);
+    console.error('❌ Unauthorized access attempt');
     res.status(403).json({
       message: 'Access denied. Admin panel requires VPN connection or authorized domain.',
       error: 'ACCESS_DENIED',
@@ -114,7 +114,7 @@ export const checkAdminRole = (req: Request, res: Response, next: NextFunction):
   const isAdmin = ADMIN_ROLES.includes(user.role);
 
   if (!isAdmin) {
-    console.error(`❌ Non-admin user attempted access: ${user.email} (role: ${user.role})`);
+    console.error('❌ Non-admin user attempted access');
     res.status(403).json({
       message: 'Access denied. Admin privileges required.',
       error: 'INSUFFICIENT_PERMISSIONS',
@@ -123,7 +123,7 @@ export const checkAdminRole = (req: Request, res: Response, next: NextFunction):
     return;
   }
 
-  console.log(`✅ Admin access granted: ${user.email}`);
+  // Admin access granted
   next();
 };
 
@@ -141,11 +141,7 @@ export const logAdminAction = (action: string) => {
     const timestamp = new Date().toISOString();
     const ip = req.ip || req.connection.remoteAddress;
 
-    console.log(`📝 ADMIN ACTION: ${action}`);
-    console.log(`   User: ${user?.email || 'unknown'}`);
-    console.log(`   IP: ${ip}`);
-    console.log(`   Time: ${timestamp}`);
-    console.log(`   Path: ${req.method} ${req.path}`);
+    // Admin action logged: ${action}
     // console.log(`   Body: ${JSON.stringify(req.body).substring(0, 200)}`);
 
     // TODO: Store in database for audit trail

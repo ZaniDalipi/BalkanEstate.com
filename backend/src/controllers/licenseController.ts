@@ -61,7 +61,7 @@ export const uploadLicense = async (
 
     await user.save();
 
-    console.log(`📝 License uploaded by ${user.email} (${country || 'N/A'} - ${licenseNumber || 'N/A'})`);
+    // License uploaded successfully
 
     res.status(200).json({
       message: 'License uploaded successfully',
@@ -165,7 +165,7 @@ export const deleteLicense = async (
     user.agentLicense = undefined;
     await user.save();
 
-    console.log(`🗑️  License deleted for ${user.email}`);
+    // License deleted successfully
 
     res.status(200).json({
       message: 'License deleted successfully',
