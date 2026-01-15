@@ -307,7 +307,7 @@ export const sendTrialExpirationReminder = async (user: IUser): Promise<void> =>
         </div>
 
         <div style="text-align: center;">
-          <a href="${FRONTEND_URL}/pricing" class="button">View Subscription Plans</a>
+          <a href="${FRONTEND_URL}/subscribe" class="button">View Subscription Plans</a>
         </div>
 
         <p><strong>Monthly Plan Pricing:</strong></p>
@@ -412,7 +412,7 @@ const sendTrialExpiredEmail = async (user: IUser): Promise<void> => {
         </ul>
 
         <div style="text-align: center;">
-          <a href="${FRONTEND_URL}/pricing" class="button">Upgrade Your Plan</a>
+          <a href="${FRONTEND_URL}/subscribe" class="button">Upgrade Your Plan</a>
         </div>
 
         <p>Thank you for trying our agent trial! We hope you'll consider upgrading to unlock the full potential of Balkan Estate.</p>

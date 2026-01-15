@@ -55,11 +55,11 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
       const currentLang = window.location.pathname.split('/')[1] || 'en';
       const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
       const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      const pricingPath = `/${lang}/pricing`;
+      const subscribePath = `/${lang}/subscribe`;
 
-      // Only update if not already on pricing route
-      if (!window.location.pathname.includes('/pricing')) {
-        window.history.pushState({ modal: 'pricing' }, '', pricingPath);
+      // Only update if not already on subscribe route
+      if (!window.location.pathname.includes('/subscribe')) {
+        window.history.pushState({ modal: 'pricing' }, '', subscribePath);
       }
     }
   }, [isOpen]);
@@ -67,7 +67,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
   // Handle browser back button when modal is open
   useEffect(() => {
     const handlePopState = () => {
-      if (isOpen && !window.location.pathname.includes('/pricing')) {
+      if (isOpen && !window.location.pathname.includes('/subscribe')) {
         onClose();
       }
     };

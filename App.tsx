@@ -249,7 +249,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/analytics': 'analytics',
         '/valuation': 'valuation',
         '/mortgage-calculator': 'mortgage-calculator',
-        '/pricing': 'pricing',
         '/subscribe': 'pricing',
         '/privacy': 'privacy',
         '/privacy-policy': 'privacy',
@@ -260,6 +259,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/refund': 'refund',
         '/refund-policy': 'refund',
       };
+
+      // Redirect /pricing to /subscribe
+      if (path === '/pricing') {
+        window.history.replaceState({}, '', buildLocalizedPath('/subscribe'));
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+        return;
+      }
 
       const view = routeMap[path];
       if (view) {
@@ -506,7 +512,7 @@ const MainLayout: React.FC = () => {
 
   const navigateToPricing = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    window.history.pushState({}, '', buildLocalizedPath('/pricing'));
+    window.history.pushState({}, '', buildLocalizedPath('/subscribe'));
   };
   
   const handleWarningConfirm = () => {

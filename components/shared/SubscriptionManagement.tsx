@@ -767,7 +767,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
 
             <a
-              href="/pricing"
+              href="/subscribe"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 mt-4 cursor-pointer"
             >
               <SparklesIcon className="w-5 h-5" />
@@ -1066,7 +1066,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 <p className="text-sm text-neutral-600">{t('management.whatsIncluded.upgradeToProDesc')}</p>
               </div>
               <a
-                href="/pricing"
+                href="/subscribe"
                 className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
               >
                 <SparklesIcon className="w-4 h-4" />
@@ -1301,7 +1301,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a
-                  href="/pricing"
+                  href="/subscribe"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
                 >
                   <SparklesIcon className="w-4 h-4" />
