@@ -13,6 +13,7 @@ import { generateTokenPair } from '../services/refreshTokenService';
 import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rateLimiter';
 import { activityLogger } from '../services/activityLogger';
 import { generateSecureAgentId } from '../utils/secureRandom';
+import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 // @desc    Register new user
 // @route   POST /api/auth/signup
@@ -169,7 +170,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     // ============================================
 
     // Determine listing limit based on role
-    let activeListingsLimit = 3; // Default for buyers and private sellers
+    let activeListingsLimit = FREE_TIER_LIMITS.LISTINGS; // Default for buyers and private sellers
     if (role === 'agent') {
       activeListingsLimit = 0; // Agents need Pro subscription to post
     }
@@ -238,18 +239,18 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         user.subscription = {
           tier: 'free',
           status: 'active',
-          listingsLimit: 0,
+          listingsLimit: 0, // Agents start with 0, need Pro to post
           activeListingsCount: 0,
           privateSellerCount: 0,
           agentCount: 0,
           promotionCoupons: {
-            monthly: 0,
-            available: 0,
+            monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS,
+            available: FREE_TIER_LIMITS.PROMOTION_COUPONS,
             used: 0,
             rollover: 0,
             lastRefresh: new Date(),
           },
-          savedSearchesLimit: 1,
+          savedSearchesLimit: FREE_TIER_LIMITS.SAVED_SEARCHES,
           totalPaid: 0,
         };
 
@@ -536,9 +537,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
     // Check if user has an active Pro subscription (legacy or new system)
     let tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'free';
-    let listingsLimit = 3;
-    let promotionCoupons = { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() };
-    let savedSearchesLimit = 1;
+    let listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+    let promotionCoupons = { monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS, available: FREE_TIER_LIMITS.PROMOTION_COUPONS, used: 0, rollover: 0, lastRefresh: new Date() };
+    let savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
     let subscriptionExpiresAt: Date | undefined;
     let subscriptionStatus: string = 'active';
 
@@ -583,22 +584,22 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       // Check if it's a Pro subscription
       if (productId?.includes('pro') || productId === 'pro_monthly' || productId === 'pro_yearly') {
         tier = 'pro';
-        // Use plan-specific listing limits: pro_monthly = 20, pro_yearly = 250
+        // Use plan-specific listing limits
         if (productId === 'pro_monthly' || productId === 'seller_pro_monthly') {
-          listingsLimit = 20; // 20 listings per month
+          listingsLimit = PRO_TIER_LIMITS.MONTHLY.LISTINGS;
         } else if (productId === 'pro_yearly' || productId === 'seller_pro_yearly') {
-          listingsLimit = 250; // 250 listings per year
+          listingsLimit = PRO_TIER_LIMITS.YEARLY.LISTINGS;
         } else {
-          listingsLimit = 250; // Default to yearly for other pro plans
+          listingsLimit = PRO_TIER_LIMITS.YEARLY.LISTINGS; // Default to yearly for other pro plans
         }
-        promotionCoupons = { monthly: 3, available: 3, used: 0, rollover: 0, lastRefresh: new Date() };
-        savedSearchesLimit = -1; // Unlimited for Pro
+        promotionCoupons = { monthly: PRO_TIER_LIMITS.YEARLY.PROMOTION_COUPONS, available: PRO_TIER_LIMITS.YEARLY.PROMOTION_COUPONS, used: 0, rollover: 0, lastRefresh: new Date() };
+        savedSearchesLimit = PRO_TIER_LIMITS.YEARLY.SAVED_SEARCHES; // Unlimited for Pro
         subscriptionExpiresAt = dbSubscription.expirationDate;
       } else if (productId?.includes('enterprise') || productId?.includes('agency')) {
         tier = 'agency_owner';
-        listingsLimit = 500; // 500 listings for enterprise
-        promotionCoupons = { monthly: 5, available: 5, used: 0, rollover: 0, lastRefresh: new Date() };
-        savedSearchesLimit = -1; // Unlimited for Enterprise
+        listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS;
+        promotionCoupons = { monthly: ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS, available: ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS, used: 0, rollover: 0, lastRefresh: new Date() };
+        savedSearchesLimit = ENTERPRISE_TIER_LIMITS.SAVED_SEARCHES; // Unlimited for Enterprise
         subscriptionExpiresAt = dbSubscription.expirationDate;
       }
     } else {
@@ -611,8 +612,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     // PRIORITY 2: Sync from proSubscription (legacy system) - only if not already Pro from Subscriptions
     if (tier === 'free' && user.proSubscription?.isActive) {
       tier = 'pro';
-      // Legacy proSubscription - default to yearly limits (250)
-      listingsLimit = user.proSubscription.totalListingsLimit || 250;
+      // Legacy proSubscription - default to yearly limits
+      listingsLimit = user.proSubscription.totalListingsLimit || PRO_TIER_LIMITS.YEARLY.LISTINGS;
       if (user.proSubscription.promotionCoupons) {
         promotionCoupons = {
           monthly: user.proSubscription.promotionCoupons.monthly || 3,
@@ -666,7 +667,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         user.subscription.expiresAt = subscriptionExpiresAt;
       } else if (tier === 'agency_owner' && user.subscription.tier !== 'agency_owner') {
         user.subscription.tier = 'agency_owner';
-        user.subscription.listingsLimit = 500; // Enterprise gets 500 listings
+        user.subscription.listingsLimit = ENTERPRISE_TIER_LIMITS.LISTINGS; // Enterprise
         user.subscription.expiresAt = subscriptionExpiresAt;
       }
 
@@ -674,9 +675,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       if (subscriptionStatus === 'expired' && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
         user.subscription.tier = 'free';
         user.subscription.status = 'expired';
-        user.subscription.listingsLimit = 3;
-        user.subscription.promotionCoupons = { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() };
-        user.subscription.savedSearchesLimit = 1;
+        user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS;
+        user.subscription.promotionCoupons = { monthly: FREE_TIER_LIMITS.PROMOTION_COUPONS, available: FREE_TIER_LIMITS.PROMOTION_COUPONS, used: 0, rollover: 0, lastRefresh: new Date() };
+        user.subscription.savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
         user.subscription.expiresAt = undefined;
       } else {
         // Sync status from DB

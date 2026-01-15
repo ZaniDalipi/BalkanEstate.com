@@ -1,5 +1,6 @@
 import User, { IUser } from '../models/User';
 import { sendEmail } from './emailService';
+import { TRIAL_LIMITS, FREE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 /**
  * Trial Management Service
@@ -13,7 +14,7 @@ import { sendEmail } from './emailService';
  */
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const TRIAL_DURATION_DAYS = 7;
+const TRIAL_DURATION_DAYS = TRIAL_LIMITS.DURATION_DAYS;
 const REMINDER_DAYS_BEFORE = 3;
 
 /**
@@ -41,7 +42,7 @@ export const startAgentTrial = async (user: IUser): Promise<void> => {
     plan: 'pro_monthly', // Use monthly plan designation for trial
     expiresAt: trialEnd,
     startedAt: now,
-    totalListingsLimit: 10, // Trial: 10 listings (paid Pro gets 15)
+    totalListingsLimit: TRIAL_LIMITS.LISTINGS, // Trial: 10 listings (paid Pro gets 15)
     activeListingsCount: 0,
     privateSellerCount: 0,
     agentCount: 0,
@@ -60,7 +61,7 @@ export const startAgentTrial = async (user: IUser): Promise<void> => {
   user.trialReminderSent = false;
   user.trialExpired = false;
   user.subscriptionStatus = 'trial';
-  user.activeListingsLimit = 10; // Trial agents get 10 active listings
+  user.activeListingsLimit = TRIAL_LIMITS.LISTINGS; // Trial agents get 10 active listings
 
   await user.save();
 
@@ -445,7 +446,7 @@ export const expireTrialAndDowngrade = async (user: IUser): Promise<void> => {
 
   // Downgrade to private_seller
   user.role = 'private_seller';
-  user.activeListingsLimit = 3; // Free tier: 3 active listings
+  user.activeListingsLimit = FREE_TIER_LIMITS.LISTINGS; // Free tier: 3 active listings
   user.isSubscribed = false;
   user.subscriptionPlan = undefined;
   user.subscriptionProductName = undefined;
@@ -454,7 +455,7 @@ export const expireTrialAndDowngrade = async (user: IUser): Promise<void> => {
   if (!user.freeSubscription) {
     user.freeSubscription = {
       activeListingsCount: 0,
-      listingsLimit: 3,
+      listingsLimit: FREE_TIER_LIMITS.LISTINGS,
     };
   }
 

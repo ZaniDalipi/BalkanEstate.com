@@ -14,6 +14,7 @@ import {
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
+import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -357,7 +358,7 @@ export const createProperty = async (
       // User has no active subscription, downgrading to free
       user.subscription.tier = 'free';
       user.subscription.status = 'expired';
-      user.subscription.listingsLimit = 3; // Free tier limit
+      user.subscription.listingsLimit = FREE_TIER_LIMITS.LISTINGS; // Free tier limit
       user.subscription.promotionCoupons = {
         monthly: 0,
         available: 0,
@@ -387,7 +388,7 @@ export const createProperty = async (
 
       // Determine the correct listing limit based on product or plan type
       const isYearlyPlan = validSubscription.productId.includes('yearly');
-      const defaultListingLimit = isYearlyPlan ? 250 : 20; // 250 for yearly, 20 for monthly
+      const defaultListingLimit = isYearlyPlan ? PRO_TIER_LIMITS.YEARLY.LISTINGS : PRO_TIER_LIMITS.MONTHLY.LISTINGS;
 
       user.proSubscription = {
         isActive: true,
@@ -419,15 +420,15 @@ export const createProperty = async (
     if (!user.subscription) {
       // Check if user has an active Pro subscription (legacy or new system)
       let tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'free';
-      let listingsLimit = 3;
+      let listingsLimit = FREE_TIER_LIMITS.LISTINGS;
       let promotionCoupons = { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() };
-      let savedSearchesLimit = 1;
+      let savedSearchesLimit = FREE_TIER_LIMITS.SAVED_SEARCHES;
 
       // Sync from proSubscription (legacy system)
       if (user.proSubscription?.isActive) {
         tier = 'pro';
-        // Default to yearly limit (250) for legacy subscriptions
-        listingsLimit = user.proSubscription.totalListingsLimit || 250;
+        // Default to yearly limit for legacy subscriptions
+        listingsLimit = user.proSubscription.totalListingsLimit || PRO_TIER_LIMITS.YEARLY.LISTINGS;
         if (user.proSubscription.promotionCoupons) {
           promotionCoupons = {
             monthly: user.proSubscription.promotionCoupons.monthly || 3,
@@ -518,7 +519,7 @@ export const createProperty = async (
 
     // Check listing limits based on subscription tier
     const currentCount = user.subscription.activeListingsCount || 0;
-    const limit = user.subscription.listingsLimit || 3;
+    const limit = user.subscription.listingsLimit || FREE_TIER_LIMITS.LISTINGS;
     const tier = user.subscription.tier || 'free';
 
     // Creating listing
@@ -816,13 +817,13 @@ export const deleteProperty = async (
         // Auto-initialize subscription for existing users (migration-safe)
         if (!user.subscription) {
           let tier: 'free' | 'pro' | 'agency_owner' | 'agency_agent' | 'buyer' = 'free';
-          let listingsLimit = 3;
+          let listingsLimit = FREE_TIER_LIMITS.LISTINGS;
 
           // Sync from proSubscription if exists
           if (user.proSubscription?.isActive) {
             tier = 'pro';
-            // Default to yearly limit (250) for legacy subscriptions
-            listingsLimit = user.proSubscription.totalListingsLimit || 250;
+            // Default to yearly limit for legacy subscriptions
+            listingsLimit = user.proSubscription.totalListingsLimit || PRO_TIER_LIMITS.YEARLY.LISTINGS;
           }
 
           // Count existing properties (excluding the one being deleted)
@@ -846,7 +847,7 @@ export const deleteProperty = async (
               rollover: 0,
               lastRefresh: new Date(),
             },
-            savedSearchesLimit: tier === 'pro' ? -1 : 1, // Unlimited for Pro
+            savedSearchesLimit: tier === 'pro' ? -1 : FREE_TIER_LIMITS.SAVED_SEARCHES, // Unlimited for Pro
             totalPaid: 0,
             startDate: user.proSubscription?.startedAt || new Date(),
             expiresAt: user.proSubscription?.expiresAt,

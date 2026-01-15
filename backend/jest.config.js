@@ -3,6 +3,21 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
+      tsconfig: {
+        target: 'ES2020',
+        module: 'commonjs',
+        lib: ['ES2020'],
+        esModuleInterop: true,
+        skipLibCheck: true,
+        strict: true,
+        noUnusedLocals: false,
+        noUnusedParameters: false,
+        types: ['node', 'jest'],
+      },
+    }],
+  },
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.spec.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverageFrom: [
