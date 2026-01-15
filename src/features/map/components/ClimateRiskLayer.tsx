@@ -43,9 +43,9 @@ const CLIMATE_RISK_LAYERS: Record<
   },
   fire: {
     name: 'Fire Risk',
-    // ESRI World Imagery shows vegetation/dry areas
-    tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; <a href="https://www.esri.com">Esri</a>',
+    // CartoDB Positron with warm filter for fire visualization
+    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
     legendTitle: 'Fire risk',
     legendColors: [
       { color: '#ffeda0', label: 'Low' },
@@ -57,8 +57,8 @@ const CLIMATE_RISK_LAYERS: Record<
   },
   wind: {
     name: 'Wind Risk',
-    // CartoDB Voyager - clean basemap
-    tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    // CartoDB Positron - clean light basemap
+    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://carto.com">CARTO</a>',
     legendTitle: 'Wind speed',
     legendColors: [
@@ -72,7 +72,7 @@ const CLIMATE_RISK_LAYERS: Record<
   air: {
     name: 'Air Quality',
     // CartoDB Dark Matter - good for showing pollution overlay effect
-    tileUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    tileUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://carto.com">CARTO</a>',
     legendTitle: 'Air quality',
     legendColors: [
@@ -85,9 +85,9 @@ const CLIMATE_RISK_LAYERS: Record<
   },
   heat: {
     name: 'Heat Risk',
-    // ESRI World Imagery with heat filter
-    tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; <a href="https://www.esri.com">Esri</a>',
+    // CartoDB Positron with heat filter
+    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
     legendTitle: 'Temperature',
     legendColors: [
       { color: '#313695', label: 'Cold' },
@@ -151,11 +151,11 @@ const useClimateLayerStyles = () => {
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
-      .flood-layer { filter: hue-rotate(200deg) saturate(1.5); }
-      .fire-layer { filter: sepia(0.3) saturate(1.5) hue-rotate(-10deg); }
-      .wind-layer { filter: hue-rotate(180deg) saturate(0.8); }
-      .air-layer { filter: brightness(0.9) contrast(1.1); }
-      .heat-layer { filter: sepia(0.4) saturate(1.8) hue-rotate(-20deg); }
+      .flood-layer { filter: hue-rotate(200deg) saturate(1.5) brightness(1.1); }
+      .fire-layer { filter: sepia(0.6) saturate(2) hue-rotate(-15deg) brightness(1.1); }
+      .wind-layer { filter: hue-rotate(180deg) saturate(1.2) brightness(1.05); }
+      .air-layer { filter: brightness(0.85) contrast(1.2); }
+      .heat-layer { filter: sepia(0.7) saturate(2.5) hue-rotate(-30deg) brightness(1.05); }
     `;
     document.head.appendChild(style);
 
