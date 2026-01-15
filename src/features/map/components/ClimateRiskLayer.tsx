@@ -15,7 +15,10 @@ interface ClimateRiskLayerProps {
   opacity?: number;
 }
 
-// Climate risk layer configurations using free tile services
+// OpenWeatherMap API key (free tier)
+const OWM_API_KEY = '439d4b804bc8187953eb36d2a8c26a02';
+
+// Climate risk layer configurations
 const CLIMATE_RISK_LAYERS: Record<
   Exclude<ClimateRiskType, 'none'>,
   {
@@ -29,37 +32,34 @@ const CLIMATE_RISK_LAYERS: Record<
 > = {
   flood: {
     name: 'Flood Risk',
-    // CartoDB Positron with blue water tint
-    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
-    legendTitle: 'Flood zones',
+    tileUrl: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    legendTitle: 'Precipitation',
     legendColors: [
-      { color: '#cce5ff', label: 'Low' },
-      { color: '#66b3ff', label: 'Med' },
-      { color: '#3399ff', label: 'High' },
-      { color: '#0066cc', label: 'Severe' },
+      { color: '#a0f0a0', label: 'Light' },
+      { color: '#00ff00', label: 'Med' },
+      { color: '#ffff00', label: 'Heavy' },
+      { color: '#ff0000', label: 'Severe' },
     ],
     className: 'flood-layer',
   },
   fire: {
     name: 'Fire Risk',
-    // CartoDB Positron with warm filter for fire visualization
-    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
-    legendTitle: 'Fire risk',
+    tileUrl: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+    legendTitle: 'Temperature',
     legendColors: [
-      { color: '#ffeda0', label: 'Low' },
-      { color: '#feb24c', label: 'Med' },
-      { color: '#f03b20', label: 'High' },
-      { color: '#bd0026', label: 'Extreme' },
+      { color: '#313695', label: 'Cool' },
+      { color: '#fee090', label: 'Warm' },
+      { color: '#f46d43', label: 'Hot' },
+      { color: '#a50026', label: 'Extreme' },
     ],
     className: 'fire-layer',
   },
   wind: {
     name: 'Wind Risk',
-    // CartoDB Positron - clean light basemap
-    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
+    tileUrl: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     legendTitle: 'Wind speed',
     legendColors: [
       { color: '#e8f4f8', label: 'Calm' },
@@ -71,7 +71,6 @@ const CLIMATE_RISK_LAYERS: Record<
   },
   air: {
     name: 'Air Quality',
-    // AQICN - shows actual air quality index numbers on cities
     tileUrl: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://aqicn.org/">AQICN</a>',
     legendTitle: 'Air quality',
@@ -85,9 +84,8 @@ const CLIMATE_RISK_LAYERS: Record<
   },
   heat: {
     name: 'Heat Risk',
-    // CartoDB Positron with heat filter
-    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
+    tileUrl: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+    attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     legendTitle: 'Temperature',
     legendColors: [
       { color: '#313695', label: 'Cold' },
@@ -151,11 +149,11 @@ const useClimateLayerStyles = () => {
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
-      .flood-layer { filter: hue-rotate(200deg) saturate(2) brightness(1.1); }
-      .fire-layer { filter: sepia(0.8) saturate(3) hue-rotate(-20deg) brightness(1.05); }
-      .wind-layer { filter: hue-rotate(170deg) saturate(1.5) brightness(1.1); }
-      .air-layer { filter: none; }
-      .heat-layer { filter: sepia(1) saturate(3) hue-rotate(-40deg) brightness(1); }
+      .flood-layer { }
+      .fire-layer { }
+      .wind-layer { }
+      .air-layer { }
+      .heat-layer { }
     `;
     document.head.appendChild(style);
 
