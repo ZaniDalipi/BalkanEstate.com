@@ -402,10 +402,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
+          // Smooth zoom settings
+          zoomSnap={0.5}
+          zoomDelta={0.5}
+          wheelPxPerZoomLevel={120}
+          zoomAnimation={true}
+          fadeAnimation={true}
+          markerZoomAnimation={true}
           // Mobile optimizations
-          fadeAnimation={!isMobile}
-          markerZoomAnimation={!isMobile}
-          zoomAnimation={!isMobile}
           tap={isMobile}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
