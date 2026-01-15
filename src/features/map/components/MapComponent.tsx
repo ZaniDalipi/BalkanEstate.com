@@ -184,6 +184,28 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
+ * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in close
+ * Far away: whole zoom levels (zoomSnap=1)
+ * Close up: fractional zoom (zoomSnap=0.5)
+ */
+const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    // Enable fractional zoom only when zoomed in close (>= 14)
+    const newZoomSnap = currentZoom >= 14 ? 0.5 : 1;
+    const newZoomDelta = currentZoom >= 14 ? 0.5 : 1;
+
+    if (map.options.zoomSnap !== newZoomSnap) {
+      map.options.zoomSnap = newZoomSnap;
+      map.options.zoomDelta = newZoomDelta;
+    }
+  }, [currentZoom, map]);
+
+  return null;
+};
+
+/**
  * ZoomAdjuster Component - adjusts zoom when switching map types
  * Ensures zoom level doesn't exceed the new layer's max zoom
  */
@@ -402,10 +424,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Smooth zoom settings
-          zoomSnap={0.5}
-          zoomDelta={0.5}
-          wheelPxPerZoomLevel={120}
+          // Smooth zoom settings (fractional zoom enabled dynamically when close)
+          zoomSnap={1}
+          zoomDelta={1}
+          wheelPxPerZoomLevel={100}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
@@ -418,6 +440,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
           <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} />
+          <ZoomSnapAdjuster currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
