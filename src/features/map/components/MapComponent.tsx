@@ -184,17 +184,17 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in close
+ * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
  * Far away: whole zoom levels (zoomSnap=1)
- * Close up: fractional zoom (zoomSnap=0.5)
+ * Very close (18+): fractional zoom (zoomSnap=0.5)
  */
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
   const map = useMap();
 
   useEffect(() => {
-    // Enable fractional zoom only when zoomed in close (>= 14)
-    const newZoomSnap = currentZoom >= 14 ? 0.5 : 1;
-    const newZoomDelta = currentZoom >= 14 ? 0.5 : 1;
+    // Enable fractional zoom only when zoomed in very close (>= 18)
+    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
+    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
 
     if (map.options.zoomSnap !== newZoomSnap) {
       map.options.zoomSnap = newZoomSnap;
