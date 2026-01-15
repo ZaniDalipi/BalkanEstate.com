@@ -468,7 +468,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             className="map-tiles"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
-          <ClimateRiskLayer riskType={selectedClimateRisk} opacity={0.6} />
+          <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
           {/* 3D Buildings with time-based shadows */}
           <Buildings3DLayer
             enabled={show3DBuildings}
