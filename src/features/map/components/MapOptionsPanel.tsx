@@ -104,23 +104,23 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
     { value: 'heat', label: t('search:map.climateRisks.heat', 'Heat') },
   ];
 
-  // Desktop: larger, more spacious layout
-  // Mobile: compact grid layout
+  // Responsive layout with auto-sizing buttons for different languages
   return (
     <div
       className={`rounded-xl shadow-lg border border-white/30 overflow-hidden ${
-        isMobile ? 'w-[160px]' : 'w-[200px]'
+        isMobile ? 'min-w-[140px] max-w-[200px]' : 'min-w-[160px] max-w-[280px]'
       }`}
       style={{
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(16px) saturate(180%)',
         WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+        width: 'fit-content',
       }}
     >
       {/* Map Options Section - only shown on mobile or when explicitly enabled */}
       {showMapOptions && (
         <div className={`border-b border-gray-200/40 ${isMobile ? 'px-2 py-2' : 'px-3 py-2.5'}`}>
-          <h3 className={`font-semibold text-gray-500 uppercase tracking-wider ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
+          <h3 className={`font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
             {t('search:map.options.title', 'Map Options')}
           </h3>
           <div className="flex flex-wrap gap-1">
@@ -128,8 +128,8 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
               <button
                 key={option.value}
                 onClick={() => onMapOptionChange(option.value)}
-                className={`font-medium rounded transition-all ${
-                  isMobile ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-[11px]'
+                className={`font-medium rounded transition-all whitespace-nowrap ${
+                  isMobile ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-1 text-[10px]'
                 } ${
                   selectedMapOption === option.value
                     ? 'bg-blue-500 text-white'
@@ -145,16 +145,16 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
 
       {/* Climate Risks Section */}
       <div className={isMobile ? 'px-2 py-2' : 'px-3 py-2.5'}>
-        <h3 className={`font-semibold text-gray-500 uppercase tracking-wider ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
+        <h3 className={`font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
           {t('search:map.climateRisks.title', 'Climate Risks')}
         </h3>
-        <div className={`grid gap-1 ${isMobile ? 'grid-cols-3' : 'grid-cols-3'}`}>
+        <div className="flex flex-wrap gap-1">
           {climateRisks.map((risk) => (
             <button
               key={risk.value}
               onClick={() => onClimateRiskChange(risk.value)}
-              className={`font-medium rounded transition-all text-center ${
-                isMobile ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-1 text-[11px]'
+              className={`font-medium rounded transition-all whitespace-nowrap ${
+                isMobile ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-1 text-[10px]'
               } ${
                 selectedClimateRisk === risk.value
                   ? 'bg-blue-500 text-white'
