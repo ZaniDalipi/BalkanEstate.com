@@ -36,19 +36,12 @@ export interface PaddleDomainConfig {
  * Mark approved: true once Paddle has approved the domain.
  */
 export const PADDLE_APPROVED_DOMAINS: PaddleDomainConfig[] = [
-  // Production domains - Submit to Paddle as: balkanestate.com
-  {
-    domain: 'balkanestate.com',
-    environment: 'production',
-    approved: false, // Update to true once approved by Paddle
-    description: 'Main production domain - submit as: balkanestate.com',
-  },
-  // Production domains - Submit to Paddle as: balkanestateai.com
+  // Production domain - Submit to Paddle as: balkanestateai.com
   {
     domain: 'balkanestateai.com',
     environment: 'production',
     approved: false, // Update to true once approved by Paddle
-    description: 'AI branded production domain - submit as: balkanestateai.com',
+    description: 'Production domain - submit as: balkanestateai.com',
   },
 
   // Development domains (sandbox only)
@@ -136,7 +129,7 @@ export function getLegalPageUrls(baseUrl: string = ''): Record<string, string> {
  * Instructions:
  * 1. Go to https://vendors.paddle.com/checkout-settings
  * 2. Click "Add domain"
- * 3. Enter domain exactly as shown below (e.g., "balkanestate.com")
+ * 3. Enter domain exactly as shown below (e.g., "balkanestateai.com")
  * 4. Ensure your legal pages are accessible before submitting:
  *    - Terms of Service: /terms
  *    - Privacy Policy: /privacy
@@ -146,7 +139,6 @@ export function getLegalPageUrls(baseUrl: string = ''): Record<string, string> {
  * NOTE: If you use www, you need to submit it separately as a subdomain
  */
 export const DOMAINS_TO_SUBMIT = [
-  'balkanestate.com',      // Submit exactly like this
   'balkanestateai.com',    // Submit exactly like this
 ];
 
