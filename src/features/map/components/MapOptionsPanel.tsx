@@ -96,7 +96,7 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
   ];
 
   const climateRisks: { value: ClimateRiskType; label: string }[] = [
-    { value: 'none', label: t('search:map.climateRisks.none', 'None selected') },
+    { value: 'none', label: t('search:map.climateRisks.none', 'None') },
     { value: 'flood', label: t('search:map.climateRisks.flood', 'Flood') },
     { value: 'fire', label: t('search:map.climateRisks.fire', 'Fire') },
     { value: 'wind', label: t('search:map.climateRisks.wind', 'Wind') },
@@ -109,7 +109,7 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
   return (
     <div
       className={`rounded-xl shadow-lg border border-white/30 overflow-hidden ${
-        isMobile ? 'w-[180px]' : 'w-[220px]'
+        isMobile ? 'w-[160px]' : 'w-[200px]'
       }`}
       style={{
         background: 'rgba(255, 255, 255, 0.95)',
@@ -119,21 +119,21 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
     >
       {/* Map Options Section - only shown on mobile or when explicitly enabled */}
       {showMapOptions && (
-        <div className={`border-b border-gray-200/40 ${isMobile ? 'px-2.5 pt-2 pb-1.5' : 'px-3 pt-3 pb-2'}`}>
-          <h3 className={`font-semibold text-gray-500 uppercase tracking-wider ${isMobile ? 'text-[9px] mb-1.5' : 'text-[10px] mb-2'}`}>
+        <div className={`border-b border-gray-200/40 ${isMobile ? 'px-2 py-2' : 'px-3 py-2.5'}`}>
+          <h3 className={`font-semibold text-gray-500 uppercase tracking-wider ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
             {t('search:map.options.title', 'Map Options')}
           </h3>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {mapOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => onMapOptionChange(option.value)}
-                className={`font-medium rounded-md transition-all ${
-                  isMobile ? 'px-2 py-1 text-[11px]' : 'px-3 py-1.5 text-xs'
+                className={`font-medium rounded transition-all ${
+                  isMobile ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-[11px]'
                 } ${
                   selectedMapOption === option.value
                     ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-gray-600 hover:bg-gray-100 bg-gray-50'
                 }`}
               >
                 {option.label}
@@ -144,21 +144,21 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
       )}
 
       {/* Climate Risks Section */}
-      <div className={isMobile ? 'px-2.5 pt-1.5 pb-2' : 'px-3 pt-2 pb-3'}>
-        <h3 className={`font-semibold text-gray-500 uppercase tracking-wider ${isMobile ? 'text-[9px] mb-1.5' : 'text-[10px] mb-2'}`}>
+      <div className={isMobile ? 'px-2 py-2' : 'px-3 py-2.5'}>
+        <h3 className={`font-semibold text-gray-500 uppercase tracking-wider ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
           {t('search:map.climateRisks.title', 'Climate Risks')}
         </h3>
-        <div className={`grid gap-1.5 ${isMobile ? 'grid-cols-3' : 'grid-cols-3'}`}>
+        <div className={`grid gap-1 ${isMobile ? 'grid-cols-3' : 'grid-cols-3'}`}>
           {climateRisks.map((risk) => (
             <button
               key={risk.value}
               onClick={() => onClimateRiskChange(risk.value)}
-              className={`font-medium rounded-md transition-all text-center ${
-                isMobile ? 'px-1 py-1 text-[11px]' : 'px-2 py-1.5 text-xs'
+              className={`font-medium rounded transition-all text-center ${
+                isMobile ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-1 text-[11px]'
               } ${
                 selectedClimateRisk === risk.value
                   ? 'bg-blue-500 text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  : 'text-gray-600 hover:bg-gray-100 bg-gray-50'
               }`}
             >
               {risk.label}
