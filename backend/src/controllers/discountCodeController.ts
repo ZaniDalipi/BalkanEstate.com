@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import DiscountCode from '../models/DiscountCode';
 import { IUser } from '../models/User';
+import { generateSecureRandomString } from '../utils/secureRandom';
 
 // @desc    Create a new discount code (Admin only)
 // @route   POST /api/discount-codes
@@ -122,8 +123,8 @@ export const generateDiscountCodes = async (req: Request, res: Response): Promis
     const codePrefix = prefix || 'DISC';
 
     for (let i = 0; i < count; i++) {
-      // Generate random code: PREFIX-RANDOM8
-      const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
+      // Generate secure random code: PREFIX-RANDOM8
+      const randomPart = generateSecureRandomString(8);
       const code = `${codePrefix}-${randomPart}`;
 
       try {

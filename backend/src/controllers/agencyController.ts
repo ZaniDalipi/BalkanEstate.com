@@ -6,12 +6,11 @@ import Agent from '../models/Agent';
 import Property from '../models/Property';
 import { geocodeAgency } from '../services/geocodingService';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { generateSecureAgentId } from '../utils/secureRandom';
 
-// Helper function to generate unique Agent ID
+// Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `AGT-${timestamp}-${randomStr}`;
+  return generateSecureAgentId().replace('AG-', 'AGT-');
 }
 
 // @desc    Create agency profile (Enterprise tier only)

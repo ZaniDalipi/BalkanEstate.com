@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
+import { generateSecureMeasurementId } from '../utils/secureRandom';
 
 interface MeasurementPoint {
   lat: number;
@@ -128,9 +129,9 @@ export const saveMeasurement = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Create measurement
+    // Create measurement with secure random ID
     const measurement: SavedMeasurement = {
-      id: `m_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: generateSecureMeasurementId(),
       name: name.trim().substring(0, 100), // Limit name length
       points,
       type,

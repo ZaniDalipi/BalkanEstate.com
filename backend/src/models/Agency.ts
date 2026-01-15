@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { generateSecureRandomString, generateSecureAgencyCouponCode } from '../utils/secureRandom';
 
 export interface IAgencyCoupon {
   code: string;
@@ -561,22 +562,19 @@ AgencySchema.pre<IAgency>('save', async function (next) {
       .replace(/^-+|-+$/g, '');
   }
 
-  // Generate invitation code if not provided
+  // Generate invitation code if not provided using secure random
   if (!this.invitationCode) {
     // Generate a unique invitation code: AGY-{agencyName}-{random6digits}
-    const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const randomCode = generateSecureRandomString(6);
     const nameCode = this.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6).toUpperCase();
     this.invitationCode = `AGY-${nameCode}-${randomCode}`;
   }
   next();
 });
 
-// Method to generate unique coupon codes for agents
+// Method to generate unique coupon codes for agents using secure random
 AgencySchema.methods.generateCouponCode = function (): string {
-  const prefix = 'AGENCY';
-  const agencyCode = this.name.replace(/[^A-Z0-9]/gi, '').substring(0, 4).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `${prefix}-${agencyCode}-${random}`;
+  return generateSecureAgencyCouponCode(this.name);
 };
 
 // Method to check if agency subscription is active

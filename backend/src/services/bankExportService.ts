@@ -1,6 +1,7 @@
 import BankExport from '../models/BankExport';
 import PaymentRecord from '../models/PaymentRecord';
 import { SubscriptionStore } from '../models/Subscription';
+import { generateSecureRandomString } from '../utils/secureRandom';
 
 /**
  * Bank Export Service
@@ -65,8 +66,8 @@ export async function createBankExport(options: ExportOptions): Promise<any> {
     const totalAmount = paymentRecords.reduce((sum, record) => sum + record.amount, 0);
     const currency = paymentRecords[0].currency; // Assume all same currency
 
-    // Generate batch ID
-    const batchId = `EXPORT_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    // Generate batch ID using secure random
+    const batchId = `EXPORT_${Date.now()}_${generateSecureRandomString(6)}`;
 
     // Create export records
     const exportRecords = paymentRecords.map((payment) => ({

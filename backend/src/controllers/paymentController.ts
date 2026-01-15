@@ -10,8 +10,19 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
 
-// Initialize Stripe with your secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+// Initialize Stripe with validation
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
+if (!STRIPE_SECRET_KEY) {
+  console.error('CRITICAL: STRIPE_SECRET_KEY environment variable is not set');
+}
+
+// Warn if using test key in production
+if (process.env.NODE_ENV === 'production' && STRIPE_SECRET_KEY?.startsWith('sk_test_')) {
+  console.error('WARNING: Using Stripe test key in production environment');
+}
+
+const stripe = new Stripe(STRIPE_SECRET_KEY || '', {
   apiVersion: '2025-10-29.clover',
 });
 

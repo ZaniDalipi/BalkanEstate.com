@@ -6,6 +6,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import Product from '../models/Product';
 import Agency from '../models/Agency';
 import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } from './emailService';
+import { generateSecureRandomString } from '../utils/secureRandom';
 
 /**
  * Secure Subscription Payment Service
@@ -97,14 +98,14 @@ export async function processSubscriptionPayment(
     } else {
       console.log('➕ Creating new subscription...');
 
-      // Generate unique tokens for web subscriptions if not provided
+      // Generate unique tokens for web subscriptions if not provided (using secure random)
       // This prevents duplicate key errors when multiple users create free subscriptions
       const webPurchaseToken = store === 'web' && !purchaseToken
-        ? `web_${userId}_${Date.now()}_${Math.random().toString(36).substring(7)}`
+        ? `web_${userId}_${Date.now()}_${generateSecureRandomString(8).toLowerCase()}`
         : purchaseToken;
 
       const webTransactionId = store === 'web' && !transactionId
-        ? `web_txn_${userId}_${Date.now()}_${Math.random().toString(36).substring(7)}`
+        ? `web_txn_${userId}_${Date.now()}_${generateSecureRandomString(8).toLowerCase()}`
         : transactionId;
 
       // Create new subscription
@@ -144,10 +145,10 @@ export async function processSubscriptionPayment(
     // 5. Create payment record
     console.log('💳 Creating payment record...');
 
-    // Use the subscription's tokens or generate a unique transaction ID
+    // Use the subscription's tokens or generate a unique transaction ID (secure random)
     const paymentTransactionId = subscription.transactionId
       || subscription.purchaseToken
-      || `web_payment_${userId}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      || `web_payment_${userId}_${Date.now()}_${generateSecureRandomString(8).toLowerCase()}`;
 
     const [paymentRecord] = await PaymentRecord.create(
       [

@@ -12,6 +12,7 @@ import { sendVerificationEmail } from '../services/emailVerificationService';
 import { generateTokenPair } from '../services/refreshTokenService';
 import { loginRateLimiterAccount, resetLoginRateLimit } from '../middleware/rateLimiter';
 import { activityLogger } from '../services/activityLogger';
+import { generateSecureAgentId } from '../utils/secureRandom';
 
 // @desc    Register new user
 // @route   POST /api/auth/signup
@@ -159,8 +160,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         agencyId = verifiedAgency._id as unknown as mongoose.Types.ObjectId;
       }
 
-      // Generate agent ID
-      generatedAgentId = `AG-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      // Generate agent ID using secure random
+      generatedAgentId = generateSecureAgentId();
     }
 
     // ============================================
@@ -988,8 +989,8 @@ export const switchRole = async (req: Request, res: Response): Promise<void> => 
         agencyName = agency.name; // Use verified agency name
       }
 
-      // Generate agent ID if not provided (improved format with random component)
-      const generatedAgentId = agentId || `AG-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      // Generate agent ID if not provided using secure random
+      const generatedAgentId = agentId || generateSecureAgentId();
 
       // Start a MongoDB session for atomic operations
       const session = await mongoose.startSession();
@@ -1185,8 +1186,6 @@ export const requestPasswordReset = async (
 
     res.json({
       message: successMessage,
-      // ONLY FOR DEVELOPMENT - Remove in production
-      resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Error processing request', error: error.message });
