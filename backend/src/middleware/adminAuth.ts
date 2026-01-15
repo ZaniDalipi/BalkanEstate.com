@@ -135,13 +135,9 @@ export const requireAdminAccess = [checkVPNAccess, checkAdminRole];
 /**
  * Middleware to log admin actions for audit trail
  */
-export const logAdminAction = (action: string) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user as IUser;
-    const timestamp = new Date().toISOString();
-    const ip = req.ip || req.connection.remoteAddress;
-
-    // Admin action logged: ${action}
+export const logAdminAction = (_action: string) => {
+  return (_req: Request, _res: Response, next: NextFunction) => {
+    // Admin action logged: ${_action}
     // console.log(`   Body: ${JSON.stringify(req.body).substring(0, 200)}`);
 
     // TODO: Store in database for audit trail

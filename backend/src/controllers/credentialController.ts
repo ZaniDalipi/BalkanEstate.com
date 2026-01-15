@@ -253,7 +253,6 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
       await deleteImages([agent.credentials[credentialIndex].documentPublicId!]);
     }
 
-    const deletedCredential = agent.credentials[credentialIndex];
     agent.credentials.splice(credentialIndex, 1);
     await agent.save();
 
