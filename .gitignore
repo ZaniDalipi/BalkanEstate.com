@@ -19,6 +19,7 @@ out
 
 # Environment variables (keep .example files)
 .env
+.env.example
 .env.local
 .env.development
 .env.staging
