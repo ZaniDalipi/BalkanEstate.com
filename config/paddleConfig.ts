@@ -40,7 +40,7 @@ export const PADDLE_APPROVED_DOMAINS: PaddleDomainConfig[] = [
   {
     domain: 'balkanestateai.com',
     environment: 'production',
-    approved: false, // Update to true once approved by Paddle
+    approved: true, // Approved in sandbox - update environment when going live
     description: 'Production domain - submit as: balkanestateai.com',
   },
 
