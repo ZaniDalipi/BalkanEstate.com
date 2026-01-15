@@ -29,9 +29,9 @@ const CLIMATE_RISK_LAYERS: Record<
 > = {
   flood: {
     name: 'Flood Risk',
-    // OpenTopoMap shows water bodies and terrain
-    tileUrl: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+    // CartoDB Positron with blue water tint
+    tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
     legendTitle: 'Flood zones',
     legendColors: [
       { color: '#cce5ff', label: 'Low' },
@@ -71,9 +71,9 @@ const CLIMATE_RISK_LAYERS: Record<
   },
   air: {
     name: 'Air Quality',
-    // CartoDB Dark Matter - good for showing pollution overlay effect
-    tileUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://carto.com">CARTO</a>',
+    // AQICN - shows actual air quality index numbers on cities
+    tileUrl: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://aqicn.org/">AQICN</a>',
     legendTitle: 'Air quality',
     legendColors: [
       { color: '#00e400', label: 'Good' },
@@ -151,11 +151,11 @@ const useClimateLayerStyles = () => {
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
-      .flood-layer { filter: hue-rotate(200deg) saturate(1.5) brightness(1.1); }
-      .fire-layer { filter: sepia(0.6) saturate(2) hue-rotate(-15deg) brightness(1.1); }
-      .wind-layer { filter: hue-rotate(180deg) saturate(1.2) brightness(1.05); }
-      .air-layer { filter: brightness(0.85) contrast(1.2); }
-      .heat-layer { filter: sepia(0.7) saturate(2.5) hue-rotate(-30deg) brightness(1.05); }
+      .flood-layer { filter: hue-rotate(200deg) saturate(2) brightness(1.1); }
+      .fire-layer { filter: sepia(0.8) saturate(3) hue-rotate(-20deg) brightness(1.05); }
+      .wind-layer { filter: hue-rotate(170deg) saturate(1.5) brightness(1.1); }
+      .air-layer { filter: none; }
+      .heat-layer { filter: sepia(1) saturate(3) hue-rotate(-40deg) brightness(1); }
     `;
     document.head.appendChild(style);
 
