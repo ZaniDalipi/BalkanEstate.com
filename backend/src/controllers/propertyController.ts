@@ -355,10 +355,6 @@ export const createProperty = async (
     // **AUTO-DOWNGRADE: If NO valid subscription in DB but user thinks they have Pro, downgrade to free**
     if (!validSubscription && user.subscription && user.subscription.tier !== 'free' && user.subscription.tier !== 'buyer') {
       // User has no active subscription, downgrading to free
-
-      // Preserve the listing counts but downgrade to free tier
-      const currentActiveCount = user.subscription.activeListingsCount || 0;
-
       user.subscription.tier = 'free';
       user.subscription.status = 'expired';
       user.subscription.listingsLimit = 3; // Free tier limit
@@ -868,9 +864,6 @@ export const deleteProperty = async (
         }
 
         // Decrement role-specific counter based on how the property was created
-        const tier = user.subscription.tier || 'free';
-        const limit = user.subscription.listingsLimit || 3;
-
         if (property.createdAsRole === 'private_seller' && (user.subscription.privateSellerCount || 0) > 0) {
           user.subscription.privateSellerCount = (user.subscription.privateSellerCount || 0) - 1;
         } else if (property.createdAsRole === 'agent' && (user.subscription.agentCount || 0) > 0) {
