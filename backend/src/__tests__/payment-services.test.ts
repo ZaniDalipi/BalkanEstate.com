@@ -1,7 +1,8 @@
 /**
  * Payment Services Unit Tests
  *
- * Tests for payment provider factory, Stripe service, and Paddle service
+ * Tests for payment provider factory and Paddle service
+ * All countries use Paddle as the primary payment provider
  * Run: npm test -- --testPathPattern=payment-services
  */
 
@@ -16,35 +17,27 @@ describe('PaymentProviderFactory', () => {
 
   describe('getProviderForCountry', () => {
 
-    // EU Countries - Should return Stripe
-    const stripeCountries = ['GR', 'HR', 'BG', 'RO', 'SI'];
+    // All Balkan countries use Paddle
+    const allCountries = ['GR', 'HR', 'BG', 'RO', 'SI', 'RS', 'AL', 'BA', 'MK', 'ME', 'XK'];
 
-    test.each(stripeCountries)('returns stripe for EU country %s', (countryCode) => {
-      const provider = paymentProviderFactory.getProviderForCountry(countryCode);
-      expect(provider).toBe('stripe');
-    });
-
-    // Non-EU Balkans - Should return Paddle
-    const paddleCountries = ['RS', 'AL', 'BA', 'MK', 'ME', 'XK'];
-
-    test.each(paddleCountries)('returns paddle for non-EU country %s', (countryCode) => {
+    test.each(allCountries)('returns paddle for country %s', (countryCode) => {
       const provider = paymentProviderFactory.getProviderForCountry(countryCode);
       expect(provider).toBe('paddle');
     });
 
-    test('returns stripe for unknown country', () => {
+    test('returns paddle for unknown country (default)', () => {
       const provider = paymentProviderFactory.getProviderForCountry('XX');
-      expect(provider).toBe('stripe');
+      expect(provider).toBe('paddle');
     });
 
     test('handles lowercase country codes', () => {
       expect(paymentProviderFactory.getProviderForCountry('rs')).toBe('paddle');
-      expect(paymentProviderFactory.getProviderForCountry('gr')).toBe('stripe');
+      expect(paymentProviderFactory.getProviderForCountry('gr')).toBe('paddle');
     });
 
     test('handles empty string', () => {
       const provider = paymentProviderFactory.getProviderForCountry('');
-      expect(provider).toBe('stripe');
+      expect(provider).toBe('paddle');
     });
   });
 
@@ -63,7 +56,7 @@ describe('PaymentProviderFactory', () => {
       const info = paymentProviderFactory.getCountryInfo('GR');
       expect(info).toBeDefined();
       expect(info?.countryName).toBe('Greece');
-      expect(info?.provider).toBe('stripe');
+      expect(info?.provider).toBe('paddle');
       expect(info?.isEU).toBe(true);
     });
 
@@ -95,17 +88,14 @@ describe('PaymentProviderFactory', () => {
 
   describe('getCountriesByProvider', () => {
 
-    test('returns 5 countries for Stripe', () => {
+    test('returns 0 countries for Stripe (not used)', () => {
       const stripeCountries = paymentProviderFactory.getCountriesByProvider('stripe');
-      expect(stripeCountries.length).toBe(5);
-      stripeCountries.forEach(c => {
-        expect(c.provider).toBe('stripe');
-      });
+      expect(stripeCountries.length).toBe(0);
     });
 
-    test('returns 6 countries for Paddle', () => {
+    test('returns all 11 countries for Paddle', () => {
       const paddleCountries = paymentProviderFactory.getCountriesByProvider('paddle');
-      expect(paddleCountries.length).toBe(6);
+      expect(paddleCountries.length).toBe(11);
       paddleCountries.forEach(c => {
         expect(c.provider).toBe('paddle');
       });

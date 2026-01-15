@@ -10,19 +10,10 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
 
-// Initialize Stripe with validation
+// Stripe is not used - Paddle and PaySera are the active payment providers
+// Keeping Stripe initialization for legacy webhook handling only
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-
-if (!STRIPE_SECRET_KEY) {
-  console.error('CRITICAL: STRIPE_SECRET_KEY environment variable is not set');
-}
-
-// Warn if using test key in production
-if (process.env.NODE_ENV === 'production' && STRIPE_SECRET_KEY?.startsWith('sk_test_')) {
-  console.error('WARNING: Using Stripe test key in production environment');
-}
-
-const stripe = new Stripe(STRIPE_SECRET_KEY || '', {
+const stripe = new Stripe(STRIPE_SECRET_KEY || 'sk_not_configured', {
   apiVersion: '2025-10-29.clover',
 });
 
