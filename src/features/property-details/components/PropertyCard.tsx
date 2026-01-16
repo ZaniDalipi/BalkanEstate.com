@@ -18,7 +18,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
   const isInComparison = state.comparisonList.includes(property.id);
   const isNew = property.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
@@ -125,13 +124,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-300 text-left w-full flex flex-col cursor-pointer ${cardStyles} ${
-        isHovered && !isSold ? 'shadow-2xl -translate-y-1 scale-[1.01]' : 'hover:shadow-xl active:shadow-2xl active:-translate-y-1 active:scale-[1.01]'
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onTouchStart={() => setIsHovered(true)}
-      onTouchEnd={() => setTimeout(() => setIsHovered(false), 150)}
+      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 text-left w-full flex flex-col cursor-pointer ${cardStyles} hover:shadow-xl`}
+      style={{ contain: 'layout style paint' }}
       onClick={handleCardClick}
     >
       {/* Image Section */}
@@ -154,9 +148,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               loading="eager"
               decoding="async"
               fetchPriority="high"
-              className={`w-full h-full object-cover transition-transform duration-500 will-change-transform ${
-                isHovered && !isSold ? 'scale-110' : 'scale-100'
-              } ${isSold ? 'grayscale' : ''}`}
+              className={`w-full h-full object-cover ${isSold ? 'grayscale' : ''}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
             />

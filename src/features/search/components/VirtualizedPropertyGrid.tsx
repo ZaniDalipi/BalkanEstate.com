@@ -113,7 +113,10 @@ const Row = ({ index, style, properties, columns, gap, onPropertyHover, totalPro
         paddingRight: '16px',
         paddingTop: index === 0 ? '16px' : '0px',
         paddingBottom: '16px',
-      }}
+        contain: 'layout style paint',
+        contentVisibility: 'auto',
+        containIntrinsicSize: '0 440px',
+      } as React.CSSProperties}
     >
       {items.map((property) => (
         <PropertyItem
