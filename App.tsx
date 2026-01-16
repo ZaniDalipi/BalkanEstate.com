@@ -91,8 +91,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         path = path.slice(0, -1);
       }
 
-      console.log('🔙 Navigation detected:', path, 'lang:', lang);
-
       // Payment callback routes (highest priority)
       if (path === '/payment/success' || path === '/payment/cancel') {
         // Don't change active view, let the component handle it
@@ -122,12 +120,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
               };
               dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
             } else {
-              console.error('Property not found:', propertyId);
               dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
             }
           })
-          .catch(err => {
-            console.error('Error loading property:', err);
+          .catch(_err => {
             dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
           });
         return;
@@ -153,7 +149,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
             }
           })
-          .catch(err => console.error('Error loading property for edit:', err));
+          .catch(() => {});
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         return;
@@ -283,7 +279,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         }
       } else {
         // Unknown route - default to search and clear selections
-        console.log('⚠️ Unknown route, defaulting to search');
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
@@ -311,7 +306,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         // Check if selectedAgencyId is already an agency object
         const agencyId = state.selectedAgencyId;
         if (typeof agencyId === 'object' && agencyId !== null && '_id' in agencyId && 'name' in agencyId) {
-          console.log('✅ Agency object already loaded:', agencyId.name);
           setSelectedAgency(agencyId);
           setIsLoadingAgency(false);
           return;
@@ -321,8 +315,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         try {
           const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
           const agencyIdentifier = state.selectedAgencyId;
-
-          console.log('🔍 Fetching agency with identifier:', agencyIdentifier);
 
           // Include auth token so backend can identify current user and auto-add owner as member
           const token = localStorage.getItem('balkan_estate_token');
@@ -338,22 +330,18 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           // Check content type before parsing
           const contentType = response.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
-            console.error('Backend API not responding correctly. Is the server running?');
             setSelectedAgency(null);
             setIsLoadingAgency(false);
             return;
           }
 
           if (!response.ok) {
-            console.error('Failed to fetch agency:', agencyIdentifier, '-', response.status, '-', response.statusText);
             setSelectedAgency(null);
           } else {
             const data = await response.json();
-            console.log('✅ Agency fetched successfully:', data.agency?.name);
             setSelectedAgency(data.agency);
           }
-        } catch (error) {
-          console.error('Error fetching agency:', error);
+        } catch (_error) {
           setSelectedAgency(null);
         } finally {
           setIsLoadingAgency(false);
@@ -617,7 +605,6 @@ const AppWrapper: React.FC = () => {
             }
 
             if (error) {
-                console.error('OAuth error:', error);
                 dispatch({
                     type: 'SHOW_ALERT',
                     payload: {

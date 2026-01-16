@@ -177,8 +177,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   // Listen for real-time agency updates (new members, etc.)
   useEffect(() => {
     const handleAgencyUpdate = (data: any) => {
-      console.log('🏢 Agency update event received:', data);
-
       if (data.type === 'member-added' || data.type === 'member-removed') {
         // Refetch agency data to get the updated member list
         fetchAgencyData();
@@ -211,15 +209,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         setAgencyData(data.agency);
         setAgents(data.agency.agents || []);
         setAgencyProperties(data.properties || []);
-        console.log('✅ Agency data refreshed, agents:', data.agency.agents?.length || 0, 'properties:', data.properties?.length || 0);
       } else {
         // Fallback to prop data if API fails
         setAgencyData(agency);
         setAgents(agency.agents || []);
         setAgencyProperties([]);
       }
-    } catch (error) {
-      console.error('Failed to fetch agency data:', error);
+    } catch (_error) {
       // Fallback to prop data on error
       setAgencyData(agency);
       setAgents(agency.agents || []);
@@ -268,7 +264,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     const agent = agents.find(a => (a.id || a._id) === agentDatabaseId);
     // Use agentId if available, fallback to database id
     const agentIdentifier = agent?.agentId || agentDatabaseId;
-    console.log('🔍 Viewing agent profile:', agentIdentifier);
     // Clear selected agency first so App.tsx renders the agents view instead of agency detail
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
     dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
@@ -370,7 +365,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       await success(t('messages.agentRemovedTitle', 'Agent Removed'), t('messages.agentRemoved', { name: agentName }));
     } catch (err: any) {
-      console.error('Error removing agent:', err);
       await error(t('messages.errorTitle', 'Error'), err.message || t('messages.onlyAdminCanRemove'));
     } finally {
       setRemovingAgentId(null);
@@ -411,7 +405,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       // Redirect to home or agencies page
       window.location.href = '/';
     } catch (err: any) {
-      console.error('Error leaving agency:', err);
       await error(t('messages.errorTitle', 'Error'), err.message || t('messages.leftAgency', { agency: agencyData.name }));
     } finally {
       setIsLeavingAgency(false);
@@ -488,7 +481,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       setIsEditModalOpen(false);
       await success(t('messages.agencyUpdatedTitle', 'Agency Updated'), t('messages.agencyUpdated'));
     } catch (err) {
-      console.error('Error updating agency:', err);
       await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update agency'));
     }
   };

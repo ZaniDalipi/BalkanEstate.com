@@ -14,7 +14,6 @@ class SocketService {
 
   connect(token: string, userId?: string) {
     if (this.socket?.connected) {
-      console.log('✅ Socket already connected');
       return;
     }
 
@@ -48,15 +47,15 @@ class SocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('✅ Connected to WebSocket server');
+      // Connected to WebSocket server
     });
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('❌ Disconnected from WebSocket server:', reason);
+    this.socket.on('disconnect', (_reason) => {
+      // Disconnected from WebSocket server
     });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('❌ WebSocket connection error:', error.message);
+    this.socket.on('connect_error', (_error) => {
+      // WebSocket connection error - silent handling
     });
 
     // Handle incoming messages
@@ -92,7 +91,6 @@ class SocketService {
 
     // Handle conversation deletion
     this.socket.on('conversation-deleted', (conversationId: string) => {
-      console.log('🗑️ Conversation deleted:', conversationId);
       this.deleteHandlers.forEach(handler => handler(conversationId));
     });
 
@@ -107,7 +105,6 @@ class SocketService {
 
   disconnect() {
     if (this.socket) {
-      console.log('👋 Disconnecting from WebSocket server');
       this.socket.disconnect();
       this.socket = null;
     }
@@ -116,7 +113,6 @@ class SocketService {
   // Join a conversation room
   joinConversation(conversationId: string) {
     if (this.socket?.connected) {
-      console.log('👥 Joining conversation:', conversationId);
       this.socket.emit('join-conversation', conversationId);
     }
   }
@@ -124,7 +120,6 @@ class SocketService {
   // Leave a conversation room
   leaveConversation(conversationId: string) {
     if (this.socket?.connected) {
-      console.log('👋 Leaving conversation:', conversationId);
       this.socket.emit('leave-conversation', conversationId);
     }
   }

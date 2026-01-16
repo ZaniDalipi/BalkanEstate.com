@@ -181,7 +181,6 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         // Check if conversation already exists
         const exists = state.conversations.some(c => c.id === action.payload.id);
         if (exists) {
-            console.log('Conversation already exists, not adding again');
             return state;
         }
         return { ...state, conversations: [action.payload, ...state.conversations] };
@@ -505,8 +504,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         throw new Error('Failed to fetch user profile');
       }
-    } catch (error) {
-      console.error('Error fetching user data after OAuth:', error);
+    } catch (_error) {
       // Clear tokens on failure
       localStorage.removeItem('balkan_estate_token');
       localStorage.removeItem('balkan_estate_refresh_token');
@@ -538,12 +536,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const createConversation = useCallback(async (propertyId: string) => {
-      console.log('createConversation called for property:', propertyId);
       const conversation = await api.createConversation(propertyId);
-      console.log('API returned conversation:', conversation.id);
-      console.log('Dispatching CREATE_CONVERSATION');
       dispatch({ type: 'CREATE_CONVERSATION', payload: conversation });
-      console.log('CREATE_CONVERSATION dispatched');
       return conversation;
   }, []);
 
@@ -555,10 +549,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const sendMessage = useCallback(async (conversationId: string, message: Message) => {
       const result = await api.sendMessage(conversationId, message);
       dispatch({ type: 'ADD_MESSAGE', payload: { conversationId, message: result.message }});
-      // Handle security warnings if any
-      if (result.securityWarnings && result.securityWarnings.length > 0) {
-          console.warn('Security warnings:', result.securityWarnings);
-      }
   }, []);
 
   const createListing = useCallback(async (property: Property) => {
@@ -583,9 +573,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [state.currentUser]);
 
   const updateListing = useCallback(async (property: Property) => {
-      console.log('📝 [updateListing] Updating property:', property.id, 'with coordinates:', property.lat, property.lng);
       const updatedProperty = await api.updateListing(property);
-      console.log('✅ [updateListing] Received updated property with coordinates:', updatedProperty.lat, updatedProperty.lng);
       dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
       return updatedProperty;
   }, []);
@@ -608,7 +596,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Set up session expired callback for proactive token refresh
   useEffect(() => {
     tokenService.onSessionExpired(() => {
-      console.log('[AppContext] Session expired, logging out user');
       // Disconnect from WebSocket
       socketService.disconnect();
       // Clear auth state
@@ -629,8 +616,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!state.currentUser) return;
 
     const handleUserUpdate = (data: any) => {
-      console.log('📢 User update event:', data);
-
       // Handle agency-joined event
       if (data.type === 'agency-joined' && data.user) {
         dispatch({ type: 'UPDATE_USER', payload: {

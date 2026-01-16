@@ -218,9 +218,7 @@ export const generateDescriptionFromImages = async (images: File[], language: st
         const sanitizedJsonText = jsonText.replace(/^```json\n/, '').replace(/\n```$/, '');
         const parsedResult = JSON.parse(sanitizedJsonText);
         return parsedResult as PropertyAnalysisResult;
-    } catch (e) {
-        console.error("Error parsing Gemini response:", e instanceof Error ? e.message : String(e));
-        console.error("Raw response text:", result.text);
+    } catch (_e) {
         throw new Error("Failed to get a valid response from the AI. Please try again.");
     }
 };
@@ -304,9 +302,7 @@ If a location type doesn't apply (e.g., sea for landlocked cities), use 999 to i
         const sanitizedJsonText = jsonText.replace(/^```json\n/, '').replace(/\n```$/, '');
         const parsedResult = JSON.parse(sanitizedJsonText);
         return parsedResult as DistanceCalculationResult;
-    } catch (e) {
-        console.error("Error parsing Gemini distance calculation response:", e instanceof Error ? e.message : String(e));
-        console.error("Raw response text:", result.text);
+    } catch (_e) {
         throw new Error("Failed to calculate distances. Using default values.");
     }
 };
@@ -472,9 +468,7 @@ export const getAiChatResponse = async (history: ChatMessage[], properties: Prop
         const jsonText = result.text.trim();
         const parsedResult = JSON.parse(jsonText);
         return parsedResult as AiChatResponse;
-    } catch (e) {
-        console.error("Error parsing Gemini chat response:", e instanceof Error ? e.message : String(e));
-        console.error("Raw chat response text:", result.text);
+    } catch (_e) {
         return {
             responseMessage: "I'm having a little trouble understanding. Could you please rephrase your request, or try using the manual filters?",
             searchQuery: null,
@@ -594,8 +588,8 @@ export const generateSearchNameFromCoords = async (lat: number, lng: number, bou
             if (neName) return `Area near ${neName}`;
 
             // Fall through to center-based naming if corners don't have good names
-        } catch (error) {
-            console.error('Bounds reverse geocoding failed, trying center:', error);
+        } catch (_error) {
+            // Bounds reverse geocoding failed, trying center
         }
     }
 
@@ -608,8 +602,8 @@ export const generateSearchNameFromCoords = async (lat: number, lng: number, bou
             const locationName = getLocationName(result.address);
             if (locationName) return locationName;
         }
-    } catch (error) {
-        console.error('Reverse geocoding failed, falling back to AI:', error);
+    } catch (_error) {
+        // Reverse geocoding failed, falling back to AI
     }
 
     // Fallback to AI if reverse geocoding fails
@@ -681,8 +675,7 @@ export const getNeighborhoodInsights = async (lat: number, lng: number, city: st
             })
         );
         return result.text.trim();
-    } catch (e) {
-        console.error("Error fetching neighborhood insights:", e instanceof Error ? e.message : String(e));
+    } catch (_e) {
         throw new Error("Could not retrieve neighborhood insights at this time.");
     }
 };

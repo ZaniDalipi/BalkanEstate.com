@@ -128,8 +128,8 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
         await cloudinary.uploader.destroy(content.publicId, {
           resource_type: content.type === 'video' ? 'video' : 'image'
         });
-      } catch (cloudErr) {
-        console.error('Failed to delete from Cloudinary:', cloudErr);
+      } catch (_cloudErr) {
+        // Cloudinary deletion failed silently - content will still be removed from database
       }
     }
 

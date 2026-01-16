@@ -102,8 +102,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     }
 
     return null;
-  } catch (error) {
-    console.error('Token refresh error:', error);
+  } catch (_error) {
     return null;
   }
 };
@@ -144,16 +143,13 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
 
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401 && requiresAuth && retryCount === 0) {
-      console.log('Access token expired, attempting to refresh...');
       const newAccessToken = await refreshAccessToken();
 
       if (newAccessToken) {
-        console.log('Token refreshed successfully, retrying request...');
         // Retry the request with the new token
         return apiRequest<T>(endpoint, options, 1);
       } else {
         // Refresh failed, clear tokens and redirect to login
-        console.log('Token refresh failed, logging out...');
         removeToken();
         throw new Error('Session expired. Please login again.');
       }
@@ -170,7 +166,6 @@ const apiRequest = async <T>(endpoint: string, options: RequestOptions = {}, ret
 
     return isJson ? await response.json() : ({} as T);
   } catch (error: any) {
-    console.error('API request error:', error);
     throw error;
   }
 };
@@ -285,8 +280,7 @@ export const logout = async (): Promise<void> => {
       requiresAuth: true,
       body: { refreshToken }
     });
-  } catch (error) {
-    console.error('Logout error:', error);
+  } catch (_error) {
     // Continue with local cleanup even if server call fails
   }
 
@@ -299,8 +293,7 @@ export const logoutAllDevices = async (): Promise<void> => {
       method: 'POST',
       requiresAuth: true
     });
-  } catch (error) {
-    console.error('Logout all devices error:', error);
+  } catch (_error) {
     // Continue with local cleanup even if server call fails
   }
 
@@ -370,8 +363,7 @@ export const getAvailableOAuthProviders = async (): Promise<{ google: boolean; a
   try {
     const response = await apiRequest<{ providers: { google: boolean; apple: boolean } }>('/auth/oauth/providers');
     return response.providers;
-  } catch (error) {
-    console.error('Error fetching OAuth providers:', error);
+  } catch (_error) {
     // Return all false if endpoint fails
     return { google: false, apple: false };
   }
@@ -641,16 +633,13 @@ export const uploadPropertyImages = async (
 
   // Handle 401 Unauthorized - try to refresh token
   if (response.status === 401 && retryCount === 0) {
-    console.log('Access token expired during image upload, attempting to refresh...');
     const newAccessToken = await refreshAccessToken();
 
     if (newAccessToken) {
-      console.log('Token refreshed successfully, retrying image upload...');
       // Retry the upload with the new token
       return uploadPropertyImages(images, propertyId, 1);
     } else {
       // Refresh failed, clear tokens
-      console.log('Token refresh failed, logging out...');
       removeToken();
       throw new Error('Session expired. Please login again.');
     }
@@ -774,8 +763,7 @@ export const getConversations = async (): Promise<Conversation[]> => {
     ) || [];
 
     return validConversations.map(transformBackendConversation);
-  } catch (error) {
-    console.error('Error fetching conversations:', error);
+  } catch (_error) {
     return [];
   }
 };
@@ -898,9 +886,8 @@ export const getMyData = async (): Promise<{ savedHomes: Property[]; savedSearch
 
 // --- SUBSCRIPTION API ---
 
-export const subscribe = async (plan: string): Promise<{ success: true }> => {
+export const subscribe = async (_plan: string): Promise<{ success: true }> => {
   // TODO: Implement subscription endpoint on backend
-  console.log(`Subscribing to ${plan}`);
   return { success: true };
 };
 
@@ -987,12 +974,6 @@ function transformBackendProperty(backendProp: any): Property {
 
 // Transform frontend Property to backend format
 function transformToBackendProperty(frontendProp: Property): any {
-  console.log('🔄 [transformToBackendProperty] Input images:', {
-    hasImages: frontendProp.images !== undefined,
-    imagesCount: frontendProp.images?.length || 0,
-    sampleImage: frontendProp.images?.[0]?.url?.substring(0, 50)
-  });
-
   // Build the property object, only including fields with meaningful values
   // This ensures we don't accidentally overwrite existing data with empty/undefined values
   const result: any = {

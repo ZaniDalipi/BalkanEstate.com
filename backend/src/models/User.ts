@@ -842,8 +842,6 @@ UserSchema.methods.comparePassword = async function (
   const matchWithoutPepper = await bcrypt.compare(candidatePassword, password);
   if (matchWithoutPepper) {
     // Password matched without pepper - this is a legacy password
-    // Optionally log this for tracking migration
-    console.log('Legacy password match (no pepper) - consider prompting password update');
     return true;
   }
 
