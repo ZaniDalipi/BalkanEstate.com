@@ -163,11 +163,11 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
     return rowHeight;
   }, [showFooter, propertyRowCount, rowHeight]);
 
-  // Preload images for upcoming rows (10 rows ahead)
+  // Preload images for upcoming rows (15 rows ahead)
   useEffect(() => {
-    const preloadAhead = 10; // Preload 10 rows ahead
-    const startRow = currentScrollIndex;
-    const endRow = Math.min(startRow + preloadAhead, propertyRowCount);
+    const preloadAhead = 15; // Preload 15 rows ahead for smoother scrolling
+    const startRow = Math.max(0, currentScrollIndex - 2); // Also preload 2 rows behind
+    const endRow = Math.min(currentScrollIndex + preloadAhead, propertyRowCount);
 
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       if (!preloadedRef.current.has(rowIndex)) {
@@ -196,7 +196,7 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
 
   // Preload first batch of images immediately on mount
   useEffect(() => {
-    const initialPreload = Math.min(12, properties.length); // Preload first 12 images
+    const initialPreload = Math.min(20, properties.length); // Preload first 20 images
     const urls = properties.slice(0, initialPreload).map(p => p.imageUrl).filter(Boolean) as string[];
     preloadImages(urls);
 
@@ -239,7 +239,7 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
       rowHeight={getRowHeight}
       rowComponent={Row}
       rowProps={rowProps}
-      overscanCount={6}
+      overscanCount={10}
       onScroll={handleScroll}
       className="virtualized-property-list"
       style={{ height: containerHeight, width: '100%' }}
