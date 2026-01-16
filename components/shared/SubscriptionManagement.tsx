@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
+import PaymentWindow from './PaymentWindow';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -187,6 +188,15 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
   const [loadingAgencyData, setLoadingAgencyData] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [generatingCoupons, setGeneratingCoupons] = useState(false);
+
+  // Payment window state
+  const [showPaymentWindow, setShowPaymentWindow] = useState(false);
+  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<{
+    name: string;
+    price: number;
+    interval: 'month' | 'year';
+    productId: string;
+  } | null>(null);
 
   const user = state.currentUser as User;
 
@@ -518,10 +528,35 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   const handleConfirmUpgrade = () => {
     if (selectedUpgrade) {
-      // Dispatch to open payment flow
-      dispatch({ type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: true, isOffer: false } });
+      const plan = plans[selectedUpgrade];
+      if (plan) {
+        // Set up payment details
+        setSelectedPlanForPayment({
+          name: plan.name,
+          price: calculateUpgradePrice(selectedUpgrade).finalPrice,
+          interval: plan.period === 'year' ? 'year' : 'month',
+          productId: selectedUpgrade,
+        });
+        // Open payment window
+        setShowPaymentWindow(true);
+      }
     }
     setShowUpgradeModal(false);
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    setShowPaymentWindow(false);
+    setSelectedPlanForPayment(null);
+    // Refresh subscription data
+    fetchSubscription();
+    // Dispatch event for other components
+    window.dispatchEvent(new Event('subscriptionUpdated'));
+    window.dispatchEvent(new Event('paymentSuccess'));
+  };
+
+  const handlePaymentError = (error: string) => {
+    console.error('Payment error:', error);
+    setActionError(error);
   };
 
   // Manual refresh button - syncs subscription counters
@@ -1702,6 +1737,26 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
         </div>
+      )}
+
+      {/* Payment Window for Upgrades */}
+      {selectedPlanForPayment && (
+        <PaymentWindow
+          isOpen={showPaymentWindow}
+          onClose={() => {
+            setShowPaymentWindow(false);
+            setSelectedPlanForPayment(null);
+          }}
+          planName={selectedPlanForPayment.name}
+          planPrice={selectedPlanForPayment.price}
+          planInterval={selectedPlanForPayment.interval}
+          userRole={user?.role === 'agent' ? 'agent' : 'private_seller'}
+          userEmail={user?.email}
+          userCountry={user?.country}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+          productId={selectedPlanForPayment.productId}
+        />
       )}
     </div>
   );
