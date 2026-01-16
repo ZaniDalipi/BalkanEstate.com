@@ -317,68 +317,87 @@ export async function cancelSubscriptionSecurely(
 /**
  * Check and update expired subscriptions
  * Should be run by a cron job daily
+ * Includes retry logic for MongoDB transient transaction errors (WriteConflict)
  */
-export async function updateExpiredSubscriptions(): Promise<number> {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+export async function updateExpiredSubscriptions(maxRetries = 3): Promise<number> {
+  let lastError: any;
 
-  try {
-    const now = new Date();
-    let updatedCount = 0;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Find all expired subscriptions
-    const expiredSubscriptions = await Subscription.find({
-      status: { $in: ['active', 'grace'] },
-      expirationDate: { $lt: now },
-    }).session(session);
+    try {
+      const now = new Date();
+      let updatedCount = 0;
 
-    for (const subscription of expiredSubscriptions) {
-      // Update subscription
-      subscription.status = 'expired';
-      await subscription.save({ session });
+      // Find all expired subscriptions
+      const expiredSubscriptions = await Subscription.find({
+        status: { $in: ['active', 'grace'] },
+        expirationDate: { $lt: now },
+      }).session(session);
 
-      // Update user - clear subscription fields
-      const user = await User.findById(subscription.userId).session(session);
-      if (user && String(user.activeSubscriptionId) === String(subscription._id)) {
-        user.isSubscribed = false;
-        user.subscriptionStatus = 'expired';
-        user.subscriptionPlan = undefined;
-        user.subscriptionProductName = undefined;
-        user.subscriptionSource = undefined;
-        user.activeSubscriptionId = undefined;
-        await user.save({ session });
+      for (const subscription of expiredSubscriptions) {
+        // Update subscription
+        subscription.status = 'expired';
+        await subscription.save({ session });
+
+        // Update user - clear subscription fields
+        const user = await User.findById(subscription.userId).session(session);
+        if (user && String(user.activeSubscriptionId) === String(subscription._id)) {
+          user.isSubscribed = false;
+          user.subscriptionStatus = 'expired';
+          user.subscriptionPlan = undefined;
+          user.subscriptionProductName = undefined;
+          user.subscriptionSource = undefined;
+          user.activeSubscriptionId = undefined;
+          await user.save({ session });
+        }
+
+        // Create event
+        await SubscriptionEvent.create(
+          [
+            {
+              subscriptionId: subscription._id,
+              userId: subscription.userId,
+              eventType: 'subscription_expired',
+              store: subscription.store,
+              metadata: {
+                expiredAt: now,
+              },
+            },
+          ],
+          { session }
+        );
+
+        updatedCount++;
       }
 
-      // Create event
-      await SubscriptionEvent.create(
-        [
-          {
-            subscriptionId: subscription._id,
-            userId: subscription.userId,
-            eventType: 'subscription_expired',
-            store: subscription.store,
-            metadata: {
-              expiredAt: now,
-            },
-          },
-        ],
-        { session }
-      );
+      await session.commitTransaction();
+      session.endSession();
 
-      updatedCount++;
+      return updatedCount;
+    } catch (error: any) {
+      await session.abortTransaction();
+      session.endSession();
+      lastError = error;
+
+      // Check for transient transaction errors (WriteConflict) that can be retried
+      const isTransientError =
+        error.errorLabels?.includes('TransientTransactionError') ||
+        error.code === 112; // WriteConflict
+
+      if (isTransientError && attempt < maxRetries) {
+        // Exponential backoff: 100ms, 200ms, 400ms...
+        const delay = Math.pow(2, attempt - 1) * 100;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      throw error;
     }
-
-    await session.commitTransaction();
-    console.log(`✅ Updated ${updatedCount} expired subscriptions`);
-
-    return updatedCount;
-  } catch (error: any) {
-    await session.abortTransaction();
-    console.error('❌ Error updating expired subscriptions:', error);
-    throw error;
-  } finally {
-    session.endSession();
   }
+
+  throw lastError;
 }
 
 /**

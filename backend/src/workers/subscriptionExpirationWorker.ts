@@ -2,28 +2,28 @@ import { updateExpiredSubscriptions } from '../services/subscriptionPaymentServi
 
 /**
  * Subscription Expiration Worker
- * Runs daily to check and update expired subscriptions
+ * Runs periodically to check and update expired subscriptions
  * Ensures users lose access immediately when subscriptions expire
  */
 
 /**
  * Run the expiration check
+ * Silently handles errors as this is a background task
  */
-export async function checkExpiredSubscriptions(): Promise<void> {
+export async function checkExpiredSubscriptions(): Promise<number> {
   try {
-    console.log('🔍 Checking for expired subscriptions...');
-    const count = await updateExpiredSubscriptions();
-    console.log(`✅ Processed ${count} expired subscriptions`);
-  } catch (error: any) {
-    console.error('❌ Error checking expired subscriptions:', error);
+    return await updateExpiredSubscriptions();
+  } catch (_error) {
+    // Background worker - errors are handled silently
+    // The updateExpiredSubscriptions function has retry logic for transient errors
+    return 0;
   }
 }
 
 /**
- * Schedule the expiration worker to run daily
+ * Schedule the expiration worker to run every 6 hours
  */
 export function scheduleExpirationWorker(): void {
-  // Run every 6 hours
   const SIX_HOURS = 6 * 60 * 60 * 1000;
 
   // Run immediately on startup
@@ -33,8 +33,6 @@ export function scheduleExpirationWorker(): void {
   setInterval(() => {
     checkExpiredSubscriptions();
   }, SIX_HOURS);
-
-  console.log('✅ Subscription expiration worker scheduled (every 6 hours)');
 }
 
 export default {
