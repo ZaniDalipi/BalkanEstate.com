@@ -1,8 +1,18 @@
-import React, { useCallback, useMemo, useRef, useEffect, memo } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect, memo, useState } from 'react';
 import { List } from 'react-window';
 import { Property } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import Footer from '@/components/shared/Footer';
+
+// Image preloader utility - preloads images before they're needed
+const preloadImages = (urls: string[]) => {
+  urls.forEach(url => {
+    if (url) {
+      const img = new Image();
+      img.src = url;
+    }
+  });
+};
 
 interface VirtualizedPropertyGridProps {
   properties: Property[];
@@ -125,6 +135,8 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
   showFooter = true,
 }) => {
   const listRef = useRef<any>(null);
+  const [currentScrollIndex, setCurrentScrollIndex] = useState(0);
+  const preloadedRef = useRef<Set<number>>(new Set());
 
   // Calculate row count based on columns
   const propertyRowCount = useMemo(() => {
@@ -151,6 +163,53 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
     return rowHeight;
   }, [showFooter, propertyRowCount, rowHeight]);
 
+  // Preload images for upcoming rows (10 rows ahead)
+  useEffect(() => {
+    const preloadAhead = 10; // Preload 10 rows ahead
+    const startRow = currentScrollIndex;
+    const endRow = Math.min(startRow + preloadAhead, propertyRowCount);
+
+    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
+      if (!preloadedRef.current.has(rowIndex)) {
+        preloadedRef.current.add(rowIndex);
+
+        // Get properties for this row
+        const startIndex = rowIndex * columns;
+        const urls: string[] = [];
+
+        for (let i = 0; i < columns; i++) {
+          const propertyIndex = startIndex + i;
+          if (propertyIndex < properties.length) {
+            const imageUrl = properties[propertyIndex].imageUrl;
+            if (imageUrl) {
+              urls.push(imageUrl);
+            }
+          }
+        }
+
+        if (urls.length > 0) {
+          preloadImages(urls);
+        }
+      }
+    }
+  }, [currentScrollIndex, properties, columns, propertyRowCount]);
+
+  // Preload first batch of images immediately on mount
+  useEffect(() => {
+    const initialPreload = Math.min(12, properties.length); // Preload first 12 images
+    const urls = properties.slice(0, initialPreload).map(p => p.imageUrl).filter(Boolean) as string[];
+    preloadImages(urls);
+
+    // Reset preloaded set when properties change
+    preloadedRef.current = new Set();
+  }, [properties]);
+
+  // Handle scroll to track position for preloading
+  const handleScroll = useCallback(({ scrollOffset }: { scrollOffset: number }) => {
+    const currentRow = Math.floor(scrollOffset / rowHeight);
+    setCurrentScrollIndex(currentRow);
+  }, [rowHeight]);
+
   // Row props passed to each row
   const rowProps = useMemo((): RowData => ({
     properties,
@@ -166,6 +225,7 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
     if (listRef.current) {
       listRef.current.scrollToRow?.({ index: 0 });
     }
+    setCurrentScrollIndex(0);
   }, [properties.length > 0 ? properties[0]?.id : null]);
 
   if (properties.length === 0) {
@@ -179,7 +239,8 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
       rowHeight={getRowHeight}
       rowComponent={Row}
       rowProps={rowProps}
-      overscanCount={2}
+      overscanCount={6}
+      onScroll={handleScroll}
       className="virtualized-property-list"
       style={{ height: containerHeight, width: '100%' }}
     />

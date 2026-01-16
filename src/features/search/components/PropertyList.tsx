@@ -903,7 +903,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     );
 };
 
-// CSS styles for virtualized list scrollbar
+// CSS styles for virtualized list scrollbar and image loading animations
 const VirtualizedListStyles = () => (
   <style>{`
     .virtualized-property-list {
@@ -922,6 +922,19 @@ const VirtualizedListStyles = () => (
     }
     .virtualized-property-list::-webkit-scrollbar-thumb:hover {
       background-color: rgba(0,0,0,0.3);
+    }
+
+    /* Shimmer animation for image loading placeholders */
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+    .skeleton-shimmer {
+      animation: shimmer 1.5s infinite;
     }
   `}</style>
 );
