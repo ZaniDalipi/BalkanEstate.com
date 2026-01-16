@@ -142,22 +142,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </div>
         ) : (
           <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
-            {/* Skeleton placeholder - shows while image is loading */}
+            {/* Simple placeholder - shows while image is loading */}
             <div
-              className={`absolute inset-0 bg-gradient-to-br from-neutral-200 via-neutral-100 to-neutral-200 animate-pulse transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-0' : 'opacity-100'
+              className={`absolute inset-0 bg-neutral-100 transition-opacity duration-150 ${
+                imageLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
               }`}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skeleton-shimmer" />
-            </div>
+            />
             <img
               src={property.imageUrl}
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
               loading="eager"
               decoding="async"
-              className={`w-full h-full object-cover transition-all duration-500 ${
+              fetchPriority="high"
+              className={`w-full h-full object-cover transition-transform duration-500 will-change-transform ${
                 isHovered && !isSold ? 'scale-110' : 'scale-100'
-              } ${isSold ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              } ${isSold ? 'grayscale' : ''}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
             />
