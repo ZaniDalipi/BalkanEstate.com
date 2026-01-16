@@ -44,9 +44,39 @@ const AiChatModal: React.FC<{
     </Modal>
 );
 
+// Type for props passed to PropertyList (matching its interface)
+interface PropertyListPropsForMobile {
+    properties: Property[];
+    filters: Filters;
+    onFilterChange: <K extends keyof Filters>(name: K, value: Filters[K]) => void;
+    onSearchClick: () => void;
+    onResetFilters: () => void;
+    onSortChange: (value: string) => void;
+    onSaveSearch: () => void;
+    isSaving: boolean;
+    isMobile: boolean;
+    showFilters: boolean;
+    showList: boolean;
+    searchMode: 'manual' | 'ai';
+    onSearchModeChange: (mode: 'manual' | 'ai') => void;
+    onApplyAiFilters: (query: AiSearchQuery) => void;
+    isAreaDrawn: boolean;
+    aiChatHistory: ChatMessage[];
+    onAiChatHistoryChange: (history: ChatMessage[]) => void;
+    onDrawStart: () => void;
+    isDrawing: boolean;
+    isSearchingLocation: boolean;
+    onPropertyHover?: (propertyId: string | null) => void;
+    suggestions?: NominatimResult[];
+    onSuggestionClick?: (suggestion: NominatimResult) => void;
+    isQueryInputFocused?: boolean;
+    onQueryInputFocusChange?: (focused: boolean) => void;
+    fallbackLocation?: string | null;
+}
+
 const MobileFilters: React.FC<{
     onClose: () => void;
-    propertyListProps: any; // Simplified for this context
+    propertyListProps: PropertyListPropsForMobile;
     localFilters: Filters;
     onLocalFilterChange: (name: keyof Filters, value: string | number | null) => void;
     onReset: () => void;
@@ -461,7 +491,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         });
 
         // Helper to convert date/string/number to timestamp
-        const toTimestamp = (value: any): number => {
+        const toTimestamp = (value: number | string | Date | undefined | null): number => {
             if (!value) return 0;
             if (typeof value === 'number') return value;
             if (typeof value === 'string') return new Date(value).getTime();
@@ -952,15 +982,26 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     
     const onFlyComplete = useCallback(() => setFlyToTarget(null), []);
 
+    // Named handlers - no inline functions
+    const handleSaveSearchArea = useCallback(() => handleSaveSearch(true), [handleSaveSearch]);
+    const handleSaveSearchFilters = useCallback(() => handleSaveSearch(false), [handleSaveSearch]);
+    const handleSearchClick = useCallback(() => handleSearch(), [handleSearch]);
+    const handleSearchModeChange = useCallback((mode: 'manual' | 'ai') => {
+        updateSearchPageState({ searchMode: mode });
+    }, [updateSearchPageState]);
+    const handleAiChatHistoryChange = useCallback((newHistory: ChatMessage[]) => {
+        updateSearchPageState({ aiChatHistory: newHistory });
+    }, [updateSearchPageState]);
+
     const mapProps = {
         properties: baseFilteredProperties,
         onMapMove: handleMapMove,
         userLocation: userLocation,
-        onSaveSearch: () => handleSaveSearch(true),
+        onSaveSearch: handleSaveSearchArea,
         isSaving: isSaving,
         isAuthenticated: isAuthenticated,
         mapBounds: mapBounds,
-        drawnBounds,
+        drawnBounds: drawnBounds,
         onDrawComplete: handleDrawComplete,
         isDrawing: isDrawing,
         onDrawStart: toggleDrawing,
@@ -968,26 +1009,30 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         onFlyComplete: onFlyComplete,
         onRecenter: handleRecenterOnUser,
         isMobile: isMobile,
+        searchMode: searchMode,
         hoveredPropertyId: hoveredPropertyId,
     };
-    
+
     const propertyListProps = {
         properties: listProperties,
         filters: filters,
         onFilterChange: handleFilterChange,
-        onSearchClick: () => handleSearch(),
+        onSearchClick: handleSearchClick,
         onResetFilters: handleResetFilters,
         onSortChange: handleSortChange,
-        onSaveSearch: () => handleSaveSearch(false),
-        isSaving,
-        searchMode,
-        onSearchModeChange: (mode: 'manual' | 'ai') => updateSearchPageState({ searchMode: mode }),
+        onSaveSearch: handleSaveSearchFilters,
+        isSaving: isSaving,
+        isMobile: isMobile,
+        showFilters: !isMobile,
+        showList: true,
+        searchMode: searchMode,
+        onSearchModeChange: handleSearchModeChange,
         onApplyAiFilters: handleApplyAiFilters,
         isAreaDrawn: !!drawnBounds,
         aiChatHistory: aiChatHistory,
-        onAiChatHistoryChange: (newHistory: ChatMessage[]) => updateSearchPageState({ aiChatHistory: newHistory }),
+        onAiChatHistoryChange: handleAiChatHistoryChange,
         onDrawStart: toggleDrawing,
-        isDrawing,
+        isDrawing: isDrawing,
         isSearchingLocation: isSearchingLocation,
         onPropertyHover: setHoveredPropertyId,
         suggestions: suggestions,
@@ -1149,14 +1194,14 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             ))}
                         </select>
                     </div>
-                    <PropertyList {...propertyListProps} isMobile={isMobile} showList={true} showFilters={!isMobile} />
+                    <PropertyList {...propertyListProps} />
                 </div>
 
 
                 {/* --- Right Panel: Map --- */}
                 <div className="h-full w-full md:w-[45%] relative z-0">
                     <div className="absolute inset-0">
-                        <MapComponent {...mapProps} searchMode={searchMode} />
+                        <MapComponent {...mapProps} />
                     </div>
 
                     {/* Newsletter Subscription - Compact bar at bottom */}
