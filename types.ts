@@ -662,7 +662,7 @@ export interface AppState {
     adminSection: AdminSection;
 }
 
-export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings';
+export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'how-it-works';
 
 export type AppAction =
     | { type: 'AUTH_CHECK_START' }

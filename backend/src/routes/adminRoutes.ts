@@ -41,6 +41,14 @@ import {
   getUserActivityLogs,
 } from '../controllers/activityLogController';
 import { triggerDailyReportManually } from '../jobs/dailyActivityReportJob';
+import {
+  getAllContent,
+  createContent,
+  updateContent,
+  deleteContent,
+  uploadVideo,
+} from '../controllers/siteContentController';
+import multer from 'multer';
 
 const router = express.Router();
 
@@ -144,5 +152,24 @@ router.post('/test-emails/daily-activity-report', logAdminAction('TRIGGER_DAILY_
     res.status(500).json({ message: 'Failed to send daily report', error: String(error) });
   }
 });
+
+// ===== Site Content Management (How It Works videos, etc.) =====
+const videoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only video files are allowed'));
+    }
+  },
+});
+
+router.get('/site-content', logAdminAction('VIEW_SITE_CONTENT'), getAllContent);
+router.post('/site-content', logAdminAction('CREATE_SITE_CONTENT'), createContent);
+router.patch('/site-content/:id', logAdminAction('UPDATE_SITE_CONTENT'), updateContent);
+router.delete('/site-content/:id', logAdminAction('DELETE_SITE_CONTENT'), deleteContent);
+router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoUpload.single('video'), uploadVideo);
 
 export default router;

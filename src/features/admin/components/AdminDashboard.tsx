@@ -15,6 +15,7 @@ import InquiryManager from './InquiryManager';
 import AgentRequestManager from './AgentRequestManager';
 import SystemSettings from './SystemSettings';
 import ActivityLog from './ActivityLog';
+import HowItWorksManager from './HowItWorksManager';
 import type { AdminSection } from '@/types';
 
 // Map URL sections to AdminView types
@@ -30,6 +31,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'pricing': 'pricing',
   'activity': 'activity',
   'settings': 'settings',
+  'how-it-works': 'howItWorks',
 };
 
 // Map AdminView to URL sections
@@ -45,6 +47,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'pricing': 'pricing',
   'activity': 'activity',
   'settings': 'settings',
+  'howItWorks': 'how-it-works',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -205,6 +208,8 @@ const AdminDashboard: React.FC = () => {
         return <AgencyManager />;
       case 'settings':
         return <SystemSettings />;
+      case 'howItWorks':
+        return <HowItWorksManager />;
       default:
         return <AnalyticsDashboard />;
     }

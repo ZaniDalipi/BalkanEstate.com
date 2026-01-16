@@ -1,9 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { buildLocalizedPath } from '../../src/utils/languageRouting';
 import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
+
+interface SiteVideo {
+  _id: string;
+  key: string;
+  url: string;
+  title: string;
+  description?: string;
+  subsection?: string;
+}
+
+// Video placeholder component that shows video if available
+const VideoPlaceholder: React.FC<{
+  videoKey: string;
+  videos: Record<string, SiteVideo[]>;
+  fallbackIcon: React.ReactNode;
+  fallbackTitle: string;
+  fallbackSubtitle?: string;
+  className?: string;
+  onClick?: () => void;
+}> = ({ videoKey, videos, fallbackIcon, fallbackTitle, fallbackSubtitle, className = '', onClick }) => {
+  const subsection = videoKey.split('-')[0];
+  const sectionVideos = videos[subsection] || [];
+  const video = sectionVideos.find(v => v.key === videoKey);
+
+  if (video) {
+    return (
+      <div className={`relative ${className}`} onClick={onClick}>
+        <video
+          src={video.url}
+          className="w-full h-full object-cover rounded-lg"
+          controls
+          preload="metadata"
+          poster={`${video.url.replace(/\.[^.]+$/, '.jpg')}`}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`flex items-center justify-center ${className} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      onClick={onClick}
+    >
+      <div className="text-center">
+        {fallbackIcon}
+        <p className="font-medium">{fallbackTitle}</p>
+        {fallbackSubtitle && <p className="text-sm opacity-70">{fallbackSubtitle}</p>}
+      </div>
+    </div>
+  );
+};
 import {
   FloatingSphere,
   GlossyPill,
@@ -140,6 +191,29 @@ const HowItWorksPage: React.FC = () => {
   const { t } = useTranslation(['howItWorks']);
   const { state, dispatch } = useAppContext();
   const activeTab = state.howItWorksTab;
+  const [videos, setVideos] = useState<Record<string, SiteVideo[]>>({});
+
+  // Fetch how-it-works videos
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_URL}/site-content/how-it-works`);
+        if (response.ok) {
+          const data = await response.json();
+          setVideos(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch how-it-works videos:', err);
+      }
+    };
+    fetchVideos();
+  }, []);
+
+  // Navigation helper
+  const navigateTo = (path: string) => {
+    window.location.href = buildLocalizedPath(path);
+  };
 
   const handleTabChange = (tabId: HowItWorksTab) => {
     dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: tabId });
@@ -265,19 +339,23 @@ const HowItWorksPage: React.FC = () => {
                 <h3 className="text-2xl font-bold mb-6 text-center">{t('howItWorks:gettingStarted.mainNavigation.title')}</h3>
                 <div className="grid md:grid-cols-5 gap-4">
                   {[
-                    { name: t('howItWorks:gettingStarted.mainNavigation.home.name'), desc: t('howItWorks:gettingStarted.mainNavigation.home.desc'), icon: HomeIcon },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.search.name'), desc: t('howItWorks:gettingStarted.mainNavigation.search.desc'), icon: SearchIcon },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.agents.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agents.desc'), icon: UserGroupIcon },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.agencies.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agencies.desc'), icon: BuildingIcon },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.explore.name'), desc: t('howItWorks:gettingStarted.mainNavigation.explore.desc'), icon: MapIcon },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.home.name'), desc: t('howItWorks:gettingStarted.mainNavigation.home.desc'), icon: HomeIcon, path: '/' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.search.name'), desc: t('howItWorks:gettingStarted.mainNavigation.search.desc'), icon: SearchIcon, path: '/search' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.agents.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agents.desc'), icon: UserGroupIcon, path: '/agents' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.agencies.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agencies.desc'), icon: BuildingIcon, path: '/agencies' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.explore.name'), desc: t('howItWorks:gettingStarted.mainNavigation.explore.desc'), icon: MapIcon, path: '/explore' },
                   ].map((nav) => {
                     const NavIcon = nav.icon;
                     return (
-                      <div key={nav.name} className="bg-white/20 backdrop-blur rounded-xl p-4 text-center hover:bg-white/30 transition-colors">
+                      <button
+                        key={nav.name}
+                        onClick={() => navigateTo(nav.path)}
+                        className="bg-white/20 backdrop-blur rounded-xl p-4 text-center hover:bg-white/30 hover:scale-105 transition-all cursor-pointer"
+                      >
                         <NavIcon className="w-8 h-8 mx-auto mb-2" />
                         <h4 className="font-semibold">{nav.name}</h4>
                         <p className="text-xs text-cyan-100 mt-1">{nav.desc}</p>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -292,15 +370,16 @@ const HowItWorksPage: React.FC = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                {/* Screenshot placeholder */}
+                {/* Video/Screenshot placeholder */}
                 <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-cyan-100 to-teal-50 flex items-center justify-center relative">
-                    <div className="text-center">
-                      <UserIcon className="w-16 h-16 text-cyan-300 mx-auto mb-2" />
-                      <p className="text-cyan-500 font-medium">{t('howItWorks:gettingStarted.createAccount.signUpModal')}</p>
-                      <p className="text-cyan-400 text-sm">{t('howItWorks:gettingStarted.createAccount.clickSignUp')}</p>
-                    </div>
-                  </div>
+                  <VideoPlaceholder
+                    videoKey="getting-started-create-account"
+                    videos={videos}
+                    fallbackIcon={<UserIcon className="w-16 h-16 text-cyan-300 mx-auto mb-2" />}
+                    fallbackTitle={t('howItWorks:gettingStarted.createAccount.signUpModal')}
+                    fallbackSubtitle={t('howItWorks:gettingStarted.createAccount.clickSignUp')}
+                    className="aspect-video bg-gradient-to-br from-cyan-100 to-teal-50"
+                  />
                 </div>
 
                 {/* Steps */}
@@ -404,23 +483,16 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Screenshot placeholder */}
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-50 flex items-center justify-center relative">
-                    <div className="text-center">
-                      <MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />
-                      <p className="text-blue-500 font-medium">{t('howItWorks:gettingStarted.interactiveMap.mapView')}</p>
-                      <p className="text-blue-400 text-sm">{t('howItWorks:gettingStarted.interactiveMap.mapViewDesc')}</p>
-                    </div>
-                    {/* Map controls mock */}
-                    <div className="absolute top-4 left-4 space-y-2">
-                      <div className="w-8 h-8 bg-white rounded-lg shadow flex items-center justify-center text-neutral-400 text-xs">+</div>
-                      <div className="w-8 h-8 bg-white rounded-lg shadow flex items-center justify-center text-neutral-400 text-xs">-</div>
-                    </div>
-                    <div className="absolute top-4 right-4 bg-white rounded-lg shadow px-3 py-1.5 text-xs text-neutral-500">
-                      {t('howItWorks:gettingStarted.interactiveMap.drawArea')}
-                    </div>
-                  </div>
+                {/* Video/Screenshot placeholder - clickable to search */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigateTo('/search')}>
+                  <VideoPlaceholder
+                    videoKey="getting-started-map-search"
+                    videos={videos}
+                    fallbackIcon={<MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />}
+                    fallbackTitle={t('howItWorks:gettingStarted.interactiveMap.mapView')}
+                    fallbackSubtitle={t('howItWorks:gettingStarted.interactiveMap.mapViewDesc')}
+                    className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-50"
+                  />
                 </div>
               </div>
             </div>
@@ -433,7 +505,10 @@ const HowItWorksPage: React.FC = () => {
               </div>
 
               <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                <button
+                  onClick={() => navigateTo('/account?tab=favorites')}
+                  className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left"
+                >
                   <div className="aspect-square bg-gradient-to-br from-red-100 to-pink-50 flex items-center justify-center">
                     <div className="text-center p-4">
                       <HeartIcon className="w-12 h-12 text-red-400 mx-auto mb-2" />
@@ -444,9 +519,12 @@ const HowItWorksPage: React.FC = () => {
                     <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.savingProperties.saveToFavorites.heading')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.savingProperties.saveToFavorites.desc')}</p>
                   </div>
-                </div>
+                </button>
 
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                <button
+                  onClick={() => navigateTo('/account?tab=saved-searches')}
+                  className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left"
+                >
                   <div className="aspect-square bg-gradient-to-br from-purple-100 to-indigo-50 flex items-center justify-center">
                     <div className="text-center p-4">
                       <SearchIcon className="w-12 h-12 text-purple-400 mx-auto mb-2" />
@@ -457,9 +535,12 @@ const HowItWorksPage: React.FC = () => {
                     <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.savingProperties.saveSearch.heading')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.savingProperties.saveSearch.desc')}</p>
                   </div>
-                </div>
+                </button>
 
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+                <button
+                  onClick={() => navigateTo('/account?tab=settings')}
+                  className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all hover:scale-[1.02] text-left"
+                >
                   <div className="aspect-square bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center">
                     <div className="text-center p-4">
                       <BellIcon className="w-12 h-12 text-amber-400 mx-auto mb-2" />
@@ -470,7 +551,7 @@ const HowItWorksPage: React.FC = () => {
                     <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.savingProperties.getNotified.heading')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.savingProperties.getNotified.desc')}</p>
                   </div>
-                </div>
+                </button>
               </div>
             </div>
 
@@ -482,14 +563,15 @@ const HowItWorksPage: React.FC = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-50 flex items-center justify-center relative">
-                    <div className="text-center">
-                      <ChatIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />
-                      <p className="text-green-500 font-medium">{t('howItWorks:gettingStarted.contactingSellers.contactForm')}</p>
-                      <p className="text-green-400 text-sm">{t('howItWorks:gettingStarted.contactingSellers.onEveryPage')}</p>
-                    </div>
-                  </div>
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigateTo('/agents')}>
+                  <VideoPlaceholder
+                    videoKey="getting-started-contact-agents"
+                    videos={videos}
+                    fallbackIcon={<ChatIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />}
+                    fallbackTitle={t('howItWorks:gettingStarted.contactingSellers.contactForm')}
+                    fallbackSubtitle={t('howItWorks:gettingStarted.contactingSellers.onEveryPage')}
+                    className="aspect-video bg-gradient-to-br from-green-100 to-emerald-50"
+                  />
                 </div>
 
                 <div className="space-y-4">
@@ -637,32 +719,41 @@ const HowItWorksPage: React.FC = () => {
               </div>
 
               <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
+                <button
+                  onClick={() => navigateTo('/account?tab=profile')}
+                  className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:scale-[1.02] text-left"
+                >
                   <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
                     <UserIcon className="w-6 h-6 text-indigo-600" />
                   </div>
                   <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.profileSettings.title')}</h4>
                   <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.profileSettings.desc')}</p>
                   <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.profileSettings.access')}</p>
-                </div>
+                </button>
 
-                <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
+                <button
+                  onClick={() => navigateTo('/account?tab=subscription')}
+                  className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:scale-[1.02] text-left"
+                >
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
                     <TicketIcon className="w-6 h-6 text-green-600" />
                   </div>
                   <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.subscription.title')}</h4>
                   <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.subscription.desc')}</p>
                   <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.subscription.access')}</p>
-                </div>
+                </button>
 
-                <div className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow">
+                <button
+                  onClick={() => navigateTo('/account?tab=settings')}
+                  className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:scale-[1.02] text-left"
+                >
                   <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
                     <BellIcon className="w-6 h-6 text-amber-600" />
                   </div>
                   <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.notifications.title')}</h4>
                   <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.notifications.desc')}</p>
                   <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.notifications.access')}</p>
-                </div>
+                </button>
               </div>
             </div>
 

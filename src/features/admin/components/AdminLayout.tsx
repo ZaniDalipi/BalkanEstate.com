@@ -28,7 +28,8 @@ export type AdminView =
   | 'inquiries'
   | 'agentRequests'
   | 'settings'
-  | 'activity';
+  | 'activity'
+  | 'howItWorks';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

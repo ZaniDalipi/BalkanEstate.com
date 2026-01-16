@@ -16,6 +16,7 @@ import {
   ChevronRightIcon,
   ChevronDownIcon,
   XMarkIcon,
+  PlayCircleIcon,
 } from '@/constants';
 import type { AdminView } from './AdminLayout';
 
@@ -120,6 +121,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: t('admin:sidebar.agencies'),
           icon: <BuildingOfficeIcon className="w-5 h-5" />,
           badge: stats?.totalAgencies
+        },
+        {
+          id: 'howItWorks',
+          label: t('admin:sidebar.howItWorks', 'How It Works'),
+          icon: <PlayCircleIcon className="w-5 h-5" />
         },
       ]
     },
