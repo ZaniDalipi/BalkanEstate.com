@@ -44,7 +44,6 @@ export async function runReconciliation(maxRetries = 3): Promise<ReconciliationR
       result.totalProcessed++;
 
       // Retry logic for individual subscription reconciliation
-      // let lastError: any;
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           // Skip web subscriptions (they don't need store validation)
@@ -77,8 +76,6 @@ export async function runReconciliation(maxRetries = 3): Promise<ReconciliationR
 
           break; // Success - exit retry loop
         } catch (error: any) {
-          // lastError = error;
-
           // Check for transient errors that can be retried
           const isTransientError =
             error.errorLabels?.includes('TransientTransactionError') ||

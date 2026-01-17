@@ -78,7 +78,7 @@ const MobileFilters: React.FC<{
     onClose: () => void;
     propertyListProps: PropertyListPropsForMobile;
     localFilters: Filters;
-    onLocalFilterChange: (name: keyof Filters, value: string | number | null) => void;
+    onLocalFilterChange: <K extends keyof Filters>(name: K, value: Filters[K]) => void;
     onReset: () => void;
     onSave: () => void;
     isSaving: boolean;
@@ -728,7 +728,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         }
     }, [filters, updateSearchPageState, showToast]);
     
-    const handleLocalFilterChange = (name: keyof Filters, value: string | number | null) => {
+    const handleLocalFilterChange = <K extends keyof Filters>(name: K, value: Filters[K]) => {
         setLocalFilters(prev => ({ ...prev, [name]: value }));
     };
 
