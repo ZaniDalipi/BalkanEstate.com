@@ -632,12 +632,22 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 });
 
 
+const ITEMS_PER_PAGE = 15;
+
 const PropertyList: React.FC<PropertyListProps> = (props) => {
     const { t } = useTranslation(['search', 'common']);
     const { state, dispatch } = useAppContext();
     const { isLoadingProperties, isAuthenticated } = state;
 
     const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, fallbackLocation } = props;
+
+    // Pagination state for mobile
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // Reset page when properties change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [properties.length]);
 
     // Virtualized list state
     const listContainerRef = useRef<HTMLDivElement>(null);
@@ -673,7 +683,20 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
 
     // Stable key for properties to detect changes
     const propertiesKey = useMemo(() => properties.map(p => p.id).join(','), [properties]);
-    
+
+    // Pagination calculations
+    const totalPages = Math.ceil(properties.length / ITEMS_PER_PAGE);
+    const paginatedProperties = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return properties.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [properties, currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        // Scroll to top of list
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const inputBaseClasses = "block w-full text-xs bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors";
     
     // Desktop layout
@@ -882,11 +905,80 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         ))}
                                     </div>
                                 ) : properties.length > 0 ? (
-                                    <div className="flex flex-col gap-4 pt-4">
-                                        {properties.map(property => (
-                                            <PropertyCard key={property.id} property={property} />
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div className="flex flex-col gap-4 pt-4">
+                                            {paginatedProperties.map(property => (
+                                                <PropertyCard key={property.id} property={property} />
+                                            ))}
+                                        </div>
+
+                                        {/* Pagination Controls */}
+                                        {totalPages > 1 && (
+                                            <div className="flex items-center justify-center gap-2 py-6 mt-4 border-t border-neutral-200">
+                                                {/* Previous button */}
+                                                <button
+                                                    onClick={() => handlePageChange(currentPage - 1)}
+                                                    disabled={currentPage === 1}
+                                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    ←
+                                                </button>
+
+                                                {/* Page numbers */}
+                                                <div className="flex items-center gap-1">
+                                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                                        .filter(page => {
+                                                            // Show first, last, current, and adjacent pages
+                                                            if (page === 1 || page === totalPages) return true;
+                                                            if (Math.abs(page - currentPage) <= 1) return true;
+                                                            return false;
+                                                        })
+                                                        .map((page, index, arr) => {
+                                                            // Add ellipsis if there's a gap
+                                                            const showEllipsisBefore = index > 0 && page - arr[index - 1] > 1;
+                                                            return (
+                                                                <React.Fragment key={page}>
+                                                                    {showEllipsisBefore && (
+                                                                        <span className="px-2 text-neutral-400">...</span>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => handlePageChange(page)}
+                                                                        className={`w-9 h-9 text-sm font-medium rounded-lg transition-colors ${
+                                                                            currentPage === page
+                                                                                ? 'bg-primary text-white shadow-md'
+                                                                                : 'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50'
+                                                                        }`}
+                                                                    >
+                                                                        {page}
+                                                                    </button>
+                                                                </React.Fragment>
+                                                            );
+                                                        })}
+                                                </div>
+
+                                                {/* Next button */}
+                                                <button
+                                                    onClick={() => handlePageChange(currentPage + 1)}
+                                                    disabled={currentPage === totalPages}
+                                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    →
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Page info */}
+                                        {totalPages > 1 && (
+                                            <p className="text-center text-xs text-neutral-500 pb-4">
+                                                {t('search:pagination.showing', {
+                                                    start: (currentPage - 1) * ITEMS_PER_PAGE + 1,
+                                                    end: Math.min(currentPage * ITEMS_PER_PAGE, properties.length),
+                                                    total: properties.length,
+                                                    defaultValue: `Showing ${(currentPage - 1) * ITEMS_PER_PAGE + 1}-${Math.min(currentPage * ITEMS_PER_PAGE, properties.length)} of ${properties.length}`
+                                                })}
+                                            </p>
+                                        )}
+                                    </>
                                 ) : (
                                     <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
                                         <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
