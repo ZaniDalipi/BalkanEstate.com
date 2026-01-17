@@ -426,16 +426,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-<<<<<<< HEAD
-          // Smooth zoom settings (fractional zoom enabled dynamically when close)
-          zoomSnap={0}
-          zoomDelta={0.1}
-=======
           zoomSnap={0}
           zoomDelta={0.25}
           wheelPxPerZoomLevel={60}
           wheelDebounceTime={40}
->>>>>>> refs/remotes/origin/claude/remove-sensitive-logs-g4pIR
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
