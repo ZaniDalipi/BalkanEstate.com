@@ -903,3 +903,19 @@ export const PlayCircleIcon: React.FC<{ className?: string }> = ({ className }) 
         })
     )
 );
+
+export const CloudArrowUpIcon: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(Icon, { className },
+        React.createElement('path', {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M12 16v-7m0 0l-3 3m3-3l3 3"
+        }),
+        React.createElement('path', {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M20.88 18.09A5.5 5.5 0 0018 7.5h-.5a7 7 0 10-13.9 1.5A4.5 4.5 0 004.5 18H6"
+        })
+    )
+);
+
