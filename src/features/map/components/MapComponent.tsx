@@ -184,13 +184,14 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - adjusts zoom snap based on zoom level
+ * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
+ * Far away: whole zoom levels (zoomSnap=1)
+ * Very close (18+): fractional zoom (zoomSnap=0.5)
  */
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
   const map = useMap();
 
   useEffect(() => {
-    // Enable fractional zoom only when zoomed in very close (>= 18)
     const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
     const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
 
@@ -422,22 +423,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={0}
+          zoomSnap={0.25}
           zoomDelta={0.25}
           wheelPxPerZoomLevel={60}
           wheelDebounceTime={40}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
-          // Mobile optimizations
-          tap={isMobile}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
-          <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} />
+          {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
           <ZoomSnapAdjuster currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
