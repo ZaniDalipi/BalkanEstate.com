@@ -184,10 +184,9 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
- * Far away: whole zoom levels (zoomSnap=1)
- * Very close (18+): fractional zoom (zoomSnap=0.5)
+ * ZoomSnapAdjuster Component - disabled for Zillow-style continuous zoom
  */
+<<<<<<< HEAD
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
   const map = useMap();
 
@@ -204,6 +203,9 @@ const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) =>
 
   return null;
 };
+=======
+const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = () => null;
+>>>>>>> refs/remotes/origin/claude/remove-sensitive-logs-g4pIR
 
 /**
  * ZoomAdjuster Component - adjusts zoom when switching map types
@@ -424,9 +426,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
+<<<<<<< HEAD
           // Smooth zoom settings (fractional zoom enabled dynamically when close)
           zoomSnap={0}
           zoomDelta={0.1}
+=======
+          zoomSnap={0}
+          zoomDelta={0.25}
+          wheelPxPerZoomLevel={60}
+          wheelDebounceTime={40}
+>>>>>>> refs/remotes/origin/claude/remove-sensitive-logs-g4pIR
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
