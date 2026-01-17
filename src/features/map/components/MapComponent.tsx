@@ -184,25 +184,9 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
- * Far away: whole zoom levels (zoomSnap=1)
- * Very close (18+): fractional zoom (zoomSnap=0.5)
+ * ZoomSnapAdjuster Component - disabled for Zillow-style continuous zoom
  */
-const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
-    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
-
-    if (map.options.zoomSnap !== newZoomSnap) {
-      map.options.zoomSnap = newZoomSnap;
-      map.options.zoomDelta = newZoomDelta;
-    }
-  }, [currentZoom, map]);
-
-  return null;
-};
+const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = () => null;
 
 /**
  * ZoomAdjuster Component - adjusts zoom when switching map types
@@ -423,7 +407,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={0.25}
+          zoomSnap={0}
           zoomDelta={0.25}
           wheelPxPerZoomLevel={60}
           wheelDebounceTime={40}
