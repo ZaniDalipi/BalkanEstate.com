@@ -184,24 +184,12 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
- * Far away: whole zoom levels (zoomSnap=1)
- * Very close (18+): fractional zoom (zoomSnap=0.5)
+ * ZoomSnapAdjuster Component - keeps smooth fractional zoom at all levels
+ * Uses 0.25 snap for fluid zoom experience
  */
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    // Enable fractional zoom only when zoomed in very close (>= 18)
-    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
-    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
-
-    if (map.options.zoomSnap !== newZoomSnap) {
-      map.options.zoomSnap = newZoomSnap;
-      map.options.zoomDelta = newZoomDelta;
-    }
-  }, [currentZoom, map]);
-
+  // Smooth fractional zoom is now always enabled via MapContainer props
+  // No dynamic adjustment needed - keeps consistent smooth experience
   return null;
 };
 
@@ -424,13 +412,18 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Smooth zoom settings (fractional zoom enabled dynamically when close)
-          zoomSnap={1}
-          zoomDelta={1}
-          wheelPxPerZoomLevel={100}
+          // Smooth zoom settings - fractional zoom for fluid experience
+          zoomSnap={0.25}
+          zoomDelta={0.5}
+          wheelPxPerZoomLevel={120}
+          wheelDebounceTime={40}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
+          // Smooth pan and zoom inertia
+          inertia={true}
+          inertiaDeceleration={3000}
+          easeLinearity={0.2}
           // Mobile optimizations
           tap={isMobile}
           touchZoom={isMobile ? 'center' : true}

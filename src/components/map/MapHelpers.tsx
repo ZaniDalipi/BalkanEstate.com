@@ -26,7 +26,8 @@ export const FlyToController: React.FC<{
       map.on('moveend', onMoveEnd);
       map.flyTo(target.center, target.zoom, {
         animate: true,
-        duration: 2.5,
+        duration: 1.5,
+        easeLinearity: 0.2,
       });
     }
   }, [target, map, onComplete]);
