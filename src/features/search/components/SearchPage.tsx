@@ -679,6 +679,19 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
     }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile]);
 
+    // Stabilize list properties reference - only change when actual property IDs change
+    // This prevents unnecessary re-renders when map moves but visible properties stay the same
+    const listPropertiesIdsKey = useMemo(() =>
+        listProperties.map(p => p.id).join(','),
+        [listProperties]
+    );
+
+    const stableListProperties = useMemo(() =>
+        listProperties,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [listPropertiesIdsKey]
+    );
+
     // Update fallback location state when computed value changes
     useEffect(() => {
         setFallbackLocation(fallbackLocationValue);
@@ -1014,7 +1027,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     };
 
     const propertyListProps = {
-        properties: listProperties,
+        properties: stableListProperties,
         filters: filters,
         onFilterChange: handleFilterChange,
         onSearchClick: handleSearchClick,
