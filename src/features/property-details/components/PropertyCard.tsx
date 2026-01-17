@@ -18,6 +18,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  // Check if image is already cached/complete on mount
+  React.useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current?.naturalHeight !== 0) {
+      setImageLoaded(true);
+    }
+  }, [property.imageUrl]);
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
   const isInComparison = state.comparisonList.includes(property.id);
   const isNew = property.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
@@ -114,10 +122,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const cardStyles = useMemo(() => {
     if (isSold) return 'border-neutral-300 opacity-80';
     if (isActivelyPromoted) {
-      if (promotionTier === 'premium') return 'ring-2 ring-amber-400 border-amber-200 shadow-amber-100';
-      if (promotionTier === 'highlight') return 'ring-2 ring-sky-400 border-sky-200 shadow-sky-100';
-      if (promotionTier === 'featured') return 'ring-2 ring-violet-500 border-violet-200 shadow-violet-100';
-      return 'ring-1 ring-gray-400 border-gray-200';
+      if (promotionTier === 'premium') return 'ring-4 ring-amber-400/70 border-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.5)]';
+      if (promotionTier === 'highlight') return 'ring-4 ring-sky-400/70 border-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.4)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)]';
+      if (promotionTier === 'featured') return 'ring-4 ring-violet-500/70 border-violet-300 shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)]';
+      return 'ring-2 ring-gray-400 border-gray-200 shadow-lg';
     }
     return 'border-neutral-200 hover:border-primary/30';
   }, [isSold, isActivelyPromoted, promotionTier]);
@@ -136,13 +144,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </div>
         ) : (
           <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
-            {/* Simple placeholder - shows while image is loading */}
-            <div
-              className={`absolute inset-0 bg-neutral-100 transition-opacity duration-150 ${
-                imageLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}
-            />
+            {/* Shimmer placeholder - shows while image is loading */}
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 animate-pulse" />
+            )}
             <img
+              ref={imgRef}
               src={property.imageUrl}
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
               loading="eager"
