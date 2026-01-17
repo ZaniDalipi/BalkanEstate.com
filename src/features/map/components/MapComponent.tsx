@@ -127,7 +127,7 @@ const inject3DPerspectiveStyles = () => {
       }
       .leaflet-container {
         -webkit-tap-highlight-color: transparent;
-        touch-action: pan-x pan-y;
+        touch-action: manipulation;
       }
       .leaflet-marker-icon {
         will-change: transform;
@@ -411,14 +411,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={0.001}
-          zoomDelta={1}
-          wheelPxPerZoomLevel={80}
+          zoomSnap={0}
+          zoomDelta={0.5}
+          wheelPxPerZoomLevel={60}
           wheelDebounceTime={0}
           zoomAnimation={true}
-          inertia={true}
-          inertiaDeceleration={2000}
-          easeLinearity={0.15}
+          easeLinearity={0.2}
           fadeAnimation={true}
           markerZoomAnimation={true}
           // Mobile optimizations
