@@ -184,11 +184,22 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - DISABLED for smooth continuous zoom like Google Maps
- * Keeping the component definition for potential future use but returns null
+ * ZoomSnapAdjuster Component - adjusts zoom snap based on zoom level
  */
-const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = () => {
-  // Disabled - we want continuous smooth zoom at all levels
+const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    // Enable fractional zoom only when zoomed in very close (>= 18)
+    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
+    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
+
+    if (map.options.zoomSnap !== newZoomSnap) {
+      map.options.zoomSnap = newZoomSnap;
+      map.options.zoomDelta = newZoomDelta;
+    }
+  }, [currentZoom, map]);
+
   return null;
 };
 
@@ -411,14 +422,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={0.001}
-          zoomDelta={1}
-          wheelPxPerZoomLevel={80}
-          wheelDebounceTime={0}
+          zoomSnap={0}
+          zoomDelta={0.25}
+          wheelPxPerZoomLevel={60}
+          wheelDebounceTime={40}
           zoomAnimation={true}
-          inertia={true}
-          inertiaDeceleration={2000}
-          easeLinearity={0.15}
           fadeAnimation={true}
           markerZoomAnimation={true}
           // Mobile optimizations
