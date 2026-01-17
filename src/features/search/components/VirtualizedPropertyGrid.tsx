@@ -3,12 +3,21 @@ import { Property } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import Footer from '@/components/shared/Footer';
 
-// Image preloader utility - preloads images before they're needed
+// Optimize Cloudinary URL for faster loading
+const optimizeCloudinaryUrl = (url: string, width: number = 400): string => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  if (url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/w_${width},c_fill,f_auto,q_auto/`);
+  }
+  return url;
+};
+
+// Image preloader utility - preloads optimized images before they're needed
 const preloadImages = (urls: string[]) => {
   urls.forEach(url => {
     if (url) {
       const img = new Image();
-      img.src = url;
+      img.src = optimizeCloudinaryUrl(url, 400);
     }
   });
 };

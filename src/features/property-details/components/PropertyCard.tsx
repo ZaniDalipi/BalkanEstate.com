@@ -7,6 +7,32 @@ import { formatPrice } from '@/utils/currency';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { getPriceReductionInfo, isPriceReducedRecently } from '@/utils/priceUtils';
 
+// Cloudinary URL optimization utilities
+const optimizeCloudinaryUrl = (url: string, width: number = 400): string => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  // Add width, auto format, auto quality for faster loading
+  if (url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/w_${width},c_fill,f_auto,q_auto/`);
+  }
+  return url;
+};
+
+const getCloudinarySrcSet = (url: string): string | undefined => {
+  if (!url || !url.includes('cloudinary.com')) return undefined;
+  const sizes = [300, 400, 600];
+  return sizes
+    .map(size => {
+      const optimized = url.replace('/upload/', `/upload/w_${size},c_fill,f_auto,q_auto/`);
+      return `${optimized} ${size}w`;
+    })
+    .join(', ');
+};
+
+const getBlurPlaceholder = (url: string): string => {
+  if (!url || !url.includes('cloudinary.com')) return '';
+  return url.replace('/upload/', '/upload/w_20,h_15,c_fill,e_blur:1000,q_1,f_auto/');
+};
+
 interface PropertyCardProps {
   property: Property;
   showToast?: (message: string, type: 'success' | 'error') => void;
@@ -20,12 +46,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = React.useRef<HTMLImageElement>(null);
 
+  // Memoize optimized image URLs
+  const optimizedImageUrl = useMemo(() => optimizeCloudinaryUrl(property.imageUrl, 400), [property.imageUrl]);
+  const imageSrcSet = useMemo(() => getCloudinarySrcSet(property.imageUrl), [property.imageUrl]);
+  const blurPlaceholder = useMemo(() => getBlurPlaceholder(property.imageUrl), [property.imageUrl]);
+
   // Check if image is already cached/complete on mount
   React.useEffect(() => {
     if (imgRef.current?.complete && imgRef.current?.naturalHeight !== 0) {
       setImageLoaded(true);
     }
-  }, [property.imageUrl]);
+  }, [optimizedImageUrl]);
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
   const isInComparison = state.comparisonList.includes(property.id);
   const isNew = property.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
@@ -144,18 +175,29 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </div>
         ) : (
           <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
-            {/* Shimmer placeholder - shows while image is loading */}
-            {!imageLoaded && (
+            {/* Blur placeholder - loads instantly for fast visual feedback */}
+            {!imageLoaded && blurPlaceholder && (
+              <img
+                src={blurPlaceholder}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover scale-110 blur-sm"
+              />
+            )}
+            {/* Fallback shimmer if no blur placeholder */}
+            {!imageLoaded && !blurPlaceholder && (
               <div className="absolute inset-0 bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 animate-pulse" />
             )}
             <img
               ref={imgRef}
-              src={property.imageUrl}
+              src={optimizedImageUrl}
+              srcSet={imageSrcSet}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
               loading="eager"
               decoding="async"
               fetchPriority="high"
-              className={`w-full h-full object-cover ${isSold ? 'grayscale' : ''}`}
+              className={`w-full h-full object-cover transition-opacity duration-200 ${isSold ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
             />
