@@ -426,6 +426,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           zoomSnap={1}
           zoomDelta={1}
           wheelPxPerZoomLevel={100}
+          wheelDebounceTime={100}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
