@@ -184,22 +184,11 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - disabled for Zillow-style continuous zoom
+ * ZoomSnapAdjuster Component - DISABLED for smooth continuous zoom like Google Maps
+ * Keeping the component definition for potential future use but returns null
  */
-const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    // Enable fractional zoom only when zoomed in very close (>= 18)
-    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
-    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
-
-    if (map.options.zoomSnap !== newZoomSnap) {
-      map.options.zoomSnap = newZoomSnap;
-      map.options.zoomDelta = newZoomDelta;
-    }
-  }, [currentZoom, map]);
-
+const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = () => {
+  // Disabled - we want continuous smooth zoom at all levels
   return null;
 };
 
