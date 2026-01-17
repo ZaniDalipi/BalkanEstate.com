@@ -122,9 +122,9 @@ const inject3DPerspectiveStyles = () => {
       .leaflet-fade-anim .leaflet-tile {
         transition: opacity 0.15s linear;
       }
-      .leaflet-zoom-anim .leaflet-zoom-animated {
-        transition: transform 0.2s cubic-bezier(0,0,0.25,1);
-      }
+      .leaflet-zoom-animated {
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
       .leaflet-container {
         -webkit-tap-highlight-color: transparent;
         touch-action: pan-x pan-y;
@@ -423,10 +423,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={1}
-          zoomDelta={1}
-          wheelPxPerZoomLevel={100}
-          wheelDebounceTime={100}
+          zoomSnap={0.25}
+          zoomDelta={0.25}
+          wheelPxPerZoomLevel={60}
+          wheelDebounceTime={40}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
@@ -437,8 +437,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
-          <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} />
-          <ZoomSnapAdjuster currentZoom={currentZoom} />
+          {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
+          <ZoomSnapAdjuster currentZoom={currentZoom} /> 
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
@@ -459,9 +459,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={isMobile ? 1 : 2}
-            updateWhenIdle={true}
-            updateWhenZooming={false}
+            keepBuffer={isMobile ? 2 : 3}
+            updateWhenIdle={false}
+            updateWhenZooming={true}
             updateInterval={isMobile ? 200 : 150}
             className="map-tiles"
           />
