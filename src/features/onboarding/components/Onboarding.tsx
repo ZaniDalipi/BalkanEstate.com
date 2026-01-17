@@ -138,12 +138,13 @@ const Onboarding: React.FC = () => {
         {bots.map(bot => (
             <div
                 key={bot.id}
-                className="absolute text-primary/10 z-0"
+                className="absolute text-primary/10 z-0 pointer-events-none"
                 style={{
                     width: `${bot.size}px`,
                     height: `${bot.size}px`,
                     transform: `translate(${bot.x}px, ${bot.y}px) rotate(${bot.rotation}deg)`,
                     willChange: 'transform',
+                    contain: 'layout style paint',
                 }}
             >
                 <bot.Icon className="w-full h-full" />
@@ -161,12 +162,20 @@ const Onboarding: React.FC = () => {
 
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-4xl border border-neutral-200 relative z-10">
         <h2 className="text-2xl sm:text-3xl font-bold text-center text-neutral-800 mb-8">{t('nav:onboarding.question')}</h2>
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-8" style={{ minHeight: '400px' }}>
           <div
             className="group p-6 border border-neutral-200 rounded-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             onClick={handleBuyChoice}
           >
-              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto-format&fit=crop" alt="A couple looking at a new home" className="rounded-lg mb-6 w-full h-48 object-cover" loading="lazy" />
+              <img
+                src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format&fit=crop"
+                srcSet="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format&fit=crop 800w"
+                sizes="(max-width: 768px) 100vw, 400px"
+                alt="A couple looking at a new home"
+                className="rounded-lg mb-6 w-full h-48 object-cover"
+                fetchPriority="high"
+                decoding="async"
+              />
               <div className="text-center flex-grow flex flex-col">
                   <h3 className="text-2xl font-semibold text-neutral-900 mb-2">{t('nav:onboarding.lookingToBuy')}</h3>
                   <p className="text-neutral-600 mb-6 flex-grow">{t('nav:onboarding.buyDescription')}</p>
@@ -180,7 +189,14 @@ const Onboarding: React.FC = () => {
             className="group p-6 border border-neutral-200 rounded-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             onClick={handleSellChoice}
           >
-              <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto-format&fit=crop" alt="A modern house exterior" className="rounded-lg mb-6 w-full h-48 object-cover" loading="lazy" />
+              <img
+                src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop"
+                srcSet="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop 800w"
+                sizes="(max-width: 768px) 100vw, 400px"
+                alt="A modern house exterior"
+                className="rounded-lg mb-6 w-full h-48 object-cover"
+                decoding="async"
+              />
               <div className="text-center flex-grow flex flex-col">
                   <h3 className="text-2xl font-semibold text-neutral-900 mb-2">{t('nav:onboarding.wantToSell')}</h3>
                   <p className="text-neutral-600 mb-6 flex-grow">{t('nav:onboarding.sellDescription')}</p>

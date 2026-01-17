@@ -18,9 +18,11 @@ import './src/i18n';
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
 // Core components (loaded immediately)
-import Onboarding from './src/features/onboarding/components/Onboarding';
-import { SearchPage } from './src/features/search/components';
 import AuthPage from './src/features/auth/components/AuthModal';
+
+// Lazy load heavy pages to reduce initial bundle
+const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
+const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
 import EmailVerificationRequired from './src/features/auth/components/EmailVerificationRequired';
 import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
@@ -460,11 +462,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     }
   };
 
-  // SearchPage is not lazy loaded, so no Suspense needed for default
-  if (state.activeView === 'search' || !state.activeView) {
-    return <SearchPage onToggleSidebar={onToggleSidebar} />;
-  }
-
+  // All views now use Suspense since SearchPage is lazy loaded
   return (
     <Suspense fallback={<PageLoader />}>
       {renderView()}
@@ -651,7 +649,9 @@ const AppWrapper: React.FC = () => {
     if (!state.onboardingComplete && !isAuthFlowPage) {
         return (
             <>
-                <Onboarding />
+                <Suspense fallback={<FullScreenLoader />}>
+                    <Onboarding />
+                </Suspense>
                 {state.isAuthModalOpen && <AuthPage />}
             </>
         )

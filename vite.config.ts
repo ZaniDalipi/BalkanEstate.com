@@ -91,12 +91,25 @@ export default defineConfig(({ mode }) => {
         rollupOptions: {
           output: {
             manualChunks: {
+              // Core React - smallest chunk, always needed
               vendor: ['react', 'react-dom'],
+              // Map functionality - only loaded when map is visible
               leaflet: ['leaflet', 'react-leaflet'],
-              i18n: ['i18next', 'react-i18next'],
+              // Internationalization
+              i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+              // Animation library - defer loading
+              animation: ['framer-motion'],
+              // Real-time messaging - only for inbox
+              realtime: ['socket.io-client'],
+              // Data fetching
+              query: ['@tanstack/react-query'],
+              // State management
+              state: ['zustand'],
             },
           },
         },
+        // Improve chunk loading
+        chunkSizeWarningLimit: 500,
         // Security: Clear console logs in production build
         target: 'es2020',
       },
