@@ -186,7 +186,6 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 /**
  * ZoomSnapAdjuster Component - disabled for Zillow-style continuous zoom
  */
-<<<<<<< HEAD
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
   const map = useMap();
 
@@ -203,9 +202,6 @@ const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) =>
 
   return null;
 };
-=======
-const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = () => null;
->>>>>>> refs/remotes/origin/claude/remove-sensitive-logs-g4pIR
 
 /**
  * ZoomAdjuster Component - adjusts zoom when switching map types
@@ -433,7 +429,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
-          wheelPxPerZoomLevel={50}
           // Mobile optimizations
           tap={isMobile}
           touchZoom={isMobile ? 'center' : true}
