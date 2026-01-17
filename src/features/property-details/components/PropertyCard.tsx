@@ -228,23 +228,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </button>
         </div>
 
-        {/* Bottom info bar on image */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
-          <div className="flex items-center justify-between gap-2">
-            {/* Property Type Badge */}
-            <span className="bg-white/95 backdrop-blur-sm text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md shadow-md">
-              {propertyTypeLabel}
-            </span>
-            {/* Price Badge */}
-            <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-lg">
-              {formatPrice(property.price, property.country)}
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* Content Section */}
       <div className="p-3 sm:p-4 flex flex-col flex-grow">
+        {/* Property Type & Price Row - moved outside image to avoid glass overlap */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          {/* Property Type Badge */}
+          <span className="bg-neutral-100 text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md border border-neutral-200">
+            {propertyTypeLabel}
+          </span>
+          {/* Price Badge */}
+          <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-md">
+            {formatPrice(property.price, property.country)}
+          </span>
+        </div>
         {/* Title */}
         {property.title && (
           <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors duration-300">
