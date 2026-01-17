@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
+import React from 'react';
 
-const PropertyCardSkeleton: React.FC = memo(() => {
+const PropertyCardSkeleton: React.FC = () => {
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-md border border-neutral-200 w-full flex flex-col animate-pulse">
       <div className="w-full h-32 sm:h-36 md:h-40 bg-neutral-200"></div>
@@ -22,8 +22,6 @@ const PropertyCardSkeleton: React.FC = memo(() => {
       </div>
     </div>
   );
-});
-
-PropertyCardSkeleton.displayName = 'PropertyCardSkeleton';
+};
 
 export default PropertyCardSkeleton;

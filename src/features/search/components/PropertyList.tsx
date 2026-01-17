@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect, useMemo, memo } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
-import { SparklesIcon, XMarkIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, MapPinIcon, SpinnerIcon } from '@/constants';
+import { SearchIcon, SparklesIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import { useAppContext } from '@/context/AppContext';
-import VirtualizedPropertyGrid from './VirtualizedPropertyGrid';
+import Footer from '@/components/shared/Footer';
 
 interface PropertyListProps {
   properties: Property[];
@@ -34,7 +34,6 @@ interface PropertyListProps {
   onSuggestionClick?: (suggestion: { place_id: number; display_name: string; lat: string; lon: string; boundingbox: string[] }) => void;
   isQueryInputFocused?: boolean;
   onQueryInputFocusChange?: (focused: boolean) => void;
-  fallbackLocation?: string | null;
 }
 
 const FilterButton: React.FC<{
@@ -118,7 +117,7 @@ const ToggleSwitch: React.FC<{
   </div>
 );
 
-const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList' | 'aiChatHistory' | 'onAiChatHistoryChange'>> = React.memo(({
+const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList' | 'aiChatHistory' | 'onAiChatHistoryChange'>> = ({
     filters, onFilterChange, onSearchClick, onResetFilters, onSaveSearch, isSaving, isMobile, isAreaDrawn, onDrawStart, isDrawing, isSearchingLocation, suggestions = [], onSuggestionClick, isQueryInputFocused, onQueryInputFocusChange
 }) => {
     const { t } = useTranslation(['search', 'common']);
@@ -484,12 +483,6 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                 onChange={(value) => onFilterChange('has360Tour', value)}
                                 t={t}
                             />
-                            <ToggleSwitch
-                                label={t('search:amenities.hasDiscount')}
-                                value={filters.hasDiscount}
-                                onChange={(value) => onFilterChange('hasDiscount', value)}
-                                t={t}
-                            />
                         </div>
 
                         {/* Distance Filters */}
@@ -629,74 +622,53 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
             )}
         </div>
     );
-});
+};
 
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 20;
 
 const PropertyList: React.FC<PropertyListProps> = (props) => {
     const { t } = useTranslation(['search', 'common']);
     const { state, dispatch } = useAppContext();
     const { isLoadingProperties, isAuthenticated } = state;
 
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, fallbackLocation } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover } = props;
 
-    // Pagination state for mobile
-    const [currentPage, setCurrentPage] = useState(1);
-
-    // Reset page when properties change
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+    const loadMoreRef = useRef(null);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    
     useEffect(() => {
-        setCurrentPage(1);
-    }, [properties.length]);
+      // Reset visible count when filters change
+      setVisibleCount(ITEMS_PER_PAGE);
+    }, [filters, properties]);
 
-    // Virtualized list state
-    const listContainerRef = useRef<HTMLDivElement>(null);
-    const [containerHeight, setContainerHeight] = useState(600);
-    const [columns, setColumns] = useState<1 | 2>(2);
-
-    // Measure container and update dimensions
     useEffect(() => {
-        const updateDimensions = () => {
-            if (listContainerRef.current) {
-                const rect = listContainerRef.current.getBoundingClientRect();
-                // Account for header (approx 60px) and padding
-                setContainerHeight(rect.height - 20);
-            }
-            // Determine columns based on viewport width (lg breakpoint is 1024px)
-            setColumns(window.innerWidth >= 1024 ? 2 : 1);
-        };
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !isLoadingMore && visibleCount < properties.length) {
+                    setIsLoadingMore(true);
+                    setTimeout(() => {
+                        setVisibleCount(prev => prev + ITEMS_PER_PAGE);
+                        setIsLoadingMore(false);
+                    }, 300); // Small delay to show loading and prevent rapid firing
+                }
+            },
+            { threshold: 1.0 }
+        );
 
-        updateDimensions();
-        window.addEventListener('resize', updateDimensions);
-
-        // Use ResizeObserver for more accurate container measurements
-        const resizeObserver = new ResizeObserver(updateDimensions);
-        if (listContainerRef.current) {
-            resizeObserver.observe(listContainerRef.current);
+        const currentRef = loadMoreRef.current;
+        if (currentRef) {
+            observer.observe(currentRef);
         }
 
         return () => {
-            window.removeEventListener('resize', updateDimensions);
-            resizeObserver.disconnect();
+            if (currentRef) {
+                observer.unobserve(currentRef);
+            }
         };
-    }, []);
-
-    // Stable key for properties to detect changes
-    const propertiesKey = useMemo(() => properties.map(p => p.id).join(','), [properties]);
-
-    // Pagination calculations
-    const totalPages = Math.ceil(properties.length / ITEMS_PER_PAGE);
-    const paginatedProperties = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        return properties.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    }, [properties, currentPage]);
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-        // Scroll to top of list
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
+    }, [visibleCount, properties.length, isLoadingMore]);
+    
     const inputBaseClasses = "block w-full text-xs bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors";
     
     // Desktop layout
@@ -740,7 +712,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                 {/* PROPERTY LIST SECTION */}
                 <div className="flex-grow min-h-0">
                     <div className="h-full overflow-y-auto">
-                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-sm z-20">
+                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-10">
                             <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
                             <div className="relative">
                                 <select
@@ -751,51 +723,49 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                 >
                                     <option value="newest">{t('search:sort.newest')}</option>
-                                    <option value="oldest">{t('search:sort.oldest')}</option>
                                     <option value="price_asc">{t('search:sort.priceAsc')}</option>
                                     <option value="price_desc">{t('search:sort.priceDesc')}</option>
-                                    <option value="area_desc">{t('search:sort.areaDesc')}</option>
-                                    <option value="area_asc">{t('search:sort.areaAsc')}</option>
                                     <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
                                     <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
-                                    <option value="featured">{t('search:sort.featured')}</option>
-                                    <option value="price_per_sqm">{t('search:sort.pricePerSqm')}</option>
+                                    <option value="sqft_desc">{t('search:sort.sqftDesc')}</option>
+                                    <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
+                            
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                     <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                 </div>
                             </div>
                         </div>
-                        <div ref={listContainerRef} className="flex-1 min-h-0" style={{ height: 'calc(100% - 60px)' }}>
-                            {/* Fallback location message */}
-                            {fallbackLocation && !isLoadingProperties && properties.length > 0 && (
-                                <div className="mx-4 mb-2 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
-                                    <MapPinIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                                    <p className="text-xs text-amber-800">
-                                        {t('search:showingNearbyProperties', { location: fallbackLocation })}
-                                    </p>
-                                </div>
-                            )}
+                        <div className="p-4 md:p-3">
                             {isLoadingProperties ? (
-                                <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-5">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} />
                                     ))}
                                 </div>
                             ) : properties.length > 0 ? (
-                                <div className="px-4" style={{ height: containerHeight }}>
-                                    <VirtualizedPropertyGrid
-                                        key={propertiesKey}
-                                        properties={properties}
-                                        onPropertyHover={onPropertyHover}
-                                        containerHeight={containerHeight}
-                                        columns={columns}
-                                        gap={20}
-                                    />
-                                </div>
+                                <>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
+                                        {properties.slice(0, visibleCount).map(prop => (
+                                            <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
+                                                <PropertyCard property={prop} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {visibleCount < properties.length && (
+                                        <div ref={loadMoreRef} className="text-center p-8 md:p-4">
+                                            {isLoadingMore && <span>{t('common:loadingMore')}</span>}
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="text-center py-16 px-4"><h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3></div>
                             )}
+
+                            {/* Footer - Integrated at bottom of property list */}
+                            <div className="mt-8">
+                                <Footer />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -839,7 +809,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
 
                     {showList && (
                         <div className="flex-grow min-h-0 overflow-y-auto">
-                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-20">
+                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-10">
                                 <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
                                 <div className="relative">
                                     <select
@@ -850,15 +820,9 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                     >
                                         <option value="newest">{t('search:sort.newest')}</option>
-                                        <option value="oldest">{t('search:sort.oldest')}</option>
                                         <option value="price_asc">{t('search:sort.priceAsc')}</option>
                                         <option value="price_desc">{t('search:sort.priceDesc')}</option>
-                                        <option value="area_desc">{t('search:sort.areaDesc')}</option>
-                                        <option value="area_asc">{t('search:sort.areaAsc')}</option>
                                         <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
-                                        <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
-                                        <option value="featured">{t('search:sort.featured')}</option>
-                                        <option value="price_per_sqm">{t('search:sort.pricePerSqm')}</option>
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                         <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -866,117 +830,31 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             </div>
 
-                            {/* Mobile: Info banner - show fallback message or map-visible info */}
-                            {fallbackLocation ? (
-                                <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <MapPinIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                                        <p className="text-xs text-amber-800">
-                                            {t('search:showingNearbyProperties', { location: fallbackLocation })}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={props.onResetFilters}
-                                        className="text-xs font-semibold text-amber-600 hover:text-amber-800 underline whitespace-nowrap"
-                                    >
-                                        {t('search:filters.seeAll', { defaultValue: 'See All' })}
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <MapPinIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                                        <p className="text-xs text-blue-700">{t('search:mobileMapInfo', { defaultValue: 'Showing properties visible on map' })}</p>
-                                    </div>
-                                    <button
-                                        onClick={props.onResetFilters}
-                                        className="text-xs font-semibold text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
-                                    >
-                                        {t('search:filters.seeAll', { defaultValue: 'See All' })}
-                                    </button>
-                                </div>
-                            )}
-
-                            <div className="flex-1 overflow-y-auto px-4 pb-4">
+                            <div className="p-4 md:p-3">
                                 {isLoadingProperties ? (
-                                    <div className="flex flex-col gap-4 pt-4">
+                                    <div className="grid grid-cols-1 gap-4 md:gap-3">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} />
                                         ))}
                                     </div>
                                 ) : properties.length > 0 ? (
                                     <>
-                                        <div className="flex flex-col gap-4 pt-4">
-                                            {paginatedProperties.map(property => (
-                                                <PropertyCard key={property.id} property={property} />
+                                        <div className="grid grid-cols-1 gap-4 md:gap-3">
+                                            {properties.slice(0, visibleCount).map(prop => (
+                                                <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
+                                                    <PropertyCard property={prop} />
+                                                </div>
                                             ))}
                                         </div>
-
-                                        {/* Pagination Controls */}
-                                        {totalPages > 1 && (
-                                            <div className="flex items-center justify-center gap-2 py-6 mt-4 border-t border-neutral-200">
-                                                {/* Previous button */}
-                                                <button
-                                                    onClick={() => handlePageChange(currentPage - 1)}
-                                                    disabled={currentPage === 1}
-                                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                                >
-                                                    ←
-                                                </button>
-
-                                                {/* Page numbers */}
-                                                <div className="flex items-center gap-1">
-                                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                                        .filter(page => {
-                                                            // Show first, last, current, and adjacent pages
-                                                            if (page === 1 || page === totalPages) return true;
-                                                            if (Math.abs(page - currentPage) <= 1) return true;
-                                                            return false;
-                                                        })
-                                                        .map((page, index, arr) => {
-                                                            // Add ellipsis if there's a gap
-                                                            const showEllipsisBefore = index > 0 && page - arr[index - 1] > 1;
-                                                            return (
-                                                                <React.Fragment key={page}>
-                                                                    {showEllipsisBefore && (
-                                                                        <span className="px-2 text-neutral-400">...</span>
-                                                                    )}
-                                                                    <button
-                                                                        onClick={() => handlePageChange(page)}
-                                                                        className={`w-9 h-9 text-sm font-medium rounded-lg transition-colors ${
-                                                                            currentPage === page
-                                                                                ? 'bg-primary text-white shadow-md'
-                                                                                : 'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50'
-                                                                        }`}
-                                                                    >
-                                                                        {page}
-                                                                    </button>
-                                                                </React.Fragment>
-                                                            );
-                                                        })}
-                                                </div>
-
-                                                {/* Next button */}
-                                                <button
-                                                    onClick={() => handlePageChange(currentPage + 1)}
-                                                    disabled={currentPage === totalPages}
-                                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                                >
-                                                    →
-                                                </button>
+                                        {visibleCount < properties.length && (
+                                            <div ref={loadMoreRef} className="text-center p-8">
+                                                {isLoadingMore ? (
+                                                    <div className="flex justify-center items-center space-x-2 text-neutral-500">
+                                                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                        <span>Loading more...</span>
+                                                    </div>
+                                                ) : <div className="h-1"></div>}
                                             </div>
-                                        )}
-
-                                        {/* Page info */}
-                                        {totalPages > 1 && (
-                                            <p className="text-center text-xs text-neutral-500 pb-4">
-                                                {t('search:pagination.showing', {
-                                                    start: (currentPage - 1) * ITEMS_PER_PAGE + 1,
-                                                    end: Math.min(currentPage * ITEMS_PER_PAGE, properties.length),
-                                                    total: properties.length,
-                                                    defaultValue: `Showing ${(currentPage - 1) * ITEMS_PER_PAGE + 1}-${Math.min(currentPage * ITEMS_PER_PAGE, properties.length)} of ${properties.length}`
-                                                })}
-                                            </p>
                                         )}
                                     </>
                                 ) : (
@@ -986,6 +864,9 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         <p className="text-neutral-500 mt-2">{t('search:results.tryDifferent')}</p>
                                     </div>
                                 )}
+
+                                {/* Footer - Integrated at bottom of property list */}
+                                <Footer />
                             </div>
                         </div>
                     )}
@@ -995,48 +876,4 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     );
 };
 
-// CSS styles for virtualized list scrollbar and image loading animations
-const VirtualizedListStyles = () => (
-  <style>{`
-    .virtualized-property-list {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(0,0,0,0.2) transparent;
-    }
-    .virtualized-property-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    .virtualized-property-list::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .virtualized-property-list::-webkit-scrollbar-thumb {
-      background-color: rgba(0,0,0,0.2);
-      border-radius: 3px;
-    }
-    .virtualized-property-list::-webkit-scrollbar-thumb:hover {
-      background-color: rgba(0,0,0,0.3);
-    }
-
-    /* Shimmer animation for image loading placeholders */
-    @keyframes shimmer {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
-    }
-    .skeleton-shimmer {
-      animation: shimmer 1.5s infinite;
-    }
-  `}</style>
-);
-
-// Wrap PropertyList with styles
-const PropertyListWithStyles: React.FC<PropertyListProps> = (props) => (
-  <>
-    <VirtualizedListStyles />
-    <PropertyList {...props} />
-  </>
-);
-
-export default React.memo(PropertyListWithStyles);
+export default PropertyList;

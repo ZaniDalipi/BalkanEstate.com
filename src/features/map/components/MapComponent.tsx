@@ -430,7 +430,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
-          tap={isMobile}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
         >
@@ -440,7 +439,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
           <ZoomSnapAdjuster currentZoom={currentZoom} /> 
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
-          <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
+          <ZoomBasedTileSwitch mapType={mapType as "street" | "satellite" | "night"} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
           {drawnBounds && !isDrawing && (
             <Rectangle

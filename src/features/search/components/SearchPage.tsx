@@ -858,7 +858,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             'macedonia': 'north-macedonia',
             'romania': 'romania',
             'serbia': 'serbia',
-            'slovenia': 'slovenia',
         };
 
         // Check if a string is a country name

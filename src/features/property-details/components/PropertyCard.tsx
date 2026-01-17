@@ -1,37 +1,10 @@
-import React, { useState, useCallback, memo, useMemo } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { getPriceReductionInfo, isPriceReducedRecently } from '@/utils/priceUtils';
-
-// Cloudinary URL optimization utilities
-const optimizeCloudinaryUrl = (url: string, width: number = 400): string => {
-  if (!url || !url.includes('cloudinary.com')) return url;
-  // Add width, auto format, auto quality for faster loading
-  if (url.includes('/upload/')) {
-    return url.replace('/upload/', `/upload/w_${width},c_fill,f_auto,q_auto/`);
-  }
-  return url;
-};
-
-const getCloudinarySrcSet = (url: string): string | undefined => {
-  if (!url || !url.includes('cloudinary.com')) return undefined;
-  const sizes = [300, 400, 600];
-  return sizes
-    .map(size => {
-      const optimized = url.replace('/upload/', `/upload/w_${size},c_fill,f_auto,q_auto/`);
-      return `${optimized} ${size}w`;
-    })
-    .join(', ');
-};
-
-const getBlurPlaceholder = (url: string): string => {
-  if (!url || !url.includes('cloudinary.com')) return '';
-  return url.replace('/upload/', '/upload/w_20,h_15,c_fill,e_blur:1000,q_1,f_auto/');
-};
 
 interface PropertyCardProps {
   property: Property;
@@ -43,28 +16,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const { t } = useTranslation(['property', 'common']);
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const imgRef = React.useRef<HTMLImageElement>(null);
-
-  // Memoize optimized image URLs
-  const optimizedImageUrl = useMemo(() => optimizeCloudinaryUrl(property.imageUrl, 400), [property.imageUrl]);
-  const imageSrcSet = useMemo(() => getCloudinarySrcSet(property.imageUrl), [property.imageUrl]);
-  const blurPlaceholder = useMemo(() => getBlurPlaceholder(property.imageUrl), [property.imageUrl]);
-
-  // Check if image is already cached/complete on mount
-  React.useEffect(() => {
-    if (imgRef.current?.complete && imgRef.current?.naturalHeight !== 0) {
-      setImageLoaded(true);
-    }
-  }, [optimizedImageUrl]);
+  const [isHovered, setIsHovered] = useState(false);
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
   const isInComparison = state.comparisonList.includes(property.id);
   const isNew = property.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isSold = property.status === 'sold';
-
-  // Calculate price reduction info
-  const priceInfo = useMemo(() => getPriceReductionInfo(property), [property]);
-  const isRecentlyReduced = useMemo(() => isPriceReducedRecently(property, 7), [property]);
 
   // Check if property has an active promotion
   const isActivelyPromoted = property.isPromoted &&
@@ -148,57 +104,44 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   // Property type labels
   const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
 
-  // Determine card styles based on promotion tier (memoized for performance)
+  // Determine card styles based on promotion tier
   // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
-  const cardStyles = useMemo(() => {
+  const getCardStyles = () => {
     if (isSold) return 'border-neutral-300 opacity-80';
     if (isActivelyPromoted) {
-      if (promotionTier === 'premium') return 'ring-4 ring-amber-400/70 border-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.5)]';
-      if (promotionTier === 'highlight') return 'ring-4 ring-sky-400/70 border-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.4)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)]';
-      if (promotionTier === 'featured') return 'ring-4 ring-violet-500/70 border-violet-300 shadow-[0_0_20px_rgba(139,92,246,0.4)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)]';
-      return 'ring-2 ring-gray-400 border-gray-200 shadow-lg';
+      if (promotionTier === 'premium') return 'ring-2 ring-amber-400 border-amber-200 shadow-amber-100';
+      if (promotionTier === 'highlight') return 'ring-2 ring-sky-400 border-sky-200 shadow-sky-100';
+      if (promotionTier === 'featured') return 'ring-2 ring-violet-500 border-violet-200 shadow-violet-100';
+      return 'ring-1 ring-gray-400 border-gray-200';
     }
     return 'border-neutral-200 hover:border-primary/30';
-  }, [isSold, isActivelyPromoted, promotionTier]);
+  };
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 text-left w-full flex flex-col cursor-pointer ${cardStyles} hover:shadow-xl`}
-      style={{ contain: 'layout style paint' }}
+      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-500 text-left w-full flex flex-col cursor-pointer ${getCardStyles()} ${
+        isHovered && !isSold ? 'shadow-2xl -translate-y-2 scale-[1.02]' : 'hover:shadow-xl'
+      }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
     >
       {/* Image Section */}
-      <div className="relative overflow-hidden rounded-t-2xl">
+      <div className="relative overflow-hidden">
         {imageError ? (
           <div className="w-full h-40 sm:h-44 md:h-48 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
             <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
           </div>
         ) : (
           <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
-            {/* Blur placeholder - loads instantly for fast visual feedback */}
-            {!imageLoaded && blurPlaceholder && (
-              <img
-                src={blurPlaceholder}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover scale-110 blur-sm"
-              />
-            )}
-            {/* Fallback shimmer if no blur placeholder */}
-            {!imageLoaded && !blurPlaceholder && (
-              <div className="absolute inset-0 bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 animate-pulse" />
-            )}
             <img
-              ref={imgRef}
-              src={optimizedImageUrl}
-              srcSet={imageSrcSet}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+              src={property.imageUrl}
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
-              loading="eager"
+              loading="lazy"
               decoding="async"
-              fetchPriority="high"
-              className={`w-full h-full object-cover transition-opacity duration-200 ${isSold ? 'grayscale' : ''} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={() => setImageLoaded(true)}
+              className={`w-full h-full object-cover transition-transform duration-700 ${
+                isHovered && !isSold ? 'scale-110' : 'scale-100'
+              } ${isSold ? 'grayscale' : ''}`}
               onError={() => setImageError(true)}
             />
             {/* Gradient overlay */}
@@ -206,25 +149,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           </div>
         )}
 
-        {/* Favorite Button - Top Right */}
-        <button
-          onClick={handleFavoriteClick}
-          className={`absolute top-4 right-4 z-20 p-2 rounded-full shadow-lg shadow-black/10 transition-all duration-300 ${
-            isFavorited
-              ? 'bg-red-500 text-white scale-110'
-              : 'bg-white/80 backdrop-blur-xl border border-white/50 text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110 hover:border-red-500'
-          }`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </button>
-
         {/* Top badges row */}
-        <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10 items-start">
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
+          <div className="flex flex-col gap-1.5">
             {/* Sold Badge */}
             {isSold && (
-              <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
+              <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                 {t('property:sold').toUpperCase()}
               </div>
@@ -232,7 +162,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
             {/* New Badge */}
             {!isSold && isNew && !isActivelyPromoted && (
-              <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
+              <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
@@ -241,19 +171,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
               </div>
             )}
 
-            {/* Price Reduced Badge */}
-            {!isSold && priceInfo.hasReduction && isRecentlyReduced && (
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-                {priceInfo.intervalLabel || t('property:status.priceReduced', 'REDUCED').toUpperCase()}
-              </div>
-            )}
-
             {/* Promotion Badges - Premium = Gold, Highlight = Light Blue, Featured = Pink */}
             {!isSold && isActivelyPromoted && promotionTier && (
-              <div className={`text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 ${
+              <div className={`text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 ${
                 promotionTier === 'premium'
                   ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400 animate-pulse'
                   : promotionTier === 'highlight'
@@ -262,7 +182,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   ? 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400'
                   : 'bg-gradient-to-r from-gray-600 to-gray-700'
               }`}>
-                <span className="text-[10px]">{promotionTier === 'premium' ? '👑' : promotionTier === 'highlight' ? '💎' : '⭐'}</span>
+                <span className="text-xs">{promotionTier === 'premium' ? '👑' : promotionTier === 'highlight' ? '💎' : '⭐'}</span>
                 {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
                 {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
                 {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
@@ -272,53 +192,53 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
             {/* Urgent Badge */}
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
-              <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse flex items-center gap-1">
+              <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg animate-pulse flex items-center gap-1">
                 🔥 {t('property:status.urgent').toUpperCase()}
               </div>
             )}
+
+            {/* 360° Tour Badge */}
+            {property.virtualTour360Url && (
+              <div
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1"
+                title="360° Virtual Tour Available"
+              >
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  <path d="M2 12h20" />
+                </svg>
+                <span>360°</span>
+              </div>
+            )}
+          </div>
+
+          {/* Favorite Button */}
+          <button
+            onClick={handleFavoriteClick}
+            className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
+              isFavorited
+                ? 'bg-red-500 text-white scale-110'
+                : 'bg-white/95 backdrop-blur-sm text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
         </div>
 
         {/* Bottom info bar on image */}
         <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
           <div className="flex items-center justify-between gap-2">
-            {/* Property Type Badge + 360° indicator */}
-            <div className="flex items-center gap-1.5">
-              <span className="bg-white/80 backdrop-blur-xl text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-lg shadow-lg shadow-black/10 border border-white/50">
-                {propertyTypeLabel}
-              </span>
-              {/* 360° Tour Badge - positioned next to property type for less interference */}
-              {property.virtualTour360Url && (
-                <div
-                  className="bg-gradient-to-r from-purple-500/90 to-pink-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-1 rounded-lg shadow-lg shadow-purple-500/20 flex items-center gap-0.5 border border-white/20"
-                  title="360° Virtual Tour Available"
-                >
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    <path d="M2 12h20" />
-                  </svg>
-                  <span>360°</span>
-                </div>
-              )}
-            </div>
+            {/* Property Type Badge */}
+            <span className="bg-white/95 backdrop-blur-sm text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md shadow-md">
+              {propertyTypeLabel}
+            </span>
             {/* Price Badge */}
-            <div className="flex flex-col items-end">
-              {priceInfo.hasReduction && (
-                <span className="text-white/80 text-[10px] line-through">
-                  {formatPrice(priceInfo.originalPrice, property.country)}
-                </span>
-              )}
-              <span className={`text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-lg shadow-xl shadow-black/20 backdrop-blur-sm border border-white/20 ${
-                priceInfo.hasReduction
-                  ? 'bg-gradient-to-r from-green-600/90 to-emerald-600/90'
-                  : 'bg-gradient-to-r from-primary/90 to-primary-dark/90'
-              }`}>
-                {formatPrice(priceInfo.currentPrice, property.country)}
-                {priceInfo.hasReduction && (
-                  <span className="ml-1 text-[10px] font-bold">-{priceInfo.discountPercentage}%</span>
-                )}
-              </span>
-            </div>
+            <span className="bg-gradient-to-r from-primary to-primary-dark text-white text-xs sm:text-sm font-bold px-2.5 py-1 rounded-md shadow-lg">
+              {formatPrice(property.price, property.country)}
+            </span>
           </div>
         </div>
       </div>
@@ -356,19 +276,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
         {/* Property Stats - Grid layout for better fit */}
         <div className="grid grid-cols-4 gap-1.5 mb-3">
-          <div className="flex flex-col items-center bg-neutral-100/80 backdrop-blur-sm py-1.5 px-1 rounded-xl" title={`${property.beds} ${t('property:features.bedrooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} ${t('property:features.bedrooms')}`}>
             <BedIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.beds}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100/80 backdrop-blur-sm py-1.5 px-1 rounded-xl" title={`${property.baths} ${t('property:features.bathrooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} ${t('property:features.bathrooms')}`}>
             <BathIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.baths}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100/80 backdrop-blur-sm py-1.5 px-1 rounded-xl" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
             <LivingRoomIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{property.livingRooms}</span>
           </div>
-          <div className="flex flex-col items-center bg-primary/10 backdrop-blur-sm py-1.5 px-1 rounded-xl border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
+          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
             <SqftIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-primary">{property.sqft}</span>
           </div>
