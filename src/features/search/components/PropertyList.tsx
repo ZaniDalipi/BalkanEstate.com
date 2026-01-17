@@ -761,11 +761,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             ) : (
                                 <div className="text-center py-16 px-4"><h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3></div>
                             )}
-
-                            {/* Footer - Integrated at bottom of property list */}
-                            <div className="mt-8">
-                                <Footer />
-                            </div>
+                            <Footer />
                         </div>
                     </div>
                 </div>

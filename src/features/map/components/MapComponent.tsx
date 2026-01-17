@@ -122,9 +122,9 @@ const inject3DPerspectiveStyles = () => {
       .leaflet-fade-anim .leaflet-tile {
         transition: opacity 0.15s linear;
       }
-      .leaflet-zoom-animated {
-  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
+      .leaflet-zoom-anim .leaflet-zoom-animated {
+        transition: transform 0.2s cubic-bezier(0,0,0.25,1);
+      }
       .leaflet-container {
         -webkit-tap-highlight-color: transparent;
         touch-action: pan-x pan-y;
@@ -192,6 +192,7 @@ const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) =>
   const map = useMap();
 
   useEffect(() => {
+    // Enable fractional zoom only when zoomed in very close (>= 18)
     const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
     const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
 
@@ -220,7 +221,7 @@ const ZoomAdjuster: React.FC<{ mapType: TileLayerType; currentZoom: number }> = 
 
       // If current zoom exceeds new layer's max, adjust it
       if (currentMapZoom > maxZoom) {
-        map.setZoom(maxZoom);
+        map.setZoom(maxZoom, { animate: true, duration: 0.6 });
       }
 
       prevMapTypeRef.current = mapType;
@@ -423,23 +424,25 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={0.25}
-          zoomDelta={0.25}
-          wheelPxPerZoomLevel={60}
-          wheelDebounceTime={40}
+          // Smooth zoom settings (fractional zoom enabled dynamically when close)
+          zoomSnap={0}
+          zoomDelta={0.1}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
+          wheelPxPerZoomLevel={50}
+          // Mobile optimizations
+          tap={isMobile}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
-          {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
-          <ZoomSnapAdjuster currentZoom={currentZoom} /> 
+          <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} />
+          <ZoomSnapAdjuster currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
-          <ZoomBasedTileSwitch mapType={mapType as "street" | "satellite" | "night"} setMapType={setMapType} />
+          <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
           {drawnBounds && !isDrawing && (
             <Rectangle
@@ -458,9 +461,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={isMobile ? 2 : 3}
-            updateWhenIdle={false}
-            updateWhenZooming={true}
+            keepBuffer={isMobile ? 1 : 2}
+            updateWhenIdle={true}
+            updateWhenZooming={false}
             updateInterval={isMobile ? 200 : 150}
             className="map-tiles"
           />
