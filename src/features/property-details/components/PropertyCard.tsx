@@ -231,8 +231,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       </div>
 
       {/* Content Section */}
-      <div className="p-3 sm:p-4 flex flex-col flex-grow">
-        {/* Property Type & Price Row - moved outside image to avoid glass overlap */}
+      <div className="relative p-3 sm:p-4 flex flex-col flex-grow">
+        {/* Glass background layer - sits behind all content */}
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-0" />
+
+        {/* Content wrapper - on top of glass */}
+        <div className="relative z-10 flex flex-col flex-grow">
+        {/* Property Type & Price Row */}
         <div className="flex items-center justify-between gap-2 mb-2">
           {/* Property Type Badge */}
           <span className="bg-neutral-100 text-neutral-800 text-[10px] font-semibold px-2 py-1 rounded-md border border-neutral-200">
@@ -364,6 +369,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             </button>
           )}
         </div>
+        </div>{/* Close content wrapper */}
       </div>
     </div>
   );
