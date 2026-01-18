@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../shared/Modal';
+import PaymentWindow from './PaymentWindow';
 import { BuildingOfficeIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
+
+// Enterprise plan configuration
+const ENTERPRISE_PLAN = {
+  name: 'Enterprise',
+  price: 499,
+  interval: 'year' as const,
+  productId: 'enterprise_yearly',
+};
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -29,6 +38,8 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [showPaymentWindow, setShowPaymentWindow] = useState(false);
+  const [pendingAgencyData, setPendingAgencyData] = useState<any>(null);
 
   // Check if user can create an agency (must be an agent with active Pro subscription)
   // Pass additional user fields for comprehensive agent status check (DB is source of truth)
@@ -201,6 +212,66 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     }));
   };
 
+  // Get user role for payment window
+  const getUserRole = (): 'buyer' | 'private_seller' | 'agent' => {
+    if (!state.currentUser) return 'private_seller';
+    return state.currentUser.role === 'agent' ? 'agent' : 'private_seller';
+  };
+
+  // Handle payment success - create agency after successful payment
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    console.log('Enterprise payment successful:', paymentIntentId);
+    setShowPaymentWindow(false);
+
+    if (pendingAgencyData) {
+      setIsCreating(true);
+      try {
+        const result = await createAgency(pendingAgencyData);
+
+        if (result && (result.agency || result._id || result.id)) {
+          dispatch({
+            type: 'SHOW_ALERT',
+            payload: {
+              type: 'success',
+              title: 'Agency Created!',
+              message: `Your agency "${pendingAgencyData.name}" has been created successfully with your Enterprise subscription.`,
+            },
+          });
+
+          // Close modal and navigate to the new agency
+          onClose();
+
+          const agencySlug = result.agency?.slug || result.agency?._id || result._id;
+          if (agencySlug) {
+            dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+            window.history.pushState({}, '', `/agencies/${agencySlug}`);
+          }
+
+          // Call the callback if provided
+          if (onAgencyCreated) {
+            onAgencyCreated(result.agency?._id || result._id);
+          }
+        } else {
+          setError('Payment successful but failed to create agency. Please contact support.');
+        }
+      } catch (err: any) {
+        console.error('Failed to create agency after payment:', err);
+        setError(err.message || 'Payment successful but failed to create agency. Please contact support.');
+      } finally {
+        setIsCreating(false);
+        setPendingAgencyData(null);
+      }
+    }
+  };
+
+  // Handle payment error
+  const handlePaymentError = (error: string) => {
+    console.error('Enterprise payment error:', error);
+    setError(`Payment failed: ${error}`);
+    setShowPaymentWindow(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -268,14 +339,12 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       return;
     }
 
-    // User doesn't have Enterprise subscription - save data and redirect to pricing
+    // User doesn't have Enterprise subscription - save data and show payment window
+    setPendingAgencyData(agencyData);
     dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: agencyData });
 
-    // Close this modal
-    onClose();
-
-    // Navigate to pricing page for Enterprise plan (agency creation mode)
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    // Show the payment window for Enterprise plan
+    setShowPaymentWindow(true);
   };
 
   const inputClasses = "w-full px-4 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all duration-200 hover:border-neutral-400";
@@ -772,6 +841,24 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Enterprise Payment Window */}
+      <PaymentWindow
+        isOpen={showPaymentWindow}
+        onClose={() => {
+          setShowPaymentWindow(false);
+          setPendingAgencyData(null);
+        }}
+        planName={ENTERPRISE_PLAN.name}
+        planPrice={ENTERPRISE_PLAN.price}
+        planInterval={ENTERPRISE_PLAN.interval}
+        userRole={getUserRole()}
+        userEmail={state.currentUser?.email}
+        userCountry={state.currentUser?.country || 'RS'}
+        onSuccess={handlePaymentSuccess}
+        onError={handlePaymentError}
+        productId={ENTERPRISE_PLAN.productId}
+      />
     </Modal>
   );
 };
