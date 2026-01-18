@@ -354,6 +354,7 @@ export function canBecomeAgent(subscription: UserSubscription | undefined): {
 /**
  * Check if user can create an agency
  * Uses multiple indicators to determine agent status (matching backend logic)
+ * Database is the single source of truth for agent status
  */
 export function canCreateAgency(
   subscription: UserSubscription | undefined,
@@ -364,10 +365,6 @@ export function canCreateAgency(
     licenseNumber?: string;
   }
 ): { allowed: boolean; reason?: string } {
-  if (!subscription) {
-    return { allowed: false, reason: 'No subscription found' };
-  }
-
   // Must be an active agent first - check multiple indicators (matches backend logic)
   // Database is the single source of truth, check all possible agent indicators
   const isAgent =
@@ -384,22 +381,15 @@ export function canCreateAgency(
     };
   }
 
-  // Must have active Pro subscription
-  if (subscription.tier !== 'pro' || subscription.status !== 'active') {
-    return {
-      allowed: false,
-      reason: 'Active Pro subscription required to create an agency',
-    };
-  }
-
-  // Must not already be an agency owner
-  if (subscription.tier === 'agency_owner') {
+  // Check if user already owns an agency (agency_owner tier means they already have one)
+  if (subscription?.tier === 'agency_owner') {
     return {
       allowed: false,
       reason: 'You already own an agency',
     };
   }
 
+  // Agent can create an agency - no Pro subscription required
   return { allowed: true };
 }
 
