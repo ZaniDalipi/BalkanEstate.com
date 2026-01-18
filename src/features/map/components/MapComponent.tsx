@@ -184,23 +184,11 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
- * Far away: whole zoom levels (zoomSnap=1)
- * Very close (18+): fractional zoom (zoomSnap=0.5)
+ * ZoomSnapAdjuster Component - DISABLED for smoother zoom experience
+ * Keeping component structure for potential future use
  */
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
-    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
-
-    if (map.options.zoomSnap !== newZoomSnap) {
-      map.options.zoomSnap = newZoomSnap;
-      map.options.zoomDelta = newZoomDelta;
-    }
-  }, [currentZoom, map]);
-
+  // Component disabled - smooth zoom is now handled by MapContainer settings
   return null;
 };
 
@@ -423,10 +411,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={0.25}
-          zoomDelta={0.25}
-          wheelPxPerZoomLevel={60}
-          wheelDebounceTime={40}
+          zoomSnap={0.1}
+          zoomDelta={0.5}
+          wheelPxPerZoomLevel={120}
+          wheelDebounceTime={100}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
@@ -458,10 +446,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={isMobile ? 2 : 3}
-            updateWhenIdle={false}
-            updateWhenZooming={true}
-            updateInterval={isMobile ? 200 : 150}
+            keepBuffer={isMobile ? 3 : 4}
+            updateWhenIdle={true}
+            updateWhenZooming={false}
+            updateInterval={200}
             className="map-tiles"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}

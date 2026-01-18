@@ -72,6 +72,7 @@ interface PropertyListPropsForMobile {
     isQueryInputFocused?: boolean;
     onQueryInputFocusChange?: (focused: boolean) => void;
     fallbackLocation?: string | null;
+    isLoadingMapMovement?: boolean;
 }
 
 const MobileFilters: React.FC<{
@@ -153,12 +154,23 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
     const [showMapHint, setShowMapHint] = useState(false); // Show hint about map view on mobile
     const [fallbackLocation, setFallbackLocation] = useState<string | null>(null); // Location name when showing fallback properties
+    const [isLoadingMapProperties, setIsLoadingMapProperties] = useState(false); // Loading state for property list during map movement
+    const mapMoveDebounceTimer = useRef<number | null>(null); // Debounce timer for map movement
 
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Cleanup map movement debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (mapMoveDebounceTimer.current) {
+                clearTimeout(mapMoveDebounceTimer.current);
+            }
+        };
     }, []);
 
     // Show map hint on mobile after 3 seconds, only once per session
@@ -830,8 +842,20 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             setShowAllOnMobile(false);
         }
 
-        const newState: Partial<SearchPageState> = { mapBoundsJSON: serializeBounds(newBounds) };
-        updateSearchPageState(newState);
+        // Show loading placeholders immediately
+        setIsLoadingMapProperties(true);
+
+        // Clear existing debounce timer
+        if (mapMoveDebounceTimer.current) {
+            clearTimeout(mapMoveDebounceTimer.current);
+        }
+
+        // Debounce the property list update by 250ms for smoother experience
+        mapMoveDebounceTimer.current = window.setTimeout(() => {
+            const newState: Partial<SearchPageState> = { mapBoundsJSON: serializeBounds(newBounds) };
+            updateSearchPageState(newState);
+            setIsLoadingMapProperties(false);
+        }, 250);
     }, [isMobile, isFiltersOpen, showAllOnMobile, updateSearchPageState]);
 
 
@@ -1039,6 +1063,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         isQueryInputFocused: isQueryInputFocused,
         onQueryInputFocusChange: setIsQueryInputFocused,
         fallbackLocation: fallbackLocation,
+        isLoadingMapMovement: isLoadingMapProperties,
     };
 
     // Generate dynamic SEO based on current filters
