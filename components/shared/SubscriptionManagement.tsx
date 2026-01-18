@@ -1013,7 +1013,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 {subscriptionDetails.currentPlan.listingLimit} Active Listings
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlanKey.includes('yearly') ? 'Per year' : subscriptionDetails.currentPlanKey.includes('monthly') ? 'Per month' : 'Total available'}
+                {subscriptionDetails.currentPlanKey.includes('yearly') || subscriptionDetails.currentPlanKey.includes('agency') ? 'Per year' : subscriptionDetails.currentPlanKey.includes('monthly') ? 'Per month' : 'Total available'}
               </p>
             </div>
           </div>
@@ -1027,7 +1027,11 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {t('management.whatsIncluded.savedSearches', { count: subscriptionDetails.currentPlanKey === 'free' ? 1 : 10 })}
+                {subscriptionDetails.currentPlanKey === 'free'
+                  ? '1 Saved Search'
+                  : subscriptionDetails.currentPlanKey.includes('agency')
+                    ? 'Unlimited Saved Searches'
+                    : `${user.subscription?.savedSearchesLimit === -1 ? 'Unlimited' : (user.subscription?.savedSearchesLimit || 10)} Saved Searches`}
               </p>
               <p className="text-sm text-neutral-500">
                 {t('management.whatsIncluded.savedSearchesDesc')}
@@ -1035,21 +1039,25 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
 
-          {/* Promotion Coupons - Pro only */}
+          {/* Promotion Coupons - Different for agency agents */}
           <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
             <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
               <GiftIconComponent className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-amber-600' : 'text-neutral-400'}`} />
             </div>
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.promotionCoupons')
-                  : t('management.whatsIncluded.noPromotionCoupons')}
+                {subscriptionDetails.currentPlanKey.includes('agency_agent')
+                  ? 'Shared Agency Pool'
+                  : subscriptionDetails.currentPlan.tier >= 1
+                    ? `${user.subscription?.promotionCoupons?.monthly || 3} Promotion Coupons/Month`
+                    : t('management.whatsIncluded.noPromotionCoupons')}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.promotionCouponsDesc')
-                  : t('management.whatsIncluded.upgradeForPromotion')}
+                {subscriptionDetails.currentPlanKey.includes('agency_agent')
+                  ? 'Use promotion coupons from agency pool'
+                  : subscriptionDetails.currentPlan.tier >= 1
+                    ? t('management.whatsIncluded.promotionCouponsDesc')
+                    : t('management.whatsIncluded.upgradeForPromotion')}
               </p>
             </div>
           </div>
@@ -1073,7 +1081,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
 
-          {/* Priority Support - Pro only */}
+          {/* Support - Different for agency agents */}
           <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
             <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
               <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1082,14 +1090,18 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.prioritySupport')
-                  : t('management.whatsIncluded.emailSupport')}
+                {subscriptionDetails.currentPlanKey.includes('agency')
+                  ? 'Agency Team Support'
+                  : subscriptionDetails.currentPlan.tier >= 1
+                    ? t('management.whatsIncluded.prioritySupport')
+                    : t('management.whatsIncluded.emailSupport')}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.prioritySupportDesc')
-                  : t('management.whatsIncluded.emailSupportDesc')}
+                {subscriptionDetails.currentPlanKey.includes('agency')
+                  ? 'Get help from your agency admin'
+                  : subscriptionDetails.currentPlan.tier >= 1
+                    ? t('management.whatsIncluded.prioritySupportDesc')
+                    : t('management.whatsIncluded.emailSupportDesc')}
               </p>
             </div>
           </div>
