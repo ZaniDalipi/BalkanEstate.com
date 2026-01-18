@@ -8,10 +8,10 @@ import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
 
-// Enterprise plan configuration
+// Enterprise plan configuration (must match database price)
 const ENTERPRISE_PLAN = {
   name: 'Enterprise',
-  price: 499,
+  price: 999,
   interval: 'year' as const,
   productId: 'enterprise_yearly',
 };
