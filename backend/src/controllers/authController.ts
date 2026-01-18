@@ -610,6 +610,49 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         console.log(`🔄 Auto-synced Agent record for ${user.email}: ${memberAgency.name}`);
       }
 
+      // **AUTO-CREATE SUBSCRIPTION DOCUMENT**: Ensure agency agents have a Subscription document
+      // This is needed because getCurrentSubscription checks the Subscription collection first
+      const Subscription = (await import('../models/Subscription')).default;
+      const existingAgentSubscription = await Subscription.findOne({ userId: user._id });
+
+      if (!existingAgentSubscription && user.subscription?.tier === 'agency_agent') {
+        // Get expiration from agency or user subscription
+        const subExpiresAt = user.subscription.expiresAt ||
+                            memberAgency.subscription?.expiresAt ||
+                            new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+        await Subscription.create({
+          userId: user._id,
+          productId: 'agency_agent_yearly',
+          store: 'agency_coupon',
+          status: 'active',
+          startDate: user.agency?.joinedAt || new Date(),
+          renewalDate: subExpiresAt,
+          expirationDate: subExpiresAt,
+          autoRenewing: false,
+          price: 0,
+          currency: 'EUR',
+          isAcknowledged: true,
+        });
+        console.log(`✅ Auto-created Subscription document for agency agent ${user.email}`);
+      } else if (existingAgentSubscription &&
+                 user.subscription?.tier === 'agency_agent' &&
+                 existingAgentSubscription.productId !== 'agency_agent_yearly') {
+        // Update existing subscription to reflect agency agent status
+        existingAgentSubscription.productId = 'agency_agent_yearly';
+        existingAgentSubscription.store = 'agency_coupon';
+        existingAgentSubscription.status = 'active';
+        existingAgentSubscription.price = 0;
+        existingAgentSubscription.autoRenewing = false;
+        const subExpiresAt = user.subscription.expiresAt ||
+                            memberAgency.subscription?.expiresAt ||
+                            new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        existingAgentSubscription.expirationDate = subExpiresAt;
+        existingAgentSubscription.renewalDate = subExpiresAt;
+        await existingAgentSubscription.save();
+        console.log(`✅ Auto-updated Subscription document for agency agent ${user.email}`);
+      }
+
       if (needsSync) {
         console.log(`🔄 Auto-synced agency data for user ${user.email}: ${memberAgency.name}`);
       }
