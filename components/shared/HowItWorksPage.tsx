@@ -24,7 +24,15 @@ const VideoPlaceholder: React.FC<{
   className?: string;
   onClick?: () => void;
 }> = ({ videoKey, videos, fallbackIcon, fallbackTitle, fallbackSubtitle, className = '', onClick }) => {
-  const subsection = videoKey.split('-')[0];
+  // Extract subsection from videoKey - handles both formats like "getting-started-xxx" and "agencies-xxx"
+  const KNOWN_SUBSECTIONS = ['getting-started', 'premium-features', 'agencies', 'agents', 'buyers', 'sellers'];
+  let subsection = 'general';
+  for (const sub of KNOWN_SUBSECTIONS) {
+    if (videoKey.startsWith(sub + '-') || videoKey === sub) {
+      subsection = sub;
+      break;
+    }
+  }
   const sectionVideos = videos[subsection] || [];
   const video = sectionVideos.find(v => v.key === videoKey);
 
