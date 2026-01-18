@@ -359,7 +359,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           agencyId: String(agency._id),
           invitationCode: agency.invitationCode || '',
           totalAgents: agency.totalAgents || agency.agents?.length || 0,
-          maxAgents: 5, // Agency plan includes 5 agent slots
+          maxAgents: 6, // Agency plan includes owner + 5 agents via coupons
           agentCoupons,
         });
       } catch (error) {
