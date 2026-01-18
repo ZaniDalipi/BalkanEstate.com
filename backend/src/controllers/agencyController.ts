@@ -4,6 +4,7 @@ import Agency from '../models/Agency';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import Property from '../models/Property';
+import Subscription from '../models/Subscription';
 import { geocodeAgency } from '../services/geocodingService';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
@@ -1647,6 +1648,42 @@ export const redeemAgentCoupon = async (
     user.agencyName = agency.name;
 
     await user.save();
+
+    // Create or update Subscription document for proper subscription endpoint compatibility
+    const subscriptionExpiresAt = new Date(coupon.expiresAt);
+    const existingSubscription = await Subscription.findOne({ userId: user._id });
+
+    if (existingSubscription) {
+      // Update existing subscription
+      existingSubscription.productId = 'agency_agent_yearly';
+      existingSubscription.store = 'agency_coupon';
+      existingSubscription.status = 'active';
+      existingSubscription.startDate = new Date();
+      existingSubscription.renewalDate = subscriptionExpiresAt;
+      existingSubscription.expirationDate = subscriptionExpiresAt;
+      existingSubscription.autoRenewing = false;
+      existingSubscription.price = 0;
+      existingSubscription.currency = 'EUR';
+      existingSubscription.isAcknowledged = true;
+      await existingSubscription.save();
+      console.log(`✅ Updated Subscription document for ${user.email}`);
+    } else {
+      // Create new subscription document
+      await Subscription.create({
+        userId: user._id,
+        productId: 'agency_agent_yearly',
+        store: 'agency_coupon',
+        status: 'active',
+        startDate: new Date(),
+        renewalDate: subscriptionExpiresAt,
+        expirationDate: subscriptionExpiresAt,
+        autoRenewing: false,
+        price: 0,
+        currency: 'EUR',
+        isAcknowledged: true,
+      });
+      console.log(`✅ Created Subscription document for ${user.email}`);
+    }
 
     // Mark coupon as used
     coupon.status = 'used';
