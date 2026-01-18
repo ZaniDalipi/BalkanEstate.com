@@ -109,31 +109,35 @@ const inject3DPerspectiveStyles = () => {
       z-index: -1;
     }
 
-    /* Google Maps-like smooth zoom with visible tiles */
+    /* Ultra-smooth zoom - transitions barely visible */
     .leaflet-container {
       -webkit-tap-highlight-color: transparent;
       touch-action: pan-x pan-y;
     }
 
-    /* Smooth zoom animation */
+    /* VERY fast zoom transition - almost instant */
     .leaflet-zoom-animated {
-      transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1) !important;
+      transition: transform 0.05s ease-out !important;
     }
 
     .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1) !important;
+      transition: transform 0.05s ease-out !important;
     }
 
-    /* Keep tiles visible during zoom - smooth fade */
+    /* Keep old tiles visible until new ones load - NO blank map */
     .leaflet-fade-anim .leaflet-tile {
-      transition: opacity 0.2s linear !important;
+      transition: opacity 0.15s ease-in !important;
     }
 
     .leaflet-tile-container {
-      transition: none !important;
+      will-change: transform;
     }
 
-    /* GPU acceleration for smooth performance */
+    .leaflet-tile {
+      will-change: opacity;
+    }
+
+    /* GPU acceleration */
     .leaflet-tile-pane,
     .leaflet-tile,
     .leaflet-marker-icon,
@@ -432,10 +436,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Smooth fractional zoom like Google Maps
-          zoomSnap={0.25}
-          zoomDelta={0.25}
-          wheelPxPerZoomLevel={100}
+          // Ultra-smooth continuous zoom
+          zoomSnap={0.1}
+          zoomDelta={0.1}
+          wheelPxPerZoomLevel={80}
           wheelDebounceTime={40}
           zoomAnimation={true}
           fadeAnimation={true}
@@ -468,11 +472,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            // Preload tiles and keep them visible during zoom
-            keepBuffer={8}
+            // Preload LOTS of tiles - always keep map visible
+            keepBuffer={12}
             updateWhenIdle={false}
             updateWhenZooming={true}
-            updateInterval={200}
+            updateInterval={150}
             className="map-tiles"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
