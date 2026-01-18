@@ -101,9 +101,11 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleSubmit = async (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setError('');
 
     // Validation
@@ -193,36 +195,47 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   };
 
   // Handle agent coupon redemption
-  const handleCouponRedemption = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleCouponRedemption = async (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setError('');
+    console.log('🎫 Starting coupon redemption...');
 
     const trimmedCode = agentCouponCode.trim().toUpperCase();
     if (!trimmedCode) {
       setError('Please enter a coupon code');
       return;
     }
+    console.log('🔑 Coupon code:', trimmedCode);
 
     // Validate user is an agent
     if (!isUserAgent()) {
       setError('Only registered agents can redeem agency coupons. Please register as an agent first.');
       return;
     }
+    console.log('✓ User is agent, proceeding...');
 
     try {
       setLoading(true);
+      console.log('📤 Sending redemption request to:', `${API_URL}/agencies/coupons/redeem`);
+
+      const token = localStorage.getItem('balkan_estate_token');
+      console.log('🔐 Auth token exists:', !!token);
 
       const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ couponCode: trimmedCode }),
       });
 
+      console.log('📥 Response status:', response.status);
       const data = await response.json();
+      console.log('📦 Response data:', data);
 
       if (!response.ok) {
         // Handle specific error codes
@@ -460,8 +473,8 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
               </div>
 
               {joinMethod === 'invitation' ? (
-                /* Invitation Code Form */
-                <form onSubmit={handleSubmit} className="space-y-4">
+                /* Invitation Code Form - using div to avoid nested form issue */
+                <div className="space-y-4">
                   {/* Agency Selection Dropdown */}
                   <div>
                     <label htmlFor="agency-select" className="block text-sm font-medium text-gray-700 mb-2">
@@ -481,7 +494,6 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         }}
                         disabled={loading}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
-                        required
                       >
                         <option value="">-- Choose an agency --</option>
                         {agencies.map((agency) => (
@@ -509,7 +521,6 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       disabled={loading}
                       placeholder="e.g., AGY-BELGRAD-A1B2C3"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm"
-                      required
                     />
                     <p className="text-xs text-gray-600 mt-1">
                       Enter the invitation code for the selected agency
@@ -535,17 +546,18 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       Cancel
                     </button>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleSubmit}
                       disabled={loading || !selectedAgencyId || !invitationCode.trim()}
                       className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                     >
                       {loading ? 'Verifying & Sending...' : 'Send Join Request'}
                     </button>
                   </div>
-                </form>
+                </div>
               ) : (
-                /* Agent Coupon Redemption Form */
-                <form onSubmit={handleCouponRedemption} className="space-y-4">
+                /* Agent Coupon Redemption Form - using div to avoid nested form issue */
+                <div className="space-y-4">
                   {!isUserAgent() && (
                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                       <div className="flex items-start gap-3">
@@ -588,12 +600,11 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                         setError('');
                       }}
                       disabled={loading || !isUserAgent()}
-                      placeholder="e.g., AGENCY-XXXXXXXX"
+                      placeholder="e.g., IND-XXXXXXXX or ABC-12345678"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm uppercase"
-                      required
                     />
                     <p className="text-xs text-gray-600 mt-1">
-                      Enter the coupon code you received from the agency owner
+                      Enter the coupon code you received from the agency owner via email
                     </p>
                   </div>
 
@@ -616,7 +627,8 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       Cancel
                     </button>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleCouponRedemption}
                       disabled={loading || !agentCouponCode.trim() || !isUserAgent()}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
                     >
@@ -633,7 +645,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       )}
                     </button>
                   </div>
-                </form>
+                </div>
               )}
             </>
           )}
