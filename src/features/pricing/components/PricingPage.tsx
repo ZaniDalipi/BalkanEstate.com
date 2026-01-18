@@ -22,8 +22,10 @@ import {
   UserGroupIcon,
   ShieldCheckIcon,
   DocumentTextIcon,
-  LockClosedIcon
+  LockClosedIcon,
+  ExclamationTriangleIcon
 } from '@/constants';
+import { UserRole } from '@/types';
 
 // Helper to build localized path
 const buildLocalizedPath = (path: string): string => {
@@ -114,6 +116,20 @@ const PricingPage: React.FC = () => {
     window.history.pushState({}, '', buildLocalizedPath(`/${page}`));
   };
 
+  // Check if user is an agent (database as single source of truth)
+  const isUserAgent = (): boolean => {
+    const user = state.currentUser;
+    if (!user) return false;
+
+    return (
+      user.availableRoles?.includes(UserRole.AGENT) ||
+      user.role === UserRole.AGENT ||
+      user.role === 'agent' ||
+      !!user.agentId ||
+      !!user.licenseNumber
+    );
+  };
+
   const handlePlanSelection = (product: Product) => {
     if (!state.isAuthenticated || !state.currentUser) {
       dispatch({
@@ -132,6 +148,30 @@ const PricingPage: React.FC = () => {
       return;
     }
 
+    // For Enterprise plan, check if user is a registered agent first
+    const isEnterprisePlan = product.productId.includes('enterprise');
+
+    if (isEnterprisePlan && !isUserAgent()) {
+      // User is not an agent - block Enterprise plan selection
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'warning',
+          title: t('pricing:enterprise.agentRequired', 'Agent Status Required'),
+          message: t(
+            'pricing:enterprise.agentRequiredMessage',
+            'Only registered agents can create an agency. Please switch to Agent account type in your profile first.'
+          ),
+        },
+      });
+
+      // Navigate to profile page to become an agent
+      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      window.history.pushState({}, '', buildLocalizedPath('/account'));
+      return;
+    }
+
     setSelectedPlan({
       name: product.name,
       price: product.price,
@@ -139,7 +179,7 @@ const PricingPage: React.FC = () => {
       productId: product.productId,
     });
 
-    if (product.productId.includes('enterprise') && !state.pendingAgencyData) {
+    if (isEnterprisePlan && !state.pendingAgencyData) {
       dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
     } else {
       setShowPaymentWindow(true);

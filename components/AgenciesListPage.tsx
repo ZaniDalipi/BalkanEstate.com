@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Agency } from '../types';
 import { Agent } from '../types';
 import { Property } from '../types';
+import { UserRole } from '../types';
 import { getAgencies } from '../services/apiService';
 import {
   BuildingOfficeIcon,
@@ -23,7 +24,8 @@ import {
   GlobeAltIcon,
   ShieldCheckIcon,
   CheckBadgeIcon,
-  AcademicCapIcon
+  AcademicCapIcon,
+  ExclamationTriangleIcon
 } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import Footer from './shared/Footer';
@@ -49,6 +51,14 @@ const AgenciesListPage: React.FC = () => {
 
   const currentUser = state.currentUser;
   const hasAgency = currentUser?.role === 'agent' && currentUser?.agencyId;
+
+  // Check if user is an agent using multiple indicators (matches backend logic)
+  const isUserAgent =
+    currentUser?.availableRoles?.includes(UserRole.AGENT) ||
+    currentUser?.role === UserRole.AGENT ||
+    currentUser?.role === 'agent' ||
+    !!currentUser?.agentId ||
+    !!currentUser?.licenseNumber;
 
   // Calculate total stats from agencies data
   const totalStats = useMemo(() => {
@@ -115,6 +125,51 @@ const AgenciesListPage: React.FC = () => {
   };
 
   const handleCreateEnterprise = () => {
+    // Check if user is authenticated
+    if (!state.isAuthenticated || !currentUser) {
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'warning',
+          title: t('agencies.loginRequired', 'Login Required'),
+          message: t('agencies.loginToCreateAgency', 'Please login to create an agency.'),
+        },
+      });
+      dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+      return;
+    }
+
+    // Check if user already has an agency
+    if (hasAgency) {
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'info',
+          title: t('agencies.alreadyHaveAgency', 'You Already Have an Agency'),
+          message: t('agencies.viewYourAgency', 'You are already part of an agency. View your agency from the filters above.'),
+        },
+      });
+      setFilter('myAgency');
+      return;
+    }
+
+    // Check if user is an agent
+    if (!isUserAgent) {
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'warning',
+          title: t('agencies.agentRequired', 'Agent Status Required'),
+          message: t('agencies.becomeAgentFirst', 'You must be a registered agent to create an agency. Please update your profile to become an agent first.'),
+        },
+      });
+      // Navigate to profile page where they can become an agent
+      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      return;
+    }
+
+    // User is an agent without an agency - open the enterprise modal
     dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
   };
 

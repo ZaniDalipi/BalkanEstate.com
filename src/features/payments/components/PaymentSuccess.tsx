@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { CheckCircleIcon, ArrowLeftIcon, LogoIcon } from '@/constants';
+import { CheckCircleIcon, ArrowLeftIcon, LogoIcon, BuildingOfficeIcon, TicketIcon, ClipboardDocumentIcon } from '@/constants';
 import { verifyPayment as verifyPaymentApi, type VerifyPaymentResponse } from '../api/paymentApi';
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
@@ -19,6 +19,29 @@ interface PaymentDetails {
   };
 }
 
+interface AgencyResult {
+  agency?: {
+    _id: string;
+    slug: string;
+    name: string;
+  };
+  agentCoupons?: {
+    generated: boolean;
+    count: number;
+    message: string;
+  };
+  freeTrial?: {
+    active: boolean;
+    message: string;
+  };
+}
+
+interface GeneratedCoupon {
+  code: string;
+  expiresAt: string;
+  copied?: boolean;
+}
+
 const PaymentSuccess: React.FC = () => {
   const { t } = useTranslation(['payment']);
   const { state, dispatch } = useAppContext();
@@ -30,6 +53,9 @@ const PaymentSuccess: React.FC = () => {
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
   const [agencyCreated, setAgencyCreated] = useState(false);
   const [creatingAgency, setCreatingAgency] = useState(false);
+  const [agencyResult, setAgencyResult] = useState<AgencyResult | null>(null);
+  const [agentCoupons, setAgentCoupons] = useState<GeneratedCoupon[]>([]);
+  const [copiedCouponIndex, setCopiedCouponIndex] = useState<number | null>(null);
 
   useEffect(() => {
     // Get parameters from URL - supports both Stripe and Paddle
@@ -111,6 +137,20 @@ const PaymentSuccess: React.FC = () => {
 
       if (result && (result.agency || result._id || result.id)) {
         setAgencyCreated(true);
+        setAgencyResult(result);
+
+        // Store coupons if generated
+        if (result.agency?.agentCoupons && Array.isArray(result.agency.agentCoupons)) {
+          setAgentCoupons(
+            result.agency.agentCoupons
+              .filter((c: any) => c.status === 'available')
+              .map((c: any) => ({
+                code: c.code,
+                expiresAt: c.expiresAt,
+              }))
+          );
+        }
+
         // Clear pending agency data from context
         dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
 
@@ -138,6 +178,28 @@ const PaymentSuccess: React.FC = () => {
       });
     } finally {
       setCreatingAgency(false);
+    }
+  };
+
+  const handleViewAgency = () => {
+    if (agencyResult?.agency?.slug) {
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyResult.agency.slug });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+      window.history.pushState({}, '', `/agencies/${agencyResult.agency.slug}`);
+    } else if (agencyResult?.agency?._id) {
+      dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyResult.agency._id });
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+      window.history.pushState({}, '', `/agencies/${agencyResult.agency._id}`);
+    }
+  };
+
+  const handleCopyCoupon = async (code: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCouponIndex(index);
+      setTimeout(() => setCopiedCouponIndex(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy coupon code:', err);
     }
   };
 
@@ -264,13 +326,15 @@ const PaymentSuccess: React.FC = () => {
           {agencyCreated && (
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5 mb-6 text-left">
               <div className="flex items-start gap-3">
-                <span className="text-3xl">🏢</span>
-                <div>
+                <div className="w-12 h-12 bg-amber-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <BuildingOfficeIcon className="w-7 h-7 text-amber-700" />
+                </div>
+                <div className="flex-1">
                   <h3 className="font-bold text-amber-900 mb-1">Agency Created Successfully!</h3>
-                  <p className="text-sm text-amber-700 mb-2">
-                    Your agency has been set up and is ready to go. You can now:
+                  <p className="text-sm text-amber-700 mb-3">
+                    Your agency <span className="font-semibold">{agencyResult?.agency?.name || 'has been set up'}</span> is ready to go!
                   </p>
-                  <ul className="text-sm text-amber-700 space-y-1">
+                  <ul className="text-sm text-amber-700 space-y-1 mb-4">
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500">✓</span>
                       <span>Invite team members with your unique codes</span>
@@ -284,6 +348,58 @@ const PaymentSuccess: React.FC = () => {
                       <span>Start listing properties under your agency</span>
                     </li>
                   </ul>
+                  {agencyResult?.agency && (
+                    <button
+                      onClick={handleViewAgency}
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                      <BuildingOfficeIcon className="w-5 h-5" />
+                      View Your Agency
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Agent Invitation Coupons */}
+          {agencyCreated && agentCoupons.length > 0 && (
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-xl p-5 mb-6 text-left">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 bg-purple-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <TicketIcon className="w-7 h-7 text-purple-700" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-purple-900 mb-1">Team Invitation Codes</h3>
+                  <p className="text-sm text-purple-700 mb-3">
+                    Share these codes with your team members. Each code grants Pro Agent status when they register.
+                  </p>
+                  <div className="space-y-2">
+                    {agentCoupons.map((coupon, index) => (
+                      <div
+                        key={coupon.code}
+                        className="flex items-center gap-2 bg-white/80 rounded-lg p-2 border border-purple-200"
+                      >
+                        <code className="flex-1 font-mono text-sm text-purple-900 font-semibold tracking-wider">
+                          {coupon.code}
+                        </code>
+                        <button
+                          onClick={() => handleCopyCoupon(coupon.code, index)}
+                          className={`p-2 rounded-lg transition-all ${
+                            copiedCouponIndex === index
+                              ? 'bg-green-100 text-green-600'
+                              : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                          }`}
+                          title={copiedCouponIndex === index ? 'Copied!' : 'Copy code'}
+                        >
+                          <ClipboardDocumentIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-purple-600 mt-3 flex items-center gap-1">
+                    <span>These codes have also been sent to your email</span>
+                  </p>
                 </div>
               </div>
             </div>
