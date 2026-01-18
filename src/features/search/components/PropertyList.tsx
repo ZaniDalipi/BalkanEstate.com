@@ -690,7 +690,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                         </div>
                     </div>
                     
-                    <div className="px-4 pb-4" style={{ height: '280px' }}>
+                    <div className="px-4 pb-4 relative z-[60]" style={{ height: '280px' }}>
                         {searchMode === 'manual' ? (
                             <div className="h-full overflow-y-auto pr-2">
                                 <FilterControls {...props} />
@@ -710,11 +710,11 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                 </div>
 
                 {/* PROPERTY LIST SECTION */}
-                <div className="flex-grow min-h-0 overflow-hidden">
+                <div className="flex-grow min-h-0 overflow-hidden relative z-0">
                     <div className="h-full overflow-y-auto overflow-x-hidden">
-                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-20">
+                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                             <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
-                            <div className="relative">
+                            <div className="relative z-[101]">
                                 <select
                                     id="sortBy"
                                     name="sortBy"
@@ -729,14 +729,14 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
                                     <option value="sqft_desc">{t('search:sort.sqftDesc')}</option>
                                     <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
-                            
+
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                     <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                 </div>
                             </div>
                         </div>
-                        <div className="p-4 md:p-3">
+                        <div className="p-4 md:p-3 relative z-0">
                             {isLoadingProperties ? (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
                                     {Array.from({ length: 6 }).map((_, index) => (
@@ -801,16 +801,16 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
             ) : (
                 <>
                     {showFilters && (
-                        <div className="p-4 flex-shrink-0">
+                        <div className="p-4 flex-shrink-0 relative z-[60]">
                             <FilterControls {...props} />
                         </div>
                     )}
 
                     {showList && (
-                        <div className="flex-grow min-h-0 overflow-y-auto">
-                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-20">
+                        <div className="flex-grow min-h-0 overflow-y-auto relative z-0">
+                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                                 <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
-                                <div className="relative">
+                                <div className="relative z-[101]">
                                     <select
                                         id="sortBy"
                                         name="sortBy"
@@ -829,7 +829,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 </div>
                             </div>
 
-                            <div className="p-4 md:p-3">
+                            <div className="p-4 md:p-3 relative z-0">
                                 {isLoadingProperties ? (
                                     <div className="grid grid-cols-1 gap-4 md:gap-3">
                                         {Array.from({ length: 4 }).map((_, index) => (
