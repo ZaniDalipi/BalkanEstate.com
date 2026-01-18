@@ -4,6 +4,7 @@ import { useAppContext } from '@/context/AppContext';
 import { CheckCircleIcon, ArrowLeftIcon } from '@/constants';
 import { verifyPayment as verifyPaymentApi, type VerifyPaymentResponse } from '../api/paymentApi';
 import { PaymentProvider } from '@/config/paymentConfig';
+import { createAgency } from '@/features/agencies/api/agencyApi';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -20,13 +21,15 @@ interface PaymentDetails {
 
 const PaymentSuccess: React.FC = () => {
   const { t } = useTranslation(['payment']);
-  const { dispatch } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [provider, setProvider] = useState<PaymentProvider | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
+  const [agencyCreated, setAgencyCreated] = useState(false);
+  const [creatingAgency, setCreatingAgency] = useState(false);
 
   useEffect(() => {
     // Get parameters from URL - supports both Stripe and Paddle
@@ -83,10 +86,58 @@ const PaymentSuccess: React.FC = () => {
         sessionStorage.removeItem('pending_payment');
       }
 
+      // If this was an Enterprise payment and we have pending agency data, create the agency
+      const isEnterprisePayment = result.subscription?.plan?.toLowerCase().includes('enterprise') ||
+                                   result.subscription?.plan?.toLowerCase().includes('agency');
+
+      if (isEnterprisePayment && state.pendingAgencyData && !agencyCreated) {
+        await handleAgencyCreation();
+      }
+
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to verify payment');
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  const handleAgencyCreation = async () => {
+    if (!state.pendingAgencyData || creatingAgency) return;
+
+    setCreatingAgency(true);
+    try {
+      const agencyData = state.pendingAgencyData;
+      const result = await createAgency(agencyData);
+
+      if (result && (result.agency || result._id || result.id)) {
+        setAgencyCreated(true);
+        // Clear pending agency data from context
+        dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
+
+        // Show success notification
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'success',
+            title: 'Agency Created!',
+            message: `Your agency "${agencyData.name}" has been created successfully.`,
+          },
+        });
+      }
+    } catch (agencyError) {
+      console.error('Failed to create agency:', agencyError);
+      // Don't block the payment success, just log the error
+      // User can create agency manually from their account
+      dispatch({
+        type: 'SHOW_ALERT',
+        payload: {
+          type: 'warning',
+          title: 'Agency Setup Pending',
+          message: 'Payment successful! Please complete your agency setup from your account page.',
+        },
+      });
+    } finally {
+      setCreatingAgency(false);
     }
   };
 
@@ -95,13 +146,19 @@ const PaymentSuccess: React.FC = () => {
     window.history.pushState({}, '', '/account');
   };
 
-  if (isVerifying) {
+  if (isVerifying || creatingAgency) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('success.verifying')}</h2>
-          <p className="text-neutral-600">{t('success.verifyingDescription')}</p>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-2">
+            {creatingAgency ? 'Creating Your Agency...' : t('success.verifying')}
+          </h2>
+          <p className="text-neutral-600">
+            {creatingAgency
+              ? 'Setting up your agency profile and generating team invitation codes...'
+              : t('success.verifyingDescription')}
+          </p>
         </div>
       </div>
     );
@@ -194,6 +251,35 @@ const PaymentSuccess: React.FC = () => {
                     </span>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Agency Created Confirmation */}
+          {agencyCreated && (
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5 mb-6 text-left">
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">🏢</span>
+                <div>
+                  <h3 className="font-bold text-amber-900 mb-1">Agency Created Successfully!</h3>
+                  <p className="text-sm text-amber-700 mb-2">
+                    Your agency has been set up and is ready to go. You can now:
+                  </p>
+                  <ul className="text-sm text-amber-700 space-y-1">
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500">✓</span>
+                      <span>Invite team members with your unique codes</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500">✓</span>
+                      <span>Customize your agency profile page</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500">✓</span>
+                      <span>Start listing properties under your agency</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           )}
