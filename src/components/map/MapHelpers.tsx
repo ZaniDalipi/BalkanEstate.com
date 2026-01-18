@@ -205,8 +205,8 @@ export const MapEvents: React.FC<{
  * This component is kept for potential future use.
  */
 export const ZoomBasedTileSwitch: React.FC<{
-  mapType: 'street' | 'satellite' | 'night';
-  setMapType: (type: 'street' | 'satellite' | 'night') => void;
+  mapType: string;
+  setMapType: (type: string) => void;
 }> = ({ mapType, setMapType }) => {
   // Both layers now support zoom 21, no auto-switching needed
   // User has full control over layer selection at all zoom levels
