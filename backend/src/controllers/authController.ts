@@ -581,6 +581,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
       // Sync subscription for agency agents (should be agency_agent tier, not free)
       if (!user.subscription || user.subscription.tier === 'free') {
+        // Get expiration from agency or use 1 year from now
+        const expiresAt = memberAgency.subscription?.expiresAt ||
+                          memberAgency.featuredSubscription?.expiresAt ||
+                          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
         user.subscription = {
           tier: 'agency_agent',
           status: 'active',
@@ -591,7 +596,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
           savedSearchesLimit: -1,
           totalPaid: user.subscription?.totalPaid || 0,
-          expiresAt: memberAgency.subscription?.expiresAt,
+          expiresAt: expiresAt,
         };
         needsSync = true;
       }

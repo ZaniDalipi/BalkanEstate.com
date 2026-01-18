@@ -221,55 +221,13 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
     }
 
     if (!subscription) {
-      // No Subscription document found - check user's proSubscription field as fallback
-      // This handles cases where subscription was set up via test endpoint or manual update
+      // No Subscription document found - check user's subscription field (database is source of truth)
       const user = await User.findById(userId);
 
-      if (user?.proSubscription?.isActive && user.proSubscription.expiresAt && new Date(user.proSubscription.expiresAt) > new Date()) {
-        // User has active proSubscription but no Subscription document
-        // Return a synthetic subscription object from user data
-        res.status(200).json({
-          subscription: {
-            _id: `user_${userId}`,
-            userId: userId,
-            store: user.subscriptionSource || 'web',
-            productId: user.subscriptionPlan || user.proSubscription.plan || 'pro_monthly',
-            startDate: user.proSubscription.startedAt || user.subscriptionStartedAt,
-            renewalDate: user.proSubscription.expiresAt,
-            expirationDate: user.proSubscription.expiresAt,
-            status: 'active',
-            autoRenewing: false, // Can't auto-renew without a real Subscription document
-            price: 0, // Unknown price for legacy subscriptions
-            currency: 'EUR',
-            isAcknowledged: true,
-            createdAt: user.proSubscription.startedAt || user.createdAt,
-            updatedAt: user.updatedAt,
-          },
-        });
-        return;
-      }
-
-      // Check for agency agent subscription (set via coupon redemption)
-      // Agency agents have tier='agency_agent' regardless of expiresAt
+      // Check for agency agent subscription (tier set in database via coupon redemption or getMe sync)
       if (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active') {
-        // Get expiration from user subscription or agency subscription
-        let expiresAt = user.subscription.expiresAt;
+        const expiresAt = user.subscription.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 
-        // If no expiration set, try to get from agency
-        if (!expiresAt && user.agencyId) {
-          const Agency = (await import('../models/Agency')).default;
-          const agency = await Agency.findById(user.agencyId);
-          if (agency?.subscription?.expiresAt) {
-            expiresAt = agency.subscription.expiresAt;
-          }
-        }
-
-        // Default to 1 year from now if still no expiration
-        if (!expiresAt) {
-          expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-        }
-
-        // Return a synthetic subscription object for agency agents
         res.status(200).json({
           subscription: {
             _id: `agency_agent_${userId}`,
@@ -280,13 +238,12 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             renewalDate: expiresAt,
             expirationDate: expiresAt,
             status: 'active',
-            autoRenewing: false, // Agency agent subscriptions are managed by agency owner
-            price: 0, // Included with agency subscription
+            autoRenewing: false,
+            price: 0,
             currency: 'EUR',
             isAcknowledged: true,
             createdAt: user.agency?.joinedAt || user.createdAt,
             updatedAt: user.updatedAt,
-            // Additional agency agent info
             isAgencyAgent: true,
             agencyId: user.agencyId,
             agencyName: user.agencyName,
@@ -296,43 +253,30 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
         return;
       }
 
-      // Fallback: Check if user is in an agency even if subscription.tier isn't set correctly
-      // This handles cases where getMe sync hasn't run yet
-      if (user?.agencyId || user?.agency?.agencyId) {
-        const Agency = (await import('../models/Agency')).default;
-        const agencyId = user.agencyId || user.agency?.agencyId;
-        const agency = await Agency.findById(agencyId);
-
-        if (agency && agency.agents.some((id: any) => String(id) === String(userId))) {
-          const expiresAt = agency.subscription?.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-
-          res.status(200).json({
-            subscription: {
-              _id: `agency_agent_${userId}`,
-              userId: userId,
-              store: 'agency_coupon',
-              productId: 'agency_agent_yearly',
-              startDate: user.agency?.joinedAt || user.createdAt,
-              renewalDate: expiresAt,
-              expirationDate: expiresAt,
-              status: 'active',
-              autoRenewing: false,
-              price: 0,
-              currency: 'EUR',
-              isAcknowledged: true,
-              createdAt: user.agency?.joinedAt || user.createdAt,
-              updatedAt: user.updatedAt,
-              isAgencyAgent: true,
-              agencyId: agency._id,
-              agencyName: agency.name,
-              listingsLimit: 25,
-            },
-          });
-          return;
-        }
+      // Check for legacy proSubscription (database is source of truth)
+      if (user?.proSubscription?.isActive && user.proSubscription.expiresAt && new Date(user.proSubscription.expiresAt) > new Date()) {
+        res.status(200).json({
+          subscription: {
+            _id: `user_${userId}`,
+            userId: userId,
+            store: user.subscriptionSource || 'web',
+            productId: user.subscriptionPlan || user.proSubscription.plan || 'pro_monthly',
+            startDate: user.proSubscription.startedAt || user.subscriptionStartedAt,
+            renewalDate: user.proSubscription.expiresAt,
+            expirationDate: user.proSubscription.expiresAt,
+            status: 'active',
+            autoRenewing: false,
+            price: 0,
+            currency: 'EUR',
+            isAcknowledged: true,
+            createdAt: user.proSubscription.startedAt || user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+        });
+        return;
       }
 
-      // No active subscription found anywhere
+      // No active subscription in database
       res.status(200).json({ subscription: null });
       return;
     }
