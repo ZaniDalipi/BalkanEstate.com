@@ -109,44 +109,32 @@ const inject3DPerspectiveStyles = () => {
       z-index: -1;
     }
 
-    /* Smooth zoom - NO flickering, NO transitions */
-    .leaflet-container {
-      -webkit-tap-highlight-color: transparent;
-      touch-action: pan-x pan-y;
+    /* Mobile map tile optimizations */
+    @media (max-width: 768px) {
+      .leaflet-tile-container {
+        will-change: transform;
+      }
+      .leaflet-tile {
+        will-change: opacity;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      .leaflet-fade-anim .leaflet-tile {
+        transition: opacity 0.15s linear;
+      }
+      .leaflet-zoom-anim .leaflet-zoom-animated {
+        transition: transform 0.2s cubic-bezier(0,0,0.25,1);
+      }
+      .leaflet-container {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: pan-x pan-y;
+      }
+      .leaflet-marker-icon {
+        will-change: transform;
+      }
     }
 
-    /* CRITICAL: Remove ALL animations and transitions */
-    .leaflet-zoom-animated {
-      transition: none !important;
-    }
-
-    .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: none !important;
-    }
-
-    /* Keep tiles visible - NO fading or opacity changes */
-    .leaflet-fade-anim .leaflet-tile {
-      transition: none !important;
-      opacity: 1 !important;
-    }
-
-    .leaflet-tile-container {
-      transition: none !important;
-    }
-
-    .leaflet-tile {
-      transition: none !important;
-      opacity: 1 !important;
-    }
-
-    /* GPU acceleration for smooth performance */
-    .leaflet-tile-pane,
-    .leaflet-tile {
-      transform: translate3d(0, 0, 0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
+    /* Cleaner tile rendering */
     .map-tiles img {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
@@ -196,11 +184,23 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - DISABLED for smoother zoom experience
- * Keeping component structure for potential future use
+ * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
+ * Far away: whole zoom levels (zoomSnap=1)
+ * Very close (18+): fractional zoom (zoomSnap=0.5)
  */
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
-  // Component disabled - smooth zoom is now handled by MapContainer settings
+  const map = useMap();
+
+  useEffect(() => {
+    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
+    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
+
+    if (map.options.zoomSnap !== newZoomSnap) {
+      map.options.zoomSnap = newZoomSnap;
+      map.options.zoomDelta = newZoomDelta;
+    }
+  }, [currentZoom, map]);
+
   return null;
 };
 
@@ -423,13 +423,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={1}
-          zoomDelta={1}
-          wheelPxPerZoomLevel={80}
-          wheelDebounceTime={0}
-          zoomAnimation={false}
-          fadeAnimation={false}
-          markerZoomAnimation={false}
+          zoomSnap={0.25}
+          zoomDelta={0.25}
+          wheelPxPerZoomLevel={60}
+          wheelDebounceTime={40}
+          zoomAnimation={true}
+          fadeAnimation={true}
+          markerZoomAnimation={true}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
         >
@@ -458,10 +458,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={10}
-            updateWhenIdle={false}
-            updateWhenZooming={true}
-            updateInterval={100}
+            keepBuffer={isMobile ? 1 : 2}
+            updateWhenIdle={true}
+            updateWhenZooming={false}
+            updateInterval={isMobile ? 200 : 150}
             className="map-tiles"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
