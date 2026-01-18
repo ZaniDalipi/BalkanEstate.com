@@ -69,6 +69,12 @@ interface Plan {
   badge?: string;
   badgeColor?: string;
   highlighted?: boolean;
+  // Dynamic feature limits
+  savedSearchesLimit?: number | 'unlimited';
+  promotionCouponsMonthly?: number | 'shared';
+  aiMessagesLimit?: number | 'unlimited';
+  analyticsLevel?: 'basic' | 'advanced' | 'full';
+  supportType?: 'email' | 'priority' | 'agency';
 }
 
 // Default free plan (not in products DB)
@@ -79,16 +85,21 @@ const FREE_PLAN: Plan = {
   period: 'forever',
   periodMonths: 0,
   features: ['3 active listings', '3 saved searches', '3 AI messages', '3 generate insights', 'Basic property details'],
-  listingLimit: 3,  // Correct limit for free tier
+  listingLimit: 3,
   color: 'from-gray-400 to-gray-500',
   tier: 0,
+  savedSearchesLimit: 3,
+  promotionCouponsMonthly: 0,
+  aiMessagesLimit: 3,
+  analyticsLevel: 'basic',
+  supportType: 'email',
 };
 
 // Agency agent plan (obtained via coupon redemption, not purchasable)
 const AGENCY_AGENT_PLAN: Plan = {
   id: 'agency_agent_yearly',
   name: 'Agency Pro',
-  price: 0,  // Included with agency subscription
+  price: 0,
   period: 'year',
   periodMonths: 12,
   features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
@@ -97,6 +108,11 @@ const AGENCY_AGENT_PLAN: Plan = {
   tier: 2,
   badge: 'Agency Member',
   badgeColor: 'emerald',
+  savedSearchesLimit: 'unlimited',
+  promotionCouponsMonthly: 'shared',
+  aiMessagesLimit: 'unlimited',
+  analyticsLevel: 'full',
+  supportType: 'agency',
 };
 
 // Map billing period to months
@@ -264,6 +280,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   // Convert product to plan structure
   const productToPlan = useCallback((product: ProductData): Plan => {
+    const tier = PLAN_TIERS[product.productId] || 0;
+    const isPro = tier >= 1;
+    const isEnterprise = tier >= 3;
+
     return {
       id: product.productId,
       name: product.name,
@@ -273,10 +293,16 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       features: product.features,
       listingLimit: LISTING_LIMITS[product.productId] || 3,
       color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
-      tier: PLAN_TIERS[product.productId] || 0,
+      tier: tier,
       badge: product.badge,
       badgeColor: product.badgeColor,
       highlighted: product.highlighted,
+      // Dynamic feature limits based on tier
+      savedSearchesLimit: isEnterprise ? 'unlimited' : isPro ? 10 : 3,
+      promotionCouponsMonthly: isEnterprise ? 10 : isPro ? 3 : 0,
+      aiMessagesLimit: isEnterprise ? 'unlimited' : isPro ? 50 : 3,
+      analyticsLevel: isEnterprise ? 'full' : isPro ? 'advanced' : 'basic',
+      supportType: isEnterprise ? 'priority' : isPro ? 'priority' : 'email',
     };
   }, []);
 
@@ -1003,7 +1029,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Listings */}
+          {/* Listings - from plan */}
           <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
             <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <HomeIcon className="w-5 h-5 text-blue-600" />
@@ -1013,12 +1039,12 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 {subscriptionDetails.currentPlan.listingLimit} Active Listings
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlanKey.includes('yearly') || subscriptionDetails.currentPlanKey.includes('agency') ? 'Per year' : subscriptionDetails.currentPlanKey.includes('monthly') ? 'Per month' : 'Total available'}
+                {subscriptionDetails.currentPlan.period === 'year' ? 'Per year' : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
               </p>
             </div>
           </div>
 
-          {/* Saved Searches */}
+          {/* Saved Searches - from plan */}
           <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
             <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
               <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1027,11 +1053,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {subscriptionDetails.currentPlanKey === 'free'
-                  ? '1 Saved Search'
-                  : subscriptionDetails.currentPlanKey.includes('agency')
-                    ? 'Unlimited Saved Searches'
-                    : `${user.subscription?.savedSearchesLimit === -1 ? 'Unlimited' : (user.subscription?.savedSearchesLimit || 10)} Saved Searches`}
+                {subscriptionDetails.currentPlan.savedSearchesLimit === 'unlimited'
+                  ? 'Unlimited Saved Searches'
+                  : `${subscriptionDetails.currentPlan.savedSearchesLimit || user.subscription?.savedSearchesLimit || 3} Saved Searches`}
               </p>
               <p className="text-sm text-neutral-500">
                 {t('management.whatsIncluded.savedSearchesDesc')}
@@ -1039,67 +1063,69 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
 
-          {/* Promotion Coupons - Different for agency agents */}
-          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <GiftIconComponent className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-amber-600' : 'text-neutral-400'}`} />
+          {/* Promotion Coupons - from plan */}
+          <div className={`flex items-start gap-3 p-3 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <GiftIconComponent className={`w-5 h-5 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'text-amber-600' : 'text-neutral-400'}`} />
             </div>
             <div>
-              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlanKey.includes('agency_agent')
+              <p className={`font-semibold ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared'
                   ? 'Shared Agency Pool'
-                  : subscriptionDetails.currentPlan.tier >= 1
-                    ? `${user.subscription?.promotionCoupons?.monthly || 3} Promotion Coupons/Month`
+                  : subscriptionDetails.currentPlan.promotionCouponsMonthly && subscriptionDetails.currentPlan.promotionCouponsMonthly > 0
+                    ? `${subscriptionDetails.currentPlan.promotionCouponsMonthly} Promotion Coupons/Month`
                     : t('management.whatsIncluded.noPromotionCoupons')}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlanKey.includes('agency_agent')
+                {subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared'
                   ? 'Use promotion coupons from agency pool'
-                  : subscriptionDetails.currentPlan.tier >= 1
+                  : subscriptionDetails.currentPlan.promotionCouponsMonthly && subscriptionDetails.currentPlan.promotionCouponsMonthly > 0
                     ? t('management.whatsIncluded.promotionCouponsDesc')
                     : t('management.whatsIncluded.upgradeForPromotion')}
               </p>
             </div>
           </div>
 
-          {/* Analytics */}
-          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-green-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <ChartBarIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-green-600' : 'text-neutral-400'}`} />
+          {/* Analytics - from plan */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'bg-green-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <ChartBarIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'text-green-600' : 'text-neutral-400'}`} />
             </div>
             <div>
-              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.tier >= 1
-                  ? t('management.whatsIncluded.advancedAnalytics')
-                  : t('management.whatsIncluded.basicAnalytics')}
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.analyticsLevel === 'full'
+                  ? 'Full Analytics'
+                  : subscriptionDetails.currentPlan.analyticsLevel === 'advanced'
+                    ? t('management.whatsIncluded.advancedAnalytics')
+                    : t('management.whatsIncluded.basicAnalytics')}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.tier >= 1
+                {subscriptionDetails.currentPlan.analyticsLevel !== 'basic'
                   ? t('management.whatsIncluded.advancedAnalyticsDesc')
                   : t('management.whatsIncluded.basicAnalyticsDesc')}
               </p>
             </div>
           </div>
 
-          {/* Support - Different for agency agents */}
-          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Support - from plan */}
+          <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
+            <div className={`p-2 ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
             <div>
-              <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlanKey.includes('agency')
+              <p className={`font-semibold ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                {subscriptionDetails.currentPlan.supportType === 'agency'
                   ? 'Agency Team Support'
-                  : subscriptionDetails.currentPlan.tier >= 1
+                  : subscriptionDetails.currentPlan.supportType === 'priority'
                     ? t('management.whatsIncluded.prioritySupport')
                     : t('management.whatsIncluded.emailSupport')}
               </p>
               <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlanKey.includes('agency')
+                {subscriptionDetails.currentPlan.supportType === 'agency'
                   ? 'Get help from your agency admin'
-                  : subscriptionDetails.currentPlan.tier >= 1
+                  : subscriptionDetails.currentPlan.supportType === 'priority'
                     ? t('management.whatsIncluded.prioritySupportDesc')
                     : t('management.whatsIncluded.emailSupportDesc')}
               </p>
