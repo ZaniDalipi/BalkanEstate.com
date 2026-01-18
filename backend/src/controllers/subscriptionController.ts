@@ -250,8 +250,25 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
       }
 
       // Check for agency agent subscription (set via coupon redemption)
-      if (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active' &&
-          user.subscription.expiresAt && new Date(user.subscription.expiresAt) > new Date()) {
+      // Agency agents have tier='agency_agent' regardless of expiresAt
+      if (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active') {
+        // Get expiration from user subscription or agency subscription
+        let expiresAt = user.subscription.expiresAt;
+
+        // If no expiration set, try to get from agency
+        if (!expiresAt && user.agencyId) {
+          const Agency = (await import('../models/Agency')).default;
+          const agency = await Agency.findById(user.agencyId);
+          if (agency?.subscription?.expiresAt) {
+            expiresAt = agency.subscription.expiresAt;
+          }
+        }
+
+        // Default to 1 year from now if still no expiration
+        if (!expiresAt) {
+          expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        }
+
         // Return a synthetic subscription object for agency agents
         res.status(200).json({
           subscription: {
@@ -260,8 +277,8 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             store: 'agency_coupon',
             productId: 'agency_agent_yearly',
             startDate: user.agency?.joinedAt || user.createdAt,
-            renewalDate: user.subscription.expiresAt,
-            expirationDate: user.subscription.expiresAt,
+            renewalDate: expiresAt,
+            expirationDate: expiresAt,
             status: 'active',
             autoRenewing: false, // Agency agent subscriptions are managed by agency owner
             price: 0, // Included with agency subscription
@@ -273,10 +290,46 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
             isAgencyAgent: true,
             agencyId: user.agencyId,
             agencyName: user.agencyName,
-            listingsLimit: user.subscription.listingsLimit,
+            listingsLimit: user.subscription.listingsLimit || 25,
           },
         });
         return;
+      }
+
+      // Fallback: Check if user is in an agency even if subscription.tier isn't set correctly
+      // This handles cases where getMe sync hasn't run yet
+      if (user?.agencyId || user?.agency?.agencyId) {
+        const Agency = (await import('../models/Agency')).default;
+        const agencyId = user.agencyId || user.agency?.agencyId;
+        const agency = await Agency.findById(agencyId);
+
+        if (agency && agency.agents.some((id: any) => String(id) === String(userId))) {
+          const expiresAt = agency.subscription?.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+          res.status(200).json({
+            subscription: {
+              _id: `agency_agent_${userId}`,
+              userId: userId,
+              store: 'agency_coupon',
+              productId: 'agency_agent_yearly',
+              startDate: user.agency?.joinedAt || user.createdAt,
+              renewalDate: expiresAt,
+              expirationDate: expiresAt,
+              status: 'active',
+              autoRenewing: false,
+              price: 0,
+              currency: 'EUR',
+              isAcknowledged: true,
+              createdAt: user.agency?.joinedAt || user.createdAt,
+              updatedAt: user.updatedAt,
+              isAgencyAgent: true,
+              agencyId: agency._id,
+              agencyName: agency.name,
+              listingsLimit: 25,
+            },
+          });
+          return;
+        }
       }
 
       // No active subscription found anywhere
