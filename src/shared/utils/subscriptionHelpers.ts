@@ -353,17 +353,30 @@ export function canBecomeAgent(subscription: UserSubscription | undefined): {
 
 /**
  * Check if user can create an agency
+ * Uses multiple indicators to determine agent status (matching backend logic)
  */
 export function canCreateAgency(
   subscription: UserSubscription | undefined,
-  availableRoles: UserRole[] | undefined
+  availableRoles: UserRole[] | undefined,
+  userFields?: {
+    role?: UserRole | string;
+    agentId?: string;
+    licenseNumber?: string;
+  }
 ): { allowed: boolean; reason?: string } {
   if (!subscription) {
     return { allowed: false, reason: 'No subscription found' };
   }
 
-  // Must be an active agent first
-  const isAgent = availableRoles?.includes(UserRole.AGENT);
+  // Must be an active agent first - check multiple indicators (matches backend logic)
+  // Database is the single source of truth, check all possible agent indicators
+  const isAgent =
+    availableRoles?.includes(UserRole.AGENT) ||
+    userFields?.role === UserRole.AGENT ||
+    userFields?.role === 'agent' ||
+    !!userFields?.agentId ||
+    !!userFields?.licenseNumber;
+
   if (!isAgent) {
     return {
       allowed: false,

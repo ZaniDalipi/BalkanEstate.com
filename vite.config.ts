@@ -97,8 +97,6 @@ export default defineConfig(({ mode }) => {
             manualChunks: {
               // Core React - smallest chunk, always needed
               vendor: ['react', 'react-dom'],
-              // Router - frequently used
-              router: ['react-router-dom'],
               // Map functionality - only loaded when map is visible
               leaflet: ['leaflet', 'react-leaflet'],
               // Internationalization

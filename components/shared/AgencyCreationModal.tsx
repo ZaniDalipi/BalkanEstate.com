@@ -30,10 +30,24 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const [availableCities, setAvailableCities] = useState<string[]>([]);
 
   // Check if user can create an agency (must be an agent with active Pro subscription)
+  // Pass additional user fields for comprehensive agent status check (DB is source of truth)
   const agencyEligibility = canCreateAgency(
     state.currentUser?.subscription,
-    state.currentUser?.availableRoles
+    state.currentUser?.availableRoles,
+    {
+      role: state.currentUser?.role,
+      agentId: state.currentUser?.agentId,
+      licenseNumber: state.currentUser?.licenseNumber,
+    }
   );
+
+  // Check if user is an agent using multiple indicators (matches backend logic)
+  const isUserAgent =
+    state.currentUser?.availableRoles?.includes(UserRole.AGENT) ||
+    state.currentUser?.role === UserRole.AGENT ||
+    state.currentUser?.role === 'agent' ||
+    !!state.currentUser?.agentId ||
+    !!state.currentUser?.licenseNumber;
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -241,7 +255,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 <p className="text-sm text-amber-700 mb-3">
                   {agencyEligibility.reason}
                 </p>
-                {!state.currentUser?.availableRoles?.includes(UserRole.AGENT) ? (
+                {!isUserAgent ? (
                   <button
                     type="button"
                     onClick={() => {
