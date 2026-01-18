@@ -42,8 +42,12 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   const [agentCouponCode, setAgentCouponCode] = useState('');
   const [couponRedemptionSuccess, setCouponRedemptionSuccess] = useState<{
     agencyName: string;
+    agencyId: string;
     subscription: { tier: string; expiresAt: string; listingsLimit: number };
   } | null>(null);
+
+  // Track newly joined agency for immediate UI update
+  const [newlyJoinedAgency, setNewlyJoinedAgency] = useState<{ name: string; id: string } | null>(null);
 
   // Check if user is an agent
   const isUserAgent = (): boolean => {
@@ -261,8 +265,11 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         return;
       }
 
-      // Success! Update context
+      // Success! Update context and local state immediately
       if (data.subscription && data.agency) {
+        console.log('✅ Coupon redeemed successfully! Joining agency:', data.agency.name);
+
+        // Update app context
         dispatch({
           type: 'UPDATE_USER',
           payload: {
@@ -283,8 +290,15 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
           },
         });
 
+        // Set local state for immediate UI update
+        setNewlyJoinedAgency({
+          name: data.agency.name,
+          id: data.agency.id,
+        });
+
         setCouponRedemptionSuccess({
           agencyName: data.agency.name,
+          agencyId: data.agency.id,
           subscription: data.subscription,
         });
 
@@ -293,6 +307,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
           `You've joined ${data.agency.name} with a Pro subscription!`
         );
 
+        // Refresh user data from server
         onAgencyChange();
       }
     } catch (err: any) {
@@ -345,11 +360,13 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     }
   };
 
-  const currentAgencyInfo = currentUser.agencyName && currentUser.agencyName !== 'Independent Agent'
-    ? currentUser.agencyName
-    : 'Independent Agent';
+  // Use newly joined agency for immediate display, fallback to props
+  const currentAgencyInfo = newlyJoinedAgency?.name
+    || (currentUser.agencyName && currentUser.agencyName !== 'Independent Agent'
+      ? currentUser.agencyName
+      : 'Independent Agent');
 
-  const isIndependent = !currentUser.agencyName || currentUser.agencyName === 'Independent Agent';
+  const isIndependent = !newlyJoinedAgency && (!currentUser.agencyName || currentUser.agencyName === 'Independent Agent');
 
   return (
     <div className="space-y-4">
@@ -426,18 +443,34 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
             <div className="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
               <div className="flex items-start gap-3">
                 <CheckCircleIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
-                <div>
+                <div className="flex-1">
                   <h5 className="font-semibold text-green-800">Welcome to {couponRedemptionSuccess.agencyName}!</h5>
                   <p className="text-sm text-green-700 mt-1">
                     You now have a Pro subscription with {couponRedemptionSuccess.subscription.listingsLimit} listings,
                     valid until {new Date(couponRedemptionSuccess.subscription.expiresAt).toLocaleDateString()}.
                   </p>
-                  <button
-                    onClick={handleCancel}
-                    className="mt-3 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700"
-                  >
-                    Done
-                  </button>
+                  <div className="mt-4 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Navigate to the agency page
+                        dispatch({ type: 'SET_SELECTED_AGENCY', payload: couponRedemptionSuccess.agencyId });
+                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+                        window.history.pushState({}, '', `/agencies/${couponRedemptionSuccess.agencyId}`);
+                        handleCancel();
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      View Agency
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="px-4 py-2 border border-green-600 text-green-700 text-sm font-semibold rounded-lg hover:bg-green-50 transition-colors"
+                    >
+                      Done
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
