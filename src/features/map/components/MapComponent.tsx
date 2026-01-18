@@ -458,10 +458,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={3}
-            updateWhenIdle={true}
-            updateWhenZooming={false}
-            updateInterval={200}
+            keepBuffer={10}
+            updateWhenIdle={false}
+            updateWhenZooming={true}
+            updateInterval={100}
             className="map-tiles"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
