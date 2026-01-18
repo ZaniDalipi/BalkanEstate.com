@@ -16,16 +16,29 @@ const cache = new Map<string, CacheEntry>();
 
 // Cache configuration by route pattern
 const cacheConfig: Record<string, number> = {
-  // Public data that changes infrequently (5 minutes)
-  '/api/cities': 5 * 60 * 1000,
-  '/api/agencies': 2 * 60 * 1000,
-  '/api/agents': 2 * 60 * 1000,
+  // Public data that changes infrequently (15 minutes)
+  '/api/cities': 15 * 60 * 1000,
+  '/api/agencies': 10 * 60 * 1000,
+  '/api/agents': 10 * 60 * 1000,
 
-  // Property listings (1 minute - more dynamic)
-  '/api/properties': 1 * 60 * 1000,
+  // Property listings (5 minutes - balance freshness with performance)
+  '/api/properties': 5 * 60 * 1000,
 
-  // Static data (30 minutes)
+  // Static/semi-static data (30 minutes)
   '/api/products': 30 * 60 * 1000,
+  '/api/promotions/tiers': 30 * 60 * 1000,
+  '/api/coupons/public': 10 * 60 * 1000,
+
+  // Neighborhood and location data (20 minutes)
+  '/api/neighborhood-insights': 20 * 60 * 1000,
+  '/api/geocoding': 20 * 60 * 1000,
+
+  // Market data (1 hour - updated biweekly)
+  '/api/city-market-data': 60 * 60 * 1000,
+  '/api/sales-history': 30 * 60 * 1000,
+
+  // Content pages (15 minutes)
+  '/api/site-content': 15 * 60 * 1000,
 };
 
 // Max cache size to prevent memory issues
@@ -33,11 +46,24 @@ const MAX_CACHE_SIZE = 1000;
 
 /**
  * Generate a cache key from request
+ * Includes auth status to separate caches for authenticated vs non-authenticated users
  */
 const generateCacheKey = (req: Request): string => {
   const baseUrl = req.baseUrl + req.path;
-  const queryString = JSON.stringify(req.query);
-  return `${req.method}:${baseUrl}:${queryString}`;
+
+  // Sort and stringify query params for consistent keys
+  const sortedQuery = Object.keys(req.query)
+    .sort()
+    .reduce((acc: any, key) => {
+      acc[key] = req.query[key];
+      return acc;
+    }, {});
+  const queryString = JSON.stringify(sortedQuery);
+
+  // Include auth status in cache key for routes that might differ
+  const authStatus = req.headers.authorization ? 'auth' : 'public';
+
+  return `${req.method}:${authStatus}:${baseUrl}:${queryString}`;
 };
 
 /**
@@ -97,9 +123,31 @@ const cleanCache = (): void => {
 // Run cache cleanup every minute
 setInterval(cleanCache, 60 * 1000);
 
+// Routes that should NOT be cached even if they match patterns (personalized data)
+const cacheBlacklist = [
+  '/api/favorites',
+  '/api/saved-agents',
+  '/api/saved-searches',
+  '/api/conversations',
+  '/api/notifications',
+  '/api/promotions',
+  '/api/subscriptions',
+  '/api/payments',
+  '/api/auth/me',
+  '/api/analytics',
+];
+
+/**
+ * Check if a route should be excluded from caching
+ */
+const isBlacklisted = (path: string): boolean => {
+  return cacheBlacklist.some(pattern => path.includes(pattern));
+};
+
 /**
  * Cache middleware for GET requests
  * Only caches successful responses
+ * Now smarter about authenticated requests - caches public-like data even when authenticated
  */
 export const apiCache = (req: Request, res: Response, next: NextFunction): void => {
   // Only cache GET requests
@@ -117,11 +165,15 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
     return;
   }
 
-  // Skip caching for authenticated requests (personalized data)
-  if (req.headers.authorization) {
+  // Skip if route contains personalized data
+  if (isBlacklisted(path)) {
     next();
     return;
   }
+
+  // For authenticated requests, we can still cache public-like data
+  // (e.g., property listings, agencies, market data)
+  // Just include auth status in cache key to separate caches if needed
 
   const cacheKey = generateCacheKey(req);
   const cached = cache.get(cacheKey);
@@ -138,11 +190,15 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
         return;
       }
 
-      // Return cached response
+      // Return cached response with stale-while-revalidate
+      const maxAge = Math.floor((ttl - age) / 1000);
+      const staleWhileRevalidate = Math.floor(ttl / 1000); // Allow serving stale for same duration
+
       res.setHeader('X-Cache', 'HIT');
       res.setHeader('X-Cache-Age', Math.floor(age / 1000).toString());
       res.setHeader('ETag', cached.etag);
-      res.setHeader('Cache-Control', `public, max-age=${Math.floor((ttl - age) / 1000)}`);
+      res.setHeader('Cache-Control', `public, max-age=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`);
+      res.setHeader('Vary', 'Authorization'); // Cache varies by auth status
       res.json(cached.data);
       return;
     }
@@ -166,9 +222,13 @@ export const apiCache = (req: Request, res: Response, next: NextFunction): void 
         etag,
       });
 
+      const maxAge = Math.floor(ttl / 1000);
+      const staleWhileRevalidate = maxAge; // Allow serving stale for same duration
+
       res.setHeader('X-Cache', 'MISS');
       res.setHeader('ETag', etag);
-      res.setHeader('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
+      res.setHeader('Cache-Control', `public, max-age=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`);
+      res.setHeader('Vary', 'Authorization'); // Cache varies by auth status
     }
 
     return originalJson(data);

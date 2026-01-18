@@ -90,9 +90,15 @@ export default defineConfig(({ mode }) => {
         minify: isProduction ? 'esbuild' : false,
         rollupOptions: {
           output: {
+            // Use content-based hash for cache busting
+            entryFileNames: `assets/[name].[hash].js`,
+            chunkFileNames: `assets/[name].[hash].js`,
+            assetFileNames: `assets/[name].[hash].[ext]`,
             manualChunks: {
               // Core React - smallest chunk, always needed
               vendor: ['react', 'react-dom'],
+              // Router - frequently used
+              router: ['react-router-dom'],
               // Map functionality - only loaded when map is visible
               leaflet: ['leaflet', 'react-leaflet'],
               // Internationalization
@@ -110,8 +116,12 @@ export default defineConfig(({ mode }) => {
         },
         // Improve chunk loading
         chunkSizeWarningLimit: 500,
+        // Optimize CSS code splitting
+        cssCodeSplit: true,
         // Security: Clear console logs in production build
         target: 'es2020',
+        // Ensure hashes change only when content changes
+        assetsInlineLimit: 4096, // Inline assets smaller than 4kb
       },
       esbuild: {
         // Drop console.log and debugger in production
