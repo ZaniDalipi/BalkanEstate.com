@@ -130,6 +130,12 @@ const PricingPage: React.FC = () => {
     );
   };
 
+  // Check if user already has an agency
+  const userHasAgency = (): boolean => {
+    const user = state.currentUser;
+    return !!(user?.agencyId);
+  };
+
   // Check if user already has Enterprise subscription
   const hasEnterpriseSubscription = (): boolean => {
     const user = state.currentUser;
@@ -167,64 +173,67 @@ const PricingPage: React.FC = () => {
       return;
     }
 
-    // For Enterprise plan, check if user is a registered agent first
+    // For Enterprise plan, perform all checks
     const isEnterprisePlan = product.productId.includes('enterprise');
 
-    if (isEnterprisePlan && !isUserAgent()) {
-      // User is not an agent - block Enterprise plan selection
-      dispatch({
-        type: 'SHOW_ALERT',
-        payload: {
-          type: 'warning',
-          title: t('pricing:enterprise.agentRequired', 'Agent Status Required'),
-          message: t(
-            'pricing:enterprise.agentRequiredMessage',
-            'Only registered agents can create an agency. Please switch to Agent account type in your profile first.'
-          ),
-        },
-      });
+    if (isEnterprisePlan) {
+      // Check 1: Must be an agent first
+      if (!isUserAgent()) {
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'warning',
+            title: t('pricing:enterprise.agentRequired', 'Agent Status Required'),
+            message: t(
+              'pricing:enterprise.agentRequiredMessage',
+              'Only registered agents can create an agency. Please switch to Agent account type in your profile first.'
+            ),
+          },
+        });
+        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+        window.history.pushState({}, '', buildLocalizedPath('/account'));
+        return;
+      }
 
-      // Navigate to profile page to become an agent
-      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      window.history.pushState({}, '', buildLocalizedPath('/account'));
-      return;
-    }
-
-    // If user already has Enterprise subscription, skip payment and go directly to agency creation
-    if (isEnterprisePlan && hasEnterpriseSubscription()) {
-      if (!state.pendingAgencyData) {
-        dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
-      } else {
-        // Agency data already pending, show info
+      // Check 2: Cannot create agency if already have one
+      if (userHasAgency()) {
         dispatch({
           type: 'SHOW_ALERT',
           payload: {
             type: 'info',
-            title: t('pricing:enterprise.alreadySubscribed', 'Already Subscribed'),
+            title: t('pricing:enterprise.alreadyHaveAgency', 'You Already Have an Agency'),
             message: t(
-              'pricing:enterprise.createAgencyNow',
-              'You already have an Enterprise subscription! Create your agency now.'
+              'pricing:enterprise.viewYourAgency',
+              'You already have an agency. Visit your account to manage it.'
             ),
           },
         });
-        dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
+        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'agency' });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+        window.history.pushState({}, '', buildLocalizedPath('/account/agency'));
+        return;
       }
+
+      // Check 3: If already has Enterprise subscription, skip payment
+      if (hasEnterpriseSubscription()) {
+        dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
+        return;
+      }
+
+      // No Enterprise subscription yet - open modal to fill agency details, then go to payment
+      dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
       return;
     }
 
+    // For non-Enterprise plans (Pro Monthly, Pro Yearly, Buyer), proceed to payment directly
     setSelectedPlan({
       name: product.name,
       price: product.price,
       interval: product.billingPeriod === 'yearly' ? 'year' : 'month',
       productId: product.productId,
     });
-
-    if (isEnterprisePlan && !state.pendingAgencyData) {
-      dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
-    } else {
-      setShowPaymentWindow(true);
-    }
+    setShowPaymentWindow(true);
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {

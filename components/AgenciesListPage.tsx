@@ -60,20 +60,6 @@ const AgenciesListPage: React.FC = () => {
     !!currentUser?.agentId ||
     !!currentUser?.licenseNumber;
 
-  // Check if user already has Enterprise subscription (no payment needed)
-  const hasEnterpriseSubscription =
-    currentUser?.subscription?.tier === 'agency_owner' ||
-    currentUser?.subscriptionPlan?.toLowerCase().includes('enterprise') ||
-    currentUser?.subscriptionPlan?.toLowerCase().includes('agency') ||
-    currentUser?.isEnterpriseTier;
-
-  const hasActiveSubscription =
-    currentUser?.subscriptionStatus === 'active' ||
-    currentUser?.subscriptionStatus === 'trial' ||
-    currentUser?.subscriptionStatus === 'grace';
-
-  const canSkipPayment = hasEnterpriseSubscription && hasActiveSubscription;
-
   // Calculate total stats from agencies data
   const totalStats = useMemo(() => {
     const totalAgents = agencies.reduce((sum, agency) => sum + (agency.totalAgents || 0), 0);
