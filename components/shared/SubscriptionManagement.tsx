@@ -1219,27 +1219,31 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     .map((coupon, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2"
+                        className="bg-green-50 border border-green-200 rounded-lg px-2 sm:px-3 py-2"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                          <code className="text-sm font-mono text-green-800">{coupon.code}</code>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-green-600">
-                            Expires: {new Date(coupon.expiresAt).toLocaleDateString()}
-                          </span>
-                          <button
-                            onClick={() => handleCopyCode(coupon.code)}
-                            className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors"
-                            title="Copy coupon"
-                          >
-                            {copiedCode === coupon.code ? (
-                              <CheckCircleIcon className="w-4 h-4" />
-                            ) : (
-                              <CopyIcon className="w-4 h-4" />
-                            )}
-                          </button>
+                        {/* Mobile: stacked layout, Desktop: side by side */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+                            <code className="text-xs sm:text-sm font-mono text-green-800 truncate">{coupon.code}</code>
+                          </div>
+                          <div className="flex items-center justify-between sm:justify-end gap-2 pl-4 sm:pl-0">
+                            <span className="text-xs text-green-600 whitespace-nowrap">
+                              <span className="hidden sm:inline">Expires: </span>
+                              {new Date(coupon.expiresAt).toLocaleDateString()}
+                            </span>
+                            <button
+                              onClick={() => handleCopyCode(coupon.code)}
+                              className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors flex-shrink-0"
+                              title="Copy coupon"
+                            >
+                              {copiedCode === coupon.code ? (
+                                <CheckCircleIcon className="w-4 h-4" />
+                              ) : (
+                                <CopyIcon className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1263,25 +1267,26 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                       .map((coupon, idx) => (
                         <div
                           key={idx}
-                          className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+                          className="bg-amber-50 border border-amber-200 rounded-lg px-2 sm:px-3 py-2"
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
-                              <code className="text-sm font-mono text-amber-800">{coupon.code}</code>
-                              <span className="px-1.5 py-0.5 text-xs font-semibold bg-amber-200 text-amber-800 rounded">
+                          {/* Mobile: stacked layout, Desktop: side by side */}
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-wrap">
+                              <span className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0"></span>
+                              <code className="text-xs sm:text-sm font-mono text-amber-800">{coupon.code}</code>
+                              <span className="px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold bg-amber-200 text-amber-800 rounded">
                                 USED
                               </span>
                             </div>
-                            <span className="text-xs text-amber-700">
+                            <span className="text-xs text-amber-700 pl-3.5 sm:pl-0">
                               {coupon.usedAt ? new Date(coupon.usedAt).toLocaleDateString() : 'Redeemed'}
                             </span>
                           </div>
                           {coupon.usedBy && (
-                            <div className="mt-1.5 pl-4 flex items-center gap-2 text-xs text-amber-700">
-                              <span className="font-medium">{coupon.usedBy.name}</span>
-                              <span className="text-amber-500">•</span>
-                              <span>{coupon.usedBy.email}</span>
+                            <div className="mt-1.5 pl-3.5 sm:pl-4 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-xs text-amber-700">
+                              <span className="font-medium truncate">{coupon.usedBy.name}</span>
+                              <span className="hidden sm:inline text-amber-500">•</span>
+                              <span className="truncate text-amber-600 sm:text-amber-700">{coupon.usedBy.email}</span>
                             </div>
                           )}
                         </div>

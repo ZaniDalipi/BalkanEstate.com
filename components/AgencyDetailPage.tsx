@@ -294,17 +294,92 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleSubmitInvitationCode = async (code: string) => {
     try {
-      // Verify the invitation code
-      const verification = await verifyInvitationCode(agency._id, code);
+      const trimmedCode = code.trim().toUpperCase();
 
-      if (!verification.valid) {
-        throw new Error(verification.message || 'Invalid invitation code');
+      // Check if this is an agent coupon (IND-XXXXXXXX format) or invitation code (AGY-XXXXXX-XXXXXX format)
+      const isAgentCoupon = trimmedCode.startsWith('IND-') ||
+                           (trimmedCode.length >= 8 && !trimmedCode.startsWith('AGY-'));
+
+      if (isAgentCoupon) {
+        // Redeem agent coupon for Pro subscription
+        const token = localStorage.getItem('balkan_estate_token');
+        const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ couponCode: trimmedCode }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          // Handle specific error codes
+          switch (data.code) {
+            case 'INVALID_COUPON':
+              throw new Error('Invalid coupon code. Please check and try again.');
+            case 'COUPON_ALREADY_USED':
+              throw new Error('This coupon has already been used.');
+            case 'COUPON_EXPIRED':
+              throw new Error('This coupon has expired.');
+            case 'AGENCY_SUBSCRIPTION_INACTIVE':
+              throw new Error('The agency subscription is no longer active.');
+            default:
+              throw new Error(data.message || 'Failed to redeem coupon.');
+          }
+        }
+
+        // Update user context with new subscription data
+        if (data.subscription && data.agency) {
+          dispatch({
+            type: 'UPDATE_USER',
+            payload: {
+              subscription: {
+                ...state.currentUser?.subscription,
+                tier: data.subscription.tier,
+                status: data.subscription.status,
+                listingsLimit: data.subscription.listingsLimit,
+                expiresAt: data.subscription.expiresAt,
+              },
+              agencyId: data.agency.id,
+              agencyName: data.agency.name,
+              agency: {
+                agencyId: data.agency.id,
+                role: data.agency.role,
+                joinedAt: new Date().toISOString(),
+              },
+            },
+          });
+
+          // Refresh user data from server to ensure full sync
+          const meResponse = await fetch(`${API_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (meResponse.ok) {
+            const userData = await meResponse.json();
+            dispatch({ type: 'UPDATE_USER', payload: userData.user });
+          }
+        }
+
+        setIsInvitationCodeModalOpen(false);
+        await success('Coupon Redeemed!', `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
+
+        // Refresh the page to show updated data
+        window.location.reload();
+      } else {
+        // Handle invitation code (AGY-XXXXXX-XXXXXX format)
+        const verification = await verifyInvitationCode(agency._id, trimmedCode);
+
+        if (!verification.valid) {
+          throw new Error(verification.message || 'Invalid invitation code');
+        }
+
+        // If code is valid, send join request with the code
+        await createJoinRequest(agency._id, `Joining with invitation code: ${trimmedCode}`);
+        setIsInvitationCodeModalOpen(false);
+        await success(t('messages.requestSent', 'Request Sent'), 'Join request sent successfully! The agency admin will review your request.');
       }
-
-      // If code is valid, send join request with the code
-      await createJoinRequest(agency._id, `Joining with invitation code: ${code}`);
-      setIsInvitationCodeModalOpen(false);
-      await success(t('messages.requestSent', 'Request Sent'), 'Join request sent successfully! The agency admin will review your request.');
     } catch (error) {
       throw error; // Let the modal handle the error display
     }
