@@ -300,7 +300,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         avatarUrl: user.avatarUrl,
         city: user.city,
         country: user.country,
+        agencyId: user.agencyId ? String(user.agencyId) : undefined,
         agencyName: user.agencyName,
+        agency: user.agency,
         agentId: user.agentId,
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
@@ -494,11 +496,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         avatarUrl: user.avatarUrl,
         city: user.city,
         country: user.country,
+        agencyId: user.agencyId ? String(user.agencyId) : undefined,
         agencyName: user.agencyName,
+        agency: user.agency,
         agentId: user.agentId,
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
         isEmailVerified: user.isEmailVerified,
+        subscription: user.subscription,
         trialActive: user.role === 'agent' ? user.isTrialActive() : false,
         trialEndDate: user.role === 'agent' ? user.trialEndDate : undefined,
         trialExpiring: user.role === 'agent' ? user.isTrialExpiring() : false,
@@ -529,6 +534,49 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
+    }
+
+    // **AUTO-SYNC AGENCY DATA**: If user has agency.agencyId but missing top-level agencyId/agencyName
+    // This fixes users who joined via coupon before the sync fix was implemented
+    const Agency = (await import('../models/Agency')).default;
+    if (user.agency?.agencyId && !user.agencyId) {
+      const agency = await Agency.findById(user.agency.agencyId);
+      if (agency) {
+        user.agencyId = agency._id as any;
+        user.agencyName = agency.name;
+        console.log(`🔄 Auto-synced agency data for user ${user.email}: ${agency.name}`);
+      }
+    }
+
+    // Also check if user is in an agency's agents array but missing agency reference
+    if (!user.agencyId && !user.agency?.agencyId) {
+      const memberAgency = await Agency.findOne({ agents: user._id });
+      if (memberAgency) {
+        user.agencyId = memberAgency._id as any;
+        user.agencyName = memberAgency.name;
+        if (!user.agency) {
+          user.agency = { role: 'agent' };
+        }
+        user.agency.agencyId = memberAgency._id as any;
+        user.agency.role = 'agent';
+
+        // Also sync subscription if they're an agency agent without proper subscription
+        if (!user.subscription || user.subscription.tier === 'free') {
+          user.subscription = {
+            tier: 'agency_agent',
+            status: 'active',
+            listingsLimit: 25,
+            activeListingsCount: 0,
+            privateSellerCount: 0,
+            agentCount: 0,
+            promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
+            savedSearchesLimit: -1,
+            totalPaid: 0,
+            expiresAt: memberAgency.subscription?.expiresAt,
+          };
+        }
+        console.log(`🔄 Auto-synced agency membership for user ${user.email}: ${memberAgency.name}`);
+      }
     }
 
     // **AUTO-MIGRATION & SYNC**: Initialize or sync subscription object
@@ -711,7 +759,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         avatarUrl: user.avatarUrl,
         city: user.city,
         country: user.country,
+        agencyId: user.agencyId ? String(user.agencyId) : undefined,
         agencyName: user.agencyName,
+        agency: user.agency,
         agentId: user.agentId,
         licenseNumber: user.licenseNumber,
         isSubscribed: user.isSubscribed,
@@ -719,7 +769,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         subscriptionExpiresAt: user.subscriptionExpiresAt,
         proSubscription: user.proSubscription,
         freeSubscription: user.freeSubscription,
-        subscription: user.subscription, // NEW: Return subscription object
+        subscription: user.subscription,
       },
     });
   } catch (error: any) {
