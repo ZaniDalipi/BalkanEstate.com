@@ -170,7 +170,7 @@ interface AgentCouponData {
   status: 'available' | 'used' | 'expired';
   generatedAt: string;
   expiresAt: string;
-  usedBy?: string;
+  usedBy?: { name: string; email: string } | null;
   usedAt?: string;
 }
 
@@ -1253,12 +1253,40 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 </div>
               )}
 
-              {/* Used coupons summary */}
-              {agencyTeamData.agentCoupons.used > 0 && (
-                <div className="mt-3 pt-3 border-t border-neutral-100">
-                  <p className="text-xs text-neutral-500">
-                    {agencyTeamData.agentCoupons.used} coupon{agencyTeamData.agentCoupons.used !== 1 ? 's' : ''} redeemed by agents
-                  </p>
+              {/* Used coupons list */}
+              {agencyTeamData.agentCoupons.coupons.filter(c => c.status === 'used').length > 0 && (
+                <div className="mt-4 pt-4 border-t border-neutral-100">
+                  <p className="text-sm font-medium text-neutral-700 mb-2">Redeemed Coupons</p>
+                  <div className="space-y-2">
+                    {agencyTeamData.agentCoupons.coupons
+                      .filter(c => c.status === 'used')
+                      .map((coupon, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                              <code className="text-sm font-mono text-amber-800">{coupon.code}</code>
+                              <span className="px-1.5 py-0.5 text-xs font-semibold bg-amber-200 text-amber-800 rounded">
+                                USED
+                              </span>
+                            </div>
+                            <span className="text-xs text-amber-700">
+                              {coupon.usedAt ? new Date(coupon.usedAt).toLocaleDateString() : 'Redeemed'}
+                            </span>
+                          </div>
+                          {coupon.usedBy && (
+                            <div className="mt-1.5 pl-4 flex items-center gap-2 text-xs text-amber-700">
+                              <span className="font-medium">{coupon.usedBy.name}</span>
+                              <span className="text-amber-500">•</span>
+                              <span>{coupon.usedBy.email}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
                 </div>
               )}
             </div>

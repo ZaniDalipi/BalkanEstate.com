@@ -1793,15 +1793,32 @@ export const getAgencyCoupons = async (
     agency.refreshPromotionCoupons();
     await agency.save();
 
-    // Get agent coupons (only show to owner)
-    const agentCoupons = isOwner ? agency.agentCoupons.map(c => ({
-      code: c.code,
-      status: c.status,
-      generatedAt: c.generatedAt,
-      expiresAt: c.expiresAt,
-      usedBy: c.usedBy,
-      usedAt: c.usedAt,
-    })) : null;
+    // Get agent coupons (only show to owner) with user details for used coupons
+    let agentCoupons = null;
+    if (isOwner) {
+      // Get user IDs from used coupons
+      const usedByIds = agency.agentCoupons
+        .filter(c => c.status === 'used' && c.usedBy)
+        .map(c => c.usedBy);
+
+      // Fetch user details for those who used coupons
+      const usersMap = new Map();
+      if (usedByIds.length > 0) {
+        const users = await User.find({ _id: { $in: usedByIds } }).select('name email');
+        users.forEach(user => {
+          usersMap.set(String(user._id), { name: user.name, email: user.email });
+        });
+      }
+
+      agentCoupons = agency.agentCoupons.map(c => ({
+        code: c.code,
+        status: c.status,
+        generatedAt: c.generatedAt,
+        expiresAt: c.expiresAt,
+        usedBy: c.usedBy ? usersMap.get(String(c.usedBy)) : null,
+        usedAt: c.usedAt,
+      }));
+    }
 
     res.status(200).json({
       subscription: {

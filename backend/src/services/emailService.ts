@@ -2562,41 +2562,41 @@ Questions? Contact us at support@balkanestateai.com
       </p>
 
       <!-- New Member Details -->
-      <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #334155;">
-        <h2 style="color: #ffffff; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🆕 New Team Member</h2>
+      <div style="background: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #e5e7eb;">
+        <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🆕 New Team Member</h2>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #334155;">
-              <span style="color: #94a3b8; font-size: 14px;">Name</span>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+              <span style="color: #6b7280; font-size: 14px;">Name</span>
             </td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #334155; text-align: right;">
-              <span style="color: #ffffff; font-size: 14px; font-weight: 600;">${safeNewAgentName}</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #334155;">
-              <span style="color: #94a3b8; font-size: 14px;">Email</span>
-            </td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #334155; text-align: right;">
-              <span style="color: #10b981; font-size: 14px; font-weight: 600;">${safeNewAgentEmail}</span>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+              <span style="color: #1f2937; font-size: 14px; font-weight: 600;">${safeNewAgentName}</span>
             </td>
           </tr>
           <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #334155;">
-              <span style="color: #94a3b8; font-size: 14px;">Code Used</span>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+              <span style="color: #6b7280; font-size: 14px;">Email</span>
             </td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #334155; text-align: right;">
-              <span style="display: inline-block; background: #334155; padding: 4px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-weight: 600; font-size: 13px; color: #f59e0b; letter-spacing: 1px;">
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+              <a href="mailto:${safeNewAgentEmail}" style="color: #0891b2; font-size: 14px; font-weight: 600; text-decoration: none;">${safeNewAgentEmail}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+              <span style="color: #6b7280; font-size: 14px;">Code Used</span>
+            </td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+              <span style="display: inline-block; background: #fef3c7; padding: 4px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-weight: 600; font-size: 13px; color: #b45309; letter-spacing: 1px;">
                 ${safeCouponCode}
               </span>
             </td>
           </tr>
           <tr>
             <td style="padding: 10px 0;">
-              <span style="color: #94a3b8; font-size: 14px;">Team Size</span>
+              <span style="color: #6b7280; font-size: 14px;">Team Size</span>
             </td>
             <td style="padding: 10px 0; text-align: right;">
-              <span style="color: #ffffff; font-size: 14px; font-weight: 600;">${params.totalAgents} agent${params.totalAgents > 1 ? 's' : ''}</span>
+              <span style="color: #1f2937; font-size: 14px; font-weight: 600;">${params.totalAgents} agent${params.totalAgents > 1 ? 's' : ''}</span>
             </td>
           </tr>
         </table>
