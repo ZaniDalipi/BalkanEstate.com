@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import {
@@ -177,10 +178,21 @@ const Onboarding: React.FC = () => {
   /* ---------------- RENDER ---------------- */
 
   return (
-    <div
-      ref={containerRef}
-      className="min-h-screen bg-neutral-50 relative overflow-hidden"
-    >
+    <>
+      {/* Preload LCP image for this page */}
+      <Helmet>
+        <link
+          rel="preload"
+          as="image"
+          href="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop"
+          imageSrcSet="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=300&auto=format&fit=crop 300w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=500&auto=format&fit=crop 500w"
+          imageSizes="(max-width: 768px) calc(100vw - 80px), 400px"
+        />
+      </Helmet>
+      <div
+        ref={containerRef}
+        className="min-h-screen bg-neutral-50 relative overflow-hidden"
+      >
       {/* BACKGROUND ICONS */}
       <div
         ref={backgroundRef}
@@ -269,6 +281,7 @@ const Onboarding: React.FC = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 
