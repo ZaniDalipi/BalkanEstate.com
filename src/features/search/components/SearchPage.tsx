@@ -520,13 +520,15 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 if (scoreA !== scoreB) return scoreB - scoreA;
                 return b.price - a.price;
             });
-            case 'area_asc': return promotionSorted.sort((a, b) => {
+            case 'area_asc':
+            case 'sqft_asc': return promotionSorted.sort((a, b) => {
                 const scoreA = getPromotionScore(a);
                 const scoreB = getPromotionScore(b);
                 if (scoreA !== scoreB) return scoreB - scoreA;
                 return a.sqft - b.sqft;
             });
-            case 'area_desc': return promotionSorted.sort((a, b) => {
+            case 'area_desc':
+            case 'sqft_desc': return promotionSorted.sort((a, b) => {
                 const scoreA = getPromotionScore(a);
                 const scoreB = getPromotionScore(b);
                 if (scoreA !== scoreB) return scoreB - scoreA;
@@ -564,6 +566,22 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 const pricePerSqmA = a.sqft > 0 ? a.price / a.sqft : Infinity;
                 const pricePerSqmB = b.sqft > 0 ? b.price / b.sqft : Infinity;
                 return pricePerSqmA - pricePerSqmB;
+            });
+            case 'year_built_desc': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return (b.yearBuilt || 0) - (a.yearBuilt || 0);
+            });
+            case 'price_reduced': return promotionSorted.sort((a, b) => {
+                const scoreA = getPromotionScore(a);
+                const scoreB = getPromotionScore(b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                // Properties with discounts first, then by discount percentage
+                const hasDiscountA = a.hasDiscount ? 1 : 0;
+                const hasDiscountB = b.hasDiscount ? 1 : 0;
+                if (hasDiscountA !== hasDiscountB) return hasDiscountB - hasDiscountA;
+                return getPropertyTime(b) - getPropertyTime(a);
             });
             case 'newest':
             default:

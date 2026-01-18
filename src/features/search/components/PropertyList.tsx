@@ -723,13 +723,16 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                 >
                                     <option value="newest">{t('search:sort.newest')}</option>
+                                    <option value="oldest">{t('search:sort.oldest')}</option>
                                     <option value="price_asc">{t('search:sort.priceAsc')}</option>
                                     <option value="price_desc">{t('search:sort.priceDesc')}</option>
                                     <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
                                     <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
-                                    <option value="sqft_desc">{t('search:sort.sqftDesc')}</option>
+                                    <option value="sqft_desc">{t('search:sort.areaDesc')}</option>
+                                    <option value="sqft_asc">{t('search:sort.areaAsc')}</option>
                                     <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
-
+                                    <option value="featured">{t('search:sort.featured')}</option>
+                                    <option value="price_reduced">{t('search:sort.priceReduced')}</option>
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                     <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -819,9 +822,16 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                     >
                                         <option value="newest">{t('search:sort.newest')}</option>
+                                        <option value="oldest">{t('search:sort.oldest')}</option>
                                         <option value="price_asc">{t('search:sort.priceAsc')}</option>
                                         <option value="price_desc">{t('search:sort.priceDesc')}</option>
                                         <option value="beds_desc">{t('search:sort.bedsDesc')}</option>
+                                        <option value="baths_desc">{t('search:sort.bathsDesc')}</option>
+                                        <option value="sqft_desc">{t('search:sort.areaDesc')}</option>
+                                        <option value="sqft_asc">{t('search:sort.areaAsc')}</option>
+                                        <option value="year_built_desc">{t('search:sort.yearBuiltDesc')}</option>
+                                        <option value="featured">{t('search:sort.featured')}</option>
+                                        <option value="price_reduced">{t('search:sort.priceReduced')}</option>
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
                                         <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>

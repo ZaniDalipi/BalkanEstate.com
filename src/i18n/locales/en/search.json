@@ -152,7 +152,9 @@
     "bathsDesc": "Most Bathrooms",
     "featured": "Featured First",
     "priceReduced": "Recently Reduced",
-    "pricePerSqm": "Price per m²"
+    "pricePerSqm": "Price per m²",
+    "yearBuiltDesc": "Newest Built",
+    "yearBuiltAsc": "Oldest Built"
   },
   "results": {
     "showing": "Showing {{count}} properties",
