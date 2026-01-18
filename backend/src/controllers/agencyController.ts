@@ -7,6 +7,7 @@ import Property from '../models/Property';
 import { geocodeAgency } from '../services/geocodingService';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
+import { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } from '../services/emailService';
 
 // Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
@@ -1680,6 +1681,42 @@ export const redeemAgentCoupon = async (
     await agency.save();
 
     console.log(`✅ User ${user.email} redeemed agent coupon for agency ${agency.name}`);
+
+    // Send email notifications (non-blocking)
+    try {
+      // Get agency owner information
+      const owner = await User.findById(agency.ownerId);
+
+      // Send email to the new agent
+      sendAgentJoinedAgencyEmail({
+        agentEmail: user.email,
+        agentName: user.name || 'Agent',
+        agencyName: agency.name,
+        agencyId: String(agency._id),
+        subscriptionTier: user.subscription.tier,
+        listingsLimit: user.subscription.listingsLimit,
+        expiresAt: user.subscription.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      }).catch(err => console.error('Failed to send agent welcome email:', err));
+
+      // Send email to the agency owner
+      if (owner && owner.email) {
+        sendAgencyNewMemberEmail({
+          ownerEmail: owner.email,
+          ownerName: owner.name || 'Agency Owner',
+          agencyName: agency.name,
+          agencyId: String(agency._id),
+          newAgentName: user.name || 'New Agent',
+          newAgentEmail: user.email,
+          couponCode: couponCode,
+          totalAgents: agency.agents.length,
+        }).catch(err => console.error('Failed to send agency notification email:', err));
+      }
+
+      console.log(`📧 Email notifications sent for coupon redemption`);
+    } catch (emailError) {
+      // Don't fail the redemption if emails fail
+      console.error('Error sending email notifications:', emailError);
+    }
 
     res.status(200).json({
       message: `Successfully joined ${agency.name} with yearly Pro subscription!`,
