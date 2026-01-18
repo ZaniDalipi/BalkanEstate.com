@@ -539,11 +539,17 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     // **AUTO-SYNC AGENCY DATA**: If user has agency.agencyId but missing top-level agencyId/agencyName
     // This fixes users who joined via coupon before the sync fix was implemented
     const Agency = (await import('../models/Agency')).default;
+    const Agent = (await import('../models/Agent')).default;
+    let syncedAgencyName: string | null = null;
+    let syncedAgencyId: any = null;
+
     if (user.agency?.agencyId && !user.agencyId) {
       const agency = await Agency.findById(user.agency.agencyId);
       if (agency) {
         user.agencyId = agency._id as any;
         user.agencyName = agency.name;
+        syncedAgencyId = agency._id;
+        syncedAgencyName = agency.name;
         console.log(`🔄 Auto-synced agency data for user ${user.email}: ${agency.name}`);
       }
     }
@@ -554,6 +560,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       if (memberAgency) {
         user.agencyId = memberAgency._id as any;
         user.agencyName = memberAgency.name;
+        syncedAgencyId = memberAgency._id;
+        syncedAgencyName = memberAgency.name;
         if (!user.agency) {
           user.agency = { role: 'agent' };
         }
@@ -576,6 +584,17 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
           };
         }
         console.log(`🔄 Auto-synced agency membership for user ${user.email}: ${memberAgency.name}`);
+      }
+    }
+
+    // Also sync Agent record if agency data was synced
+    if (syncedAgencyId && syncedAgencyName) {
+      const agentRecord = await Agent.findOne({ userId: user._id });
+      if (agentRecord && (!agentRecord.agencyId || agentRecord.agencyName === 'Independent Agent')) {
+        agentRecord.agencyId = syncedAgencyId;
+        agentRecord.agencyName = syncedAgencyName;
+        await agentRecord.save();
+        console.log(`🔄 Auto-synced Agent record for ${user.email}: ${syncedAgencyName}`);
       }
     }
 

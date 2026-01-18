@@ -1684,6 +1684,16 @@ export const redeemAgentCoupon = async (
 
     await agency.save();
 
+    // Also update the Agent record if it exists
+    const Agent = (await import('../models/Agent')).default;
+    const agentRecord = await Agent.findOne({ userId: user._id });
+    if (agentRecord) {
+      agentRecord.agencyId = agency._id as any;
+      agentRecord.agencyName = agency.name;
+      await agentRecord.save();
+      console.log(`✅ Updated Agent record for ${user.email} with agency: ${agency.name}`);
+    }
+
     console.log(`✅ User ${user.email} redeemed agent coupon for agency ${agency.name}`);
 
     // Send email notifications (non-blocking)
