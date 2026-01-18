@@ -246,7 +246,9 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                     type="button"
                     onClick={() => {
                       onClose();
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                      // Navigate to profile page where user can switch from private seller to agent
+                      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
+                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
                     }}
                     className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
                   >
