@@ -21,6 +21,7 @@ import {
   getAgencyCoupons,
   usePromotionCoupon,
   getAgencyAgents,
+  migrateAgentSubscriptions,
 } from '../controllers/agencyController';
 import { protect } from '../middleware/auth';
 
@@ -72,5 +73,8 @@ router.post('/coupons/redeem', protect, redeemAgentCoupon); // Redeem agent coup
 router.get('/:id/coupons', protect, getAgencyCoupons); // Get coupon status (owner + agents)
 router.post('/:id/coupons/use-promotion', protect, usePromotionCoupon); // Use promotion coupon (owner + agents)
 router.get('/:id/agents', protect, getAgencyAgents); // Get agent list with details (owner only)
+
+// Migration route (run once to fix existing agents)
+router.post('/migrate-agent-subscriptions', protect, migrateAgentSubscriptions);
 
 export default router;

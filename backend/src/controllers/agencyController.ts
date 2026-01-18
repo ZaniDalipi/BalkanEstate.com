@@ -2052,3 +2052,157 @@ export const getAgencyAgents = async (
     });
   }
 };
+
+
+// @desc    Migrate existing agency agents to have proper Subscription documents
+// @route   POST /api/agencies/migrate-agent-subscriptions
+// @access  Private (Admin only - should be called once)
+export const migrateAgentSubscriptions = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    console.log('🔄 Starting agency agent subscription migration...');
+
+    // Find all agencies with agents
+    const agencies = await Agency.find({ agents: { $exists: true, $ne: [] } })
+      .populate('agents', '_id email name subscription agency agencyId agencyName');
+
+    let totalUpdated = 0;
+    let totalCreated = 0;
+    const results: any[] = [];
+
+    for (const agency of agencies) {
+      const agencyExpiresAt = agency.subscription?.expiresAt ||
+                             new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+      for (const agentRef of agency.agents) {
+        const agent = agentRef as any;
+        if (!agent || !agent._id) continue;
+
+        // Get fresh user data
+        const user = await User.findById(agent._id);
+        if (!user) continue;
+
+        let userUpdated = false;
+        let subscriptionCreated = false;
+
+        // Update user's subscription if needed
+        if (!user.subscription || user.subscription.tier === 'free') {
+          user.subscription = {
+            tier: 'agency_agent',
+            status: 'active',
+            listingsLimit: 25,
+            activeListingsCount: user.subscription?.activeListingsCount || 0,
+            privateSellerCount: user.subscription?.privateSellerCount || 0,
+            agentCount: user.subscription?.agentCount || 0,
+            promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
+            savedSearchesLimit: -1,
+            totalPaid: user.subscription?.totalPaid || 0,
+            expiresAt: agencyExpiresAt,
+          };
+          userUpdated = true;
+        } else if (user.subscription.tier !== 'agency_agent' && user.subscription.tier !== 'agency_owner') {
+          // User has a subscription but not agency_agent - update tier
+          user.subscription.tier = 'agency_agent';
+          user.subscription.listingsLimit = 25;
+          user.subscription.expiresAt = agencyExpiresAt;
+          userUpdated = true;
+        }
+
+        // Update agency fields if needed
+        if (!user.agencyId || String(user.agencyId) !== String(agency._id)) {
+          user.agencyId = agency._id as any;
+          userUpdated = true;
+        }
+        if (!user.agencyName || user.agencyName === 'Independent Agent') {
+          user.agencyName = agency.name;
+          userUpdated = true;
+        }
+
+        // Update agency object
+        if (!user.agency) {
+          user.agency = { role: 'agent' };
+          userUpdated = true;
+        }
+        if (!user.agency.agencyId) {
+          user.agency.agencyId = agency._id as any;
+          user.agency.role = 'agent';
+          userUpdated = true;
+        }
+
+        if (userUpdated) {
+          await user.save();
+          totalUpdated++;
+        }
+
+        // Check/create Subscription document
+        const existingSubscription = await Subscription.findOne({ userId: user._id });
+
+        if (!existingSubscription) {
+          await Subscription.create({
+            userId: user._id,
+            productId: 'agency_agent_yearly',
+            store: 'agency_coupon',
+            status: 'active',
+            startDate: user.agency?.joinedAt || new Date(),
+            renewalDate: agencyExpiresAt,
+            expirationDate: agencyExpiresAt,
+            autoRenewing: false,
+            price: 0,
+            currency: 'EUR',
+            isAcknowledged: true,
+          });
+          subscriptionCreated = true;
+          totalCreated++;
+        } else if (existingSubscription.productId !== 'agency_agent_yearly') {
+          // Update existing subscription
+          existingSubscription.productId = 'agency_agent_yearly';
+          existingSubscription.store = 'agency_coupon';
+          existingSubscription.status = 'active';
+          existingSubscription.expirationDate = agencyExpiresAt;
+          existingSubscription.renewalDate = agencyExpiresAt;
+          existingSubscription.price = 0;
+          existingSubscription.autoRenewing = false;
+          await existingSubscription.save();
+          totalUpdated++;
+        }
+
+        // Update Agent record if exists
+        const agentRecord = await Agent.findOne({ userId: user._id });
+        if (agentRecord) {
+          if (!agentRecord.agencyId || agentRecord.agencyName === 'Independent Agent') {
+            agentRecord.agencyId = agency._id as any;
+            agentRecord.agencyName = agency.name;
+            await agentRecord.save();
+          }
+        }
+
+        results.push({
+          email: user.email,
+          agency: agency.name,
+          userUpdated,
+          subscriptionCreated,
+        });
+      }
+    }
+
+    console.log(`✅ Migration complete: ${totalUpdated} users updated, ${totalCreated} subscriptions created`);
+
+    res.status(200).json({
+      message: 'Migration completed successfully',
+      summary: {
+        usersUpdated: totalUpdated,
+        subscriptionsCreated: totalCreated,
+        totalAgents: results.length,
+      },
+      details: results,
+    });
+  } catch (error: any) {
+    console.error('Migration error:', error);
+    res.status(500).json({
+      message: 'Migration failed',
+      error: error.message
+    });
+  }
+};
