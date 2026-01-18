@@ -8,13 +8,22 @@ import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
 import { createAgency } from '../../src/features/agencies/api/agencyApi';
 
-// Enterprise plan configuration - price must match database (€999/year)
-const ENTERPRISE_PLAN = {
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
+// Default Enterprise plan configuration (fallback if API fails)
+const DEFAULT_ENTERPRISE_PLAN = {
   name: 'Enterprise',
   price: 999,
   interval: 'year' as const,
   productId: 'enterprise_yearly',
 };
+
+interface EnterprisePlan {
+  name: string;
+  price: number;
+  interval: 'month' | 'year';
+  productId: string;
+}
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -40,6 +49,46 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [pendingAgencyData, setPendingAgencyData] = useState<any>(null);
+  const [enterprisePlan, setEnterprisePlan] = useState<EnterprisePlan>(DEFAULT_ENTERPRISE_PLAN);
+  const [loadingPlan, setLoadingPlan] = useState(false);
+
+  // Fetch Enterprise plan from database
+  useEffect(() => {
+    const fetchEnterprisePlan = async () => {
+      setLoadingPlan(true);
+      try {
+        const response = await fetch(`${API_URL}/products?role=seller`);
+        if (response.ok) {
+          const data = await response.json();
+          const products = data.products || [];
+
+          // Find the enterprise product
+          const enterprise = products.find((p: any) =>
+            p.productId?.toLowerCase().includes('enterprise') ||
+            p.name?.toLowerCase().includes('enterprise')
+          );
+
+          if (enterprise) {
+            setEnterprisePlan({
+              name: enterprise.name || 'Enterprise',
+              price: enterprise.price || 999,
+              interval: enterprise.billingPeriod === 'monthly' ? 'month' : 'year',
+              productId: enterprise.productId || 'enterprise_yearly',
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch enterprise plan:', err);
+        // Keep default plan on error
+      } finally {
+        setLoadingPlan(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchEnterprisePlan();
+    }
+  }, [isOpen]);
 
   // Check if user can create an agency (must be an agent with active Pro subscription)
   // Pass additional user fields for comprehensive agent status check (DB is source of truth)
@@ -843,21 +892,22 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       </div>
 
       {/* Enterprise Payment Window - shown directly after form submission */}
+      {/* Price fetched from database, supports coupons and discount codes */}
       <PaymentWindow
         isOpen={showPaymentWindow}
         onClose={() => {
           setShowPaymentWindow(false);
           setPendingAgencyData(null);
         }}
-        planName={ENTERPRISE_PLAN.name}
-        planPrice={ENTERPRISE_PLAN.price}
-        planInterval={ENTERPRISE_PLAN.interval}
+        planName={enterprisePlan.name}
+        planPrice={enterprisePlan.price}
+        planInterval={enterprisePlan.interval}
         userRole={getUserRole()}
         userEmail={state.currentUser?.email}
         userCountry={state.currentUser?.country || 'RS'}
         onSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
-        productId={ENTERPRISE_PLAN.productId}
+        productId={enterprisePlan.productId}
       />
     </Modal>
   );
