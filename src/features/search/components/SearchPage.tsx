@@ -850,12 +850,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             clearTimeout(mapMoveDebounceTimer.current);
         }
 
-        // Debounce the property list update by 250ms for smoother experience
+        // Debounce the property list update by 200ms to prevent flickering during zoom
         mapMoveDebounceTimer.current = window.setTimeout(() => {
             const newState: Partial<SearchPageState> = { mapBoundsJSON: serializeBounds(newBounds) };
             updateSearchPageState(newState);
             setIsLoadingMapProperties(false);
-        }, 250);
+        }, 200);
     }, [isMobile, isFiltersOpen, showAllOnMobile, updateSearchPageState]);
 
 
