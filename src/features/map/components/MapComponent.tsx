@@ -109,39 +109,35 @@ const inject3DPerspectiveStyles = () => {
       z-index: -1;
     }
 
-    /* Smooth zoom - NO flickering, NO transitions */
+    /* Google Maps-like smooth zoom with visible tiles */
     .leaflet-container {
       -webkit-tap-highlight-color: transparent;
       touch-action: pan-x pan-y;
     }
 
-    /* CRITICAL: Remove ALL animations and transitions */
+    /* Smooth zoom animation */
     .leaflet-zoom-animated {
-      transition: none !important;
+      transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1) !important;
     }
 
     .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: none !important;
+      transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1) !important;
     }
 
-    /* Keep tiles visible - NO fading or opacity changes */
+    /* Keep tiles visible during zoom - smooth fade */
     .leaflet-fade-anim .leaflet-tile {
-      transition: none !important;
-      opacity: 1 !important;
+      transition: opacity 0.2s linear !important;
     }
 
     .leaflet-tile-container {
       transition: none !important;
     }
 
-    .leaflet-tile {
-      transition: none !important;
-      opacity: 1 !important;
-    }
-
     /* GPU acceleration for smooth performance */
     .leaflet-tile-pane,
-    .leaflet-tile {
+    .leaflet-tile,
+    .leaflet-marker-icon,
+    .leaflet-popup {
       transform: translate3d(0, 0, 0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -423,13 +419,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={1}
-          zoomDelta={1}
-          wheelPxPerZoomLevel={80}
-          wheelDebounceTime={0}
-          zoomAnimation={false}
-          fadeAnimation={false}
-          markerZoomAnimation={false}
+          // Smooth fractional zoom like Google Maps
+          zoomSnap={0.25}
+          zoomDelta={0.25}
+          wheelPxPerZoomLevel={100}
+          wheelDebounceTime={40}
+          zoomAnimation={true}
+          fadeAnimation={true}
+          markerZoomAnimation={true}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
         >
@@ -458,10 +455,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={10}
+            // Preload tiles and keep them visible during zoom
+            keepBuffer={8}
             updateWhenIdle={false}
             updateWhenZooming={true}
-            updateInterval={100}
+            updateInterval={200}
             className="map-tiles"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
