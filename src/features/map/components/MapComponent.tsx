@@ -696,7 +696,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen(!isLegendOpen)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-2.5 text-xs font-semibold rounded-full transition-all ${
                   isLegendOpen
                     ? 'bg-amber-500 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
