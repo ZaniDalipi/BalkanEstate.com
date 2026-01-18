@@ -78,19 +78,49 @@ const PromotionCouponManager: React.FC = () => {
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Validate validUntil is in the future
+      const validUntilDate = new Date(newCoupon.validUntil);
+      if (validUntilDate <= new Date()) {
+        setError('Valid until date must be in the future');
+        setTimeout(() => setError(null), 5000);
+        return;
+      }
+
       const token = localStorage.getItem('balkan_estate_token');
+
+      // Prepare payload with proper handling of optional number fields
+      const payload: any = {
+        code: newCoupon.code.toUpperCase(),
+        description: newCoupon.description || undefined,
+        discountType: newCoupon.discountType,
+        discountValue: newCoupon.discountValue,
+        validFrom: new Date().toISOString(),
+        validUntil: validUntilDate.toISOString(),
+        maxUsesPerUser: newCoupon.maxUsesPerUser || 1,
+        isPublic: newCoupon.isPublic,
+        notes: newCoupon.notes || undefined,
+      };
+
+      // Only include optional fields if they have valid values
+      if (newCoupon.maxTotalUses && newCoupon.maxTotalUses > 0) {
+        payload.maxTotalUses = newCoupon.maxTotalUses;
+      }
+
+      if (newCoupon.minimumPurchaseAmount && newCoupon.minimumPurchaseAmount > 0) {
+        payload.minimumPurchaseAmount = newCoupon.minimumPurchaseAmount;
+      }
+
+      if (newCoupon.applicableTiers && newCoupon.applicableTiers.length > 0) {
+        payload.applicableTiers = newCoupon.applicableTiers;
+      }
+
       const response = await fetch(`${API_URL}/coupons`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...newCoupon,
-          code: newCoupon.code.toUpperCase(),
-          validFrom: new Date().toISOString(),
-          validUntil: new Date(newCoupon.validUntil).toISOString(),
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -465,7 +495,7 @@ const PromotionCouponManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCoupon.discountValue}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, discountValue: Number(e.target.value) })}
+                    onChange={(e) => setNewCoupon({ ...newCoupon, discountValue: Number(e.target.value) || 0 })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                     max={newCoupon.discountType === 'percentage' ? 100 : undefined}
@@ -484,6 +514,7 @@ const PromotionCouponManager: React.FC = () => {
                     value={newCoupon.validUntil}
                     onChange={(e) => setNewCoupon({ ...newCoupon, validUntil: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    min={new Date().toISOString().slice(0, 16)}
                     required
                   />
                 </div>
@@ -495,9 +526,10 @@ const PromotionCouponManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCoupon.minimumPurchaseAmount}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, minimumPurchaseAmount: Number(e.target.value) })}
+                    onChange={(e) => setNewCoupon({ ...newCoupon, minimumPurchaseAmount: Number(e.target.value) || 0 })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="0"
+                    placeholder="0 (optional)"
                   />
                 </div>
               </div>
@@ -509,11 +541,13 @@ const PromotionCouponManager: React.FC = () => {
                   </label>
                   <input
                     type="number"
-                    value={newCoupon.maxTotalUses}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, maxTotalUses: Number(e.target.value) })}
+                    value={newCoupon.maxTotalUses || ''}
+                    onChange={(e) => setNewCoupon({ ...newCoupon, maxTotalUses: e.target.value ? Number(e.target.value) : 0 })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
+                    placeholder="Unlimited (optional)"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Leave empty for unlimited uses</p>
                 </div>
 
                 <div>
@@ -523,9 +557,10 @@ const PromotionCouponManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCoupon.maxUsesPerUser}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, maxUsesPerUser: Number(e.target.value) })}
+                    onChange={(e) => setNewCoupon({ ...newCoupon, maxUsesPerUser: Number(e.target.value) || 1 })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
+                    required
                   />
                 </div>
               </div>
