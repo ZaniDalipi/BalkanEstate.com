@@ -34,7 +34,6 @@ interface PropertyListProps {
   onSuggestionClick?: (suggestion: { place_id: number; display_name: string; lat: string; lon: string; boundingbox: string[] }) => void;
   isQueryInputFocused?: boolean;
   onQueryInputFocusChange?: (focused: boolean) => void;
-  isLoadingMapMovement?: boolean;
 }
 
 const FilterButton: React.FC<{
@@ -633,7 +632,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
     const { state, dispatch } = useAppContext();
     const { isLoadingProperties, isAuthenticated } = state;
 
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, isLoadingMapMovement = false } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover } = props;
 
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
@@ -738,7 +737,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             </div>
                         </div>
                         <div className="p-4 md:p-3">
-                            {isLoadingProperties || isLoadingMapMovement ? (
+                            {isLoadingProperties ? (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} />
@@ -831,7 +830,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             </div>
 
                             <div className="p-4 md:p-3">
-                                {isLoadingProperties || isLoadingMapMovement ? (
+                                {isLoadingProperties ? (
                                     <div className="grid grid-cols-1 gap-4 md:gap-3">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} />
