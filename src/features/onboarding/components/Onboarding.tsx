@@ -215,8 +215,14 @@ const Onboarding: React.FC = () => {
               className="group p-6 border rounded-xl hover:shadow-2xl hover:-translate-y-2 transition cursor-pointer flex flex-col"
             >
               <img
-                src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
+                src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop"
+                srcSet="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=300&auto=format&fit=crop 300w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=500&auto=format&fit=crop 500w"
+                sizes="(max-width: 768px) calc(100vw - 80px), 400px"
+                alt="A couple looking at a new home"
                 className="rounded-lg mb-6 h-48 w-full object-cover"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
               <h3 className="text-2xl font-semibold mb-2 text-center">
                 {t('nav:onboarding.lookingToBuy')}
@@ -235,8 +241,13 @@ const Onboarding: React.FC = () => {
               className="group p-6 border rounded-xl hover:shadow-2xl hover:-translate-y-2 transition cursor-pointer flex flex-col"
             >
               <img
-                src="https://images.unsplash.com/photo-1570129477492-45c003edd2be"
+                src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop"
+                srcSet="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=300&auto=format&fit=crop 300w, https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=500&auto=format&fit=crop 500w"
+                sizes="(max-width: 768px) calc(100vw - 80px), 400px"
+                alt="A modern house exterior"
                 className="rounded-lg mb-6 h-48 w-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
               <h3 className="text-2xl font-semibold mb-2 text-center">
                 {t('nav:onboarding.wantToSell')}
