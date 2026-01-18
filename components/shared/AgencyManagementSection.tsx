@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '../../types';
+import { User, UserRole } from '../../types';
 import { getAgencies, verifyInvitationCode, createJoinRequest, leaveAgency } from '../../services/apiService';
 import { useAppContext } from '../../context/AppContext';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
+import { TicketIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../../constants';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -35,6 +36,25 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+
+  // Coupon redemption state
+  const [joinMethod, setJoinMethod] = useState<'invitation' | 'coupon'>('invitation');
+  const [agentCouponCode, setAgentCouponCode] = useState('');
+  const [couponRedemptionSuccess, setCouponRedemptionSuccess] = useState<{
+    agencyName: string;
+    subscription: { tier: string; expiresAt: string; listingsLimit: number };
+  } | null>(null);
+
+  // Check if user is an agent
+  const isUserAgent = (): boolean => {
+    return (
+      currentUser.availableRoles?.includes(UserRole.AGENT) ||
+      currentUser.role === UserRole.AGENT ||
+      currentUser.role === 'agent' ||
+      !!currentUser.agentId ||
+      !!currentUser.licenseNumber
+    );
+  };
 
   // Fetch pending join requests on mount and when showing the form
   useEffect(() => {
@@ -166,7 +186,108 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     setShowForm(false);
     setSelectedAgencyId('');
     setInvitationCode('');
+    setAgentCouponCode('');
     setError('');
+    setJoinMethod('invitation');
+    setCouponRedemptionSuccess(null);
+  };
+
+  // Handle agent coupon redemption
+  const handleCouponRedemption = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setError('');
+
+    const trimmedCode = agentCouponCode.trim().toUpperCase();
+    if (!trimmedCode) {
+      setError('Please enter a coupon code');
+      return;
+    }
+
+    // Validate user is an agent
+    if (!isUserAgent()) {
+      setError('Only registered agents can redeem agency coupons. Please register as an agent first.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('balkan_estate_token')}`,
+        },
+        body: JSON.stringify({ couponCode: trimmedCode }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle specific error codes
+        switch (data.code) {
+          case 'INVALID_COUPON':
+            setError('Invalid coupon code. Please check the code and try again.');
+            break;
+          case 'COUPON_ALREADY_USED':
+            setError('This coupon has already been used by another agent.');
+            break;
+          case 'COUPON_EXPIRED':
+            setError('This coupon has expired and can no longer be redeemed.');
+            break;
+          case 'COUPON_NOT_FOUND':
+            setError('Coupon not found. Please verify the code is correct.');
+            break;
+          case 'AGENCY_SUBSCRIPTION_INACTIVE':
+            setError('The agency subscription is no longer active. This coupon cannot be redeemed.');
+            break;
+          default:
+            setError(data.message || 'Failed to redeem coupon. Please try again.');
+        }
+        return;
+      }
+
+      // Success! Update context
+      if (data.subscription && data.agency) {
+        dispatch({
+          type: 'UPDATE_USER',
+          payload: {
+            subscription: {
+              ...currentUser.subscription,
+              tier: data.subscription.tier,
+              status: data.subscription.status,
+              listingsLimit: data.subscription.listingsLimit,
+              expiresAt: data.subscription.expiresAt,
+            },
+            agencyId: data.agency.id,
+            agencyName: data.agency.name,
+            agency: {
+              agencyId: data.agency.id,
+              role: data.agency.role,
+              joinedAt: new Date().toISOString(),
+            },
+          },
+        });
+
+        setCouponRedemptionSuccess({
+          agencyName: data.agency.name,
+          subscription: data.subscription,
+        });
+
+        await success(
+          'Coupon Redeemed!',
+          `You've joined ${data.agency.name} with a Pro subscription!`
+        );
+
+        onAgencyChange();
+      }
+    } catch (err: any) {
+      console.error('Coupon redemption error:', err);
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLeaveAgency = async () => {
@@ -280,93 +401,242 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
           {!isIndependent && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                ⚠️ You are currently with <strong>{currentUser.agencyName}</strong>.
+                <ExclamationTriangleIcon className="w-4 h-4 inline mr-1" />
+                You are currently with <strong>{currentUser.agencyName}</strong>.
                 Switching will remove you from your current agency.
               </p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Agency Selection Dropdown */}
-            <div>
-              <label htmlFor="agency-select" className="block text-sm font-medium text-gray-700 mb-2">
-                Select Agency <span className="text-red-500">*</span>
-              </label>
-              {loadingAgencies ? (
-                <div className="px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-500 text-sm">
-                  Loading agencies...
+          {/* Coupon Redemption Success */}
+          {couponRedemptionSuccess && (
+            <div className="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <CheckCircleIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
+                <div>
+                  <h5 className="font-semibold text-green-800">Welcome to {couponRedemptionSuccess.agencyName}!</h5>
+                  <p className="text-sm text-green-700 mt-1">
+                    You now have a Pro subscription with {couponRedemptionSuccess.subscription.listingsLimit} listings,
+                    valid until {new Date(couponRedemptionSuccess.subscription.expiresAt).toLocaleDateString()}.
+                  </p>
+                  <button
+                    onClick={handleCancel}
+                    className="mt-3 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700"
+                  >
+                    Done
+                  </button>
                 </div>
-              ) : (
-                <select
-                  id="agency-select"
-                  value={selectedAgencyId}
-                  onChange={(e) => {
-                    setSelectedAgencyId(e.target.value);
-                    setError('');
-                  }}
-                  disabled={loading}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
-                  required
-                >
-                  <option value="">-- Choose an agency --</option>
-                  {agencies.map((agency) => (
-                    <option key={agency._id} value={agency._id}>
-                      {agency.name} {agency.city ? `(${agency.city}${agency.country ? ', ' + agency.country : ''})` : ''}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {/* Invitation Code Input */}
-            <div>
-              <label htmlFor="invitation-code" className="block text-sm font-medium text-gray-700 mb-2">
-                Agency Invitation Code <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="invitation-code"
-                value={invitationCode}
-                onChange={(e) => {
-                  setInvitationCode(e.target.value.toUpperCase());
-                  setError('');
-                }}
-                disabled={loading}
-                placeholder="e.g., AGY-BELGRAD-A1B2C3"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm"
-                required
-              />
-              <p className="text-xs text-gray-600 mt-1">
-                Enter the invitation code for the selected agency
-              </p>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-700">{error}</p>
               </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={loading}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading || !selectedAgencyId || !invitationCode.trim()}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
-                {loading ? 'Verifying & Sending...' : 'Send Join Request'}
-              </button>
             </div>
-          </form>
+          )}
+
+          {!couponRedemptionSuccess && (
+            <>
+              {/* Join Method Toggle */}
+              <div className="mb-4 flex gap-2 p-1 bg-gray-100 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => { setJoinMethod('invitation'); setError(''); }}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    joinMethod === 'invitation'
+                      ? 'bg-white text-blue-700 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Invitation Code
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setJoinMethod('coupon'); setError(''); }}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
+                    joinMethod === 'coupon'
+                      ? 'bg-white text-amber-700 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <TicketIcon className="w-4 h-4" />
+                  Agent Coupon
+                </button>
+              </div>
+
+              {joinMethod === 'invitation' ? (
+                /* Invitation Code Form */
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Agency Selection Dropdown */}
+                  <div>
+                    <label htmlFor="agency-select" className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Agency <span className="text-red-500">*</span>
+                    </label>
+                    {loadingAgencies ? (
+                      <div className="px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-500 text-sm">
+                        Loading agencies...
+                      </div>
+                    ) : (
+                      <select
+                        id="agency-select"
+                        value={selectedAgencyId}
+                        onChange={(e) => {
+                          setSelectedAgencyId(e.target.value);
+                          setError('');
+                        }}
+                        disabled={loading}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+                        required
+                      >
+                        <option value="">-- Choose an agency --</option>
+                        {agencies.map((agency) => (
+                          <option key={agency._id} value={agency._id}>
+                            {agency.name} {agency.city ? `(${agency.city}${agency.country ? ', ' + agency.country : ''})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  {/* Invitation Code Input */}
+                  <div>
+                    <label htmlFor="invitation-code" className="block text-sm font-medium text-gray-700 mb-2">
+                      Agency Invitation Code <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="invitation-code"
+                      value={invitationCode}
+                      onChange={(e) => {
+                        setInvitationCode(e.target.value.toUpperCase());
+                        setError('');
+                      }}
+                      disabled={loading}
+                      placeholder="e.g., AGY-BELGRAD-A1B2C3"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm"
+                      required
+                    />
+                    <p className="text-xs text-gray-600 mt-1">
+                      Enter the invitation code for the selected agency
+                    </p>
+                  </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{error}</p>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      disabled={loading}
+                      className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading || !selectedAgencyId || !invitationCode.trim()}
+                      className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      {loading ? 'Verifying & Sending...' : 'Send Join Request'}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Agent Coupon Redemption Form */
+                <form onSubmit={handleCouponRedemption} className="space-y-4">
+                  {!isUserAgent() && (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                        <div>
+                          <h5 className="font-semibold text-amber-800">Agent Registration Required</h5>
+                          <p className="text-sm text-amber-700 mt-1">
+                            Only registered agents can redeem agency coupons. Please register as an agent first.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <TicketIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h5 className="font-semibold text-amber-800">Agent Coupon Benefits</h5>
+                        <ul className="text-sm text-amber-700 mt-1 space-y-1">
+                          <li>• Instantly join the agency (no approval needed)</li>
+                          <li>• Get a Pro subscription for 1 year</li>
+                          <li>• Up to 25 active listings</li>
+                          <li>• Agency branding on your listings</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="agent-coupon-code" className="block text-sm font-medium text-gray-700 mb-2">
+                      Agent Coupon Code <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="agent-coupon-code"
+                      value={agentCouponCode}
+                      onChange={(e) => {
+                        setAgentCouponCode(e.target.value.toUpperCase());
+                        setError('');
+                      }}
+                      disabled={loading || !isUserAgent()}
+                      placeholder="e.g., AGENCY-XXXXXXXX"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm uppercase"
+                      required
+                    />
+                    <p className="text-xs text-gray-600 mt-1">
+                      Enter the coupon code you received from the agency owner
+                    </p>
+                  </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{error}</p>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      disabled={loading}
+                      className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading || !agentCouponCode.trim() || !isUserAgent()}
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
+                    >
+                      {loading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Redeeming...
+                        </>
+                      ) : (
+                        <>
+                          <TicketIcon className="w-4 h-4" />
+                          Redeem Coupon
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>
