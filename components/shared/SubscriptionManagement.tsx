@@ -528,6 +528,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     return Object.entries(plans)
       .filter(([key, plan]) => {
         if (key === 'free') return false;
+        // agency_agent_yearly is NOT purchasable - only obtained via agency coupon redemption
+        if (key === 'agency_agent_yearly') return false;
         if (key === subscriptionDetails.currentPlanKey) return false;
         if (subscriptionDetails.currentPlanKey === 'seller_pro_monthly' && key === 'seller_pro_yearly') return true;
         return plan.tier > subscriptionDetails.currentPlan.tier;
