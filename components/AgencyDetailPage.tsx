@@ -162,11 +162,27 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   // Check if current user is already a member of this agency
   const isAlreadyMember = currentUser && agents.some(agent => {
-    const agentUserId = agent.agentId || agent._id || agent.id;
-    return String(agentUserId) === String(currentUser.id) || String(agentUserId) === String(currentUser._id);
+    // Check multiple possible ID fields
+    const agentUserId = agent.userId || agent.agentId || agent._id || agent.id;
+    const currentUserId = currentUser.id || currentUser._id;
+    return String(agentUserId) === String(currentUserId);
   });
 
-  const canRequestToJoin = isAuthenticated && currentUser?.role === 'agent' && !currentUser?.agencyId && !isAlreadyMember;
+  // Check if user's agency matches this agency (multiple ways to check)
+  const isUserInThisAgency = currentUser && (
+    // Check top-level agencyId
+    (currentUser.agencyId && String(currentUser.agencyId) === String(agencyData._id)) ||
+    // Check nested agency.agencyId
+    (currentUser.agency?.agencyId && String(currentUser.agency.agencyId) === String(agencyData._id))
+  );
+
+  // Can only request to join if: authenticated, is agent, not already in ANY agency, and not already a member of THIS agency
+  const canRequestToJoin = isAuthenticated &&
+    currentUser?.role === 'agent' &&
+    !currentUser?.agencyId &&
+    !currentUser?.agency?.agencyId &&
+    !isAlreadyMember &&
+    !isUserInThisAgency;
 
   // Scroll to top on mount and when agency changes
   useEffect(() => {
