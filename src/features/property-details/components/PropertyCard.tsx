@@ -119,7 +119,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
   return (
     <div
-      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-500 text-left w-full flex flex-col cursor-pointer ${getCardStyles()} ${
+      className={`group bg-white rounded-2xl overflow-hidden shadow-lg border-2 transition-all duration-500 text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
         isHovered && !isSold ? 'shadow-2xl -translate-y-2 scale-[1.02]' : 'hover:shadow-xl'
       }`}
       onMouseEnter={() => setIsHovered(true)}
