@@ -10,6 +10,7 @@ import L from 'leaflet';
  *
  * Handles flying the map to a specific location with smooth animation.
  * Calls onComplete callback when animation finishes.
+ * Uses optimized easing curve for natural, buttery-smooth transitions.
  */
 export const FlyToController: React.FC<{
   target: { center: [number, number]; zoom: number } | null;
@@ -24,9 +25,18 @@ export const FlyToController: React.FC<{
         map.off('moveend', onMoveEnd);
       };
       map.on('moveend', onMoveEnd);
+
+      // Calculate optimal duration based on distance
+      const currentCenter = map.getCenter();
+      const distance = currentCenter.distanceTo(L.latLng(target.center[0], target.center[1]));
+      // Shorter animations for short distances, longer for far distances
+      // Min 1s, max 2.5s based on distance
+      const duration = Math.min(2.5, Math.max(1, distance / 500000));
+
       map.flyTo(target.center, target.zoom, {
         animate: true,
-        duration: 2.5,
+        duration: duration,
+        easeLinearity: 0.15, // Smoother easing curve
       });
     }
   }, [target, map, onComplete]);

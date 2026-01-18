@@ -362,6 +362,12 @@ export function canCreateAgency(
     return { allowed: false, reason: 'No subscription found' };
   }
 
+  // Admin users can always create agencies (for testing/management purposes)
+  const isAdmin = availableRoles?.includes(UserRole.ADMIN) || availableRoles?.includes(UserRole.SUPER_ADMIN);
+  if (isAdmin) {
+    return { allowed: true };
+  }
+
   // Must be an active agent first
   const isAgent = availableRoles?.includes(UserRole.AGENT);
   if (!isAgent) {

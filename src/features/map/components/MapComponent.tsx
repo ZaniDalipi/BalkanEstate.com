@@ -55,7 +55,7 @@ const BALKAN_BOUNDS = L.latLngBounds(
   [49, 31] // Northeast corner (Northern Romania, Eastern Bulgaria)
 );
 
-// CSS for 3D perspective camera effect
+// CSS for 3D perspective camera effect and performance optimizations
 const inject3DPerspectiveStyles = () => {
   const styleId = 'map-3d-perspective-styles';
   if (document.getElementById(styleId)) return;
@@ -109,37 +109,61 @@ const inject3DPerspectiveStyles = () => {
       z-index: -1;
     }
 
-    /* Smooth zoom - same timing as UI button transitions (0.3s ease-out) */
+    /* === PERFORMANCE OPTIMIZATIONS === */
+
+    /* Smooth zoom - optimized for 60fps */
     .leaflet-container {
       -webkit-tap-highlight-color: transparent;
       touch-action: pan-x pan-y;
+      /* Force GPU layer creation for entire container */
+      transform: translateZ(0);
+      contain: layout style paint;
     }
 
-    /* Smooth zoom transition - same as button animations (0.3s ease-out) */
+    /* Ultra-smooth zoom transition - using cubic-bezier for natural feel */
     .leaflet-zoom-animated {
-      transition: transform 0.3s ease-out !important;
+      transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+      will-change: transform;
     }
 
     .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.3s ease-out !important;
+      transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
     }
 
-    /* Smooth tile fade - matches button animations */
+    /* Faster tile fade for smoother appearance */
     .leaflet-fade-anim .leaflet-tile {
-      transition: opacity 0.3s ease-out !important;
+      transition: opacity 0.2s ease-out !important;
     }
 
+    /* GPU acceleration for tile containers */
     .leaflet-tile-container {
-      will-change: transform;
+      will-change: transform, opacity;
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
 
     .leaflet-tile {
       will-change: opacity;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      /* Prevent subpixel rendering issues */
+      image-rendering: -webkit-optimize-contrast;
     }
 
-    /* GPU acceleration */
+    /* Heavy GPU acceleration for all map layers */
     .leaflet-tile-pane,
-    .leaflet-tile,
+    .leaflet-overlay-pane,
+    .leaflet-shadow-pane,
+    .leaflet-marker-pane,
+    .leaflet-tooltip-pane,
+    .leaflet-popup-pane {
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform;
+    }
+
+    /* Optimize marker rendering */
     .leaflet-marker-icon,
     .leaflet-popup {
       transform: translate3d(0, 0, 0);
@@ -147,10 +171,35 @@ const inject3DPerspectiveStyles = () => {
       -webkit-backface-visibility: hidden;
     }
 
-    /* Cleaner tile rendering */
+    /* Smoother panning */
+    .leaflet-pan-anim .leaflet-tile,
+    .leaflet-pan-anim .leaflet-marker-icon,
+    .leaflet-pan-anim .leaflet-shadow {
+      transition: none !important;
+    }
+
+    /* Optimize tile loading - hide loading flicker */
+    .leaflet-tile-loaded {
+      opacity: 1 !important;
+    }
+
+    /* Cleaner tile rendering with optimized settings */
     .map-tiles img {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
+      /* Prevent layout shifts during tile load */
+      contain: strict;
+    }
+
+    /* Prevent layout thrashing during zoom */
+    .leaflet-proxy {
+      transform: translateZ(0);
+    }
+
+    /* Optimize canvas layers for better performance */
+    .leaflet-canvas-pane {
+      will-change: transform;
+      transform: translateZ(0);
     }
   `;
   document.head.appendChild(style);
@@ -193,6 +242,77 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
       onZoomChange(e.target.getZoom());
     },
   });
+  return null;
+};
+
+/**
+ * TilePreloader Component - preloads tiles at adjacent zoom levels
+ * This makes zoom transitions much smoother by having tiles ready
+ */
+const TilePreloader: React.FC<{ tileUrl: string; currentZoom: number }> = ({ tileUrl, currentZoom }) => {
+  const map = useMap();
+  const preloadedRef = useRef<Set<string>>(new Set());
+  const preloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Clear any pending preload
+    if (preloadTimeoutRef.current) {
+      clearTimeout(preloadTimeoutRef.current);
+    }
+
+    // Debounce preloading to avoid excessive requests
+    preloadTimeoutRef.current = setTimeout(() => {
+      const bounds = map.getBounds();
+      const center = map.getCenter();
+      const roundedZoom = Math.round(currentZoom);
+
+      // Preload tiles at zoom+1 and zoom-1
+      const zoomLevels = [roundedZoom + 1, roundedZoom - 1].filter(z => z >= 6 && z <= 21);
+
+      zoomLevels.forEach(targetZoom => {
+        // Calculate tile coordinates for center at target zoom
+        const scale = Math.pow(2, targetZoom);
+        const x = Math.floor(((center.lng + 180) / 360) * scale);
+        const y = Math.floor((1 - Math.log(Math.tan(center.lat * Math.PI / 180) + 1 / Math.cos(center.lat * Math.PI / 180)) / Math.PI) / 2 * scale);
+
+        // Preload a 3x3 grid around center
+        for (let dx = -1; dx <= 1; dx++) {
+          for (let dy = -1; dy <= 1; dy++) {
+            const tileX = x + dx;
+            const tileY = y + dy;
+            const key = `${targetZoom}/${tileX}/${tileY}`;
+
+            if (!preloadedRef.current.has(key)) {
+              const url = tileUrl
+                .replace('{z}', String(targetZoom))
+                .replace('{x}', String(tileX))
+                .replace('{y}', String(tileY))
+                .replace('{s}', 'a'); // Use 'a' subdomain for preloading
+
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.src = url;
+
+              preloadedRef.current.add(key);
+
+              // Keep cache size manageable
+              if (preloadedRef.current.size > 200) {
+                const keysArray = Array.from(preloadedRef.current);
+                preloadedRef.current = new Set(keysArray.slice(-100));
+              }
+            }
+          }
+        }
+      });
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (preloadTimeoutRef.current) {
+        clearTimeout(preloadTimeoutRef.current);
+      }
+    };
+  }, [map, tileUrl, currentZoom]);
+
   return null;
 };
 
@@ -436,20 +556,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Ultra-smooth continuous zoom
+          // Ultra-smooth continuous zoom - optimized for 60fps
           zoomSnap={0.1}
           zoomDelta={0.1}
-          wheelPxPerZoomLevel={80}
-          wheelDebounceTime={40}
+          wheelPxPerZoomLevel={100} // Increased for smoother wheel zoom
+          wheelDebounceTime={25} // Reduced for faster response
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
+          // Enhanced inertia for smoother panning
+          inertia={true}
+          inertiaDeceleration={3500} // Faster deceleration for snappier feel
+          inertiaMaxSpeed={2000} // Increased max speed for responsive panning
+          easeLinearity={0.2} // Smoother easing curve
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
+          {/* Preload adjacent zoom level tiles for smoother zoom transitions */}
+          <TilePreloader tileUrl={TILE_LAYERS[mapType].url} currentZoom={currentZoom} />
           {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
           <ZoomSnapAdjuster currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
@@ -472,12 +599,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            // Preload LOTS of tiles - always keep map visible
-            keepBuffer={12}
-            updateWhenIdle={false}
-            updateWhenZooming={true}
-            updateInterval={150}
+            // Optimized tile loading for smooth experience
+            keepBuffer={16} // Increased buffer for smoother panning
+            updateWhenIdle={false} // Update tiles continuously
+            updateWhenZooming={true} // Load during zoom
+            updateInterval={80} // Reduced for faster updates
             className="map-tiles"
+            // Detect high-DPI displays for sharper tiles
+            detectRetina={true}
+            // Cross-origin for better caching
+            crossOrigin="anonymous"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
           <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
