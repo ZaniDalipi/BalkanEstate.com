@@ -117,7 +117,6 @@ const inject3DPerspectiveStyles = () => {
       touch-action: pan-x pan-y;
       /* Force GPU layer creation for entire container */
       transform: translateZ(0);
-      contain: layout style paint;
     }
 
     /* Ultra-smooth zoom transition - using cubic-bezier for natural feel */
@@ -187,8 +186,6 @@ const inject3DPerspectiveStyles = () => {
     .map-tiles img {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
-      /* Prevent layout shifts during tile load */
-      contain: strict;
     }
 
     /* Prevent layout thrashing during zoom */
@@ -605,10 +602,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
             updateWhenZooming={true} // Load during zoom
             updateInterval={80} // Reduced for faster updates
             className="map-tiles"
-            // Detect high-DPI displays for sharper tiles
-            detectRetina={true}
-            // Cross-origin for better caching
-            crossOrigin="anonymous"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
           <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
