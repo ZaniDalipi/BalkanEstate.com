@@ -122,9 +122,9 @@ const inject3DPerspectiveStyles = () => {
       .leaflet-fade-anim .leaflet-tile {
         transition: opacity 0.15s linear;
       }
-      .leaflet-zoom-animated {
-  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
+      .leaflet-zoom-anim .leaflet-zoom-animated {
+        transition: transform 0.2s cubic-bezier(0,0,0.25,1);
+      }
       .leaflet-container {
         -webkit-tap-highlight-color: transparent;
         touch-action: pan-x pan-y;
@@ -208,7 +208,7 @@ const ZoomAdjuster: React.FC<{ mapType: TileLayerType; currentZoom: number }> = 
 
       // If current zoom exceeds new layer's max, adjust it
       if (currentMapZoom > maxZoom) {
-        map.setZoom(maxZoom);
+        map.setZoom(maxZoom, { animate: true, duration: 0.6 });
       }
 
       prevMapTypeRef.current = mapType;
@@ -425,9 +425,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
           {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
-          <ZoomSnapAdjuster currentZoom={currentZoom} /> 
+          <ZoomSnapAdjuster currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
-          <ZoomBasedTileSwitch mapType={mapType as "street" | "satellite" | "night"} setMapType={setMapType} />
+          <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
           {drawnBounds && !isDrawing && (
             <Rectangle
@@ -684,7 +684,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen(!isLegendOpen)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-2.5 text-xs font-semibold rounded-full transition-all ${
                   isLegendOpen
                     ? 'bg-amber-500 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'

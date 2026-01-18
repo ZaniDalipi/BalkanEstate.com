@@ -711,8 +711,8 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                 </div>
 
                 {/* PROPERTY LIST SECTION */}
-                <div className="flex-grow min-h-0">
-                    <div className="h-full overflow-y-auto">
+                <div className="flex-grow min-h-0 overflow-hidden">
+                    <div className="h-full overflow-y-auto overflow-x-hidden">
                         <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-10">
                             <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
                             <div className="relative">
@@ -762,10 +762,9 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             ) : (
                                 <div className="text-center py-16 px-4"><h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3></div>
                             )}
-
                             {/* Footer - Integrated at bottom of property list */}
-                            <div className="mt-8">
-                                <Footer />
+                            <div className="mt-8 overflow-x-hidden">
+                                <Footer contained />
                             </div>
                         </div>
                     </div>
@@ -867,7 +866,9 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 )}
 
                                 {/* Footer - Integrated at bottom of property list */}
-                                <Footer />
+                                <div className="overflow-x-hidden">
+                                    <Footer contained />
+                                </div>
                             </div>
                         </div>
                     )}
