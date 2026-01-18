@@ -114,6 +114,12 @@ export default defineConfig(({ mode }) => {
               query: ['@tanstack/react-query'],
               // State management
               state: ['zustand'],
+              // Icons library - large, load separately
+              icons: ['lucide-react'],
+              // AI/Gemini - only needed for AI features
+              ai: ['@google/genai', '@google/generative-ai'],
+              // Error tracking - defer loading
+              sentry: ['@sentry/react'],
             },
           },
         },
