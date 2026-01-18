@@ -109,24 +109,24 @@ const inject3DPerspectiveStyles = () => {
       z-index: -1;
     }
 
-    /* Ultra-smooth zoom - transitions barely visible */
+    /* Smooth zoom - same timing as UI button transitions (0.3s ease-out) */
     .leaflet-container {
       -webkit-tap-highlight-color: transparent;
       touch-action: pan-x pan-y;
     }
 
-    /* VERY fast zoom transition - almost instant */
+    /* Smooth zoom transition - same as button animations (0.3s ease-out) */
     .leaflet-zoom-animated {
-      transition: transform 0.05s ease-out !important;
+      transition: transform 0.3s ease-out !important;
     }
 
     .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.05s ease-out !important;
+      transition: transform 0.3s ease-out !important;
     }
 
-    /* Keep old tiles visible until new ones load - NO blank map */
+    /* Smooth tile fade - matches button animations */
     .leaflet-fade-anim .leaflet-tile {
-      transition: opacity 0.15s ease-in !important;
+      transition: opacity 0.3s ease-out !important;
     }
 
     .leaflet-tile-container {
