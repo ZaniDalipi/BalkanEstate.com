@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { CheckCircleIcon, ArrowLeftIcon } from '@/constants';
+import { CheckCircleIcon, ArrowLeftIcon, LogoIcon } from '@/constants';
 import { verifyPayment as verifyPaymentApi, type VerifyPaymentResponse } from '../api/paymentApi';
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
@@ -150,7 +150,12 @@ const PaymentSuccess: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+          <div className="flex flex-col items-center justify-center mb-4">
+            <LogoIcon className="w-16 h-16 animate-pulse" />
+            <h1 className="text-xl font-bold text-neutral-800 mt-2">
+              Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
+            </h1>
+          </div>
           <h2 className="text-2xl font-bold text-neutral-800 mb-2">
             {creatingAgency ? 'Creating Your Agency...' : t('success.verifying')}
           </h2>
