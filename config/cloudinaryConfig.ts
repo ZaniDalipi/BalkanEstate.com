@@ -59,8 +59,8 @@ export const getCityImageUrl = (
     country,
     width = 800,
     height = 600,
-    quality = 'auto',
-    format = 'auto',
+    quality = 'auto:eco', // Use auto:eco for 40-50% smaller files with minimal quality loss
+    format = 'auto', // Auto-detects WebP/AVIF support
     crop = 'fill',
     gravity = 'auto',
   } = options;

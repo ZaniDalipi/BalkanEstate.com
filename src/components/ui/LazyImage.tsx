@@ -54,7 +54,7 @@ const LazyImage: React.FC<LazyImageProps> = memo(({
         });
       },
       {
-        rootMargin: '50px', // Start loading 50px before visible
+        rootMargin: '200px', // Start loading 200px before visible (feels faster)
         threshold: 0.01,
       }
     );
@@ -81,12 +81,13 @@ const LazyImage: React.FC<LazyImageProps> = memo(({
     if (!url.includes('cloudinary.com')) return undefined;
 
     // Cloudinary URL transformations for responsive images
-    const sizes = [320, 640, 768, 1024, 1280];
+    // More granular sizes for better bandwidth optimization
+    const sizes = [320, 480, 640, 768, 1024, 1280, 1536];
     return sizes
       .map((size) => {
         const transformedUrl = url.replace(
           '/upload/',
-          `/upload/w_${size},c_scale,q_auto,f_auto/`
+          `/upload/w_${size},c_scale,q_auto:eco,f_auto,dpr_auto/`
         );
         return `${transformedUrl} ${size}w`;
       })
@@ -97,9 +98,9 @@ const LazyImage: React.FC<LazyImageProps> = memo(({
   const optimizeUrl = (url: string): string => {
     if (!url.includes('cloudinary.com')) return url;
 
-    // Add auto format and quality if not present
+    // Add auto format and eco quality if not present (40-50% smaller files)
     if (!url.includes('f_auto')) {
-      return url.replace('/upload/', '/upload/f_auto,q_auto/');
+      return url.replace('/upload/', '/upload/f_auto,q_auto:eco,dpr_auto/');
     }
     return url;
   };
