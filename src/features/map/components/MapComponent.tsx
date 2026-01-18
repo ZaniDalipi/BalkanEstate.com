@@ -109,20 +109,25 @@ const inject3DPerspectiveStyles = () => {
       z-index: -1;
     }
 
-    /* Global map tile optimizations for smooth zoom */
-    .leaflet-tile-container {
-      will-change: transform;
+    /* Google Maps-like smooth zoom optimizations */
+    .leaflet-container {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: pan-x pan-y;
     }
 
-    .leaflet-tile {
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
-    }
-
-    .leaflet-zoom-animated {
+    /* Remove ALL transitions for instant zoom response */
+    .leaflet-zoom-animated,
+    .leaflet-zoom-anim .leaflet-zoom-animated {
       transition: none !important;
+      animation: none !important;
+    }
+
+    /* Keep tiles visible during zoom - no fading */
+    .leaflet-tile-container,
+    .leaflet-tile {
+      transition: none !important;
+      animation: none !important;
+      will-change: transform;
     }
 
     .leaflet-fade-anim .leaflet-tile {
@@ -130,18 +135,17 @@ const inject3DPerspectiveStyles = () => {
       opacity: 1 !important;
     }
 
-    .leaflet-container {
-      -webkit-tap-highlight-color: transparent;
-      touch-action: pan-x pan-y;
-    }
-
-    .leaflet-marker-icon {
-      will-change: transform;
+    /* Hardware acceleration for smooth rendering */
+    .leaflet-tile,
+    .leaflet-marker-icon,
+    .leaflet-popup {
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
     }
 
-    /* Cleaner tile rendering */
+    /* Crisp tile rendering */
     .map-tiles img {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
@@ -418,13 +422,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          zoomSnap={0}
-          zoomDelta={1}
-          wheelPxPerZoomLevel={60}
-          wheelDebounceTime={0}
-          zoomAnimation={true}
-          fadeAnimation={false}
-          markerZoomAnimation={false}
+          // Google Maps zoom settings - smooth continuous zoom
+          zoomSnap={0}              // Continuous zoom, no snapping to integer levels
+          zoomDelta={0.25}          // Small delta for precise zoom control
+          wheelPxPerZoomLevel={120} // Higher value = smoother, slower zoom like Google Maps
+          wheelDebounceTime={40}    // Minimal debounce for responsive feel
+          zoomAnimation={false}     // No animation - instant zoom like Google Maps
+          fadeAnimation={false}     // No tile fading - instant appearance
+          markerZoomAnimation={false} // No marker animation during zoom
           touchZoom={isMobile ? 'center' : true}
           bounceAtZoomLimits={false}
         >
@@ -453,10 +458,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            keepBuffer={isMobile ? 4 : 6}
-            updateWhenIdle={true}
-            updateWhenZooming={false}
-            updateInterval={300}
+            // Google Maps-like tile loading - preload tiles, don't refresh during zoom
+            keepBuffer={isMobile ? 5 : 8}    // Large buffer for smooth zoom
+            updateWhenIdle={true}            // Only update tiles when zoom/pan stops
+            updateWhenZooming={false}        // Don't refresh tiles during zoom
+            updateInterval={200}             // Update tiles every 200ms when idle
             className="map-tiles"
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
