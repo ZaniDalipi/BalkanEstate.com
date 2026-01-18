@@ -29,10 +29,8 @@
     <meta name="twitter:description" content="Discover houses, apartments, and villas for sale across the Balkans. Your AI-powered real estate platform." />
     <meta name="twitter:image" content="/og-image.png" />
 
-    <!-- Security Meta Tags -->
+    <!-- Security Meta Tags (X-Frame-Options must be set via HTTP header, not meta) -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <!-- Additional SEO Tags -->
@@ -71,9 +69,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://images.unsplash.com">
 
-    <!-- Preload LCP image with responsive srcset -->
-    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop" imagesrcset="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=300&auto=format&fit=crop 300w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=500&auto=format&fit=crop 500w" imagesizes="(max-width: 768px) calc(100vw - 80px), 400px" fetchpriority="high">
-
     <!-- Google Fonts with display=swap (non-blocking) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
@@ -81,6 +76,54 @@
     <!-- Leaflet CSS - deferred loading (only needed for map pages) -->
     <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" onload="this.onload=null;this.rel='stylesheet'" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
     <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                DEFAULT: '#0252CD',
+                light: '#E6F0FF',
+                dark: '#003A96',
+              },
+              secondary: {
+                DEFAULT: '#FFA500',
+              },
+              neutral: {
+                50: '#F8F9FA',
+                100: '#F1F3F5',
+                200: '#E9ECEF',
+                300: '#DEE2E6',
+                400: '#CED4DA',
+                500: '#A0AEC0',
+                600: '#718096',
+                700: '#4A5568',
+                800: '#2D3748',
+                900: '#1A202C',
+              },
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'scale(0.98)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
+              },
+              imageFade: {
+                '0%': { opacity: '0.6' },
+                '100%': { opacity: '1' },
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.3s ease-in-out',
+              'image-fade': 'imageFade 0.4s ease-in-out',
+            },
+          }
+        }
+      }
+    </script>
   <script type="importmap">
 {
   "imports": {
