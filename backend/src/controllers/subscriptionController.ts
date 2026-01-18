@@ -249,6 +249,36 @@ export const getCurrentSubscription = async (req: Request, res: Response): Promi
         return;
       }
 
+      // Check for agency agent subscription (set via coupon redemption)
+      if (user?.subscription?.tier === 'agency_agent' && user.subscription.status === 'active' &&
+          user.subscription.expiresAt && new Date(user.subscription.expiresAt) > new Date()) {
+        // Return a synthetic subscription object for agency agents
+        res.status(200).json({
+          subscription: {
+            _id: `agency_agent_${userId}`,
+            userId: userId,
+            store: 'agency_coupon',
+            productId: 'agency_agent_yearly',
+            startDate: user.agency?.joinedAt || user.createdAt,
+            renewalDate: user.subscription.expiresAt,
+            expirationDate: user.subscription.expiresAt,
+            status: 'active',
+            autoRenewing: false, // Agency agent subscriptions are managed by agency owner
+            price: 0, // Included with agency subscription
+            currency: 'EUR',
+            isAcknowledged: true,
+            createdAt: user.agency?.joinedAt || user.createdAt,
+            updatedAt: user.updatedAt,
+            // Additional agency agent info
+            isAgencyAgent: true,
+            agencyId: user.agencyId,
+            agencyName: user.agencyName,
+            listingsLimit: user.subscription.listingsLimit,
+          },
+        });
+        return;
+      }
+
       // No active subscription found anywhere
       res.status(200).json({ subscription: null });
       return;

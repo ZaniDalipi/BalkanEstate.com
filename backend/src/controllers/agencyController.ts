@@ -1642,6 +1642,10 @@ export const redeemAgentCoupon = async (
     user.agency.joinedAt = new Date();
     user.agency.couponCode = couponCode;
 
+    // Set top-level agency fields for UI compatibility
+    user.agencyId = agency._id as any;
+    user.agencyName = agency.name;
+
     await user.save();
 
     // Mark coupon as used

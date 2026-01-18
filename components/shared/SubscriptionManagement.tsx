@@ -84,6 +84,21 @@ const FREE_PLAN: Plan = {
   tier: 0,
 };
 
+// Agency agent plan (obtained via coupon redemption, not purchasable)
+const AGENCY_AGENT_PLAN: Plan = {
+  id: 'agency_agent_yearly',
+  name: 'Agency Pro',
+  price: 0,  // Included with agency subscription
+  period: 'year',
+  periodMonths: 12,
+  features: ['25 active listings', 'Unlimited saved searches', 'Unlimited AI chat', 'Full analytics', 'Agency team support'],
+  listingLimit: 25,
+  color: 'from-emerald-500 to-teal-600',
+  tier: 2,
+  badge: 'Agency Member',
+  badgeColor: 'emerald',
+};
+
 // Map billing period to months
 const PERIOD_TO_MONTHS: Record<string, number> = {
   monthly: 1,
@@ -106,6 +121,8 @@ const LISTING_LIMITS: Record<string, number> = {
   pro_yearly: 250,  // 250 listings per year
   agency_yearly: 500,  // 500 listings for enterprise
   buyer_monthly: 0,  // Buyers don't create listings
+  // Agency agent tier (joined via coupon)
+  agency_agent_yearly: 25,  // 25 listings per year for agency agents
 };
 
 // Map product IDs to gradient colors
@@ -114,6 +131,7 @@ const PLAN_COLORS: Record<string, string> = {
   seller_pro_monthly: 'from-blue-500 to-blue-600',
   seller_pro_yearly: 'from-purple-500 to-purple-600',
   seller_enterprise_yearly: 'from-amber-500 to-orange-600',
+  agency_agent_yearly: 'from-emerald-500 to-teal-600',  // Agency agent color
 };
 
 // Map product IDs to tiers
@@ -122,6 +140,7 @@ const PLAN_TIERS: Record<string, number> = {
   seller_pro_monthly: 1,
   seller_pro_yearly: 2,
   seller_enterprise_yearly: 3,
+  agency_agent_yearly: 2,  // Same tier as pro yearly
 };
 
 // Gift/Coupon icon component
@@ -263,7 +282,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
   // Build plans object from products
   const plans = useMemo(() => {
-    const plansMap: Record<string, Plan> = { free: FREE_PLAN };
+    const plansMap: Record<string, Plan> = {
+      free: FREE_PLAN,
+      agency_agent_yearly: AGENCY_AGENT_PLAN,  // Non-purchasable, obtained via coupon
+    };
     products.forEach(product => {
       plansMap[product.productId] = productToPlan(product);
     });
