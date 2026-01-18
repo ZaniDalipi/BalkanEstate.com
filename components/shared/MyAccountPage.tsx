@@ -1375,16 +1375,23 @@ const MyAccountPage: React.FC = () => {
                                 <h2 className="font-bold text-lg sm:text-xl text-neutral-800">{state.currentUser.name}</h2>
                                 <p className="text-sm text-neutral-500 capitalize mb-2">{roleDisplayMap[state.currentUser.role]}</p>
 
-                                {/* Agency Badge */}
-                                {state.currentUser.role === UserRole.AGENT && state.currentUser.agencyName && (
-                                    <button
-                                        onClick={handleAgencyClick}
-                                        className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-primary-light rounded-full border border-primary/20 hover:from-blue-100 hover:to-primary-light/80 transition-all cursor-pointer"
-                                        title="View agency details"
-                                    >
-                                        <BuildingOfficeIcon className="w-4 h-4 text-primary" />
-                                        <span className="text-xs font-semibold text-primary">{state.currentUser.agencyName}</span>
-                                    </button>
+                                {/* Agency Badge - show actual agency name or "Independent Agent" */}
+                                {state.currentUser.role === UserRole.AGENT && (
+                                    state.currentUser.agencyName && state.currentUser.agencyName !== 'Independent Agent' ? (
+                                        <button
+                                            onClick={handleAgencyClick}
+                                            className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-primary-light rounded-full border border-primary/20 hover:from-blue-100 hover:to-primary-light/80 transition-all cursor-pointer"
+                                            title="View agency details"
+                                        >
+                                            <BuildingOfficeIcon className="w-4 h-4 text-primary" />
+                                            <span className="text-xs font-semibold text-primary">{state.currentUser.agencyName}</span>
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                                            <BuildingOfficeIcon className="w-4 h-4 text-gray-500" />
+                                            <span className="text-xs font-semibold text-gray-600">{t('account:agent.independentAgent', 'Independent Agent')}</span>
+                                        </div>
+                                    )
                                 )}
 
                                 {/* License Verified Badge */}
