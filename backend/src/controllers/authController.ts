@@ -536,65 +536,77 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // **AUTO-SYNC AGENCY DATA**: If user has agency.agencyId but missing top-level agencyId/agencyName
+    // **AUTO-SYNC AGENCY DATA**: Comprehensive sync for users in agencies
     // This fixes users who joined via coupon before the sync fix was implemented
     const Agency = (await import('../models/Agency')).default;
     const Agent = (await import('../models/Agent')).default;
-    let syncedAgencyName: string | null = null;
-    let syncedAgencyId: any = null;
+    let memberAgency: any = null;
 
-    if (user.agency?.agencyId && !user.agencyId) {
-      const agency = await Agency.findById(user.agency.agencyId);
-      if (agency) {
-        user.agencyId = agency._id as any;
-        user.agencyName = agency.name;
-        syncedAgencyId = agency._id;
-        syncedAgencyName = agency.name;
-        console.log(`🔄 Auto-synced agency data for user ${user.email}: ${agency.name}`);
-      }
+    // Method 1: Check if user has agency.agencyId reference
+    if (user.agency?.agencyId) {
+      memberAgency = await Agency.findById(user.agency.agencyId);
     }
 
-    // Also check if user is in an agency's agents array but missing agency reference
-    if (!user.agencyId && !user.agency?.agencyId) {
-      const memberAgency = await Agency.findOne({ agents: user._id });
-      if (memberAgency) {
+    // Method 2: Check if user is in an agency's agents array
+    if (!memberAgency) {
+      memberAgency = await Agency.findOne({ agents: user._id });
+    }
+
+    // If user is in an agency, sync ALL relevant fields
+    if (memberAgency) {
+      let needsSync = false;
+
+      // Sync top-level agencyId
+      if (!user.agencyId || String(user.agencyId) !== String(memberAgency._id)) {
         user.agencyId = memberAgency._id as any;
+        needsSync = true;
+      }
+
+      // Sync agencyName (fix "Independent Agent" or missing)
+      if (!user.agencyName || user.agencyName === 'Independent Agent') {
         user.agencyName = memberAgency.name;
-        syncedAgencyId = memberAgency._id;
-        syncedAgencyName = memberAgency.name;
-        if (!user.agency) {
-          user.agency = { role: 'agent' };
-        }
+        needsSync = true;
+      }
+
+      // Sync agency object
+      if (!user.agency) {
+        user.agency = { role: 'agent' };
+        needsSync = true;
+      }
+      if (!user.agency.agencyId || String(user.agency.agencyId) !== String(memberAgency._id)) {
         user.agency.agencyId = memberAgency._id as any;
         user.agency.role = 'agent';
-
-        // Also sync subscription if they're an agency agent without proper subscription
-        if (!user.subscription || user.subscription.tier === 'free') {
-          user.subscription = {
-            tier: 'agency_agent',
-            status: 'active',
-            listingsLimit: 25,
-            activeListingsCount: 0,
-            privateSellerCount: 0,
-            agentCount: 0,
-            promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
-            savedSearchesLimit: -1,
-            totalPaid: 0,
-            expiresAt: memberAgency.subscription?.expiresAt,
-          };
-        }
-        console.log(`🔄 Auto-synced agency membership for user ${user.email}: ${memberAgency.name}`);
+        needsSync = true;
       }
-    }
 
-    // Also sync Agent record if agency data was synced
-    if (syncedAgencyId && syncedAgencyName) {
+      // Sync subscription for agency agents (should be agency_agent tier, not free)
+      if (!user.subscription || user.subscription.tier === 'free') {
+        user.subscription = {
+          tier: 'agency_agent',
+          status: 'active',
+          listingsLimit: 25,
+          activeListingsCount: user.subscription?.activeListingsCount || 0,
+          privateSellerCount: user.subscription?.privateSellerCount || 0,
+          agentCount: user.subscription?.agentCount || 0,
+          promotionCoupons: { monthly: 0, available: 0, used: 0, rollover: 0, lastRefresh: new Date() },
+          savedSearchesLimit: -1,
+          totalPaid: user.subscription?.totalPaid || 0,
+          expiresAt: memberAgency.subscription?.expiresAt,
+        };
+        needsSync = true;
+      }
+
+      // Sync Agent record
       const agentRecord = await Agent.findOne({ userId: user._id });
       if (agentRecord && (!agentRecord.agencyId || agentRecord.agencyName === 'Independent Agent')) {
-        agentRecord.agencyId = syncedAgencyId;
-        agentRecord.agencyName = syncedAgencyName;
+        agentRecord.agencyId = memberAgency._id as any;
+        agentRecord.agencyName = memberAgency.name;
         await agentRecord.save();
-        console.log(`🔄 Auto-synced Agent record for ${user.email}: ${syncedAgencyName}`);
+        console.log(`🔄 Auto-synced Agent record for ${user.email}: ${memberAgency.name}`);
+      }
+
+      if (needsSync) {
+        console.log(`🔄 Auto-synced agency data for user ${user.email}: ${memberAgency.name}`);
       }
     }
 
