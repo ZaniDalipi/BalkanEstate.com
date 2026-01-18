@@ -130,6 +130,25 @@ const PricingPage: React.FC = () => {
     );
   };
 
+  // Check if user already has Enterprise subscription
+  const hasEnterpriseSubscription = (): boolean => {
+    const user = state.currentUser;
+    if (!user) return false;
+
+    const isEnterpriseTier =
+      user.subscription?.tier === 'agency_owner' ||
+      user.subscriptionPlan?.toLowerCase().includes('enterprise') ||
+      user.subscriptionPlan?.toLowerCase().includes('agency') ||
+      user.isEnterpriseTier;
+
+    const isActiveSubscription =
+      user.subscriptionStatus === 'active' ||
+      user.subscriptionStatus === 'trial' ||
+      user.subscriptionStatus === 'grace';
+
+    return !!(isEnterpriseTier && isActiveSubscription);
+  };
+
   const handlePlanSelection = (product: Product) => {
     if (!state.isAuthenticated || !state.currentUser) {
       dispatch({
@@ -169,6 +188,28 @@ const PricingPage: React.FC = () => {
       dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
       window.history.pushState({}, '', buildLocalizedPath('/account'));
+      return;
+    }
+
+    // If user already has Enterprise subscription, skip payment and go directly to agency creation
+    if (isEnterprisePlan && hasEnterpriseSubscription()) {
+      if (!state.pendingAgencyData) {
+        dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
+      } else {
+        // Agency data already pending, show info
+        dispatch({
+          type: 'SHOW_ALERT',
+          payload: {
+            type: 'info',
+            title: t('pricing:enterprise.alreadySubscribed', 'Already Subscribed'),
+            message: t(
+              'pricing:enterprise.createAgencyNow',
+              'You already have an Enterprise subscription! Create your agency now.'
+            ),
+          },
+        });
+        dispatch({ type: 'TOGGLE_ENTERPRISE_MODAL', payload: true });
+      }
       return;
     }
 

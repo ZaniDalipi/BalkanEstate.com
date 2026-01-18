@@ -5,6 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { BALKAN_LOCATIONS } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
 import { UserRole } from '../../types';
+import { createAgency } from '../../src/features/agencies/api/agencyApi';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -48,6 +49,21 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
     state.currentUser?.role === 'agent' ||
     !!state.currentUser?.agentId ||
     !!state.currentUser?.licenseNumber;
+
+  // Check if user already has Enterprise subscription (can create agency without payment)
+  const hasEnterpriseSubscription =
+    state.currentUser?.subscription?.tier === 'agency_owner' ||
+    state.currentUser?.subscriptionPlan?.toLowerCase().includes('enterprise') ||
+    state.currentUser?.subscriptionPlan?.toLowerCase().includes('agency') ||
+    state.currentUser?.isEnterpriseTier;
+
+  const hasActiveSubscription =
+    state.currentUser?.subscriptionStatus === 'active' ||
+    state.currentUser?.subscriptionStatus === 'trial' ||
+    state.currentUser?.subscriptionStatus === 'grace';
+
+  const canSkipPayment = hasEnterpriseSubscription && hasActiveSubscription;
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -209,7 +225,50 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       yearsInBusiness: formData.yearsInBusiness ? parseInt(formData.yearsInBusiness) : undefined,
     };
 
-    // Save agency data to context (will be created after payment)
+    // If user already has Enterprise subscription, create agency directly without payment
+    if (canSkipPayment) {
+      setIsCreating(true);
+      try {
+        const result = await createAgency(agencyData);
+
+        if (result && (result.agency || result._id || result.id)) {
+          // Agency created successfully
+          dispatch({
+            type: 'SHOW_ALERT',
+            payload: {
+              type: 'success',
+              title: 'Agency Created!',
+              message: `Your agency "${agencyData.name}" has been created successfully.`,
+            },
+          });
+
+          // Close modal and navigate to the new agency
+          onClose();
+
+          const agencySlug = result.agency?.slug || result.agency?._id || result._id;
+          if (agencySlug) {
+            dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+            window.history.pushState({}, '', `/agencies/${agencySlug}`);
+          }
+
+          // Call the callback if provided
+          if (onAgencyCreated) {
+            onAgencyCreated(result.agency?._id || result._id);
+          }
+        } else {
+          setError('Failed to create agency. Please try again.');
+        }
+      } catch (err: any) {
+        console.error('Failed to create agency:', err);
+        setError(err.message || 'Failed to create agency. Please try again.');
+      } finally {
+        setIsCreating(false);
+      }
+      return;
+    }
+
+    // User doesn't have Enterprise subscription - save data and redirect to pricing
     dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: agencyData });
 
     // Close this modal
@@ -234,11 +293,19 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             {state.pendingAgencyData ? 'Edit Agency Details' : 'Create Your Agency'}
           </h2>
           <p className="text-sm text-neutral-600">
-            {state.pendingAgencyData
-              ? 'Update your agency information before proceeding to payment'
-              : 'Set up your agency profile to showcase your team and properties'
+            {canSkipPayment
+              ? 'You have an active Enterprise subscription! Set up your agency profile now.'
+              : state.pendingAgencyData
+                ? 'Update your agency information before proceeding to payment'
+                : 'Set up your agency profile to showcase your team and properties'
             }
           </p>
+          {canSkipPayment && (
+            <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+              <CheckCircleIcon className="w-4 h-4" />
+              <span>Enterprise Subscription Active - No Payment Required</span>
+            </div>
+          )}
         </div>
 
         {/* Show eligibility warning if user is not an agent */}
@@ -688,7 +755,12 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
               {isCreating ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Processing...</span>
+                  <span>Creating Agency...</span>
+                </>
+              ) : canSkipPayment ? (
+                <>
+                  <BuildingOfficeIcon className="w-5 h-5" />
+                  <span>Create Agency</span>
                 </>
               ) : (
                 <>
