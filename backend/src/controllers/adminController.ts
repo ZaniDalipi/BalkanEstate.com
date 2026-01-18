@@ -209,8 +209,8 @@ export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<
     const skip = (Number(page) - 1) * Number(limit);
 
     const agencies = await Agency.find()
-      .populate('ownerId', 'name email')
-      .populate('agents', 'name email role')
+      .populate('ownerId', 'name email subscription')
+      .populate('agents', 'name email role subscription agencyName')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
@@ -218,8 +218,45 @@ export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<
 
     const total = await Agency.countDocuments();
 
+    // Enhance agencies with subscription and coupon stats
+    const enhancedAgencies = agencies.map((agency: any) => {
+      // Count agent coupons
+      const availableCoupons = agency.agentCoupons?.filter((c: any) => c.status === 'available').length || 0;
+      const usedCoupons = agency.agentCoupons?.filter((c: any) => c.status === 'used').length || 0;
+      const expiredCoupons = agency.agentCoupons?.filter((c: any) => c.status === 'expired').length || 0;
+
+      // Count agents with active subscriptions
+      const agentsWithSubscription = (agency.agents || []).filter((agent: any) =>
+        agent.subscription?.tier === 'agency_agent' && agent.subscription?.status === 'active'
+      ).length;
+
+      return {
+        ...agency,
+        stats: {
+          ...agency.stats,
+          totalAgents: agency.agents?.length || 0,
+          agentsWithSubscription,
+          maxAgents: 6, // Enterprise plan: owner + 5 agents
+          slotsRemaining: Math.max(0, 6 - (agency.agents?.length || 0)),
+        },
+        couponStats: {
+          total: (agency.agentCoupons?.length || 0),
+          available: availableCoupons,
+          used: usedCoupons,
+          expired: expiredCoupons,
+        },
+        subscription: {
+          status: agency.subscription?.status,
+          expiresAt: agency.subscription?.expiresAt,
+          isActive: agency.subscription?.status === 'active' &&
+                   agency.subscription?.expiresAt &&
+                   new Date(agency.subscription.expiresAt) > new Date(),
+        },
+      };
+    });
+
     res.json({
-      agencies,
+      agencies: enhancedAgencies,
       pagination: {
         currentPage: Number(page),
         totalPages: Math.ceil(total / Number(limit)),
@@ -230,6 +267,108 @@ export const getAllAgenciesAdmin = async (req: Request, res: Response): Promise<
   } catch (error: any) {
     console.error('Get agencies error:', error);
     res.status(500).json({ message: 'Error fetching agencies', error: error.message });
+  }
+};
+
+// @desc    Get single agency with full agent details
+// @route   GET /api/admin/agencies/:id
+// @access  Private/Admin + VPN
+export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const agency = await Agency.findById(id)
+      .populate('ownerId', 'name email phone subscription avatarUrl')
+      .populate('agents', 'name email phone role subscription agencyName avatarUrl createdAt')
+      .lean();
+
+    if (!agency) {
+      res.status(404).json({ message: 'Agency not found' });
+      return;
+    }
+
+    // Get detailed agent info with their coupon codes
+    const agentDetails = (agency.agents || []).map((agent: any) => {
+      // Find the coupon this agent used
+      const agentCoupon = agency.agentCoupons?.find(
+        (c: any) => String(c.usedBy) === String(agent._id)
+      );
+
+      return {
+        _id: agent._id,
+        name: agent.name,
+        email: agent.email,
+        phone: agent.phone,
+        avatarUrl: agent.avatarUrl,
+        createdAt: agent.createdAt,
+        subscription: {
+          tier: agent.subscription?.tier,
+          status: agent.subscription?.status,
+          listingsLimit: agent.subscription?.listingsLimit,
+          activeListingsCount: agent.subscription?.activeListingsCount || 0,
+          expiresAt: agent.subscription?.expiresAt,
+        },
+        coupon: agentCoupon ? {
+          code: agentCoupon.code,
+          usedAt: agentCoupon.usedAt,
+          expiresAt: agentCoupon.expiresAt,
+        } : null,
+      };
+    });
+
+    // Coupon statistics
+    const couponStats = {
+      total: agency.agentCoupons?.length || 0,
+      available: agency.agentCoupons?.filter((c: any) => c.status === 'available').length || 0,
+      used: agency.agentCoupons?.filter((c: any) => c.status === 'used').length || 0,
+      expired: agency.agentCoupons?.filter((c: any) => c.status === 'expired').length || 0,
+      coupons: agency.agentCoupons?.map((c: any) => ({
+        code: c.code,
+        status: c.status,
+        generatedAt: c.generatedAt,
+        expiresAt: c.expiresAt,
+        usedBy: c.usedBy,
+        usedAt: c.usedAt,
+      })) || [],
+    };
+
+    res.json({
+      agency: {
+        _id: agency._id,
+        name: agency.name,
+        email: agency.email,
+        phone: agency.phone,
+        website: agency.website,
+        address: agency.address,
+        city: agency.city,
+        country: agency.country,
+        logoUrl: agency.logoUrl,
+        coverImageUrl: agency.coverImageUrl,
+        owner: agency.ownerId,
+        invitationCode: agency.invitationCode,
+        createdAt: agency.createdAt,
+        subscription: {
+          status: agency.subscription?.status,
+          expiresAt: agency.subscription?.expiresAt,
+          isActive: agency.subscription?.status === 'active' &&
+                   agency.subscription?.expiresAt &&
+                   new Date(agency.subscription.expiresAt) > new Date(),
+        },
+        stats: {
+          totalAgents: agentDetails.length,
+          agentsWithActiveSubscription: agentDetails.filter(a => a.subscription.status === 'active').length,
+          maxAgents: 6,
+          slotsRemaining: Math.max(0, 6 - agentDetails.length),
+          totalProperties: agency.stats?.totalProperties || 0,
+          totalListings: agency.stats?.totalListings || 0,
+        },
+      },
+      agents: agentDetails,
+      couponStats,
+    });
+  } catch (error: any) {
+    console.error('Get agency detail error:', error);
+    res.status(500).json({ message: 'Error fetching agency details', error: error.message });
   }
 };
 

@@ -7,6 +7,7 @@ import {
   updateUserAdmin,
   deleteUser,
   getAllAgenciesAdmin,
+  getAgencyDetailAdmin,
   updateAgency,
   deleteAgency,
   getAllPropertiesAdmin,
@@ -72,6 +73,7 @@ router.delete('/users/:id', logAdminAction('DELETE_USER'), deleteUser);
 
 // ===== Agency Management =====
 router.get('/agencies', logAdminAction('VIEW_AGENCIES'), getAllAgenciesAdmin);
+router.get('/agencies/:id', logAdminAction('VIEW_AGENCY_DETAIL'), getAgencyDetailAdmin);
 router.patch('/agencies/:id', logAdminAction('UPDATE_AGENCY'), updateAgency);
 router.delete('/agencies/:id', logAdminAction('DELETE_AGENCY'), deleteAgency);
 
