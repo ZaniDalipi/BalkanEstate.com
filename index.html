@@ -247,6 +247,55 @@
       ::-webkit-scrollbar-thumb:hover {
         background: #A0AEC0;
       }
+
+      /* Leaflet popup mobile optimizations */
+      .leaflet-popup {
+        margin-bottom: 20px;
+      }
+      .leaflet-popup-content-wrapper {
+        padding: 0;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .leaflet-popup-content {
+        margin: 0;
+        width: auto !important;
+        max-width: calc(100vw - 60px);
+      }
+      .leaflet-popup-tip-container {
+        width: 30px;
+        height: 15px;
+      }
+      .leaflet-popup-tip {
+        width: 15px;
+        height: 15px;
+      }
+      /* Mobile-specific popup adjustments */
+      @media (max-width: 640px) {
+        .leaflet-popup-content {
+          max-width: calc(100vw - 40px);
+        }
+        .leaflet-popup-content-wrapper {
+          border-radius: 10px;
+        }
+      }
+      /* Better close button for popups */
+      .leaflet-popup-close-button {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 20px !important;
+        line-height: 28px !important;
+        top: 4px !important;
+        right: 4px !important;
+        color: #666 !important;
+        background: white !important;
+        border-radius: 50% !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+      }
+      .leaflet-popup-close-button:hover {
+        color: #333 !important;
+        background: #f5f5f5 !important;
+      }
     </style>
   </body>
 </html>
