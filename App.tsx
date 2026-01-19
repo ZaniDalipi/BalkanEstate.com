@@ -62,8 +62,8 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
 
-// 3D Decorative Elements
-import { Loader3D } from './components/shared/Decorative3D';
+// Lightweight loader (extracted for smaller initial bundle)
+import { Loader3D } from './components/shared/Loader3D';
 
 // Microsoft Clarity - Heatmaps & Session Recordings
 import ClarityInit from './src/app/components/ClarityInit';
