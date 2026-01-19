@@ -626,8 +626,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Show notification to user
       notificationService.showNotification(
         'Session Expired',
-        'Your session has expired. Please log in again.',
-        { tag: 'session-expired' }
+        { body: 'Your session has expired. Please log in again.', tag: 'session-expired' }
       );
       // Open auth modal
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
@@ -649,8 +648,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Show notification to user
         notificationService.showNotification(
           'Agency Joined!',
-          data.message || `You have joined ${data.agency?.name}!`,
-          { tag: 'agency-joined' }
+          { body: data.message || `You have joined ${data.agency?.name}!`, tag: 'agency-joined' }
         );
       }
 
@@ -664,8 +662,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // Show notification to user
         notificationService.showNotification(
           'Agency Left',
-          data.message || 'You have left your agency',
-          { tag: 'agency-left' }
+          { body: data.message || 'You have left your agency', tag: 'agency-left' }
         );
       }
     };
