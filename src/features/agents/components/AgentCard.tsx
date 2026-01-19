@@ -29,27 +29,32 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
+  // Fallback placeholder when no avatar or on error
   if (!agent.avatarUrl || error) {
     return (
-      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 border-2 border-blue-100">
-        <UserCircleIcon className="w-16 h-16 sm:w-20 sm:h-20 text-blue-300" />
+      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 aspect-square rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 border-2 border-blue-100 flex-shrink-0">
+        <UserCircleIcon className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-blue-300" />
       </div>
     );
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 aspect-square flex-shrink-0">
       {/* Blue glow effect */}
       <div className="absolute inset-0 bg-blue-400/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-900" />
-      <img
-        src={agent.avatarUrl}
-        alt={agent.name}
-        className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white shadow-xl transition-all duration-700 ${
-          loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        } group-hover:scale-105 group-hover:shadow-blue-300/30 group-hover:border-blue-100`}
-        onError={() => setError(true)}
-        onLoad={() => setLoaded(true)}
-      />
+      {/* Avatar container with strict constraints */}
+      <div className="w-full h-full rounded-full overflow-hidden border-3 sm:border-4 border-white shadow-xl group-hover:shadow-blue-300/30 group-hover:border-blue-100 transition-all duration-700 group-hover:scale-105">
+        <img
+          src={agent.avatarUrl}
+          alt={agent.name}
+          className={`w-full h-full min-w-full min-h-full object-cover object-center transition-all duration-700 ${
+            loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
+          onError={() => setError(true)}
+          onLoad={() => setLoaded(true)}
+          loading="lazy"
+        />
+      </div>
       {/* Subtle blue ring */}
       <div className="absolute inset-0 rounded-full border border-blue-200/50 animate-ping-slow opacity-0 group-hover:opacity-100" />
     </div>
@@ -207,18 +212,19 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         </div>
       )}
 
-      <div className="p-6 relative z-0">
+      <div className="p-4 sm:p-6 relative z-0">
         {/* Agent Avatar and Info */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative mb-4">
+          {/* Avatar wrapper - constrained size */}
+          <div className="relative mb-4 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0">
             <AgentAvatar agent={agent} />
-            
+
             {/* Premier Agent Badge with blue animation */}
-            <div className="absolute -bottom-2 -right-2">
+            <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2">
               <div className="relative">
                 <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-20" />
-                <div className="relative bg-gradient-to-br from-blue-600 to-blue-700 rounded-full p-2 shadow-xl">
-                  <CheckBadgeIcon className="w-6 h-6 text-white" />
+                <div className="relative bg-gradient-to-br from-blue-600 to-blue-700 rounded-full p-1.5 sm:p-2 shadow-xl">
+                  <CheckBadgeIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                 </div>
               </div>
             </div>
