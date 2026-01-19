@@ -205,11 +205,11 @@ const SavedSearchesPage: React.FC = () => {
                   <h3 className="text-xl font-semibold text-neutral-800">{t('empty.title')}</h3>
                   <p className="text-neutral-500 mt-2">{t('empty.description')}</p>
 
-                  <div className="mt-6 bg-neutral-50 p-4 rounded-lg border max-w-md mx-auto flex items-center justify-between">
-                      <p className="font-semibold text-neutral-700">{t('example.label')}: {t('example.name')}</p>
+                  <div className="mt-6 bg-neutral-50 p-4 rounded-lg border max-w-md mx-auto flex items-center justify-between gap-4">
+                      <p className="font-semibold text-neutral-700 text-left">{t('example.label')}: {t('example.name')}</p>
                       <button
                           onClick={handleSaveExample}
-                          className="px-4 py-2 bg-secondary text-white font-bold rounded-lg shadow-sm hover:bg-opacity-90 transition-colors text-sm"
+                          className="px-4 py-2 bg-secondary text-white font-bold rounded-lg shadow-sm hover:bg-opacity-90 transition-colors text-sm flex-shrink-0"
                       >
                           + {t('example.save')}
                       </button>

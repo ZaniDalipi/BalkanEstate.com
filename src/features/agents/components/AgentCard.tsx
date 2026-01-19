@@ -31,25 +31,27 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
 
   if (!agent.avatarUrl || error) {
     return (
-      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 border-2 border-blue-100">
+      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 border-2 border-blue-100 flex-shrink-0">
         <UserCircleIcon className="w-16 h-16 sm:w-20 sm:h-20 text-blue-300" />
       </div>
     );
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0">
       {/* Blue glow effect */}
       <div className="absolute inset-0 bg-blue-400/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-900" />
-      <img
-        src={agent.avatarUrl}
-        alt={agent.name}
-        className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white shadow-xl transition-all duration-700 ${
-          loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        } group-hover:scale-105 group-hover:shadow-blue-300/30 group-hover:border-blue-100`}
-        onError={() => setError(true)}
-        onLoad={() => setLoaded(true)}
-      />
+      <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl group-hover:shadow-blue-300/30 group-hover:border-blue-100 transition-all duration-700 group-hover:scale-105">
+        <img
+          src={agent.avatarUrl}
+          alt={agent.name}
+          className={`w-full h-full object-cover transition-all duration-700 ${
+            loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
+          onError={() => setError(true)}
+          onLoad={() => setLoaded(true)}
+        />
+      </div>
       {/* Subtle blue ring */}
       <div className="absolute inset-0 rounded-full border border-blue-200/50 animate-ping-slow opacity-0 group-hover:opacity-100" />
     </div>
