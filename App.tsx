@@ -32,18 +32,15 @@ import './src/i18n';
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
-// Lazy load auth components (loaded on demand)
-const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
-const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
+// Core layout components (loaded immediately - always visible)
+import Sidebar from './components/shared/Sidebar';
+import Header from './components/shared/Header';
 
-// Lazy load heavy pages to reduce initial bundle
+// Lazy load all pages and conditional components to reduce initial bundle
 const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
-
-// Lazy load Sidebar, Header, and Footer (they render after initial load)
-const Sidebar = lazy(() => import('./components/shared/Sidebar'));
-const Header = lazy(() => import('./components/shared/Header'));
-const Footer = lazy(() => import('./components/shared/Footer'));
+const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
+const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
 const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
 
 // Lazy loaded components (loaded on demand)
@@ -77,11 +74,11 @@ const TermsOfServicePage = lazy(() => import('./src/features/legal/components/Te
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 
-// Cookie Consent Banner (lazy loaded)
+// Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
 
-// 3D Decorative Elements
-import { Loader3D } from './components/shared/Decorative3D';
+// Lightweight loader (extracted for smaller initial bundle)
+import { Loader3D } from './components/shared/Loader3D';
 
 // Microsoft Clarity - Heatmaps & Session Recordings (lazy loaded)
 const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));

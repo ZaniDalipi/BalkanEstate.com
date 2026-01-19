@@ -234,7 +234,7 @@ const Onboarding: React.FC = () => {
                 className="rounded-lg mb-6 h-48 w-full object-cover"
                 loading="eager"
                 decoding="async"
-                fetchPriority="high"
+                fetchpriority="high"
               />
               <h3 className="text-2xl font-semibold mb-2 text-center">
                 {t('nav:onboarding.lookingToBuy')}

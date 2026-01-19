@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
+// Import Tailwind CSS (production build)
+import './src/index.css';
+
 // Initialize Sentry for error monitoring (must be first)
 import { initSentry } from './src/lib/sentry';
 initSentry();

@@ -1,31 +1,26 @@
 import React, { createContext, useReducer, useContext, Dispatch, useCallback, useEffect } from 'react';
 import { User, Property, SavedSearch, Conversation, AppState, AppAction, Filters, Message, AuthModalView, initialFilters, SearchPageState } from '../types';
-
-// Feature-specific API imports (replacing deprecated apiService)
 import {
-  checkAuth,
-  login as authLogin,
-  signup as authSignup,
-  logout as authLogout,
-  logoutAllDevices as authLogoutAllDevices,
-  requestPasswordReset,
-  resetPassword as authResetPassword,
-  loginWithSocial,
-  updateUser as authUpdateUser,
-} from '../src/features/auth/api';
-import { getProperties, createProperty, updateProperty } from '../src/features/properties/api';
-import {
-  getMyData,
-  toggleSavedHome as savedToggleSavedHome,
-  addSavedSearch as savedAddSavedSearch,
-  updateSavedSearchAccessTime as savedUpdateSavedSearchAccessTime,
-} from '../src/features/saved/api';
-import {
-  createConversation as convCreateConversation,
-  deleteConversation as convDeleteConversation,
-  sendMessage as convSendMessage,
-} from '../src/features/conversations/api';
-
+  checkAuth as apiCheckAuth,
+  getMyData as apiGetMyData,
+  login as apiLogin,
+  signup as apiSignup,
+  logout as apiLogout,
+  logoutAllDevices as apiLogoutAllDevices,
+  requestPasswordReset as apiRequestPasswordReset,
+  resetPassword as apiResetPassword,
+  loginWithSocial as apiLoginWithSocial,
+  getProperties as apiGetProperties,
+  toggleSavedHome as apiToggleSavedHome,
+  addSavedSearch as apiAddSavedSearch,
+  createConversation as apiCreateConversation,
+  deleteConversation as apiDeleteConversation,
+  sendMessage as apiSendMessage,
+  createListing as apiCreateListing,
+  updateListing as apiUpdateListing,
+  updateUser as apiUpdateUser,
+  updateSavedSearchAccessTime as apiUpdateSavedSearchAccessTime
+} from '../services/apiService';
 import { MUNICIPALITY_DATA } from '../services/propertyService';
 import { socketService } from '../services/socketService';
 import { notificationService } from '../services/notificationService';
@@ -359,11 +354,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const checkAuthStatus = useCallback(async () => {
     dispatch({ type: 'AUTH_CHECK_START' });
-    const user = await checkAuth();
+    const user = await apiCheckAuth();
     dispatch({ type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: !!user, user } });
     if (user) {
         dispatch({ type: 'USER_DATA_LOADING' });
-        const userData = await getMyData();
+        const userData = await apiGetMyData();
         dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
 
         // Connect to WebSocket with user ID
@@ -378,10 +373,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const login = useCallback(async (emailOrPhone: string, pass: string) => {
-    const user = await authLogin(emailOrPhone, pass);
+    const user = await apiLogin(emailOrPhone, pass);
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
     dispatch({ type: 'USER_DATA_LOADING' });
-    const userData = await getMyData();
+    const userData = await apiGetMyData();
     dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
 
     // Connect to WebSocket for real-time chat
@@ -429,7 +424,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       agencyInvitationCode?: string;
     }
   ) => {
-    const user = await authSignup(email, pass, options);
+    const user = await apiSignup(email, pass, options);
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
     dispatch({ type: 'USER_DATA_SUCCESS', payload: { savedHomes: [], savedSearches: [], conversations: [] } });
 
@@ -468,35 +463,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [state.pendingSubscription, state.isFirstLoginOffer, state.pendingRedirect]);
 
   const logout = useCallback(async () => {
-    await authLogout();
+    await apiLogout();
     // Disconnect from WebSocket
     socketService.disconnect();
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
   }, []);
 
   const logoutAllDevices = useCallback(async () => {
-    await authLogoutAllDevices();
+    await apiLogoutAllDevices();
     // Disconnect from WebSocket
     socketService.disconnect();
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
   }, []);
 
   const requestPasswordReset = useCallback(async (email: string) => {
-      await requestPasswordReset(email);
+      await apiRequestPasswordReset(email);
   }, []);
 
   const resetPassword = useCallback(async (token: string, newPassword: string) => {
-    const user = await authResetPassword(token, newPassword);
+    const user = await apiResetPassword(token, newPassword);
     dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
     dispatch({ type: 'USER_DATA_LOADING' });
-    const userData = await getMyData();
+    const userData = await apiGetMyData();
     dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
     return user;
   }, []);
 
   const loginWithSocial = useCallback((provider: 'google' | 'apple') => {
     // Redirect to OAuth endpoint
-    authLoginWithSocial(provider);
+    apiLoginWithSocial(provider);
   }, []);
 
   const handleOAuthCallback = useCallback(async (token: string, refreshToken?: string) => {
@@ -511,7 +506,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       // Fetch user profile securely via authenticated API call
-      const user = await checkAuth();
+      const user = await apiCheckAuth();
       if (user) {
         dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: true, user } });
         // Mark auth check as complete so the app can proceed
@@ -524,7 +519,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         tokenService.initializeProactiveRefresh();
 
         // Fetch additional user data
-        const userData = await getMyData();
+        const userData = await apiGetMyData();
         dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
       } else {
         throw new Error('Failed to fetch user profile');
@@ -542,7 +537,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const fetchProperties = useCallback(async (filters?: Filters) => {
       dispatch({ type: 'PROPERTIES_LOADING' });
       try {
-          const properties = await getProperties(filters);
+          const properties = await apiGetProperties(filters);
           dispatch({ type: 'PROPERTIES_SUCCESS', payload: properties });
       } catch (e: any) {
           dispatch({ type: 'PROPERTIES_ERROR', payload: e.message || 'Failed to fetch properties.'});
@@ -551,33 +546,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const toggleSavedHome = useCallback(async (property: Property) => {
     const isSaved = state.savedHomes.some(p => p.id === property.id);
-    await savedToggleSavedHome(property.id, isSaved);
+    await apiToggleSavedHome(property.id, isSaved);
     dispatch({ type: 'TOGGLE_SAVED_HOME', payload: property });
   }, [state.savedHomes]);
 
   const addSavedSearch = useCallback(async (search: SavedSearch) => {
-    const newSearch = await savedAddSavedSearch(search);
+    const newSearch = await apiAddSavedSearch(search);
     dispatch({ type: 'ADD_SAVED_SEARCH', payload: newSearch });
   }, []);
 
   const createConversation = useCallback(async (propertyId: string) => {
-      const conversation = await convCreateConversation(propertyId);
+      const conversation = await apiCreateConversation(propertyId);
       dispatch({ type: 'CREATE_CONVERSATION', payload: conversation });
       return conversation;
   }, []);
 
   const deleteConversation = useCallback(async (conversationId: string) => {
-      await convDeleteConversation(conversationId);
+      await apiDeleteConversation(conversationId);
       dispatch({ type: 'DELETE_CONVERSATION', payload: conversationId });
   }, []);
 
   const sendMessage = useCallback(async (conversationId: string, message: Message) => {
-      const result = await convSendMessage(conversationId, message);
+      const result = await apiSendMessage(conversationId, message);
       dispatch({ type: 'ADD_MESSAGE', payload: { conversationId, message: result.message }});
   }, []);
 
   const createListing = useCallback(async (property: Property) => {
-      const result = await createProperty(property);
+      const result = await apiCreateListing(property);
       // Add the new property to the list
       dispatch({ type: 'ADD_PROPERTY', payload: result.property });
 
@@ -598,13 +593,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [state.currentUser]);
 
   const updateListing = useCallback(async (property: Property) => {
-      const updatedProperty = await updateProperty(property);
+      const updatedProperty = await apiUpdateListing(property);
       dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
       return updatedProperty;
   }, []);
   
   const updateUser = useCallback(async (userData: Partial<User>) => {
-      const updatedUser = await authUpdateUser(userData);
+      const updatedUser = await apiUpdateUser(userData);
       dispatch({ type: 'UPDATE_USER', payload: updatedUser });
       return updatedUser;
   }, []);
@@ -614,7 +609,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const updateSavedSearchAccessTime = useCallback(async (searchId: string, seenPropertyIds?: string[]) => {
-    await savedUpdateSavedSearchAccessTime(searchId, seenPropertyIds);
+    await apiUpdateSavedSearchAccessTime(searchId, seenPropertyIds);
     dispatch({ type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId, seenPropertyIds } });
   }, []);
 

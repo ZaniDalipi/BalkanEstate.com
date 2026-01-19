@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import AlertDialog, { AlertType, AlertAction } from '../components/shared/AlertDialog';
+import React, { createContext, useContext, useState, useCallback, lazy, Suspense } from 'react';
+import type { AlertType, AlertAction } from '../components/shared/AlertDialog';
+
+// Lazy load AlertDialog to reduce initial bundle
+const AlertDialog = lazy(() => import('../components/shared/AlertDialog'));
 
 interface AlertConfig {
   type: AlertType;
@@ -73,18 +76,20 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <AlertContext.Provider value={{ showAlert, showError, showWarning, showSuccess, showInfo, closeAlert }}>
       {children}
-      {alert && (
-        <AlertDialog
-          isOpen={isOpen}
-          onClose={closeAlert}
-          type={alert.type}
-          title={alert.title}
-          message={alert.message}
-          actions={alert.actions}
-          showCloseButton={alert.showCloseButton}
-          icon={alert.icon}
-        />
-      )}
+      <Suspense fallback={null}>
+        {alert && (
+          <AlertDialog
+            isOpen={isOpen}
+            onClose={closeAlert}
+            type={alert.type}
+            title={alert.title}
+            message={alert.message}
+            actions={alert.actions}
+            showCloseButton={alert.showCloseButton}
+            icon={alert.icon}
+          />
+        )}
+      </Suspense>
     </AlertContext.Provider>
   );
 };
