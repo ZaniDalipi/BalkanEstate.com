@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-@source "../index.html";
-@source "./**/*.{js,ts,jsx,tsx}";
-@source "../*.{js,ts,jsx,tsx}";
-
 @theme {
   --font-sans: 'Inter', sans-serif;
 
@@ -44,7 +40,3 @@
     100% { opacity: 1; }
   }
 }
-
-/* Custom media queries for landscape modes */
-@custom-media --landscape (orientation: landscape) and (max-height: 500px);
-@custom-media --tablet-landscape (orientation: landscape) and (min-width: 768px) and (max-width: 1024px);
