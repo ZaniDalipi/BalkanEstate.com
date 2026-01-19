@@ -723,6 +723,9 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
   const markerRefsMap = React.useRef<Map<string, L.Marker>>(new Map());
+  const prevHoveredIdRef = React.useRef<string | null | undefined>(null);
+  const prevZoomRef = React.useRef<number>(zoom);
+  const prevNightModeRef = React.useRef<boolean>(isNightMode);
 
   useMapEvents({
     zoomend: () => {
@@ -730,17 +733,47 @@ export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hove
     },
   });
 
-  // Update marker icon when hover state or night mode changes
+  // Update marker icon only when hover state, zoom, or night mode actually changes
   React.useEffect(() => {
-    properties.forEach((prop) => {
-      const marker = markerRefsMap.current.get(prop.id);
-      if (marker) {
-        const isHovered = prop.id === hoveredPropertyId;
-        const newIcon = createCustomMarkerIcon(prop, zoom, isHovered, isNightMode);
-        marker.setIcon(newIcon);
+    const hoverChanged = prevHoveredIdRef.current !== hoveredPropertyId;
+    const zoomChanged = prevZoomRef.current !== zoom;
+    const nightModeChanged = prevNightModeRef.current !== isNightMode;
+
+    if (!hoverChanged && !zoomChanged && !nightModeChanged) return;
+
+    // Only update affected markers for hover changes (performance optimization)
+    if (hoverChanged && !zoomChanged && !nightModeChanged) {
+      // Update previously hovered marker
+      if (prevHoveredIdRef.current) {
+        const prevMarker = markerRefsMap.current.get(prevHoveredIdRef.current);
+        const prevProp = properties.find(p => p.id === prevHoveredIdRef.current);
+        if (prevMarker && prevProp) {
+          prevMarker.setIcon(createCustomMarkerIcon(prevProp, zoom, false, isNightMode));
+        }
       }
-    });
-  }, [hoveredPropertyId, zoom, properties, isNightMode]);
+      // Update newly hovered marker
+      if (hoveredPropertyId) {
+        const newMarker = markerRefsMap.current.get(hoveredPropertyId);
+        const newProp = properties.find(p => p.id === hoveredPropertyId);
+        if (newMarker && newProp) {
+          newMarker.setIcon(createCustomMarkerIcon(newProp, zoom, true, isNightMode));
+        }
+      }
+    } else {
+      // Full update for zoom or night mode changes
+      markerRefsMap.current.forEach((marker, id) => {
+        const prop = properties.find(p => p.id === id);
+        if (prop) {
+          const isHovered = id === hoveredPropertyId;
+          marker.setIcon(createCustomMarkerIcon(prop, zoom, isHovered, isNightMode));
+        }
+      });
+    }
+
+    prevHoveredIdRef.current = hoveredPropertyId;
+    prevZoomRef.current = zoom;
+    prevNightModeRef.current = isNightMode;
+  }, [hoveredPropertyId, zoom, isNightMode, properties]);
 
   // Helper to check if property is actively promoted
   const isPropertyPromoted = (prop: Property) =>
