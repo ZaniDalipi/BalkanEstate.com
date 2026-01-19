@@ -17,17 +17,16 @@ import './src/i18n';
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
-// Core components (loaded immediately)
-import AuthPage from './src/features/auth/components/AuthModal';
-
-// Lazy load heavy pages to reduce initial bundle
-const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
-const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
-import EmailVerificationRequired from './src/features/auth/components/EmailVerificationRequired';
+// Core layout components (loaded immediately - always visible)
 import Sidebar from './components/shared/Sidebar';
 import Header from './components/shared/Header';
-import Footer from './components/shared/Footer';
-import AlertDialog from './components/shared/AlertDialog';
+
+// Lazy load all pages and conditional components to reduce initial bundle
+const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
+const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
+const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
+const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
+const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -60,8 +59,8 @@ const TermsOfServicePage = lazy(() => import('./src/features/legal/components/Te
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 
-// Cookie Consent Banner
-import CookieConsent from './src/shared/components/CookieConsent';
+// Cookie Consent Banner (lazy loaded - shown after initial render)
+const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
 
 // 3D Decorative Elements
 import { Loader3D } from './components/shared/Decorative3D';
@@ -557,15 +556,17 @@ const MainLayout: React.FC = () => {
         </Suspense>
 
         {/* Global Alert Dialog */}
-        {state.alertDialog && (
-          <AlertDialog
-            isOpen={state.alertDialog.isOpen}
-            type={state.alertDialog.type}
-            title={state.alertDialog.title}
-            message={state.alertDialog.message}
-            onClose={() => dispatch({ type: 'HIDE_ALERT' })}
-          />
-        )}
+        <Suspense fallback={null}>
+          {state.alertDialog && (
+            <AlertDialog
+              isOpen={state.alertDialog.isOpen}
+              type={state.alertDialog.type}
+              title={state.alertDialog.title}
+              message={state.alertDialog.message}
+              onClose={() => dispatch({ type: 'HIDE_ALERT' })}
+            />
+          )}
+        </Suspense>
     </div>
   );
 };
@@ -643,7 +644,11 @@ const AppWrapper: React.FC = () => {
                                    !isAuthFlowPage;
 
     if (needsEmailVerification && state.currentUser) {
-        return <EmailVerificationRequired email={state.currentUser.email} />;
+        return (
+            <Suspense fallback={<FullScreenLoader />}>
+                <EmailVerificationRequired email={state.currentUser.email} />
+            </Suspense>
+        );
     }
 
     if (!state.onboardingComplete && !isAuthFlowPage) {
@@ -652,7 +657,9 @@ const AppWrapper: React.FC = () => {
                 <Suspense fallback={<FullScreenLoader />}>
                     <Onboarding />
                 </Suspense>
-                {state.isAuthModalOpen && <AuthPage />}
+                <Suspense fallback={null}>
+                    {state.isAuthModalOpen && <AuthPage />}
+                </Suspense>
             </>
         )
     }
@@ -660,8 +667,10 @@ const AppWrapper: React.FC = () => {
     return (
         <>
             <MainLayout />
-            {state.isAuthModalOpen && <AuthPage />}
-            <CookieConsent />
+            <Suspense fallback={null}>
+                {state.isAuthModalOpen && <AuthPage />}
+                <CookieConsent />
+            </Suspense>
         </>
     );
 }
