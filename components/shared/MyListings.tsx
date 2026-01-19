@@ -92,12 +92,12 @@ const ListingCard: React.FC<{
     <div className="bg-white p-4 rounded-xl border border-neutral-200 hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row gap-5">
         <button onClick={handleCardClick} className="block flex-shrink-0 w-full sm:w-56">
              {imageError ? (
-                <div className="w-full h-40 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-lg">
+                <div className="w-full h-48 sm:h-40 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-lg">
                     <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
                 </div>
             ) : (
-                <div className="w-full h-40 rounded-lg overflow-hidden bg-neutral-100">
-                    <img src={property.imageUrl} alt={property.address} className="w-full h-full object-cover" onError={() => setImageError(true)} />
+                <div className="w-full h-48 sm:h-40 rounded-lg overflow-hidden bg-neutral-100">
+                    <img src={property.imageUrl} alt={property.address} className="w-full h-full object-cover object-center" onError={() => setImageError(true)} />
                 </div>
             )}
         </button>
