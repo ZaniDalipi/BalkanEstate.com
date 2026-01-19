@@ -40,6 +40,7 @@ const initialSearchPageState: SearchPageState = {
 };
 
 const initialState: AppState = {
+  user: null,
   onboardingComplete: false,
   isAuthenticating: true,
   activeView: 'search',
@@ -249,6 +250,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 messages: [message],
                 createdAt: Date.now(),
                 isRead: false,
+                buyerUnreadCount: 0,
+                sellerUnreadCount: 1,
             };
             return { ...state, conversations: [newConversation, ...state.conversations] };
         }
