@@ -78,59 +78,6 @@
     <!-- Leaflet CSS - deferred loading (only needed for map pages) -->
     <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" onload="this.onload=null;this.rel='stylesheet'" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
     <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"></noscript>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              primary: {
-                DEFAULT: '#0252CD',
-                light: '#E6F0FF',
-                dark: '#003A96',
-              },
-              secondary: {
-                DEFAULT: '#FFA500',
-              },
-              neutral: {
-                50: '#F8F9FA',
-                100: '#F1F3F5',
-                200: '#E9ECEF',
-                300: '#DEE2E6',
-                400: '#CED4DA',
-                500: '#A0AEC0',
-                600: '#718096',
-                700: '#4A5568',
-                800: '#2D3748',
-                900: '#1A202C',
-              },
-            },
-            screens: {
-              'xs': '375px',
-              'landscape': { 'raw': '(orientation: landscape) and (max-height: 500px)' },
-              'tablet-landscape': { 'raw': '(orientation: landscape) and (min-width: 768px) and (max-width: 1024px)' },
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0', transform: 'scale(0.98)' },
-                '100%': { opacity: '1', transform: 'scale(1)' },
-              },
-              imageFade: {
-                '0%': { opacity: '0.6' },
-                '100%': { opacity: '1' },
-              }
-            },
-            animation: {
-              'fade-in': 'fadeIn 0.3s ease-in-out',
-              'image-fade': 'imageFade 0.4s ease-in-out',
-            },
-          }
-        }
-      }
-    </script>
   <script type="importmap">
 {
   "imports": {
