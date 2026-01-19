@@ -215,30 +215,57 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
       <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200">
         <h3 className="text-base sm:text-lg font-bold text-neutral-800 mb-4">{t('property:actions.contactSeller')}</h3>
 
-        {/* Seller Info */}
-        <div className="flex items-center gap-4 mb-4">
-          {property.seller?.avatarUrl ? (
-            <img
-              src={property.seller.avatarUrl}
-              alt={property.seller.name}
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100"
-            />
-          ) : (
-            <UserCircleIcon className="w-12 h-12 text-neutral-300" />
-          )}
-          <div className="flex-1">
-            <p className="font-bold text-base text-neutral-900">{property.seller?.name}</p>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                property.seller?.type === 'agent'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-green-100 text-green-700'
-              }`}>
-                {property.seller?.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
-              </span>
+        {/* Seller Info - Clickable for agents */}
+        {property.seller?.type === 'agent' ? (
+          <button
+            onClick={() => {
+              dispatch({ type: 'SET_SELECTED_AGENT', payload: property.sellerId });
+              window.history.pushState({}, '', `/agents/${property.sellerId}`);
+            }}
+            className="flex items-center gap-4 mb-4 w-full p-2 -m-2 rounded-xl hover:bg-blue-50 transition-colors group cursor-pointer text-left"
+          >
+            {property.seller?.avatarUrl ? (
+              <img
+                src={property.seller.avatarUrl}
+                alt={property.seller.name}
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all"
+              />
+            ) : (
+              <UserCircleIcon className="w-12 h-12 text-neutral-300 group-hover:text-blue-400 transition-colors" />
+            )}
+            <div className="flex-1">
+              <p className="font-bold text-base text-neutral-900 group-hover:text-blue-600 transition-colors">{property.seller?.name}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
+                  {t('property:seller.agent')}
+                </span>
+                <span className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {t('property:seller.viewProfile', 'View Profile')} →
+                </span>
+              </div>
+            </div>
+          </button>
+        ) : (
+          <div className="flex items-center gap-4 mb-4">
+            {property.seller?.avatarUrl ? (
+              <img
+                src={property.seller.avatarUrl}
+                alt={property.seller.name}
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100"
+              />
+            ) : (
+              <UserCircleIcon className="w-12 h-12 text-neutral-300" />
+            )}
+            <div className="flex-1">
+              <p className="font-bold text-base text-neutral-900">{property.seller?.name}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700">
+                  {t('property:seller.private')}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Contact Buttons */}
         <div className="space-y-2">
