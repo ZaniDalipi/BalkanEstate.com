@@ -351,6 +351,18 @@ const MapComponent: React.FC<MapComponentProps> = ({
     onMapMoveRef.current = onMapMove;
   });
 
+  // Debounce ref for map center updates to prevent infinite loops with popup autoPan
+  const mapCenterDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup debounce timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (mapCenterDebounceRef.current) {
+        clearTimeout(mapCenterDebounceRef.current);
+      }
+    };
+  }, []);
+
   // Handle shadow time change from SunPositionControl
   const handleShadowTimeChange = useCallback((dateTime: Date) => {
     setShadowDateTime(dateTime);
@@ -369,11 +381,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [show3DBuildings]);
 
-  // Update map center coordinates when map moves
+  // Update map center coordinates when map moves (debounced to prevent popup autoPan loops)
   const handleMapMoveWithCenter = useCallback((bounds: L.LatLngBounds, center: L.LatLng) => {
-    setMapCenterLng(center.lng);
-    setMapCenterLat(center.lat);
+    // Always call the parent callback immediately for search updates
     onMapMoveRef.current(bounds, center);
+
+    // Debounce the internal state updates to prevent infinite loops
+    // when popup autoPan triggers moveend events
+    if (mapCenterDebounceRef.current) {
+      clearTimeout(mapCenterDebounceRef.current);
+    }
+    mapCenterDebounceRef.current = setTimeout(() => {
+      setMapCenterLng(center.lng);
+      setMapCenterLat(center.lat);
+    }, 100);
   }, []);
 
   const validProperties = useMemo(() => {
