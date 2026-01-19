@@ -228,6 +228,7 @@ const ResetPasswordPage: React.FC = () => {
                             placeholder=" "
                             required
                             disabled={!token}
+                            autoComplete="new-password"
                         />
                         <label htmlFor="password" className={floatingLabelClasses}>{t('resetPassword.newPassword')}</label>
                         <button
@@ -253,6 +254,7 @@ const ResetPasswordPage: React.FC = () => {
                             placeholder=" "
                             required
                             disabled={!token}
+                            autoComplete="new-password"
                         />
                         <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('resetPassword.confirmPassword')}</label>
                         <button

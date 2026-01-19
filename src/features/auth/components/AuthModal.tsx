@@ -287,7 +287,7 @@ const AuthPage: React.FC = () => {
                         {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
 
                         <form onSubmit={handleEmailSubmit} className="space-y-4">
-                            <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
+                            <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required autoComplete="email" /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
                             <div>
                                 <div className="relative">
                                     <input
@@ -298,6 +298,7 @@ const AuthPage: React.FC = () => {
                                         className={floatingInputClasses}
                                         placeholder=" "
                                         required
+                                        autoComplete={state.authModalView === 'signup' ? 'new-password' : 'current-password'}
                                     />
                                     <label htmlFor="password" className={floatingLabelClasses}>{t('auth:login.password')}</label>
                                     <button
@@ -365,7 +366,7 @@ const AuthPage: React.FC = () => {
                         <p className="text-sm text-neutral-600 text-center mb-6">{t('auth:forgotPassword.subtitle')}</p>
                         {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
                         <form onSubmit={handlePasswordResetRequest} className="space-y-4">
-                             <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
+                             <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required autoComplete="email" /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
                             <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? t('common:loading') : t('auth:forgotPassword.submit')}</button>
                             <button type="button" onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })} className="w-full text-sm font-semibold text-primary hover:underline mt-2">{t('auth:forgotPassword.backToLogin')}</button>
                         </form>
