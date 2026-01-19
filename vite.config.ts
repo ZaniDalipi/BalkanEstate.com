@@ -55,6 +55,12 @@ export default defineConfig(({ mode }) => {
         } : undefined, // No proxy in staging/production (direct API calls)
       },
       plugins: [tailwindcss(), react()],
+      css: {
+        // Disable Vite's built-in PostCSS processing - let @tailwindcss/vite handle it
+        postcss: {
+          plugins: [],
+        },
+      },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
