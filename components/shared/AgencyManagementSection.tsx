@@ -372,17 +372,17 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
     <div className="space-y-4">
       {/* Current Agency Status */}
       <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
             <h4 className="text-sm font-semibold text-gray-900">Current Agency</h4>
-            <p className="text-lg font-bold text-blue-600 mt-1">{currentAgencyInfo}</p>
+            <p className="text-lg font-bold text-blue-600 mt-1 break-words">{currentAgencyInfo}</p>
           </div>
           {!showForm && (
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center"
               >
                 {isIndependent ? 'Join an Agency' : 'Switch Agency'}
               </button>
@@ -391,7 +391,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                   type="button"
                   onClick={handleLeaveAgency}
                   disabled={loading}
-                  className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-4 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
                 >
                   Leave Agency
                 </button>

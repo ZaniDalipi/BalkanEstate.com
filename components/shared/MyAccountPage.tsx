@@ -1241,8 +1241,8 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
                 </fieldset>
             )}
 
-            <div className="flex justify-end pt-4">
-                <button type="submit" disabled={isSaving} className="px-6 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors w-36 disabled:opacity-50">
+            <div className="flex justify-center sm:justify-end pt-4">
+                <button type="submit" disabled={isSaving} className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors disabled:opacity-50">
                     {isSaving ? t('profile.saving') : (isSaved ? t('profile.saved') : t('profile.saveChanges'))}
                 </button>
             </div>
