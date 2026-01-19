@@ -57,3 +57,91 @@
 /* Custom Media Query Variants for landscape modes */
 @custom-variant landscape (@media (orientation: landscape) and (max-height: 500px));
 @custom-variant tablet-landscape (@media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px));
+
+/* Leaflet Map Popup Styling */
+.leaflet-popup-content-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  min-width: 140px;
+  max-width: 220px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.leaflet-popup-content b {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 4px;
+}
+
+.leaflet-popup-tip-container {
+  margin-top: -1px;
+}
+
+.leaflet-popup-tip {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-popup-close-button {
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 18px !important;
+  line-height: 24px !important;
+  color: #718096 !important;
+  top: 6px !important;
+  right: 6px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f7fafc !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #2d3748 !important;
+  background: #e2e8f0 !important;
+}
+
+/* Mobile optimizations for Leaflet popup */
+@media (max-width: 640px) {
+  .leaflet-popup-content-wrapper {
+    border-radius: 10px;
+  }
+
+  .leaflet-popup-content {
+    margin: 10px 12px;
+    font-size: 12px;
+    min-width: 120px;
+    max-width: 180px;
+    padding-right: 20px;
+  }
+
+  .leaflet-popup-content b {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+
+  .leaflet-popup-close-button {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 16px !important;
+    line-height: 22px !important;
+    top: 4px !important;
+    right: 4px !important;
+  }
+}
