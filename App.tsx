@@ -6,8 +6,14 @@ import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
 import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
-import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from './src/components/seo';
-import { Analytics } from './src/components/marketing/Analytics';
+// Lazy load SEO components (don't block initial render)
+const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
+const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
+const FAQSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.FAQSchema })));
+import { realEstateFAQs } from './src/components/seo';
+
+// Lazy load Analytics (only loads if env vars exist)
+const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
 import { UserRole, HowItWorksTab, AdminSection } from './types';
 import { LogoIcon } from './constants';
 
@@ -25,11 +31,10 @@ const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboa
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
 import EmailVerificationRequired from './src/features/auth/components/EmailVerificationRequired';
 
-// Lazy load Sidebar and Header (they render after initial load)
+// Lazy load Sidebar, Header, and Footer (they render after initial load)
 const Sidebar = lazy(() => import('./components/shared/Sidebar'));
 const Header = lazy(() => import('./components/shared/Header'));
-
-import Footer from './components/shared/Footer';
+const Footer = lazy(() => import('./components/shared/Footer'));
 import AlertDialog from './components/shared/AlertDialog';
 
 // Lazy loaded components (loaded on demand)
@@ -69,8 +74,8 @@ import CookieConsent from './src/shared/components/CookieConsent';
 // 3D Decorative Elements
 import { Loader3D } from './components/shared/Decorative3D';
 
-// Microsoft Clarity - Heatmaps & Session Recordings
-import ClarityInit from './src/app/components/ClarityInit';
+// Microsoft Clarity - Heatmaps & Session Recordings (lazy loaded)
+const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));
 
 // Loading fallback component with 3D animation
 const PageLoader: React.FC = () => (
@@ -686,21 +691,21 @@ const App: React.FC = () => {
             <AlertProvider>
               <NotificationProvider>
                 <ConfirmationProvider>
-                  {/* Global SEO Components */}
-                  <SEO />
-                  <OrganizationSchema />
-                  <FAQSchema faqs={realEstateFAQs} />
-
-                  {/* Analytics - only loaded if IDs are provided */}
-                  {(googleAnalyticsId || facebookPixelId) && (
-                    <Analytics
-                      googleAnalyticsId={googleAnalyticsId}
-                      facebookPixelId={facebookPixelId}
-                    />
-                  )}
-
-                  {/* Microsoft Clarity - Heatmaps & Session Recordings */}
-                  <ClarityInit />
+                  {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
+                  <Suspense fallback={null}>
+                    <SEO />
+                    <OrganizationSchema />
+                    <FAQSchema faqs={realEstateFAQs} />
+                    {/* Analytics - only loaded if IDs are provided */}
+                    {(googleAnalyticsId || facebookPixelId) && (
+                      <Analytics
+                        googleAnalyticsId={googleAnalyticsId}
+                        facebookPixelId={facebookPixelId}
+                      />
+                    )}
+                    {/* Microsoft Clarity - Heatmaps & Session Recordings */}
+                    <ClarityInit />
+                  </Suspense>
 
                   <AppWrapper />
                 </ConfirmationProvider>

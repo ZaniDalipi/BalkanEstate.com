@@ -169,12 +169,12 @@ export const MapEvents: React.FC<{
 
       // Force map to invalidate size and re-render layers after a short delay
       // This ensures markers render properly on first load
+      // Note: We don't fire 'moveend' here as onMove was already called above,
+      // and firing it again can cause infinite update loops
       setTimeout(() => {
         try {
           if (map.getContainer()) {
             map.invalidateSize();
-            // Trigger a moveend event to ensure everything updates
-            map.fire('moveend');
           }
         } catch (e) {
           console.debug('Map invalidateSize deferred:', e);

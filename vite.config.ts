@@ -120,6 +120,8 @@ export default defineConfig(({ mode }) => {
               ai: ['@google/genai', '@google/generative-ai'],
               // Error tracking - defer loading
               sentry: ['@sentry/react'],
+              // Helmet for SEO
+              helmet: ['react-helmet-async'],
             },
           },
         },
