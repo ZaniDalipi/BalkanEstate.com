@@ -79,7 +79,6 @@ export const helmetConfig = helmet({
         "'self'",
         "'unsafe-inline'", // Required for some inline scripts
         "'unsafe-eval'", // Required for some libraries
-        'https://cdn.tailwindcss.com',
         'https://unpkg.com',
         'https://www.googletagmanager.com',
         'https://connect.facebook.net',
