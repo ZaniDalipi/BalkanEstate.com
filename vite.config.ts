@@ -102,8 +102,8 @@ export default defineConfig(({ mode }) => {
             chunkFileNames: `assets/[name].[hash].js`,
             assetFileNames: `assets/[name].[hash].[ext]`,
             manualChunks: {
-              // Core React - smallest chunk, always needed
-              vendor: ['react', 'react-dom'],
+              // Core React + Router - always needed
+              vendor: ['react', 'react-dom', 'react-router-dom'],
               // Map functionality - only loaded when map is visible
               leaflet: ['leaflet', 'react-leaflet'],
               // Internationalization

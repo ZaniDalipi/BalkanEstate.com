@@ -45,7 +45,6 @@ const ToolsSection: React.FC<{
 }> = ({ activeView, onNavClick, onClose }) => {
   const { t } = useTranslation(['nav']);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { getLocalizedPath } = useLocalizedNavigation();
 
   const toolItems = [
     { view: 'valuation' as AppView, label: t('nav:valuation'), icon: <CurrencyDollarIcon /> },
@@ -109,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation(['nav', 'common', 'auth']);
     const { state, dispatch, logout } = useAppContext();
     const { activeView, isAuthenticated, currentUser, conversations } = state;
-    const { getLocalizedPath } = useLocalizedNavigation();
+    const { navigate } = useLocalizedNavigation();
 
     // Calculate total unread messages
     const totalUnreadCount = conversations.reduce((total, conversation) => {
@@ -126,9 +125,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
-            // Update browser URL with language prefix
-            const route = view === 'search' ? '/' : `/${view}`;
-            window.history.pushState({}, '', getLocalizedPath(route));
+            // Navigate using React Router
+            const route = view === 'search' ? '/search' : `/${view}`;
+            navigate(route);
         }
         onClose(); // Close sidebar on mobile after navigation
     };
@@ -138,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             // Clear selected agency when creating new listing
             dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
             dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-            window.history.pushState({}, '', getLocalizedPath('/create-listing'));
+            navigate('/create-listing');
         } else {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
         }
@@ -155,7 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         // After logout, reset to a default public view and clear any selected items
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        window.history.pushState({}, '', getLocalizedPath('/'));
+        navigate('/search');
         onClose();
     };
 
