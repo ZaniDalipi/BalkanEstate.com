@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230252CD'%3e%3cpath d='M12 21V5L10 7V23L12 21Z M4 21V10L2 12V23L4 21Z' /%3e%3cpath d='M12 5H20V21H12V5Z M4 10H10V21H4V10Z' /%3e%3c/svg%3e" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- Primary Meta Tags -->
     <title>BalkanEstateAI - Find Your Dream Property in the Balkans</title>
@@ -73,7 +73,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://images.unsplash.com">
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
 
     <!-- Google Fonts with display=swap (non-blocking) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -111,6 +110,11 @@
                 800: '#2D3748',
                 900: '#1A202C',
               },
+            },
+            screens: {
+              'xs': '375px',
+              'landscape': { 'raw': '(orientation: landscape) and (max-height: 500px)' },
+              'tablet-landscape': { 'raw': '(orientation: landscape) and (min-width: 768px) and (max-width: 1024px)' },
             },
             keyframes: {
               fadeIn: {
@@ -174,6 +178,138 @@
       input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
+      }
+
+      /* Safe area insets for notched devices */
+      .safe-area-inset-top {
+        padding-top: env(safe-area-inset-top);
+      }
+      .safe-area-inset-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .safe-area-inset-left {
+        padding-left: env(safe-area-inset-left);
+      }
+      .safe-area-inset-right {
+        padding-right: env(safe-area-inset-right);
+      }
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Better focus styles for accessibility */
+      :focus-visible {
+        outline: 2px solid #0252CD;
+        outline-offset: 2px;
+      }
+
+      /* Reduce motion for users who prefer it */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* Landscape mode optimizations */
+      @media (orientation: landscape) and (max-height: 500px) {
+        .landscape-compact {
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
+        }
+      }
+
+      /* Better touch targets */
+      @media (pointer: coarse) {
+        button, a, input, select, textarea {
+          min-height: 44px;
+        }
+      }
+
+      /* Scrollbar styling for webkit browsers */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #CED4DA;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #A0AEC0;
+      }
+
+      /* Leaflet popup mobile optimizations */
+      .leaflet-popup {
+        margin-bottom: 20px;
+      }
+      .leaflet-popup-content-wrapper {
+        padding: 0;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .leaflet-popup-content {
+        margin: 0;
+        width: auto !important;
+        max-width: calc(100vw - 60px);
+      }
+      .leaflet-popup-tip-container {
+        width: 30px;
+        height: 15px;
+      }
+      .leaflet-popup-tip {
+        width: 15px;
+        height: 15px;
+      }
+      /* Mobile-specific popup adjustments */
+      @media (max-width: 640px) {
+        .leaflet-popup-content {
+          max-width: calc(100vw - 40px);
+        }
+        .leaflet-popup-content-wrapper {
+          border-radius: 10px;
+        }
+      }
+      /* Subtle close button for popups */
+      .leaflet-popup-close-button {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        line-height: 18px !important;
+        top: 8px !important;
+        right: 8px !important;
+        color: white !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        border: none !important;
+        border-radius: 50% !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+      .leaflet-popup-close-button:hover {
+        color: white !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        transform: scale(1.1) !important;
+        box-shadow: none !important;
+      }
+      .leaflet-popup-close-button:active {
+        transform: scale(0.95) !important;
       }
     </style>
   </body>

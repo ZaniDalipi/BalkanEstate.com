@@ -216,13 +216,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {/* Favorite Button */}
           <button
             onClick={handleFavoriteClick}
-            className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
+            className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full shadow-lg transition-all duration-300 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500/50 ${
               isFavorited
                 ? 'bg-red-500 text-white scale-110'
-                : 'bg-white/95 backdrop-blur-sm text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110'
+                : 'bg-white/95 backdrop-blur-sm text-neutral-600 hover:bg-red-500 hover:text-white hover:scale-110 active:scale-105'
             }`}
+            aria-label={isFavorited ? t('property:actions.removeFromFavorites', 'Remove from favorites') : t('property:actions.addToFavorites', 'Add to favorites')}
+            aria-pressed={isFavorited}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform duration-300 ${isFavorited ? 'fill-current scale-110' : ''}`} fill={isFavorited ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </button>
@@ -358,13 +360,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           {showCompareButton && (
             <button
               onClick={handleCompareClick}
-              className={`mt-2.5 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-300 w-full ${
+              className={`mt-2.5 flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 rounded-lg text-xs font-bold transition-all duration-300 w-full touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50 ${
                 isInComparison
                   ? 'bg-primary text-white shadow-md'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-primary hover:text-white'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-primary hover:text-white active:bg-primary-dark'
               }`}
+              aria-pressed={isInComparison}
             >
-              <ScaleIcon className="w-4 h-4" />
+              <ScaleIcon className="w-4 h-4" aria-hidden="true" />
               <span>{isInComparison ? t('property:actions.removeFromCompare') : t('property:actions.addToCompare')}</span>
             </button>
           )}

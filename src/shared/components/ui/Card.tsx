@@ -4,20 +4,21 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'elevated' | 'outlined' | 'glass';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hoverable?: boolean;
+  as?: keyof JSX.IntrinsicElements;
 }
 
 const variantClasses: Record<string, string> = {
   default: 'bg-white shadow-sm',
-  elevated: 'bg-white shadow-lg',
+  elevated: 'bg-white shadow-lg hover:shadow-xl',
   outlined: 'bg-white border border-gray-200',
   glass: 'bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg shadow-black/5',
 };
 
 const paddingClasses: Record<string, string> = {
   none: '',
-  sm: 'p-3',
-  md: 'p-4',
-  lg: 'p-6',
+  sm: 'p-2.5 sm:p-3',
+  md: 'p-3 sm:p-4',
+  lg: 'p-4 sm:p-5 md:p-6',
 };
 
 export const Card: React.FC<CardProps> = ({
@@ -26,21 +27,22 @@ export const Card: React.FC<CardProps> = ({
   padding = 'md',
   hoverable = false,
   className = '',
+  as: Component = 'div',
   ...props
 }) => {
   return (
-    <div
+    <Component
       className={`
         rounded-xl
         ${variantClasses[variant]}
         ${paddingClasses[padding]}
-        ${hoverable ? 'transition-shadow duration-200 hover:shadow-md' : ''}
+        ${hoverable ? 'transition-all duration-200 hover:shadow-md active:scale-[0.99] cursor-pointer' : ''}
         ${className}
       `}
       {...props}
     >
       {children}
-    </div>
+    </Component>
   );
 };
 
