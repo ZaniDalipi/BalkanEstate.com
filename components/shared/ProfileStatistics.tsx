@@ -771,7 +771,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
                       )}
                     </div>
 
-                    {/* Active filters display */}
+                    {/* Active fi.   lters display */}
                     {(typeFilter !== 'all' || dateFilter !== 'all' || priceFilter !== 'all') && (
                       <div className="text-xs text-neutral-500">
                         Showing {filteredSales.length} of {salesHistory.sales.length} sales
