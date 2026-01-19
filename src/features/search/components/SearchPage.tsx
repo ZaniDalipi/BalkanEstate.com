@@ -86,19 +86,24 @@ const MobileFilters: React.FC<{
     searchMode: 'manual' | 'ai';
     t: (key: string) => string;
 }> = ({ onClose, propertyListProps, localFilters, onLocalFilterChange, onReset, onSave, isSaving, onApply, searchMode, t }) => (
-    <div className="bg-white h-full w-full flex flex-col">
-        <div className="flex-shrink-0 p-4 border-b border-neutral-200 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-neutral-800">{t('search:filters.title')}</h2>
-            <button onClick={onClose} className="p-2 text-neutral-500 hover:text-neutral-800" aria-label="Close filters">
+    <div className="bg-white h-full w-full flex flex-col" role="dialog" aria-modal="true" aria-labelledby="filters-title">
+        <div className="flex-shrink-0 p-3 sm:p-4 border-b border-neutral-200 flex justify-between items-center landscape:p-2">
+            <h2 id="filters-title" className="text-base sm:text-lg font-bold text-neutral-800">{t('search:filters.title')}</h2>
+            <button
+                onClick={onClose}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-neutral-500 hover:text-neutral-800 rounded-full hover:bg-neutral-100 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                aria-label="Close filters"
+            >
                 <XMarkIcon className="w-6 h-6" />
             </button>
         </div>
-        <div className="flex-shrink-0 p-4 bg-neutral-50 border-b border-neutral-200">
-            <label className="block text-xs font-medium text-neutral-700 mb-2">{t('search:filters.country')}</label>
+        <div className="flex-shrink-0 p-3 sm:p-4 bg-neutral-50 border-b border-neutral-200 landscape:p-2">
+            <label htmlFor="country-select" className="block text-xs font-medium text-neutral-700 mb-1.5 sm:mb-2">{t('search:filters.country')}</label>
             <select
+                id="country-select"
                 value={localFilters.country}
                 onChange={(e) => onLocalFilterChange('country', e.target.value)}
-                className="w-full bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm font-medium"
+                className="w-full bg-white border border-neutral-300 rounded-lg text-neutral-900 shadow-sm px-3 py-2.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm font-medium"
             >
                 <option value="any">{t('search:filters.allCountries')}</option>
                 {Object.entries(BALKAN_COUNTRIES).map(([key, country]) => (
@@ -108,21 +113,37 @@ const MobileFilters: React.FC<{
                 ))}
             </select>
         </div>
-        <div className="flex-grow overflow-y-auto min-h-0 pt-4">
-            <PropertyList 
+        <div className="flex-grow overflow-y-auto min-h-0 pt-3 sm:pt-4 landscape:pt-2">
+            <PropertyList
                 {...propertyListProps}
                 filters={localFilters}
                 onFilterChange={onLocalFilterChange}
-                isMobile={true} 
-                showFilters={true} 
-                showList={false} 
+                isMobile={true}
+                showFilters={true}
+                showList={false}
             />
         </div>
         {searchMode === 'manual' && (
-            <div className="flex-shrink-0 p-4 border-t border-neutral-200 bg-white flex items-center gap-2">
-                 <button onClick={onReset} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">Reset</button>
-                 <button onClick={onSave} disabled={isSaving} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">Save Search</button>
-                 <button onClick={onApply} className="flex-grow px-3 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark">Show Results</button>
+            <div className="flex-shrink-0 p-3 sm:p-4 border-t border-neutral-200 bg-white flex items-center gap-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] landscape:p-2 landscape:pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+                 <button
+                    onClick={onReset}
+                    className="min-h-[44px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                 >
+                    Reset
+                 </button>
+                 <button
+                    onClick={onSave}
+                    disabled={isSaving}
+                    className="min-h-[44px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors disabled:opacity-50 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                 >
+                    {isSaving ? 'Saving...' : 'Save Search'}
+                 </button>
+                 <button
+                    onClick={onApply}
+                    className="flex-grow min-h-[44px] px-3 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark active:bg-primary-dark transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50"
+                 >
+                    Show Results
+                 </button>
             </div>
         )}
     </div>
@@ -1261,26 +1282,42 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Mobile View Overlays --- */}
                 {isMobile && !isFiltersOpen && (
                     <>
-                        <div className="absolute top-0 left-0 right-0 z-[100] p-2 pointer-events-none">
+                        <div className="absolute top-0 left-0 right-0 z-[100] p-2 landscape:p-1.5 pointer-events-none safe-area-inset-top">
                             <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
-                                <div className="w-full bg-white/95 backdrop-blur-md rounded-full shadow-lg p-1 flex items-center gap-1">
-                                    <button onClick={onToggleSidebar} className="p-2 flex-shrink-0"><Bars3Icon className="w-6 h-6 text-neutral-800"/></button>
+                                <div className="w-full bg-white/95 backdrop-blur-md rounded-full shadow-lg p-1 flex items-center gap-0.5 sm:gap-1">
+                                    <button
+                                        onClick={onToggleSidebar}
+                                        className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                        aria-label="Open menu"
+                                    >
+                                        <Bars3Icon className="w-6 h-6 text-neutral-800"/>
+                                    </button>
                                     {renderSearchInput(true)}
-                                    <button onClick={() => updateSearchPageState({ isFiltersOpen: true })} className="p-2 flex-shrink-0 hover:bg-neutral-100 rounded-full"><AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/></button>
+                                    <button
+                                        onClick={() => updateSearchPageState({ isFiltersOpen: true })}
+                                        className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                        aria-label="Open filters"
+                                    >
+                                        <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/>
+                                    </button>
                                     {isAuthenticated && currentUser && (
-                                        <button onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })} className="flex-shrink-0 mr-1">
+                                        <button
+                                            onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
+                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
+                                            aria-label="My account"
+                                        >
                                             {currentUser.avatarUrl ? (
-                                                <img src={currentUser.avatarUrl} alt="My Account" className="w-8 h-8 rounded-full object-cover" referrerPolicy="no-referrer" />
+                                                <img src={currentUser.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
                                             ) : (
-                                                <UserCircleIcon className="w-8 h-8 text-neutral-400"/>
+                                                <UserCircleIcon className="w-8 h-8 text-neutral-400" aria-hidden="true"/>
                                             )}
                                         </button>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        
-                        <div className="absolute bottom-16 left-0 right-0 z-[100] p-4 pointer-events-none">
+
+                        <div className="absolute bottom-16 landscape:bottom-12 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none">
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">
@@ -1290,16 +1327,32 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     </div>
                                 </div>
                             )}
-                            <div className="pointer-events-auto mx-auto w-fit bg-white/80 text-neutral-800 p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
-                                <button onClick={() => updateSearchPageState({ mobileView: 'list' })} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${mobileView === 'list' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
-                                    <Squares2x2Icon className="w-4 h-4" />
+                            <nav
+                                className="pointer-events-auto mx-auto w-fit bg-white/80 text-neutral-800 p-1 sm:p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-0.5 sm:gap-1"
+                                role="tablist"
+                                aria-label="View toggle"
+                            >
+                                <button
+                                    onClick={() => updateSearchPageState({ mobileView: 'list' })}
+                                    className={`flex items-center gap-1 sm:gap-1.5 min-h-[40px] px-3 sm:px-4 py-1.5 rounded-full text-sm font-bold transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 ${mobileView === 'list' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200 active:bg-neutral-300'}`}
+                                    role="tab"
+                                    aria-selected={mobileView === 'list'}
+                                    aria-controls="property-list"
+                                >
+                                    <Squares2x2Icon className="w-4 h-4" aria-hidden="true" />
                                     <span>List</span>
                                 </button>
-                                <button onClick={() => { updateSearchPageState({ mobileView: 'map' }); setShowMapHint(false); }} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-colors ${mobileView === 'map' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200'}`}>
-                                    <MapIcon className="w-4 h-4" />
+                                <button
+                                    onClick={() => { updateSearchPageState({ mobileView: 'map' }); setShowMapHint(false); }}
+                                    className={`flex items-center gap-1 sm:gap-1.5 min-h-[40px] px-3 sm:px-4 py-1.5 rounded-full text-sm font-bold transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 ${mobileView === 'map' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200 active:bg-neutral-300'}`}
+                                    role="tab"
+                                    aria-selected={mobileView === 'map'}
+                                    aria-controls="map-view"
+                                >
+                                    <MapIcon className="w-4 h-4" aria-hidden="true" />
                                     <span>Map</span>
                                 </button>
-                            </div>
+                            </nav>
                         </div>
                     </>
                 )}

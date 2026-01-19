@@ -41,24 +41,33 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   }, [dispatch]);
 
   const AuthButton: React.FC<{ floating?: boolean }> = ({ floating }) => {
+    const baseClasses = `
+      flex items-center justify-center gap-2 font-semibold transition-all
+      min-h-[44px] px-3 sm:px-4 rounded-full whitespace-nowrap
+      touch-manipulation select-none
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50
+    `;
+
     if (isAuthenticated && currentUser) {
       return (
         <button
           onClick={handleAccountClick}
-          className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${
+          className={`${baseClasses} ${
             floating
-              ? 'text-neutral-700 bg-white hover:bg-neutral-100'
-              : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'
+              ? 'text-neutral-700 bg-white hover:bg-neutral-100 active:bg-neutral-200'
+              : 'text-neutral-600 hover:text-primary hover:bg-neutral-100 active:bg-neutral-200'
           }`}
+          aria-label={t('nav:myAccount')}
         >
           {currentUser.avatarUrl ? (
             <img
               src={currentUser.avatarUrl}
-              alt="User Avatar"
+              alt=""
               className="w-7 h-7 rounded-full object-cover"
+              aria-hidden="true"
             />
           ) : (
-            <UserCircle className="w-7 h-7" />
+            <UserCircle className="w-7 h-7" aria-hidden="true" />
           )}
           <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>
@@ -67,13 +76,14 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     return (
       <button
         onClick={handleAccountClick}
-        className={`flex items-center space-x-2 font-semibold transition-colors py-1.5 px-2.5 rounded-full whitespace-nowrap ${
+        className={`${baseClasses} ${
           floating
-            ? 'text-neutral-700 bg-white hover:bg-neutral-100'
-            : 'text-neutral-600 hover:text-primary hover:bg-neutral-100'
+            ? 'text-neutral-700 bg-white hover:bg-neutral-100 active:bg-neutral-200'
+            : 'text-neutral-600 hover:text-primary hover:bg-neutral-100 active:bg-neutral-200'
         }`}
+        aria-label={t('nav:loginRegister')}
       >
-        <User className="w-5 h-5" />
+        <User className="w-5 h-5" aria-hidden="true" />
         <span className="hidden sm:inline text-sm">{t('nav:loginRegister')}</span>
       </button>
     );
@@ -81,21 +91,27 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
 
   if (isFloating) {
     return (
-      <header className="absolute top-0 right-0 z-[1001] p-3">
-        <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/70 backdrop-blur-xl p-1.5 rounded-full shadow-xl shadow-black/10 border border-white/30">
+      <header className="absolute top-0 right-0 z-[1001] p-2 sm:p-3 landscape:p-2" role="banner">
+        <nav
+          className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 bg-white/70 backdrop-blur-xl p-1.5 rounded-full shadow-xl shadow-black/10 border border-white/30"
+          role="navigation"
+          aria-label={t('nav:mainNavigation', 'Main navigation')}
+        >
           <button
             onClick={handleSubscribeClick}
-            className="bg-gradient-to-r from-primary to-primary-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all shadow-md whitespace-nowrap"
+            className="min-h-[40px] sm:min-h-[44px] bg-gradient-to-r from-primary to-primary-dark text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50 active:scale-[0.98]"
             aria-label={t('nav:subscribe')}
           >
-            {t('nav:subscribe')}
+            <span className="hidden xs:inline">{t('nav:subscribe')}</span>
+            <span className="xs:hidden">PRO</span>
           </button>
           <button
             onClick={handleNewListingClick}
-            className="bg-gradient-to-r from-secondary to-orange-400 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-secondary/30 transition-all shadow-md whitespace-nowrap"
+            className="min-h-[40px] sm:min-h-[44px] bg-gradient-to-r from-secondary to-orange-400 text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-secondary/30 transition-all shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:scale-[0.98]"
             aria-label={t('nav:newListing')}
           >
-            + {t('nav:newListing')}
+            <span className="hidden sm:inline">+ {t('nav:newListing')}</span>
+            <span className="sm:hidden">+</span>
           </button>
           <NotificationCenter />
           <AuthButton floating />
@@ -105,33 +121,39 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-2">
+    <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0" role="banner">
+      <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-1.5 sm:py-2 landscape:py-1">
           <div className="flex items-center">
             <button
               onClick={onToggleSidebar}
-              className="md:hidden text-neutral-600 hover:text-primary p-1.5 -ml-1.5"
-              aria-label="Toggle sidebar navigation"
+              className="md:hidden text-neutral-600 hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center -ml-2 rounded-lg hover:bg-neutral-100 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              aria-label={t('nav:toggleSidebar', 'Toggle sidebar navigation')}
+              aria-expanded="false"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
 
-          <nav className="flex justify-end items-center space-x-2 sm:space-x-3">
+          <nav
+            className="flex justify-end items-center gap-1.5 sm:gap-2 lg:gap-3"
+            role="navigation"
+            aria-label={t('nav:mainNavigation', 'Main navigation')}
+          >
             <button
               onClick={handleSubscribeClick}
-              className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="min-h-[40px] sm:min-h-[44px] bg-primary text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50 active:bg-primary-dark"
               aria-label={t('nav:subscribe')}
             >
               {t('nav:subscribe')}
             </button>
             <button
               onClick={handleNewListingClick}
-              className="bg-secondary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              className="min-h-[40px] sm:min-h-[44px] bg-secondary text-white px-3 py-2 sm:px-4 rounded-full text-sm font-semibold hover:bg-orange-600 transition-all shadow-sm hover:shadow-md whitespace-nowrap touch-manipulation select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary/50 active:bg-orange-600"
               aria-label={t('nav:newListing')}
             >
-              + {t('nav:newListing')}
+              <span className="hidden sm:inline">+ {t('nav:newListing')}</span>
+              <span className="sm:hidden">+ {t('nav:sell', 'Sell')}</span>
             </button>
             <NotificationCenter />
             <AuthButton />

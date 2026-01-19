@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, memo } from 'react';
+import React, { useEffect, useCallback, useRef, memo } from 'react';
 import { XMarkIcon } from '../../constants';
 
 interface ModalProps {
@@ -8,18 +8,65 @@ interface ModalProps {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
   maxWidth?: string;
+  'aria-describedby'?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg', maxWidth }) => {
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'lg',
+  maxWidth,
+  'aria-describedby': ariaDescribedBy,
+}) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const titleId = title ? `modal-title-${Math.random().toString(36).substr(2, 9)}` : undefined;
+
   // Lock body scroll when modal is open to prevent map jumping
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Focus the close button when modal opens for accessibility
+      closeButtonRef.current?.focus();
       return () => {
         document.body.style.overflow = 'unset';
       };
     }
   }, [isOpen]);
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+
+      // Trap focus within modal
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleBackdropClick = useCallback(() => {
     onClose();
@@ -50,15 +97,49 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto" onClick={handleBackdropClick}>
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto"
+      onClick={handleBackdropClick}
+      role="presentation"
+    >
       <div
-        className={`bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 p-3 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto max-h-screen sm:max-h-[95vh] md:max-h-[90vh] border border-white/50`}
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={ariaDescribedBy}
+        className={`
+          bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10
+          p-3 sm:p-4 md:p-6 w-full ${sizeClass} relative
+          overflow-y-auto border border-white/50
+          max-h-[calc(100vh-1rem)] sm:max-h-[95vh] md:max-h-[90vh]
+          landscape:max-h-[calc(100vh-1rem)] landscape:sm:max-h-[85vh]
+        `}
         onClick={handleContentClick}
       >
-        <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-400 hover:text-neutral-700 z-10 p-1.5 rounded-full hover:bg-black/5 transition-colors" aria-label="Close modal">
+        <button
+          ref={closeButtonRef}
+          onClick={onClose}
+          className="
+            absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4
+            text-neutral-400 hover:text-neutral-700 z-10
+            min-h-[44px] min-w-[44px] flex items-center justify-center
+            rounded-full hover:bg-black/5 active:bg-black/10
+            transition-colors touch-manipulation
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50
+          "
+          aria-label="Close modal"
+        >
           <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
-        {title && <h2 className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-10">{title}</h2>}
+        {title && (
+          <h2
+            id={titleId}
+            className="text-base sm:text-lg md:text-xl font-bold text-neutral-800 mb-3 text-center pr-12"
+          >
+            {title}
+          </h2>
+        )}
         <div className="overflow-x-hidden">{children}</div>
       </div>
     </div>
