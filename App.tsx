@@ -15,7 +15,16 @@ import { realEstateFAQs } from './src/components/seo';
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
 import { UserRole, HowItWorksTab, AdminSection } from './types';
-import { LogoIcon } from './constants';
+
+// Inline LogoIcon to avoid importing all icons from constants
+const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <g fillRule="evenodd">
+      <path fill="#003A96" d="M12 21V5L10 7V23L12 21Z M4 21V10L2 12V23L4 21Z" />
+      <path fill="#0252CD" d="M12 5H20V21H12V5Z M4 10H10V21H4V10Z" />
+    </g>
+  </svg>
+);
 
 // Initialize i18n
 import './src/i18n';
@@ -23,19 +32,19 @@ import './src/i18n';
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
-// Core components (loaded immediately)
-import AuthPage from './src/features/auth/components/AuthModal';
+// Lazy load auth components (loaded on demand)
+const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
+const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
 
 // Lazy load heavy pages to reduce initial bundle
 const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
-import EmailVerificationRequired from './src/features/auth/components/EmailVerificationRequired';
 
 // Lazy load Sidebar, Header, and Footer (they render after initial load)
 const Sidebar = lazy(() => import('./components/shared/Sidebar'));
 const Header = lazy(() => import('./components/shared/Header'));
 const Footer = lazy(() => import('./components/shared/Footer'));
-import AlertDialog from './components/shared/AlertDialog';
+const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -68,8 +77,8 @@ const TermsOfServicePage = lazy(() => import('./src/features/legal/components/Te
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 
-// Cookie Consent Banner
-import CookieConsent from './src/shared/components/CookieConsent';
+// Cookie Consent Banner (lazy loaded)
+const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
 
 // 3D Decorative Elements
 import { Loader3D } from './components/shared/Decorative3D';
@@ -569,15 +578,17 @@ const MainLayout: React.FC = () => {
         </Suspense>
 
         {/* Global Alert Dialog */}
-        {state.alertDialog && (
-          <AlertDialog
-            isOpen={state.alertDialog.isOpen}
-            type={state.alertDialog.type}
-            title={state.alertDialog.title}
-            message={state.alertDialog.message}
-            onClose={() => dispatch({ type: 'HIDE_ALERT' })}
-          />
-        )}
+        <Suspense fallback={null}>
+          {state.alertDialog && (
+            <AlertDialog
+              isOpen={state.alertDialog.isOpen}
+              type={state.alertDialog.type}
+              title={state.alertDialog.title}
+              message={state.alertDialog.message}
+              onClose={() => dispatch({ type: 'HIDE_ALERT' })}
+            />
+          )}
+        </Suspense>
     </div>
   );
 };
@@ -655,7 +666,11 @@ const AppWrapper: React.FC = () => {
                                    !isAuthFlowPage;
 
     if (needsEmailVerification && state.currentUser) {
-        return <EmailVerificationRequired email={state.currentUser.email} />;
+        return (
+            <Suspense fallback={<FullScreenLoader />}>
+                <EmailVerificationRequired email={state.currentUser.email} />
+            </Suspense>
+        );
     }
 
     if (!state.onboardingComplete && !isAuthFlowPage) {
@@ -664,7 +679,9 @@ const AppWrapper: React.FC = () => {
                 <Suspense fallback={<FullScreenLoader />}>
                     <Onboarding />
                 </Suspense>
-                {state.isAuthModalOpen && <AuthPage />}
+                <Suspense fallback={null}>
+                    {state.isAuthModalOpen && <AuthPage />}
+                </Suspense>
             </>
         )
     }
@@ -672,8 +689,10 @@ const AppWrapper: React.FC = () => {
     return (
         <>
             <MainLayout />
-            {state.isAuthModalOpen && <AuthPage />}
-            <CookieConsent />
+            <Suspense fallback={null}>
+                {state.isAuthModalOpen && <AuthPage />}
+                <CookieConsent />
+            </Suspense>
         </>
     );
 }
