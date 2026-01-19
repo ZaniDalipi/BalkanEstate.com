@@ -216,3 +216,12 @@ export const applyFeaturedCoupon = async (agencyId: string, couponCode: string):
     requiresAuth: true,
   });
 };
+
+// --- Agent Self-Service ---
+
+export const leaveAgency = async (): Promise<{ message: string; user: { id: string; agencyId: null; agencyName: string } }> => {
+  return apiRequest('/agents/leave-agency', {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};

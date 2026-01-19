@@ -11,7 +11,7 @@ import InvitationCodeModal from './InvitationCodeModal';
 import FeaturedSubscriptionCard from './shared/FeaturedSubscriptionCard';
 import FeaturedSubscriptionDialog from './shared/FeaturedSubscriptionDialog';
 import { formatPrice } from '../utils/currency';
-import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyAdmin, verifyInvitationCode, leaveAgency } from '../services/apiService';
+import { createJoinRequest, removeAgentFromAgency, addAgencyAdmin, removeAgencyAdmin, verifyInvitationCode, leaveAgency } from '../src/features/agencies/api';
 import { Agency } from '../types';
 import { socketService } from '../services/socketService';
 import { SEO, Breadcrumbs, generateAgencyBreadcrumbs } from '../src/components/seo';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { XMarkIcon, UserCircleIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../constants';
-import { getAgencyJoinRequests, approveJoinRequest, rejectJoinRequest } from '../services/apiService';
+import { getAgencyJoinRequests, approveJoinRequest, rejectJoinRequest } from '../src/features/agencies/api';
 import { formatPrice } from '../utils/currency';
 import { useNotification } from '../src/shared/hooks/useNotification';
 

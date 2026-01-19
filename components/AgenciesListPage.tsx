@@ -4,7 +4,7 @@ import { Agency } from '../types';
 import { Agent } from '../types';
 import { Property } from '../types';
 import { UserRole } from '../types';
-import { getAgencies } from '../services/apiService';
+import { getAgencies } from '../src/features/agencies/api';
 import {
   BuildingOfficeIcon,
   PhoneIcon,

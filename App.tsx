@@ -24,8 +24,11 @@ import AuthPage from './src/features/auth/components/AuthModal';
 const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
 const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
 import EmailVerificationRequired from './src/features/auth/components/EmailVerificationRequired';
-import Sidebar from './components/shared/Sidebar';
-import Header from './components/shared/Header';
+
+// Lazy load Sidebar and Header (they render after initial load)
+const Sidebar = lazy(() => import('./components/shared/Sidebar'));
+const Header = lazy(() => import('./components/shared/Header'));
+
 import Footer from './components/shared/Footer';
 import AlertDialog from './components/shared/AlertDialog';
 
@@ -514,10 +517,14 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50 font-sans overflow-x-hidden max-w-full">
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <Suspense fallback={null}>
+          <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        </Suspense>
 
         <div className={`relative transition-all duration-300 ease-in-out h-screen flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
-            {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
+            <Suspense fallback={null}>
+              {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
+            </Suspense>
             <main id="main-content" className={`flex flex-col flex-grow overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>

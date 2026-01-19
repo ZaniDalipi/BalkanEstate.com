@@ -5,7 +5,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Property } from '../types';
-import * as api from '../services/apiService';
+import { getMyListings } from '../src/features/properties/api';
+import { getMyPromotions, addUrgentBadge, updateAutoExtend, getAutoExtendCheckout } from '../src/features/promotions/api';
 
 export type PromotionFilter = 'all' | 'active' | 'expired';
 
@@ -41,8 +42,8 @@ export const usePromotions = (): UsePromotionsReturn => {
     setError(null);
     try {
       const [listings, promotionsData] = await Promise.all([
-        api.getMyListings(),
-        api.getMyPromotions(),
+        getMyListings(),
+        getMyPromotions(),
       ]);
 
       const promoted = listings.filter((p: Property) => p.isPromoted);
@@ -135,7 +136,7 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
   const handleAddUrgent = useCallback(async (promotionId: string) => {
     try {
       setActionLoading(promotionId);
-      const result = await api.addUrgentBadge(promotionId);
+      const result = await addUrgentBadge(promotionId);
 
       if (!result.success) {
         throw new Error(result.message || 'Failed to add urgent badge');
@@ -165,7 +166,7 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
     onSuccess?: () => void
   ) => {
     try {
-      await api.updateAutoExtend(promotionId, { autoExtend });
+      await updateAutoExtend(promotionId, { autoExtend });
       onSuccess?.();
     } catch (error: any) {
       console.error('Failed to update auto-extend:', error);
@@ -176,7 +177,7 @@ export const usePromotionActions = (): UsePromotionActionsReturn => {
   const handleCompleteAutoExtend = useCallback(async (promotionId: string) => {
     try {
       setActionLoading(promotionId);
-      const result = await api.getAutoExtendCheckout(promotionId);
+      const result = await getAutoExtendCheckout(promotionId);
       if (result.success && result.url) {
         window.location.href = result.url;
       } else {
