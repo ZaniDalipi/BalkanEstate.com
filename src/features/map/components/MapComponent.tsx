@@ -63,52 +63,19 @@ const injectMapStyles = () => {
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
-    /* 3D mode styles */
-    .map-3d-perspective-container {
-      perspective: 1500px;
-      perspective-origin: 50% 25%;
-    }
-    .map-3d-active {
-      transform: rotateX(25deg) scale(1.08);
-      transform-origin: center 70%;
-      transition: transform 0.4s ease-out;
-    }
-    .map-3d-inactive {
-      transform: none;
-    }
+    /* 3D mode */
+    .map-3d-perspective-container { perspective: 1500px; perspective-origin: 50% 25%; }
+    .map-3d-active { transform: rotateX(25deg) scale(1.08); transform-origin: center 70%; transition: transform 0.4s ease-out; }
+    .map-3d-inactive { transform: none; }
     .map-3d-active .leaflet-control-container,
     .map-3d-active .leaflet-marker-pane,
-    .map-3d-active .leaflet-popup-pane {
-      transform: rotateX(-25deg);
-      transform-origin: center 30%;
-    }
+    .map-3d-active .leaflet-popup-pane { transform: rotateX(-25deg); transform-origin: center 30%; }
 
-    /* Mobile touch */
-    .leaflet-container {
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
+    /* Touch */
+    .leaflet-container { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
-    /* Smooth zoom like Google Maps - fast but smooth */
-    .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.15s ease-out !important;
-    }
-
-    /* Keep tiles visible during zoom - no flicker */
-    .leaflet-tile-container {
-      will-change: transform;
-    }
-
-    /* Smooth tile fade-in after zoom */
-    .leaflet-tile {
-      outline: none;
-      transition: opacity 0.2s ease-out;
-    }
-
-    /* Hide tile loading gaps */
-    .leaflet-tile-pane {
-      background: #f0f0f0;
-    }
+    /* Zoom animation */
+    .leaflet-zoom-anim .leaflet-zoom-animated { transition: transform 0.25s ease-out !important; }
   `;
   document.head.appendChild(style);
 };
@@ -408,13 +375,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            // Preload lots of tiles like Google Maps - tiles ready before you pan/zoom
-            keepBuffer={8}
-            // Load new tiles during zoom but not too aggressively
-            updateWhenZooming={true}
-            updateWhenIdle={false}
-            // Only fetch new tiles every 300ms during continuous zoom (not every frame)
-            updateInterval={300}
+            keepBuffer={6}
+            updateWhenZooming={false}
+            updateWhenIdle={true}
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
           <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
