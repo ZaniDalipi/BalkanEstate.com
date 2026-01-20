@@ -101,29 +101,109 @@ export default defineConfig(({ mode }) => {
             entryFileNames: `assets/[name].[hash].js`,
             chunkFileNames: `assets/[name].[hash].js`,
             assetFileNames: `assets/[name].[hash].[ext]`,
-            manualChunks: {
-              // Core React - smallest chunk, always needed
-              vendor: ['react', 'react-dom'],
+            manualChunks(id) {
+              // Core React - always needed
+              if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+                return 'vendor';
+              }
               // Map functionality - only loaded when map is visible
-              leaflet: ['leaflet', 'react-leaflet'],
+              if (id.includes('leaflet') || id.includes('react-leaflet')) {
+                return 'leaflet';
+              }
               // Internationalization
-              i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+              if (id.includes('i18next') || id.includes('react-i18next')) {
+                return 'i18n';
+              }
               // Animation library - defer loading
-              animation: ['framer-motion'],
+              if (id.includes('framer-motion')) {
+                return 'animation';
+              }
               // Real-time messaging - only for inbox
-              realtime: ['socket.io-client'],
+              if (id.includes('socket.io')) {
+                return 'realtime';
+              }
               // Data fetching
-              query: ['@tanstack/react-query'],
+              if (id.includes('@tanstack/react-query')) {
+                return 'query';
+              }
               // State management
-              state: ['zustand'],
+              if (id.includes('zustand')) {
+                return 'state';
+              }
               // Icons library - large, load separately
-              icons: ['lucide-react'],
+              if (id.includes('lucide-react')) {
+                return 'icons';
+              }
               // AI/Gemini - only needed for AI features
-              ai: ['@google/genai', '@google/generative-ai'],
+              if (id.includes('@google/genai') || id.includes('@google/generative-ai')) {
+                return 'ai';
+              }
               // Error tracking - defer loading
-              sentry: ['@sentry/react'],
+              if (id.includes('@sentry')) {
+                return 'sentry';
+              }
               // Helmet for SEO
-              helmet: ['react-helmet-async'],
+              if (id.includes('react-helmet-async')) {
+                return 'helmet';
+              }
+              // Image compression - only for uploads
+              if (id.includes('browser-image-compression')) {
+                return 'image-utils';
+              }
+              // Virtualization - for long lists
+              if (id.includes('react-window')) {
+                return 'virtualization';
+              }
+              // Property utilities - shared across features
+              if (id.includes('/utils/propertyUtils') || id.includes('/utils/balkanLocations')) {
+                return 'propertyUtils';
+              }
+              // Services - shared across features
+              if (id.includes('/services/geminiService') || id.includes('/services/osmService')) {
+                return 'services';
+              }
+              if (id.includes('/services/apiService')) {
+                return 'api';
+              }
+              // Split large feature modules
+              if (id.includes('/src/features/admin/')) {
+                return 'admin';
+              }
+              if (id.includes('/src/features/seller/')) {
+                return 'seller';
+              }
+              if (id.includes('/src/features/agents/')) {
+                return 'agents';
+              }
+              if (id.includes('/src/features/property-details/')) {
+                return 'property-details';
+              }
+              if (id.includes('/src/features/map/')) {
+                return 'map-features';
+              }
+              if (id.includes('/src/features/messaging/')) {
+                return 'messaging';
+              }
+              if (id.includes('/src/features/saved/')) {
+                return 'saved';
+              }
+              if (id.includes('/src/features/search/')) {
+                return 'search';
+              }
+              // Large shared components - split individually
+              if (id.includes('/components/shared/MyAccountPage')) {
+                return 'account';
+              }
+              if (id.includes('/components/shared/HowItWorksPage')) {
+                return 'how-it-works';
+              }
+              if (id.includes('/components/AgencyDetailPage') || id.includes('/components/AgenciesListPage')) {
+                return 'agencies';
+              }
+              // Keep other node_modules separate
+              if (id.includes('node_modules')) {
+                return 'vendor-misc';
+              }
             },
           },
         },
