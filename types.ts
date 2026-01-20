@@ -660,6 +660,8 @@ export interface AppState {
     howItWorksTab: HowItWorksTab;
     // Admin panel active section
     adminSection: AdminSection;
+    // Session expired modal
+    isSessionExpiredModalOpen: boolean;
 }
 
 export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'how-it-works';
@@ -718,4 +720,6 @@ export type AppAction =
     | { type: 'SET_ACCOUNT_TAB', payload: string }
     | { type: 'SET_HOW_IT_WORKS_TAB', payload: HowItWorksTab }
     | { type: 'SET_ADMIN_SECTION', payload: AdminSection }
-    | { type: 'CLEAR_ALL_SAVED_SEARCHES' };
+    | { type: 'CLEAR_ALL_SAVED_SEARCHES' }
+    | { type: 'SESSION_EXPIRED' }
+    | { type: 'HIDE_SESSION_EXPIRED_MODAL' };

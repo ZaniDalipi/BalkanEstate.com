@@ -95,8 +95,10 @@ export const apiRequest = async <T>(
         console.log('Token refreshed successfully, retrying request...');
         return apiRequest<T>(endpoint, options, 1);
       } else {
-        console.log('Token refresh failed, logging out...');
+        console.log('Token refresh failed, session expired...');
         tokenService.clearTokens();
+        // Emit custom event for session expiration
+        window.dispatchEvent(new CustomEvent('session-expired'));
         throw new Error('Session expired. Please login again.');
       }
     }
@@ -145,8 +147,10 @@ export const uploadRequest = async <T>(
       console.log('Token refreshed successfully, retrying upload...');
       return uploadRequest<T>(endpoint, formData, 1);
     } else {
-      console.log('Token refresh failed, logging out...');
+      console.log('Token refresh failed, session expired...');
       tokenService.clearTokens();
+      // Emit custom event for session expiration
+      window.dispatchEvent(new CustomEvent('session-expired'));
       throw new Error('Session expired. Please login again.');
     }
   }

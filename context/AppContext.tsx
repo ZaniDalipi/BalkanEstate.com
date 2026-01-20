@@ -81,6 +81,7 @@ const initialState: AppState = {
   accountTab: 'listings',
   howItWorksTab: 'getting-started',
   adminSection: 'dashboard',
+  isSessionExpiredModalOpen: false,
 };
 
 
@@ -319,6 +320,15 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         return { ...state, howItWorksTab: action.payload };
     case 'SET_ADMIN_SECTION':
         return { ...state, adminSection: action.payload };
+    case 'SESSION_EXPIRED':
+        return {
+            ...state,
+            isSessionExpiredModalOpen: true,
+            isAuthenticated: false,
+            currentUser: null,
+        };
+    case 'HIDE_SESSION_EXPIRED_MODAL':
+        return { ...state, isSessionExpiredModalOpen: false };
     default:
       return state;
   }

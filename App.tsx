@@ -42,6 +42,7 @@ const SearchPage = lazy(() => import('./src/features/search/components').then(m 
 const AuthPage = lazy(() => import('./src/features/auth/components/AuthModal'));
 const EmailVerificationRequired = lazy(() => import('./src/features/auth/components/EmailVerificationRequired'));
 const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
+const SessionExpiredModal = lazy(() => import('./src/features/auth/components/SessionExpiredModal'));
 
 // Lazy loaded components (loaded on demand)
 // All these components use default exports
@@ -94,6 +95,18 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   const { state, dispatch } = useAppContext();
   const [selectedAgency, setSelectedAgency] = useState<any>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
+
+  // Listen for session expiration events from httpClient
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      dispatch({ type: 'SESSION_EXPIRED' });
+    };
+
+    window.addEventListener('session-expired', handleSessionExpired);
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired);
+    };
+  }, [dispatch]);
 
   // Check URL for routing on mount and when URL changes (handles browser/mobile back button)
   useEffect(() => {
@@ -585,6 +598,11 @@ const MainLayout: React.FC = () => {
               onClose={() => dispatch({ type: 'HIDE_ALERT' })}
             />
           )}
+        </Suspense>
+
+        {/* Session Expired Modal */}
+        <Suspense fallback={null}>
+          {state.isSessionExpiredModalOpen && <SessionExpiredModal />}
         </Suspense>
     </div>
   );
