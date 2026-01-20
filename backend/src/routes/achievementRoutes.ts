@@ -10,7 +10,7 @@ import {
   deleteAgencyAchievement,
   verifyAchievement,
 } from '../controllers/achievementController';
-import { protect, adminProtect } from '../middleware/auth';
+import { protect, restrictTo } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -27,6 +27,6 @@ router.put('/agency/:agencyId/:achievementId', protect, updateAgencyAchievement)
 router.delete('/agency/:agencyId/:achievementId', protect, deleteAgencyAchievement);
 
 // Admin verification
-router.post('/verify/:type/:entityId/:achievementId', protect, adminProtect, verifyAchievement);
+router.post('/verify/:type/:entityId/:achievementId', protect, restrictTo('admin', 'super_admin'), verifyAchievement);
 
 export default router;
