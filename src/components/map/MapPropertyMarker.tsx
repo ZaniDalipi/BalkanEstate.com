@@ -721,17 +721,36 @@ interface MarkersProps {
 
 export const Markers: React.FC<MarkersProps> = ({ properties, onPopupClick, hoveredPropertyId, isNightMode = false }) => {
   const map = useMap();
-  const [zoom, setZoom] = useState(map.getZoom());
+  const [zoom, setZoom] = useState(Math.round(map.getZoom()));
   const markerRefsMap = React.useRef<Map<string, L.Marker>>(new Map());
   const prevHoveredIdRef = React.useRef<string | null | undefined>(null);
   const prevZoomRef = React.useRef<number>(zoom);
   const prevNightModeRef = React.useRef<boolean>(isNightMode);
+  const zoomDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useMapEvents({
     zoomend: () => {
-      setZoom(map.getZoom());
+      // Debounce zoom updates to prevent marker refresh spam during pinch-to-zoom
+      if (zoomDebounceRef.current) {
+        clearTimeout(zoomDebounceRef.current);
+      }
+      zoomDebounceRef.current = setTimeout(() => {
+        const newZoom = Math.round(map.getZoom());
+        if (newZoom !== zoom) {
+          setZoom(newZoom);
+        }
+      }, 200);
     },
   });
+
+  // Cleanup debounce on unmount
+  React.useEffect(() => {
+    return () => {
+      if (zoomDebounceRef.current) {
+        clearTimeout(zoomDebounceRef.current);
+      }
+    };
+  }, []);
 
   // Update marker icon only when hover state, zoom, or night mode actually changes
   React.useEffect(() => {
