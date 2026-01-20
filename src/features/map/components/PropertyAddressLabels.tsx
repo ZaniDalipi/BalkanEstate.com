@@ -101,15 +101,25 @@ const PropertyAddressLabels: React.FC<PropertyAddressLabelsProps> = ({
   minZoom = 19,
 }) => {
   const map = useMap();
-  const [currentZoom, setCurrentZoom] = React.useState(map.getZoom());
+  const [currentZoom, setCurrentZoom] = React.useState(Math.round(map.getZoom()));
   const markersRef = React.useRef<L.Marker[]>([]);
+  const zoomDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Track zoom changes
+  // Track zoom changes with debounce
   useMapEvents({
     zoomend: () => {
-      setCurrentZoom(map.getZoom());
+      if (zoomDebounceRef.current) clearTimeout(zoomDebounceRef.current);
+      zoomDebounceRef.current = setTimeout(() => {
+        setCurrentZoom(Math.round(map.getZoom()));
+      }, 200);
     },
   });
+
+  React.useEffect(() => {
+    return () => {
+      if (zoomDebounceRef.current) clearTimeout(zoomDebounceRef.current);
+    };
+  }, []);
 
   // Should labels be visible?
   const shouldShow = enabled && currentZoom >= minZoom;

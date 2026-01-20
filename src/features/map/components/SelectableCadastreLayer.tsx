@@ -21,16 +21,20 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
   onParcelSelect,
 }) => {
   const map = useMap();
-  const [currentZoom, setCurrentZoom] = useState(map.getZoom());
+  const [currentZoom, setCurrentZoom] = useState(Math.round(map.getZoom()));
   const [currentLayer, setCurrentLayer] = useState<CadastreLayerConfig | undefined>(undefined);
   const [selectedParcel, setSelectedParcel] = useState<any>(null);
   const parcelsLayerRef = useRef<L.GeoJSON | null>(null);
   const wmsLayerRef = useRef<L.TileLayer.WMS | null>(null);
+  const zoomDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Track map events
+  // Track map events (debounced zoom)
   useMapEvents({
     zoomend: () => {
-      setCurrentZoom(map.getZoom());
+      if (zoomDebounceRef.current) clearTimeout(zoomDebounceRef.current);
+      zoomDebounceRef.current = setTimeout(() => {
+        setCurrentZoom(Math.round(map.getZoom()));
+      }, 200);
     },
     moveend: () => {
       updateCurrentLayer();
@@ -42,6 +46,12 @@ export const SelectableCadastreLayer: React.FC<SelectableCadastreLayerProps> = (
       handleMapClick(e);
     },
   });
+
+  useEffect(() => {
+    return () => {
+      if (zoomDebounceRef.current) clearTimeout(zoomDebounceRef.current);
+    };
+  }, []);
 
   const updateCurrentLayer = () => {
     const center = map.getCenter();

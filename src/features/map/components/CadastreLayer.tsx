@@ -32,15 +32,19 @@ export const CadastreLayer: React.FC<CadastreLayerProps> = ({
   minZoom = CADASTRE_MIN_ZOOM,
 }) => {
   const map = useMap();
-  const [currentZoom, setCurrentZoom] = useState(map.getZoom());
+  const [currentZoom, setCurrentZoom] = useState(Math.round(map.getZoom()));
   const [currentLayer, setCurrentLayer] = useState<CadastreLayerConfig | undefined>(undefined);
   const [isMapReady, setIsMapReady] = useState(false);
   const tileLayerRef = useRef<L.TileLayer.WMS | null>(null);
+  const zoomDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Track map events to update layer visibility
+  // Track map events to update layer visibility (debounced)
   useMapEvents({
     zoomend: () => {
-      setCurrentZoom(map.getZoom());
+      if (zoomDebounceRef.current) clearTimeout(zoomDebounceRef.current);
+      zoomDebounceRef.current = setTimeout(() => {
+        setCurrentZoom(Math.round(map.getZoom()));
+      }, 200);
     },
     moveend: () => {
       updateCurrentLayer();
@@ -49,6 +53,12 @@ export const CadastreLayer: React.FC<CadastreLayerProps> = ({
       setIsMapReady(true);
     }
   });
+
+  useEffect(() => {
+    return () => {
+      if (zoomDebounceRef.current) clearTimeout(zoomDebounceRef.current);
+    };
+  }, []);
 
   // Update the current cadastre layer based on map center
   const updateCurrentLayer = () => {
