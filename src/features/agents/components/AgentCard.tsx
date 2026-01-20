@@ -174,37 +174,27 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       {/* Animated border effect - blue */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-blue-200/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
       
-      {/* Agency Badge - Top Right - More Visible */}
+      {/* Agency Badge - Top Right - Compact & Visible */}
       {isTeam && (
         <div className="absolute top-3 right-3 z-10">
-          <div className="relative group/agency">
-            <div className="absolute -inset-1 bg-white/50 rounded-xl blur opacity-70" />
-            <button
-              onClick={handleAgencyClick}
-              className={`relative flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white/50 ${
-                agent.agencyGradient || 'bg-gradient-to-r from-blue-600 to-blue-700'
-              }`}
-            >
-              {agent.agencyLogo ? (
-                <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 bg-white/30 ring-2 ring-white/50">
-                  <img
-                    src={agent.agencyLogo}
-                    alt={agent.agencyName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-4 h-4 text-white" />
-                </div>
-              )}
-              <div className="flex flex-col items-start">
-                <span className="text-[10px] text-white/70 font-medium leading-none">{t('agents:card.agency')}</span>
-                <span className="text-xs text-white font-bold leading-tight max-w-[80px] truncate">{agent.agencyName}</span>
+          <button
+            onClick={handleAgencyClick}
+            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700"
+          >
+            {agent.agencyLogo ? (
+              <div className="w-5 h-5 rounded overflow-hidden flex-shrink-0 bg-white/10">
+                <img
+                  src={agent.agencyLogo}
+                  alt={agent.agencyName}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <ChevronRightIcon className="w-4 h-4 text-white/70 transform group-hover/agency:translate-x-1 transition-transform" />
-            </button>
-          </div>
+            ) : (
+              <BuildingOfficeIcon className="w-4 h-4 text-slate-300" />
+            )}
+            <span className="text-[11px] text-white font-semibold max-w-[70px] truncate">{agent.agencyName}</span>
+            <ChevronRightIcon className="w-3 h-3 text-slate-400" />
+          </button>
         </div>
       )}
 
