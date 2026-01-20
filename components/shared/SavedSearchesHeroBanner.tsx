@@ -6,7 +6,7 @@ import {
   ClockIcon,
   SparklesIcon,
   MapPinIcon,
-  BellAlertIcon,
+  BellIcon,
   FunnelIcon
 } from '@/constants';
 
@@ -67,7 +67,7 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
         <MapPinIcon className="w-20 h-20 text-white" />
       </div>
       <div className="absolute top-32 right-[15%] opacity-10 hidden xl:block animate-float" style={{ animationDelay: '2s' }}>
-        <BellAlertIcon className="w-16 h-16 text-white" />
+        <BellIcon className="w-16 h-16 text-white" />
       </div>
 
       {/* Main content */}
@@ -76,11 +76,11 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
           {/* Badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-              <BellAlertIcon className="w-4 h-4 text-cyan-400" />
+              <BellIcon className="w-4 h-4 text-cyan-400" />
               <span className="text-white/90 font-semibold text-sm uppercase tracking-wider">
                 {t('hero.badge', 'Smart Property Alerts')}
               </span>
-              <BellAlertIcon className="w-4 h-4 text-cyan-400" />
+              <BellIcon className="w-4 h-4 text-cyan-400" />
             </div>
           </div>
 
@@ -116,7 +116,7 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
               <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
-                  <BellAlertIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <BellIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">
                   {totalSearches > 0 ? 'ON' : 'OFF'}
@@ -185,7 +185,7 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 mt-8 text-white/50 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
-              <BellAlertIcon className="w-4 h-4 text-cyan-400" />
+              <BellIcon className="w-4 h-4 text-cyan-400" />
               <span>{t('badges.instantAlerts', 'Instant Alerts')}</span>
             </div>
             <span className="hidden sm:inline">•</span>

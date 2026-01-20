@@ -75,6 +75,10 @@ const TermsOfServicePage = lazy(() => import('./src/features/legal/components/Te
 const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
 
+// Agency creation pages
+const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
+const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/AgencyPaymentPage'));
+
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
 
@@ -283,6 +287,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         '/cookie-policy': 'cookies',
         '/refund': 'refund',
         '/refund-policy': 'refund',
+        '/create-agency': 'createAgency',
+        '/create-agency/payment': 'createAgencyPayment',
+        '/create-agency/confirm': 'createAgencyConfirm',
       };
 
       // Redirect /pricing to /subscribe
@@ -483,6 +490,12 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         return <CookiePolicyPage />;
       case 'refund':
         return <RefundPolicyPage />;
+      case 'createAgency':
+        return <CreateAgencyPage />;
+      case 'createAgencyPayment':
+        return <AgencyPaymentPage />;
+      case 'createAgencyConfirm':
+        return <AgencyPaymentPage />;
       case 'search':
       default:
         return <SearchPage onToggleSidebar={onToggleSidebar} />;
