@@ -198,17 +198,35 @@ const AgenciesListPage: React.FC = () => {
         onClick={() => handleViewAgency(agency)}
         className="group relative bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100/80 hover:border-primary/30"
       >
-        {/* Top gradient banner */}
-        <div className={`h-24 sm:h-28 bg-gradient-to-br ${index < 3 ? rankStyle.bg : 'from-slate-700 via-blue-800 to-indigo-900'} relative overflow-hidden`}>
-          {/* Decorative pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <pattern id={`grid-${agency._id}`} width="10" height="10" patternUnits="userSpaceOnUse">
-                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
-              </pattern>
-              <rect width="100%" height="100%" fill={`url(#grid-${agency._id})`}/>
-            </svg>
-          </div>
+        {/* Top banner - use agency cover image or gradient fallback */}
+        <div className={`h-24 sm:h-28 relative overflow-hidden ${!agency.coverImage ? `bg-gradient-to-br ${index < 3 ? rankStyle.bg : 'from-slate-700 via-blue-800 to-indigo-900'}` : ''}`}>
+          {/* Agency cover image */}
+          {agency.coverImage && (
+            <img
+              src={agency.coverImage}
+              alt={`${agency.name} banner`}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              draggable={false}
+            />
+          )}
+
+          {/* Overlay for better text visibility on images */}
+          {agency.coverImage && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+          )}
+
+          {/* Decorative pattern - only show on gradient backgrounds */}
+          {!agency.coverImage && (
+            <div className="absolute inset-0 opacity-10">
+              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <pattern id={`grid-${agency._id}`} width="10" height="10" patternUnits="userSpaceOnUse">
+                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
+                </pattern>
+                <rect width="100%" height="100%" fill={`url(#grid-${agency._id})`}/>
+              </svg>
+            </div>
+          )}
 
           {/* Rank badge */}
           {index < 10 && (
