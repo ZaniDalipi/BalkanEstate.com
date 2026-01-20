@@ -189,7 +189,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       await updateSavedSearchAccessTime(search.id, allPropertyIds);
       onOpen(); // Call onOpen after updating (in case parent needs to do something)
 
-      // Set fly target for map when opening - calculate appropriate zoom to fit bounds
+      // Set fly target for map when opening - calculate appropriate zoom to fit bounds with padding
       if (parsedBounds) {
         try {
           const bounds = L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
@@ -203,15 +203,19 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
           // Approximate zoom level based on degree span
           let zoom = 13; // default
-          if (maxDiff > 1) zoom = 9;
-          else if (maxDiff > 0.5) zoom = 10;
-          else if (maxDiff > 0.2) zoom = 11;
-          else if (maxDiff > 0.1) zoom = 12;
-          else if (maxDiff > 0.05) zoom = 13;
-          else if (maxDiff > 0.02) zoom = 14;
-          else zoom = 15;
+          if (maxDiff > 2) zoom = 7;
+          else if (maxDiff > 1) zoom = 8;
+          else if (maxDiff > 0.5) zoom = 9;
+          else if (maxDiff > 0.2) zoom = 10;
+          else if (maxDiff > 0.1) zoom = 11;
+          else if (maxDiff > 0.05) zoom = 12;
+          else if (maxDiff > 0.02) zoom = 13;
+          else zoom = 14;
 
-          setMapFlyTarget({ center: [center.lat, center.lng], zoom });
+          // Subtract 1 from zoom for better padding around the search area
+          const finalZoom = Math.max(5, zoom - 1);
+
+          setMapFlyTarget({ center: [center.lat, center.lng], zoom: finalZoom });
         } catch (e) {
           console.error("Failed to create bounds for fly target", e);
         }
@@ -282,41 +286,51 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
-      {/* Header */}
-      <div className="w-full p-4 flex justify-between items-center gap-3">
-        <button
-          onClick={handleToggle}
-          className="flex-1 flex justify-between items-center text-left"
-        >
-          {isRenaming ? (
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onClick={(e) => e.stopPropagation()}
-              className="flex-1 px-3 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-lg font-bold"
-              placeholder={t('accordion.namePlaceholder')}
-            />
-          ) : (
-            <h3 className="text-lg font-bold text-neutral-800">{search.name}</h3>
-          )}
-          <div className="flex items-center gap-2">
-            {newPropertyCount > 0 && (
-              <div className="bg-red-500 text-white rounded-full px-3 py-1.5">
-                <span className="text-sm font-bold">{newPropertyCount} {t('accordion.new')}</span>
-              </div>
-            )}
-            <div className="flex items-center bg-indigo-600 text-white rounded-full transition-colors hover:bg-indigo-700">
-              <span className="text-sm font-bold px-3 py-1.5 text-center min-w-[2rem]">
-                {isLoadingProperties || properties.length === 0 ? '...' : propertyCount}
-              </span>
-              <div className="border-l border-indigo-400 p-1.5">
-                {isOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+      {/* Header - Mobile Responsive */}
+      <div className="w-full p-4">
+        <div className="flex items-start sm:items-center gap-3">
+          {/* Main clickable area */}
+          <button
+            onClick={handleToggle}
+            className="flex-1 min-w-0"
+          >
+            {/* Mobile: Stack layout, Desktop: Row layout */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              {/* Name */}
+              {isRenaming ? (
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 px-3 py-2 border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-lg font-bold"
+                  placeholder={t('accordion.namePlaceholder')}
+                />
+              ) : (
+                <h3 className="text-lg font-bold text-neutral-800 truncate text-left">{search.name}</h3>
+              )}
+
+              {/* Badges row - always horizontal */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {newPropertyCount > 0 && (
+                  <div className="bg-red-500 text-white rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5">
+                    <span className="text-xs sm:text-sm font-bold whitespace-nowrap">{newPropertyCount} {t('accordion.new')}</span>
+                  </div>
+                )}
+                <div className="flex items-center bg-indigo-600 text-white rounded-full transition-colors hover:bg-indigo-700">
+                  <span className="text-xs sm:text-sm font-bold px-2.5 py-1 sm:px-3 sm:py-1.5 text-center min-w-[1.75rem] sm:min-w-[2rem]">
+                    {isLoadingProperties || properties.length === 0 ? '...' : propertyCount}
+                  </span>
+                  <div className="border-l border-indigo-400 p-1 sm:p-1.5">
+                    {isOpen ? <ChevronUpIcon className="w-4 h-4 sm:w-5 sm:h-5" /> : <ChevronDownIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </button>
-        <div className="flex items-center gap-2">
+          </button>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {isRenaming ? (
             <>
               <button
@@ -421,6 +435,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
               </button>
             </>
           )}
+          </div>
         </div>
       </div>
 
