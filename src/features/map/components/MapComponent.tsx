@@ -109,36 +109,58 @@ const inject3DPerspectiveStyles = () => {
       z-index: -1;
     }
 
-    /* Smooth zoom - same timing as UI button transitions (0.3s ease-out) */
+    /* Smooth zoom - optimized for mobile pinch-to-zoom */
     .leaflet-container {
       -webkit-tap-highlight-color: transparent;
-      touch-action: pan-x pan-y;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
-    /* Smooth zoom transition - same as button animations (0.3s ease-out) */
+    /* Enable smooth pinch zoom on mobile */
+    .leaflet-touch .leaflet-container {
+      touch-action: manipulation;
+    }
+
+    /* Smooth zoom transition - fast and responsive for pinch gestures */
     .leaflet-zoom-animated {
-      transition: transform 0.3s ease-out !important;
+      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
     }
 
     .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.3s ease-out !important;
+      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
     }
 
-    /* Smooth tile fade - matches button animations */
+    /* Disable transition during active pinch for immediate response */
+    .leaflet-touch-zoom .leaflet-zoom-animated {
+      transition: none !important;
+    }
+
+    /* Smooth tile fade - quick and clean */
     .leaflet-fade-anim .leaflet-tile {
-      transition: opacity 0.3s ease-out !important;
+      transition: opacity 0.15s ease-out !important;
     }
 
     .leaflet-tile-container {
       will-change: transform;
+      transform: translateZ(0);
     }
 
     .leaflet-tile {
-      will-change: opacity;
+      will-change: opacity, transform;
     }
 
-    /* GPU acceleration */
+    /* GPU acceleration for smooth mobile performance */
     .leaflet-tile-pane,
+    .leaflet-overlay-pane,
+    .leaflet-marker-pane,
+    .leaflet-tooltip-pane,
+    .leaflet-popup-pane {
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
     .leaflet-tile,
     .leaflet-marker-icon,
     .leaflet-popup {
@@ -147,10 +169,37 @@ const inject3DPerspectiveStyles = () => {
       -webkit-backface-visibility: hidden;
     }
 
-    /* Cleaner tile rendering */
+    /* Clean tile rendering - remove blur and artifacts */
+    .leaflet-tile {
+      image-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+    }
+
     .map-tiles img {
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
+      image-rendering: auto;
+    }
+
+    /* Prevent visual glitches during zoom */
+    .leaflet-zoom-animated {
+      will-change: transform;
+    }
+
+    /* Clean edges during pinch zoom */
+    .leaflet-touch .leaflet-tile {
+      border: none;
+      outline: none;
+    }
+
+    /* Prevent flickering on mobile */
+    .leaflet-pane {
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+    }
+
+    /* Smooth map container on mobile */
+    .leaflet-container.leaflet-touch-drag {
+      -ms-touch-action: manipulation;
+      touch-action: manipulation;
     }
   `;
   document.head.appendChild(style);
@@ -197,16 +246,16 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - enables fractional zoom only when zoomed in very close
- * Far away: whole zoom levels (zoomSnap=1)
- * Very close (18+): fractional zoom (zoomSnap=0.5)
+ * ZoomSnapAdjuster Component - enables finer zoom control when zoomed in very close
+ * Far away: half zoom levels (zoomSnap=0.5) - smooth but predictable
+ * Very close (18+): quarter zoom levels (zoomSnap=0.25) - fine-grained control
  */
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
   const map = useMap();
 
   useEffect(() => {
-    const newZoomSnap = currentZoom >= 18 ? 0.5 : 1;
-    const newZoomDelta = currentZoom >= 18 ? 0.5 : 1;
+    const newZoomSnap = currentZoom >= 18 ? 0.25 : 0.5;
+    const newZoomDelta = currentZoom >= 18 ? 0.25 : 0.5;
 
     if (map.options.zoomSnap !== newZoomSnap) {
       map.options.zoomSnap = newZoomSnap;
@@ -457,16 +506,23 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Ultra-smooth continuous zoom
-          zoomSnap={0.1}
-          zoomDelta={0.1}
-          wheelPxPerZoomLevel={80}
-          wheelDebounceTime={40}
+          // Smooth continuous zoom
+          zoomSnap={0.5}
+          zoomDelta={0.5}
+          wheelPxPerZoomLevel={100}
+          wheelDebounceTime={50}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
-          touchZoom={isMobile ? 'center' : true}
+          // Mobile touch settings - zoom at finger location
+          touchZoom={true}
+          doubleClickZoom={true}
           bounceAtZoomLimits={false}
+          // Smooth inertia for panning
+          inertia={true}
+          inertiaDeceleration={2000}
+          inertiaMaxSpeed={1500}
+          easeLinearity={0.25}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
