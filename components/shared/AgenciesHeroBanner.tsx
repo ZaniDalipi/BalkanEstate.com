@@ -146,7 +146,7 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
                   {t('agencies.findIdealAgency', 'Find Your Ideal Agency')}
                 </h2>
                 <p className="text-white/60 text-xs sm:text-sm">
-                  {t('agencies.searchAgencies', 'Search by name, city, or specialty')}
+                  {t('agencies.searchAgencies', 'Search by name, city, or specialty', { count: totalAgencies })}
                 </p>
               </div>
 

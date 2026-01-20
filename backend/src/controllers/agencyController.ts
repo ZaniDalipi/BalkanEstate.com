@@ -565,11 +565,30 @@ export const getAgency = async (
         .lean();
 
       // Transform sellerId to seller for frontend compatibility
-      properties = rawProperties.map((prop: any) => ({
-        ...prop,
-        id: prop._id.toString(),
-        seller: prop.sellerId,
-      }));
+      // PropertyCard expects: { type, name, avatarUrl, phone, agencyName, agencyLogo, agencyId }
+      properties = rawProperties.map((prop: any) => {
+        const sellerData = prop.sellerId;
+        return {
+          ...prop,
+          id: prop._id.toString(),
+          seller: sellerData ? {
+            type: sellerData.role === 'agent' ? 'agent' : 'private',
+            name: sellerData.name || 'Unknown',
+            avatarUrl: sellerData.avatarUrl,
+            phone: sellerData.phone || '',
+            agencyName: sellerData.agencyName || agency.name,
+            agencyLogo: agency.logo,
+            agencyId: String(agency._id),
+          } : {
+            type: 'agent',
+            name: 'Unknown Agent',
+            phone: '',
+            agencyName: agency.name,
+            agencyLogo: agency.logo,
+            agencyId: String(agency._id),
+          },
+        };
+      });
 
       console.log(`✅ Found ${properties.length} properties for agency`);
     } catch (propertyError: any) {

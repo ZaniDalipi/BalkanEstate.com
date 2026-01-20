@@ -9,6 +9,7 @@ import type { Agency, AgencyFilters, Agent } from '@/src/shared/types';
 export const getAgencies = async (filters?: AgencyFilters): Promise<any> => {
   const params = new URLSearchParams();
   if (filters?.city) params.append('city', filters.city);
+  if (filters?.search) params.append('search', filters.search);
   if (filters?.featured !== undefined) params.append('featured', String(filters.featured));
   if (filters?.page) params.append('page', String(filters.page));
   if (filters?.limit) params.append('limit', String(filters.limit));

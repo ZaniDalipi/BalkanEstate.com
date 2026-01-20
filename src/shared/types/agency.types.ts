@@ -105,6 +105,7 @@ export interface Agent extends User {
 
 export interface AgencyFilters {
   city?: string;
+  search?: string;
   featured?: boolean;
   page?: number;
   limit?: number;
