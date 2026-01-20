@@ -978,19 +978,19 @@ const ProfileSettings: React.FC<{ user: User }> = ({ user }) => {
             <fieldset className="border-t pt-6">
                 <legend className="block text-sm font-medium text-neutral-700 mb-4">{t('profile.profilePicture')}</legend>
                 <div className="flex items-center gap-6">
-                    <div className="relative">
+                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-neutral-200 bg-neutral-100 flex-shrink-0">
                         {avatarPreview || formData.avatarUrl ? (
                             <img
                                 src={avatarPreview || formData.avatarUrl}
                                 alt="Avatar"
-                                className="w-24 h-24 rounded-full object-cover border-4 border-neutral-200"
+                                className="w-full h-full object-cover"
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <UserCircleIcon className="w-24 h-24 text-neutral-300" />
+                            <UserCircleIcon className="w-full h-full text-neutral-300" />
                         )}
                         {isUploadingAvatar && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                             </div>
                         )}
@@ -1367,11 +1367,13 @@ const MyAccountPage: React.FC = () => {
                     <div className="lg:col-span-1">
                         <div className="bg-white p-4 rounded-xl shadow-md border border-neutral-200">
                              <div className="flex flex-col items-center text-center pb-4 mb-4 border-b">
-                                {state.currentUser.avatarUrl ? (
-                                    <img src={state.currentUser.avatarUrl} alt="avatar" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mb-3" referrerPolicy="no-referrer" />
-                                ) : (
-                                    <UserCircleIcon className="w-20 h-20 sm:w-24 sm:h-24 text-neutral-300 mb-3" />
-                                )}
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 bg-neutral-100 flex-shrink-0">
+                                    {state.currentUser.avatarUrl ? (
+                                        <img src={state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                    ) : (
+                                        <UserCircleIcon className="w-full h-full text-neutral-300" />
+                                    )}
+                                </div>
                                 <h2 className="font-bold text-lg sm:text-xl text-neutral-800">{state.currentUser.name}</h2>
                                 <p className="text-sm text-neutral-500 capitalize mb-2">{roleDisplayMap[state.currentUser.role]}</p>
 

@@ -59,16 +59,18 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
           }`}
           aria-label={t('nav:myAccount')}
         >
-          {currentUser.avatarUrl ? (
-            <img
-              src={currentUser.avatarUrl}
-              alt=""
-              className="w-7 h-7 rounded-full object-cover"
-              aria-hidden="true"
-            />
-          ) : (
-            <UserCircle className="w-7 h-7" aria-hidden="true" />
-          )}
+          <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100">
+            {currentUser.avatarUrl ? (
+              <img
+                src={currentUser.avatarUrl}
+                alt=""
+                className="w-full h-full object-cover"
+                aria-hidden="true"
+              />
+            ) : (
+              <UserCircle className="w-full h-full text-neutral-400" aria-hidden="true" />
+            )}
+          </div>
           <span className="hidden sm:inline text-sm">{t('nav:myAccount')}</span>
         </button>
       );

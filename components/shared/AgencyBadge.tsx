@@ -93,18 +93,20 @@ const AgencyBadge: React.FC<AgencyBadgeProps> = ({
   // Get the appropriate icon
   const renderIcon = () => {
     if (!showIcon) return null;
-    
+
     if (agencyLogo) {
       return (
-        <img 
-          src={agencyLogo} 
-          alt={agencyName || 'Agency'}
-          className={`${sizeConfig[size].icon} flex-shrink-0 rounded object-contain`}
-          onError={(e) => {
-            // Fallback to default icon if image fails to load
-            e.currentTarget.style.display = 'none';
-          }}
-        />
+        <div className={`${sizeConfig[size].icon} flex-shrink-0 rounded overflow-hidden bg-white/10`}>
+          <img
+            src={agencyLogo}
+            alt={agencyName || 'Agency'}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to default icon if image fails to load
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        </div>
       );
     }
 

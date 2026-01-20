@@ -101,17 +101,21 @@ interface AgentProfilePageProps {
 const ProfileAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
     const [error, setError] = useState(false);
 
-    if (!agent.avatarUrl || error) {
-        return <UserCircleIcon className="w-32 h-32 text-gray-300" />;
-    }
-
     return (
-        <img
-            src={agent.avatarUrl}
-            alt={agent.name}
-            className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-            onError={() => setError(true)}
-        />
+        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-gray-100 to-gray-200 flex-shrink-0">
+            {(!agent.avatarUrl || error) ? (
+                <div className="w-full h-full flex items-center justify-center">
+                    <UserCircleIcon className="w-20 h-20 text-gray-300" />
+                </div>
+            ) : (
+                <img
+                    src={agent.avatarUrl}
+                    alt={agent.name}
+                    className="w-full h-full object-cover"
+                    onError={() => setError(true)}
+                />
+            )}
+        </div>
     );
 };
 
@@ -1309,7 +1313,9 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             <Popup>
                                                                 <div className="text-center min-w-[200px]">
                                                                     {agent.avatarUrl && (
-                                                                        <img src={agent.avatarUrl} alt={agent.name} className="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-gray-300" referrerPolicy="no-referrer" />
+                                                                        <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-gray-300 flex-shrink-0">
+                                                                            <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                                        </div>
                                                                     )}
                                                                     <p className="font-bold text-base mb-1">{agent.name}</p>
                                                                     <p className="text-sm text-gray-600 mb-3">{agent.city}, {agent.country}</p>
@@ -1340,7 +1346,9 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                     <div className={`absolute inset-0 bg-gradient-to-t from-indigo-950/85 via-indigo-900/40 to-transparent transition-opacity duration-300 flex items-end p-6 ${mapCardOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setMapCardOpen(false)}>
                                                         <div className="w-full text-white text-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                                             {agent.avatarUrl && (
-                                                                <img src={agent.avatarUrl} alt={agent.name} className="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-4 border-indigo-300" referrerPolicy="no-referrer" />
+                                                                <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-indigo-300 flex-shrink-0">
+                                                                    <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                                </div>
                                                             )}
                                                             <p className="font-bold text-lg">{agent.name}</p>
                                                             <p className="text-sm text-indigo-200 mb-3">{agent.city}, {agent.country}</p>

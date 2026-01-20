@@ -315,11 +315,11 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                     className={`flex items-end gap-1.5 sm:gap-2 ${isCurrentUserMessage ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {!isCurrentUserMessage && otherPerson && (
-                                        <div className="flex-shrink-0">
+                                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100">
                                             {otherPerson.avatarUrl ? (
-                                                <img src={otherPerson.avatarUrl} alt={otherPerson.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover" referrerPolicy="no-referrer" />
+                                                <img src={otherPerson.avatarUrl} alt={otherPerson.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                             ) : (
-                                                <UserCircleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400" />
+                                                <UserCircleIcon className="w-full h-full text-neutral-400" />
                                             )}
                                         </div>
                                     )}
@@ -341,15 +341,15 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                         {/* Typing Indicator */}
                         {isTyping && (
                             <div className="flex items-end gap-1.5 sm:gap-2 justify-start animate-pulse">
-                                <div className="flex-shrink-0">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100 ring-2 ring-primary ring-opacity-50">
                                     {(conversation.seller?.avatarUrl || property?.seller?.avatarUrl) ? (
                                         <img
                                             src={conversation.seller?.avatarUrl || property?.seller?.avatarUrl}
                                             alt="Seller"
-                                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-primary ring-opacity-50"
+                                            className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <UserCircleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400" />
+                                        <UserCircleIcon className="w-full h-full text-neutral-400" />
                                     )}
                                 </div>
                                 <div className="bg-neutral-100 p-2.5 sm:p-3 rounded-2xl rounded-bl-lg shadow-sm">
