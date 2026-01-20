@@ -73,6 +73,9 @@ const injectMapStyles = () => {
 
     /* Touch */
     .leaflet-container { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+    /* Zoom animation - fast */
+    .leaflet-zoom-anim .leaflet-zoom-animated { transition: transform 0.1s ease-out !important; }
   `;
   document.head.appendChild(style);
 };
@@ -314,13 +317,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Instant zoom - no animation lag
-          zoomSnap={1}
+          // Fast smooth zoom
+          zoomSnap={0}
           zoomDelta={1}
           wheelPxPerZoomLevel={60}
-          zoomAnimation={false}
-          fadeAnimation={false}
-          markerZoomAnimation={false}
+          zoomAnimation={true}
+          fadeAnimation={true}
+          markerZoomAnimation={true}
           // Touch: pinch zooms at finger location (not center)
           touchZoom={true}
           scrollWheelZoom={true}
