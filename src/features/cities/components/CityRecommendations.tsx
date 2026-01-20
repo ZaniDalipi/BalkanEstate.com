@@ -9,6 +9,7 @@ import { SEO } from '@/src/components/seo';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
+import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -222,14 +223,12 @@ const CityRecommendations: React.FC = () => {
     );
   }
 
+  // Calculate stats for hero banner
+  const totalListings = cities.reduce((sum, c) => sum + c.listingsCount, 0);
+  const avgGrowth = cities.length > 0 ? cities.reduce((sum, c) => sum + c.priceGrowthYoY, 0) / cities.length : 0;
+
   return (
-    <div className="min-h-screen bg-neutral-50 relative">
-      {/* Include 3D animation styles */}
-      <Decorative3DStyles />
-
-      {/* 3D Decorative Background Elements with Random City Images */}
-      <RandomCityBubbles count={8} />
-
+    <div className="min-h-screen bg-gray-50 relative">
       {/* SEO Meta Tags */}
       <SEO
         title={t('page.title')}
@@ -238,114 +237,58 @@ const CityRecommendations: React.FC = () => {
         type="website"
       />
 
+      {/* New Hero Banner */}
+      <ExploreCitiesHeroBanner
+        totalCities={cities.length}
+        totalCountries={countries.length}
+        totalListings={totalListings}
+        avgGrowth={avgGrowth}
+        selectedCountry={selectedCountry}
+        countries={countries}
+        onCountryChange={setSelectedCountry}
+      />
+
       <div className="p-4 sm:p-8 relative z-10">
         <div className="max-w-7xl mx-auto">
-          {/* Header with Stats */}
-          <div className="mb-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <SparklesIcon className="w-8 h-8 text-primary" />
-                  <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900">{t('hero.title')}</h2>
+          {/* AI-Powered Market Intelligence Card */}
+          {cities.length > 0 && (
+            <div className="mb-8 p-5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-2xl border border-violet-200 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
+                  <SparklesIcon className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-neutral-600 text-sm sm:text-base">
-                  {t('hero.subtitle', { count: cities.length })}
-                </p>
+                <div>
+                  <h4 className="font-bold text-slate-900 mb-1 text-lg">{t('aiInsights.title')}</h4>
+                  <p className="text-sm text-slate-600 mb-2">
+                    {t('aiInsights.description', { count: cities.length })}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {t('aiInsights.lastUpdated', {
+                      date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })
+                    })} • {t('aiInsights.dataSource')}
+                  </p>
+                </div>
               </div>
             </div>
+          )}
 
-            {/* Quick Stats Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white rounded-lg p-4 border border-neutral-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <MapPinIcon className="w-4 h-4 text-primary" />
-                  <span className="text-xs text-neutral-500 font-medium">{t('stats.totalCities')}</span>
-                </div>
-                <p className="text-2xl font-bold text-neutral-900">{cities.length}</p>
-              </div>
-              <div className="bg-white rounded-lg p-4 border border-neutral-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <BuildingOfficeIcon className="w-4 h-4 text-green-600" />
-                  <span className="text-xs text-neutral-500 font-medium">{t('stats.countries')}</span>
-                </div>
-                <p className="text-2xl font-bold text-neutral-900">{countries.length}</p>
-              </div>
-              <div className="bg-white rounded-lg p-4 border border-neutral-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <ArrowTrendingUpIcon className="w-4 h-4 text-green-600" />
-                  <span className="text-xs text-neutral-500 font-medium">{t('stats.avgGrowth')}</span>
-                </div>
-                <p className="text-2xl font-bold text-green-600">
-                  +{(cities.reduce((sum, c) => sum + c.priceGrowthYoY, 0) / cities.length).toFixed(1)}%
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-4 border border-neutral-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <HomeIcon className="w-4 h-4 text-primary" />
-                  <span className="text-xs text-neutral-500 font-medium">{t('stats.totalListings')}</span>
-                </div>
-                <p className="text-2xl font-bold text-neutral-900">
-                  {cities.reduce((sum, c) => sum + c.listingsCount, 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            {/* AI-Powered Market Intelligence - Moved to top */}
-            {cities.length > 0 && (
-              <div className="p-4 bg-gradient-to-r from-primary/5 to-blue-50 rounded-xl border border-primary/20">
-                <div className="flex items-start gap-3">
-                  <SparklesIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-neutral-900 mb-1">{t('aiInsights.title')}</h4>
-                    <p className="text-sm text-neutral-600 mb-1">
-                      {t('aiInsights.description', { count: cities.length })}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      {t('aiInsights.lastUpdated', {
-                        date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })
-                      })} • {t('aiInsights.dataSource')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-        {/* Country Filter */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedCountry('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              selectedCountry === 'all'
-                ? 'bg-primary text-white'
-                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-            }`}
-          >
-            {t('filters.allCountries')} ({cities.length})
-          </button>
-          {countries.map(country => {
-            const count = cities.filter(c => c.country === country).length;
-            return (
-              <button
-                key={country}
-                onClick={() => setSelectedCountry(country)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedCountry === country
-                    ? 'bg-primary text-white'
-                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                }`}
-              >
-                {country} ({count})
-              </button>
-            );
-          })}
+        {/* Section Header for City Cards */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            {selectedCountry === 'all'
+              ? t('cards.allCitiesTitle', 'All Cities')
+              : t('cards.countryTitle', { country: selectedCountry })}
+          </h2>
+          <p className="text-slate-600">
+            {t('cards.subtitle', { count: filteredCities.length })}
+          </p>
         </div>
 
-        {/* City Cards */}
+        {/* City Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCities.map((city) => {
             const hasImage = !failedImages.has(city.city);
