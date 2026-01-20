@@ -1462,56 +1462,61 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           )}
 
           <div className="space-y-4">
-            {/* Auto-Renew Toggle */}
-            <div className="flex items-center justify-between py-3 border-b border-neutral-100">
-              <div>
+            {/* Auto-Renew Toggle - Mobile friendly layout */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-neutral-100 gap-3">
+              <div className="flex-1">
                 <p className="font-medium text-neutral-800">Auto-Renewal</p>
                 <p className="text-sm text-neutral-500">
                   {subscriptionDetails.autoRenewing
-                    ? `Your subscription will automatically renew on ${formatDate(subscriptionDetails.renewalDate)}`
-                    : `Your subscription will expire on ${formatDate(subscriptionDetails.expirationDate)}`}
+                    ? `Renews on ${formatDate(subscriptionDetails.renewalDate)}`
+                    : `Expires on ${formatDate(subscriptionDetails.expirationDate)}`}
                 </p>
               </div>
-              <button
-                onClick={handleToggleAutoRenewal}
-                disabled={togglingAutoRenew}
-                className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  subscriptionDetails.autoRenewing
-                    ? 'bg-green-500 focus:ring-green-500'
-                    : 'bg-neutral-300 focus:ring-neutral-400'
-                } ${togglingAutoRenew ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                role="switch"
-                aria-checked={subscriptionDetails.autoRenewing}
-              >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
-                    subscriptionDetails.autoRenewing ? 'translate-x-8' : 'translate-x-1'
-                  }`}
-                />
-                {togglingAutoRenew && (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  </span>
-                )}
-              </button>
+              <div className="flex items-center gap-3">
+                <span className={`text-xs font-medium ${subscriptionDetails.autoRenewing ? 'text-green-600' : 'text-neutral-500'}`}>
+                  {subscriptionDetails.autoRenewing ? 'ON' : 'OFF'}
+                </span>
+                <button
+                  onClick={handleToggleAutoRenewal}
+                  disabled={togglingAutoRenew}
+                  className={`relative inline-flex h-7 w-14 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    subscriptionDetails.autoRenewing
+                      ? 'bg-green-500 focus:ring-green-500'
+                      : 'bg-neutral-300 focus:ring-neutral-400'
+                  } ${togglingAutoRenew ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  role="switch"
+                  aria-checked={subscriptionDetails.autoRenewing}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
+                      subscriptionDetails.autoRenewing ? 'translate-x-8' : 'translate-x-1'
+                    }`}
+                  />
+                  {togglingAutoRenew && (
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Payment Method Info */}
-            <div className="flex items-center justify-between py-3 border-b border-neutral-100">
+            {/* Payment Method Info - Mobile friendly */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-neutral-100 gap-2">
               <div>
                 <p className="font-medium text-neutral-800">Payment Source</p>
-                <p className="text-sm text-neutral-500 capitalize">{subscription.store || 'Web'} payment</p>
+                <p className="text-sm text-neutral-500 capitalize">{subscription.store || 'Web'} Payment</p>
               </div>
-              <span className="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800 capitalize">
+              <span className="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800 capitalize w-fit">
                 {subscription.store || 'Web'}
               </span>
             </div>
 
-            {/* Cancel Subscription */}
-            <div className="flex items-center justify-between py-3">
+            {/* Cancel Subscription - Mobile friendly */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
               <div>
                 <p className="font-medium text-neutral-800">Cancel Subscription</p>
                 <p className="text-sm text-neutral-500">
@@ -1520,7 +1525,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               </div>
               <button
                 onClick={() => setShowCancelModal(true)}
-                className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-200 sm:border-0 text-center"
               >
                 Cancel Plan
               </button>
@@ -1534,50 +1539,70 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div>
           <h3 className="text-lg font-bold text-neutral-800 mb-4">Upgrade Your Plan</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {upgradeOptions.map(({ key, plan, pricing }) => (
-              <div
-                key={key}
-                className={`bg-white rounded-xl border-2 ${plan.highlighted ? 'border-primary' : 'border-neutral-200'} hover:border-primary transition-colors overflow-hidden shadow-sm hover:shadow-md relative`}
-              >
-                {/* Badge */}
-                {plan.badge && (
-                  <div className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold text-white ${plan.badgeColor === 'red' ? 'bg-red-500' : plan.badgeColor === 'green' ? 'bg-green-500' : 'bg-amber-500'} rounded-bl-lg`}>
-                    {plan.badge}
-                  </div>
-                )}
-                <div className={`bg-gradient-to-r ${plan.color} p-4 text-white`}>
-                  <h4 className="font-bold text-lg">{plan.name}</h4>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    {pricing.discount > 0 && (
-                      <span className="text-sm line-through text-white/60">€{pricing.originalPrice}</span>
-                    )}
-                    <span className="text-2xl font-bold">€{pricing.finalPrice.toFixed(2)}</span>
-                    <span className="text-sm text-white/80">/{plan.period}</span>
-                  </div>
-                  {pricing.savings && (
-                    <p className="text-xs mt-1 bg-white/20 px-2 py-0.5 rounded-full inline-block">
-                      {pricing.savings}
-                    </p>
+            {upgradeOptions.map(({ key, plan, pricing }) => {
+              // Enhanced features for Enterprise plan
+              const isEnterprise = key.includes('enterprise') || key.includes('agency_yearly');
+              const displayFeatures = isEnterprise ? [
+                '500 Active Listings',
+                'Create Your Own Agency',
+                '5 Agent Invitation Coupons',
+                'Unlimited Saved Searches',
+                'Full Analytics Dashboard',
+                'Priority Support',
+                '10 Monthly Promotion Coupons',
+                'Team Management Tools',
+              ] : plan.features;
+
+              return (
+                <div
+                  key={key}
+                  className={`bg-white rounded-xl border-2 ${plan.highlighted || isEnterprise ? 'border-primary' : 'border-neutral-200'} hover:border-primary transition-colors overflow-hidden shadow-sm hover:shadow-md relative`}
+                >
+                  {/* Badge */}
+                  {(plan.badge || isEnterprise) && (
+                    <div className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold text-white ${isEnterprise ? 'bg-amber-500' : plan.badgeColor === 'red' ? 'bg-red-500' : plan.badgeColor === 'green' ? 'bg-green-500' : 'bg-amber-500'} rounded-bl-lg`}>
+                      {isEnterprise ? 'Best for Agencies' : plan.badge}
+                    </div>
                   )}
+                  <div className={`bg-gradient-to-r ${plan.color} p-4 text-white`}>
+                    <h4 className="font-bold text-lg">{plan.name}</h4>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      {pricing.discount > 0 && (
+                        <span className="text-sm line-through text-white/60">€{pricing.originalPrice}</span>
+                      )}
+                      <span className="text-2xl font-bold">€{pricing.finalPrice.toFixed(2)}</span>
+                      <span className="text-sm text-white/80">/{plan.period}</span>
+                    </div>
+                    {pricing.savings && (
+                      <p className="text-xs mt-1 bg-white/20 px-2 py-0.5 rounded-full inline-block">
+                        {pricing.savings}
+                      </p>
+                    )}
+                    {isEnterprise && (
+                      <p className="text-xs mt-2 text-white/80">
+                        Build and manage your real estate agency
+                      </p>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <ul className="space-y-2 mb-4">
+                      {displayFeatures.slice(0, isEnterprise ? 8 : displayFeatures.length).map((feature, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm text-neutral-700">
+                          <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={() => handleUpgradeClick(key)}
+                      className={`w-full py-2.5 rounded-lg font-bold text-white bg-gradient-to-r ${plan.color} hover:opacity-90 transition-opacity`}
+                    >
+                      {isEnterprise ? 'Start Your Agency' : 'Upgrade Now'}
+                    </button>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <ul className="space-y-2 mb-4">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-sm text-neutral-700">
-                        <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => handleUpgradeClick(key)}
-                    className={`w-full py-2.5 rounded-lg font-bold text-white bg-gradient-to-r ${plan.color} hover:opacity-90 transition-opacity`}
-                  >
-                    Upgrade Now
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

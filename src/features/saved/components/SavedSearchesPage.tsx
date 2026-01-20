@@ -11,6 +11,7 @@ import { SEO } from '@/src/components/seo';
 import * as api from '@/services/apiService';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { FloatingSphere, GlossyPill, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import SavedSearchesHeroBanner from '@/components/shared/SavedSearchesHeroBanner';
 
 const initialFilters: Filters = {
     query: '',
@@ -55,22 +56,6 @@ const isValidSavedSearch = (search: SavedSearch): boolean => {
     return !!(search && search.id && search.name);
 };
 
-const SortButton: React.FC<{
-    label: string;
-    isActive: boolean;
-    onClick: () => void;
-}> = ({ label, isActive, onClick }) => (
-    <button
-        onClick={onClick}
-        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex-grow text-center ${
-            isActive
-                ? 'bg-white text-primary shadow'
-                : 'text-neutral-600 hover:bg-neutral-200'
-        }`}
-    >
-        {label}
-    </button>
-);
 
 
 const SavedSearchesPage: React.FC = () => {
@@ -227,32 +212,15 @@ const SavedSearchesPage: React.FC = () => {
     }
     
     return (
-        <>
-            <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
-                    <SortButton label={t('sort.newest')} isActive={sortBy === 'createdAt'} onClick={() => setSortBy('createdAt')} />
-                    <SortButton label={t('sort.name')} isActive={sortBy === 'name'} onClick={() => setSortBy('name')} />
-                    <SortButton label={t('sort.lastActive')} isActive={sortBy === 'lastAccessed'} onClick={() => setSortBy('lastAccessed')} />
-                </div>
-                <button
-                    onClick={handleClearAll}
-                    disabled={isClearing}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
-                >
-                    <TrashIcon className="w-4 h-4" />
-                    {isClearing ? 'Clearing...' : 'Clear All'}
-                </button>
-            </div>
-            <div className="space-y-4">
-              {sortedSearches.map((search) => (
-                <SavedSearchAccordion
-                    key={search.id}
-                    search={search}
-                    onOpen={() => {}} // SavedSearchAccordion handles updating access time itself
-                />
-              ))}
-            </div>
-        </>
+        <div className="space-y-4">
+          {sortedSearches.map((search) => (
+            <SavedSearchAccordion
+                key={search.id}
+                search={search}
+                onOpen={() => {}} // SavedSearchAccordion handles updating access time itself
+            />
+          ))}
+        </div>
     );
   };
 
@@ -265,42 +233,14 @@ const SavedSearchesPage: React.FC = () => {
         noindex={true}
       />
 
-      {/* Include 3D animation styles */}
-      <Decorative3DStyles />
-
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-primary via-primary-dark to-primary text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg relative overflow-hidden">
-        {/* 3D Decorative elements in hero */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-6 right-[10%] opacity-15 hidden md:block">
-            <FloatingSphere size="lg" color="cyan" />
-          </div>
-          <div className="absolute bottom-4 left-[8%] opacity-10 hidden md:block">
-            <FloatingSphere size="md" color="pink" animate={false} />
-          </div>
-          <div className="absolute top-1/2 -right-8 opacity-10 hidden lg:block rotate-[15deg]">
-            <GlossyPill orientation="vertical" size="md" color="blue" />
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4">
-            <MagnifyingGlassPlusIcon className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">{t('hero.title')}</h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            {t('hero.subtitle')}
-          </p>
-          {sortedSearches.length > 0 && (
-            <div className="mt-6 inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
-              <span className="text-2xl font-bold text-white">{sortedSearches.length}</span>
-              <div className="h-6 w-px bg-white/30"></div>
-              <span className="text-sm font-semibold text-white/90">
-                {sortedSearches.length === 1 ? t('hero.searchCount.singular') : t('hero.searchCount.plural')}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Modern Hero Banner */}
+      <SavedSearchesHeroBanner
+        totalSearches={sortedSearches.length}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        onClearAll={handleClearAll}
+        isClearing={isClearing}
+      />
 
       <main className="py-8 flex-grow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -13,6 +13,7 @@ import Footer from '@/components/shared/Footer';
 import { getSavedAgents } from '@/src/features/agents/api/agentApi';
 import StarRating from '@/components/shared/StarRating';
 import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import SavedItemsHeroBanner from '@/components/shared/SavedItemsHeroBanner';
 
 const SavedPropertiesPage: React.FC = () => {
   const { t } = useTranslation(['property', 'nav', 'agents']);
@@ -285,52 +286,7 @@ const SavedPropertiesPage: React.FC = () => {
       );
     }
 
-    return (
-      <>
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('properties')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === 'properties'
-                ? 'bg-primary text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-            }`}
-          >
-            <HomeIcon className="w-5 h-5" />
-            {t('property:saved.tabs.properties')}
-            {savedHomes.length > 0 && (
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                activeTab === 'properties' ? 'bg-white/20' : 'bg-gray-100'
-              }`}>
-                {savedHomes.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('agents')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === 'agents'
-                ? 'bg-primary text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-            }`}
-          >
-            <UsersIcon className="w-5 h-5" />
-            {t('property:saved.tabs.agents')}
-            {savedAgentsList.length > 0 && (
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                activeTab === 'agents' ? 'bg-white/20' : 'bg-gray-100'
-              }`}>
-                {savedAgentsList.length}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Content based on active tab */}
-        {activeTab === 'properties' ? renderPropertiesContent() : renderAgentsContent()}
-      </>
-    );
+    return activeTab === 'properties' ? renderPropertiesContent() : renderAgentsContent();
   };
 
   const totalSaved = savedHomes.length + savedAgentsList.length;
@@ -350,45 +306,14 @@ const SavedPropertiesPage: React.FC = () => {
           properties={selectedForComparison}
       />
 
-      {/* Include 3D animation styles */}
-      <Decorative3DStyles />
-
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-primary via-primary-dark to-primary text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg relative overflow-hidden">
-        {/* 3D Decorative elements in hero */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-6 right-[10%] opacity-15 hidden md:block">
-            <FloatingSphere size="lg" color="cyan" />
-          </div>
-          <div className="absolute bottom-4 left-[8%] opacity-10 hidden md:block">
-            <FloatingSphere size="md" color="pink" animate={false} />
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4">
-            <HeartIcon className="w-10 h-10 text-white fill-current" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">{t('property:saved.title')}</h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            {t('property:saved.subtitle')}
-          </p>
-          {totalSaved > 0 && (
-            <div className="mt-6 inline-flex items-center gap-4 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
-              <div className="flex items-center gap-2">
-                <HomeIcon className="w-5 h-5" />
-                <span className="text-lg font-bold text-white">{savedHomes.length}</span>
-                <span className="text-sm text-white/80">{savedHomes.length === 1 ? t('property:saved.propertySaved') : t('property:saved.propertiesSaved')}</span>
-              </div>
-              <div className="h-6 w-px bg-white/30"></div>
-              <div className="flex items-center gap-2">
-                <UsersIcon className="w-5 h-5" />
-                <span className="text-lg font-bold text-white">{savedAgentsList.length}</span>
-                <span className="text-sm text-white/80">{savedAgentsList.length === 1 ? t('property:saved.agents.agentSaved') : t('property:saved.agents.agentsSaved')}</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Modern Hero Banner with Tabs */}
+      <SavedItemsHeroBanner
+        savedPropertiesCount={savedHomes.length}
+        savedAgentsCount={savedAgentsList.length}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        groupedCountries={Object.keys(groupedHomes).length}
+      />
 
       <main className={`flex-grow ${comparisonList.length > 0 ? 'pb-20' : 'pb-8'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
