@@ -9,8 +9,40 @@
     "searchCount": {
       "singular": "Saved Search",
       "plural": "Saved Searches"
-    }
+    },
+    "badge": "Smart Property Alerts",
+    "titleHighlight": "Property Searches",
+    "description": "Track your favorite search criteria and get notified when new properties match"
   },
+  "stats": {
+    "savedSearches": "Saved Searches",
+    "alerts": "Email Alerts",
+    "countries": "Countries",
+    "toggleAlerts": "Toggle email alerts",
+    "upgradeForAlerts": "Upgrade to Pro for email alerts",
+    "proOnly": "Pro Feature"
+  },
+  "badges": {
+    "instantAlerts": "Instant Alerts",
+    "customAreas": "Custom Areas",
+    "smartMatching": "Smart Matching"
+  },
+  "alerts": {
+    "enabledTitle": "Alerts Enabled",
+    "enabledMessage": "You will receive email notifications for all saved searches",
+    "disabledTitle": "Alerts Disabled",
+    "disabledMessage": "Email notifications have been turned off",
+    "toggleFailed": "Failed to update alert settings"
+  },
+  "clearAll": {
+    "button": "Clear All",
+    "clearing": "Clearing...",
+    "confirmTitle": "Delete All Saved Searches",
+    "confirmMessage": "Are you sure you want to delete all saved searches? This cannot be undone.",
+    "confirmButton": "Delete All",
+    "cancelButton": "Cancel"
+  },
+  "sortBy": "Sort by",
   "loginRequired": {
     "title": "Log in to view your saved searches",
     "description": "Save your favorite search criteria and get notified about new listings.",

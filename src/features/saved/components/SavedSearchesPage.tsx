@@ -10,6 +10,7 @@ import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { SEO } from '@/src/components/seo';
 import * as api from '@/services/apiService';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { useNotification } from '@/src/shared/hooks/useNotification';
 import { FloatingSphere, GlossyPill, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import SavedSearchesHeroBanner from '@/components/shared/SavedSearchesHeroBanner';
 
@@ -61,10 +62,76 @@ const isValidSavedSearch = (search: SavedSearch): boolean => {
 const SavedSearchesPage: React.FC = () => {
   const { t } = useTranslation(['saved']);
   const { state, dispatch, fetchProperties } = useAppContext();
-  const { savedSearches, isAuthenticated, properties } = state;
+  const { savedSearches, isAuthenticated, properties, currentUser } = state;
   const [sortBy, setSortBy] = useState<'createdAt' | 'name' | 'lastAccessed'>('createdAt');
   const [isClearing, setIsClearing] = useState(false);
+  const [isTogglingAlerts, setIsTogglingAlerts] = useState(false);
   const { confirm } = useConfirmation();
+  const { success, error: showError } = useNotification();
+
+  // Check if user has Pro subscription (buyer tier or higher)
+  const isPro = useMemo(() => {
+    if (!currentUser?.subscription) return false;
+    const { tier, status } = currentUser.subscription;
+    const eligibleTiers = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
+    const eligibleStatuses = ['active', 'trial', 'grace'];
+    return eligibleTiers.includes(tier) && eligibleStatuses.includes(status);
+  }, [currentUser]);
+
+  // Check if any saved search has alerts enabled
+  const emailAlertsEnabled = useMemo(() => {
+    return savedSearches.some(search => search.alertsEnabled);
+  }, [savedSearches]);
+
+  // Handle global toggle of email alerts
+  const handleToggleEmailAlerts = async () => {
+    // If not Pro, show subscription modal
+    if (!isPro) {
+      dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });
+      return;
+    }
+
+    // Toggle all saved searches alerts
+    const newAlertsState = !emailAlertsEnabled;
+    setIsTogglingAlerts(true);
+
+    try {
+      // Update all saved searches
+      await Promise.all(
+        savedSearches.map(search =>
+          api.updateSavedSearchAlerts(search.id, newAlertsState, search.alertFrequency || 'instant')
+        )
+      );
+
+      // Update local state for all saved searches
+      savedSearches.forEach(search => {
+        dispatch({
+          type: 'UPDATE_SAVED_SEARCH',
+          payload: { ...search, alertsEnabled: newAlertsState }
+        });
+      });
+
+      if (newAlertsState) {
+        await success(
+          t('alerts.enabledTitle', 'Alerts Enabled'),
+          t('alerts.enabledMessage', 'You will receive email notifications for all saved searches')
+        );
+      } else {
+        await success(
+          t('alerts.disabledTitle', 'Alerts Disabled'),
+          t('alerts.disabledMessage', 'Email notifications have been turned off')
+        );
+      }
+    } catch (err) {
+      console.error('Failed to toggle alerts:', err);
+      await showError(
+        t('common:error', 'Error'),
+        t('alerts.toggleFailed', 'Failed to update alert settings')
+      );
+    } finally {
+      setIsTogglingAlerts(false);
+    }
+  };
 
   // Fetch properties if not already loaded
   useEffect(() => {
@@ -240,6 +307,10 @@ const SavedSearchesPage: React.FC = () => {
         onSortChange={setSortBy}
         onClearAll={handleClearAll}
         isClearing={isClearing}
+        emailAlertsEnabled={emailAlertsEnabled}
+        onToggleEmailAlerts={handleToggleEmailAlerts}
+        isPro={isPro}
+        isTogglingAlerts={isTogglingAlerts}
       />
 
       <main className="py-8 flex-grow">

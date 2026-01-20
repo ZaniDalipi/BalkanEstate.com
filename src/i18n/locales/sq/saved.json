@@ -9,8 +9,40 @@
     "searchCount": {
       "singular": "Kërkim i Ruajtur",
       "plural": "Kërkime të Ruajtura"
-    }
+    },
+    "badge": "Njoftime të Zgjuara për Prona",
+    "titleHighlight": "Kërkimet e Pronave",
+    "description": "Ndiqni kriteret tuaja të preferuara të kërkimit dhe njoftohuni kur prona të reja përputhen"
   },
+  "stats": {
+    "savedSearches": "Kërkime të Ruajtura",
+    "alerts": "Njoftime Email",
+    "countries": "Vende",
+    "toggleAlerts": "Aktivizo/çaktivizo njoftimet email",
+    "upgradeForAlerts": "Përmirëso në Pro për njoftime email",
+    "proOnly": "Veçori Pro"
+  },
+  "badges": {
+    "instantAlerts": "Njoftime të Menjëhershme",
+    "customAreas": "Zona të Personalizuara",
+    "smartMatching": "Përputhje e Zgjuar"
+  },
+  "alerts": {
+    "enabledTitle": "Njoftimet u Aktivizuan",
+    "enabledMessage": "Do të merrni njoftime email për të gjitha kërkimet e ruajtura",
+    "disabledTitle": "Njoftimet u Çaktivizuan",
+    "disabledMessage": "Njoftimet email janë çaktivizuar",
+    "toggleFailed": "Dështoi përditësimi i cilësimeve të njoftimeve"
+  },
+  "clearAll": {
+    "button": "Pastro të Gjitha",
+    "clearing": "Duke Pastruar...",
+    "confirmTitle": "Fshi të Gjitha Kërkimet e Ruajtura",
+    "confirmMessage": "Jeni të sigurt që dëshironi të fshini të gjitha kërkimet e ruajtura? Kjo nuk mund të zhbëhet.",
+    "confirmButton": "Fshi të Gjitha",
+    "cancelButton": "Anulo"
+  },
+  "sortBy": "Rendit sipas",
   "loginRequired": {
     "title": "Identifikohuni për të parë kërkimet e ruajtura",
     "description": "Ruani kriteret tuaja të preferuara të kërkimit dhe njoftohuni për listat e reja.",

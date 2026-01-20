@@ -8,7 +8,8 @@ import {
   SparklesIcon,
   MapPinIcon,
   BellIcon,
-  FunnelIcon
+  FunnelIcon,
+  LockClosedIcon
 } from '@/constants';
 
 type SortOption = 'createdAt' | 'name' | 'lastAccessed';
@@ -19,6 +20,10 @@ interface SavedSearchesHeroBannerProps {
   onSortChange: (sort: SortOption) => void;
   onClearAll?: () => void;
   isClearing?: boolean;
+  emailAlertsEnabled: boolean;
+  onToggleEmailAlerts: () => void;
+  isPro: boolean;
+  isTogglingAlerts?: boolean;
 }
 
 const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
@@ -26,7 +31,11 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
   sortBy,
   onSortChange,
   onClearAll,
-  isClearing
+  isClearing,
+  emailAlertsEnabled,
+  onToggleEmailAlerts,
+  isPro,
+  isTogglingAlerts
 }) => {
   const { t } = useTranslation(['saved']);
 
@@ -113,20 +122,51 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
               </div>
             </div>
 
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
-              <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
+            <button
+              onClick={onToggleEmailAlerts}
+              disabled={isTogglingAlerts}
+              className="relative group text-left w-full"
+              title={isPro ? t('stats.toggleAlerts', 'Toggle email alerts') : t('stats.upgradeForAlerts', 'Upgrade to Pro for email alerts')}
+            >
+              <div className={`absolute inset-0 rounded-xl sm:rounded-2xl blur-lg transition-opacity ${
+                emailAlertsEnabled && isPro
+                  ? 'bg-gradient-to-br from-green-500 to-green-600 opacity-50 group-hover:opacity-70'
+                  : 'bg-gradient-to-br from-teal-500 to-teal-600 opacity-50 group-hover:opacity-70'
+              }`} />
+              <div className={`relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border text-center transition-all ${
+                isTogglingAlerts ? 'opacity-50' : ''
+              } ${
+                emailAlertsEnabled && isPro
+                  ? 'border-green-400/40 hover:bg-green-500/20'
+                  : 'border-white/20 hover:bg-white/15'
+              }`}>
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 rounded-xl flex items-center justify-center shadow-lg relative ${
+                  emailAlertsEnabled && isPro
+                    ? 'bg-green-500 shadow-green-500/30'
+                    : 'bg-teal-500 shadow-teal-500/30'
+                }`}>
                   <BellIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  {!isPro && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center shadow-lg">
+                      <LockClosedIcon className="w-3 h-3 text-white" />
+                    </div>
+                  )}
                 </div>
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">
-                  {totalSearches > 0 ? 'ON' : 'OFF'}
+                <div className={`text-2xl sm:text-3xl lg:text-4xl font-black mb-1 ${
+                  emailAlertsEnabled && isPro ? 'text-green-400' : 'text-white'
+                }`}>
+                  {isTogglingAlerts ? '...' : (emailAlertsEnabled && isPro ? 'ON' : 'OFF')}
                 </div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
                   {t('stats.alerts', 'Email Alerts')}
                 </div>
+                {!isPro && (
+                  <div className="mt-2 text-[9px] sm:text-[10px] text-amber-400 font-medium">
+                    {t('stats.proOnly', 'Pro Feature')}
+                  </div>
+                )}
               </div>
-            </div>
+            </button>
 
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
