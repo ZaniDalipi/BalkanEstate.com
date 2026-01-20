@@ -90,14 +90,22 @@ const ListingCard: React.FC<{
 
     return (
     <div className="bg-white p-4 rounded-xl border border-neutral-200 hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row gap-5">
+        {/* Image container - fixed size with image fitted inside */}
         <button onClick={handleCardClick} className="block flex-shrink-0">
-             {imageError ? (
-                <div className="w-full sm:w-48 h-40 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-lg">
-                    <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
-                </div>
-            ) : (
-                <img src={property.imageUrl} alt={property.address} className="w-full sm:w-48 h-40 object-cover rounded-lg" onError={() => setImageError(true)} />
-            )}
+            <div className="w-full sm:w-56 h-44 bg-neutral-100 rounded-lg overflow-hidden flex items-center justify-center">
+                {imageError ? (
+                    <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
+                        <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+                    </div>
+                ) : (
+                    <img
+                        src={property.imageUrl}
+                        alt={property.address}
+                        className="w-full h-full object-cover object-center"
+                        onError={() => setImageError(true)}
+                    />
+                )}
+            </div>
         </button>
         <div className="flex-grow flex flex-col">
             <div className="flex justify-between items-start">
