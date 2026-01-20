@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
@@ -8,7 +8,7 @@ import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
-import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);

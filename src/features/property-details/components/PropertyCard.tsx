@@ -17,16 +17,52 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const isFavorited = state.savedHomes.some(p => p.id === property.id);
-  const isInComparison = state.comparisonList.includes(property.id);
-  const isNew = property.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
-  const isSold = property.status === 'sold';
+
+  // Defensive checks for required fields
+  const hasRequiredFields = property && property.id && property.price !== undefined;
+
+  // Safe access with fallbacks
+  const safeProperty = {
+    ...property,
+    city: property?.city || 'Unknown',
+    country: property?.country || 'Unknown',
+    beds: property?.beds ?? 0,
+    baths: property?.baths ?? 0,
+    livingRooms: property?.livingRooms ?? 0,
+    sqft: property?.sqft ?? 0,
+    seller: property?.seller || { type: 'private' as const, name: 'Unknown', phone: '' },
+  };
+
+  const isFavorited = state.savedHomes.some(p => p.id === property?.id);
+  const isInComparison = state.comparisonList.includes(property?.id || '');
+  const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
+  const isSold = property?.status === 'sold';
 
   // Check if property has an active promotion
-  const isActivelyPromoted = property.isPromoted &&
-    property.promotionEndDate &&
+  const isActivelyPromoted = property?.isPromoted &&
+    property?.promotionEndDate &&
     property.promotionEndDate > Date.now();
-  const promotionTier = isActivelyPromoted ? property.promotionTier : null;
+  const promotionTier = isActivelyPromoted ? property?.promotionTier : null;
+
+  // Early return for invalid/incomplete properties
+  if (!hasRequiredFields) {
+    return (
+      <div className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-neutral-200 w-full flex flex-col">
+        <div className="w-full h-40 sm:h-44 md:h-48 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
+          <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+        </div>
+        <div className="p-3 sm:p-4">
+          <div className="h-4 bg-neutral-200 rounded w-3/4 mb-2 animate-pulse" />
+          <div className="h-3 bg-neutral-200 rounded w-1/2 mb-3 animate-pulse" />
+          <div className="grid grid-cols-4 gap-1.5">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-10 bg-neutral-100 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -264,38 +300,38 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             <button
               onClick={(e) => handleLocationClick(e, 'city')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
-              title={`View all properties in ${property.city}`}
+              title={`View all properties in ${safeProperty.city}`}
             >
-              {property.city}
+              {safeProperty.city}
             </button>
             <span>,</span>
             <button
               onClick={(e) => handleLocationClick(e, 'country')}
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
-              title={`View all properties in ${property.country}`}
+              title={`View all properties in ${safeProperty.country}`}
             >
-              {property.country}
+              {safeProperty.country}
             </button>
           </div>
         </div>
 
         {/* Property Stats - Grid layout for better fit */}
         <div className="grid grid-cols-4 gap-1.5 mb-3">
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.beds} ${t('property:features.bedrooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${safeProperty.beds} ${t('property:features.bedrooms')}`}>
             <BedIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-neutral-800">{property.beds}</span>
+            <span className="font-bold text-xs text-neutral-800">{safeProperty.beds}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.baths} ${t('property:features.bathrooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${safeProperty.baths} ${t('property:features.bathrooms')}`}>
             <BathIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-neutral-800">{property.baths}</span>
+            <span className="font-bold text-xs text-neutral-800">{safeProperty.baths}</span>
           </div>
-          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${property.livingRooms} ${t('property:features.livingRooms')}`}>
+          <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${safeProperty.livingRooms} ${t('property:features.livingRooms')}`}>
             <LivingRoomIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-neutral-800">{property.livingRooms}</span>
+            <span className="font-bold text-xs text-neutral-800">{safeProperty.livingRooms}</span>
           </div>
-          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${property.sqft} ${t('common:sqm')}`}>
+          <div className="flex flex-col items-center bg-primary/10 py-1.5 px-1 rounded-lg border border-primary/20" title={`${safeProperty.sqft} ${t('common:sqm')}`}>
             <SqftIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
-            <span className="font-bold text-xs text-primary">{property.sqft}</span>
+            <span className="font-bold text-xs text-primary">{safeProperty.sqft}</span>
           </div>
         </div>
 
@@ -306,10 +342,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           <div className="flex items-center gap-2">
             {/* Seller Avatar */}
             <div className="relative flex-shrink-0">
-              {property.seller.avatarUrl ? (
+              {safeProperty.seller.avatarUrl ? (
                 <img
-                  src={property.seller.avatarUrl}
-                  alt={`${property.seller.name} - Real Estate ${property.seller.type === 'agent' ? 'Agent' : 'Seller'}`}
+                  src={safeProperty.seller.avatarUrl}
+                  alt={`${safeProperty.seller.name} - Real Estate ${safeProperty.seller.type === 'agent' ? 'Agent' : 'Seller'}`}
                   loading="lazy"
                   decoding="async"
                   className="w-8 h-8 rounded-full object-cover border-2 border-white shadow"
@@ -324,23 +360,23 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
 
             {/* Seller Info */}
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-neutral-800 truncate">{property.seller.name}</p>
+              <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
               <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                property.seller.type === 'agent'
+                safeProperty.seller.type === 'agent'
                   ? 'bg-blue-500 text-white'
                   : 'bg-neutral-200 text-neutral-600'
               }`}>
-                {property.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
+                {safeProperty.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
               </span>
             </div>
 
             {/* Agency Logo (if agent with agency) */}
-            {property.seller.type === 'agent' && property.seller.agencyName && (
+            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
               <div className="flex items-center gap-1.5 flex-shrink-0 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
-                {property.seller.agencyLogo ? (
+                {safeProperty.seller.agencyLogo ? (
                   <img
-                    src={property.seller.agencyLogo}
-                    alt={`${property.seller.agencyName} - Real Estate Agency`}
+                    src={safeProperty.seller.agencyLogo}
+                    alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                     loading="lazy"
                     decoding="async"
                     className="w-6 h-6 rounded object-contain bg-white"
@@ -350,7 +386,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                 )}
                 <div className="hidden sm:block">
                   <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
-                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[60px]">{property.seller.agencyName}</p>
+                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[60px]">{safeProperty.seller.agencyName}</p>
                 </div>
               </div>
             )}
