@@ -32,23 +32,30 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
   // Fallback placeholder when no avatar or on error
   if (!agent.avatarUrl || error) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
         <UserCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-blue-300" />
       </div>
     );
   }
 
   return (
-    <img
-      src={agent.avatarUrl}
-      alt={agent.name}
-      className={`w-full h-full object-cover object-center transition-opacity duration-300 ${
-        loaded ? 'opacity-100' : 'opacity-0'
-      }`}
-      onError={() => setError(true)}
-      onLoad={() => setLoaded(true)}
-      loading="lazy"
-    />
+    <>
+      {/* Loading placeholder */}
+      {!loaded && (
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 animate-pulse" />
+      )}
+      <img
+        src={agent.avatarUrl}
+        alt={agent.name}
+        className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        onError={() => setError(true)}
+        onLoad={() => setLoaded(true)}
+        loading="lazy"
+        draggable={false}
+      />
+    </>
   );
 };
 
@@ -208,8 +215,18 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         <div className="flex flex-col items-center text-center mb-6">
           {/* Avatar container - outer wrapper for positioning badge */}
           <div className="relative mb-4">
-            {/* Avatar image container - strictly constrained with overflow hidden */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-50 to-blue-100">
+            {/* Avatar image container - STRICTLY constrained with fixed pixel dimensions */}
+            <div
+              className="relative rounded-full overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white"
+              style={{
+                width: 'clamp(64px, 20vw, 96px)',
+                height: 'clamp(64px, 20vw, 96px)',
+                minWidth: '64px',
+                minHeight: '64px',
+                maxWidth: '96px',
+                maxHeight: '96px'
+              }}
+            >
               <AgentAvatar agent={agent} />
             </div>
 

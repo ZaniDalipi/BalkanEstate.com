@@ -190,32 +190,51 @@ const AgenciesListPage: React.FC = () => {
 
   const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => {
     const rankStyle = getRankStyle(index);
+    const logoSize = isCompact ? 56 : 72; // Fixed pixel sizes for logo container
 
     return (
       <div
         key={agency._id}
         onClick={() => handleViewAgency(agency)}
-        className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-primary/30 active:scale-[0.98]"
+        className="group relative bg-white rounded-2xl sm:rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100 hover:border-primary/40 active:scale-[0.98]"
       >
-        {/* Accent gradient bar at top */}
-        <div className={`h-1.5 bg-gradient-to-r ${index < 3 ? rankStyle.bg : 'from-primary via-blue-500 to-violet-500'}`} />
+        {/* Modern gradient accent */}
+        <div className={`h-1 sm:h-1.5 bg-gradient-to-r ${index < 3 ? rankStyle.bg : 'from-primary via-blue-500 to-violet-500'}`} />
 
-        <div className="p-5">
+        <div className="p-4 sm:p-6">
           {/* Header Row */}
-          <div className="flex items-start gap-4 mb-4">
-            {/* Logo Container with glow effect */}
+          <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5">
+            {/* Logo Container - STRICTLY fixed dimensions */}
             <div className="relative flex-shrink-0">
-              <div className={`${isCompact ? 'w-14 h-14' : 'w-16 h-16'} rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg group-hover:shadow-xl transition-shadow`}>
+              <div
+                className="relative rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden border-2 border-white shadow-lg group-hover:shadow-xl transition-all duration-300"
+                style={{
+                  width: `${logoSize}px`,
+                  height: `${logoSize}px`,
+                  minWidth: `${logoSize}px`,
+                  minHeight: `${logoSize}px`,
+                  maxWidth: `${logoSize}px`,
+                  maxHeight: `${logoSize}px`
+                }}
+              >
                 {agency.logo ? (
-                  <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
+                  <img
+                    src={agency.logo}
+                    alt={agency.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                    draggable={false}
+                  />
                 ) : (
-                  <BuildingOfficeIcon className="w-8 h-8 text-primary" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                    <BuildingOfficeIcon className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
+                  </div>
                 )}
               </div>
               {/* Rank badge */}
               {index < 10 && (
-                <div className={`absolute -top-2 -right-2 px-2 py-1 bg-gradient-to-r ${rankStyle.bg} rounded-lg text-white text-[10px] font-bold shadow-lg flex items-center gap-1`}>
-                  {rankStyle.emoji && <span>{rankStyle.emoji}</span>}
+                <div className={`absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gradient-to-r ${rankStyle.bg} rounded-lg text-white text-[9px] sm:text-[10px] font-bold shadow-lg flex items-center gap-0.5 sm:gap-1`}>
+                  {rankStyle.emoji && <span className="text-xs">{rankStyle.emoji}</span>}
                   <span>#{index + 1}</span>
                 </div>
               )}
@@ -223,92 +242,92 @@ const AgenciesListPage: React.FC = () => {
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className={`${isCompact ? 'text-base' : 'text-lg'} font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1`}>
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                <h3 className={`${isCompact ? 'text-sm sm:text-base' : 'text-base sm:text-lg'} font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1`}>
                   {agency.name}
                 </h3>
                 {agency.isFeatured && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full text-[10px] font-bold shadow-sm">
-                    <SparklesIcon className="w-3 h-3" />
-                    <span className="hidden sm:inline">Featured</span>
+                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full text-[9px] sm:text-[10px] font-bold shadow-sm flex-shrink-0">
+                    <SparklesIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                    <span className="hidden xs:inline">Featured</span>
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-1.5 text-gray-500">
-                <MapPinIcon className="w-3.5 h-3.5 text-primary/60" />
-                <span className="text-sm">{agency.city}, {agency.country}</span>
+                <MapPinIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary/60 flex-shrink-0" />
+                <span className="text-xs sm:text-sm truncate">{agency.city}, {agency.country}</span>
               </div>
 
-              {/* Quick contact icons */}
-              <div className="flex items-center gap-2 mt-2">
-                {agency.phone && (
+              {/* Quick contact - visible only on larger screens */}
+              {agency.phone && (
+                <div className="hidden sm:flex items-center gap-2 mt-2">
                   <a
                     href={`tel:${agency.phone}`}
                     onClick={(e) => e.stopPropagation()}
                     className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
                   >
                     <PhoneIcon className="w-3 h-3" />
-                    <span className="hidden sm:inline">{agency.phone}</span>
+                    <span>{agency.phone}</span>
                   </a>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            <ChevronRightIcon className="w-5 h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
+            <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 text-center group/stat hover:from-blue-100 hover:to-blue-200/50 transition-colors">
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-blue-200/30 rounded-full blur-xl" />
-              <HomeIcon className="w-5 h-5 text-primary mx-auto mb-1" />
-              <div className="text-xl font-bold text-gray-900">{agency.totalProperties || 0}</div>
-              <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.properties')}</div>
+          {/* Stats Grid - Responsive */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center group/stat hover:from-blue-100 hover:to-blue-200/50 transition-colors">
+              <div className="absolute -top-4 -right-4 w-10 h-10 sm:w-12 sm:h-12 bg-blue-200/30 rounded-full blur-xl" />
+              <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-0.5 sm:mb-1" />
+              <div className="text-base sm:text-xl font-bold text-gray-900">{agency.totalProperties || 0}</div>
+              <div className="text-[8px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.properties')}</div>
             </div>
 
-            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-3 text-center group/stat hover:from-emerald-100 hover:to-emerald-200/50 transition-colors">
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-200/30 rounded-full blur-xl" />
-              <UsersIcon className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
-              <div className="text-xl font-bold text-gray-900">{agency.totalAgents || 0}</div>
-              <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.agents')}</div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center group/stat hover:from-emerald-100 hover:to-emerald-200/50 transition-colors">
+              <div className="absolute -top-4 -right-4 w-10 h-10 sm:w-12 sm:h-12 bg-emerald-200/30 rounded-full blur-xl" />
+              <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 mx-auto mb-0.5 sm:mb-1" />
+              <div className="text-base sm:text-xl font-bold text-gray-900">{agency.totalAgents || 0}</div>
+              <div className="text-[8px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.agents')}</div>
             </div>
 
-            <div className="relative overflow-hidden bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-xl p-3 text-center group/stat hover:from-violet-100 hover:to-violet-200/50 transition-colors">
-              <div className="absolute -top-4 -right-4 w-12 h-12 bg-violet-200/30 rounded-full blur-xl" />
-              <CalendarIcon className="w-5 h-5 text-violet-600 mx-auto mb-1" />
-              <div className="text-xl font-bold text-gray-900">{agency.yearsInBusiness || 0}+</div>
-              <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.years')}</div>
+            <div className="relative overflow-hidden bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center group/stat hover:from-violet-100 hover:to-violet-200/50 transition-colors">
+              <div className="absolute -top-4 -right-4 w-10 h-10 sm:w-12 sm:h-12 bg-violet-200/30 rounded-full blur-xl" />
+              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-violet-600 mx-auto mb-0.5 sm:mb-1" />
+              <div className="text-base sm:text-xl font-bold text-gray-900">{agency.yearsInBusiness || 0}+</div>
+              <div className="text-[8px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.years')}</div>
             </div>
           </div>
 
-          {/* Action Row */}
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <div className="flex items-center gap-2">
+          {/* Action Row - Mobile optimized */}
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {agency.phone && (
                 <a
                   href={`tel:${agency.phone}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
+                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
                   aria-label={t('agencies.call')}
                 >
-                  <PhoneIcon className="w-4 h-4" />
+                  <PhoneIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </a>
               )}
               {agency.email && (
                 <a
                   href={`mailto:${agency.email}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
+                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
                   aria-label={t('agencies.email')}
                 >
-                  <EnvelopeIcon className="w-4 h-4" />
+                  <EnvelopeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </a>
               )}
             </div>
 
-            <button className="px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95">
+            <button className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2 shadow-md hover:shadow-lg active:scale-95">
               {t('agencies.view')}
-              <ChevronRightIcon className="w-4 h-4" />
+              <ChevronRightIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
@@ -586,32 +605,32 @@ const AgenciesListPage: React.FC = () => {
 
             {/* Content */}
             {error ? (
-              <div className="bg-gradient-to-br from-red-50 to-white rounded-3xl border-2 border-red-100 p-12 text-center">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-red-100 to-red-50 rounded-full flex items-center justify-center">
-                  <span className="text-4xl">⚠️</span>
+              <div className="bg-gradient-to-br from-red-50 to-white rounded-2xl sm:rounded-3xl border-2 border-red-100 p-8 sm:p-12 text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-red-100 to-red-50 rounded-full flex items-center justify-center">
+                  <ExclamationTriangleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-red-900 mb-3">{t('agencies.unableToLoad')}</h3>
-                <p className="text-red-700 mb-6 max-w-md mx-auto">{error}</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-red-900 mb-2 sm:mb-3">{t('agencies.unableToLoad')}</h3>
+                <p className="text-red-700 mb-4 sm:mb-6 max-w-md mx-auto text-sm sm:text-base">{error}</p>
                 <button
                   onClick={fetchAgencies}
-                  className="inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-2xl font-semibold hover:shadow-lg transition-all"
+                  className="inline-flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
                 >
                   {t('agencies.tryAgain')}
                 </button>
               </div>
             ) : loading ? (
-              <div className="bg-white rounded-3xl border-2 border-gray-100 p-16">
+              <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-gray-100 p-10 sm:p-16">
                 <div className="max-w-md mx-auto">
-                  <div className="w-32 h-32 mx-auto mb-6 relative">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark rounded-full opacity-20 animate-ping"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark rounded-full flex items-center justify-center">
-                      <MagnifyingGlassIcon className="w-16 h-16 text-white animate-pulse" />
+                      <MagnifyingGlassIcon className="w-12 h-12 sm:w-16 sm:h-16 text-white animate-pulse" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-center text-gray-900 mb-3">
+                  <h3 className="text-xl sm:text-2xl font-bold text-center text-gray-900 mb-2 sm:mb-3">
                     {t('agencies.findingAgencies')}
                   </h3>
-                  <p className="text-center text-gray-600">
+                  <p className="text-center text-gray-600 text-sm sm:text-base">
                     {t('agencies.searchingNetwork')}
                   </p>
                   <div className="flex justify-center gap-2 mt-4">
@@ -622,21 +641,21 @@ const AgenciesListPage: React.FC = () => {
                 </div>
               </div>
             ) : agencies.length === 0 ? (
-              <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl border-2 border-gray-200 p-16 text-center">
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl sm:rounded-3xl border-2 border-gray-200 p-10 sm:p-16 text-center">
                 <div className="max-w-md mx-auto">
-                  <div className="w-40 h-40 mx-auto mb-6 relative">
-                    <div className="absolute inset-0 bg-gray-200 rounded-2xl flex items-center justify-center transform rotate-6 transition-transform group-hover:rotate-12">
-                      <BuildingOfficeIcon className="w-20 h-20 text-gray-400" />
+                  <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 sm:mb-6 relative">
+                    <div className="absolute inset-0 bg-gray-200 rounded-2xl flex items-center justify-center transform rotate-6">
+                      <BuildingOfficeIcon className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400" />
                     </div>
-                    <div className="absolute top-0 right-0 w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center animate-bounce">
-                      <SparklesIcon className="w-5 h-5 text-amber-600" />
+                    <div className="absolute top-0 right-0 w-6 h-6 sm:w-8 sm:h-8 bg-amber-100 rounded-full flex items-center justify-center animate-bounce">
+                      <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
                     {searchQuery ? t('agencies.noAgenciesFound') :
                      filter === 'myAgency' ? t('agencies.noAgencyFound') : t('agencies.noAgenciesYet')}
                   </h3>
-                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  <p className="text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base">
                     {searchQuery
                       ? t('agencies.adjustCriteria')
                       : filter === 'myAgency'
@@ -645,35 +664,46 @@ const AgenciesListPage: React.FC = () => {
                   </p>
                   <button
                     onClick={handleCreateEnterprise}
-                    className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-xl hover:scale-105 transition-all"
+                    className="inline-flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-primary to-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold hover:shadow-xl hover:scale-105 transition-all text-sm sm:text-base"
                   >
-                    <BuildingOfficeIcon className="w-5 h-5" />
+                    <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                     {t('agencies.createAgency')}
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-4 sm:space-y-6">
-                {/* Top Agencies - Full width cards */}
-                <div className="grid grid-cols-1 gap-4 sm:gap-6">
-                  {agencies.slice(0, 3).map((agency, index) => (
-                    <div key={agency._id}>
-                      {renderAgencyCard(agency, index)}
+              <div className="space-y-6 sm:space-y-8">
+                {/* Featured Top 3 Agencies - Showcase Section */}
+                {agencies.length >= 3 && (
+                  <div className="mb-6 sm:mb-10">
+                    <div className="flex items-center gap-2 mb-4 sm:mb-6">
+                      <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('agencies.topAgencies', 'Top Agencies')}</h3>
                     </div>
-                  ))}
-                </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                      {agencies.slice(0, 3).map((agency, index) => (
+                        <div
+                          key={agency._id}
+                          className={index === 0 ? 'lg:col-span-1' : ''}
+                        >
+                          {renderAgencyCard(agency, index)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                {/* Remaining Agencies - Responsive Grid */}
+                {/* All Other Agencies */}
                 {agencies.length > 3 && (
                   <>
-                    <div className="my-6 sm:my-10">
+                    <div className="my-6 sm:my-8">
                       <div className="relative">
                         <div className="absolute inset-0 flex items-center">
                           <div className="w-full border-t border-gray-200"></div>
                         </div>
                         <div className="relative flex justify-center">
-                          <span className="px-4 sm:px-6 bg-gray-50 text-gray-500 text-xs sm:text-sm font-medium rounded-full">
-                            {t('agencies.moreAgencies')}
+                          <span className="px-4 sm:px-6 py-1.5 sm:py-2 bg-white text-gray-600 text-xs sm:text-sm font-semibold rounded-full border border-gray-200 shadow-sm">
+                            {t('agencies.moreAgencies', 'More Agencies')} ({agencies.length - 3})
                           </span>
                         </div>
                       </div>
@@ -688,6 +718,17 @@ const AgenciesListPage: React.FC = () => {
                       ))}
                     </div>
                   </>
+                )}
+
+                {/* If less than 3 agencies, show them in a grid */}
+                {agencies.length > 0 && agencies.length < 3 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    {agencies.map((agency, index) => (
+                      <div key={agency._id}>
+                        {renderAgencyCard(agency, index)}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
