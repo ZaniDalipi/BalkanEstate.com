@@ -427,7 +427,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
         {!showPromotionGuide && (
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             <button
-                onClick={onClose}
+                onClick={handleCreateNewListing}
                 className="order-1 sm:order-2 flex-1 px-4 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-lg sm:rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all shadow-md text-sm sm:text-base"
             >
                 {t('modals:subscription.sellerPromotion.startCreatingListing')}
