@@ -174,8 +174,37 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       {/* Animated border effect - blue */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-blue-200/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
       
-      {/* Performance Score Badge - Blue theme with glass effect */}
-      <div className="absolute top-4 right-4 z-10">
+      {/* Agency Badge - Top Right with fixed small container */}
+      {isTeam && (
+        <div className="absolute top-4 right-4 z-10">
+          <div className="relative group/agency">
+            <div className="absolute -inset-1 bg-blue-400/30 rounded-full blur opacity-0 group-hover/agency:opacity-70 transition-opacity duration-800" />
+            <button
+              onClick={handleAgencyClick}
+              className={`relative text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 ${
+                agent.agencyGradient || 'bg-gradient-to-r from-blue-600 to-blue-700'
+              }`}
+            >
+              {agent.agencyLogo ? (
+                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-white/20">
+                  <img
+                    src={agent.agencyLogo}
+                    alt={agent.agencyName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <BuildingOfficeIcon className="w-3.5 h-3.5" />
+              )}
+              <span className="max-w-[60px] truncate">{t('agents:card.agency')}</span>
+              <ChevronRightIcon className="w-3 h-3 transform group-hover/agency:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Performance Score Badge - Top Left */}
+      <div className="absolute top-4 left-4 z-10">
         <div className="relative group/score">
           <div className="absolute inset-0 bg-blue-500 rounded-full blur opacity-50 group-hover/score:opacity-80 transition-opacity duration-300" />
           <div className="relative bg-gradient-to-b from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-blue-500/20 border border-white/20">
@@ -185,31 +214,6 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
           </div>
         </div>
       </div>
-
-      {/* Agency Badge - Uses agency's gradient color */}
-      {isTeam && (
-        <div className="absolute top-4 left-4 z-10 bg-blue-500 rounded-full p-1 shadow-sm">
-          <div className="relative group/agency">
-            <div className="absolute -inset-1 bg-blue-400/30 rounded-full blur opacity-0 group-hover/agency:opacity-70 transition-opacity duration-800" />
-            <button
-              onClick={handleAgencyClick}
-              className={`relative text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                agent.agencyGradient || 'bg-gradient-to-r from-blue-600 to-blue-700'
-              }`}
-            >
-              {agent.agencyLogo ? (
-                <img src={agent.agencyLogo} alt={agent.agencyName} className="h-4 w-auto max-w-[60px] object-contain" />
-              ) : (
-                <>
-                  <BuildingOfficeIcon className="w-3.5 h-3.5" />
-                  <span>{t('agents:card.agency')}</span>
-                </>
-              )}
-              <ChevronRightIcon className="w-3 h-3 ml-1 transform group-hover/agency:translate-x-1 transition-transform" />
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="p-4 sm:p-6 relative z-0">
         {/* Agent Avatar and Info */}

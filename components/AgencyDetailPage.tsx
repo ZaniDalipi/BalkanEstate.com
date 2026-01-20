@@ -947,17 +947,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
-            {agencyData.logo ? (
-              <img
-                src={agencyData.logo}
-                alt={agencyData.name}
-                className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl object-cover backdrop-blur-sm"
-              />
-            ) : (
-              <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl bg-white/10 backdrop-blur-md flex items-center justify-center">
-                <BuildingOfficeIcon className="w-14 h-14 text-white" />
-              </div>
-            )}
+            <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl border-2 border-white/30 shadow-2xl overflow-hidden bg-white/10 backdrop-blur-md flex-shrink-0">
+              {agencyData.logo ? (
+                <img
+                  src={agencyData.logo}
+                  alt={agencyData.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <BuildingOfficeIcon className="w-14 h-14 text-white" />
+                </div>
+              )}
+            </div>
 
             {/* Featured Badge */}
             {agencyData.isFeatured && (
@@ -1758,7 +1760,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <Popup>
                     <div className="text-center min-w-[200px]">
                       {agencyData.logo && (
-                        <img src={agencyData.logo} alt={agencyData.name} className="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-slate-300" />
+                        <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-slate-300 flex-shrink-0">
+                          <img src={agencyData.logo} alt={agencyData.name} className="w-full h-full object-cover" />
+                        </div>
                       )}
                       <h3 className="font-bold text-slate-900">{agencyData.name}</h3>
                       {agencyData.address && <p className="text-sm text-slate-600 mt-1">{agencyData.address}</p>}
