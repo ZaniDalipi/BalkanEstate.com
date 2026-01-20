@@ -74,8 +74,8 @@ const injectMapStyles = () => {
     /* Touch */
     .leaflet-container { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
-    /* Zoom animation */
-    .leaflet-zoom-anim .leaflet-zoom-animated { transition: transform 0.25s ease-out !important; }
+    /* Zoom animation - fast */
+    .leaflet-zoom-anim .leaflet-zoom-animated { transition: transform 0.1s ease-out !important; }
   `;
   document.head.appendChild(style);
 };
