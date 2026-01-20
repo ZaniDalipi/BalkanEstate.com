@@ -33,7 +33,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
   if (!agent.avatarUrl || error) {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
-        <UserCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-blue-300" />
+        <UserCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-blue-300" />
       </div>
     );
   }
@@ -50,6 +50,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
         className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
         }`}
+        style={{ aspectRatio: '1/1' }}
         onError={() => setError(true)}
         onLoad={() => setLoaded(true)}
         loading="lazy"
@@ -215,18 +216,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         <div className="flex flex-col items-center text-center mb-6">
           {/* Avatar container - outer wrapper for positioning badge */}
           <div className="relative mb-4">
-            {/* Avatar image container - STRICTLY constrained with fixed pixel dimensions */}
-            <div
-              className="relative rounded-full overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white"
-              style={{
-                width: 'clamp(64px, 20vw, 96px)',
-                height: 'clamp(64px, 20vw, 96px)',
-                minWidth: '64px',
-                minHeight: '64px',
-                maxWidth: '96px',
-                maxHeight: '96px'
-              }}
-            >
+            {/* Avatar image container - Fixed static dimensions */}
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden flex-shrink-0 shadow-lg ring-4 ring-white bg-gradient-to-br from-blue-50 to-blue-100">
               <AgentAvatar agent={agent} />
             </div>
 
