@@ -83,20 +83,31 @@ const injectMapStyles = () => {
       transform-origin: center 30%;
     }
 
-    /* Mobile touch - essential only */
+    /* Mobile touch */
     .leaflet-container {
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Smooth zoom animation - Leaflet scales tiles during zoom */
+    /* Smooth zoom like Google Maps - scale existing tiles smoothly */
     .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.25s ease-out !important;
+      transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
     }
 
-    /* Tile appearance */
+    /* Keep tiles visible during zoom - no flicker */
+    .leaflet-tile-container {
+      will-change: transform;
+    }
+
+    /* Smooth tile fade-in after zoom */
     .leaflet-tile {
       outline: none;
+      transition: opacity 0.2s ease-out;
+    }
+
+    /* Hide tile loading gaps */
+    .leaflet-tile-pane {
+      background: #f0f0f0;
     }
   `;
   document.head.appendChild(style);
@@ -356,20 +367,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Zoom: whole levels, smooth animation
-          zoomSnap={1}
+          // Smooth zoom like Google Maps
+          zoomSnap={0}
           zoomDelta={1}
-          wheelPxPerZoomLevel={60}
+          wheelPxPerZoomLevel={80}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
-          // Touch: pinch zooms at finger location
+          // Touch: pinch zooms at finger location (not center)
           touchZoom={true}
           scrollWheelZoom={true}
           doubleClickZoom={true}
-          // Panning
+          // Smooth panning with momentum
           inertia={true}
-          inertiaDeceleration={3000}
+          inertiaDeceleration={2500}
+          inertiaMaxSpeed={2000}
+          easeLinearity={0.2}
           bounceAtZoomLimits={false}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
@@ -395,11 +408,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            // Preload tiles around viewport
-            keepBuffer={4}
-            // CRITICAL: Don't refresh tiles during zoom - only after zoom ends
-            updateWhenZooming={false}
-            updateWhenIdle={true}
+            // Preload lots of tiles like Google Maps - tiles ready before you pan/zoom
+            keepBuffer={8}
+            // Load new tiles during zoom but not too aggressively
+            updateWhenZooming={true}
+            updateWhenIdle={false}
+            // Only fetch new tiles every 300ms during continuous zoom (not every frame)
+            updateInterval={300}
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
           <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
