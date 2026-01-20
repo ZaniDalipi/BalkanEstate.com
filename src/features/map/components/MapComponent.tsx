@@ -106,22 +106,6 @@ interface MapComponentProps {
 }
 
 /**
- * ZoomTracker Component - tracks zoom level changes
- */
-const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoomChange }) => {
-  useMapEvents({
-    zoomend: (e) => {
-      onZoomChange(e.target.getZoom());
-    },
-    load: (e) => {
-      onZoomChange(e.target.getZoom());
-    },
-  });
-  return null;
-};
-
-
-/**
  * MapComponent
  *
  * Main map component for property search with:
@@ -168,7 +152,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [shadowDateTime, setShadowDateTime] = useState<Date>(new Date());
   const [mapCenterLng, setMapCenterLng] = useState<number>(22); // Default Balkans longitude
   const [mapCenterLat, setMapCenterLat] = useState<number>(41); // Default Balkans latitude
-  const [currentZoom, setCurrentZoom] = useState<number>(7); // Current zoom level for display
   const [isManualTimeControl, setIsManualTimeControl] = useState(false); // Track if user is controlling time
   const [selectedSeason, setSelectedSeason] = useState<Season>('current'); // Season for sun position
   const [showMeasurement, setShowMeasurement] = useState(false); // Toggle for measurement tool
@@ -354,7 +337,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
-          <ZoomTracker onZoomChange={setCurrentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
@@ -422,14 +404,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
         )}
 
-        {/* Debug Info Display - shows zoom level and coordinates */}
-        <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-4 left-4'} z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md`}>
-          <span>🔍{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} 📍{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
-        </div>
-
-        {/* Climate Risk Legend - TOP LEFT, under zoom display (both mobile and desktop) */}
+        {/* Climate Risk Legend */}
         {selectedClimateRisk !== 'none' && !isMapOptionsOpen && (
-          <div className={`absolute ${show3DBuildings ? 'top-14 right-4' : 'top-14 left-4'} z-[1000]`}>
+          <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-4 left-4'} z-[1000]`}>
             <ClimateRiskLegend riskType={selectedClimateRisk} />
           </div>
         )}
