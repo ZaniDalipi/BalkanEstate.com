@@ -224,7 +224,7 @@ const Onboarding: React.FC = () => {
             {/* BUY */}
             <div
               onClick={handleBuyChoice}
-              className="group p-6 border rounded-xl hover:shadow-2xl hover:-translate-y-2 transition cursor-pointer flex flex-col"
+              className="group p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             >
               <img
                 src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop"
@@ -242,7 +242,7 @@ const Onboarding: React.FC = () => {
               <p className="text-neutral-600 mb-6 text-center flex-grow">
                 {t('nav:onboarding.buyDescription')}
               </p>
-              <button className="bg-primary text-white py-3 rounded-lg font-bold">
+              <button className="bg-primary text-white py-3 rounded-lg font-bold group-hover:bg-primary-dark transition-colors">
                 {t('nav:onboarding.startSearching')}
               </button>
             </div>
@@ -250,7 +250,7 @@ const Onboarding: React.FC = () => {
             {/* SELL */}
             <div
               onClick={handleSellChoice}
-              className="group p-6 border rounded-xl hover:shadow-2xl hover:-translate-y-2 transition cursor-pointer flex flex-col"
+              className="group p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             >
               <img
                 src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop"
@@ -267,7 +267,7 @@ const Onboarding: React.FC = () => {
               <p className="text-neutral-600 mb-6 text-center flex-grow">
                 {t('nav:onboarding.sellDescription')}
               </p>
-              <button className="bg-neutral-800 text-white py-3 rounded-lg font-bold">
+              <button className="bg-neutral-800 text-white py-3 rounded-lg font-bold group-hover:bg-neutral-900 transition-colors">
                 {t('nav:onboarding.listProperty')}
               </button>
             </div>
