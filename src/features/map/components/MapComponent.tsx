@@ -63,19 +63,111 @@ const injectMapStyles = () => {
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
-    /* 3D mode */
-    .map-3d-perspective-container { perspective: 1500px; perspective-origin: 50% 25%; }
-    .map-3d-active { transform: rotateX(25deg) scale(1.08); transform-origin: center 70%; transition: transform 0.4s ease-out; }
-    .map-3d-inactive { transform: none; }
+    /* =============================================
+       SMOOTH ZOOM ANIMATION - Google Maps Style
+       ============================================= */
+
+    /* Base container - enable GPU acceleration */
+    .leaflet-container {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Main zoom animation - smooth cubic bezier like Google Maps */
+    .leaflet-zoom-anim .leaflet-zoom-animated {
+      will-change: transform;
+      transition: transform 250ms cubic-bezier(0, 0, 0.25, 1) !important;
+    }
+
+    /* Tile pane - GPU accelerated */
+    .leaflet-tile-pane {
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    /* Individual tiles - smooth fade in */
+    .leaflet-tile {
+      will-change: opacity, transform;
+      transition: opacity 200ms ease-out;
+    }
+
+    /* Tile container during zoom */
+    .leaflet-tile-container {
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    /* Markers - smooth position updates */
+    .leaflet-marker-pane {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    .leaflet-marker-icon {
+      will-change: transform;
+      transition: transform 200ms ease-out;
+    }
+
+    /* Popup pane */
+    .leaflet-popup-pane {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    /* Overlay pane (polygons, etc) */
+    .leaflet-overlay-pane {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    /* Shadow pane */
+    .leaflet-shadow-pane {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    /* Smooth fade for zoom animations */
+    .leaflet-fade-anim .leaflet-popup {
+      transition: opacity 200ms ease-out;
+    }
+
+    .leaflet-fade-anim .leaflet-map-pane .leaflet-tile {
+      transition: opacity 150ms ease-out;
+    }
+
+    /* Pinch zoom - instant response during gesture */
+    .leaflet-touch-zoom .leaflet-zoom-animated {
+      transition: none !important;
+    }
+
+    /* After pinch ends - smooth settle */
+    .leaflet-touch-zoom-ended .leaflet-zoom-animated {
+      transition: transform 200ms cubic-bezier(0, 0, 0.25, 1) !important;
+    }
+
+    /* 3D mode styles */
+    .map-3d-perspective-container {
+      perspective: 1500px;
+      perspective-origin: 50% 25%;
+    }
+    .map-3d-active {
+      transform: rotateX(25deg) scale(1.08);
+      transform-origin: center 70%;
+      transition: transform 0.4s ease-out;
+    }
+    .map-3d-inactive {
+      transform: none;
+    }
     .map-3d-active .leaflet-control-container,
     .map-3d-active .leaflet-marker-pane,
-    .map-3d-active .leaflet-popup-pane { transform: rotateX(-25deg); transform-origin: center 30%; }
-
-    /* Touch */
-    .leaflet-container { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-
-    /* Zoom animation - fast */
-    .leaflet-zoom-anim .leaflet-zoom-animated { transition: transform 0.1s ease-out !important; }
+    .map-3d-active .leaflet-popup-pane {
+      transform: rotateX(-25deg);
+      transform-origin: center 30%;
+    }
   `;
   document.head.appendChild(style);
 };
