@@ -13,6 +13,7 @@ import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -542,156 +543,16 @@ const AgentsPage: React.FC = () => {
         }
       `}</style>
 
-      {/* Hero Section with Integrated Search - Always visible */}
-      <section className="relative z-10 w-full flex-shrink-0 bg-gradient-to-b from-neutral-100 via-neutral-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-          {/* Badge */}
-          <div className="text-center mb-4 sm:mb-8">
-            <span className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/10 rounded-full text-primary font-semibold text-xs sm:text-sm uppercase tracking-wider">
-              {t('hero.badge', 'Connecting You with Experts')}
-            </span>
-          </div>
-
-          {/* Title */}
-          <div className="text-center max-w-4xl mx-auto mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-3 sm:mb-4 leading-tight">
-              {t('hero.title', 'Find Your Perfect')}
-              <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-                {t('hero.titleHighlight', 'Real Estate Partner')}
-              </span>
-            </h1>
-            <p className="text-sm sm:text-lg md:text-xl text-neutral-600 max-w-2xl mx-auto px-2">
-              {t('hero.subtitle', 'Connect with top-rated agents in the Balkans who specialize in your local market.')}
-            </p>
-          </div>
-
-          {/* Search Box */}
-          <div className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg border border-neutral-200 p-4 sm:p-6 md:p-8">
-            <div className="text-center mb-4 sm:mb-6">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-1 sm:mb-2">
-                {t('search.title', 'Find Your Ideal Agent')}
-              </h2>
-              <p className="text-neutral-600 text-xs sm:text-sm md:text-base">
-                {t('search.subtitle', { count: agents.length, defaultValue: `Search ${agents.length}+ verified professionals across the Balkans` })}
-              </p>
-            </div>
-
-            {/* Search Tabs - Scrollable on mobile */}
-            <div className="flex justify-start sm:justify-center gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-hide">
-              {[
-                { id: 'all' as SearchTab, label: t('search.tabs.all', 'All'), icon: '🔍' },
-                { id: 'name' as SearchTab, label: t('search.tabs.name', 'Name'), icon: '👤' },
-                { id: 'location' as SearchTab, label: t('search.tabs.location', 'Location'), icon: '📍' },
-                { id: 'specialization' as SearchTab, label: t('search.tabs.specialization', 'Specialty'), icon: '⭐' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setSearchTab(tab.id);
-                    setSearchQuery('');
-                  }}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 ${
-                    searchTab === tab.id
-                      ? 'bg-primary text-white shadow-md'
-                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                  }`}
-                >
-                  <span>{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Search Input */}
-            <div className="relative mb-4 sm:mb-6">
-              <div className="absolute inset-y-0 left-3 sm:left-4 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-colors ${searchQuery ? 'text-primary' : 'text-neutral-400'}`} />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={
-                  searchTab === 'all' ? t('search.placeholders.all', 'Search by name, city, country, or specialty...') :
-                  searchTab === 'name' ? t('search.placeholders.name', 'Search by agent name...') :
-                  searchTab === 'location' ? t('search.placeholders.location', 'Search by city, country, or region...') :
-                  t('search.placeholders.specialization', 'Search by specialty (Luxury, Commercial, Residential...)')
-                }
-                className="w-full pl-10 sm:pl-12 md:pl-14 pr-10 sm:pr-12 py-2.5 sm:py-3 md:py-4 border-2 border-neutral-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-2 sm:focus:ring-4 focus:ring-primary/20 transition-all bg-white text-sm sm:text-base md:text-lg"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-                  title="Clear search"
-                >
-                  <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
-                </button>
-              )}
-            </div>
-
-            {/* Quick Search Suggestions based on tab */}
-            {!searchQuery && (
-              <div className="mb-4 sm:mb-6">
-                <p className="text-center text-xs sm:text-sm text-neutral-600 mb-2 sm:mb-3">
-                  {searchTab === 'all' && t('search.quickSearch.all', 'Popular searches:')}
-                  {searchTab === 'name' && t('search.quickSearch.name', 'Try searching for:')}
-                  {searchTab === 'location' && t('search.quickSearch.location', 'Popular locations:')}
-                  {searchTab === 'specialization' && t('search.quickSearch.specialization', 'Popular specialties:')}
-                </p>
-                <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-                  {(searchTab === 'all' ? ['Belgrade', 'Zagreb', 'Luxury', 'Commercial'] :
-                    searchTab === 'name' ? ['Top Rated', 'Verified', 'Expert'] :
-                    searchTab === 'location' ? ['Serbia', 'Croatia', 'Albania', 'Montenegro', 'Bosnia', 'Kosovo'] :
-                    ['Luxury', 'Commercial', 'Residential', 'Investment', 'New Construction']
-                  ).map((term) => (
-                    <button
-                      key={term}
-                      onClick={() => setSearchQuery(term)}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 hover:border-primary hover:bg-primary/5 hover:text-primary text-neutral-700 rounded-md sm:rounded-lg transition-colors font-medium"
-                    >
-                      {term}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Stats - Responsive grid */}
-            <div className="pt-4 sm:pt-6 border-t border-neutral-200">
-              <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-4 md:gap-6">
-                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 bg-blue-50 px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-blue-100">
-                  <div className="p-1.5 sm:p-2 bg-blue-500 rounded-md sm:rounded-lg">
-                    <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <div className="font-bold text-base sm:text-xl text-neutral-900">{agencies.length || 0}</div>
-                    <div className="text-blue-700 text-[10px] sm:text-xs font-medium">{t('stats.professionalAgencies', 'Agencies')}</div>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 bg-green-50 px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-green-100">
-                  <div className="p-1.5 sm:p-2 bg-green-500 rounded-md sm:rounded-lg">
-                    <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <div className="font-bold text-base sm:text-xl text-neutral-900">{agents.length || 0}</div>
-                    <div className="text-green-700 text-[10px] sm:text-xs font-medium">{t('stats.verifiedAgents', 'Agents')}</div>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 bg-purple-50 px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-purple-100">
-                  <div className="p-1.5 sm:p-2 bg-purple-500 rounded-md sm:rounded-lg">
-                    <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <div className="font-bold text-base sm:text-xl text-neutral-900">{totalActiveListings || 0}</div>
-                    <div className="text-purple-700 text-[10px] sm:text-xs font-medium">{t('agencies.listedProperties', 'Properties')}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Special Agents Banner */}
+      <AgentsHeroBanner
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchTab={searchTab}
+        onSearchTabChange={setSearchTab}
+        totalAgents={agents.length}
+        totalAgencies={agencies.length}
+        totalProperties={totalActiveListings}
+      />
 
       {/* Main Content */}
       <main className="w-full flex-grow">

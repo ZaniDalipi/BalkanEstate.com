@@ -190,144 +190,126 @@ const AgenciesListPage: React.FC = () => {
 
   const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => {
     const rankStyle = getRankStyle(index);
-    const logoSize = isCompact ? 56 : 72; // Fixed pixel sizes for logo container
+    const logoSize = isCompact ? 56 : 80;
 
     return (
       <div
         key={agency._id}
         onClick={() => handleViewAgency(agency)}
-        className="group relative bg-white rounded-2xl sm:rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100 hover:border-primary/40 active:scale-[0.98]"
+        className="group relative bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border border-gray-100/80 hover:border-primary/30"
       >
-        {/* Modern gradient accent */}
-        <div className={`h-1 sm:h-1.5 bg-gradient-to-r ${index < 3 ? rankStyle.bg : 'from-primary via-blue-500 to-violet-500'}`} />
+        {/* Top gradient banner */}
+        <div className={`h-24 sm:h-28 bg-gradient-to-br ${index < 3 ? rankStyle.bg : 'from-slate-700 via-blue-800 to-indigo-900'} relative overflow-hidden`}>
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <pattern id={`grid-${agency._id}`} width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
+              </pattern>
+              <rect width="100%" height="100%" fill={`url(#grid-${agency._id})`}/>
+            </svg>
+          </div>
 
-        <div className="p-4 sm:p-6">
-          {/* Header Row */}
-          <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5">
-            {/* Logo Container - STRICTLY fixed dimensions */}
-            <div className="relative flex-shrink-0">
-              <div
-                className="relative rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden border-2 border-white shadow-lg group-hover:shadow-xl transition-all duration-300"
-                style={{
-                  width: `${logoSize}px`,
-                  height: `${logoSize}px`,
-                  minWidth: `${logoSize}px`,
-                  minHeight: `${logoSize}px`,
-                  maxWidth: `${logoSize}px`,
-                  maxHeight: `${logoSize}px`
-                }}
+          {/* Rank badge */}
+          {index < 10 && (
+            <div className={`absolute top-3 right-3 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-bold flex items-center gap-1 border border-white/30`}>
+              {rankStyle.emoji && <span>{rankStyle.emoji}</span>}
+              <span>#{index + 1}</span>
+            </div>
+          )}
+
+          {/* Featured badge */}
+          {agency.isFeatured && (
+            <div className="absolute top-3 left-3 px-2.5 py-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg text-white text-xs font-bold flex items-center gap-1 shadow-lg">
+              <SparklesIcon className="w-3 h-3" />
+              <span>Featured</span>
+            </div>
+          )}
+        </div>
+
+        {/* Logo - overlapping banner */}
+        <div className="relative px-4 sm:px-5 -mt-10 sm:-mt-12 mb-3">
+          <div
+            className="relative rounded-xl sm:rounded-2xl bg-white overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl transition-all duration-300 mx-auto sm:mx-0"
+            style={{
+              width: `${logoSize}px`,
+              height: `${logoSize}px`,
+              minWidth: `${logoSize}px`,
+              minHeight: `${logoSize}px`,
+            }}
+          >
+            {agency.logo ? (
+              <img
+                src={agency.logo}
+                alt={agency.name}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                draggable={false}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                <BuildingOfficeIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+          {/* Name and Location */}
+          <div className="mb-4">
+            <h3 className={`${isCompact ? 'text-base' : 'text-lg sm:text-xl'} font-bold text-gray-900 group-hover:text-primary transition-colors mb-1 line-clamp-1`}>
+              {agency.name}
+            </h3>
+            <div className="flex items-center gap-1.5 text-gray-500">
+              <MapPinIcon className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
+              <span className="text-sm truncate">{agency.city}, {agency.country}</span>
+            </div>
+          </div>
+
+          {/* Stats Row - Horizontal compact */}
+          <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3 mb-4">
+            <div className="text-center flex-1">
+              <div className="text-lg sm:text-xl font-bold text-primary">{agency.totalProperties || 0}</div>
+              <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.properties')}</div>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div className="text-center flex-1">
+              <div className="text-lg sm:text-xl font-bold text-emerald-600">{agency.totalAgents || 0}</div>
+              <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.agents')}</div>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div className="text-center flex-1">
+              <div className="text-lg sm:text-xl font-bold text-violet-600">{agency.yearsInBusiness || 0}+</div>
+              <div className="text-[10px] text-gray-500 font-medium uppercase">{t('agencies.years')}</div>
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="flex items-center gap-2">
+            {agency.phone && (
+              <a
+                href={`tel:${agency.phone}`}
+                onClick={(e) => e.stopPropagation()}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all"
+                aria-label={t('agencies.call')}
               >
-                {agency.logo ? (
-                  <img
-                    src={agency.logo}
-                    alt={agency.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                    draggable={false}
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                    <BuildingOfficeIcon className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
-                  </div>
-                )}
-              </div>
-              {/* Rank badge */}
-              {index < 10 && (
-                <div className={`absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gradient-to-r ${rankStyle.bg} rounded-lg text-white text-[9px] sm:text-[10px] font-bold shadow-lg flex items-center gap-0.5 sm:gap-1`}>
-                  {rankStyle.emoji && <span className="text-xs">{rankStyle.emoji}</span>}
-                  <span>#{index + 1}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
-                <h3 className={`${isCompact ? 'text-sm sm:text-base' : 'text-base sm:text-lg'} font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1`}>
-                  {agency.name}
-                </h3>
-                {agency.isFeatured && (
-                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full text-[9px] sm:text-[10px] font-bold shadow-sm flex-shrink-0">
-                    <SparklesIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    <span className="hidden xs:inline">Featured</span>
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <MapPinIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary/60 flex-shrink-0" />
-                <span className="text-xs sm:text-sm truncate">{agency.city}, {agency.country}</span>
-              </div>
-
-              {/* Quick contact - visible only on larger screens */}
-              {agency.phone && (
-                <div className="hidden sm:flex items-center gap-2 mt-2">
-                  <a
-                    href={`tel:${agency.phone}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
-                  >
-                    <PhoneIcon className="w-3 h-3" />
-                    <span>{agency.phone}</span>
-                  </a>
-                </div>
-              )}
-            </div>
-
-            <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
-          </div>
-
-          {/* Stats Grid - Responsive */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center group/stat hover:from-blue-100 hover:to-blue-200/50 transition-colors">
-              <div className="absolute -top-4 -right-4 w-10 h-10 sm:w-12 sm:h-12 bg-blue-200/30 rounded-full blur-xl" />
-              <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-0.5 sm:mb-1" />
-              <div className="text-base sm:text-xl font-bold text-gray-900">{agency.totalProperties || 0}</div>
-              <div className="text-[8px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.properties')}</div>
-            </div>
-
-            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center group/stat hover:from-emerald-100 hover:to-emerald-200/50 transition-colors">
-              <div className="absolute -top-4 -right-4 w-10 h-10 sm:w-12 sm:h-12 bg-emerald-200/30 rounded-full blur-xl" />
-              <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 mx-auto mb-0.5 sm:mb-1" />
-              <div className="text-base sm:text-xl font-bold text-gray-900">{agency.totalAgents || 0}</div>
-              <div className="text-[8px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.agents')}</div>
-            </div>
-
-            <div className="relative overflow-hidden bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center group/stat hover:from-violet-100 hover:to-violet-200/50 transition-colors">
-              <div className="absolute -top-4 -right-4 w-10 h-10 sm:w-12 sm:h-12 bg-violet-200/30 rounded-full blur-xl" />
-              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-violet-600 mx-auto mb-0.5 sm:mb-1" />
-              <div className="text-base sm:text-xl font-bold text-gray-900">{agency.yearsInBusiness || 0}+</div>
-              <div className="text-[8px] sm:text-[10px] text-gray-500 font-medium uppercase tracking-wide">{t('agencies.years')}</div>
-            </div>
-          </div>
-
-          {/* Action Row - Mobile optimized */}
-          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {agency.phone && (
-                <a
-                  href={`tel:${agency.phone}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
-                  aria-label={t('agencies.call')}
-                >
-                  <PhoneIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </a>
-              )}
-              {agency.email && (
-                <a
-                  href={`mailto:${agency.email}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg sm:rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all active:scale-95"
-                  aria-label={t('agencies.email')}
-                >
-                  <EnvelopeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </a>
-              )}
-            </div>
-
-            <button className="px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2 shadow-md hover:shadow-lg active:scale-95">
+                <PhoneIcon className="w-4 h-4" />
+              </a>
+            )}
+            {agency.email && (
+              <a
+                href={`mailto:${agency.email}`}
+                onClick={(e) => e.stopPropagation()}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all"
+                aria-label={t('agencies.email')}
+              >
+                <EnvelopeIcon className="w-4 h-4" />
+              </a>
+            )}
+            <button className="flex-1 py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98]">
               {t('agencies.view')}
-              <ChevronRightIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <ChevronRightIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
