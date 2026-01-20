@@ -19,6 +19,13 @@ import { useTrackView } from '../src/features/view-stats/hooks';
 import { useConfirmation } from '../src/shared/hooks/useConfirmation';
 import { useNotification } from '../src/shared/hooks/useNotification';
 import Footer from './shared/Footer';
+import AchievementsSection, { Achievement } from './shared/AchievementsSection';
+import {
+  getAgencyAchievements,
+  addAgencyAchievement,
+  updateAgencyAchievement,
+  deleteAgencyAchievement
+} from '../src/features/achievements/api/achievementApi';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -100,6 +107,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agencyProperties, setAgencyProperties] = useState<any[]>([]);
+  const [agencyAchievements, setAgencyAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false);
   const [isInvitationCodeModalOpen, setIsInvitationCodeModalOpen] = useState(false);
@@ -225,11 +233,23 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         setAgencyData(data.agency);
         setAgents(data.agency.agents || []);
         setAgencyProperties(data.properties || []);
+        // Set achievements from agency data or fetch separately
+        if (data.agency.achievements) {
+          setAgencyAchievements(data.agency.achievements);
+        }
       } else {
         // Fallback to prop data if API fails
         setAgencyData(agency);
         setAgents(agency.agents || []);
         setAgencyProperties([]);
+      }
+
+      // Also try to fetch achievements separately if not in agency data
+      try {
+        const achievements = await getAgencyAchievements(agency._id || agency.id);
+        setAgencyAchievements(achievements);
+      } catch {
+        // Achievements fetch failed, use what we have
       }
     } catch (_error) {
       // Fallback to prop data on error
@@ -573,6 +593,56 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       await success(t('messages.agencyUpdatedTitle', 'Agency Updated'), t('messages.agencyUpdated'));
     } catch (err) {
       await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update agency'));
+    }
+  };
+
+  // Achievement handlers
+  const handleAddAchievement = async (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => {
+    try {
+      const newAchievement = await addAgencyAchievement(agencyData._id || agencyData.id, {
+        type: achievement.type,
+        title: achievement.title,
+        description: achievement.description,
+        dateReceived: achievement.dateReceived,
+        expiryDate: achievement.expiryDate,
+        issuingOrganization: achievement.issuingOrganization,
+        documentUrl: achievement.documentUrl,
+      });
+      setAgencyAchievements(prev => [...prev, newAchievement]);
+      await success(t('achievements.addedTitle', 'Achievement Added'), t('achievements.addedMessage', 'The achievement has been added successfully'));
+    } catch (err) {
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('achievements.addFailed', 'Failed to add achievement'));
+      throw err;
+    }
+  };
+
+  const handleEditAchievement = async (id: string, achievement: Partial<Achievement>) => {
+    try {
+      const updated = await updateAgencyAchievement(agencyData._id || agencyData.id, id, {
+        type: achievement.type,
+        title: achievement.title,
+        description: achievement.description,
+        dateReceived: achievement.dateReceived,
+        expiryDate: achievement.expiryDate,
+        issuingOrganization: achievement.issuingOrganization,
+        documentUrl: achievement.documentUrl,
+      });
+      setAgencyAchievements(prev => prev.map(a => a.id === id ? updated : a));
+      await success(t('achievements.updatedTitle', 'Achievement Updated'), t('achievements.updatedMessage', 'The achievement has been updated successfully'));
+    } catch (err) {
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('achievements.updateFailed', 'Failed to update achievement'));
+      throw err;
+    }
+  };
+
+  const handleDeleteAchievement = async (id: string) => {
+    try {
+      await deleteAgencyAchievement(agencyData._id || agencyData.id, id);
+      setAgencyAchievements(prev => prev.filter(a => a.id !== id));
+      await success(t('achievements.deletedTitle', 'Achievement Deleted'), t('achievements.deletedMessage', 'The achievement has been deleted'));
+    } catch (err) {
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('achievements.deleteFailed', 'Failed to delete achievement'));
+      throw err;
     }
   };
 
@@ -1049,6 +1119,17 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {agencyData.description && (
               <div className="relative mb-8 pl-4 border-l-4 border-primary/30">
                 <p className="text-slate-600 leading-relaxed text-base italic">{agencyData.description}</p>
+              </div>
+            )}
+
+            {/* Achievements Display - Public View */}
+            {agencyAchievements.length > 0 && (
+              <div className="mb-8">
+                <AchievementsSection
+                  achievements={agencyAchievements}
+                  isOwner={false}
+                  entityType="agency"
+                />
               </div>
             )}
 
@@ -2126,6 +2207,23 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Achievements Section */}
+              <div className="space-y-4 border-t border-slate-100 pt-6">
+                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  Awards & Achievements
+                </h4>
+                <AchievementsSection
+                  achievements={agencyAchievements}
+                  isOwner={isOwner || isAdmin}
+                  onAdd={handleAddAchievement}
+                  onEdit={handleEditAchievement}
+                  onDelete={handleDeleteAchievement}
+                  entityType="agency"
+                  className="bg-slate-50 rounded-xl p-4"
+                />
               </div>
             </form>
 

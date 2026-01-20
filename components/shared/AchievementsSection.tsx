@@ -13,7 +13,7 @@ import {
   CheckCircleIcon,
   CalendarIcon,
   BuildingOfficeIcon,
-  DocumentIcon,
+  DocumentTextIcon,
   PhotoIcon
 } from '@/constants';
 
@@ -305,7 +305,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                     >
-                      <DocumentIcon className="w-4 h-4" />
+                      <DocumentTextIcon className="w-4 h-4" />
                       {t('achievements.viewDocument', 'View Document')}
                     </a>
                   )}
