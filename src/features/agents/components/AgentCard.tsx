@@ -32,32 +32,34 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
   // Fallback placeholder when no avatar or on error
   if (!agent.avatarUrl || error) {
     return (
-      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 aspect-square rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 border-2 border-blue-100 flex-shrink-0">
-        <UserCircleIcon className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-blue-300" />
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 border-2 border-blue-100">
+        <UserCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-blue-300" />
       </div>
     );
   }
 
   return (
-    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 aspect-square flex-shrink-0">
+    <>
       {/* Blue glow effect */}
       <div className="absolute inset-0 bg-blue-400/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-900" />
-      {/* Avatar container with strict constraints */}
-      <div className="w-full h-full rounded-full overflow-hidden border-3 sm:border-4 border-white shadow-xl group-hover:shadow-blue-300/30 group-hover:border-blue-100 transition-all duration-700 group-hover:scale-105">
-        <img
-          src={agent.avatarUrl}
-          alt={agent.name}
-          className={`w-full h-full min-w-full min-h-full object-cover object-center transition-all duration-700 ${
-            loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}
-          onError={() => setError(true)}
-          onLoad={() => setLoaded(true)}
-          loading="lazy"
-        />
-      </div>
-      {/* Subtle blue ring */}
-      <div className="absolute inset-0 rounded-full border border-blue-200/50 animate-ping-slow opacity-0 group-hover:opacity-100" />
-    </div>
+      {/* Avatar image - fills parent completely */}
+      <img
+        src={agent.avatarUrl}
+        alt={agent.name}
+        className={`absolute inset-0 w-full h-full rounded-full object-cover object-center border-3 sm:border-4 border-white shadow-xl group-hover:shadow-blue-300/30 group-hover:border-blue-100 transition-all duration-700 group-hover:scale-105 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        onError={() => setError(true)}
+        onLoad={() => setLoaded(true)}
+        loading="lazy"
+      />
+      {/* Loading placeholder */}
+      {!loaded && (
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 animate-pulse" />
+      )}
+      {/* Subtle blue ring on hover */}
+      <div className="absolute inset-0 rounded-full border border-blue-200/50 animate-ping-slow opacity-0 group-hover:opacity-100 pointer-events-none" />
+    </>
   );
 };
 
@@ -215,8 +217,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       <div className="p-4 sm:p-6 relative z-0">
         {/* Agent Avatar and Info */}
         <div className="flex flex-col items-center text-center mb-6">
-          {/* Avatar wrapper - constrained size */}
-          <div className="relative mb-4 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0">
+          {/* Avatar wrapper - strictly constrained with overflow hidden */}
+          <div className="relative mb-4 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0 rounded-full overflow-hidden">
             <AgentAvatar agent={agent} />
 
             {/* Premier Agent Badge with blue animation */}
