@@ -174,19 +174,19 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       {/* Animated border effect - blue */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-blue-200/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
       
-      {/* Agency Badge - Top Right with fixed small container */}
+      {/* Agency Badge - Top Right - More Visible */}
       {isTeam && (
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-3 right-3 z-10">
           <div className="relative group/agency">
-            <div className="absolute -inset-1 bg-blue-400/30 rounded-full blur opacity-0 group-hover/agency:opacity-70 transition-opacity duration-800" />
+            <div className="absolute -inset-1 bg-white/50 rounded-xl blur opacity-70" />
             <button
               onClick={handleAgencyClick}
-              className={`relative text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 ${
+              className={`relative flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white/50 ${
                 agent.agencyGradient || 'bg-gradient-to-r from-blue-600 to-blue-700'
               }`}
             >
               {agent.agencyLogo ? (
-                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-white/20">
+                <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 bg-white/30 ring-2 ring-white/50">
                   <img
                     src={agent.agencyLogo}
                     alt={agent.agencyName}
@@ -194,17 +194,22 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                   />
                 </div>
               ) : (
-                <BuildingOfficeIcon className="w-3.5 h-3.5" />
+                <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                  <BuildingOfficeIcon className="w-4 h-4 text-white" />
+                </div>
               )}
-              <span className="max-w-[60px] truncate">{t('agents:card.agency')}</span>
-              <ChevronRightIcon className="w-3 h-3 transform group-hover/agency:translate-x-1 transition-transform" />
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] text-white/70 font-medium leading-none">{t('agents:card.agency')}</span>
+                <span className="text-xs text-white font-bold leading-tight max-w-[80px] truncate">{agent.agencyName}</span>
+              </div>
+              <ChevronRightIcon className="w-4 h-4 text-white/70 transform group-hover/agency:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
       )}
 
       {/* Performance Score Badge - Top Left */}
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-3 left-3 z-10">
         <div className="relative group/score">
           <div className="absolute inset-0 bg-blue-500 rounded-full blur opacity-50 group-hover/score:opacity-80 transition-opacity duration-300" />
           <div className="relative bg-gradient-to-b from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-blue-500/20 border border-white/20">
