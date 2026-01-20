@@ -357,5 +357,41 @@
     "m": "m",
     "sqm": "m²",
     "sqft": "sq ft"
-  }
+  },
+  "achievements": {
+    "title": "Achievements & Awards",
+    "subtitle": "Professional recognitions and certifications",
+    "add": "Add Achievement",
+    "addFirst": "Add Your First Achievement",
+    "addTitle": "Add Achievement",
+    "editTitle": "Edit Achievement",
+    "addButton": "Add Achievement",
+    "verified": "Verified",
+    "expired": "Expired",
+    "viewDocument": "View Document",
+    "empty": "No achievements to display yet.",
+    "emptyOwner": "Showcase your achievements and certifications to build trust with clients.",
+    "types": {
+      "award": "Award",
+      "certification": "Certification",
+      "milestone": "Milestone",
+      "recognition": "Recognition",
+      "membership": "Membership"
+    },
+    "form": {
+      "type": "Type",
+      "title": "Title",
+      "titlePlaceholder": "e.g., Top Producer Award 2024",
+      "organization": "Issuing Organization",
+      "organizationPlaceholder": "e.g., National Association of Realtors",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of this achievement...",
+      "dateReceived": "Date Received",
+      "expiryDate": "Expiry Date",
+      "documentUrl": "Document/Certificate URL",
+      "documentHint": "Link to your certificate or supporting documentation"
+    }
+  },
+  "saving": "Saving...",
+  "saveChanges": "Save Changes"
 }

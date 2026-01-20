@@ -231,6 +231,24 @@ export interface IUser extends Document {
     updatedAt?: Date;
   }>;
 
+  // Professional Achievements (for agents and agency owners)
+  achievements?: Array<{
+    id: string;
+    type: 'award' | 'certification' | 'milestone' | 'recognition' | 'membership';
+    title: string;
+    description?: string;
+    dateReceived: Date;
+    expiryDate?: Date;          // For certifications that expire
+    issuingOrganization: string;
+    documentUrl?: string;       // Proof document (S3/Cloudinary URL)
+    documentPublicId?: string;  // Cloudinary public ID for cleanup
+    isVerified: boolean;
+    verifiedAt?: Date;
+    verifiedBy?: mongoose.Types.ObjectId; // Admin who verified
+    createdAt: Date;
+    updatedAt?: Date;
+  }>;
+
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -756,6 +774,64 @@ const UserSchema: Schema = new Schema(
         default: Date.now,
       },
       updatedAt: Date,
+    }],
+
+    // Professional Achievements (for agents and agency owners)
+    achievements: [{
+      id: {
+        type: String,
+        required: true,
+      },
+      type: {
+        type: String,
+        enum: ['award', 'certification', 'milestone', 'recognition', 'membership'],
+        required: true,
+      },
+      title: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      description: {
+        type: String,
+        trim: true,
+      },
+      dateReceived: {
+        type: Date,
+        required: true,
+      },
+      expiryDate: {
+        type: Date,
+      },
+      issuingOrganization: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      documentUrl: {
+        type: String,
+      },
+      documentPublicId: {
+        type: String,
+      },
+      isVerified: {
+        type: Boolean,
+        default: false,
+      },
+      verifiedAt: {
+        type: Date,
+      },
+      verifiedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+      updatedAt: {
+        type: Date,
+      },
     }],
   },
   {

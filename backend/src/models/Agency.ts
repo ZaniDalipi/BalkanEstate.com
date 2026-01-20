@@ -47,6 +47,24 @@ export interface IAgency extends Document {
   certifications?: string[];
   languages?: string[]; // Languages spoken by agency staff
 
+  // Agency Achievements & Awards
+  achievements?: Array<{
+    id: string;
+    type: 'award' | 'certification' | 'milestone' | 'recognition' | 'membership';
+    title: string;
+    description?: string;
+    dateReceived: Date;
+    expiryDate?: Date;          // For certifications that expire
+    issuingOrganization: string;
+    documentUrl?: string;       // Proof document (S3/Cloudinary URL)
+    documentPublicId?: string;  // Cloudinary public ID for cleanup
+    isVerified: boolean;
+    verifiedAt?: Date;
+    verifiedBy?: mongoose.Types.ObjectId; // Admin who verified
+    createdAt: Date;
+    updatedAt?: Date;
+  }>;
+
   // Social media links
   facebookUrl?: string;
   instagramUrl?: string;
@@ -262,6 +280,65 @@ const AgencySchema: Schema = new Schema(
       type: String,
       trim: true,
     }],
+
+    // Agency Achievements & Awards
+    achievements: [{
+      id: {
+        type: String,
+        required: true,
+      },
+      type: {
+        type: String,
+        enum: ['award', 'certification', 'milestone', 'recognition', 'membership'],
+        required: true,
+      },
+      title: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      description: {
+        type: String,
+        trim: true,
+      },
+      dateReceived: {
+        type: Date,
+        required: true,
+      },
+      expiryDate: {
+        type: Date,
+      },
+      issuingOrganization: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      documentUrl: {
+        type: String,
+      },
+      documentPublicId: {
+        type: String,
+      },
+      isVerified: {
+        type: Boolean,
+        default: false,
+      },
+      verifiedAt: {
+        type: Date,
+      },
+      verifiedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+      updatedAt: {
+        type: Date,
+      },
+    }],
+
     facebookUrl: {
       type: String,
       trim: true,

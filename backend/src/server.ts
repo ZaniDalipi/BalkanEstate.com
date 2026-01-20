@@ -84,6 +84,7 @@ import inquiryRoutes from './routes/inquiryRoutes';
 import measurementRoutes from './routes/measurementRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import siteContentRoutes from './routes/siteContentRoutes';
+import achievementRoutes from './routes/achievementRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -260,6 +261,7 @@ app.use('/api/inquiries', inquiryRoutes); // Buyer-to-agent inquiries (rate limi
 app.use('/api/measurements', measurementRoutes); // User land measurements
 app.use('/api/analytics', analyticsRoutes); // Analytics and activity tracking
 app.use('/api/site-content', siteContentRoutes); // Public site content (how it works videos)
+app.use('/api/achievements', achievementRoutes); // User and agency achievements
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
