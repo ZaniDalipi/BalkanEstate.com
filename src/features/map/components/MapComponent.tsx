@@ -55,33 +55,27 @@ const BALKAN_BOUNDS = L.latLngBounds(
   [49, 31] // Northeast corner (Northern Romania, Eastern Bulgaria)
 );
 
-// CSS for map styling - clean, minimal approach
+// Inject map styles once
 const injectMapStyles = () => {
-  const styleId = 'map-styles';
+  const styleId = 'balkan-map-styles';
   if (document.getElementById(styleId)) return;
 
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
-    /* ========================================
-       3D PERSPECTIVE MODE
-       ======================================== */
+    /* 3D mode styles */
     .map-3d-perspective-container {
       perspective: 1500px;
       perspective-origin: 50% 25%;
     }
-
     .map-3d-active {
       transform: rotateX(25deg) scale(1.08);
       transform-origin: center 70%;
-      transition: transform 0.5s ease-out;
+      transition: transform 0.4s ease-out;
     }
-
     .map-3d-inactive {
       transform: none;
-      transition: transform 0.5s ease-out;
     }
-
     .map-3d-active .leaflet-control-container,
     .map-3d-active .leaflet-marker-pane,
     .map-3d-active .leaflet-popup-pane {
@@ -89,54 +83,20 @@ const injectMapStyles = () => {
       transform-origin: center 30%;
     }
 
-    /* ========================================
-       MOBILE TOUCH & ZOOM
-       ======================================== */
+    /* Mobile touch - essential only */
     .leaflet-container {
-      /* Allow all touch gestures including pinch-to-zoom */
       touch-action: manipulation;
-      /* Disable tap highlight on mobile */
       -webkit-tap-highlight-color: transparent;
-      /* Prevent text selection during map interaction */
-      -webkit-user-select: none;
-      user-select: none;
     }
 
-    /* ========================================
-       SMOOTH ZOOM ANIMATIONS
-       ======================================== */
-    .leaflet-zoom-animated {
-      /* Fast, snappy zoom animation */
-      transition: transform 150ms ease-out !important;
+    /* Smooth zoom animation - Leaflet scales tiles during zoom */
+    .leaflet-zoom-anim .leaflet-zoom-animated {
+      transition: transform 0.25s ease-out !important;
     }
 
-    /* Tile fade-in */
-    .leaflet-fade-anim .leaflet-tile {
-      transition: opacity 200ms ease-out !important;
-    }
-
-    /* ========================================
-       GPU ACCELERATION (minimal, targeted)
-       ======================================== */
-    .leaflet-tile-pane,
-    .leaflet-marker-pane,
-    .leaflet-popup-pane {
-      transform: translateZ(0);
-      backface-visibility: hidden;
-    }
-
-    /* ========================================
-       CLEAN TILE RENDERING
-       ======================================== */
+    /* Tile appearance */
     .leaflet-tile {
-      /* Prevent tile borders/gaps */
       outline: none;
-      border: none;
-    }
-
-    /* Prevent white flash during zoom on mobile */
-    .leaflet-tile-container {
-      background: transparent;
     }
   `;
   document.head.appendChild(style);
@@ -182,50 +142,6 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
   return null;
 };
 
-/**
- * ZoomSnapAdjuster - use whole zoom levels for clean, predictable zoom
- * At high zoom (18+), allow half steps for finer control
- */
-const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    // Whole zoom levels normally, half steps when zoomed in close
-    const snap = currentZoom >= 18 ? 0.5 : 1;
-    if (map.options.zoomSnap !== snap) {
-      map.options.zoomSnap = snap;
-      map.options.zoomDelta = snap;
-    }
-  }, [currentZoom, map]);
-
-  return null;
-};
-
-/**
- * ZoomAdjuster Component - adjusts zoom when switching map types
- * Ensures zoom level doesn't exceed the new layer's max zoom
- */
-const ZoomAdjuster: React.FC<{ mapType: TileLayerType; currentZoom: number }> = ({ mapType, currentZoom }) => {
-  const map = useMap();
-  const prevMapTypeRef = useRef(mapType);
-
-  useEffect(() => {
-    // Only act when mapType actually changes
-    if (prevMapTypeRef.current !== mapType) {
-      const maxZoom = TILE_LAYERS[mapType]?.maxZoom || 21;
-      const currentMapZoom = map.getZoom();
-
-      // If current zoom exceeds new layer's max, adjust it
-      if (currentMapZoom > maxZoom) {
-        map.setZoom(maxZoom, { animate: true, duration: 0.6 });
-      }
-
-      prevMapTypeRef.current = mapType;
-    }
-  }, [mapType, map]);
-
-  return null;
-};
 
 /**
  * MapComponent
@@ -434,40 +350,31 @@ const MapComponent: React.FC<MapComponentProps> = ({
           center={center}
           zoom={zoom}
           className={`w-full h-full ${show3DBuildings ? 'map-3d-active' : 'map-3d-inactive'}`}
-          // Zoom limits
           maxZoom={21}
           minZoom={6}
-          // Hide default zoom control (we have custom)
           zoomControl={false}
-          // Region bounds
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
-          // Use canvas for better performance with many markers
           preferCanvas={true}
-          // Zoom behavior - whole steps for clean zoom
+          // Zoom: whole levels, smooth animation
           zoomSnap={1}
           zoomDelta={1}
-          wheelPxPerZoomLevel={120}
-          // Animations
+          wheelPxPerZoomLevel={60}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
-          // Touch: zoom at finger location, not center
+          // Touch: pinch zooms at finger location
           touchZoom={true}
           scrollWheelZoom={true}
           doubleClickZoom={true}
-          // Smooth panning with inertia
+          // Panning
           inertia={true}
           inertiaDeceleration={3000}
-          inertiaMaxSpeed={1500}
-          // Don't bounce at zoom limits
           bounceAtZoomLimits={false}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
           <ZoomTracker onZoomChange={setCurrentZoom} />
-          {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
-          <ZoomSnapAdjuster currentZoom={currentZoom} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
@@ -488,12 +395,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
             url={TILE_LAYERS[mapType].url}
             maxZoom={TILE_LAYERS[mapType].maxZoom}
             maxNativeZoom={TILE_LAYERS[mapType].maxNativeZoom}
-            // Preload LOTS of tiles - always keep map visible
-            keepBuffer={12}
-            updateWhenIdle={false}
-            updateWhenZooming={true}
-            updateInterval={150}
-            className="map-tiles"
+            // Preload tiles around viewport
+            keepBuffer={4}
+            // CRITICAL: Don't refresh tiles during zoom - only after zoom ends
+            updateWhenZooming={false}
+            updateWhenIdle={true}
           />
           {/* Climate Risk Overlay Layer (Zillow-style) */}
           <ClimateRiskLayer key={selectedClimateRisk} riskType={selectedClimateRisk} opacity={0.6} />
