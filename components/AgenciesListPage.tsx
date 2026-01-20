@@ -30,7 +30,7 @@ import {
 import { useAppContext } from '../context/AppContext';
 import Footer from './shared/Footer';
 import { SEO } from '../src/components/seo';
-import HeroSearchSection from './shared/HeroSearchSection';
+import AgenciesHeroBanner from './shared/AgenciesHeroBanner';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from './shared/Decorative3D';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
@@ -454,26 +454,15 @@ const AgenciesListPage: React.FC = () => {
       {/* Add CSS animations */}
       <style>{cssAnimations}</style>
 
-      {/* Hero Section with Integrated Search */}
-      <HeroSearchSection
-        badge={t('agencies.badge')}
-        title={t('agencies.heroTitle')}
-        titleHighlight={t('agencies.heroTitleHighlight')}
-        subtitle={t('agencies.heroSubtitle')}
-        searchTitle={t('agencies.findIdealAgency')}
-        searchSubtitle={t('agencies.searchAgencies', { count: agencies.length })}
-        searchPlaceholder={t('agencies.universalSearchPlaceholder', 'Search by name, city, country, or specialty...')}
+      {/* Hero Section - Special Agencies Banner */}
+      <AgenciesHeroBanner
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSearch={fetchAgencies}
+        totalAgencies={agencies.length}
+        totalAgents={totalStats.totalAgents}
+        totalProperties={totalStats.totalProperties}
         popularSearches={['Belgrade', 'Zagreb', 'Luxury', 'Tirana', 'Commercial', 'Residential']}
-        popularSearchesLabel={t('agencies.popularSearches')}
-        stats={[
-          { icon: 'building', count: agencies.length, label: t('agencies.professionalAgencies'), color: 'green' },
-          { icon: 'users', count: totalStats.totalAgents, label: t('agencies.expertAgents'), color: 'blue' },
-          { icon: 'home', count: totalStats.totalProperties.toLocaleString(), label: t('agencies.listedProperties'), color: 'purple' }
-        ]}
-        mousePosition={mousePosition}
       />
 
       {/* Main Content */}
