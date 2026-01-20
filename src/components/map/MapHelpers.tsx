@@ -40,7 +40,7 @@ export const FlyToController: React.FC<{
  * Handles map resize and movement events.
  * - Observes container size changes
  * - Invalidates map size on layout shifts
- * - Calls onMove when map bounds change
+ * - Calls onMove when map bounds change (debounced to avoid lag during zoom)
  */
 export const MapEvents: React.FC<{
   onMove: (bounds: L.LatLngBounds, center: L.LatLng) => void;
@@ -49,6 +49,7 @@ export const MapEvents: React.FC<{
 }> = ({ onMove, mapBounds, searchMode }) => {
   const map = useMap();
   const hasInitialized = useRef(false);
+  const moveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Ensure bounds are set on initial mount - don't rely solely on 'load' event
   useEffect(() => {
@@ -169,8 +170,6 @@ export const MapEvents: React.FC<{
 
       // Force map to invalidate size and re-render layers after a short delay
       // This ensures markers render properly on first load
-      // Note: We don't fire 'moveend' here as onMove was already called above,
-      // and firing it again can cause infinite update loops
       setTimeout(() => {
         try {
           if (map.getContainer()) {
@@ -182,17 +181,33 @@ export const MapEvents: React.FC<{
       }, 150);
     },
     moveend: () => {
-      try {
-        const bounds = map.getBounds();
-        const center = map.getCenter();
-        if (bounds && center) {
-          onMove(bounds, center);
-        }
-      } catch (e) {
-        console.debug('Map moveend - bounds not ready:', e);
+      // Debounce the onMove callback to prevent property list updates during zoom
+      // This keeps the map smooth like Google Maps
+      if (moveDebounceRef.current) {
+        clearTimeout(moveDebounceRef.current);
       }
+      moveDebounceRef.current = setTimeout(() => {
+        try {
+          const bounds = map.getBounds();
+          const center = map.getCenter();
+          if (bounds && center) {
+            onMove(bounds, center);
+          }
+        } catch (e) {
+          console.debug('Map moveend - bounds not ready:', e);
+        }
+      }, 150); // Wait 150ms after user stops zooming/panning
     },
   });
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (moveDebounceRef.current) {
+        clearTimeout(moveDebounceRef.current);
+      }
+    };
+  }, []);
 
   return null;
 };
