@@ -390,7 +390,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               fillOpacity: 0.1,
               strokeWeight: 2,
               strokeColor: '#0252CD',
-              strokeDashArray: '5,5',
               clickable: false,
             }}
           />
@@ -439,7 +438,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             >
               {selectedProperty.images && selectedProperty.images[0] && (
                 <img
-                  src={selectedProperty.images[0]}
+                  src={selectedProperty.images[0].url}
                   alt={selectedProperty.title || selectedProperty.address}
                   className="w-full h-32 object-cover rounded-t-lg"
                 />
@@ -451,10 +450,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 <p className="text-sm text-gray-700 font-medium truncate">
                   {selectedProperty.title || selectedProperty.address}
                 </p>
-                {selectedProperty.bedrooms !== undefined && (
+                {selectedProperty.beds !== undefined && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {selectedProperty.bedrooms} bed • {selectedProperty.bathrooms} bath
-                    {selectedProperty.area && ` • ${selectedProperty.area}m²`}
+                    {selectedProperty.beds} bed • {selectedProperty.baths} bath
+                    {selectedProperty.sqft && ` • ${selectedProperty.sqft}m²`}
                   </p>
                 )}
                 <p className="text-xs text-primary mt-2 font-medium">
