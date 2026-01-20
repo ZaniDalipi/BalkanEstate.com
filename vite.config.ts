@@ -102,108 +102,42 @@ export default defineConfig(({ mode }) => {
             chunkFileNames: `assets/[name].[hash].js`,
             assetFileNames: `assets/[name].[hash].[ext]`,
             manualChunks(id) {
-              // Core React - always needed
-              if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+              // Only split third-party libraries to avoid circular dependencies
+              // Application code will be split automatically by dynamic imports
+
+              if (id.includes('node_modules')) {
+                // Core React - must load first, keep separate
+                if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/scheduler/')) {
+                  return 'react-vendor';
+                }
+                // Map functionality - lazy loaded
+                if (id.includes('leaflet') || id.includes('react-leaflet')) {
+                  return 'leaflet';
+                }
+                // Internationalization
+                if (id.includes('i18next') || id.includes('react-i18next')) {
+                  return 'i18n';
+                }
+                // Animation library
+                if (id.includes('framer-motion')) {
+                  return 'animation';
+                }
+                // Real-time messaging
+                if (id.includes('socket.io')) {
+                  return 'realtime';
+                }
+                // AI/Gemini
+                if (id.includes('@google/genai') || id.includes('@google/generative-ai')) {
+                  return 'ai';
+                }
+                // Image compression
+                if (id.includes('browser-image-compression')) {
+                  return 'image-utils';
+                }
+                // All other node_modules
                 return 'vendor';
               }
-              // Map functionality - only loaded when map is visible
-              if (id.includes('leaflet') || id.includes('react-leaflet')) {
-                return 'leaflet';
-              }
-              // Internationalization
-              if (id.includes('i18next') || id.includes('react-i18next')) {
-                return 'i18n';
-              }
-              // Animation library - defer loading
-              if (id.includes('framer-motion')) {
-                return 'animation';
-              }
-              // Real-time messaging - only for inbox
-              if (id.includes('socket.io')) {
-                return 'realtime';
-              }
-              // Data fetching
-              if (id.includes('@tanstack/react-query')) {
-                return 'query';
-              }
-              // State management
-              if (id.includes('zustand')) {
-                return 'state';
-              }
-              // Icons library - large, load separately
-              if (id.includes('lucide-react')) {
-                return 'icons';
-              }
-              // AI/Gemini - only needed for AI features
-              if (id.includes('@google/genai') || id.includes('@google/generative-ai')) {
-                return 'ai';
-              }
-              // Error tracking - defer loading
-              if (id.includes('@sentry')) {
-                return 'sentry';
-              }
-              // Helmet for SEO
-              if (id.includes('react-helmet-async')) {
-                return 'helmet';
-              }
-              // Image compression - only for uploads
-              if (id.includes('browser-image-compression')) {
-                return 'image-utils';
-              }
-              // Virtualization - for long lists
-              if (id.includes('react-window')) {
-                return 'virtualization';
-              }
-              // Property utilities - shared across features
-              if (id.includes('/utils/propertyUtils') || id.includes('/utils/balkanLocations')) {
-                return 'propertyUtils';
-              }
-              // Services - shared across features
-              if (id.includes('/services/geminiService') || id.includes('/services/osmService')) {
-                return 'services';
-              }
-              if (id.includes('/services/apiService')) {
-                return 'api';
-              }
-              // Split large feature modules
-              if (id.includes('/src/features/admin/')) {
-                return 'admin';
-              }
-              if (id.includes('/src/features/seller/')) {
-                return 'seller';
-              }
-              if (id.includes('/src/features/agents/')) {
-                return 'agents';
-              }
-              if (id.includes('/src/features/property-details/')) {
-                return 'property-details';
-              }
-              if (id.includes('/src/features/map/')) {
-                return 'map-features';
-              }
-              if (id.includes('/src/features/messaging/')) {
-                return 'messaging';
-              }
-              if (id.includes('/src/features/saved/')) {
-                return 'saved';
-              }
-              if (id.includes('/src/features/search/')) {
-                return 'search';
-              }
-              // Large shared components - split individually
-              if (id.includes('/components/shared/MyAccountPage')) {
-                return 'account';
-              }
-              if (id.includes('/components/shared/HowItWorksPage')) {
-                return 'how-it-works';
-              }
-              if (id.includes('/components/AgencyDetailPage') || id.includes('/components/AgenciesListPage')) {
-                return 'agencies';
-              }
-              // Keep other node_modules separate
-              if (id.includes('node_modules')) {
-                return 'vendor-misc';
-              }
+              // Let Rollup handle application code splitting automatically
             },
           },
         },
