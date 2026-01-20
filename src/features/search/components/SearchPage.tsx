@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import MapComponent from '@/src/features/map/components/MapComponent';
+import GoogleMapComponent from '@/src/features/map/components/GoogleMapComponent';
 import PropertyList from './PropertyList';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
 import { getAiChatResponse, generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
@@ -1240,7 +1240,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Right Panel: Map --- */}
                 <div className="h-full w-full md:w-[45%] md:flex-shrink-0 relative z-0">
                     <div className="absolute inset-0">
-                        <MapComponent {...mapProps} />
+                        <GoogleMapComponent {...mapProps} />
                     </div>
 
                     {/* Newsletter Subscription - Compact bar at bottom */}
