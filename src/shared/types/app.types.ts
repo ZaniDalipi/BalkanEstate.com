@@ -23,9 +23,18 @@ export type AppView =
   | 'admin'
   | 'analytics'
   | 'reset-password'
+  | 'verify-email'
   | 'valuation'
   | 'mortgage-calculator'
-  | 'pricing';
+  | 'pricing'
+  | 'how-it-works'
+  | 'privacy'
+  | 'terms'
+  | 'cookies'
+  | 'refund'
+  | 'createAgency'
+  | 'createAgencyPayment'
+  | 'createAgencyConfirm';
 
 export type AuthModalView =
   | 'login'
