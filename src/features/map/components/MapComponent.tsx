@@ -89,9 +89,9 @@ const injectMapStyles = () => {
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Smooth zoom like Google Maps - scale existing tiles smoothly */
+    /* Smooth zoom like Google Maps - fast but smooth */
     .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+      transition: transform 0.15s ease-out !important;
     }
 
     /* Keep tiles visible during zoom - no flicker */
@@ -367,10 +367,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Smooth zoom like Google Maps
+          // Fast smooth zoom
           zoomSnap={0}
           zoomDelta={1}
-          wheelPxPerZoomLevel={80}
+          wheelPxPerZoomLevel={60}
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
