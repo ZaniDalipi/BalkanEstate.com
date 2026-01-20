@@ -317,8 +317,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
           preferCanvas={true}
-          // Fast smooth zoom
-          zoomSnap={0}
+          // Smooth zoom - whole levels only to prevent marker refresh spam
+          zoomSnap={1}
           zoomDelta={1}
           wheelPxPerZoomLevel={60}
           zoomAnimation={true}
