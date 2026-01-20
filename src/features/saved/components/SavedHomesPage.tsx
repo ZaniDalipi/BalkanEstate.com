@@ -178,7 +178,7 @@ const SavedPropertiesPage: React.FC = () => {
     } else {
       return (
         <>
-          <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
+          <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-lg relative overflow-hidden">
             {/* 3D Decorative background */}
             <div className="absolute inset-0 pointer-events-none opacity-40">
               <div className="absolute top-4 right-8">
@@ -241,7 +241,7 @@ const SavedPropertiesPage: React.FC = () => {
       );
     } else {
       return (
-        <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-md border relative overflow-hidden">
+        <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-lg relative overflow-hidden">
           {/* 3D Decorative background */}
           <div className="absolute inset-0 pointer-events-none opacity-40">
             <div className="absolute top-4 left-8">
@@ -272,7 +272,7 @@ const SavedPropertiesPage: React.FC = () => {
   const renderContent = () => {
     if (!isAuthenticated) {
       return (
-        <div className="text-center py-16 px-4 bg-white rounded-lg shadow-md border">
+        <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-lg">
           <HeartIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-neutral-800">{t('property:saved.loginToView')}</h3>
           <p className="text-neutral-500 mt-2">{t('property:saved.saveDescription')}</p>
