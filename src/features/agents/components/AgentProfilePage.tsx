@@ -84,6 +84,14 @@ import { getAgencyAgents, getAllAgents } from '@/services/apiService';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { updateAgentProfile, toggleSavedAgent, checkSavedAgent } from '@/src/features/agents/api/agentApi';
 import AgentInquiryModal from '@/src/features/inquiries/components/AgentInquiryModal';
+import AchievementsSection, { Achievement } from '@/components/shared/AchievementsSection';
+import {
+  getUserAchievements,
+  addUserAchievement,
+  updateUserAchievement,
+  deleteUserAchievement
+} from '@/src/features/achievements/api/achievementApi';
+import { useNotification } from '@/src/shared/hooks/useNotification';
 
 
 interface AgentProfilePageProps {
@@ -136,6 +144,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [agentData, setAgentData] = useState(agent);
+    const [agentAchievements, setAgentAchievements] = useState<Achievement[]>([]);
+    const { success, error: showError } = useNotification();
     const [editForm, setEditForm] = useState({
         bio: agent.bio || '',
         specializations: agent.specializations || [],
@@ -336,6 +346,21 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         };
         checkIfSaved();
     }, [agent.id, state.isAuthenticated]);
+
+    // Fetch agent achievements
+    useEffect(() => {
+        const fetchAchievements = async () => {
+            const userId = agent.userId || agent.id;
+            if (!userId) return;
+            try {
+                const achievements = await getUserAchievements(userId);
+                setAgentAchievements(achievements);
+            } catch (error) {
+                console.error('Error fetching agent achievements:', error);
+            }
+        };
+        fetchAchievements();
+    }, [agent.id, agent.userId]);
 
     const handleShareAgent = async () => {
         const shareUrl = window.location.href;
@@ -541,6 +566,56 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             ...prev,
             [field]: prev[field].filter((_, i) => i !== index)
         }));
+    };
+
+    // Achievement handlers for agents
+    const handleAddAchievement = async (achievement: Omit<Achievement, 'id' | 'createdAt' | 'isVerified'>) => {
+        try {
+            const newAchievement = await addUserAchievement({
+                type: achievement.type,
+                title: achievement.title,
+                description: achievement.description,
+                dateReceived: achievement.dateReceived,
+                expiryDate: achievement.expiryDate,
+                issuingOrganization: achievement.issuingOrganization,
+                documentUrl: achievement.documentUrl,
+            });
+            setAgentAchievements(prev => [...prev, newAchievement]);
+            await success(t('achievements.addedTitle', 'Achievement Added'), t('achievements.addedMessage', 'The achievement has been added successfully'));
+        } catch (err) {
+            await showError(t('common:error', 'Error'), err instanceof Error ? err.message : t('achievements.addFailed', 'Failed to add achievement'));
+            throw err;
+        }
+    };
+
+    const handleEditAchievement = async (id: string, achievement: Partial<Achievement>) => {
+        try {
+            const updated = await updateUserAchievement(id, {
+                type: achievement.type,
+                title: achievement.title,
+                description: achievement.description,
+                dateReceived: achievement.dateReceived,
+                expiryDate: achievement.expiryDate,
+                issuingOrganization: achievement.issuingOrganization,
+                documentUrl: achievement.documentUrl,
+            });
+            setAgentAchievements(prev => prev.map(a => a.id === id ? updated : a));
+            await success(t('achievements.updatedTitle', 'Achievement Updated'), t('achievements.updatedMessage', 'The achievement has been updated successfully'));
+        } catch (err) {
+            await showError(t('common:error', 'Error'), err instanceof Error ? err.message : t('achievements.updateFailed', 'Failed to update achievement'));
+            throw err;
+        }
+    };
+
+    const handleDeleteAchievement = async (id: string) => {
+        try {
+            await deleteUserAchievement(id);
+            setAgentAchievements(prev => prev.filter(a => a.id !== id));
+            await success(t('achievements.deletedTitle', 'Achievement Deleted'), t('achievements.deletedMessage', 'The achievement has been deleted'));
+        } catch (err) {
+            await showError(t('common:error', 'Error'), err instanceof Error ? err.message : t('achievements.deleteFailed', 'Failed to delete achievement'));
+            throw err;
+        }
     };
 
     // Get header gradient - use agency's gradient or default blue
@@ -916,6 +991,17 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                 )}
                                             </div>
                                         </div>
+
+                                        {/* Achievements Display - Public View */}
+                                        {agentAchievements.length > 0 && (
+                                            <div className="mt-6 sm:mt-8">
+                                                <AchievementsSection
+                                                    achievements={agentAchievements}
+                                                    isOwner={false}
+                                                    entityType="agent"
+                                                />
+                                            </div>
+                                        )}
 
                                         {/* Performance Stats */}
                                         <div>
@@ -2209,6 +2295,23 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Awards & Achievements Section */}
+                            <div className="border-t border-gray-200 pt-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <TrophyIcon className="w-5 h-5 text-amber-500" />
+                                    {t('profilePage.editModal.achievements', 'Awards & Achievements')}
+                                </h3>
+                                <AchievementsSection
+                                    achievements={agentAchievements}
+                                    isOwner={true}
+                                    onAdd={handleAddAchievement}
+                                    onEdit={handleEditAchievement}
+                                    onDelete={handleDeleteAchievement}
+                                    entityType="agent"
+                                    className="bg-gray-50 rounded-xl p-4"
+                                />
                             </div>
 
                             {/* Action Buttons */}
