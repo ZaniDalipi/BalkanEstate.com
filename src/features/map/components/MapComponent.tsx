@@ -55,159 +55,96 @@ const BALKAN_BOUNDS = L.latLngBounds(
   [49, 31] // Northeast corner (Northern Romania, Eastern Bulgaria)
 );
 
-// CSS for 3D perspective camera effect
-const inject3DPerspectiveStyles = () => {
-  const styleId = 'map-3d-perspective-styles';
+// CSS for map styling - clean, minimal approach
+const injectMapStyles = () => {
+  const styleId = 'map-styles';
   if (document.getElementById(styleId)) return;
 
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
-    /* 3D perspective container - creates isometric-like view */
+    /* ========================================
+       3D PERSPECTIVE MODE
+       ======================================== */
     .map-3d-perspective-container {
       perspective: 1500px;
       perspective-origin: 50% 25%;
     }
 
-    /* Map transforms for 3D mode - subtle tilt for better building view */
     .map-3d-active {
       transform: rotateX(25deg) scale(1.08);
       transform-origin: center 70%;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.5s ease-out;
     }
 
-    /* Normal 2D mode */
     .map-3d-inactive {
-      transform: rotateX(0deg) scale(1);
-      transform-origin: center center;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: none;
+      transition: transform 0.5s ease-out;
     }
 
-    /* Ensure controls stay upright in 3D mode */
-    .map-3d-active .leaflet-control-container {
-      transform: rotateX(-25deg);
-      transform-origin: center 30%;
-    }
-
-    /* Keep markers/popups properly oriented */
+    .map-3d-active .leaflet-control-container,
     .map-3d-active .leaflet-marker-pane,
     .map-3d-active .leaflet-popup-pane {
       transform: rotateX(-25deg);
       transform-origin: center 30%;
     }
 
-    /* Smooth shadow for 3D depth effect */
-    .map-3d-active::after {
-      content: '';
-      position: absolute;
-      bottom: -20px;
-      left: 5%;
-      right: 5%;
-      height: 40px;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    /* Smooth zoom - optimized for mobile pinch-to-zoom */
+    /* ========================================
+       MOBILE TOUCH & ZOOM
+       ======================================== */
     .leaflet-container {
-      -webkit-tap-highlight-color: transparent;
+      /* Allow all touch gestures including pinch-to-zoom */
       touch-action: manipulation;
+      /* Disable tap highlight on mobile */
+      -webkit-tap-highlight-color: transparent;
+      /* Prevent text selection during map interaction */
       -webkit-user-select: none;
       user-select: none;
     }
 
-    /* Enable smooth pinch zoom on mobile */
-    .leaflet-touch .leaflet-container {
-      touch-action: manipulation;
-    }
-
-    /* Smooth zoom transition - fast and responsive for pinch gestures */
+    /* ========================================
+       SMOOTH ZOOM ANIMATIONS
+       ======================================== */
     .leaflet-zoom-animated {
-      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+      /* Fast, snappy zoom animation */
+      transition: transform 150ms ease-out !important;
     }
 
-    .leaflet-zoom-anim .leaflet-zoom-animated {
-      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
-    }
-
-    /* Disable transition during active pinch for immediate response */
-    .leaflet-touch-zoom .leaflet-zoom-animated {
-      transition: none !important;
-    }
-
-    /* Smooth tile fade - quick and clean */
+    /* Tile fade-in */
     .leaflet-fade-anim .leaflet-tile {
-      transition: opacity 0.15s ease-out !important;
+      transition: opacity 200ms ease-out !important;
     }
 
-    .leaflet-tile-container {
-      will-change: transform;
-      transform: translateZ(0);
-    }
-
-    .leaflet-tile {
-      will-change: opacity, transform;
-    }
-
-    /* GPU acceleration for smooth mobile performance */
+    /* ========================================
+       GPU ACCELERATION (minimal, targeted)
+       ======================================== */
     .leaflet-tile-pane,
-    .leaflet-overlay-pane,
     .leaflet-marker-pane,
-    .leaflet-tooltip-pane,
     .leaflet-popup-pane {
-      transform: translate3d(0, 0, 0);
+      transform: translateZ(0);
       backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
     }
 
-    .leaflet-tile,
-    .leaflet-marker-icon,
-    .leaflet-popup {
-      transform: translate3d(0, 0, 0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
-    /* Clean tile rendering - remove blur and artifacts */
+    /* ========================================
+       CLEAN TILE RENDERING
+       ======================================== */
     .leaflet-tile {
-      image-rendering: auto;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .map-tiles img {
-      image-rendering: auto;
-    }
-
-    /* Prevent visual glitches during zoom */
-    .leaflet-zoom-animated {
-      will-change: transform;
-    }
-
-    /* Clean edges during pinch zoom */
-    .leaflet-touch .leaflet-tile {
-      border: none;
+      /* Prevent tile borders/gaps */
       outline: none;
+      border: none;
     }
 
-    /* Prevent flickering on mobile */
-    .leaflet-pane {
-      -webkit-transform: translate3d(0, 0, 0);
-      transform: translate3d(0, 0, 0);
-    }
-
-    /* Smooth map container on mobile */
-    .leaflet-container.leaflet-touch-drag {
-      -ms-touch-action: manipulation;
-      touch-action: manipulation;
+    /* Prevent white flash during zoom on mobile */
+    .leaflet-tile-container {
+      background: transparent;
     }
   `;
   document.head.appendChild(style);
 };
 
-// Initialize 3D perspective styles
+// Initialize map styles
 if (typeof window !== 'undefined') {
-  inject3DPerspectiveStyles();
+  injectMapStyles();
 }
 
 interface MapComponentProps {
@@ -246,20 +183,18 @@ const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoo
 };
 
 /**
- * ZoomSnapAdjuster Component - enables finer zoom control when zoomed in very close
- * Far away: half zoom levels (zoomSnap=0.5) - smooth but predictable
- * Very close (18+): quarter zoom levels (zoomSnap=0.25) - fine-grained control
+ * ZoomSnapAdjuster - use whole zoom levels for clean, predictable zoom
+ * At high zoom (18+), allow half steps for finer control
  */
 const ZoomSnapAdjuster: React.FC<{ currentZoom: number }> = ({ currentZoom }) => {
   const map = useMap();
 
   useEffect(() => {
-    const newZoomSnap = currentZoom >= 18 ? 0.25 : 0.5;
-    const newZoomDelta = currentZoom >= 18 ? 0.25 : 0.5;
-
-    if (map.options.zoomSnap !== newZoomSnap) {
-      map.options.zoomSnap = newZoomSnap;
-      map.options.zoomDelta = newZoomDelta;
+    // Whole zoom levels normally, half steps when zoomed in close
+    const snap = currentZoom >= 18 ? 0.5 : 1;
+    if (map.options.zoomSnap !== snap) {
+      map.options.zoomSnap = snap;
+      map.options.zoomDelta = snap;
     }
   }, [currentZoom, map]);
 
@@ -498,31 +433,35 @@ const MapComponent: React.FC<MapComponentProps> = ({
         <MapContainer
           center={center}
           zoom={zoom}
-          scrollWheelZoom={true}
           className={`w-full h-full ${show3DBuildings ? 'map-3d-active' : 'map-3d-inactive'}`}
+          // Zoom limits
           maxZoom={21}
           minZoom={6}
+          // Hide default zoom control (we have custom)
           zoomControl={false}
+          // Region bounds
           maxBounds={BALKAN_BOUNDS}
           maxBoundsViscosity={0.5}
+          // Use canvas for better performance with many markers
           preferCanvas={true}
-          // Smooth continuous zoom
-          zoomSnap={0.5}
-          zoomDelta={0.5}
-          wheelPxPerZoomLevel={100}
-          wheelDebounceTime={50}
+          // Zoom behavior - whole steps for clean zoom
+          zoomSnap={1}
+          zoomDelta={1}
+          wheelPxPerZoomLevel={120}
+          // Animations
           zoomAnimation={true}
           fadeAnimation={true}
           markerZoomAnimation={true}
-          // Mobile touch settings - zoom at finger location
+          // Touch: zoom at finger location, not center
           touchZoom={true}
+          scrollWheelZoom={true}
           doubleClickZoom={true}
-          bounceAtZoomLimits={false}
-          // Smooth inertia for panning
+          // Smooth panning with inertia
           inertia={true}
-          inertiaDeceleration={2000}
+          inertiaDeceleration={3000}
           inertiaMaxSpeed={1500}
-          easeLinearity={0.25}
+          // Don't bounce at zoom limits
+          bounceAtZoomLimits={false}
         >
           <FlyToController target={flyToTarget} onComplete={onFlyComplete} />
           <MapEvents onMove={handleMapMoveWithCenter} mapBounds={mapBounds} searchMode={searchMode} />
