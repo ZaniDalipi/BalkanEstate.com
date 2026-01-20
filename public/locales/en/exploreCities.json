@@ -1,6 +1,11 @@
 {
   "title": "Explore Balkan Cities",
   "subtitle": "AI-powered market insights for {count} major cities across 10 countries",
+  "cards": {
+    "allCitiesTitle": "All Cities",
+    "countryTitle": "Cities in {{country}}",
+    "subtitle": "Discover real estate opportunities in {{count}} cities"
+  },
   "discoverSubtitle": "Discover the best real estate markets across the Balkans",
   "noCitiesTitle": "No City Data Available",
   "noCitiesMessage": "Market data will be updated soon. Check back later!",
