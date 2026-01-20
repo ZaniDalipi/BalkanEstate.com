@@ -1244,7 +1244,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     </div>
 
                     {/* Newsletter Subscription - Compact bar at bottom */}
-                    <div className="flex absolute bottom-0 left-0 right-0 z-10 bg-primary/95 backdrop-blur-sm items-center justify-center gap-2 md:gap-3 py-1.5 px-3 md:px-4">
+                    <div className="hidden md:flex absolute bottom-0 left-0 right-0 z-[1002] bg-primary/95 backdrop-blur-sm items-center justify-center gap-3 py-1.5 px-4">
                         <span className="text-white text-xs font-medium">📬 Get new listings alerts</span>
                         <form onSubmit={(e) => {
                             e.preventDefault();
