@@ -2,7 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   MagnifyingGlassPlusIcon,
-  BookmarkIcon,
+  DocumentTextIcon,
+  HeartIcon,
   ClockIcon,
   SparklesIcon,
   MapPinIcon,
@@ -31,7 +32,7 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
 
   const sortOptions: { key: SortOption; label: string; icon: React.ReactNode }[] = [
     { key: 'createdAt', label: t('sort.newest', 'Newest'), icon: <SparklesIcon className="w-4 h-4" /> },
-    { key: 'name', label: t('sort.name', 'Name'), icon: <BookmarkIcon className="w-4 h-4" /> },
+    { key: 'name', label: t('sort.name', 'Name'), icon: <DocumentTextIcon className="w-4 h-4" /> },
     { key: 'lastAccessed', label: t('sort.lastActive', 'Recently Used'), icon: <ClockIcon className="w-4 h-4" /> },
   ];
 
@@ -103,7 +104,7 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                  <BookmarkIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <HeartIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalSearches}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
