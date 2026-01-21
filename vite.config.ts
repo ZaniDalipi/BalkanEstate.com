@@ -114,6 +114,10 @@ export default defineConfig(({ mode }) => {
                 if (id.includes('leaflet') || id.includes('react-leaflet')) {
                   return 'leaflet';
                 }
+                // 3D Map (MapLibre)
+                if (id.includes('maplibre-gl') || id.includes('react-map-gl')) {
+                  return 'maplibre';
+                }
                 // Internationalization
                 if (id.includes('i18next') || id.includes('react-i18next')) {
                   return 'i18n';
@@ -159,6 +163,10 @@ export default defineConfig(({ mode }) => {
         port: 3001,
         host: '0.0.0.0',
         headers: securityHeaders,
+      },
+      // Optimize dependencies for faster dev startup
+      optimizeDeps: {
+        include: ['maplibre-gl', 'react-map-gl'],
       },
     };
 });
