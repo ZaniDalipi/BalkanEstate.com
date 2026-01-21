@@ -309,6 +309,25 @@
       "noLocation": "Të dhënat e vendndodhjes nuk janë të disponueshme"
     }
   },
+  "shadowTimelapse": {
+    "title": "Animacion kohor i hijeve",
+    "description": "Shikoni si lëvizin hijet gjatë ditës",
+    "periods": {
+      "night": "Natë",
+      "dawn": "Agim",
+      "morning": "Mëngjes",
+      "noon": "Mesditë",
+      "afternoon": "Pasdite",
+      "sunset": "Perëndim",
+      "dusk": "Muzg"
+    },
+    "sunrise": "Lindja e diellit",
+    "noon": "Mesditë",
+    "sunset": "Perëndimi",
+    "speed": "Shpejtësia",
+    "reset": "Rivendos",
+    "tip": "Shikoni si lëvizin hijet për të kuptuar ekspozimin ndaj dritës së diellit"
+  },
   "guide": {
     "messages": {
       "welcome": "Përshëndetje! Unë jam Homey, udhëzuesi juaj i pronave. Më lejoni t'ju tregoj!",

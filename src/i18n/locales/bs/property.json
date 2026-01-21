@@ -336,6 +336,25 @@
       "noLocation": "Podaci o lokaciji nisu dostupni"
     }
   },
+  "shadowTimelapse": {
+    "title": "Vremenska animacija sjenki",
+    "description": "Gledajte kako se sjenke kreću tokom dana",
+    "periods": {
+      "night": "Noć",
+      "dawn": "Zora",
+      "morning": "Jutro",
+      "noon": "Podne",
+      "afternoon": "Popodne",
+      "sunset": "Zalazak sunca",
+      "dusk": "Sumrak"
+    },
+    "sunrise": "Izlazak sunca",
+    "noon": "Podne",
+    "sunset": "Zalazak sunca",
+    "speed": "Brzina",
+    "reset": "Resetuj",
+    "tip": "Gledajte kako se sjenke kreću da biste razumjeli izloženost sunčevoj svjetlosti"
+  },
   "guide": {
     "messages": {
       "welcome": "Zdravo! Ja sam Homey, Vaš vodič za nekretnine. Dozvolite mi da Vam pokažem okolinu!",

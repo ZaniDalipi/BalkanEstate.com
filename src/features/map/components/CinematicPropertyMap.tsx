@@ -1,11 +1,12 @@
 // CinematicPropertyMap Component
-// Immersive map experience with dramatic flythrough animation
+// Immersive map experience with dramatic flythrough animation and shadow timelapse
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useCinematicFlythrough, type FlythroughPhase } from '../hooks/useCinematicFlythrough';
+import { useShadowTimelapse, type TimePeriod } from '../hooks/useShadowTimelapse';
 import { MAP_TILE_LAYERS } from '@/config/mapStyles';
 
 // Fix for default icon issue with bundlers
@@ -37,7 +38,183 @@ interface CinematicPropertyMapProps {
   autoPlay?: boolean;
   /** Custom height for the map container */
   height?: string;
+  /** Enable shadow timelapse feature */
+  enableShadowTimelapse?: boolean;
 }
+
+/**
+ * Time period gradient backgrounds
+ */
+const PERIOD_GRADIENTS: Record<TimePeriod, string> = {
+  night: 'from-indigo-900 to-slate-900',
+  dawn: 'from-orange-400 to-pink-400',
+  morning: 'from-yellow-300 to-blue-300',
+  noon: 'from-yellow-300 to-sky-400',
+  afternoon: 'from-amber-300 to-orange-300',
+  sunset: 'from-orange-500 to-purple-500',
+  dusk: 'from-purple-500 to-indigo-700',
+};
+
+/**
+ * Time period icons
+ */
+const PERIOD_ICONS: Record<TimePeriod, string> = {
+  night: '🌙',
+  dawn: '🌅',
+  morning: '🌤️',
+  noon: '☀️',
+  afternoon: '🌤️',
+  sunset: '🌇',
+  dusk: '🌆',
+};
+
+/**
+ * Shadow Timelapse Panel Component
+ */
+const ShadowTimelapsePanel: React.FC<{
+  latitude: number;
+  isVisible: boolean;
+  onClose: () => void;
+}> = ({ latitude, isVisible, onClose }) => {
+  const { t } = useTranslation(['property']);
+
+  const {
+    currentTime,
+    isPlaying,
+    speed,
+    progress,
+    timePeriod,
+    sunInfo,
+    formattedTime,
+    toggle,
+    reset,
+    setSpeed,
+    seekToProgress,
+    goToSunrise,
+    goToNoon,
+    goToSunset,
+  } = useShadowTimelapse(latitude);
+
+  const startHour = Math.floor(sunInfo.sunrise - 1);
+  const endHour = Math.ceil(sunInfo.sunset + 1);
+  const range = endHour - startHour;
+
+  // Calculate marker positions
+  const sunrisePos = ((sunInfo.sunrise - startHour) / range) * 100;
+  const noonPos = ((12 - startHour) / range) * 100;
+  const sunsetPos = ((sunInfo.sunset - startHour) / range) * 100;
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="absolute bottom-20 left-4 right-4 z-[1000] max-w-sm mx-auto">
+      <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-neutral-200 overflow-hidden">
+        {/* Header */}
+        <div className={`p-3 bg-gradient-to-r ${PERIOD_GRADIENTS[timePeriod]} transition-all duration-500`}>
+          <div className="flex items-center justify-between">
+            <div className="text-white">
+              <div className="text-xl font-bold">{formattedTime}</div>
+              <div className="text-sm opacity-90">
+                {PERIOD_ICONS[timePeriod]} {t(`property:shadowTimelapse.periods.${timePeriod}`, timePeriod)}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggle}
+                className="w-12 h-12 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white transition-all hover:bg-white/30 active:scale-95"
+              >
+                {isPlaying ? (
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 text-white hover:bg-white/30 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="p-3 space-y-2">
+          {/* Progress bar */}
+          <div
+            className="relative h-2 bg-neutral-200 rounded-full cursor-pointer overflow-hidden"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const percent = ((e.clientX - rect.left) / rect.width) * 100;
+              seekToProgress(Math.max(0, Math.min(100, percent)));
+            }}
+          >
+            {/* Day/night gradient */}
+            <div
+              className="absolute inset-0 opacity-40"
+              style={{
+                background: `linear-gradient(to right,
+                  #1e293b 0%, #1e293b ${sunrisePos - 5}%,
+                  #f97316 ${sunrisePos}%, #facc15 ${noonPos}%,
+                  #f97316 ${sunsetPos}%, #1e293b ${sunsetPos + 5}%, #1e293b 100%
+                )`,
+              }}
+            />
+            {/* Progress */}
+            <div
+              className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${PERIOD_GRADIENTS[timePeriod]} transition-all duration-100`}
+              style={{ width: `${progress}%` }}
+            />
+            {/* Playhead */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full border-2 border-white shadow"
+              style={{ left: `calc(${progress}% - 6px)` }}
+            />
+          </div>
+
+          {/* Quick actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              {(['slow', 'normal', 'fast', 'ultra'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSpeed(s)}
+                  className={`px-2 py-1 text-[10px] font-medium rounded transition-all ${
+                    speed === s ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  }`}
+                >
+                  {s === 'slow' ? '0.5x' : s === 'normal' ? '1x' : s === 'fast' ? '2x' : '4x'}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1">
+              <button onClick={goToSunrise} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title="Sunrise">🌅</button>
+              <button onClick={goToNoon} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title="Noon">☀️</button>
+              <button onClick={goToSunset} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title="Sunset">🌇</button>
+              <button onClick={reset} className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500" title="Reset">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Tip */}
+          <div className="text-[10px] text-neutral-500 text-center">
+            💡 {t('property:shadowTimelapse.tip', 'Watch how shadows move to understand sunlight exposure')}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 /**
  * Inner component that has access to map instance
@@ -122,7 +299,9 @@ const FlythroughControls: React.FC<{
   onSkip: () => void;
   onReplay: () => void;
   onNavigateToMap?: () => void;
-}> = ({ phase, hasPlayed, onStart, onSkip, onReplay, onNavigateToMap }) => {
+  onToggleShadowTimelapse?: () => void;
+  showShadowTimelapseButton?: boolean;
+}> = ({ phase, hasPlayed, onStart, onSkip, onReplay, onNavigateToMap, onToggleShadowTimelapse, showShadowTimelapseButton }) => {
   const { t } = useTranslation(['property']);
   const isAnimating = phase !== 'idle' && phase !== 'complete';
 
@@ -154,7 +333,7 @@ const FlythroughControls: React.FC<{
         </button>
       )}
 
-      {/* Replay and Navigate buttons - show when complete */}
+      {/* Replay, Shadow Timelapse, and Navigate buttons - show when complete */}
       {phase === 'complete' && (
         <>
           <button
@@ -166,6 +345,15 @@ const FlythroughControls: React.FC<{
             </svg>
             {t('property:cinematicMap.controls.replay', 'Replay')}
           </button>
+          {showShadowTimelapseButton && onToggleShadowTimelapse && (
+            <button
+              onClick={onToggleShadowTimelapse}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all"
+            >
+              <span className="text-sm">☀️</span>
+              {t('property:shadowTimelapse.title', 'Shadow Time-Lapse')}
+            </button>
+          )}
           {onNavigateToMap && (
             <button
               onClick={onNavigateToMap}
@@ -192,6 +380,15 @@ const FlythroughControls: React.FC<{
             </svg>
             {t('property:cinematicMap.controls.play', 'Fly to Property')}
           </button>
+          {showShadowTimelapseButton && onToggleShadowTimelapse && (
+            <button
+              onClick={onToggleShadowTimelapse}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all"
+            >
+              <span className="text-sm">☀️</span>
+              {t('property:shadowTimelapse.title', 'Shadow Time-Lapse')}
+            </button>
+          )}
           {onNavigateToMap && (
             <button
               onClick={onNavigateToMap}
@@ -267,10 +464,12 @@ const CinematicPropertyMap: React.FC<CinematicPropertyMapProps> = ({
   onNavigateToMap,
   autoPlay = false,
   height = '400px',
+  enableShadowTimelapse = true,
 }) => {
   const { t } = useTranslation(['property']);
   const [map, setMap] = useState<L.Map | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [showShadowTimelapse, setShowShadowTimelapse] = useState(false);
   const hasAutoPlayedRef = useRef(false);
 
   // Validate coordinates
@@ -372,14 +571,27 @@ const CinematicPropertyMap: React.FC<CinematicPropertyMapProps> = ({
       <PhaseIndicator phase={phase} progress={progress} />
 
       {/* Control buttons */}
-      <FlythroughControls
-        phase={phase}
-        hasPlayed={hasPlayed}
-        onStart={startFlythrough}
-        onSkip={skipToEnd}
-        onReplay={replay}
-        onNavigateToMap={onNavigateToMap}
-      />
+      {!showShadowTimelapse && (
+        <FlythroughControls
+          phase={phase}
+          hasPlayed={hasPlayed}
+          onStart={startFlythrough}
+          onSkip={skipToEnd}
+          onReplay={replay}
+          onNavigateToMap={onNavigateToMap}
+          onToggleShadowTimelapse={() => setShowShadowTimelapse(true)}
+          showShadowTimelapseButton={enableShadowTimelapse && (phase === 'complete' || (phase === 'idle' && hasPlayed))}
+        />
+      )}
+
+      {/* Shadow Timelapse Panel */}
+      {enableShadowTimelapse && (
+        <ShadowTimelapsePanel
+          latitude={lat}
+          isVisible={showShadowTimelapse}
+          onClose={() => setShowShadowTimelapse(false)}
+        />
+      )}
 
       {/* Address label */}
       {(phase === 'complete' || (phase === 'idle' && hasPlayed)) && (

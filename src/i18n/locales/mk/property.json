@@ -1,7 +1,21 @@
 {
   "property": "Недвижност",
   "properties": "Недвижности",
-  "listing": "Оглас",
+  "listing": {
+    "listedOn": "Објавено на",
+    "updatedOn": "Ажурирано на",
+    "listedDaysAgo": "Објавено пред {{days}} дена",
+    "listedToday": "Објавено денес",
+    "listedYesterday": "Објавено вчера",
+    "listedWeeksAgo": "Објавено пред {{weeks}} недела",
+    "listedWeeksAgoPlural": "Објавено пред {{weeks}} недели",
+    "listedMonthsAgo": "Објавено пред {{months}} месец",
+    "listedMonthsAgoPlural": "Објавено пред {{months}} месеци",
+    "views": "прегледи",
+    "viewsCount": "{{count}} прегледи",
+    "inquiries": "Барања",
+    "id": "ИД на оглас"
+  },
   "listings": "Огласи",
   "forSale": "За продажба",
   "forRent": "Под наем",
@@ -153,21 +167,6 @@
     "phone": "Телефон",
     "email": "Е-пошта",
     "website": "Веб-страница"
-  },
-  "listing": {
-    "listedOn": "Објавено на",
-    "updatedOn": "Ажурирано на",
-    "listedDaysAgo": "Објавено пред {{days}} дена",
-    "listedToday": "Објавено денес",
-    "listedYesterday": "Објавено вчера",
-    "listedWeeksAgo": "Објавено пред {{weeks}} недела",
-    "listedWeeksAgoPlural": "Објавено пред {{weeks}} недели",
-    "listedMonthsAgo": "Објавено пред {{months}} месец",
-    "listedMonthsAgoPlural": "Објавено пред {{months}} месеци",
-    "views": "прегледи",
-    "viewsCount": "{{count}} прегледи",
-    "inquiries": "Барања",
-    "id": "ИД на оглас"
   },
   "navigation": {
     "back": "Назад",
@@ -336,6 +335,25 @@
     "errors": {
       "noLocation": "Податоците за локација не се достапни"
     }
+  },
+  "shadowTimelapse": {
+    "title": "Временска анимација на сенки",
+    "description": "Гледајте како се движат сенките во текот на денот",
+    "periods": {
+      "night": "Ноќ",
+      "dawn": "Зора",
+      "morning": "Утро",
+      "noon": "Пладне",
+      "afternoon": "Попладне",
+      "sunset": "Зајдисонце",
+      "dusk": "Самрак"
+    },
+    "sunrise": "Изгрејсонце",
+    "noon": "Пладне",
+    "sunset": "Зајдисонце",
+    "speed": "Брзина",
+    "reset": "Ресетирај",
+    "tip": "Гледајте како се движат сенките за да ја разберете изложеноста на сончева светлина"
   },
   "guide": {
     "messages": {

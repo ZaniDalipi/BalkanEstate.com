@@ -305,6 +305,25 @@
       "noLocation": "Datele de locație nu sunt disponibile"
     }
   },
+  "shadowTimelapse": {
+    "title": "Animație temporală a umbrelor",
+    "description": "Urmăriți cum se mișcă umbrele pe parcursul zilei",
+    "periods": {
+      "night": "Noapte",
+      "dawn": "Zori",
+      "morning": "Dimineață",
+      "noon": "Amiază",
+      "afternoon": "După-amiază",
+      "sunset": "Apus",
+      "dusk": "Amurg"
+    },
+    "sunrise": "Răsărit",
+    "noon": "Amiază",
+    "sunset": "Apus",
+    "speed": "Viteză",
+    "reset": "Resetare",
+    "tip": "Urmăriți cum se mișcă umbrele pentru a înțelege expunerea la lumina soarelui"
+  },
   "guide": {
     "messages": {
       "welcome": "Salut! Sunt Homey, ghidul tău imobiliar. Lasă-mă să îți arăt împrejurimile!",
