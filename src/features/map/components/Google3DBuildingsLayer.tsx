@@ -1,11 +1,8 @@
 // Google3DBuildingsLayer Component
-// Adds 3D building extrusions with realistic time-based shadows using deck.gl
+// Adds 3D building extrusions with realistic time-based shadows using OSMBuildings
 // Designed for Google Maps integration with shadow simulation
 
-import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
-import { GoogleMapsOverlay } from '@deck.gl/google-maps';
-import { GeoJsonLayer } from '@deck.gl/layers';
-import { LightingEffect, AmbientLight, DirectionalLight } from '@deck.gl/core';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 interface Google3DBuildingsLayerProps {
   map: google.maps.Map | null;
@@ -25,14 +22,24 @@ export interface BuildingInfo {
   name?: string;
 }
 
+// Declare OSMBuildings on window
+declare global {
+  interface Window {
+    OSMBuildings: any;
+  }
+}
+
+// OSM Buildings data sources - primary and fallbacks
+const OSM_BUILDINGS_DATA_SOURCES = [
+  'https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile/{z}/{x}/{y}.json',
+  'https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json',
+];
+
+// CDN source for the OSM Buildings standalone library (works with any map including Google Maps)
+const OSM_BUILDINGS_CDN = 'https://cdn.osmbuildings.org/4.1.2/OSMBuildings.js';
+
 // Time periods for dynamic theming
 type TimePeriod = 'night' | 'dawn' | 'morning' | 'noon' | 'afternoon' | 'sunset' | 'dusk';
-
-// Overpass API for loading building data
-const OVERPASS_API = 'https://overpass-api.de/api/interpreter';
-
-// Cache for building data to avoid re-fetching
-const buildingCache = new Map<string, GeoJSON.FeatureCollection>();
 
 /**
  * Get the time period based on hour
@@ -50,238 +57,63 @@ const getTimePeriod = (hour: number): TimePeriod => {
 
 /**
  * Get building colors based on time of day
- * Creates realistic lighting effects that change throughout the day
  */
-const getBuildingColorsByTime = (hour: number): { wallColor: [number, number, number, number]; roofColor: [number, number, number, number] } => {
+const getBuildingColorsByTime = (hour: number): { wallColor: string; roofColor: string } => {
   const period = getTimePeriod(hour);
 
   switch (period) {
     case 'night':
       return {
-        wallColor: [30, 40, 65, 230],
-        roofColor: [45, 55, 80, 220],
+        wallColor: 'rgba(30, 40, 65, 0.92)',
+        roofColor: 'rgba(45, 55, 80, 0.88)',
       };
     case 'dawn':
       return {
-        wallColor: [180, 140, 130, 230],
-        roofColor: [200, 160, 140, 220],
+        wallColor: 'rgba(180, 140, 130, 0.9)',
+        roofColor: 'rgba(200, 160, 140, 0.88)',
       };
     case 'morning':
       return {
-        wallColor: [200, 195, 180, 230],
-        roofColor: [180, 175, 165, 220],
+        wallColor: 'rgba(200, 195, 180, 0.9)',
+        roofColor: 'rgba(180, 175, 165, 0.88)',
       };
     case 'noon':
       return {
-        wallColor: [220, 220, 215, 230],
-        roofColor: [195, 195, 190, 220],
+        wallColor: 'rgba(220, 220, 215, 0.9)',
+        roofColor: 'rgba(195, 195, 190, 0.88)',
       };
     case 'afternoon':
       return {
-        wallColor: [210, 200, 180, 230],
-        roofColor: [190, 180, 165, 220],
+        wallColor: 'rgba(210, 200, 180, 0.9)',
+        roofColor: 'rgba(190, 180, 165, 0.88)',
       };
     case 'sunset':
       return {
-        wallColor: [200, 150, 100, 230],
-        roofColor: [220, 160, 90, 220],
+        wallColor: 'rgba(200, 150, 100, 0.9)',
+        roofColor: 'rgba(220, 160, 90, 0.88)',
       };
     case 'dusk':
       return {
-        wallColor: [100, 90, 120, 230],
-        roofColor: [120, 100, 130, 220],
+        wallColor: 'rgba(100, 90, 120, 0.9)',
+        roofColor: 'rgba(120, 100, 130, 0.88)',
       };
     default:
       return {
-        wallColor: [200, 200, 200, 230],
-        roofColor: [180, 180, 180, 220],
+        wallColor: 'rgba(200, 200, 200, 0.9)',
+        roofColor: 'rgba(180, 180, 180, 0.88)',
       };
-  }
-};
-
-/**
- * Calculate shadow color based on sun altitude and time
- */
-const getShadowColor = (hour: number): [number, number, number, number] => {
-  const period = getTimePeriod(hour);
-
-  switch (period) {
-    case 'night':
-      return [10, 15, 30, 180];
-    case 'dawn':
-    case 'dusk':
-      return [60, 40, 80, 150];
-    case 'sunset':
-      return [80, 50, 40, 140];
-    default:
-      return [40, 45, 60, 120];
-  }
-};
-
-/**
- * Calculate sun direction vector based on hour
- * Returns [x, y] where direction of shadow is cast
- */
-const getSunDirection = (hour: number, latitude: number = 41): [number, number] => {
-  // Convert hour to radians (0-24 -> 0-2PI)
-  // Sun rises in east (azimuth ~90), peaks at south (azimuth ~180), sets in west (azimuth ~270)
-  const hourAngle = ((hour - 12) / 12) * Math.PI;
-
-  // Sun altitude affects shadow length
-  const maxAltitude = 90 - Math.abs(latitude - 23.5);
-  const altitudeProgress = Math.sin((hour / 24) * Math.PI);
-  const altitude = altitudeProgress * maxAltitude;
-
-  // Calculate shadow direction
-  const x = Math.cos(hourAngle);
-  const y = Math.sin(hourAngle);
-
-  // Shadow length increases as sun gets lower
-  const shadowMultiplier = altitude < 10 ? 3 : altitude < 30 ? 2 : 1;
-
-  return [x * shadowMultiplier, y * shadowMultiplier];
-};
-
-/**
- * Generate Overpass query for buildings
- */
-const generateOverpassQuery = (bounds: google.maps.LatLngBounds): string => {
-  const sw = bounds.getSouthWest();
-  const ne = bounds.getNorthEast();
-
-  return `
-    [out:json][timeout:25];
-    (
-      way["building"](${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()});
-      relation["building"]["type"="multipolygon"](${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()});
-    );
-    out body;
-    >;
-    out skel qt;
-  `;
-};
-
-/**
- * Parse Overpass response to GeoJSON
- */
-const parseOverpassToGeoJson = (data: any): GeoJSON.FeatureCollection => {
-  const features: GeoJSON.Feature[] = [];
-  const nodes = new Map<number, [number, number]>();
-
-  // First pass: collect all nodes
-  for (const element of data.elements) {
-    if (element.type === 'node') {
-      nodes.set(element.id, [element.lon, element.lat]);
-    }
-  }
-
-  // Second pass: build features from ways
-  for (const element of data.elements) {
-    if (element.type === 'way' && element.nodes) {
-      const coordinates: [number, number][] = [];
-
-      for (const nodeId of element.nodes) {
-        const coord = nodes.get(nodeId);
-        if (coord) {
-          coordinates.push(coord);
-        }
-      }
-
-      if (coordinates.length >= 4) {
-        // Calculate building height
-        let height = 10; // Default height in meters
-
-        if (element.tags) {
-          if (element.tags.height) {
-            height = parseFloat(element.tags.height) || height;
-          } else if (element.tags['building:levels']) {
-            height = (parseInt(element.tags['building:levels']) || 3) * 3.5;
-          } else if (element.tags.building === 'house') {
-            height = 8;
-          } else if (element.tags.building === 'apartments' || element.tags.building === 'residential') {
-            height = 15;
-          } else if (element.tags.building === 'commercial' || element.tags.building === 'office') {
-            height = 20;
-          } else if (element.tags.building === 'industrial') {
-            height = 12;
-          }
-        }
-
-        features.push({
-          type: 'Feature',
-          id: element.id,
-          properties: {
-            height,
-            levels: element.tags?.['building:levels'],
-            type: element.tags?.building || 'yes',
-            name: element.tags?.name,
-          },
-          geometry: {
-            type: 'Polygon',
-            coordinates: [coordinates],
-          },
-        });
-      }
-    }
-  }
-
-  return {
-    type: 'FeatureCollection',
-    features,
-  };
-};
-
-/**
- * Fetch buildings from Overpass API
- */
-const fetchBuildings = async (bounds: google.maps.LatLngBounds): Promise<GeoJSON.FeatureCollection> => {
-  const cacheKey = `${bounds.getSouthWest().lat().toFixed(3)},${bounds.getSouthWest().lng().toFixed(3)},${bounds.getNorthEast().lat().toFixed(3)},${bounds.getNorthEast().lng().toFixed(3)}`;
-
-  if (buildingCache.has(cacheKey)) {
-    return buildingCache.get(cacheKey)!;
-  }
-
-  try {
-    const query = generateOverpassQuery(bounds);
-    const response = await fetch(OVERPASS_API, {
-      method: 'POST',
-      body: `data=${encodeURIComponent(query)}`,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch buildings');
-    }
-
-    const data = await response.json();
-    const geoJson = parseOverpassToGeoJson(data);
-
-    // Cache the result
-    buildingCache.set(cacheKey, geoJson);
-
-    // Limit cache size
-    if (buildingCache.size > 20) {
-      const firstKey = buildingCache.keys().next().value;
-      buildingCache.delete(firstKey);
-    }
-
-    return geoJson;
-  } catch (error) {
-    console.warn('Failed to fetch buildings from Overpass:', error);
-    return { type: 'FeatureCollection', features: [] };
   }
 };
 
 /**
  * Google3DBuildingsLayer Component
  *
- * Renders 3D building extrusions on Google Maps using deck.gl
+ * Renders 3D building extrusions on Google Maps using OSMBuildings standalone.
  * Features:
- * - Loads building footprints from OpenStreetMap via Overpass API
- * - Time-based coloring for realistic lighting
- * - Shadow simulation based on sun position
+ * - 3D building extrusions from OpenStreetMap data
+ * - Time-based shadow projection with realistic sun position
+ * - Dynamic theming based on time of day
+ * - Building click interaction
  * - Smooth integration with Google Maps
  */
 const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
@@ -291,188 +123,245 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   onBuildingClick,
   highlightedBuilding,
 }) => {
-  const overlayRef = useRef<GoogleMapsOverlay | null>(null);
-  const [buildingData, setBuildingData] = useState<GeoJSON.FeatureCollection | null>(null);
+  const osmBuildingsRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const scriptLoadedRef = useRef(false);
+  const lastHourRef = useRef<number>(-1);
+  const dataSourceIndexRef = useRef(0);
   const [isLoading, setIsLoading] = useState(false);
-  const lastBoundsRef = useRef<string | null>(null);
-  const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get current hour from dateTime
-  const currentHour = useMemo(() => {
+  const getCurrentHour = useCallback(() => {
     return dateTime ? dateTime.getHours() + dateTime.getMinutes() / 60 : new Date().getHours();
   }, [dateTime]);
 
-  // Get colors based on time
-  const colors = useMemo(() => getBuildingColorsByTime(currentHour), [currentHour]);
-  const shadowColor = useMemo(() => getShadowColor(currentHour), [currentHour]);
-  const sunDirection = useMemo(() => getSunDirection(currentHour), [currentHour]);
-
-  // Fetch buildings when map bounds change
-  const loadBuildings = useCallback(async () => {
-    if (!map || !enabled) return;
-
-    const bounds = map.getBounds();
-    const zoom = map.getZoom();
-
-    if (!bounds || !zoom || zoom < 14) {
-      // Only load buildings at zoom level 14+
-      setBuildingData(null);
-      return;
-    }
-
-    const boundsKey = `${bounds.getSouthWest().lat().toFixed(3)},${bounds.getSouthWest().lng().toFixed(3)},${bounds.getNorthEast().lat().toFixed(3)},${bounds.getNorthEast().lng().toFixed(3)}`;
-
-    if (boundsKey === lastBoundsRef.current) {
-      return;
-    }
-
-    lastBoundsRef.current = boundsKey;
-    setIsLoading(true);
+  // Initialize OSMBuildings
+  const initBuildings = useCallback(() => {
+    if (!window.OSMBuildings || !map || osmBuildingsRef.current) return;
 
     try {
-      const data = await fetchBuildings(bounds);
-      setBuildingData(data);
-    } catch (error) {
-      console.warn('Error loading buildings:', error);
-    } finally {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+
+      if (!center || !zoom) return;
+
+      // Create container for OSMBuildings if not exists
+      if (!containerRef.current) {
+        containerRef.current = document.createElement('div');
+        containerRef.current.id = 'osm-buildings-container';
+        containerRef.current.style.cssText = `
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1;
+        `;
+
+        // Find the Google Maps container and append
+        const mapDiv = map.getDiv();
+        const firstChild = mapDiv.querySelector('[aria-label]')?.parentElement;
+        if (firstChild) {
+          firstChild.appendChild(containerRef.current);
+        } else {
+          mapDiv.appendChild(containerRef.current);
+        }
+      }
+
+      // Create OSMBuildings instance
+      const osmb = new window.OSMBuildings({
+        container: 'osm-buildings-container',
+        position: { latitude: center.lat(), longitude: center.lng() },
+        zoom: zoom,
+        minZoom: 14,
+        maxZoom: 20,
+        tilt: 45,
+        rotation: 0,
+        fastMode: false,
+        backgroundColor: 'transparent',
+        highlightColor: 'rgba(2, 82, 205, 0.9)',
+      });
+
+      // Load building data
+      const dataSource = OSM_BUILDINGS_DATA_SOURCES[dataSourceIndexRef.current];
+      osmb.addGeoJSONTiles(dataSource);
+
+      // Set initial style based on time
+      const hour = getCurrentHour();
+      const colors = getBuildingColorsByTime(hour);
+      osmb.setStyle(colors);
+      lastHourRef.current = Math.floor(hour);
+
+      // Set initial date/time for shadow projection
+      osmb.setDate(dateTime || new Date());
+
+      // Handle building click events
+      osmb.on('click', (e: any) => {
+        if (e && onBuildingClick) {
+          onBuildingClick({
+            featureId: e.feature?.id || 'unknown',
+            lat: e.lat,
+            lon: e.lon,
+            height: e.feature?.height,
+            levels: e.feature?.levels,
+            type: e.feature?.type,
+            name: e.feature?.name,
+          });
+        }
+      });
+
+      // Highlight specific building if set
+      if (highlightedBuilding) {
+        osmb.highlight(highlightedBuilding, 'rgba(2, 82, 205, 0.95)');
+      }
+
+      osmBuildingsRef.current = osmb;
+
+      // Sync OSMBuildings with Google Maps movements
+      const syncWithMap = () => {
+        if (!osmBuildingsRef.current || !map) return;
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+        const tilt = map.getTilt();
+        const heading = map.getHeading();
+
+        if (center && zoom) {
+          osmBuildingsRef.current.setPosition({
+            latitude: center.lat(),
+            longitude: center.lng(),
+          });
+          osmBuildingsRef.current.setZoom(zoom);
+          if (typeof tilt === 'number') {
+            osmBuildingsRef.current.setTilt(tilt);
+          }
+          if (typeof heading === 'number') {
+            osmBuildingsRef.current.setRotation(heading);
+          }
+        }
+      };
+
+      // Add map listeners
+      map.addListener('center_changed', syncWithMap);
+      map.addListener('zoom_changed', syncWithMap);
+      map.addListener('tilt_changed', syncWithMap);
+      map.addListener('heading_changed', syncWithMap);
+
+      setIsLoading(false);
+    } catch (e) {
+      console.warn('Failed to initialize OSM Buildings:', e);
+      // Try fallback data source
+      if (dataSourceIndexRef.current < OSM_BUILDINGS_DATA_SOURCES.length - 1) {
+        dataSourceIndexRef.current++;
+        setTimeout(initBuildings, 100);
+      }
       setIsLoading(false);
     }
-  }, [map, enabled]);
+  }, [map, dateTime, getCurrentHour, onBuildingClick, highlightedBuilding]);
 
-  // Create and update deck.gl overlay
+  // Load OSMBuildings script and initialize
   useEffect(() => {
-    if (!map || !enabled) {
-      // Cleanup overlay when disabled
-      if (overlayRef.current) {
-        overlayRef.current.setMap(null);
-        overlayRef.current = null;
+    if (!enabled || !map) {
+      // Cleanup when disabled
+      if (osmBuildingsRef.current) {
+        try {
+          osmBuildingsRef.current.destroy();
+        } catch (e) {
+          // Cleanup error
+        }
+        osmBuildingsRef.current = null;
+      }
+      if (containerRef.current) {
+        containerRef.current.remove();
+        containerRef.current = null;
       }
       return;
     }
 
-    // Create overlay if it doesn't exist
-    if (!overlayRef.current) {
-      overlayRef.current = new GoogleMapsOverlay({});
-      overlayRef.current.setMap(map);
+    setIsLoading(true);
+
+    // Check if OSMBuildings is already loaded
+    if (window.OSMBuildings) {
+      initBuildings();
+      return;
     }
 
-    // Create lighting effect based on sun position
-    // Sun direction affects the directional light direction
-    const sunAltitude = Math.sin((currentHour / 24) * Math.PI);
-    const isNight = currentHour < 6 || currentHour > 20;
+    // Load the OSM Buildings script
+    if (!scriptLoadedRef.current) {
+      const existingScript = document.querySelector(`script[src="${OSM_BUILDINGS_CDN}"]`);
+      if (existingScript) {
+        // Script already in DOM, wait for load
+        existingScript.addEventListener('load', () => {
+          scriptLoadedRef.current = true;
+          initBuildings();
+        });
+        return;
+      }
 
-    const ambientLight = new AmbientLight({
-      color: isNight ? [80, 80, 120] : [255, 255, 255],
-      intensity: isNight ? 0.3 : 0.4,
-    });
+      const script = document.createElement('script');
+      script.src = OSM_BUILDINGS_CDN;
+      script.async = true;
+      script.onload = () => {
+        scriptLoadedRef.current = true;
+        initBuildings();
+      };
+      script.onerror = () => {
+        console.warn('Failed to load OSM Buildings from CDN');
+        setIsLoading(false);
+      };
+      document.head.appendChild(script);
+    }
 
-    const directionalLight = new DirectionalLight({
-      color: isNight ? [100, 120, 180] : [255, 250, 240],
-      intensity: isNight ? 0.2 : 0.8 * sunAltitude + 0.2,
-      direction: [-sunDirection[0], -sunDirection[1], -1],
-      _shadow: true,
-    });
-
-    const lightingEffect = new LightingEffect({ ambientLight, directionalLight });
-
-    // Create building layer
-    const buildingLayer = buildingData?.features.length ? new GeoJsonLayer({
-      id: '3d-buildings',
-      data: buildingData,
-      filled: true,
-      extruded: true,
-      wireframe: false,
-      getElevation: (f: GeoJSON.Feature) => f.properties?.height || 10,
-      getFillColor: (f: GeoJSON.Feature) => {
-        // Highlighted building gets special color
-        if (highlightedBuilding && f.id === highlightedBuilding) {
-          return [2, 82, 205, 240] as [number, number, number, number];
+    return () => {
+      if (osmBuildingsRef.current) {
+        try {
+          osmBuildingsRef.current.destroy();
+        } catch (e) {
+          // Cleanup error
         }
-        return colors.wallColor;
-      },
-      getLineColor: [60, 60, 60, 100] as [number, number, number, number],
-      lineWidthMinPixels: 1,
-      material: {
-        ambient: 0.4,
-        diffuse: 0.6,
-        shininess: 32,
-        specularColor: [60, 64, 70],
-      },
-      pickable: true,
-      onClick: (info: any) => {
-        if (info.object && onBuildingClick) {
-          const coordinates = info.coordinate;
-          onBuildingClick({
-            featureId: info.object.id,
-            lat: coordinates[1],
-            lon: coordinates[0],
-            height: info.object.properties?.height,
-            levels: info.object.properties?.levels,
-            type: info.object.properties?.type,
-            name: info.object.properties?.name,
-          });
+        osmBuildingsRef.current = null;
+      }
+      if (containerRef.current) {
+        containerRef.current.remove();
+        containerRef.current = null;
+      }
+    };
+  }, [enabled, map, initBuildings]);
+
+  // Update date/time for shadow projection and building colors
+  useEffect(() => {
+    if (osmBuildingsRef.current && enabled) {
+      try {
+        const hour = getCurrentHour();
+
+        // Update shadow projection
+        if (dateTime) {
+          osmBuildingsRef.current.setDate(dateTime);
         }
-      },
-      // Shadow simulation parameters
-      parameters: {
-        depthTest: true,
-        depthMask: true,
-      },
-      // Update on time change
-      updateTriggers: {
-        getFillColor: [colors.wallColor, highlightedBuilding],
-      },
-    }) : null;
 
-    // Shadow layer - create offset shadow geometries
-    // Note: For simplicity, we skip shadow layer as deck.gl handles basic shadows via lighting
-    // The 3D extrusions naturally create depth perception
+        // Update building colors if hour changed
+        const hourFloor = Math.floor(hour);
+        if (hourFloor !== lastHourRef.current) {
+          const colors = getBuildingColorsByTime(hour);
+          osmBuildingsRef.current.setStyle(colors);
+          lastHourRef.current = hourFloor;
+        }
+      } catch (e) {
+        // Update error
+      }
+    }
+  }, [dateTime, enabled, getCurrentHour]);
 
-    // Set layers on overlay with lighting effects
-    const layers = [buildingLayer].filter(Boolean);
-    overlayRef.current.setProps({
-      layers,
-      effects: [lightingEffect],
-    });
-
-    return () => {
-      // Cleanup will happen on next effect run or unmount
-    };
-  }, [map, enabled, buildingData, colors, shadowColor, sunDirection, currentHour, highlightedBuilding, onBuildingClick]);
-
-  // Setup map listeners for loading buildings
+  // Update highlighted building
   useEffect(() => {
-    if (!map || !enabled) return;
-
-    // Initial load
-    loadBuildings();
-
-    // Load buildings when map idle (finished panning/zooming)
-    const idleListener = map.addListener('idle', () => {
-      // Debounce to avoid too many requests
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
+    if (osmBuildingsRef.current && enabled && highlightedBuilding) {
+      try {
+        osmBuildingsRef.current.highlight(highlightedBuilding, 'rgba(2, 82, 205, 0.95)');
+      } catch (e) {
+        // Highlight error
       }
-      fetchTimeoutRef.current = setTimeout(loadBuildings, 500);
-    });
-
-    return () => {
-      google.maps.event.removeListener(idleListener);
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
-      }
-    };
-  }, [map, enabled, loadBuildings]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (overlayRef.current) {
-        overlayRef.current.setMap(null);
-        overlayRef.current = null;
-      }
-    };
-  }, []);
+    }
+  }, [highlightedBuilding, enabled]);
 
   // Loading indicator
   if (enabled && isLoading) {
