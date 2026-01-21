@@ -206,16 +206,16 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   const lightingEffect = useMemo(() => {
     if (!enabled) return null;
 
-    // High ambient for overall brightness (MapLibre style)
+    // Balanced ambient for overall brightness
     const ambientLight = new AmbientLight({
       color: [255, 255, 255],
-      intensity: 0.75,
+      intensity: 0.65,
     });
 
     // Soft directional light for subtle wall shading
     const directionalLight = new DirectionalLight({
       color: [255, 255, 255],
-      intensity: 0.6,
+      intensity: 0.55,
       direction: sunDirection,
     });
 
@@ -300,7 +300,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
     const layers = [];
 
-    // Building layer - MapLibre/OneGeo style
+    // Building layer - OneGeo style (gray/charcoal urban look)
     if (buildings.length > 0) {
       layers.push(
         new GeoJsonLayer({
@@ -311,15 +311,15 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           wireframe: false,
           opacity: 1,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
-          // MapLibre default building color: #d4c4b0 (warm sandstone tan)
-          getFillColor: [212, 196, 176, 255],
-          // Subtle darker outline
-          getLineColor: [180, 165, 145, 255],
+          // OneGeo gray/charcoal color with slight warm tint
+          getFillColor: [180, 175, 168, 255],
+          // Darker edge for crisp definition
+          getLineColor: [140, 135, 130, 255],
           lineWidthMinPixels: 1,
-          // Flat matte material like MapLibre (no shine, even lighting)
+          // Matte material for clean urban look
           material: {
-            ambient: 0.6,
-            diffuse: 0.4,
+            ambient: 0.5,
+            diffuse: 0.5,
             shininess: 0,
             specularColor: [0, 0, 0],
           },
