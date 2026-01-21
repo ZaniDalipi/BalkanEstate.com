@@ -1,13 +1,27 @@
 // CinematicPropertyMap Component
 // Immersive map experience with dramatic flythrough animation and shadow timelapse
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useCinematicFlythrough, type FlythroughPhase } from '../hooks/useCinematicFlythrough';
 import { useShadowTimelapse, type TimePeriod } from '../hooks/useShadowTimelapse';
 import { MAP_TILE_LAYERS } from '@/config/mapStyles';
+
+/**
+ * 3D tilt configurations for different animation phases
+ * Creates an immersive perspective effect during flythrough
+ */
+const PHASE_TILT_CONFIG: Record<FlythroughPhase, { tilt: number; scale: number }> = {
+  idle: { tilt: 0, scale: 1 },
+  starting: { tilt: 15, scale: 1.02 },
+  zooming_out: { tilt: 25, scale: 1.05 },
+  panning: { tilt: 35, scale: 1.08 },
+  zooming_in: { tilt: 20, scale: 1.03 },
+  orbiting: { tilt: 30, scale: 1.05 },
+  complete: { tilt: 0, scale: 1 },
+};
 
 // Fix for default icon issue with bundlers
 const DefaultIcon = L.icon({
@@ -538,13 +552,34 @@ const CinematicPropertyMap: React.FC<CinematicPropertyMapProps> = ({
   // Show marker only when animation is complete or skipped
   const showMarker = phase === 'complete' || phase === 'idle';
 
+  // Calculate 3D tilt transform based on current phase
+  const tiltConfig = PHASE_TILT_CONFIG[phase];
+  const mapTransformStyle = useMemo(() => ({
+    transform: `perspective(1000px) rotateX(${tiltConfig.tilt}deg) scale(${tiltConfig.scale})`,
+    transformOrigin: 'center bottom',
+    transition: 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+  }), [tiltConfig.tilt, tiltConfig.scale]);
+
   return (
-    <div className="relative rounded-xl overflow-hidden shadow-lg" style={{ height }}>
+    <div className="relative rounded-xl overflow-hidden shadow-lg" style={{ height, perspective: '1000px' }}>
       {/* Gradient overlay for cinematic effect */}
       {isAnimating && (
-        <div className="absolute inset-0 pointer-events-none z-[999] bg-gradient-to-b from-black/20 via-transparent to-black/20" />
+        <div className="absolute inset-0 pointer-events-none z-[999] bg-gradient-to-b from-black/20 via-transparent to-black/30" />
       )}
 
+      {/* Horizon fade effect for 3D tilt - appears when tilted */}
+      <div
+        className="absolute top-0 left-0 right-0 pointer-events-none z-[998] transition-all duration-800"
+        style={{
+          height: tiltConfig.tilt > 0 ? `${Math.min(tiltConfig.tilt * 2, 40)}%` : '0%',
+          background: 'linear-gradient(to bottom, rgba(135, 206, 235, 0.6), rgba(135, 206, 235, 0.3) 40%, transparent)',
+          opacity: tiltConfig.tilt > 0 ? 1 : 0,
+          transition: 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      />
+
+      {/* 3D tilt container */}
+      <div className="w-full h-full" style={mapTransformStyle}>
       {/* Map container */}
       <MapContainer
         center={initialCenter}
@@ -566,6 +601,7 @@ const CinematicPropertyMap: React.FC<CinematicPropertyMapProps> = ({
 
         <PropertyMarker lat={lat} lng={lng} address={address} isVisible={showMarker} />
       </MapContainer>
+      </div>
 
       {/* Phase indicator */}
       <PhaseIndicator phase={phase} progress={progress} />
