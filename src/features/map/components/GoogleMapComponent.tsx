@@ -6,6 +6,7 @@ import {
   Marker,
   InfoWindow,
   Rectangle,
+  HeatmapLayer,
 } from '@react-google-maps/api';
 import { Property } from '@/types';
 import L from 'leaflet';
@@ -38,8 +39,8 @@ const defaultCenter = {
   lng: 22,
 };
 
-// Google Maps libraries to load - empty since we're not using DrawingManager
-const libraries: ('places' | 'geometry')[] = [];
+// Google Maps libraries to load
+const libraries: ('visualization' | 'places' | 'geometry')[] = ['visualization'];
 
 // Price formatter
 const formatPrice = (price: number): string => {
@@ -52,35 +53,68 @@ const formatPrice = (price: number): string => {
 };
 
 // Custom marker icons as SVG data URLs
-const createMarkerIcon = (price: number, isPromoted: boolean, isHovered: boolean): string => {
-  const bgColor = isPromoted ? '#7c3aed' : isHovered ? '#0252CD' : '#1a1a1a';
+const createMarkerIcon = (
+  price: number,
+  isPromoted: boolean,
+  isHovered: boolean,
+  propertyType?: string
+): string => {
+  // Colors based on state
+  let bgColor = '#1a1a1a'; // Default dark
+  if (isPromoted) bgColor = '#7c3aed'; // Purple for promoted
+  if (isHovered) bgColor = '#0252CD'; // Blue for hovered
+
   const text = formatPrice(price);
-  const width = Math.max(50, text.length * 8 + 16);
+  const width = Math.max(55, text.length * 8 + 20);
+  const height = 36;
 
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="32" viewBox="0 0 ${width} 32">
-      <rect x="0" y="0" width="${width}" height="26" rx="4" fill="${bgColor}" />
-      <polygon points="${width/2 - 6},26 ${width/2},32 ${width/2 + 6},26" fill="${bgColor}" />
-      <text x="${width/2}" y="18" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">${text}</text>
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <defs>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+        </filter>
+      </defs>
+      <rect x="2" y="2" width="${width - 4}" height="${height - 10}" rx="6" fill="${bgColor}" filter="url(#shadow)" />
+      <polygon points="${width/2 - 6},${height - 8} ${width/2},${height} ${width/2 + 6},${height - 8}" fill="${bgColor}" />
+      <text x="${width/2}" y="${height/2 - 2}" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="white" text-anchor="middle">${text}</text>
     </svg>
   `;
 
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
-// Simple Legend component
-const Legend: React.FC = () => (
-  <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-100 min-w-[180px]">
-    <h4 className="text-sm font-semibold text-gray-800 mb-3">Property Types</h4>
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-5 bg-[#1a1a1a] rounded text-[10px] text-white flex items-center justify-center font-bold">€50K</div>
+// Legend component with property type colors
+const Legend: React.FC<{ showHeatMap?: boolean }> = ({ showHeatMap }) => (
+  <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-100 min-w-[200px]">
+    <h4 className="text-sm font-semibold text-gray-800 mb-3">Map Legend</h4>
+    <div className="space-y-2.5">
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-6 bg-[#1a1a1a] rounded-md text-[10px] text-white flex items-center justify-center font-bold shadow-sm">€50K</div>
         <span className="text-xs text-gray-600">Standard Listing</span>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-5 bg-[#7c3aed] rounded text-[10px] text-white flex items-center justify-center font-bold">€50K</div>
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-6 bg-[#7c3aed] rounded-md text-[10px] text-white flex items-center justify-center font-bold shadow-sm">€50K</div>
         <span className="text-xs text-gray-600">Promoted</span>
       </div>
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-6 bg-[#0252CD] rounded-md text-[10px] text-white flex items-center justify-center font-bold shadow-sm">€50K</div>
+        <span className="text-xs text-gray-600">Selected/Hovered</span>
+      </div>
+      {showHeatMap && (
+        <>
+          <div className="border-t border-gray-200 pt-2 mt-2">
+            <span className="text-xs font-medium text-gray-700">Heat Map</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-full h-3 rounded bg-gradient-to-r from-green-400 via-yellow-400 to-red-500" />
+          </div>
+          <div className="flex justify-between text-[10px] text-gray-500">
+            <span>Low density</span>
+            <span>High density</span>
+          </div>
+        </>
+      )}
     </div>
   </div>
 );
@@ -135,7 +169,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   onSaveSearch,
   isSaving,
   isAuthenticated,
-  mapBounds,
   drawnBounds,
   onDrawComplete,
   isDrawing,
@@ -144,7 +177,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   onFlyComplete,
   onRecenter,
   isMobile,
-  searchMode,
   hoveredPropertyId,
 }) => {
   const { t } = useTranslation(['search']);
@@ -152,12 +184,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // State
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [mapType, setMapType] = useState<'roadmap' | 'satellite' | 'hybrid'>('roadmap');
+  const [mapType, setMapType] = useState<'roadmap' | 'satellite' | 'hybrid' | 'terrain'>('roadmap');
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false);
   const [drawStartPos, setDrawStartPos] = useState<google.maps.LatLng | null>(null);
   const [tempDrawRect, setTempDrawRect] = useState<google.maps.LatLngBounds | null>(null);
+
+  // Layer toggles
+  const [showHeatMap, setShowHeatMap] = useState(false);
+  const [showLandmarks, setShowLandmarks] = useState(true);
 
   // Refs
   const moveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -165,7 +201,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   // Load Google Maps API
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY || import.meta.env.GOOGLE_MAPS_KEY || '',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY || '',
     libraries,
   });
 
@@ -187,6 +223,36 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     ).slice(0, 500); // Limit for performance
   }, [properties]);
 
+  // Heat map data
+  const heatMapData = useMemo(() => {
+    if (!isLoaded || !showHeatMap) return [];
+    return validProperties.map((p) => ({
+      location: new google.maps.LatLng(p.lat!, p.lng!),
+      weight: 1,
+    }));
+  }, [validProperties, isLoaded, showHeatMap]);
+
+  // Map styles for cleaner look
+  const mapStyles: google.maps.MapTypeStyle[] = useMemo(() => {
+    if (mapType === 'satellite' || mapType === 'hybrid') return [];
+    return [
+      {
+        featureType: 'poi',
+        elementType: 'labels',
+        stylers: [{ visibility: showLandmarks ? 'on' : 'off' }],
+      },
+      {
+        featureType: 'poi.business',
+        stylers: [{ visibility: 'off' }],
+      },
+      {
+        featureType: 'transit',
+        elementType: 'labels.icon',
+        stylers: [{ visibility: 'off' }],
+      },
+    ];
+  }, [mapType, showLandmarks]);
+
   // Map options with smooth zoom enabled by default
   const mapOptions: google.maps.MapOptions = useMemo(() => ({
     disableDefaultUI: true,
@@ -203,12 +269,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     minZoom: 6,
     maxZoom: 21,
     mapTypeId: mapType,
-    gestureHandling: 'greedy', // Allow single-finger pan on mobile
-    // These enable smooth zoom by default in Google Maps
+    gestureHandling: 'greedy',
     scrollwheel: true,
-    // Smooth zoom animation
     draggable: !isDrawing,
-  }), [mapType, isMobile, isDrawing]);
+    styles: mapStyles,
+  }), [mapType, isMobile, isDrawing, mapStyles]);
 
   // Handle map load
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
@@ -244,7 +309,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       const bounds = map.getBounds();
       const center = map.getCenter();
       if (bounds && center) {
-        // Convert to Leaflet format for SearchPage compatibility
         const leafletBounds = googleBoundsToLeaflet(bounds);
         const leafletCenter = googleLatLngToLeaflet(center);
         onMapMove(leafletBounds, leafletCenter);
@@ -267,20 +331,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       map.panTo({ lat: flyToTarget.center[0], lng: flyToTarget.center[1] });
       map.setZoom(flyToTarget.zoom);
 
-      // Call onFlyComplete after animation
       const listener = map.addListener('idle', () => {
         onFlyComplete();
         google.maps.event.removeListener(listener);
       });
     }
   }, [map, flyToTarget, onFlyComplete]);
-
-  // Handle recenter
-  useEffect(() => {
-    if (map && userLocation) {
-      // Recenter will be triggered by parent via flyToTarget
-    }
-  }, [map, userLocation]);
 
   // Handle marker click
   const handleMarkerClick = useCallback((property: Property) => {
@@ -298,7 +354,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
   }, [dispatch]);
 
-  // Custom drawing handlers (no DrawingManager needed)
+  // Custom drawing handlers
   const handleMapMouseDown = useCallback((e: google.maps.MapMouseEvent) => {
     if (!isDrawing || !e.latLng) return;
     setDrawStartPos(e.latLng);
@@ -327,7 +383,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       return;
     }
 
-    // Convert Google Maps bounds to Leaflet bounds for SearchPage
     const leafletBounds = googleBoundsToLeaflet(tempDrawRect);
     onDrawComplete(leafletBounds);
     setDrawStartPos(null);
@@ -381,13 +436,31 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         onMouseMove={handleMapMouseMove}
         onMouseUp={handleMapMouseUp}
       >
+        {/* Heat Map Layer */}
+        {showHeatMap && heatMapData.length > 0 && (
+          <HeatmapLayer
+            data={heatMapData}
+            options={{
+              radius: 30,
+              opacity: 0.6,
+              gradient: [
+                'rgba(0, 255, 0, 0)',
+                'rgba(0, 255, 0, 1)',
+                'rgba(255, 255, 0, 1)',
+                'rgba(255, 128, 0, 1)',
+                'rgba(255, 0, 0, 1)',
+              ],
+            }}
+          />
+        )}
+
         {/* Temporary drawing rectangle */}
         {tempDrawRect && (
           <Rectangle
             bounds={tempDrawRect}
             options={{
               fillColor: '#0252CD',
-              fillOpacity: 0.1,
+              fillOpacity: 0.15,
               strokeWeight: 2,
               strokeColor: '#0252CD',
               clickable: false,
@@ -396,7 +469,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         )}
 
         {/* Property Markers */}
-        {validProperties.map((property) => (
+        {!showHeatMap && validProperties.map((property) => (
           <Marker
             key={property.id}
             position={{ lat: property.lat!, lng: property.lng! }}
@@ -404,15 +477,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               url: createMarkerIcon(
                 property.price,
                 property.isPromoted || false,
-                hoveredPropertyId === property.id
+                hoveredPropertyId === property.id,
+                property.propertyType
               ),
               scaledSize: new google.maps.Size(
-                Math.max(50, formatPrice(property.price).length * 8 + 16),
-                32
+                Math.max(55, formatPrice(property.price).length * 8 + 20),
+                36
               ),
               anchor: new google.maps.Point(
-                Math.max(50, formatPrice(property.price).length * 8 + 16) / 2,
-                32
+                Math.max(55, formatPrice(property.price).length * 8 + 20) / 2,
+                36
               ),
             }}
             onClick={() => handleMarkerClick(property)}
@@ -429,42 +503,64 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             position={{ lat: selectedProperty.lat!, lng: selectedProperty.lng! }}
             onCloseClick={handleInfoWindowClose}
             options={{
-              pixelOffset: new google.maps.Size(0, -32),
+              pixelOffset: new google.maps.Size(0, -36),
+              maxWidth: 320,
             }}
           >
             <div
-              className="max-w-[280px] cursor-pointer"
+              className="cursor-pointer"
               onClick={() => handlePropertyClick(selectedProperty.id)}
             >
               {selectedProperty.images && selectedProperty.images[0] && (
                 <img
                   src={selectedProperty.images[0].url}
                   alt={selectedProperty.title || selectedProperty.address}
-                  className="w-full h-32 object-cover rounded-t-lg"
+                  className="w-full h-36 object-cover rounded-t-lg -mt-3 -mx-3 mb-3"
+                  style={{ width: 'calc(100% + 24px)' }}
                 />
               )}
-              <div className="p-3">
-                <p className="font-bold text-lg text-primary">
-                  €{selectedProperty.price.toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-700 font-medium truncate">
+              <div className="px-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-bold text-xl text-primary">
+                    €{selectedProperty.price.toLocaleString()}
+                  </p>
+                  {selectedProperty.isPromoted && (
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-semibold rounded-full">
+                      PROMOTED
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-800 font-medium mt-1 line-clamp-2">
                   {selectedProperty.title || selectedProperty.address}
                 </p>
-                {selectedProperty.beds !== undefined && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    {selectedProperty.beds} bed • {selectedProperty.baths} bath
-                    {selectedProperty.sqft && ` • ${selectedProperty.sqft}m²`}
-                  </p>
+                {(selectedProperty.beds || selectedProperty.baths || selectedProperty.sqft) && (
+                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
+                    {selectedProperty.beds && (
+                      <span className="flex items-center gap-1">
+                        <span>🛏️</span> {selectedProperty.beds} beds
+                      </span>
+                    )}
+                    {selectedProperty.baths && (
+                      <span className="flex items-center gap-1">
+                        <span>🚿</span> {selectedProperty.baths} baths
+                      </span>
+                    )}
+                    {selectedProperty.sqft && (
+                      <span className="flex items-center gap-1">
+                        <span>📐</span> {selectedProperty.sqft}m²
+                      </span>
+                    )}
+                  </div>
                 )}
-                <p className="text-xs text-primary mt-2 font-medium">
-                  Click to view details →
-                </p>
+                <button className="w-full mt-3 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors">
+                  View Details →
+                </button>
               </div>
             </div>
           </InfoWindow>
         )}
 
-        {/* Drawn bounds rectangle - convert Leaflet bounds to Google Maps */}
+        {/* Drawn bounds rectangle */}
         {drawnBounds && !isDrawing && (
           <Rectangle
             bounds={leafletBoundsToGoogle(drawnBounds)}
@@ -484,96 +580,126 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         <>
           <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
-            <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
+            <div className="bg-white/90 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5">
               <button
                 onClick={onRecenter}
-                className="p-1.5 rounded-full transition-colors hover:bg-black/10"
+                className="p-2 rounded-full transition-colors hover:bg-black/10"
                 title={t('search:map.centerOnLocation')}
               >
                 <CrosshairsIcon className="w-5 h-5 text-neutral-700" />
               </button>
 
-              <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full">
+              <div className="w-px h-6 bg-neutral-300" />
+
+              <div className="flex items-center bg-neutral-100 p-0.5 rounded-full">
                 <button
                   onClick={() => setMapType('roadmap')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     mapType === 'roadmap'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
                 >
-                  {t('search:map.street')}
+                  Map
                 </button>
                 <button
                   onClick={() => setMapType('satellite')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     mapType === 'satellite'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
                 >
-                  {t('search:map.satellite')}
+                  Satellite
                 </button>
                 <button
-                  onClick={() => setMapType('hybrid')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                    mapType === 'hybrid'
+                  onClick={() => setMapType('terrain')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    mapType === 'terrain'
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
                 >
-                  Hybrid
+                  Terrain
                 </button>
               </div>
 
+              <div className="w-px h-6 bg-neutral-300" />
+
               <button
                 onClick={onDrawStart}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full shadow-md transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full transition-colors ${
                   isDrawing
-                    ? 'bg-red-600 text-white hover:bg-red-700'
+                    ? 'bg-red-500 text-white hover:bg-red-600'
                     : 'bg-neutral-800 text-white hover:bg-neutral-900'
                 }`}
               >
                 {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
-                <span className="hidden sm:inline">{isDrawing ? t('search:map.cancel') : t('search:map.drawArea')}</span>
+                <span>{isDrawing ? 'Cancel' : 'Draw Area'}</span>
               </button>
             </div>
 
             {/* Layer toggles */}
-            <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
+            <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
+              <button
+                onClick={() => setShowHeatMap(!showHeatMap)}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-full transition-all ${
+                  showHeatMap
+                    ? 'bg-orange-500 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
+                title="Toggle heat map"
+              >
+                <span>🔥</span>
+                <span>Heat Map</span>
+              </button>
+
+              <button
+                onClick={() => setShowLandmarks(!showLandmarks)}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-full transition-all ${
+                  showLandmarks
+                    ? 'bg-blue-500 text-white'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
+                title="Toggle landmarks"
+              >
+                <span>🏛️</span>
+                <span>POI</span>
+              </button>
+
               <button
                 onClick={() => setIsLegendOpen(!isLegendOpen)}
-                className={`flex items-center gap-1 px-2.5 py-2.5 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-full transition-all ${
                   isLegendOpen
                     ? 'bg-amber-500 text-white'
-                    : 'text-neutral-600 hover:bg-neutral-200'
+                    : 'text-neutral-600 hover:bg-neutral-100'
                 }`}
-                title={t('search:map.legend', 'Legend')}
+                title="Toggle legend"
               >
                 <MapLegendIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('search:map.legend', 'Legend')}</span>
+                <span>Legend</span>
               </button>
             </div>
 
             {/* Drawn bounds actions */}
             {drawnBounds && !isDrawing && (
-              <div className="flex items-center gap-1.5 animate-fade-in">
+              <div className="flex items-center gap-2 animate-fade-in">
                 {isAuthenticated && (
                   <button
                     onClick={onSaveSearch}
                     disabled={isSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
                   >
                     <SearchPlusIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
+                    <span>{isSaving ? 'Saving...' : 'Save Search'}</span>
                   </button>
                 )}
                 <button
                   onClick={() => onDrawComplete(null)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-lg hover:bg-neutral-900"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-lg hover:bg-neutral-900"
                 >
                   <XCircleIcon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t('search:map.clearArea')}</span>
+                  <span>Clear</span>
                 </button>
               </div>
             )}
@@ -582,9 +708,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           {/* Legend */}
           {isLegendOpen && (
             <div className="absolute bottom-12 left-4 z-[1000] animate-fade-in">
-              <Legend />
+              <Legend showHeatMap={showHeatMap} />
             </div>
           )}
+
+          {/* Property count badge */}
+          <div className="absolute top-4 left-4 z-[1000]">
+            <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-white/50">
+              <span className="text-sm font-semibold text-neutral-800">
+                {validProperties.length} {validProperties.length === 1 ? 'property' : 'properties'}
+              </span>
+            </div>
+          </div>
         </>
       )}
 
@@ -596,13 +731,33 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             {isLayerMenuOpen && (
               <div className="absolute bottom-full left-0 mb-3 pointer-events-auto">
                 <div
-                  className="flex flex-col gap-1.5 p-3 rounded-2xl shadow-2xl border border-white/30"
+                  className="flex flex-col gap-1.5 p-3 rounded-2xl shadow-2xl border border-white/30 min-w-[180px]"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
+                    background: 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(24px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(24px) saturate(180%)',
                   }}
                 >
+                  <button
+                    onClick={() => setShowHeatMap(!showHeatMap)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
+                      showHeatMap ? 'bg-orange-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    }`}
+                  >
+                    <span className="text-lg">🔥</span>
+                    <span className="text-sm font-medium">Heat Map</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowLandmarks(!showLandmarks)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
+                      showLandmarks ? 'bg-blue-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    }`}
+                  >
+                    <span className="text-lg">🏛️</span>
+                    <span className="text-sm font-medium">Points of Interest</span>
+                  </button>
+
                   <button
                     onClick={() => {
                       setIsLegendOpen((p) => !p);
@@ -627,7 +782,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               style={{
                 boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
                 ...(isLayerMenuOpen ? {} : {
-                  background: 'rgba(255, 255, 255, 0.85)',
+                  background: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(20px) saturate(180%)',
                   WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                 }),
@@ -646,11 +801,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
+              {(showHeatMap || !showLandmarks) && !isLayerMenuOpen && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                  {[showHeatMap, !showLandmarks].filter(Boolean).length}
+                </span>
+              )}
             </button>
 
             {isLegendOpen && !isLayerMenuOpen && (
-              <div className="absolute bottom-14 left-0 pointer-events-auto">
-                <Legend />
+              <div className="absolute bottom-16 left-0 pointer-events-auto">
+                <Legend showHeatMap={showHeatMap} />
               </div>
             )}
           </div>
@@ -661,15 +821,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               <div
                 className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
+                  background: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(20px) saturate(180%)',
                   WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                 }}
               >
-                {/* Map type buttons */}
                 <button
                   onClick={() => setMapType('roadmap')}
-                  className={`px-2.5 py-2 text-xs font-semibold rounded-xl transition-all active:scale-95 ${
+                  className={`px-3 py-2 text-xs font-semibold rounded-xl transition-all active:scale-95 ${
                     mapType === 'roadmap'
                       ? 'bg-primary text-white'
                       : 'text-gray-700 hover:bg-white/50'
@@ -679,7 +838,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 </button>
                 <button
                   onClick={() => setMapType('satellite')}
-                  className={`px-2.5 py-2 text-xs font-semibold rounded-xl transition-all active:scale-95 ${
+                  className={`px-3 py-2 text-xs font-semibold rounded-xl transition-all active:scale-95 ${
                     mapType === 'satellite' || mapType === 'hybrid'
                       ? 'bg-primary text-white'
                       : 'text-gray-700 hover:bg-white/50'
@@ -688,7 +847,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                   Satellite
                 </button>
 
-                {/* Recenter */}
+                <div className="w-px h-6 bg-neutral-300" />
+
                 <button
                   onClick={onRecenter}
                   className="p-2 rounded-xl hover:bg-white/50 text-neutral-600 active:scale-95"
@@ -697,7 +857,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                   <CrosshairsIcon className="w-5 h-5" />
                 </button>
 
-                {/* Draw */}
                 <button
                   onClick={onDrawStart}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all active:scale-95 ${
@@ -705,7 +864,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                   }`}
                 >
                   {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
-                  <span className="text-xs font-semibold">{isDrawing ? t('search:map.cancel') : t('search:map.draw', 'Draw')}</span>
+                  <span className="text-xs font-semibold">{isDrawing ? 'Cancel' : 'Draw'}</span>
                 </button>
               </div>
 
@@ -714,7 +873,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 <div
                   className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30 animate-fade-in"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
+                    background: 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(20px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                   }}
@@ -723,21 +882,36 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     <button
                       onClick={onSaveSearch}
                       disabled={isSaving}
-                      className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded-lg disabled:opacity-50 transition-all"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg disabled:opacity-50 transition-all text-xs font-semibold"
                     >
                       <SearchPlusIcon className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-semibold">{t('search:map.save', 'Save')}</span>
+                      <span>Save</span>
                     </button>
                   )}
                   <button
                     onClick={() => onDrawComplete(null)}
-                    className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded-lg transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-lg transition-all text-xs font-semibold"
                   >
                     <XCircleIcon className="w-3.5 h-3.5" />
-                    <span className="text-[10px] font-semibold">{t('search:map.clear', 'Clear')}</span>
+                    <span>Clear</span>
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Mobile: Property count */}
+          <div className="absolute top-16 left-2 z-[999] md:hidden">
+            <div
+              className="px-3 py-1.5 rounded-xl shadow-lg border border-white/30"
+              style={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(20px)',
+              }}
+            >
+              <span className="text-xs font-semibold text-neutral-800">
+                {validProperties.length} listings
+              </span>
             </div>
           </div>
         </>
