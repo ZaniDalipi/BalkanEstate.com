@@ -411,7 +411,9 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     }
 
     if (!overlayRef.current) {
-      overlayRef.current = new GoogleMapsOverlay({});
+      overlayRef.current = new GoogleMapsOverlay({
+        interleaved: true, // Allow Google Maps elements (markers) to show through
+      });
       overlayRef.current.setMap(map);
     }
 
