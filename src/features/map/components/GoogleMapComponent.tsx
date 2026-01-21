@@ -8,6 +8,7 @@ import {
   Rectangle,
   HeatmapLayer,
   Polyline,
+  OverlayView,
 } from '@react-google-maps/api';
 import { Property } from '@/types';
 import L from 'leaflet';
@@ -18,6 +19,7 @@ import {
   SearchPlusIcon,
   MapLegendIcon,
   CrosshairsIcon,
+  FireIcon,
 } from '@/constants';
 import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
 
@@ -125,48 +127,8 @@ const formatMarkerPrice = (price: number): string => {
   return `€${price}`;
 };
 
-// Create marker icon with property styling
-const createMarkerIcon = (
-  property: Property,
-  isHovered: boolean,
-  zoom: number
-): string => {
-  const price = formatMarkerPrice(property.price);
-  const baseColor = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
-
-  // Check promotion status
-  const isActivelyPromoted = property.isPromoted &&
-    property.promotionEndDate &&
-    property.promotionEndDate > Date.now();
-
-  // Determine colors
-  let bgColor = baseColor;
-  let strokeColor = '#FFFFFF';
-  let strokeWidth = 2;
-
-  if (isActivelyPromoted && property.promotionTier) {
-    strokeColor = PROMOTION_COLORS[property.promotionTier] || '#9ca3af';
-    strokeWidth = 3;
-  }
-
-  if (isHovered) {
-    strokeColor = bgColor;
-    strokeWidth = 4;
-  }
-
-  // Fixed dimensions for simpler markers
-  const width = Math.max(52, price.length * 8 + 16);
-  const height = 28;
-  const rx = height / 2;
-
-  // Simplified SVG without style attribute for better encoding
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-<rect x="${strokeWidth/2}" y="${strokeWidth/2}" width="${width - strokeWidth}" height="${height - strokeWidth}" rx="${rx}" fill="${bgColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
-<text x="${width/2}" y="${height/2 + 1}" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
-</svg>`;
-
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-};
+// Cadastre tile URL (OpenStreetMap cadastral layer)
+const CADASTRE_TILE_URL = 'https://inspire.cadastre.gouv.fr/scpc/{z}/{x}/{y}.png';
 
 // Climate Risk Legend Component
 const ClimateRiskLegend: React.FC<{ riskType: ClimateRiskType }> = ({ riskType }) => {
@@ -194,6 +156,115 @@ const ClimateRiskLegend: React.FC<{ riskType: ClimateRiskType }> = ({ riskType }
         </div>
       </div>
     </div>
+  );
+};
+
+// Inject styles for marker animations
+const injectMarkerStyles = () => {
+  const styleId = 'google-map-marker-styles';
+  if (typeof document !== 'undefined' && !document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      @keyframes marker-pulse-gold {
+        0%, 100% { box-shadow: 0 0 8px 2px rgba(255, 184, 0, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
+        50% { box-shadow: 0 0 16px 6px rgba(255, 184, 0, 0.8), 0 4px 12px rgba(0,0,0,0.3); }
+      }
+      @keyframes marker-pulse-blue {
+        0%, 100% { box-shadow: 0 0 8px 2px rgba(14, 165, 233, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
+        50% { box-shadow: 0 0 16px 6px rgba(14, 165, 233, 0.8), 0 4px 12px rgba(0,0,0,0.3); }
+      }
+      @keyframes marker-pulse-purple {
+        0%, 100% { box-shadow: 0 0 8px 2px rgba(124, 58, 237, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
+        50% { box-shadow: 0 0 16px 6px rgba(124, 58, 237, 0.8), 0 4px 12px rgba(0,0,0,0.3); }
+      }
+      .marker-pulse-premium { animation: marker-pulse-gold 2s ease-in-out infinite; }
+      .marker-pulse-highlight { animation: marker-pulse-blue 2s ease-in-out infinite; }
+      .marker-pulse-featured { animation: marker-pulse-purple 2s ease-in-out infinite; }
+    `;
+    document.head.appendChild(style);
+  }
+};
+
+// Initialize marker styles
+if (typeof window !== 'undefined') {
+  injectMarkerStyles();
+}
+
+// Custom Property Marker using OverlayView for reliable rendering
+interface PropertyMarkerProps {
+  property: Property;
+  isHovered: boolean;
+  onClick: () => void;
+}
+
+const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHovered, onClick }) => {
+  const price = formatMarkerPrice(property.price);
+  const baseColor = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+
+  // Check promotion status
+  const isActivelyPromoted = property.isPromoted &&
+    property.promotionEndDate &&
+    property.promotionEndDate > Date.now();
+
+  const promotionTier = isActivelyPromoted ? property.promotionTier : null;
+  const promotionColor = promotionTier ? PROMOTION_COLORS[promotionTier] : null;
+
+  // Determine animation class for promoted listings
+  const pulseClass = promotionTier ? `marker-pulse-${promotionTier}` : '';
+
+  const position = { lat: property.lat!, lng: property.lng! };
+
+  return (
+    <OverlayView
+      position={position}
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      getPixelPositionOffset={(width, height) => ({
+        x: -(width / 2),
+        y: -(height / 2),
+      })}
+    >
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        className="cursor-pointer"
+        style={{
+          transform: isHovered ? 'scale(1.15)' : 'scale(1)',
+          transition: 'transform 0.15s ease-out',
+          zIndex: isHovered ? 1000 : isActivelyPromoted ? 100 : 1,
+          position: 'relative',
+        }}
+      >
+        <div
+          className={`px-2.5 py-1 rounded-full text-white text-[11px] font-bold whitespace-nowrap ${pulseClass}`}
+          style={{
+            backgroundColor: baseColor,
+            border: `${isHovered ? 3 : promotionColor ? 3 : 2}px solid ${isHovered ? baseColor : promotionColor || '#fff'}`,
+            boxShadow: !pulseClass ? (isHovered
+              ? `0 0 12px 3px ${baseColor}60, 0 4px 12px rgba(0,0,0,0.3)`
+              : '0 2px 6px rgba(0,0,0,0.3)') : undefined,
+          }}
+        >
+          {price}
+        </div>
+        {/* Promotion badge */}
+        {promotionTier && (
+          <div
+            className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px]"
+            style={{
+              backgroundColor: promotionColor,
+              border: '2px solid white',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+            }}
+            title={promotionTier.charAt(0).toUpperCase() + promotionTier.slice(1)}
+          >
+            {promotionTier === 'premium' ? '★' : promotionTier === 'highlight' ? '✦' : '◆'}
+          </div>
+        )}
+      </div>
+    </OverlayView>
   );
 };
 
@@ -333,6 +404,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // Climate overlay ref
   const climateOverlayRef = useRef<google.maps.ImageMapType | null>(null);
+  // Cadastre overlay ref
+  const cadastreOverlayRef = useRef<google.maps.ImageMapType | null>(null);
 
   // Refs
   const moveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -444,6 +517,33 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [map, selectedClimateRisk, isLoaded]);
 
+  // Apply cadastre overlay
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+
+    // Remove existing cadastre overlay
+    if (cadastreOverlayRef.current) {
+      const index = map.overlayMapTypes.getArray().indexOf(cadastreOverlayRef.current);
+      if (index > -1) map.overlayMapTypes.removeAt(index);
+      cadastreOverlayRef.current = null;
+    }
+
+    // Add cadastre overlay if enabled and in satellite/hybrid view
+    if (showCadastre && (mapType === 'satellite' || mapType === 'hybrid')) {
+      const cadastreOverlay = new google.maps.ImageMapType({
+        getTileUrl: (coord, zoom) => {
+          // Use OpenStreetMap cadastral data or similar
+          return `https://wxs.ign.fr/parcellaire/geoportail/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&STYLE=PCI%20vecteur&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX=${zoom}&TILEROW=${coord.y}&TILECOL=${coord.x}`;
+        },
+        tileSize: new google.maps.Size(256, 256),
+        opacity: 0.7,
+        name: 'cadastre',
+      });
+      map.overlayMapTypes.push(cadastreOverlay);
+      cadastreOverlayRef.current = cadastreOverlay;
+    }
+  }, [map, showCadastre, mapType, isLoaded]);
+
   // Handle map load
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
     setMap(mapInstance);
@@ -554,11 +654,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setTotalDistance(dist);
   }, [showMeasurement, measurementPoints]);
 
-  // Update cursor for drawing/measurement mode
+  // Update cursor and draggable for drawing/measurement mode
   useEffect(() => {
     if (map) {
       const cursor = isDrawing ? 'crosshair' : showMeasurement ? 'crosshair' : null;
-      map.setOptions({ draggableCursor: cursor, draggingCursor: cursor });
+      map.setOptions({
+        draggableCursor: cursor,
+        draggingCursor: cursor,
+        draggable: !isDrawing && !showMeasurement,
+      });
     }
   }, [map, isDrawing, showMeasurement]);
 
@@ -632,24 +736,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           />
         )}
 
-        {/* Property Markers */}
+        {/* Property Markers - using OverlayView for reliable rendering */}
         {!showHeatMap && validProperties.map((property) => (
-          <Marker
+          <PropertyMarkerOverlay
             key={property.id}
-            position={{ lat: property.lat!, lng: property.lng! }}
-            icon={{
-              url: createMarkerIcon(property, hoveredPropertyId === property.id, zoom),
-              scaledSize: new google.maps.Size(
-                Math.max(50, formatMarkerPrice(property.price).length * 7 + 20) * (zoom >= 14 ? 1 : zoom >= 12 ? 0.95 : 0.9),
-                28 * (zoom >= 14 ? 1 : zoom >= 12 ? 0.95 : 0.9)
-              ),
-              anchor: new google.maps.Point(
-                (Math.max(50, formatMarkerPrice(property.price).length * 7 + 20) * (zoom >= 14 ? 1 : zoom >= 12 ? 0.95 : 0.9)) / 2,
-                14 * (zoom >= 14 ? 1 : zoom >= 12 ? 0.95 : 0.9)
-              ),
-            }}
+            property={property}
+            isHovered={hoveredPropertyId === property.id}
             onClick={() => handleMarkerClick(property)}
-            zIndex={hoveredPropertyId === property.id ? 1000 : property.isPromoted ? 100 : 1}
           />
         ))}
 
@@ -741,30 +834,35 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         </div>
       )}
 
-      {/* Measurement Display */}
+      {/* Measurement Display - positioned at top center on desktop, bottom on mobile */}
       {showMeasurement && (
-        <div className="absolute bottom-24 md:bottom-28 left-4 right-4 md:left-auto md:right-auto md:left-1/2 md:-translate-x-1/2 z-[1001] bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3 shadow-xl border border-emerald-200">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1001] bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2 shadow-xl border border-emerald-200 max-w-[90%] md:max-w-md">
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Total Distance</p>
-              <p className="text-xl font-bold text-emerald-600">{formatDistance(totalDistance)}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                <span className="text-lg">📏</span>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase tracking-wider">Distance</p>
+                <p className="text-lg font-bold text-emerald-600">{formatDistance(totalDistance)}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={clearMeasurement}
-                className="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Clear
               </button>
               <button
                 onClick={() => { setShowMeasurement(false); clearMeasurement(); }}
-                className="px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                className="px-2.5 py-1 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 Done
               </button>
             </div>
           </div>
-          <p className="text-[10px] text-gray-400 mt-2">Click on map to add measurement points • {measurementPoints.length} points added</p>
+          <p className="text-[9px] text-gray-400 mt-1 text-center">Click on map to add points • {measurementPoints.length} points</p>
         </div>
       )}
 
@@ -830,6 +928,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               </div>
 
               <div className="w-px h-5 bg-gray-300/50" />
+
+              {/* Heat Map */}
+              <button
+                onClick={() => setShowHeatMap(!showHeatMap)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${showHeatMap ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'}`}
+                title="Heat Map"
+              >
+                <span className="text-sm">🔥</span>
+                <span>Heat</span>
+              </button>
 
               {/* 3D Buildings */}
               <button
@@ -940,6 +1048,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     <span className="text-lg">🏢</span>
                     <span className="text-sm font-medium">3D Buildings</span>
                   </button>
+                  <button onClick={() => setShowHeatMap(!showHeatMap)} className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${showHeatMap ? 'bg-orange-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'}`}>
+                    <span className="text-lg">🔥</span>
+                    <span className="text-sm font-medium">Heat Map</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -947,9 +1059,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               <svg className="w-7 h-7" style={{ transform: isLayerMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease-out' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-              {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement) && (
+              {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement || showHeatMap) && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
-                  {[showLandmarks, show3DBuildings, showCadastre, showMeasurement].filter(Boolean).length}
+                  {[showLandmarks, show3DBuildings, showCadastre, showMeasurement, showHeatMap].filter(Boolean).length}
                 </span>
               )}
             </button>
