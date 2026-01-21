@@ -212,7 +212,7 @@ interface PropertyMarkerProps {
   onClick: () => void;
 }
 
-const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHovered, onClick }) => {
+const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = React.memo(({ property, isHovered, onClick }) => {
   const price = formatMarkerPrice(property.price);
   const baseColor = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
 
@@ -305,7 +305,18 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
       </div>
     </OverlayView>
   );
-};
+}, (prevProps, nextProps) => {
+  // Only re-render if these specific props change
+  return (
+    prevProps.property.id === nextProps.property.id &&
+    prevProps.property.price === nextProps.property.price &&
+    prevProps.property.lat === nextProps.property.lat &&
+    prevProps.property.lng === nextProps.property.lng &&
+    prevProps.property.isPromoted === nextProps.property.isPromoted &&
+    prevProps.property.promotionTier === nextProps.property.promotionTier &&
+    prevProps.isHovered === nextProps.isHovered
+  );
+});
 
 // Property Legend Component
 const Legend: React.FC = () => (
@@ -439,8 +450,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [sunSeason, setSunSeason] = useState<Season>('current');
   const [isNightMode, setIsNightMode] = useState(false);
 
-  // Force re-render state for markers
-  const [markersKey, setMarkersKey] = useState(0);
 
   // Promoted listings agent state
   const [showAgentPanel, setShowAgentPanel] = useState(false);
@@ -503,16 +512,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     return filtered.slice(0, 500);
   }, [properties, showPromotedOnly]);
 
-  // Force marker re-render when map loads or properties change
-  useEffect(() => {
-    if (isLoaded && map) {
-      // Small delay to ensure map is fully ready
-      const timer = setTimeout(() => {
-        setMarkersKey(prev => prev + 1);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded, map, properties.length]);
 
   // Handle day/night change from sun animation
   const handleDayNightChange = useCallback((isDay: boolean, sunInfo: SunriseSunsetInfo) => {
@@ -1017,7 +1016,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         {/* Property Markers - using OverlayView for reliable rendering */}
         {validProperties.map((property) => (
           <PropertyMarkerOverlay
-            key={`${property.id}-${markersKey}`}
+            key={property.id}
             property={property}
             isHovered={hoveredPropertyId === property.id}
             onClick={() => handleMarkerClick(property)}
