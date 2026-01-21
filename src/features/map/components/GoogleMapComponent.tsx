@@ -4,9 +4,7 @@ import {
   GoogleMap,
   useJsApiLoader,
   Marker,
-  InfoWindow,
   Rectangle,
-  HeatmapLayer,
   Polyline,
   OverlayView,
 } from '@react-google-maps/api';
@@ -19,12 +17,11 @@ import {
   SearchPlusIcon,
   MapLegendIcon,
   CrosshairsIcon,
-  FireIcon,
 } from '@/constants';
 import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
 import SunPositionControl from './SunPositionControl';
 import SunArcAnimation, { type Season, type SunriseSunsetInfo } from './SunArcAnimation';
-import Google3DBuildingsLayer, { type BuildingInfo } from './Google3DBuildingsLayer';
+import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM, type CadastreLayerConfig } from '@/config/cadastreLayers';
 
 // Balkan region bounds
 const BALKAN_BOUNDS = {
@@ -42,7 +39,7 @@ const containerStyle = {
 const defaultCenter = { lat: 41.5, lng: 22 };
 
 // Google Maps libraries
-const libraries: ('visualization' | 'places' | 'geometry')[] = ['visualization'];
+const libraries: ('places' | 'geometry')[] = [];
 
 // Property type colors (matching Leaflet version)
 const PROPERTY_TYPE_COLORS: Record<string, string> = {
@@ -129,9 +126,6 @@ const formatMarkerPrice = (price: number): string => {
   if (price >= 1000) return `€${Math.round(price / 1000)}K`;
   return `€${price}`;
 };
-
-// Cadastre tile URL (OpenStreetMap cadastral layer)
-const CADASTRE_TILE_URL = 'https://inspire.cadastre.gouv.fr/scpc/{z}/{x}/{y}.png';
 
 // Climate Risk Legend Component
 const ClimateRiskLegend: React.FC<{ riskType: ClimateRiskType }> = ({ riskType }) => {
@@ -419,10 +413,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [isMapOptionsOpen, setIsMapOptionsOpen] = useState(false);
 
   // Layer toggles
-  const [showHeatMap, setShowHeatMap] = useState(false);
   const [showLandmarks, setShowLandmarks] = useState(false);
   const [show3DBuildings, setShow3DBuildings] = useState(false);
   const [showCadastre, setShowCadastre] = useState(false);
+  const [currentCadastreLayer, setCurrentCadastreLayer] = useState<CadastreLayerConfig | undefined>(undefined);
   const [showMeasurement, setShowMeasurement] = useState(false);
   const [showPromotedOnly, setShowPromotedOnly] = useState(false);
   const [selectedMapOption, setSelectedMapOption] = useState<MapOptionType>('streetview');
@@ -499,25 +493,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setIsNightMode(!isDay);
   }, []);
 
-  // Handle building click from 3D layer
-  const handleBuildingClick = useCallback((info: BuildingInfo) => {
-    console.log('Building clicked:', info);
-    // Could show a popup with building info here if needed
-  }, []);
-
   // Get current sun hour from dateTime
   const sunHour = useMemo(() => {
     return sunDateTime.getHours() + sunDateTime.getMinutes() / 60;
   }, [sunDateTime]);
-
-  // Heat map data
-  const heatMapData = useMemo(() => {
-    if (!isLoaded || !showHeatMap) return [];
-    return validProperties.map((p) => ({
-      location: new google.maps.LatLng(p.lat!, p.lng!),
-      weight: 1,
-    }));
-  }, [validProperties, isLoaded, showHeatMap]);
 
   // Map styles for POI visibility
   const mapStyles: google.maps.MapTypeStyle[] = useMemo(() => {
@@ -595,6 +574,34 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [map, selectedClimateRisk, isLoaded]);
 
+  // Update cadastre layer based on map center
+  useEffect(() => {
+    if (!map || !isLoaded || !showCadastre) {
+      setCurrentCadastreLayer(undefined);
+      return;
+    }
+
+    const updateCadastreLayer = () => {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      if (!center || !zoom) return;
+
+      // Only show cadastre at high zoom levels
+      if (zoom < CADASTRE_MIN_ZOOM) {
+        setCurrentCadastreLayer(undefined);
+        return;
+      }
+
+      // Find the appropriate cadastre layer for the current location
+      const layer = getCadastreLayerForLocation(center.lat(), center.lng());
+      setCurrentCadastreLayer(layer);
+    };
+
+    updateCadastreLayer();
+    const listener = map.addListener('idle', updateCadastreLayer);
+    return () => google.maps.event.removeListener(listener);
+  }, [map, isLoaded, showCadastre]);
+
   // Apply cadastre overlay
   useEffect(() => {
     if (!map || !isLoaded) return;
@@ -606,21 +613,41 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       cadastreOverlayRef.current = null;
     }
 
-    // Add cadastre overlay if enabled and in satellite/hybrid view
-    if (showCadastre && (mapType === 'satellite' || mapType === 'hybrid')) {
+    // Add cadastre overlay if enabled and layer is available
+    if (showCadastre && currentCadastreLayer && (mapType === 'satellite' || mapType === 'hybrid')) {
+      const { wmsUrl, layers, format, version, transparent, additionalParams } = currentCadastreLayer;
+
       const cadastreOverlay = new google.maps.ImageMapType({
         getTileUrl: (coord, zoom) => {
-          // Use OpenStreetMap cadastral data or similar
-          return `https://wxs.ign.fr/parcellaire/geoportail/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&STYLE=PCI%20vecteur&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX=${zoom}&TILEROW=${coord.y}&TILECOL=${coord.x}`;
+          // Calculate tile bounds in lat/lng
+          const tileSize = 256;
+          const scale = Math.pow(2, zoom);
+          const worldCoordinate = {
+            x: coord.x * tileSize / scale,
+            y: coord.y * tileSize / scale
+          };
+
+          // Convert to EPSG:4326 bounds
+          const nwLng = (coord.x / scale) * 360 - 180;
+          const seLng = ((coord.x + 1) / scale) * 360 - 180;
+          const n = Math.PI - 2 * Math.PI * coord.y / scale;
+          const nwLat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+          const n2 = Math.PI - 2 * Math.PI * (coord.y + 1) / scale;
+          const seLat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n2) - Math.exp(-n2)));
+
+          const bbox = `${nwLng},${seLat},${seLng},${nwLat}`;
+          const crs = additionalParams?.CRS || 'EPSG:4326';
+
+          return `${wmsUrl}?SERVICE=WMS&VERSION=${version || '1.3.0'}&REQUEST=GetMap&LAYERS=${encodeURIComponent(layers)}&STYLES=&FORMAT=${format || 'image/png'}&TRANSPARENT=${transparent !== false}&WIDTH=256&HEIGHT=256&CRS=${crs}&BBOX=${bbox}`;
         },
         tileSize: new google.maps.Size(256, 256),
-        opacity: 0.7,
+        opacity: 0.75,
         name: 'cadastre',
       });
       map.overlayMapTypes.push(cadastreOverlay);
       cadastreOverlayRef.current = cadastreOverlay;
     }
-  }, [map, showCadastre, mapType, isLoaded]);
+  }, [map, showCadastre, currentCadastreLayer, mapType, isLoaded]);
 
   // Handle map load
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
@@ -800,18 +827,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         onMouseMove={handleMapMouseMove}
         onMouseUp={handleMapMouseUp}
       >
-        {/* Heat Map Layer */}
-        {showHeatMap && heatMapData.length > 0 && (
-          <HeatmapLayer
-            data={heatMapData}
-            options={{
-              radius: 30,
-              opacity: 0.6,
-              gradient: ['rgba(0, 255, 0, 0)', 'rgba(0, 255, 0, 1)', 'rgba(255, 255, 0, 1)', 'rgba(255, 128, 0, 1)', 'rgba(255, 0, 0, 1)'],
-            }}
-          />
-        )}
-
         {/* Temporary drawing rectangle */}
         {tempDrawRect && (
           <Rectangle
@@ -821,7 +836,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         )}
 
         {/* Property Markers - using OverlayView for reliable rendering */}
-        {!showHeatMap && validProperties.map((property) => (
+        {validProperties.map((property) => (
           <PropertyMarkerOverlay
             key={`${property.id}-${markersKey}`}
             property={property}
@@ -985,14 +1000,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         />
       )}
 
-      {/* 3D Buildings Layer with deck.gl */}
-      <Google3DBuildingsLayer
-        map={map}
-        enabled={show3DBuildings}
-        dateTime={sunDateTime}
-        onBuildingClick={handleBuildingClick}
-      />
-
       {/* Sun Position Control for 3D Buildings */}
       {show3DBuildings && (
         <div className="absolute top-20 left-4 z-[1000]">
@@ -1078,16 +1085,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               >
                 <span className="text-sm">⭐</span>
                 <span>Promoted</span>
-              </button>
-
-              {/* Heat Map */}
-              <button
-                onClick={() => setShowHeatMap(!showHeatMap)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${showHeatMap ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'}`}
-                title="Heat Map"
-              >
-                <span className="text-sm">🔥</span>
-                <span>Heat</span>
               </button>
 
               {/* 3D Buildings */}
@@ -1199,10 +1196,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     <span className="text-lg">🏢</span>
                     <span className="text-sm font-medium">3D Buildings</span>
                   </button>
-                  <button onClick={() => setShowHeatMap(!showHeatMap)} className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${showHeatMap ? 'bg-orange-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'}`}>
-                    <span className="text-lg">🔥</span>
-                    <span className="text-sm font-medium">Heat Map</span>
-                  </button>
                   <button onClick={() => setShowPromotedOnly(!showPromotedOnly)} className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${showPromotedOnly ? 'bg-gradient-to-r from-amber-500 to-purple-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'}`}>
                     <span className="text-lg">⭐</span>
                     <span className="text-sm font-medium">Promoted Only</span>
@@ -1214,9 +1207,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               <svg className="w-7 h-7" style={{ transform: isLayerMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease-out' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-              {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement || showHeatMap || showPromotedOnly) && (
+              {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement || showPromotedOnly) && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
-                  {[showLandmarks, show3DBuildings, showCadastre, showMeasurement, showHeatMap, showPromotedOnly].filter(Boolean).length}
+                  {[showLandmarks, show3DBuildings, showCadastre, showMeasurement, showPromotedOnly].filter(Boolean).length}
                 </span>
               )}
             </button>
