@@ -7,7 +7,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { GoogleMapsOverlay } from '@deck.gl/google-maps';
 import { GeoJsonLayer, PolygonLayer } from '@deck.gl/layers';
-import { AmbientLight, _SunLight as SunLight, LightingEffect } from '@deck.gl/core';
+import { AmbientLight, DirectionalLight, LightingEffect } from '@deck.gl/core';
 
 interface Google3DBuildingsLayerProps {
   map: google.maps.Map | null;
@@ -264,7 +264,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
   // Create lighting effect with sun shadows - OSMBuildings style
   const lightingEffect = useMemo(() => {
-    const { altitude } = sunPosition;
+    const { azimuth, altitude } = sunPosition;
     const isDay = altitude > 0.05;
 
     const ambientLight = new AmbientLight({
@@ -272,16 +272,23 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       intensity: isDay ? 0.4 : 0.2,
     });
 
-    // Use SunLight for realistic sun-based shadows
-    const sunLight = new SunLight({
-      timestamp: currentDateTime.getTime(),
+    // Calculate sun direction from azimuth and altitude
+    const sunDirection: [number, number, number] = [
+      Math.sin(azimuth) * Math.cos(altitude),
+      -Math.cos(azimuth) * Math.cos(altitude),
+      -Math.sin(altitude),
+    ];
+
+    // Use DirectionalLight for realistic sun-based shadows
+    const directionalLight = new DirectionalLight({
       color: isDay ? [255, 250, 240] : [100, 100, 120],
       intensity: isDay ? 1.5 : 0.2,
+      direction: sunDirection,
       _shadow: true,
     });
 
-    return new LightingEffect({ ambientLight, sunLight });
-  }, [sunPosition, currentDateTime]);
+    return new LightingEffect({ ambientLight, directionalLight });
+  }, [sunPosition]);
 
   // Calculate shadow polygons
   const shadowPolygons = useMemo(() => {
