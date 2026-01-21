@@ -851,15 +851,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           <OverlayView
             position={{ lat: selectedProperty.lat!, lng: selectedProperty.lng! }}
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={() => ({ x: 0, y: -50 })}
+            getPixelPositionOffset={() => ({ x: -100, y: -180 })}
           >
             <div
-              className="cursor-pointer bg-white rounded-xl shadow-2xl overflow-hidden animate-fade-in"
-              style={{ width: '180px', transform: 'translateX(-50%)' }}
-              onClick={() => { handlePropertyClick(selectedProperty.id); setSelectedProperty(null); }}
+              className="cursor-pointer bg-white rounded-2xl shadow-2xl overflow-hidden"
+              style={{
+                width: '200px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1)',
+              }}
+              onClick={(e) => { e.stopPropagation(); handlePropertyClick(selectedProperty.id); setSelectedProperty(null); }}
             >
               {/* Image container */}
-              <div className="relative w-full h-20 bg-gray-100 overflow-hidden">
+              <div className="relative w-full h-24 bg-gradient-to-br from-blue-50 to-blue-100 overflow-hidden">
                 {selectedProperty.images && selectedProperty.images[0] ? (
                   <img
                     src={selectedProperty.images[0].url}
@@ -867,43 +870,76 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                    <span className="text-2xl">🏠</span>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <svg className="w-12 h-12 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 3L4 9v12h16V9l-8-6zm6 16h-3v-5H9v5H6v-9.5l6-4.5 6 4.5V19z"/>
+                      <path d="M10 14h4v5h-4z" opacity="0.5"/>
+                    </svg>
                   </div>
                 )}
-                {/* Promotion badge on image */}
+                {/* Promotion badge */}
                 {selectedProperty.isPromoted && selectedProperty.promotionTier && (
                   <div
-                    className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold text-white"
-                    style={{ backgroundColor: PROMOTION_COLORS[selectedProperty.promotionTier] }}
+                    className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-bold text-white uppercase tracking-wide"
+                    style={{
+                      backgroundColor: PROMOTION_COLORS[selectedProperty.promotionTier],
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}
                   >
-                    {selectedProperty.promotionTier.toUpperCase()}
+                    {selectedProperty.promotionTier}
                   </div>
                 )}
+                {/* Close button */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setSelectedProperty(null); }}
+                  className="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-white transition-all shadow-sm"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
               {/* Content */}
-              <div className="p-2">
-                <p className="font-bold text-sm text-primary">€{selectedProperty.price.toLocaleString()}</p>
-                <p className="text-[10px] text-gray-700 font-medium line-clamp-1 mt-0.5">
+              <div className="p-3">
+                <p className="font-bold text-base text-primary mb-0.5">
+                  €{selectedProperty.price.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-700 font-medium line-clamp-1">
                   {selectedProperty.title || selectedProperty.address}
                 </p>
-                <div className="flex items-center gap-2 mt-1 text-[9px] text-gray-500">
-                  {selectedProperty.beds && <span>🛏️{selectedProperty.beds}</span>}
-                  {selectedProperty.baths && <span>🚿{selectedProperty.baths}</span>}
-                  {selectedProperty.sqft && <span>📐{selectedProperty.sqft}m²</span>}
+                <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
+                  {selectedProperty.beds && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-gray-400">🛏</span>{selectedProperty.beds}
+                    </span>
+                  )}
+                  {selectedProperty.baths && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-gray-400">🚿</span>{selectedProperty.baths}
+                    </span>
+                  )}
+                  {selectedProperty.sqft && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-gray-400">📐</span>{selectedProperty.sqft}m²
+                    </span>
+                  )}
+                </div>
+                {/* View details hint */}
+                <div className="mt-2 pt-2 border-t border-gray-100 text-center">
+                  <span className="text-[10px] text-primary font-medium">Tap to view details →</span>
                 </div>
               </div>
-              {/* Arrow pointer */}
+              {/* Arrow pointer at bottom */}
               <div
                 className="absolute left-1/2 -bottom-2"
                 style={{
                   width: 0,
                   height: 0,
+                  marginLeft: '-8px',
                   borderLeft: '8px solid transparent',
                   borderRight: '8px solid transparent',
                   borderTop: '8px solid white',
-                  transform: 'translateX(-50%)',
-                  filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.1))',
+                  filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.1))'
                 }}
               />
             </div>
