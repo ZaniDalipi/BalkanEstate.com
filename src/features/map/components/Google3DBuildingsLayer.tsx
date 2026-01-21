@@ -185,7 +185,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
   // Calculate sun direction based on time
   const sunDirection = useMemo((): [number, number, number] => {
-    if (!enabled) return [-1, -1, -2];
+    if (!enabled) return [1, 1, -1];
 
     const dt = dateTime || new Date();
     const hour = dt.getHours() + dt.getMinutes() / 60;
@@ -193,7 +193,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
     // Sun moves from east to west
     const angle = ((clampedHour - 6) / 12) * Math.PI;
-    const altitude = Math.PI / 4; // 45 degree elevation
+    const altitude = Math.PI / 3; // 60 degree elevation for softer shadows
 
     return [
       Math.sin(angle) * Math.cos(altitude),
@@ -202,24 +202,24 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     ];
   }, [dateTime, enabled]);
 
-  // Create lighting effect optimized for warm building colors
+  // Create MapLibre-style lighting - simple and clean
   const lightingEffect = useMemo(() => {
     if (!enabled) return null;
 
-    // Ambient light - provides base illumination
+    // High ambient for overall brightness (MapLibre style)
     const ambientLight = new AmbientLight({
       color: [255, 255, 255],
-      intensity: 0.5,
+      intensity: 0.75,
     });
 
-    // Main directional light - sun with warm tint
-    const sunLight = new DirectionalLight({
-      color: [255, 248, 235],
-      intensity: 1.4,
+    // Soft directional light for subtle wall shading
+    const directionalLight = new DirectionalLight({
+      color: [255, 255, 255],
+      intensity: 0.6,
       direction: sunDirection,
     });
 
-    return new LightingEffect({ ambientLight, sunLight });
+    return new LightingEffect({ ambientLight, directionalLight });
   }, [sunDirection, enabled]);
 
   // Check if viewport is within fetched bounds
@@ -300,7 +300,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
     const layers = [];
 
-    // Building layer - warm beige/tan style like OneGeo/MapLibre
+    // Building layer - MapLibre/OneGeo style
     if (buildings.length > 0) {
       layers.push(
         new GeoJsonLayer({
@@ -311,17 +311,17 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           wireframe: false,
           opacity: 1,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
-          // Warm beige/tan color - classic OSMBuildings/MapLibre style
-          getFillColor: [232, 215, 190, 255], // Warm beige
-          // Darker tan edge for definition
-          getLineColor: [195, 175, 150, 255],
+          // MapLibre default building color: #d4c4b0 (warm sandstone tan)
+          getFillColor: [212, 196, 176, 255],
+          // Subtle darker outline
+          getLineColor: [180, 165, 145, 255],
           lineWidthMinPixels: 1,
-          // Material optimized for warm natural look
+          // Flat matte material like MapLibre (no shine, even lighting)
           material: {
-            ambient: 0.35,
-            diffuse: 0.8,
-            shininess: 5,
-            specularColor: [30, 30, 20],
+            ambient: 0.6,
+            diffuse: 0.4,
+            shininess: 0,
+            specularColor: [0, 0, 0],
           },
           pickable: false,
         })
