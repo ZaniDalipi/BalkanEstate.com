@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
   useJsApiLoader,
-  Marker,
   Rectangle,
   Polyline,
   Polygon,
@@ -1261,23 +1260,38 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               </>
             )}
 
-            {/* Measurement point markers */}
-            {measurementTool.points.map((point, index) => (
-              <Marker
-                key={`measure-point-s${measurementSessionKey}-${index}`}
-                position={{ lat: point.lat, lng: point.lng }}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: index === 0 && measurementTool.points.length >= 3 && !measurementTool.isPolygonClosed ? 10 : 7,
-                  fillColor: index === 0 && measurementTool.points.length >= 3 && !measurementTool.isPolygonClosed ? '#10B981' : '#0252CD',
-                  fillOpacity: 1,
-                  strokeColor: '#ffffff',
-                  strokeWeight: 2,
-                }}
-                onClick={index === 0 && measurementTool.points.length >= 3 && !measurementTool.isPolygonClosed ? measurementTool.closePolygon : undefined}
-                zIndex={index === 0 ? 2000 : 1000}
-              />
-            ))}
+            {/* Measurement point markers - using OverlayView instead of deprecated Marker */}
+            {measurementTool.points.map((point, index) => {
+              const isFirstPoint = index === 0;
+              const canClose = measurementTool.points.length >= 3 && !measurementTool.isPolygonClosed;
+              const isClosePoint = isFirstPoint && canClose;
+              const size = isClosePoint ? 20 : 14;
+              const color = isClosePoint ? '#10B981' : '#0252CD';
+
+              return (
+                <OverlayView
+                  key={`measure-point-s${measurementSessionKey}-${index}`}
+                  position={{ lat: point.lat, lng: point.lng }}
+                  mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                  getPixelPositionOffset={() => ({ x: -size / 2, y: -size / 2 })}
+                >
+                  <div
+                    onClick={isClosePoint ? measurementTool.closePolygon : undefined}
+                    style={{
+                      width: size,
+                      height: size,
+                      borderRadius: '50%',
+                      backgroundColor: color,
+                      border: '2px solid white',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                      cursor: isClosePoint ? 'pointer' : 'default',
+                      zIndex: isFirstPoint ? 2000 : 1000,
+                    }}
+                    title={isClosePoint ? 'Click to close polygon' : undefined}
+                  />
+                </OverlayView>
+              );
+            })}
           </>
         )}
       </GoogleMap>

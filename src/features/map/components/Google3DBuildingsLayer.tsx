@@ -17,9 +17,10 @@ interface Google3DBuildingsLayerProps {
 
 // Overpass API endpoints (multiple for fallback)
 const OVERPASS_ENDPOINTS = [
-  'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
 ];
 
 // Cache for building data
@@ -30,10 +31,9 @@ const buildingCache = new Map<string, GeoJSON.Feature[]>();
  */
 const generateOverpassQuery = (south: number, west: number, north: number, east: number): string => {
   return `
-[out:json][timeout:30];
+[out:json][timeout:15];
 (
   way["building"](${south},${west},${north},${east});
-  relation["building"](${south},${west},${north},${east});
 );
 out body;
 >;
@@ -138,7 +138,7 @@ const fetchBuildings = async (
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per endpoint
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -149,7 +149,11 @@ const fetchBuildings = async (
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) continue;
+      // Skip to next endpoint on server errors
+      if (!response.ok) {
+        console.warn(`Overpass endpoint ${endpoint} returned ${response.status}, trying next...`);
+        continue;
+      }
 
       const data = await response.json();
       const features = parseOverpassResponse(data);
