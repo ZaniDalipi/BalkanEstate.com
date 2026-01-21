@@ -192,40 +192,57 @@ const fetchBuildings = async (
 
 /**
  * Calculate shadow polygons for buildings based on sun position
+ * Creates proper shadow shapes that extend from building footprint
  */
 const calculateShadowPolygons = (
   buildings: GeoJSON.Feature[],
   sunAzimuth: number, // radians, 0 = north, clockwise
   sunAltitude: number // radians, 0 = horizon
 ): Array<{ polygon: [number, number][]; opacity: number }> => {
-  if (sunAltitude <= 0.05) return []; // No shadows at night/very low sun
+  if (sunAltitude <= 0.1) return []; // No shadows at night/very low sun
 
   const shadows: Array<{ polygon: [number, number][]; opacity: number }> = [];
-  const shadowLength = 1 / Math.tan(sunAltitude); // Shadow length multiplier
-  const shadowOpacity = Math.min(0.5, sunAltitude * 1.5); // Fade shadows near sunset/sunrise
 
-  // Sun direction in lat/lng space (approximate)
-  const dx = Math.sin(sunAzimuth) * shadowLength * 0.00001;
-  const dy = -Math.cos(sunAzimuth) * shadowLength * 0.00001;
+  // Shadow length based on sun altitude - longer shadows when sun is lower
+  const shadowLength = Math.min(3, 1 / Math.tan(Math.max(0.15, sunAltitude)));
+
+  // Shadow opacity - darker when sun is higher, fades at sunrise/sunset
+  const shadowOpacity = Math.min(0.6, Math.max(0.2, sunAltitude * 0.8));
+
+  // Base shadow offset scale (in degrees) - increased for visibility
+  const baseOffset = 0.00008;
+
+  // Sun direction vector
+  const dx = Math.sin(sunAzimuth) * shadowLength * baseOffset;
+  const dy = -Math.cos(sunAzimuth) * shadowLength * baseOffset;
 
   for (const building of buildings) {
     const height = (building.properties?.height as number) || 12;
     const coords = building.geometry.coordinates[0] as [number, number][];
     if (!coords || coords.length < 4) continue;
 
-    // Scale shadow by building height
-    const heightFactor = height / 10;
+    // Scale shadow by building height (taller = longer shadow)
+    const heightFactor = Math.sqrt(height) / 3;
     const shadowDx = dx * heightFactor;
     const shadowDy = dy * heightFactor;
 
-    // Create shadow polygon by offsetting building footprint
-    const shadowCoords: [number, number][] = coords.map(([lng, lat]) => [
-      lng + shadowDx,
-      lat + shadowDy,
-    ]);
+    // Create a proper shadow polygon that connects building base to shadow projection
+    // This creates a more realistic shadow shape
+    const shadowPolygon: [number, number][] = [];
+
+    // Add the original building footprint points
+    for (const [lng, lat] of coords) {
+      shadowPolygon.push([lng, lat]);
+    }
+
+    // Add the offset shadow points in reverse order to create closed shape
+    for (let i = coords.length - 1; i >= 0; i--) {
+      const [lng, lat] = coords[i];
+      shadowPolygon.push([lng + shadowDx, lat + shadowDy]);
+    }
 
     shadows.push({
-      polygon: shadowCoords,
+      polygon: shadowPolygon,
       opacity: shadowOpacity,
     });
   }
@@ -400,14 +417,15 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
     const layers = [];
 
-    // Shadow layer - rendered first (below buildings)
+    // Shadow layer - rendered first (below buildings) with dark blue-gray color
     if (shadowPolygons.length > 0) {
       layers.push(
         new PolygonLayer({
           id: 'building-shadows',
           data: shadowPolygons,
           getPolygon: (d: { polygon: [number, number][] }) => d.polygon,
-          getFillColor: (d: { opacity: number }) => [50, 40, 60, Math.floor(d.opacity * 180)],
+          // Dark shadow color matching OSMBuildings style
+          getFillColor: (d: { opacity: number }) => [30, 30, 50, Math.floor(d.opacity * 200)],
           getLineColor: [0, 0, 0, 0],
           filled: true,
           stroked: false,
