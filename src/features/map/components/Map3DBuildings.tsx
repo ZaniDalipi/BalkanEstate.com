@@ -470,24 +470,49 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       .addTo(mapInstance);
   };
 
-  // Update lighting based on time
+  // Update lighting and shadows based on time
   useEffect(() => {
     if (!map.current || !mapLoaded || !showTimelapse) return;
 
     const lighting = TIME_LIGHTING[timelapse.timePeriod];
 
-    // Apply lighting via layer opacity and colors
+    // Calculate shadow color based on sun altitude (darker shadows when sun is lower)
+    const shadowIntensity = Math.max(0.1, 1 - lighting.sunAltitude / 90);
+    const shadowColor = `rgba(50, 50, 80, ${shadowIntensity * 0.6})`;
+
+    // Calculate lit side color (warmer when sun is lower)
+    const warmth = lighting.sunAltitude < 30 ? 1.1 : 1.0;
+
+    // Apply lighting via layer colors and opacity
     if (map.current.getLayer('buildings-3d')) {
+      // Simulate sun-facing sides being brighter
+      map.current.setPaintProperty('buildings-3d', 'fill-extrusion-color', [
+        'interpolate',
+        ['linear'],
+        ['get', 'height'],
+        0, lighting.ambientColor,
+        20, lighting.directionalColor,
+        50, '#ffffff',
+      ]);
       map.current.setPaintProperty('buildings-3d', 'fill-extrusion-opacity',
-        0.6 + lighting.ambientIntensity * 0.35
+        0.5 + lighting.ambientIntensity * 0.45
       );
     }
     if (map.current.getLayer('fallback-buildings-3d')) {
+      map.current.setPaintProperty('fallback-buildings-3d', 'fill-extrusion-color', lighting.ambientColor);
       map.current.setPaintProperty('fallback-buildings-3d', 'fill-extrusion-opacity',
-        0.6 + lighting.ambientIntensity * 0.35
+        0.5 + lighting.ambientIntensity * 0.45
       );
     }
-  }, [timelapse.timePeriod, mapLoaded, showTimelapse]);
+
+    // Rotate map bearing slightly to simulate sun movement effect
+    const targetBearing = (lighting.sunAzimuth - 180) * 0.15; // Subtle rotation
+    map.current.easeTo({
+      bearing: targetBearing,
+      duration: 500,
+    });
+
+  }, [timelapse.timePeriod, timelapse.currentTime, mapLoaded, showTimelapse]);
 
   // Toggle 2D/3D mode
   const toggle3DMode = useCallback(() => {
@@ -520,19 +545,70 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       {/* Map container */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* Lighting overlay for time simulation */}
+      {/* Dynamic lighting overlay for time simulation */}
       {showTimelapse && (
-        <div
-          className="absolute inset-0 pointer-events-none transition-all duration-1000"
-          style={{
-            background: `linear-gradient(180deg,
-              ${TIME_LIGHTING[timelapse.timePeriod].skyColor}40 0%,
-              transparent 30%,
-              transparent 70%,
-              ${TIME_LIGHTING[timelapse.timePeriod].fogColor}30 100%
-            )`,
-          }}
-        />
+        <>
+          {/* Sky gradient overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none transition-all duration-500"
+            style={{
+              background: `linear-gradient(180deg,
+                ${TIME_LIGHTING[timelapse.timePeriod].skyColor}50 0%,
+                ${TIME_LIGHTING[timelapse.timePeriod].skyColor}20 20%,
+                transparent 40%,
+                transparent 60%,
+                ${TIME_LIGHTING[timelapse.timePeriod].fogColor}20 80%,
+                ${TIME_LIGHTING[timelapse.timePeriod].fogColor}40 100%
+              )`,
+            }}
+          />
+
+          {/* Directional shadow/light effect */}
+          <div
+            className="absolute inset-0 pointer-events-none transition-all duration-500"
+            style={{
+              background: `linear-gradient(${TIME_LIGHTING[timelapse.timePeriod].sunAzimuth + 180}deg,
+                rgba(0,0,0,${0.3 * (1 - TIME_LIGHTING[timelapse.timePeriod].sunAltitude / 90)}) 0%,
+                transparent 30%,
+                transparent 70%,
+                rgba(255,255,200,${0.15 * TIME_LIGHTING[timelapse.timePeriod].directionalIntensity}) 100%
+              )`,
+            }}
+          />
+
+          {/* Sun position indicator */}
+          <div
+            className="absolute w-16 h-16 pointer-events-none transition-all duration-500"
+            style={{
+              left: `${50 + Math.cos((TIME_LIGHTING[timelapse.timePeriod].sunAzimuth - 90) * Math.PI / 180) * 40}%`,
+              top: `${10 + (90 - TIME_LIGHTING[timelapse.timePeriod].sunAltitude) * 0.3}%`,
+              transform: 'translate(-50%, -50%)',
+              opacity: TIME_LIGHTING[timelapse.timePeriod].sunAltitude > 0 ? 1 : 0,
+            }}
+          >
+            <div
+              className="w-full h-full rounded-full transition-all duration-500"
+              style={{
+                background: `radial-gradient(circle, ${TIME_LIGHTING[timelapse.timePeriod].directionalColor} 0%, transparent 70%)`,
+                boxShadow: `0 0 60px 30px ${TIME_LIGHTING[timelapse.timePeriod].directionalColor}40`,
+              }}
+            />
+          </div>
+
+          {/* Ground shadow projection effect */}
+          <div
+            className="absolute bottom-0 left-0 right-0 pointer-events-none transition-all duration-500"
+            style={{
+              height: '40%',
+              background: `linear-gradient(${TIME_LIGHTING[timelapse.timePeriod].sunAzimuth}deg,
+                transparent 0%,
+                rgba(30, 30, 60, ${0.2 * (1 - TIME_LIGHTING[timelapse.timePeriod].sunAltitude / 90)}) 50%,
+                transparent 100%
+              )`,
+              transform: `skewX(${(TIME_LIGHTING[timelapse.timePeriod].sunAzimuth - 180) * 0.1}deg)`,
+            }}
+          />
+        </>
       )}
 
       {/* Property info card */}
