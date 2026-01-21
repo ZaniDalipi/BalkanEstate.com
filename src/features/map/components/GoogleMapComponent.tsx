@@ -166,21 +166,26 @@ const injectMarkerStyles = () => {
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
+      @keyframes marker-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
       @keyframes marker-pulse-gold {
-        0%, 100% { box-shadow: 0 0 8px 2px rgba(255, 184, 0, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
-        50% { box-shadow: 0 0 16px 6px rgba(255, 184, 0, 0.8), 0 4px 12px rgba(0,0,0,0.3); }
+        0%, 100% { box-shadow: 0 0 8px 2px rgba(255, 184, 0, 0.6), 0 2px 8px rgba(0,0,0,0.3); transform: translateY(0); }
+        50% { box-shadow: 0 0 20px 8px rgba(255, 184, 0, 0.9), 0 4px 12px rgba(0,0,0,0.3); transform: translateY(-6px); }
       }
       @keyframes marker-pulse-blue {
-        0%, 100% { box-shadow: 0 0 8px 2px rgba(14, 165, 233, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
-        50% { box-shadow: 0 0 16px 6px rgba(14, 165, 233, 0.8), 0 4px 12px rgba(0,0,0,0.3); }
+        0%, 100% { box-shadow: 0 0 8px 2px rgba(14, 165, 233, 0.6), 0 2px 8px rgba(0,0,0,0.3); transform: translateY(0); }
+        50% { box-shadow: 0 0 20px 8px rgba(14, 165, 233, 0.9), 0 4px 12px rgba(0,0,0,0.3); transform: translateY(-6px); }
       }
       @keyframes marker-pulse-purple {
-        0%, 100% { box-shadow: 0 0 8px 2px rgba(124, 58, 237, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
-        50% { box-shadow: 0 0 16px 6px rgba(124, 58, 237, 0.8), 0 4px 12px rgba(0,0,0,0.3); }
+        0%, 100% { box-shadow: 0 0 8px 2px rgba(124, 58, 237, 0.6), 0 2px 8px rgba(0,0,0,0.3); transform: translateY(0); }
+        50% { box-shadow: 0 0 20px 8px rgba(124, 58, 237, 0.9), 0 4px 12px rgba(0,0,0,0.3); transform: translateY(-6px); }
       }
-      .marker-pulse-premium { animation: marker-pulse-gold 2s ease-in-out infinite; }
-      .marker-pulse-highlight { animation: marker-pulse-blue 2s ease-in-out infinite; }
-      .marker-pulse-featured { animation: marker-pulse-purple 2s ease-in-out infinite; }
+      .marker-pulse-premium { animation: marker-pulse-gold 1.5s ease-in-out infinite; }
+      .marker-pulse-highlight { animation: marker-pulse-blue 1.5s ease-in-out infinite; }
+      .marker-pulse-featured { animation: marker-pulse-purple 1.5s ease-in-out infinite; }
+      .marker-bounce { animation: marker-bounce 1s ease-in-out infinite; }
     `;
     document.head.appendChild(style);
   }
@@ -391,8 +396,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [show3DBuildings, setShow3DBuildings] = useState(false);
   const [showCadastre, setShowCadastre] = useState(false);
   const [showMeasurement, setShowMeasurement] = useState(false);
+  const [showPromotedOnly, setShowPromotedOnly] = useState(false);
   const [selectedMapOption, setSelectedMapOption] = useState<MapOptionType>('streetview');
   const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
+
+  // Sun simulation state for 3D buildings
+  const [sunHour, setSunHour] = useState(() => new Date().getHours() + new Date().getMinutes() / 60);
+
+  // Force re-render state for markers
+  const [markersKey, setMarkersKey] = useState(0);
 
   // Drawing state
   const [drawStartPos, setDrawStartPos] = useState<google.maps.LatLng | null>(null);
@@ -427,10 +439,36 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // Filter valid properties
   const validProperties = useMemo(() => {
-    return properties.filter(
+    let filtered = properties.filter(
       (p) => p.lat != null && !isNaN(p.lat) && p.lng != null && !isNaN(p.lng)
-    ).slice(0, 500);
-  }, [properties]);
+    );
+    // Filter for promoted only if enabled
+    if (showPromotedOnly) {
+      filtered = filtered.filter(p => p.isPromoted && p.promotionEndDate && p.promotionEndDate > Date.now());
+    }
+    return filtered.slice(0, 500);
+  }, [properties, showPromotedOnly]);
+
+  // Force marker re-render when map loads or properties change
+  useEffect(() => {
+    if (isLoaded && map) {
+      // Small delay to ensure map is fully ready
+      const timer = setTimeout(() => {
+        setMarkersKey(prev => prev + 1);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded, map, properties.length]);
+
+  // Sun simulation for 3D buildings - update sun position
+  useEffect(() => {
+    if (!show3DBuildings) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      setSunHour(now.getHours() + now.getMinutes() / 60);
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, [show3DBuildings]);
 
   // Heat map data
   const heatMapData = useMemo(() => {
@@ -739,7 +777,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         {/* Property Markers - using OverlayView for reliable rendering */}
         {!showHeatMap && validProperties.map((property) => (
           <PropertyMarkerOverlay
-            key={property.id}
+            key={`${property.id}-${markersKey}`}
             property={property}
             isHovered={hoveredPropertyId === property.id}
             onClick={() => handleMarkerClick(property)}
@@ -834,35 +872,57 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         </div>
       )}
 
-      {/* Measurement Display - positioned at top center on desktop, bottom on mobile */}
+      {/* Measurement Display - positioned in center-left to avoid header */}
       {showMeasurement && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1001] bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2 shadow-xl border border-emerald-200 max-w-[90%] md:max-w-md">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                <span className="text-lg">📏</span>
-              </div>
-              <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider">Distance</p>
-                <p className="text-lg font-bold text-emerald-600">{formatDistance(totalDistance)}</p>
-              </div>
+        <div className="absolute top-1/3 left-4 z-[1001] bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-xl border border-emerald-200 max-w-[200px]">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
+              <span className="text-sm">📏</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={clearMeasurement}
-                className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => { setShowMeasurement(false); clearMeasurement(); }}
-                className="px-2.5 py-1 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-              >
-                Done
-              </button>
+            <div>
+              <p className="text-[9px] text-gray-500 uppercase tracking-wider">Distance</p>
+              <p className="text-base font-bold text-emerald-600">{formatDistance(totalDistance)}</p>
             </div>
           </div>
-          <p className="text-[9px] text-gray-400 mt-1 text-center">Click on map to add points • {measurementPoints.length} points</p>
+          <p className="text-[9px] text-gray-400 mb-2">Click map to add points ({measurementPoints.length})</p>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={clearMeasurement}
+              className="flex-1 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => { setShowMeasurement(false); clearMeasurement(); }}
+              className="flex-1 px-2 py-1 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Sun Position Control for 3D Buildings */}
+      {show3DBuildings && (
+        <div className="absolute top-20 left-4 z-[1000] bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">{sunHour >= 6 && sunHour < 18 ? '☀️' : '🌙'}</span>
+            <span className="text-xs font-medium text-gray-700">Sun Position</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="24"
+            step="0.5"
+            value={sunHour}
+            onChange={(e) => setSunHour(parseFloat(e.target.value))}
+            className="w-full h-2 bg-gradient-to-r from-blue-900 via-yellow-400 to-blue-900 rounded-lg appearance-none cursor-pointer"
+          />
+          <div className="flex justify-between text-[9px] text-gray-500 mt-1">
+            <span>00:00</span>
+            <span className="font-medium text-gray-700">{Math.floor(sunHour)}:{String(Math.round((sunHour % 1) * 60)).padStart(2, '0')}</span>
+            <span>24:00</span>
+          </div>
         </div>
       )}
 
@@ -928,6 +988,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               </div>
 
               <div className="w-px h-5 bg-gray-300/50" />
+
+              {/* Promoted Listings */}
+              <button
+                onClick={() => setShowPromotedOnly(!showPromotedOnly)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${showPromotedOnly ? 'bg-gradient-to-r from-amber-500 to-purple-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'}`}
+                title="Show Promoted Listings Only"
+              >
+                <span className="text-sm">⭐</span>
+                <span>Promoted</span>
+              </button>
 
               {/* Heat Map */}
               <button
@@ -1052,6 +1122,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     <span className="text-lg">🔥</span>
                     <span className="text-sm font-medium">Heat Map</span>
                   </button>
+                  <button onClick={() => setShowPromotedOnly(!showPromotedOnly)} className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${showPromotedOnly ? 'bg-gradient-to-r from-amber-500 to-purple-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'}`}>
+                    <span className="text-lg">⭐</span>
+                    <span className="text-sm font-medium">Promoted Only</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -1059,9 +1133,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               <svg className="w-7 h-7" style={{ transform: isLayerMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease-out' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-              {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement || showHeatMap) && (
+              {!isLayerMenuOpen && (showLandmarks || show3DBuildings || showCadastre || showMeasurement || showHeatMap || showPromotedOnly) && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
-                  {[showLandmarks, show3DBuildings, showCadastre, showMeasurement, showHeatMap].filter(Boolean).length}
+                  {[showLandmarks, show3DBuildings, showCadastre, showMeasurement, showHeatMap, showPromotedOnly].filter(Boolean).length}
                 </span>
               )}
             </button>
