@@ -22,6 +22,7 @@ import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPan
 import SunPositionControl from './SunPositionControl';
 import SunArcAnimation, { type Season, type SunriseSunsetInfo } from './SunArcAnimation';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM, type CadastreLayerConfig } from '@/config/cadastreLayers';
+import GoogleMeasurementTool from './GoogleMeasurementTool';
 
 // Balkan region bounds
 const BALKAN_BOUNDS = {
@@ -438,9 +439,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [drawStartPos, setDrawStartPos] = useState<google.maps.LatLng | null>(null);
   const [tempDrawRect, setTempDrawRect] = useState<google.maps.LatLngBounds | null>(null);
 
-  // Measurement state
-  const [measurementPoints, setMeasurementPoints] = useState<google.maps.LatLng[]>([]);
-  const [totalDistance, setTotalDistance] = useState(0);
 
   // Climate overlay ref
   const climateOverlayRef = useRef<google.maps.ImageMapType | null>(null);
@@ -743,27 +741,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setTempDrawRect(null);
   }, [isDrawing, tempDrawRect, onDrawComplete]);
 
-  // Map click handler - close popup or add measurement point
+  // Map click handler - close popup
   const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-    // Close property popup when clicking on map
+    // Close property popup when clicking on map (not in measurement mode)
     if (selectedProperty && !showMeasurement) {
       setSelectedProperty(null);
-      return;
     }
-    // Measurement mode
-    if (!e.latLng || !showMeasurement) return;
-    const newPoints = [...measurementPoints, e.latLng];
-    setMeasurementPoints(newPoints);
-    // Calculate total distance
-    let dist = 0;
-    for (let i = 1; i < newPoints.length; i++) {
-      dist += calculateDistance(
-        newPoints[i-1].lat(), newPoints[i-1].lng(),
-        newPoints[i].lat(), newPoints[i].lng()
-      );
-    }
-    setTotalDistance(dist);
-  }, [showMeasurement, measurementPoints, selectedProperty]);
+  }, [selectedProperty, showMeasurement]);
 
   // Update cursor and draggable for drawing/measurement mode
   useEffect(() => {
@@ -776,18 +760,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       });
     }
   }, [map, isDrawing, showMeasurement]);
-
-  // Clear measurement
-  const clearMeasurement = useCallback(() => {
-    setMeasurementPoints([]);
-    setTotalDistance(0);
-  }, []);
-
-  // Format distance for display
-  const formatDistance = (meters: number): string => {
-    if (meters >= 1000) return `${(meters / 1000).toFixed(2)} km`;
-    return `${Math.round(meters)} m`;
-  };
 
   // Loading/error states
   if (loadError) {
@@ -916,37 +888,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             options={{ fillColor: '#0252CD', fillOpacity: 0.2, strokeWeight: 3, strokeColor: '#0252CD', clickable: false }}
           />
         )}
-
-        {/* Measurement polyline */}
-        {showMeasurement && measurementPoints.length > 1 && (
-          <Polyline
-            path={measurementPoints.map(p => ({ lat: p.lat(), lng: p.lng() }))}
-            options={{ strokeColor: '#10b981', strokeWeight: 3, strokeOpacity: 1 }}
-          />
-        )}
-
-        {/* Measurement point markers */}
-        {showMeasurement && measurementPoints.map((point, index) => (
-          <Marker
-            key={`measure-${index}`}
-            position={{ lat: point.lat(), lng: point.lng() }}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: '#10b981',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 2,
-            }}
-            label={index > 0 ? {
-              text: String(index + 1),
-              color: '#ffffff',
-              fontSize: '10px',
-              fontWeight: 'bold',
-            } : undefined}
-            zIndex={2000}
-          />
-        ))}
       </GoogleMap>
 
       {/* Climate Risk Legend */}
@@ -956,35 +897,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         </div>
       )}
 
-      {/* Measurement Display - positioned in center-left to avoid header */}
-      {showMeasurement && (
-        <div className="absolute top-1/3 left-4 z-[1001] bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-xl border border-emerald-200 max-w-[200px]">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
-              <span className="text-sm">📏</span>
-            </div>
-            <div>
-              <p className="text-[9px] text-gray-500 uppercase tracking-wider">Distance</p>
-              <p className="text-base font-bold text-emerald-600">{formatDistance(totalDistance)}</p>
-            </div>
-          </div>
-          <p className="text-[9px] text-gray-400 mb-2">Click map to add points ({measurementPoints.length})</p>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={clearMeasurement}
-              className="flex-1 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Clear
-            </button>
-            <button
-              onClick={() => { setShowMeasurement(false); clearMeasurement(); }}
-              className="flex-1 px-2 py-1 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Measurement Tool - with area calculation and save to profile */}
+      <GoogleMeasurementTool
+        map={map}
+        enabled={showMeasurement}
+        onClose={() => setShowMeasurement(false)}
+      />
 
       {/* Sun Arc Animation - shows sun/moon moving across the map */}
       {show3DBuildings && (
@@ -1121,7 +1039,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
               {/* Measure */}
               <button
-                onClick={() => { setShowMeasurement(!showMeasurement); if (showMeasurement) clearMeasurement(); }}
+                onClick={() => setShowMeasurement(!showMeasurement)}
                 className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${showMeasurement ? 'bg-emerald-600 text-white' : 'text-neutral-600 hover:bg-neutral-200'}`}
                 title="Measure Distance"
               >
