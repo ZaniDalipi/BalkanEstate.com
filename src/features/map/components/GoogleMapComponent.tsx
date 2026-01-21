@@ -491,6 +491,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setIsNightMode(!isDay);
   }, []);
 
+  // Adjust zoom when 3D buildings is toggled (3D buildings only work up to zoom 19)
+  useEffect(() => {
+    if (map && show3DBuildings) {
+      const currentZoom = map.getZoom();
+      if (currentZoom && currentZoom > 19) {
+        map.setZoom(19);
+      }
+    }
+  }, [map, show3DBuildings]);
+
   // Get current sun hour from dateTime
   const sunHour = useMemo(() => {
     return sunDateTime.getHours() + sunDateTime.getMinutes() / 60;
@@ -513,11 +523,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     mapTypeControl: false,
     scaleControl: true,
     streetViewControl: false,
-    rotateControl: false,
+    rotateControl: show3DBuildings, // Enable rotate control for 3D navigation
     fullscreenControl: false,
     restriction: { latLngBounds: BALKAN_BOUNDS, strictBounds: false },
     minZoom: 6,
-    maxZoom: 21,
+    maxZoom: show3DBuildings ? 19 : 21, // Limit zoom for 3D buildings (they disappear at high zoom)
     mapTypeId: mapType,
     gestureHandling: 'greedy',
     scrollwheel: true,
