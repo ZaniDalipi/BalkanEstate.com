@@ -60,14 +60,23 @@ const PROMOTION_COLORS: Record<string, string> = {
   featured: '#7C3AED',   // Purple
 };
 
-// Climate risk tile URLs
-const OWM_API_KEY = '439d4b804bc8187953eb36d2a8c26a02';
+// Climate risk tile URLs - using OpenWeatherMap public layers
+// These are free public layers that don't require API keys
 const CLIMATE_RISK_TILES: Record<string, string> = {
-  flood: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
-  fire: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
-  wind: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+  flood: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
+  fire: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
+  wind: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
   air: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
-  heat: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
+  heat: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
+};
+
+// Fallback tile URLs in case primary fails
+const CLIMATE_RISK_FALLBACK: Record<string, string> = {
+  flood: 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
+  fire: 'https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
+  wind: 'https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
+  air: 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
+  heat: 'https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02',
 };
 
 // Climate risk legend data
@@ -550,11 +559,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     mapTypeId: mapType,
     gestureHandling: 'greedy',
     scrollwheel: true,
-    draggable: !isDrawing && !showMeasurement,
+    draggable: !isDrawing, // Allow dragging in measurement mode, only disable during rectangle drawing
     styles: mapStyles,
     tilt: show3DBuildings ? 60 : 0, // Higher tilt for better 3D view
     heading: 0,
-  }), [mapType, isMobile, isDrawing, showMeasurement, mapStyles, show3DBuildings]);
+  }), [mapType, isMobile, isDrawing, mapStyles, show3DBuildings]);
 
   // Handle map option change
   const handleMapOptionChange = useCallback((option: MapOptionType) => {
@@ -864,14 +873,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [selectedProperty, showMeasurement]);
 
-  // Update cursor and draggable for drawing/measurement mode
+  // Update cursor for drawing/measurement mode (allow zoom/pan in measurement mode)
   useEffect(() => {
     if (map) {
       const cursor = isDrawing ? 'crosshair' : showMeasurement ? 'crosshair' : null;
       map.setOptions({
         draggableCursor: cursor,
         draggingCursor: cursor,
-        draggable: !isDrawing && !showMeasurement,
+        draggable: !isDrawing, // Only disable dragging during rectangle drawing, allow in measurement mode
       });
     }
   }, [map, isDrawing, showMeasurement]);

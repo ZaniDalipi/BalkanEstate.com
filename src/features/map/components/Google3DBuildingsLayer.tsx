@@ -15,7 +15,12 @@ interface Google3DBuildingsLayerProps {
 }
 
 // OSMBuildings tile server - same source as Leaflet version
-const OSMB_TILE_URL = 'https://data.osmbuildings.org/0.2/59fcc2e8/tile';
+// Using multiple subdomains for load balancing
+const OSMB_SUBDOMAINS = ['a', 'b', 'c', 'd'];
+const OSMB_TILE_URL_TEMPLATE = 'https://{s}.data.osmbuildings.org/0.2/59fcc2e8/tile';
+
+// Fallback to anonymous endpoint if API key doesn't work
+const OSMB_FALLBACK_URL = 'https://{s}.data.osmbuildings.org/0.2/anonymous/tile';
 
 // Cache for tile data
 const tileCache = new Map<string, GeoJSON.Feature[]>();
@@ -102,7 +107,54 @@ const latLngToTile = (lat: number, lng: number, zoom: number): { x: number; y: n
 };
 
 /**
- * Fetch building tile from OSMBuildings server
+ * Parse OSMBuildings tile data to GeoJSON features
+ */
+const parseOSMBuildingsData = (data: unknown): GeoJSON.Feature[] => {
+  const features: GeoJSON.Feature[] = [];
+
+  // OSMBuildings tile format: array of [footprint, height, minHeight, color, id]
+  // footprint is array of [lng, lat] pairs (flat array)
+  if (Array.isArray(data)) {
+    for (const building of data) {
+      if (!Array.isArray(building) || building.length < 2) continue;
+
+      const footprint = building[0];
+      const height = building[1] || 12;
+      const minHeight = building[2] || 0;
+
+      if (!Array.isArray(footprint) || footprint.length < 6) continue; // Need at least 3 points (6 values)
+
+      // Convert footprint to GeoJSON coordinates
+      const coordinates: [number, number][] = [];
+      for (let i = 0; i < footprint.length; i += 2) {
+        coordinates.push([footprint[i], footprint[i + 1]]);
+      }
+
+      // Close the polygon if needed
+      if (coordinates.length >= 3) {
+        const first = coordinates[0];
+        const last = coordinates[coordinates.length - 1];
+        if (first[0] !== last[0] || first[1] !== last[1]) {
+          coordinates.push([...first]);
+        }
+
+        features.push({
+          type: 'Feature',
+          properties: { height, minHeight },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [coordinates],
+          },
+        });
+      }
+    }
+  }
+
+  return features;
+};
+
+/**
+ * Fetch building tile from OSMBuildings server with fallback
  */
 const fetchTile = async (z: number, x: number, y: number): Promise<GeoJSON.Feature[]> => {
   const cacheKey = `${z}/${x}/${y}`;
@@ -111,65 +163,40 @@ const fetchTile = async (z: number, x: number, y: number): Promise<GeoJSON.Featu
     return tileCache.get(cacheKey)!;
   }
 
-  try {
-    const response = await fetch(`${OSMB_TILE_URL}/${z}/${x}/${y}.json`);
-    if (!response.ok) {
-      return [];
-    }
+  // Select subdomain based on tile coords for load balancing
+  const subdomain = OSMB_SUBDOMAINS[(x + y) % OSMB_SUBDOMAINS.length];
 
-    const data = await response.json();
-    const features: GeoJSON.Feature[] = [];
+  // Try primary URL first, then fallback
+  const urls = [
+    OSMB_TILE_URL_TEMPLATE.replace('{s}', subdomain) + `/${z}/${x}/${y}.json`,
+    OSMB_FALLBACK_URL.replace('{s}', subdomain) + `/${z}/${x}/${y}.json`,
+  ];
 
-    // OSMBuildings tile format: array of [footprint, height, minHeight, color, id]
-    // footprint is array of [lng, lat] pairs
-    if (Array.isArray(data)) {
-      for (const building of data) {
-        if (!Array.isArray(building) || building.length < 2) continue;
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) continue;
 
-        const footprint = building[0];
-        const height = building[1] || 12;
-        const minHeight = building[2] || 0;
+      const data = await response.json();
+      const features = parseOSMBuildingsData(data);
 
-        if (!Array.isArray(footprint) || footprint.length < 4) continue;
-
-        // Convert footprint to GeoJSON coordinates
-        const coordinates: [number, number][] = [];
-        for (let i = 0; i < footprint.length; i += 2) {
-          coordinates.push([footprint[i], footprint[i + 1]]);
-        }
-
-        // Close the polygon if needed
-        if (coordinates.length >= 3) {
-          const first = coordinates[0];
-          const last = coordinates[coordinates.length - 1];
-          if (first[0] !== last[0] || first[1] !== last[1]) {
-            coordinates.push([...first]);
-          }
-
-          features.push({
-            type: 'Feature',
-            properties: { height, minHeight },
-            geometry: {
-              type: 'Polygon',
-              coordinates: [coordinates],
-            },
-          });
-        }
+      // Cache even if empty to avoid repeated requests
+      if (tileCache.size > 100) {
+        const firstKey = tileCache.keys().next().value;
+        if (firstKey) tileCache.delete(firstKey);
       }
-    }
 
-    // Limit cache size
-    if (tileCache.size > 50) {
-      const firstKey = tileCache.keys().next().value;
-      if (firstKey) tileCache.delete(firstKey);
+      tileCache.set(cacheKey, features);
+      return features;
+    } catch {
+      // Try next URL
+      continue;
     }
-
-    tileCache.set(cacheKey, features);
-    return features;
-  } catch (error) {
-    console.warn('Failed to fetch building tile:', error);
-    return [];
   }
+
+  // All URLs failed, cache empty result
+  tileCache.set(cacheKey, []);
+  return [];
 };
 
 /**
