@@ -212,7 +212,7 @@ interface PropertyMarkerProps {
   onClick: () => void;
 }
 
-const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = React.memo(({ property, isHovered, onClick }) => {
+const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHovered, onClick }) => {
   const price = formatMarkerPrice(property.price);
   const baseColor = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
 
@@ -305,18 +305,7 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = React.memo(({ prope
       </div>
     </OverlayView>
   );
-}, (prevProps, nextProps) => {
-  // Only re-render if these specific props change
-  return (
-    prevProps.property.id === nextProps.property.id &&
-    prevProps.property.price === nextProps.property.price &&
-    prevProps.property.lat === nextProps.property.lat &&
-    prevProps.property.lng === nextProps.property.lng &&
-    prevProps.property.isPromoted === nextProps.property.isPromoted &&
-    prevProps.property.promotionTier === nextProps.property.promotionTier &&
-    prevProps.isHovered === nextProps.isHovered
-  );
-});
+};
 
 // Property Legend Component
 const Legend: React.FC = () => (
