@@ -1,6 +1,6 @@
 /**
  * Google3DBuildingsLayer Component
- * Renders 3D building extrusions using OSM Buildings tile service
+ * Renders 3D building extrusions using Overpass API with tile-based caching
  * Style inspired by OneGeo
  */
 
@@ -15,11 +15,15 @@ interface Google3DBuildingsLayerProps {
   dateTime?: Date;
 }
 
-// OSM Buildings tile servers (load balanced)
-const TILE_SERVERS = ['a', 'b', 'c'];
+// Overpass API endpoints (multiple for fallback)
+const OVERPASS_ENDPOINTS = [
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+];
 
-// Cache for building tiles
-const tileCache = new Map<string, GeoJSON.Feature[]>();
+// Cache for building data
+const buildingCache = new Map<string, GeoJSON.Feature[]>();
 
 /**
  * Convert lat/lng to tile coordinates
@@ -45,83 +49,121 @@ const tileToBounds = (x: number, y: number, zoom: number): { north: number; sout
 };
 
 /**
- * Fetch a single tile from OSM Buildings
+ * Fetch buildings from Overpass API for a tile
  */
-const fetchTile = async (x: number, y: number, zoom: number = 15): Promise<GeoJSON.Feature[]> => {
+const fetchTileFromOverpass = async (x: number, y: number, zoom: number = 15): Promise<GeoJSON.Feature[]> => {
   const cacheKey = `${zoom}/${x}/${y}`;
 
-  if (tileCache.has(cacheKey)) {
-    return tileCache.get(cacheKey)!;
+  if (buildingCache.has(cacheKey)) {
+    return buildingCache.get(cacheKey)!;
   }
 
-  // Use random server for load balancing
-  const server = TILE_SERVERS[Math.floor(Math.random() * TILE_SERVERS.length)];
-  const url = `https://${server}.data.osmbuildings.org/0.2/anonymous/tile/${zoom}/${x}/${y}.json`;
+  const bounds = tileToBounds(x, y, zoom);
+  const query = `
+[out:json][timeout:15];
+(
+  way["building"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+);
+out body;
+>;
+out skel qt;
+`.trim();
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `data=${encodeURIComponent(query)}`,
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      return [];
+      clearTimeout(timeoutId);
+
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      const features = parseOverpassResponse(data);
+
+      // Cache with size limit
+      if (buildingCache.size > 100) {
+        const firstKey = buildingCache.keys().next().value;
+        if (firstKey) buildingCache.delete(firstKey);
+      }
+      buildingCache.set(cacheKey, features);
+
+      return features;
+    } catch {
+      continue;
     }
+  }
 
-    const data = await response.json();
-    const features: GeoJSON.Feature[] = data.features || [];
+  return [];
+};
 
-    // Process features to ensure height data
-    const processedFeatures = features.map((f: GeoJSON.Feature) => {
-      const props = f.properties || {};
-      let height = 12; // Default height
+/**
+ * Parse Overpass response to GeoJSON features
+ */
+const parseOverpassResponse = (data: any): GeoJSON.Feature[] => {
+  const features: GeoJSON.Feature[] = [];
+  const nodes = new Map<number, [number, number]>();
 
-      if (props.height) {
-        height = parseFloat(props.height) || 12;
-      } else if (props.levels) {
-        height = (parseInt(props.levels) || 4) * 3;
-      } else if (props.building) {
-        // Estimate height based on building type
-        const type = props.building;
-        if (type === 'house' || type === 'detached' || type === 'residential') height = 9;
-        else if (type === 'apartments' || type === 'dormitory') height = 18;
-        else if (type === 'commercial' || type === 'office') height = 15;
-        else if (type === 'industrial' || type === 'warehouse') height = 10;
-        else if (type === 'church' || type === 'cathedral') height = 25;
-        else if (type === 'garage' || type === 'shed') height = 4;
+  for (const element of data.elements || []) {
+    if (element.type === 'node') {
+      nodes.set(element.id, [element.lon, element.lat]);
+    }
+  }
+
+  for (const element of data.elements || []) {
+    if (element.type === 'way' && element.nodes && element.nodes.length >= 4) {
+      const coordinates: [number, number][] = [];
+
+      for (const nodeId of element.nodes) {
+        const coord = nodes.get(nodeId);
+        if (coord) coordinates.push(coord);
       }
 
-      return {
-        ...f,
-        properties: { ...props, height },
-      };
-    });
+      if (coordinates.length >= 4) {
+        const tags = element.tags || {};
+        let height = 12;
 
-    // Cache with size limit
-    if (tileCache.size > 100) {
-      const firstKey = tileCache.keys().next().value;
-      if (firstKey) tileCache.delete(firstKey);
+        if (tags.height) {
+          height = parseFloat(tags.height) || 12;
+        } else if (tags['building:levels']) {
+          height = (parseInt(tags['building:levels']) || 4) * 3;
+        } else {
+          const type = tags.building;
+          if (type === 'house' || type === 'detached' || type === 'residential') height = 9;
+          else if (type === 'apartments' || type === 'dormitory') height = 18;
+          else if (type === 'commercial' || type === 'office') height = 15;
+          else if (type === 'industrial' || type === 'warehouse') height = 10;
+          else if (type === 'church' || type === 'cathedral') height = 25;
+          else if (type === 'garage' || type === 'shed') height = 4;
+        }
+
+        features.push({
+          type: 'Feature',
+          properties: { height, type: tags.building || 'yes' },
+          geometry: { type: 'Polygon', coordinates: [coordinates] },
+        });
+      }
     }
-    tileCache.set(cacheKey, processedFeatures);
-
-    return processedFeatures;
-  } catch {
-    return [];
   }
+
+  return features;
 };
 
 /**
  * Fetch all tiles for the visible area
  */
-const fetchTilesForBounds = async (
-  bounds: google.maps.LatLngBounds,
-  zoom: number = 15
-): Promise<GeoJSON.Feature[]> => {
+const fetchTilesForBounds = async (bounds: google.maps.LatLngBounds): Promise<GeoJSON.Feature[]> => {
   const sw = bounds.getSouthWest();
   const ne = bounds.getNorthEast();
+  const zoom = 15;
 
-  // Get tile range
   const swTile = latLngToTile(sw.lat(), sw.lng(), zoom);
   const neTile = latLngToTile(ne.lat(), ne.lng(), zoom);
 
@@ -130,23 +172,20 @@ const fetchTilesForBounds = async (
   const minY = Math.min(swTile.y, neTile.y);
   const maxY = Math.max(swTile.y, neTile.y);
 
-  // Limit tile count to prevent too many requests
+  // Limit tile count
   const tileCount = (maxX - minX + 1) * (maxY - minY + 1);
-  if (tileCount > 16) {
-    // Too many tiles, reduce area
-    return [];
-  }
+  if (tileCount > 9) return [];
 
-  // Fetch all tiles in parallel
+  // Fetch tiles in parallel
   const tilePromises: Promise<GeoJSON.Feature[]>[] = [];
   for (let x = minX; x <= maxX; x++) {
     for (let y = minY; y <= maxY; y++) {
-      tilePromises.push(fetchTile(x, y, zoom));
+      tilePromises.push(fetchTileFromOverpass(x, y, zoom));
     }
   }
 
-  const tileResults = await Promise.all(tilePromises);
-  return tileResults.flat();
+  const results = await Promise.all(tilePromises);
+  return results.flat();
 };
 
 const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
@@ -207,8 +246,12 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       return;
     }
 
-    // Create bounds key to check if we need to reload
-    const boundsKey = `${bounds.getSouthWest().lat().toFixed(4)},${bounds.getSouthWest().lng().toFixed(4)},${bounds.getNorthEast().lat().toFixed(4)},${bounds.getNorthEast().lng().toFixed(4)}`;
+    // Create bounds key based on tiles to check if we need to reload
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    const swTile = latLngToTile(sw.lat(), sw.lng(), 15);
+    const neTile = latLngToTile(ne.lat(), ne.lng(), 15);
+    const boundsKey = `${swTile.x},${swTile.y}-${neTile.x},${neTile.y}`;
 
     if (boundsKey === lastBoundsRef.current) return;
     if (loadingRef.current) return;
@@ -217,7 +260,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     lastBoundsRef.current = boundsKey;
 
     try {
-      const features = await fetchTilesForBounds(bounds, 15);
+      const features = await fetchTilesForBounds(bounds);
       if (features.length > 0) {
         setBuildings(features);
       }
