@@ -430,6 +430,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [showCadastre, setShowCadastre] = useState(false);
   const [currentCadastreLayer, setCurrentCadastreLayer] = useState<CadastreLayerConfig | undefined>(undefined);
   const [showMeasurement, setShowMeasurement] = useState(false);
+  const [measurementSessionKey, setMeasurementSessionKey] = useState(0); // Forces remount of measurement components
   const [showPromotedOnly, setShowPromotedOnly] = useState(false);
   const [selectedMapOption, setSelectedMapOption] = useState<MapOptionType>('streetview');
   const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
@@ -451,6 +452,21 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   // Measurement tool state (using hook for shared state)
   const measurementTool = useMeasurementTool(map, showMeasurement);
 
+  // Increment session key when measurement is disabled or cleared to force cleanup
+  const prevShowMeasurement = useRef(showMeasurement);
+  const prevPointsLength = useRef(measurementTool.points.length);
+  useEffect(() => {
+    // If measurement was enabled and is now disabled, increment key
+    if (prevShowMeasurement.current && !showMeasurement) {
+      setMeasurementSessionKey(k => k + 1);
+    }
+    // If points were > 0 and are now 0 (cleared), increment key
+    if (prevPointsLength.current > 0 && measurementTool.points.length === 0) {
+      setMeasurementSessionKey(k => k + 1);
+    }
+    prevShowMeasurement.current = showMeasurement;
+    prevPointsLength.current = measurementTool.points.length;
+  }, [showMeasurement, measurementTool.points.length]);
 
   // Climate overlay ref
   const climateOverlayRef = useRef<google.maps.ImageMapType | null>(null);
@@ -1187,6 +1203,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             {/* Measurement polygon (when closed) */}
             {measurementTool.isPolygonClosed ? (
               <Polygon
+                key={`measure-polygon-s${measurementSessionKey}-p${measurementTool.points.length}`}
                 paths={measurementTool.points.map(p => ({ lat: p.lat, lng: p.lng }))}
                 options={{
                   fillColor: '#0252CD',
@@ -1201,6 +1218,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 {/* Measurement polyline */}
                 {measurementTool.points.length > 1 && (
                   <Polyline
+                    key={`measure-line-s${measurementSessionKey}-p${measurementTool.points.length}`}
                     path={measurementTool.points.map(p => ({ lat: p.lat, lng: p.lng }))}
                     options={{
                       strokeColor: '#0252CD',
@@ -1212,6 +1230,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 {/* Preview closing line when 3+ points */}
                 {measurementTool.points.length >= 3 && (
                   <Polyline
+                    key={`measure-preview-s${measurementSessionKey}-p${measurementTool.points.length}`}
                     path={[
                       { lat: measurementTool.points[measurementTool.points.length - 1].lat, lng: measurementTool.points[measurementTool.points.length - 1].lng },
                       { lat: measurementTool.points[0].lat, lng: measurementTool.points[0].lng }
@@ -1230,7 +1249,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             {/* Measurement point markers */}
             {measurementTool.points.map((point, index) => (
               <Marker
-                key={`measure-point-${index}`}
+                key={`measure-point-s${measurementSessionKey}-${index}`}
                 position={{ lat: point.lat, lng: point.lng }}
                 icon={{
                   path: google.maps.SymbolPath.CIRCLE,
