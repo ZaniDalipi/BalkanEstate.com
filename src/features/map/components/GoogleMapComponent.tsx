@@ -715,7 +715,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     };
   }, []);
 
-  // Handle fly to target - Google Earth style animation
+  // Handle fly to target - smooth animation like Leaflet
   useEffect(() => {
     if (!map || !flyToTarget) return;
 
@@ -732,94 +732,61 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       return;
     }
 
-    // Calculate distance between current and target
-    const currentLat = currentCenter.lat();
-    const currentLng = currentCenter.lng();
-    const latDiff = Math.abs(targetLat - currentLat);
-    const lngDiff = Math.abs(targetLng - currentLng);
+    const startLat = currentCenter.lat();
+    const startLng = currentCenter.lng();
+    const startZoom = currentZoom;
+
+    // Calculate distance to determine animation behavior
+    const latDiff = Math.abs(targetLat - startLat);
+    const lngDiff = Math.abs(targetLng - startLng);
     const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
 
-    // For very short distances, just pan smoothly
-    if (distance < 0.5 && Math.abs(currentZoom - targetZoom) < 4) {
-      map.panTo({ lat: targetLat, lng: targetLng });
-      setTimeout(() => {
-        map.setZoom(targetZoom);
-        const listener = map.addListener('idle', () => {
-          onFlyComplete();
-          google.maps.event.removeListener(listener);
-        });
-      }, 300);
-      return;
-    }
+    // Duration: 2.5s like Leaflet default
+    const duration = 2500;
 
-    // Google Earth style: zoom out -> fly -> zoom in
-    // Calculate "cruise altitude" based on distance
-    const cruiseZoom = Math.max(
-      4, // Never go below zoom 4
-      Math.min(
-        currentZoom - 2,
-        Math.round(10 - Math.log2(distance + 1) * 2)
-      )
-    );
+    // Calculate zoom dip - zoom out during flight, more for longer distances
+    const zoomDip = Math.min(4, Math.max(0.5, Math.log2(distance + 1) * 1.2));
+    const minZoom = Math.max(4, Math.min(startZoom, targetZoom) - zoomDip);
 
-    let phase = 0; // 0: zoom out, 1: fly, 2: zoom in
     let animationFrame: number;
-    let startTime: number;
+    let startTime: number | null = null;
 
-    const zoomOutDuration = 600; // ms
-    const flyDuration = 1200; // ms
-    const zoomInDuration = 800; // ms
-
-    // Easing function for smooth animation
-    const easeInOutCubic = (t: number): number => {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    // Smooth easing function (same as Leaflet)
+    const easeInOutQuad = (t: number): number => {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     };
 
     const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
+      if (startTime === null) startTime = timestamp;
       const elapsed = timestamp - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const easedProgress = easeInOutQuad(progress);
 
-      if (phase === 0) {
-        // Phase 1: Zoom out
-        const progress = Math.min(1, elapsed / zoomOutDuration);
-        const easedProgress = easeInOutCubic(progress);
-        const newZoom = currentZoom + (cruiseZoom - currentZoom) * easedProgress;
-        map.setZoom(newZoom);
+      // Interpolate position
+      const lat = startLat + (targetLat - startLat) * easedProgress;
+      const lng = startLng + (targetLng - startLng) * easedProgress;
 
-        if (progress >= 1) {
-          phase = 1;
-          startTime = timestamp;
-        }
+      // Zoom follows a curve: start -> dip down -> end
+      // Parabola peaks at progress=0.5
+      const zoomCurve = 1 - 4 * Math.pow(progress - 0.5, 2);
+      const zoomDipAmount = zoomDip * zoomCurve;
+      const linearZoom = startZoom + (targetZoom - startZoom) * easedProgress;
+      const zoom = linearZoom - zoomDipAmount;
+
+      map.moveCamera({
+        center: { lat, lng },
+        zoom: Math.max(minZoom, zoom),
+      });
+
+      if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
-      } else if (phase === 1) {
-        // Phase 2: Fly to target
-        const progress = Math.min(1, elapsed / flyDuration);
-        const easedProgress = easeInOutCubic(progress);
-
-        const lat = currentLat + (targetLat - currentLat) * easedProgress;
-        const lng = currentLng + (targetLng - currentLng) * easedProgress;
-        map.setCenter({ lat, lng });
-
-        if (progress >= 1) {
-          phase = 2;
-          startTime = timestamp;
-        }
-        animationFrame = requestAnimationFrame(animate);
-      } else if (phase === 2) {
-        // Phase 3: Zoom in
-        const progress = Math.min(1, elapsed / zoomInDuration);
-        const easedProgress = easeInOutCubic(progress);
-        const newZoom = cruiseZoom + (targetZoom - cruiseZoom) * easedProgress;
-        map.setZoom(newZoom);
-
-        if (progress >= 1) {
-          // Animation complete
-          map.setCenter({ lat: targetLat, lng: targetLng });
-          map.setZoom(targetZoom);
-          onFlyComplete();
-        } else {
-          animationFrame = requestAnimationFrame(animate);
-        }
+      } else {
+        // Ensure we end exactly at target
+        map.moveCamera({
+          center: { lat: targetLat, lng: targetLng },
+          zoom: targetZoom,
+        });
+        onFlyComplete();
       }
     };
 
