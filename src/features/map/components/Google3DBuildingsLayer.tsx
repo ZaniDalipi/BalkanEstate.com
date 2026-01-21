@@ -202,20 +202,20 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     ];
   }, [dateTime, enabled]);
 
-  // Create clean, modern lighting effect
+  // Create lighting effect optimized for warm building colors
   const lightingEffect = useMemo(() => {
     if (!enabled) return null;
 
-    // Soft ambient light - simulates sky dome
+    // Ambient light - provides base illumination
     const ambientLight = new AmbientLight({
       color: [255, 255, 255],
-      intensity: 0.7,
+      intensity: 0.5,
     });
 
-    // Main directional light - sun
+    // Main directional light - sun with warm tint
     const sunLight = new DirectionalLight({
-      color: [255, 250, 240],
-      intensity: 1.0,
+      color: [255, 248, 235],
+      intensity: 1.4,
       direction: sunDirection,
     });
 
@@ -300,7 +300,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
     const layers = [];
 
-    // Building layer - clean, modern style
+    // Building layer - warm beige/tan style like OneGeo/MapLibre
     if (buildings.length > 0) {
       layers.push(
         new GeoJsonLayer({
@@ -309,25 +309,19 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           filled: true,
           extruded: true,
           wireframe: false,
-          opacity: 0.9,
+          opacity: 1,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
-          // Clean white/light gray color scheme
-          getFillColor: (f: GeoJSON.Feature) => {
-            const height = (f.properties?.height as number) || 12;
-            // Subtle color variation based on height
-            const base = 235;
-            const variation = Math.min(20, height * 0.5);
-            return [base - variation, base - variation, base - variation * 0.8, 255];
-          },
-          // Subtle edge highlighting
-          getLineColor: [200, 200, 205, 255],
+          // Warm beige/tan color - classic OSMBuildings/MapLibre style
+          getFillColor: [232, 215, 190, 255], // Warm beige
+          // Darker tan edge for definition
+          getLineColor: [195, 175, 150, 255],
           lineWidthMinPixels: 1,
-          // Material for nice lighting response
+          // Material optimized for warm natural look
           material: {
-            ambient: 0.6,
-            diffuse: 0.5,
-            shininess: 32,
-            specularColor: [255, 255, 255],
+            ambient: 0.35,
+            diffuse: 0.8,
+            shininess: 5,
+            specularColor: [30, 30, 20],
           },
           pickable: false,
         })
