@@ -1,13 +1,13 @@
 /**
  * Google3DBuildingsLayer Component
- * Renders 3D building extrusions on Google Maps using deck.gl
- * Enhanced sun lighting system for realistic building illumination
+ * Renders clean, modern 3D building extrusions on Google Maps using deck.gl
+ * Inspired by Apple Maps / Google Maps 3D building style
  */
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { GoogleMapsOverlay } from '@deck.gl/google-maps';
-import { GeoJsonLayer, PolygonLayer } from '@deck.gl/layers';
-import { AmbientLight, DirectionalLight, LightingEffect, _SunLight as SunLight } from '@deck.gl/core';
+import { GeoJsonLayer } from '@deck.gl/layers';
+import { AmbientLight, DirectionalLight, LightingEffect } from '@deck.gl/core';
 
 interface Google3DBuildingsLayerProps {
   map: google.maps.Map | null;
@@ -138,7 +138,7 @@ const fetchBuildings = async (
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per endpoint
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -149,7 +149,6 @@ const fetchBuildings = async (
 
       clearTimeout(timeoutId);
 
-      // Skip to next endpoint on server errors
       if (!response.ok) {
         console.warn(`Overpass endpoint ${endpoint} returned ${response.status}, trying next...`);
         continue;
@@ -173,56 +172,6 @@ const fetchBuildings = async (
   return [];
 };
 
-/**
- * Calculate shadow polygons based on sun position
- * Creates realistic cast shadows that vary with sun altitude
- */
-const calculateShadowPolygons = (
-  buildings: GeoJSON.Feature[],
-  sunAzimuth: number,
-  sunAltitude: number,
-  hour: number
-): Array<{ polygon: [number, number][]; opacity: number }> => {
-  const shadows: Array<{ polygon: [number, number][]; opacity: number }> = [];
-
-  // Shadow length based on sun altitude (longer shadows at low sun angles)
-  // At 60° altitude: short shadows, at 15° altitude: long shadows
-  const shadowMultiplier = 1 / Math.tan(Math.max(0.2, sunAltitude));
-  const baseOffset = 0.00006;
-
-  // Shadow direction - opposite of sun direction
-  const dx = Math.sin(sunAzimuth) * shadowMultiplier * baseOffset;
-  const dy = -Math.cos(sunAzimuth) * shadowMultiplier * baseOffset;
-
-  // Shadow opacity varies with time - darker at midday, softer at golden hour
-  const hourFromNoon = Math.abs(hour - 12);
-  const baseOpacity = hourFromNoon > 4 ? 0.25 : 0.4;
-
-  for (const building of buildings) {
-    const height = (building.properties?.height as number) || 12;
-    const coords = (building.geometry as any).coordinates[0] as [number, number][];
-    if (!coords || coords.length < 4) continue;
-
-    // Height affects shadow length (taller buildings cast longer shadows)
-    const heightFactor = Math.sqrt(height) / 2.5;
-    const shadowDx = dx * heightFactor;
-    const shadowDy = dy * heightFactor;
-
-    // Create shadow as offset footprint
-    const shadowPolygon: [number, number][] = coords.map(([lng, lat]) => [
-      lng + shadowDx,
-      lat + shadowDy,
-    ]);
-
-    shadows.push({
-      polygon: shadowPolygon,
-      opacity: baseOpacity,
-    });
-  }
-
-  return shadows;
-};
-
 const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   map,
   enabled,
@@ -230,101 +179,48 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 }) => {
   const overlayRef = useRef<GoogleMapsOverlay | null>(null);
   const [buildings, setBuildings] = useState<GeoJSON.Feature[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const lastFetchBoundsRef = useRef<{ south: number; west: number; north: number; east: number } | null>(null);
   const loadingRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Calculate sun position from time with realistic solar angles
-  const sunPosition = useMemo(() => {
-    if (!enabled) return { azimuth: Math.PI * 0.75, altitude: Math.PI / 4, hour: 12 };
+  // Calculate sun direction based on time
+  const sunDirection = useMemo((): [number, number, number] => {
+    if (!enabled) return [-1, -1, -2];
 
     const dt = dateTime || new Date();
     const hour = dt.getHours() + dt.getMinutes() / 60;
-    // Clamp to daytime (6am - 6pm) for good visibility
-    const clampedHour = Math.max(6, Math.min(18, hour));
+    const clampedHour = Math.max(7, Math.min(17, hour));
 
-    // Sun azimuth: East (6am) -> South (12pm) -> West (6pm)
-    // 0 = North, PI/2 = East, PI = South, 3PI/2 = West
-    const azimuth = Math.PI * (0.5 + (clampedHour - 6) / 12);
+    // Sun moves from east to west
+    const angle = ((clampedHour - 6) / 12) * Math.PI;
+    const altitude = Math.PI / 4; // 45 degree elevation
 
-    // Sun altitude: peaks at noon (~60°), lower at morning/evening (~15°)
-    const hourFromNoon = Math.abs(clampedHour - 12);
-    const maxAltitude = Math.PI / 3; // 60 degrees at noon
-    const minAltitude = Math.PI / 12; // 15 degrees at sunrise/sunset
-    const altitude = maxAltitude - (hourFromNoon / 6) * (maxAltitude - minAltitude);
-
-    return { azimuth, altitude, hour: clampedHour };
+    return [
+      Math.sin(angle) * Math.cos(altitude),
+      -Math.cos(angle) * Math.cos(altitude),
+      -Math.sin(altitude),
+    ];
   }, [dateTime, enabled]);
 
-  // Calculate sun color temperature based on time (warmer at sunrise/sunset)
-  const sunColor = useMemo((): [number, number, number] => {
-    const { hour } = sunPosition;
-    const hourFromNoon = Math.abs(hour - 12);
-
-    if (hourFromNoon > 5) {
-      // Golden hour - warm orange
-      return [255, 200, 150];
-    } else if (hourFromNoon > 3) {
-      // Late afternoon/early morning - warm yellow
-      return [255, 240, 210];
-    } else {
-      // Midday - neutral white with slight warmth
-      return [255, 252, 248];
-    }
-  }, [sunPosition]);
-
-  // Create comprehensive lighting effect for realistic sun illumination
+  // Create clean, modern lighting effect
   const lightingEffect = useMemo(() => {
     if (!enabled) return null;
 
-    const { azimuth, altitude } = sunPosition;
-
-    // Sky light - cool blue ambient from above (simulates sky dome)
-    const skyLight = new AmbientLight({
-      color: [220, 235, 255], // Slight blue tint
-      intensity: 0.35,
+    // Soft ambient light - simulates sky dome
+    const ambientLight = new AmbientLight({
+      color: [255, 255, 255],
+      intensity: 0.7,
     });
 
-    // Calculate sun direction vector
-    const sunDirection: [number, number, number] = [
-      Math.sin(azimuth) * Math.cos(altitude),
-      -Math.cos(azimuth) * Math.cos(altitude),
-      -Math.sin(altitude),
-    ];
-
-    // Primary sun light - warm directional
+    // Main directional light - sun
     const sunLight = new DirectionalLight({
-      color: sunColor,
-      intensity: 1.8, // Strong for dramatic contrast
+      color: [255, 250, 240],
+      intensity: 1.0,
       direction: sunDirection,
     });
 
-    // Fill light - subtle bounce light from opposite direction (ground reflection)
-    const bounceDirection: [number, number, number] = [
-      -sunDirection[0] * 0.5,
-      -sunDirection[1] * 0.5,
-      0.3, // Slight upward angle (bouncing off ground)
-    ];
-
-    const bounceLight = new DirectionalLight({
-      color: [200, 190, 180], // Warm neutral (ground reflection)
-      intensity: 0.25,
-      direction: bounceDirection,
-    });
-
-    return new LightingEffect({
-      ambientLight: skyLight,
-      directionalLight: sunLight,
-      directionalLight2: bounceLight,
-    });
-  }, [sunPosition, sunColor, enabled]);
-
-  // Calculate shadow polygons
-  const shadowPolygons = useMemo(() => {
-    if (!enabled || buildings.length === 0) return [];
-    return calculateShadowPolygons(buildings, sunPosition.azimuth, sunPosition.altitude, sunPosition.hour);
-  }, [buildings, sunPosition, enabled]);
+    return new LightingEffect({ ambientLight, sunLight });
+  }, [sunDirection, enabled]);
 
   // Check if viewport is within fetched bounds
   const isWithinFetchedBounds = useCallback((bounds: google.maps.LatLngBounds): boolean => {
@@ -352,7 +248,6 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     if (loadingRef.current) return;
 
     loadingRef.current = true;
-    if (buildings.length === 0) setIsLoading(true);
 
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
@@ -368,7 +263,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       );
 
       if (features.length > 0) {
-        setBuildings(features); // Replace instead of merge to reduce flickering
+        setBuildings(features);
         lastFetchBoundsRef.current = {
           south: sw.lat() - latPadding,
           west: sw.lng() - lngPadding,
@@ -380,7 +275,6 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       // Ignore errors
     } finally {
       loadingRef.current = false;
-      setIsLoading(false);
     }
   }, [map, enabled, buildings.length, isWithinFetchedBounds]);
 
@@ -406,36 +300,8 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
     const layers = [];
 
-    // Determine shadow color based on time of day
-    const { hour } = sunPosition;
-    const hourFromNoon = Math.abs(hour - 12);
-    // Warmer shadow color during golden hour, cooler at midday
-    const shadowColor: [number, number, number, number] = hourFromNoon > 4
-      ? [40, 30, 50, 70]  // Purple-ish at golden hour
-      : [25, 30, 45, 90]; // Blue-ish at midday (stronger)
-
-    // Shadow layer - rendered first (below buildings)
-    if (shadowPolygons.length > 0) {
-      layers.push(
-        new PolygonLayer({
-          id: 'building-shadows',
-          data: shadowPolygons,
-          getPolygon: (d: { polygon: [number, number][] }) => d.polygon,
-          getFillColor: shadowColor,
-          filled: true,
-          stroked: false,
-          extruded: false,
-          pickable: false,
-        })
-      );
-    }
-
-    // Building layer with enhanced material for realistic sun response
+    // Building layer - clean, modern style
     if (buildings.length > 0) {
-      // Base wall color - warm terracotta that responds well to directional lighting
-      // The lighting system will make sun-facing sides brighter and shadow sides darker
-      const wallColor: [number, number, number] = [215, 165, 135];
-
       layers.push(
         new GeoJsonLayer({
           id: '3d-buildings',
@@ -443,20 +309,25 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           filled: true,
           extruded: true,
           wireframe: false,
-          opacity: 1,
+          opacity: 0.9,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
-          getFillColor: wallColor,
-          getLineColor: [140, 110, 85, 255], // Darker edge lines
+          // Clean white/light gray color scheme
+          getFillColor: (f: GeoJSON.Feature) => {
+            const height = (f.properties?.height as number) || 12;
+            // Subtle color variation based on height
+            const base = 235;
+            const variation = Math.min(20, height * 0.5);
+            return [base - variation, base - variation, base - variation * 0.8, 255];
+          },
+          // Subtle edge highlighting
+          getLineColor: [200, 200, 205, 255],
           lineWidthMinPixels: 1,
-          // Material settings optimized for directional lighting visibility
-          // High diffuse = surfaces respond strongly to light direction
-          // Low ambient = shadow sides stay dark
-          // This creates strong contrast between sun-facing and shadow-facing sides
+          // Material for nice lighting response
           material: {
-            ambient: 0.25,  // Low ambient - shadow sides stay dark
-            diffuse: 0.85,  // High diffuse - strong response to sun direction
-            shininess: 12,  // Slight shininess for roof highlights
-            specularColor: [80, 70, 60], // Warm specular
+            ambient: 0.6,
+            diffuse: 0.5,
+            shininess: 32,
+            specularColor: [255, 255, 255],
           },
           pickable: false,
         })
@@ -467,38 +338,28 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       layers,
       effects: lightingEffect ? [lightingEffect] : [],
     });
-  }, [map, enabled, buildings, shadowPolygons, lightingEffect, sunPosition]);
+  }, [map, enabled, buildings, lightingEffect]);
 
   // Map listeners
   useEffect(() => {
     if (!map || !enabled) return;
-    loadBuildings();
+
     const idleListener = map.addListener('idle', debouncedLoad);
+    debouncedLoad();
+
     return () => {
       google.maps.event.removeListener(idleListener);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [map, enabled, loadBuildings, debouncedLoad]);
+  }, [map, enabled, debouncedLoad]);
 
-  // Cleanup
+  // Cleanup on disable
   useEffect(() => {
-    return () => {
-      if (overlayRef.current) {
-        overlayRef.current.setMap(null);
-        overlayRef.current = null;
-      }
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
-  if (enabled && isLoading) {
-    return (
-      <div className="absolute top-24 left-4 z-[1000] bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg flex items-center gap-2">
-        <div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-medium text-amber-800">Loading 3D buildings...</span>
-      </div>
-    );
-  }
+    if (!enabled) {
+      setBuildings([]);
+      lastFetchBoundsRef.current = null;
+    }
+  }, [enabled]);
 
   return null;
 };
