@@ -452,6 +452,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // Refs
   const moveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initialCenterSetRef = useRef(false);
+  const initialCenterRef = useRef<{ lat: number; lng: number } | null>(null);
 
   // Load Google Maps API
   const { isLoaded, loadError } = useJsApiLoader({
@@ -460,11 +462,23 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     libraries,
   });
 
-  // Initial center and zoom
+  // Initial center and zoom - only set ONCE, don't re-center when userLocation changes
   const { center, initialZoom } = useMemo(() => {
-    if (userLocation) {
-      return { center: { lat: userLocation[0], lng: userLocation[1] }, initialZoom: 13 };
+    // If we already set initial center, keep using it (don't recenter)
+    if (initialCenterSetRef.current && initialCenterRef.current) {
+      return { center: initialCenterRef.current, initialZoom: 7 };
     }
+
+    // First time setup
+    if (userLocation) {
+      const newCenter = { lat: userLocation[0], lng: userLocation[1] };
+      initialCenterRef.current = newCenter;
+      initialCenterSetRef.current = true;
+      return { center: newCenter, initialZoom: 13 };
+    }
+
+    initialCenterRef.current = defaultCenter;
+    initialCenterSetRef.current = true;
     return { center: defaultCenter, initialZoom: 7 };
   }, [userLocation]);
 
