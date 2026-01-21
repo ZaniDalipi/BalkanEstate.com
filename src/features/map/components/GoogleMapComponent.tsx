@@ -496,13 +496,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setIsNightMode(!isDay);
   }, []);
 
-  // Adjust zoom when 3D buildings is toggled (3D buildings only work up to zoom 19)
+  // Apply tilt when 3D buildings is toggled
   useEffect(() => {
     if (map && show3DBuildings) {
-      const currentZoom = map.getZoom();
-      if (currentZoom && currentZoom > 19) {
-        map.setZoom(19);
-      }
+      // Set tilt for 3D view
+      map.setTilt(60);
+    } else if (map) {
+      map.setTilt(0);
     }
   }, [map, show3DBuildings]);
 
@@ -532,13 +532,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     fullscreenControl: false,
     restriction: { latLngBounds: BALKAN_BOUNDS, strictBounds: false },
     minZoom: 6,
-    maxZoom: show3DBuildings ? 19 : 21, // Limit zoom for 3D buildings (they disappear at high zoom)
+    maxZoom: 21, // No limit on zoom
     mapTypeId: mapType,
     gestureHandling: 'greedy',
     scrollwheel: true,
     draggable: !isDrawing && !showMeasurement,
     styles: mapStyles,
-    tilt: show3DBuildings ? 45 : 0,
+    tilt: show3DBuildings ? 60 : 0, // Higher tilt for better 3D view
     heading: 0,
   }), [mapType, isMobile, isDrawing, showMeasurement, mapStyles, show3DBuildings]);
 
@@ -715,16 +715,121 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     };
   }, []);
 
-  // Handle fly to target
+  // Handle fly to target - Google Earth style animation
   useEffect(() => {
-    if (map && flyToTarget) {
-      map.panTo({ lat: flyToTarget.center[0], lng: flyToTarget.center[1] });
-      map.setZoom(flyToTarget.zoom);
-      const listener = map.addListener('idle', () => {
-        onFlyComplete();
-        google.maps.event.removeListener(listener);
-      });
+    if (!map || !flyToTarget) return;
+
+    const targetLat = flyToTarget.center[0];
+    const targetLng = flyToTarget.center[1];
+    const targetZoom = flyToTarget.zoom;
+    const currentZoom = map.getZoom() || 10;
+    const currentCenter = map.getCenter();
+
+    if (!currentCenter) {
+      map.panTo({ lat: targetLat, lng: targetLng });
+      map.setZoom(targetZoom);
+      onFlyComplete();
+      return;
     }
+
+    // Calculate distance between current and target
+    const currentLat = currentCenter.lat();
+    const currentLng = currentCenter.lng();
+    const latDiff = Math.abs(targetLat - currentLat);
+    const lngDiff = Math.abs(targetLng - currentLng);
+    const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+
+    // For very short distances, just pan smoothly
+    if (distance < 0.5 && Math.abs(currentZoom - targetZoom) < 4) {
+      map.panTo({ lat: targetLat, lng: targetLng });
+      setTimeout(() => {
+        map.setZoom(targetZoom);
+        const listener = map.addListener('idle', () => {
+          onFlyComplete();
+          google.maps.event.removeListener(listener);
+        });
+      }, 300);
+      return;
+    }
+
+    // Google Earth style: zoom out -> fly -> zoom in
+    // Calculate "cruise altitude" based on distance
+    const cruiseZoom = Math.max(
+      4, // Never go below zoom 4
+      Math.min(
+        currentZoom - 2,
+        Math.round(10 - Math.log2(distance + 1) * 2)
+      )
+    );
+
+    let phase = 0; // 0: zoom out, 1: fly, 2: zoom in
+    let animationFrame: number;
+    let startTime: number;
+
+    const zoomOutDuration = 600; // ms
+    const flyDuration = 1200; // ms
+    const zoomInDuration = 800; // ms
+
+    // Easing function for smooth animation
+    const easeInOutCubic = (t: number): number => {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+
+      if (phase === 0) {
+        // Phase 1: Zoom out
+        const progress = Math.min(1, elapsed / zoomOutDuration);
+        const easedProgress = easeInOutCubic(progress);
+        const newZoom = currentZoom + (cruiseZoom - currentZoom) * easedProgress;
+        map.setZoom(newZoom);
+
+        if (progress >= 1) {
+          phase = 1;
+          startTime = timestamp;
+        }
+        animationFrame = requestAnimationFrame(animate);
+      } else if (phase === 1) {
+        // Phase 2: Fly to target
+        const progress = Math.min(1, elapsed / flyDuration);
+        const easedProgress = easeInOutCubic(progress);
+
+        const lat = currentLat + (targetLat - currentLat) * easedProgress;
+        const lng = currentLng + (targetLng - currentLng) * easedProgress;
+        map.setCenter({ lat, lng });
+
+        if (progress >= 1) {
+          phase = 2;
+          startTime = timestamp;
+        }
+        animationFrame = requestAnimationFrame(animate);
+      } else if (phase === 2) {
+        // Phase 3: Zoom in
+        const progress = Math.min(1, elapsed / zoomInDuration);
+        const easedProgress = easeInOutCubic(progress);
+        const newZoom = cruiseZoom + (targetZoom - cruiseZoom) * easedProgress;
+        map.setZoom(newZoom);
+
+        if (progress >= 1) {
+          // Animation complete
+          map.setCenter({ lat: targetLat, lng: targetLng });
+          map.setZoom(targetZoom);
+          onFlyComplete();
+        } else {
+          animationFrame = requestAnimationFrame(animate);
+        }
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
   }, [map, flyToTarget, onFlyComplete]);
 
   // Handle marker click
