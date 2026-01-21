@@ -127,11 +127,14 @@ export const useMeasurementTool = (
       };
 
       // Check if clicking near first point to close polygon
+      // Only auto-close if clicking very close to the first point marker
       if (points.length >= 3) {
         const firstPoint = points[0];
         const distance = calculateDistance(newPoint, firstPoint);
         const zoom = map.getZoom() || 15;
-        const threshold = Math.max(5, 100 / Math.pow(1.5, zoom - 15));
+        // Much smaller threshold - roughly the size of the marker (5-15 meters depending on zoom)
+        // At zoom 18+: ~3m, zoom 15: ~8m, zoom 12: ~20m
+        const threshold = Math.max(3, 25 / Math.pow(2, zoom - 15));
         if (distance < threshold) {
           setIsPolygonClosed(true);
           return;
