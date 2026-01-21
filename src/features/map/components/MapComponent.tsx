@@ -63,48 +63,62 @@ const inject3DPerspectiveStyles = () => {
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
-    /* 3D perspective container - creates isometric-like view */
+    /* 3D perspective container - OneGeo-style isometric view */
     .map-3d-perspective-container {
-      perspective: 1500px;
-      perspective-origin: 50% 25%;
+      perspective: 1200px;
+      perspective-origin: 50% 30%;
+      overflow: hidden;
     }
 
-    /* Map transforms for 3D mode - subtle tilt for better building view */
+    /* Map transforms for 3D mode - dramatic tilt like OneGeo */
     .map-3d-active {
-      transform: rotateX(25deg) scale(1.08);
-      transform-origin: center 70%;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotateX(50deg) scale(1.15);
+      transform-origin: center 85%;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Normal 2D mode */
     .map-3d-inactive {
       transform: rotateX(0deg) scale(1);
       transform-origin: center center;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Ensure controls stay upright in 3D mode */
     .map-3d-active .leaflet-control-container {
-      transform: rotateX(-25deg);
-      transform-origin: center 30%;
+      transform: rotateX(-50deg) translateY(-15%);
+      transform-origin: center 20%;
     }
 
     /* Keep markers/popups properly oriented */
     .map-3d-active .leaflet-marker-pane,
     .map-3d-active .leaflet-popup-pane {
-      transform: rotateX(-25deg);
-      transform-origin: center 30%;
+      transform: rotateX(-50deg);
+      transform-origin: center 20%;
+    }
+
+    /* Horizon fade effect at the top */
+    .map-3d-active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 25%;
+      background: linear-gradient(to bottom, rgba(135, 206, 235, 0.4) 0%, rgba(135, 206, 235, 0.1) 50%, transparent 100%);
+      pointer-events: none;
+      z-index: 1000;
     }
 
     /* Smooth shadow for 3D depth effect */
     .map-3d-active::after {
       content: '';
       position: absolute;
-      bottom: -20px;
+      bottom: -30px;
       left: 5%;
       right: 5%;
-      height: 40px;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, transparent 70%);
+      height: 60px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.2) 0%, transparent 70%);
       pointer-events: none;
       z-index: -1;
     }
