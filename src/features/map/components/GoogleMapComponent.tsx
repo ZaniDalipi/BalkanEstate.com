@@ -6,6 +6,7 @@ import {
   Marker,
   Rectangle,
   Polyline,
+  Polygon,
   OverlayView,
 } from '@react-google-maps/api';
 import { Property } from '@/types';
@@ -22,7 +23,7 @@ import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPan
 import SunPositionControl from './SunPositionControl';
 import SunArcAnimation, { type Season, type SunriseSunsetInfo } from './SunArcAnimation';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM, type CadastreLayerConfig } from '@/config/cadastreLayers';
-import GoogleMeasurementTool from './GoogleMeasurementTool';
+import GoogleMeasurementTool, { useMeasurementTool, type MeasurementPoint } from './GoogleMeasurementTool';
 
 // Balkan region bounds
 const BALKAN_BOUNDS = {
@@ -439,6 +440,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [drawStartPos, setDrawStartPos] = useState<google.maps.LatLng | null>(null);
   const [tempDrawRect, setTempDrawRect] = useState<google.maps.LatLngBounds | null>(null);
 
+  // Measurement tool state (using hook for shared state)
+  const measurementTool = useMeasurementTool(map, showMeasurement);
+
 
   // Climate overlay ref
   const climateOverlayRef = useRef<google.maps.ImageMapType | null>(null);
@@ -624,18 +628,21 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     // Add cadastre overlay if enabled and layer is available
     if (showCadastre && currentCadastreLayer && (mapType === 'satellite' || mapType === 'hybrid')) {
       const { wmsUrl, layers, format, version, transparent, additionalParams } = currentCadastreLayer;
+      const crs = additionalParams?.CRS || 'EPSG:4326';
+
+      // Helper function to convert lat/lng to Web Mercator (EPSG:3857)
+      const toWebMercator = (lat: number, lng: number): [number, number] => {
+        const x = lng * 20037508.34 / 180;
+        let y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+        y = y * 20037508.34 / 180;
+        return [x, y];
+      };
 
       const cadastreOverlay = new google.maps.ImageMapType({
         getTileUrl: (coord, zoom) => {
-          // Calculate tile bounds in lat/lng
-          const tileSize = 256;
           const scale = Math.pow(2, zoom);
-          const worldCoordinate = {
-            x: coord.x * tileSize / scale,
-            y: coord.y * tileSize / scale
-          };
 
-          // Convert to EPSG:4326 bounds
+          // Calculate tile bounds in EPSG:4326 (lat/lng)
           const nwLng = (coord.x / scale) * 360 - 180;
           const seLng = ((coord.x + 1) / scale) * 360 - 180;
           const n = Math.PI - 2 * Math.PI * coord.y / scale;
@@ -643,10 +650,21 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           const n2 = Math.PI - 2 * Math.PI * (coord.y + 1) / scale;
           const seLat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n2) - Math.exp(-n2)));
 
-          const bbox = `${nwLng},${seLat},${seLng},${nwLat}`;
-          const crs = additionalParams?.CRS || 'EPSG:4326';
+          let bbox: string;
+          let bboxCrs = crs;
 
-          return `${wmsUrl}?SERVICE=WMS&VERSION=${version || '1.3.0'}&REQUEST=GetMap&LAYERS=${encodeURIComponent(layers)}&STYLES=&FORMAT=${format || 'image/png'}&TRANSPARENT=${transparent !== false}&WIDTH=256&HEIGHT=256&CRS=${crs}&BBOX=${bbox}`;
+          if (crs === 'EPSG:3857') {
+            // Convert to Web Mercator coordinates
+            const [nwX, nwY] = toWebMercator(nwLat, nwLng);
+            const [seX, seY] = toWebMercator(seLat, seLng);
+            bbox = `${nwX},${seY},${seX},${nwY}`;
+          } else {
+            // EPSG:4326 - use lat/lng directly
+            // WMS 1.3.0 with EPSG:4326 expects lat,lng order
+            bbox = `${seLat},${nwLng},${nwLat},${seLng}`;
+          }
+
+          return `${wmsUrl}?SERVICE=WMS&VERSION=${version || '1.3.0'}&REQUEST=GetMap&LAYERS=${encodeURIComponent(layers)}&STYLES=&FORMAT=${format || 'image/png'}&TRANSPARENT=${transparent !== false}&WIDTH=256&HEIGHT=256&CRS=${bboxCrs}&BBOX=${bbox}`;
         },
         tileSize: new google.maps.Size(256, 256),
         opacity: 0.75,
@@ -898,6 +916,72 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             options={{ fillColor: '#0252CD', fillOpacity: 0.2, strokeWeight: 3, strokeColor: '#0252CD', clickable: false }}
           />
         )}
+
+        {/* Measurement tool elements - rendered inside GoogleMap */}
+        {showMeasurement && measurementTool.points.length > 0 && (
+          <>
+            {/* Measurement polygon (when closed) */}
+            {measurementTool.isPolygonClosed ? (
+              <Polygon
+                paths={measurementTool.points.map(p => ({ lat: p.lat, lng: p.lng }))}
+                options={{
+                  fillColor: '#0252CD',
+                  fillOpacity: 0.2,
+                  strokeColor: '#0252CD',
+                  strokeWeight: 3,
+                  clickable: false,
+                }}
+              />
+            ) : (
+              <>
+                {/* Measurement polyline */}
+                {measurementTool.points.length > 1 && (
+                  <Polyline
+                    path={measurementTool.points.map(p => ({ lat: p.lat, lng: p.lng }))}
+                    options={{
+                      strokeColor: '#0252CD',
+                      strokeWeight: 3,
+                      clickable: false,
+                    }}
+                  />
+                )}
+                {/* Preview closing line when 3+ points */}
+                {measurementTool.points.length >= 3 && (
+                  <Polyline
+                    path={[
+                      { lat: measurementTool.points[measurementTool.points.length - 1].lat, lng: measurementTool.points[measurementTool.points.length - 1].lng },
+                      { lat: measurementTool.points[0].lat, lng: measurementTool.points[0].lng }
+                    ]}
+                    options={{
+                      strokeColor: '#10B981',
+                      strokeWeight: 2,
+                      strokeOpacity: 0.5,
+                      clickable: false,
+                    }}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Measurement point markers */}
+            {measurementTool.points.map((point, index) => (
+              <Marker
+                key={`measure-point-${index}`}
+                position={{ lat: point.lat, lng: point.lng }}
+                icon={{
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: index === 0 && measurementTool.points.length >= 3 && !measurementTool.isPolygonClosed ? 10 : 7,
+                  fillColor: index === 0 && measurementTool.points.length >= 3 && !measurementTool.isPolygonClosed ? '#10B981' : '#0252CD',
+                  fillOpacity: 1,
+                  strokeColor: '#ffffff',
+                  strokeWeight: 2,
+                }}
+                onClick={index === 0 && measurementTool.points.length >= 3 && !measurementTool.isPolygonClosed ? measurementTool.closePolygon : undefined}
+                zIndex={index === 0 ? 2000 : 1000}
+              />
+            ))}
+          </>
+        )}
       </GoogleMap>
 
       {/* Climate Risk Legend */}
@@ -907,10 +991,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         </div>
       )}
 
-      {/* Measurement Tool - with area calculation and save to profile */}
+      {/* Measurement Tool UI Panel */}
       <GoogleMeasurementTool
-        map={map}
         enabled={showMeasurement}
+        measurementState={measurementTool}
         onClose={() => setShowMeasurement(false)}
       />
 
