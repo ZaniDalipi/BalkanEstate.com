@@ -230,17 +230,17 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
   const position = { lat: property.lat!, lng: property.lng! };
 
   // Calculate scale factor based on zoom level
-  // Full size at zoom >= 14, scales down to 0.5 at zoom <= 8
-  const zoomScale = Math.max(0.5, Math.min(1, (zoom - 8) / 6));
+  // Full size at zoom >= 14, scales down to 0.6 at zoom <= 8
+  const zoomScale = Math.max(0.6, Math.min(1, (zoom - 8) / 6));
 
   // Calculate dynamic width based on price length and zoom
   const priceLen = price.length;
-  const baseMinWidth = Math.max(42, priceLen * 8 + 16);
+  const baseMinWidth = Math.max(52, priceLen * 9 + 20);
   const minWidth = baseMinWidth * zoomScale;
-  const height = 28 * zoomScale;
-  const fontSize = 11 * zoomScale;
-  const padding = 10 * zoomScale;
-  const borderRadius = 14 * zoomScale;
+  const height = 34 * zoomScale;
+  const fontSize = 13 * zoomScale;
+  const padding = 12 * zoomScale;
+  const borderRadius = 17 * zoomScale;
 
   return (
     <OverlayView
