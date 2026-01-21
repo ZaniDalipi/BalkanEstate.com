@@ -235,6 +235,23 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
     return calculateSunriseSunset(latitude, dayOfYear);
   }, [selectedSeason, latitude]);
 
+  // Calculate slider min/max hours based on sunrise/sunset (daytime only)
+  const sliderBounds = useMemo(() => {
+    // Round sunrise down and sunset up to include the full daytime period
+    const minHour = Math.floor(sunriseSunset.sunrise);
+    const maxHour = Math.ceil(sunriseSunset.sunset);
+    return { min: minHour, max: maxHour };
+  }, [sunriseSunset]);
+
+  // Clamp hour to slider bounds when season changes
+  useEffect(() => {
+    if (hour < sliderBounds.min) {
+      setHour(sliderBounds.min);
+    } else if (hour > sliderBounds.max) {
+      setHour(sliderBounds.max);
+    }
+  }, [sliderBounds, hour]);
+
   // Check if current hour is daytime
   const isCurrentlyDay = useMemo(() => {
     return hour >= sunriseSunset.sunrise && hour < sunriseSunset.sunset;
@@ -254,12 +271,19 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
     }
   }, [hour, enabled, onDateTimeChange, createDateTime]);
 
-  // Animation: cycle through hours
+  // Animation: cycle through daytime hours only
   useEffect(() => {
     if (isPlaying && enabled) {
       animationRef.current = setInterval(() => {
-        setHour((prev) => (prev + 1) % 24);
-      }, 4000); // Change hour every 400ms
+        setHour((prev) => {
+          const next = prev + 1;
+          // Loop back to sunrise when reaching sunset
+          if (next > sliderBounds.max) {
+            return sliderBounds.min;
+          }
+          return next;
+        });
+      }, 4000); // Change hour every 4 seconds
     } else {
       if (animationRef.current) {
         clearInterval(animationRef.current);
@@ -272,7 +296,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
         clearInterval(animationRef.current);
       }
     };
-  }, [isPlaying, enabled]);
+  }, [isPlaying, enabled, sliderBounds]);
 
   // Quick time presets
   const setTime = (h: number) => {
@@ -360,12 +384,12 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
         {/* Compact expanded view */}
         {isExpanded && (
           <div className="mt-3 space-y-3">
-            {/* Time slider - larger for easier touch */}
+            {/* Time slider - larger for easier touch (daytime hours only) */}
             <div className="px-1">
               <input
                 type="range"
-                min="0"
-                max="23"
+                min={sliderBounds.min}
+                max={sliderBounds.max}
                 value={hour}
                 onChange={(e) => {
                   setIsPlaying(false);
@@ -387,6 +411,10 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
                   [&::-webkit-slider-thumb]:border-white
                 `}
               />
+              <div className={`flex justify-between text-[9px] mt-1 ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
+                <span>{formatHour(sliderBounds.min)}</span>
+                <span>{formatHour(sliderBounds.max)}</span>
+              </div>
             </div>
 
             {/* Quick buttons row - larger touch targets */}
@@ -516,12 +544,12 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
             </p>
           </div>
 
-          {/* Time slider */}
+          {/* Time slider - daytime hours only */}
           <div className="space-y-1">
             <input
               type="range"
-              min="0"
-              max="23"
+              min={sliderBounds.min}
+              max={sliderBounds.max}
               value={hour}
               onChange={(e) => {
                 setIsPlaying(false);
@@ -542,11 +570,9 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               `}
             />
             <div className={`flex justify-between text-[9px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
-              <span>12AM</span>
-              <span>6AM</span>
-              <span>12PM</span>
-              <span>6PM</span>
-              <span>11PM</span>
+              <span>{formatHour(sliderBounds.min)}</span>
+              <span>{formatHour(Math.round((sliderBounds.min + sliderBounds.max) / 2))}</span>
+              <span>{formatHour(sliderBounds.max)}</span>
             </div>
           </div>
 

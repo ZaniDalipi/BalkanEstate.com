@@ -490,6 +490,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const moveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initialCenterSetRef = useRef(false);
   const initialCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+  const previousMapTypeRef = useRef<'roadmap' | 'satellite' | 'terrain' | 'hybrid' | null>(null);
 
   // Load Google Maps API
   const { isLoaded, loadError } = useJsApiLoader({
@@ -536,14 +537,26 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setIsNightMode(!isDay);
   }, []);
 
-  // Apply tilt when 3D buildings is toggled
+  // Apply tilt and switch to roadmap when 3D buildings is toggled
   useEffect(() => {
     if (map && show3DBuildings) {
+      // Store previous map type before switching (only if not already in 3D mode)
+      if (previousMapTypeRef.current === null && mapType !== 'roadmap') {
+        previousMapTypeRef.current = mapType;
+      }
+      // Switch to roadmap for better 3D building visibility with buildings data
+      setMapType('roadmap');
       // Set tilt for 3D view
       map.setTilt(60);
     } else if (map) {
+      // Restore previous map type when 3D is disabled (only if user didn't change it)
+      if (previousMapTypeRef.current !== null && mapType === 'roadmap') {
+        setMapType(previousMapTypeRef.current);
+      }
+      previousMapTypeRef.current = null;
       map.setTilt(0);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, show3DBuildings]);
 
   // Get current sun hour from dateTime
