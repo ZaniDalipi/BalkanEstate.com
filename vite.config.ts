@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => {
                   return 'leaflet';
                 }
                 // 3D Map (MapLibre)
-                if (id.includes('maplibre-gl') || id.includes('react-map-gl')) {
+                if (id.includes('maplibre-gl')) {
                   return 'maplibre';
                 }
                 // Internationalization
@@ -166,7 +166,7 @@ export default defineConfig(({ mode }) => {
       },
       // Optimize dependencies for faster dev startup
       optimizeDeps: {
-        include: ['maplibre-gl', 'react-map-gl'],
+        include: ['maplibre-gl'],
       },
     };
 });
