@@ -1,236 +1,212 @@
 # Payment Provider Alternatives for BalkanEstate.com
 
-## Overview
+## Your Situation
 
-Since Paddle rejected your application, here are alternative payment solutions that work across the Balkans (Greece, Macedonia, Albania, etc.) with varying fee structures and integration complexity.
-
----
-
-## 🏆 Recommended Options (Ranked)
-
-### 1. **Stripe** (Best Overall - If Available)
-**Availability:** Greece ✅ | North Macedonia ✅ (SEPA member as of March 2025) | Albania ✅ (SEPA member as of November 2024)
-
-| Feature | Details |
-|---------|---------|
-| Transaction Fee | 1.4% + €0.25 (EEA cards) / 2.9% + €0.25 (non-EEA) |
-| Monthly Fee | None |
-| Setup Fee | None |
-| Payout to Bank | Free (SEPA) |
-| Currencies | 135+ currencies |
-
-**Pros:**
-- Industry standard, most integrations available
-- North Macedonia and Albania joined SEPA in 2024-2025, improving availability
-- Excellent developer documentation
-- Handles tax compliance (Stripe Tax add-on)
-
-**Cons:**
-- May require verification/documentation for Balkan countries
-- Some features may be limited in newer SEPA countries
-
-**Recommendation:** Apply directly at stripe.com - with SEPA membership, Macedonia should now be supported.
+- **Location:** North Macedonia
+- **Business:** SaaS for real estate agencies/agents
+- **Payment needs:** Subscriptions (monthly, yearly, enterprise), featured listings, premium features
+- **Paddle Status:** Application rejected
 
 ---
 
-### 2. **Wise Business** (Best for Low Fees + Bank Transfers)
-**Availability:** All Balkans ✅
+## ⚠️ The Hard Truth About North Macedonia
 
-| Feature | Details |
-|---------|---------|
-| Receiving Money | **FREE** (local SEPA/bank transfers) |
-| Currency Conversion | Starting from 0.33% |
-| International (SWIFT) | Small fee applies |
-| Setup Fee | €50 one-time |
-| Monthly Fee | None |
+Most popular payment providers **DO NOT support** businesses registered in North Macedonia:
 
-**Pros:**
-- Get EUR IBAN to receive payments like a local European bank
-- 60% of transfers are instant, 95% within 24 hours
-- Lowest fees for bank-to-bank transfers
-- Works perfectly with your Macedonian operations
-- Can receive from 23+ countries as a "local"
-
-**Cons:**
-- Not a full payment gateway (no checkout/card processing)
-- Best suited for invoice-based payments or bank transfers
-- Need separate solution for card payments
-
-**Best Use Case:** Receiving property deposits, agent commissions, B2B payments
+| Provider | Status | Issue |
+|----------|--------|-------|
+| Stripe | ❌ Not supported | Macedonia not in 46 supported countries |
+| Revolut Business | ❌ Not supported | Only EEA/UK/Switzerland companies |
+| Wise Business | ❌ Not supported | Country restriction (you confirmed) |
+| PayPal | ⚠️ Limited | Can SEND but **CANNOT RECEIVE** money |
+| Paddle | ❌ Rejected | Your application was declined |
 
 ---
 
-### 3. **Revolut Business** (Best All-in-One Solution)
-**Availability:** All Balkans ✅
+## ✅ Options That ACTUALLY Work for North Macedonia
+
+### 1. **LemonSqueezy** ⭐ RECOMMENDED
+**Status:** North Macedonia supported for bank payouts ✅
 
 | Feature | Details |
 |---------|---------|
-| Online Card Payments | 1% + €0.20 per transaction |
-| In-Person Payments | 0.8% + €0.02 |
-| Revolut Pay | 0.5% + €0.02 (lowest!) |
-| Monthly Fee | €10 (Basic) / €30 (Grow) |
-| Setup Fee | None |
-| Refunds | Free |
-| Chargeback Support | Free |
-
-**Pros:**
-- Accept cards + bank transfers + Revolut Pay
-- Multi-currency accounts (25+ currencies)
-- Instant transfers between Revolut accounts (free)
-- Payment links for easy invoicing
-- Physical card readers available
-- You already know Revolut!
-
-**Cons:**
-- Monthly subscription required
-- Higher fees than pure bank transfer solutions
-
-**Best Use Case:** Full payment acceptance (cards + transfers) with simple setup
-
----
-
-### 4. **PayPal Business** (Widest Recognition)
-**Availability:** All Balkans ✅
-
-| Feature | Details |
-|---------|---------|
-| Domestic EEA | 1.9% + fixed fee (~€0.35) |
-| Cross-Border | +1.5% additional |
-| Currency Conversion | 3% above exchange rate |
-| Monthly Fee | None |
-| Chargeback Fee | €16 |
-
-**Pros:**
-- Customers trust PayPal globally
-- Easy integration
-- Buyer/seller protection
-- Works everywhere in Balkans
-
-**Cons:**
-- Higher fees for international transactions
-- Currency conversion is expensive (3%)
-- Account freezes can happen
-- Disputes favor buyers
-
-**Best Use Case:** Offering as additional payment option alongside primary provider
-
----
-
-### 5. **LemonSqueezy** (Merchant of Record - No Tax Worries)
-**Availability:** Payouts to Macedonia ✅ (79 countries via bank)
-
-| Feature | Details |
-|---------|---------|
-| Base Fee | 5% + $0.50 per transaction |
+| Fees | 5% + $0.50 per transaction |
 | International | +1.5% for non-US transactions |
-| Tax Handling | Included (they handle VAT) |
-| Monthly Fee | None |
-| Payouts | 1st and 15th of month |
+| **Total effective** | ~6.5% per transaction |
+| Payout to Macedonia | ✅ Bank transfer supported |
+| Payout schedule | 1st and 15th of month |
+| Minimum payout | $50 |
+| Tax handling | They handle ALL VAT/taxes |
 
-**Pros:**
-- They handle ALL tax compliance (VAT, etc.)
-- No need to register for VAT in multiple countries
-- Accept payments from 135+ countries
-- Bank payouts to Macedonia supported
-- Owned by Stripe (reliable)
+**Why LemonSqueezy for your SaaS:**
+- ✅ Bank payouts to North Macedonia confirmed
+- ✅ Built for SaaS subscriptions (monthly, yearly, enterprise)
+- ✅ They handle VAT compliance for all EU countries
+- ✅ Checkout pages included
+- ✅ Owned by Stripe (reliable infrastructure)
+- ✅ Supports 135+ countries for customers
 
-**Cons:**
-- Higher total fees (~6.5%+ for international)
-- Bi-monthly payouts only
-- Best for digital products/subscriptions
+**Perfect for:**
+- Monthly/yearly subscriptions
+- Featured listing payments
+- Agency enterprise plans
+- Pro buyer features
 
-**Best Use Case:** If you want zero tax/compliance headaches
+**Website:** https://www.lemonsqueezy.com
 
 ---
 
-### 6. **GoCardless** (Best for Recurring/Subscriptions)
-**Availability:** All SEPA countries ✅
+### 2. **Gumroad**
+**Status:** North Macedonia recently added ✅
 
 | Feature | Details |
 |---------|---------|
-| Transaction Fee | 1% + €0.20 (capped at €4) |
-| Failed Payment | Free retry |
-| Monthly Fee | None (pay-as-you-go) |
+| Fees | 10% flat (includes everything) |
+| Payout to Macedonia | ✅ Via PayPal (2% fee) or bank |
+| Minimum payout | $10 |
+| Tax handling | Included |
 
 **Pros:**
-- Direct debit from bank accounts
-- Much lower fees than cards
-- Great for recurring payments (subscriptions, rent collection)
-- 75,000+ businesses use it
+- Very simple setup
+- Good for digital products
+- Recently added North Macedonia support
 
 **Cons:**
-- Only bank-to-bank (no cards)
-- Customer needs to authorize mandate
+- Higher fees (10%)
+- Less professional for B2B SaaS
+- Limited subscription features compared to LemonSqueezy
 
-**Best Use Case:** Monthly subscription services, recurring property management fees
+**Best for:** If LemonSqueezy doesn't work out
 
----
-
-## 📊 Quick Comparison Table
-
-| Provider | Card Payments | Bank Transfers | Setup | Monthly | Best For |
-|----------|--------------|----------------|-------|---------|----------|
-| Stripe | 1.4-2.9% + €0.25 | Free (SEPA) | Free | Free | Full solution |
-| Wise | ❌ | **FREE** | €50 | Free | Receiving transfers |
-| Revolut | 1% + €0.20 | Free | Free | €10-30 | All-in-one |
-| PayPal | 1.9% + €0.35 | N/A | Free | Free | Recognition |
-| LemonSqueezy | 5% + $0.50 | Via payout | Free | Free | Tax handling |
-| GoCardless | ❌ | 1% (max €4) | Free | Free | Subscriptions |
+**Website:** https://gumroad.com
 
 ---
 
-## 💡 My Recommendations for BalkanEstate.com
+### 3. **FastSpring**
+**Status:** Worldwide payouts ✅
 
-### Option A: Simple & Low Cost
-**Primary:** Wise Business (for receiving deposits/payments via bank transfer)
-**Secondary:** Revolut Business (for card payments when needed)
+| Feature | Details |
+|---------|---------|
+| Fees | 5.9% + $0.95 OR 8.9% flat |
+| Payout | 200+ countries |
+| Tax handling | Full compliance included |
 
-**Total effective cost:** 0-1% for bank transfers, 1% for cards
+**Pros:**
+- Enterprise-grade MoR
+- Excellent for software/SaaS
+- Handles everything (taxes, compliance, chargebacks)
 
-### Option B: Professional Full Solution
-**Primary:** Stripe (if approved for Macedonia)
-**Fallback:** Revolut Business if Stripe unavailable
+**Cons:**
+- Higher fees
+- More complex setup
+- Better suited for larger operations
 
-**Total effective cost:** 1.4-2.9% depending on card origin
-
-### Option C: Zero Compliance Worries
-**Use:** LemonSqueezy as Merchant of Record
-**They handle:** VAT, taxes, compliance, refunds, chargebacks
-
-**Total effective cost:** ~6.5% but zero admin overhead
-
----
-
-## 🔧 Integration Considerations
-
-For your real estate platform, you likely need:
-
-1. **Property listing fees** (one-time) → Stripe/Revolut/PayPal
-2. **Premium subscriptions** (recurring) → Stripe/GoCardless
-3. **Deposit collection** (large amounts) → Wise (lowest fees)
-4. **International buyers** → PayPal as backup option
+**Website:** https://fastspring.com
 
 ---
 
-## 📋 Next Steps
+### 4. **US LLC + Stripe** (Advanced Option)
+If you want access to Stripe's lower fees, you can:
 
-1. **Apply for Stripe** - With Macedonia's SEPA membership, worth trying
-2. **Set up Wise Business** - Immediate, low-cost bank transfer receiving
-3. **Consider Revolut Business** - You likely already have personal Revolut
-4. **Keep PayPal as backup** - Universal recognition
+1. **Form a US LLC** (~$500-800 via services like doola, Firstbase)
+2. **Get EIN** (Tax ID)
+3. **Open US bank account** (Mercury, Relay)
+4. **Use Stripe** with 2.9% + $0.30 fees
+
+| Setup Cost | ~$500-800 one-time |
+|------------|-------------------|
+| Annual maintenance | ~$200-500/year |
+| Stripe fees | 2.9% + $0.30 |
+| Complexity | High |
+
+**Pros:**
+- Access to Stripe's full features
+- Lower transaction fees long-term
+- US business presence
+
+**Cons:**
+- Upfront cost and complexity
+- Annual US tax filing required
+- Takes 2-4 weeks to set up
+
+**Consider this if:** You expect significant revenue (>$5,000/month)
 
 ---
 
-## 🔗 Useful Links
+## 📊 Comparison for Your SaaS
 
-- Stripe: https://stripe.com/global
-- Wise Business: https://wise.com/business/
-- Revolut Business: https://www.revolut.com/business/
-- PayPal Business: https://www.paypal.com/business/
-- LemonSqueezy: https://www.lemonsqueezy.com/
-- GoCardless: https://gocardless.com/
+| Provider | Setup | Monthly Fee | Per Transaction | Tax Handling | Best For |
+|----------|-------|-------------|-----------------|--------------|----------|
+| **LemonSqueezy** | Free | Free | ~6.5% | ✅ Included | SaaS subscriptions |
+| Gumroad | Free | Free | 10% | ✅ Included | Simple products |
+| FastSpring | Free | Free | 5.9-8.9% | ✅ Included | Enterprise SaaS |
+| US LLC + Stripe | $500+ | $0-50 | 2.9% + $0.30 | ❌ Extra | High volume |
 
 ---
 
-*Document created: January 2025*
-*Note: Fees may change. Always verify current rates on provider websites.*
+## 💡 My Recommendation
+
+### For BalkanEstate.com → **Use LemonSqueezy**
+
+**Why:**
+1. **Works in North Macedonia** - Confirmed bank payouts
+2. **Built for SaaS** - Perfect for your subscription model
+3. **Handles everything** - VAT, taxes, compliance, chargebacks
+4. **Professional checkout** - Good for B2B (agencies, agents)
+5. **Reasonable fees** - 6.5% is fair for MoR service
+6. **Stripe-backed** - Reliable infrastructure
+
+### Revenue Example
+
+| Your Price | Customer Pays | LemonSqueezy Takes | You Receive |
+|------------|---------------|-------------------|-------------|
+| €9.99/mo | €9.99 | ~€0.65 + €0.45 = €1.10 | €8.89 |
+| €49/mo | €49 | ~€3.19 + €0.45 = €3.64 | €45.36 |
+| €199/year | €199 | ~€12.94 + €0.45 = €13.39 | €185.61 |
+| €499 Enterprise | €499 | ~€32.44 + €0.45 = €32.89 | €466.11 |
+
+---
+
+## 🚀 Next Steps
+
+1. **Sign up for LemonSqueezy** at https://www.lemonsqueezy.com
+2. **Verify your identity** and add your Macedonian bank account
+3. **Create your products:**
+   - Monthly subscription
+   - Yearly subscription
+   - Enterprise plan
+   - Featured listing packages
+4. **Integrate with your website** (they have React/JS SDKs)
+5. **Test with a small purchase** before going live
+
+---
+
+## 🔗 Resources
+
+- **LemonSqueezy Docs:** https://docs.lemonsqueezy.com
+- **LemonSqueezy Supported Countries:** https://docs.lemonsqueezy.com/help/getting-started/supported-countries
+- **Gumroad Help:** https://gumroad.com/help
+- **FastSpring:** https://fastspring.com
+
+---
+
+## ❓ About Paddle Rejection
+
+Common reasons Paddle rejects applications:
+- Business type not in their focus (they prefer pure SaaS)
+- Geographic restrictions
+- Insufficient business documentation
+- Website not ready/professional enough
+- Revenue projections unclear
+
+You could try reapplying later with:
+- More detailed business plan
+- Professional website live
+- Clear revenue model documented
+
+But **LemonSqueezy is a better fit** for your situation anyway.
+
+---
+
+*Document updated: January 2025*
+*Specific to: North Macedonia SaaS business*
