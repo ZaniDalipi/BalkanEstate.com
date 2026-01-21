@@ -17,6 +17,10 @@
     "start:prod": "npm run build && npm run preview"
   },
   "dependencies": {
+    "@deck.gl/core": "^9.2.6",
+    "@deck.gl/geo-layers": "^9.2.6",
+    "@deck.gl/google-maps": "^9.2.6",
+    "@deck.gl/layers": "^9.2.6",
     "@google/genai": "^1.27.0",
     "@google/generative-ai": "^0.24.1",
     "@react-google-maps/api": "^2.20.8",

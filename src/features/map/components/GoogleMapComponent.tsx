@@ -24,6 +24,7 @@ import {
 import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
 import SunPositionControl from './SunPositionControl';
 import SunArcAnimation, { type Season, type SunriseSunsetInfo } from './SunArcAnimation';
+import Google3DBuildingsLayer, { type BuildingInfo } from './Google3DBuildingsLayer';
 
 // Balkan region bounds
 const BALKAN_BOUNDS = {
@@ -496,6 +497,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   // Handle day/night change from sun animation
   const handleDayNightChange = useCallback((isDay: boolean, sunInfo: SunriseSunsetInfo) => {
     setIsNightMode(!isDay);
+  }, []);
+
+  // Handle building click from 3D layer
+  const handleBuildingClick = useCallback((info: BuildingInfo) => {
+    console.log('Building clicked:', info);
+    // Could show a popup with building info here if needed
   }, []);
 
   // Get current sun hour from dateTime
@@ -977,6 +984,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           onDayNightChange={handleDayNightChange}
         />
       )}
+
+      {/* 3D Buildings Layer with deck.gl */}
+      <Google3DBuildingsLayer
+        map={map}
+        enabled={show3DBuildings}
+        dateTime={sunDateTime}
+        onBuildingClick={handleBuildingClick}
+      />
 
       {/* Sun Position Control for 3D Buildings */}
       {show3DBuildings && (
