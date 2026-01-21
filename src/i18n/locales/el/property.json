@@ -1,7 +1,21 @@
 {
   "property": "Ακίνητο",
   "properties": "Ακίνητα",
-  "listing": "Αγγελία",
+  "listing": {
+    "listedOn": "Δημοσιεύτηκε στις",
+    "updatedOn": "Ενημερώθηκε στις",
+    "listedDaysAgo": "Δημοσιεύτηκε πριν {{days}} ημέρες",
+    "listedToday": "Δημοσιεύτηκε σήμερα",
+    "listedYesterday": "Δημοσιεύτηκε χθες",
+    "listedWeeksAgo": "Δημοσιεύτηκε πριν {{weeks}} εβδομάδα",
+    "listedWeeksAgoPlural": "Δημοσιεύτηκε πριν {{weeks}} εβδομάδες",
+    "listedMonthsAgo": "Δημοσιεύτηκε πριν {{months}} μήνα",
+    "listedMonthsAgoPlural": "Δημοσιεύτηκε πριν {{months}} μήνες",
+    "views": "προβολές",
+    "viewsCount": "{{count}} προβολές",
+    "inquiries": "Ερωτήσεις",
+    "id": "Κωδικός Αγγελίας"
+  },
   "listings": "Αγγελίες",
   "forSale": "Προς Πώληση",
   "forRent": "Προς Ενοικίαση",
@@ -154,21 +168,6 @@
     "email": "Email",
     "website": "Ιστοσελίδα"
   },
-  "listing": {
-    "listedOn": "Δημοσιεύτηκε στις",
-    "updatedOn": "Ενημερώθηκε στις",
-    "listedDaysAgo": "Δημοσιεύτηκε πριν {{days}} ημέρες",
-    "listedToday": "Δημοσιεύτηκε σήμερα",
-    "listedYesterday": "Δημοσιεύτηκε χθες",
-    "listedWeeksAgo": "Δημοσιεύτηκε πριν {{weeks}} εβδομάδα",
-    "listedWeeksAgoPlural": "Δημοσιεύτηκε πριν {{weeks}} εβδομάδες",
-    "listedMonthsAgo": "Δημοσιεύτηκε πριν {{months}} μήνα",
-    "listedMonthsAgoPlural": "Δημοσιεύτηκε πριν {{months}} μήνες",
-    "views": "προβολές",
-    "viewsCount": "{{count}} προβολές",
-    "inquiries": "Ερωτήσεις",
-    "id": "Κωδικός Αγγελίας"
-  },
   "navigation": {
     "back": "Πίσω",
     "goBackToSearch": "Επιστροφή στα αποτελέσματα αναζήτησης"
@@ -284,6 +283,27 @@
     "title": "Δείτε στον Χάρτη",
     "description": "Θέλετε να εξερευνήσετε την περιοχή γύρω από αυτό το ακίνητο;",
     "button": "Δείτε στον Χάρτη Αναζήτησης"
+  },
+  "cinematicMap": {
+    "title": "Τοποθεσία ακινήτου",
+    "description": "Ζήστε ένα κινηματογραφικό ταξίδι στην τοποθεσία αυτού του ακινήτου",
+    "phases": {
+      "starting": "Προετοιμασία ταξιδιού...",
+      "zoomingOut": "Ανύψωση...",
+      "panning": "Ταξίδι στην τοποθεσία...",
+      "zoomingIn": "Πλησιάζοντας το ακίνητο...",
+      "orbiting": "Εξερεύνηση περιβάλλοντος...",
+      "complete": "Φτάσαμε!"
+    },
+    "controls": {
+      "play": "Πτήση στο ακίνητο",
+      "skip": "Παράλειψη",
+      "replay": "Επανάληψη",
+      "exploreMap": "Εξερεύνηση χάρτη"
+    },
+    "errors": {
+      "noLocation": "Τα δεδομένα τοποθεσίας δεν είναι διαθέσιμα"
+    }
   },
   "guide": {
     "messages": {

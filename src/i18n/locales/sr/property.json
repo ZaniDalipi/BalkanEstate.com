@@ -1,7 +1,21 @@
 {
   "property": "Некретнина",
   "properties": "Некретнине",
-  "listing": "Оглас",
+  "listing": {
+    "listedOn": "Објављено",
+    "updatedOn": "Ажурирано",
+    "listedDaysAgo": "Објављено пре {{days}} дана",
+    "listedToday": "Објављено данас",
+    "listedYesterday": "Објављено јуче",
+    "listedWeeksAgo": "Објављено пре {{weeks}} недеље",
+    "listedWeeksAgoPlural": "Објављено пре {{weeks}} недеља",
+    "listedMonthsAgo": "Објављено пре {{months}} месеца",
+    "listedMonthsAgoPlural": "Објављено пре {{months}} месеци",
+    "views": "прегледа",
+    "viewsCount": "{{count}} прегледа",
+    "inquiries": "Упита",
+    "id": "ID Огласа"
+  },
   "listings": "Огласи",
   "forSale": "На Продају",
   "forRent": "Издавање",
@@ -154,21 +168,6 @@
     "email": "Email",
     "website": "Веб Сајт"
   },
-  "listing": {
-    "listedOn": "Објављено",
-    "updatedOn": "Ажурирано",
-    "listedDaysAgo": "Објављено пре {{days}} дана",
-    "listedToday": "Објављено данас",
-    "listedYesterday": "Објављено јуче",
-    "listedWeeksAgo": "Објављено пре {{weeks}} недеље",
-    "listedWeeksAgoPlural": "Објављено пре {{weeks}} недеља",
-    "listedMonthsAgo": "Објављено пре {{months}} месеца",
-    "listedMonthsAgoPlural": "Објављено пре {{months}} месеци",
-    "views": "прегледа",
-    "viewsCount": "{{count}} прегледа",
-    "inquiries": "Упита",
-    "id": "ID Огласа"
-  },
   "navigation": {
     "back": "Назад",
     "goBackToSearch": "Повратак на резултате претраге"
@@ -315,6 +314,27 @@
     "title": "Погледај на Мапи",
     "description": "Желите да истражите околину ове некретнине?",
     "button": "Погледај на Мапи Претраге"
+  },
+  "cinematicMap": {
+    "title": "Локација некретнине",
+    "description": "Доживите кинематографско путовање до локације ове некретнине",
+    "phases": {
+      "starting": "Припрема за путовање...",
+      "zoomingOut": "Уздизање...",
+      "panning": "Путовање до локације...",
+      "zoomingIn": "Приближавање некретнини...",
+      "orbiting": "Истраживање околине...",
+      "complete": "Стигли смо!"
+    },
+    "controls": {
+      "play": "Лет до некретнине",
+      "skip": "Прескочи",
+      "replay": "Понови",
+      "exploreMap": "Истражи мапу"
+    },
+    "errors": {
+      "noLocation": "Подаци о локацији нису доступни"
+    }
   },
   "guide": {
     "messages": {

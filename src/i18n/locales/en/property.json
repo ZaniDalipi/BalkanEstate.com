@@ -316,6 +316,27 @@
     "description": "Want to explore the area around this property?",
     "button": "View on Search Map"
   },
+  "cinematicMap": {
+    "title": "Property Location",
+    "description": "Experience a cinematic journey to this property's location",
+    "phases": {
+      "starting": "Preparing journey...",
+      "zoomingOut": "Rising above...",
+      "panning": "Traveling to location...",
+      "zoomingIn": "Approaching property...",
+      "orbiting": "Exploring surroundings...",
+      "complete": "Arrived!"
+    },
+    "controls": {
+      "play": "Fly to Property",
+      "skip": "Skip",
+      "replay": "Replay",
+      "exploreMap": "Explore Map"
+    },
+    "errors": {
+      "noLocation": "Location data unavailable"
+    }
+  },
   "guide": {
     "messages": {
       "welcome": "Hey there! I'm Homey, your property guide. Let me show you around!",

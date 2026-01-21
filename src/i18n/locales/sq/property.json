@@ -288,6 +288,27 @@
     "description": "Dëshironi të eksploroni zonën rreth kësaj prone?",
     "button": "Shiko në Hartën e Kërkimit"
   },
+  "cinematicMap": {
+    "title": "Vendndodhja e pronës",
+    "description": "Përjetoni një udhëtim kinematografik drejt vendndodhjes së kësaj prone",
+    "phases": {
+      "starting": "Përgatitje për udhëtim...",
+      "zoomingOut": "Po ngjitemi...",
+      "panning": "Po udhëtojmë drejt vendndodhjes...",
+      "zoomingIn": "Po afrohemi te prona...",
+      "orbiting": "Po eksplorojmë rrethinën...",
+      "complete": "Mbërritëm!"
+    },
+    "controls": {
+      "play": "Fluturim drejt pronës",
+      "skip": "Kapërce",
+      "replay": "Riprodho",
+      "exploreMap": "Eksploro hartën"
+    },
+    "errors": {
+      "noLocation": "Të dhënat e vendndodhjes nuk janë të disponueshme"
+    }
+  },
   "guide": {
     "messages": {
       "welcome": "Përshëndetje! Unë jam Homey, udhëzuesi juaj i pronave. Më lejoni t'ju tregoj!",
