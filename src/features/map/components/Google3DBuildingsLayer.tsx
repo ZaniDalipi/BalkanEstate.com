@@ -1,13 +1,13 @@
 /**
  * Google3DBuildingsLayer Component
  * Renders 3D building extrusions on Google Maps using deck.gl
- * Uses Overpass API to fetch OSM building data
+ * Styled to match classic OSMBuildings with sun shadows
  */
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { GoogleMapsOverlay } from '@deck.gl/google-maps';
-import { GeoJsonLayer } from '@deck.gl/layers';
-import { AmbientLight, DirectionalLight, LightingEffect } from '@deck.gl/core';
+import { GeoJsonLayer, PolygonLayer } from '@deck.gl/layers';
+import { AmbientLight, _SunLight as SunLight, LightingEffect } from '@deck.gl/core';
 
 interface Google3DBuildingsLayerProps {
   map: google.maps.Map | null;
@@ -25,108 +25,17 @@ const OVERPASS_ENDPOINTS = [
 // Cache for building data
 const buildingCache = new Map<string, GeoJSON.Feature[]>();
 
-// Time periods for coloring
-type TimePeriod = 'night' | 'dawn' | 'morning' | 'noon' | 'afternoon' | 'sunset' | 'dusk';
-
-const getTimePeriod = (hour: number): TimePeriod => {
-  if (hour >= 0 && hour < 5) return 'night';
-  if (hour >= 5 && hour < 7) return 'dawn';
-  if (hour >= 7 && hour < 11) return 'morning';
-  if (hour >= 11 && hour < 14) return 'noon';
-  if (hour >= 14 && hour < 17) return 'afternoon';
-  if (hour >= 17 && hour < 20) return 'sunset';
-  if (hour >= 20 && hour < 22) return 'dusk';
-  return 'night';
-};
-
-/**
- * Get building colors and lighting based on time of day
- * Uses classic OSMBuildings terracotta/coral style
- */
-const getBuildingStyle = (hour: number): {
-  wallColor: [number, number, number, number];
-  roofColor: [number, number, number, number];
-  sunDirection: [number, number, number];
-  sunIntensity: number;
-  ambientIntensity: number;
-} => {
-  const period = getTimePeriod(hour);
-
-  // Calculate sun position based on hour
-  const sunAngle = ((hour - 6) / 12) * Math.PI; // 6am = east, 12pm = south, 6pm = west
-  const sunAltitude = Math.sin(((hour - 6) / 12) * Math.PI) * 0.7;
-  const sunDirection: [number, number, number] = [
-    -Math.cos(sunAngle) * 0.5,
-    -Math.sin(sunAngle) * 0.5,
-    -Math.max(0.3, sunAltitude),
-  ];
-
-  switch (period) {
-    case 'night':
-      return {
-        wallColor: [50, 45, 60, 230],
-        roofColor: [70, 65, 80, 220],
-        sunDirection: [0, 0, -1],
-        sunIntensity: 0.1,
-        ambientIntensity: 0.3,
-      };
-    case 'dawn':
-      return {
-        wallColor: [200, 140, 120, 230],
-        roofColor: [180, 170, 165, 220],
-        sunDirection,
-        sunIntensity: 0.5,
-        ambientIntensity: 0.4,
-      };
-    case 'morning':
-      return {
-        wallColor: [210, 145, 115, 230],
-        roofColor: [190, 185, 180, 220],
-        sunDirection,
-        sunIntensity: 0.7,
-        ambientIntensity: 0.45,
-      };
-    case 'noon':
-      return {
-        wallColor: [215, 150, 120, 230],
-        roofColor: [200, 195, 190, 220],
-        sunDirection,
-        sunIntensity: 0.85,
-        ambientIntensity: 0.5,
-      };
-    case 'afternoon':
-      return {
-        wallColor: [212, 148, 118, 230],
-        roofColor: [195, 190, 185, 220],
-        sunDirection,
-        sunIntensity: 0.75,
-        ambientIntensity: 0.45,
-      };
-    case 'sunset':
-      return {
-        wallColor: [205, 130, 95, 230],
-        roofColor: [200, 175, 155, 220],
-        sunDirection,
-        sunIntensity: 0.5,
-        ambientIntensity: 0.4,
-      };
-    case 'dusk':
-      return {
-        wallColor: [130, 100, 115, 230],
-        roofColor: [120, 115, 130, 220],
-        sunDirection,
-        sunIntensity: 0.2,
-        ambientIntensity: 0.35,
-      };
-    default:
-      return {
-        wallColor: [215, 150, 120, 230],
-        roofColor: [200, 195, 190, 220],
-        sunDirection,
-        sunIntensity: 0.8,
-        ambientIntensity: 0.5,
-      };
-  }
+// Classic OSMBuildings color palette
+const OSM_COLORS = {
+  // Terracotta/beige wall colors - classic OSMBuildings style
+  wallLight: [238, 211, 182, 255] as [number, number, number, number],  // Sunlit side
+  wallMid: [216, 183, 150, 255] as [number, number, number, number],    // Mid tone
+  wallDark: [180, 150, 120, 255] as [number, number, number, number],   // Shadow side
+  // Roof colors
+  roofLight: [220, 210, 200, 255] as [number, number, number, number],
+  roofDark: [190, 180, 170, 255] as [number, number, number, number],
+  // Shadow color (dark blue-gray on ground)
+  shadow: [60, 50, 70, 120] as [number, number, number, number],
 };
 
 /**
@@ -281,6 +190,49 @@ const fetchBuildings = async (
   return [];
 };
 
+/**
+ * Calculate shadow polygons for buildings based on sun position
+ */
+const calculateShadowPolygons = (
+  buildings: GeoJSON.Feature[],
+  sunAzimuth: number, // radians, 0 = north, clockwise
+  sunAltitude: number // radians, 0 = horizon
+): Array<{ polygon: [number, number][]; opacity: number }> => {
+  if (sunAltitude <= 0.05) return []; // No shadows at night/very low sun
+
+  const shadows: Array<{ polygon: [number, number][]; opacity: number }> = [];
+  const shadowLength = 1 / Math.tan(sunAltitude); // Shadow length multiplier
+  const shadowOpacity = Math.min(0.5, sunAltitude * 1.5); // Fade shadows near sunset/sunrise
+
+  // Sun direction in lat/lng space (approximate)
+  const dx = Math.sin(sunAzimuth) * shadowLength * 0.00001;
+  const dy = -Math.cos(sunAzimuth) * shadowLength * 0.00001;
+
+  for (const building of buildings) {
+    const height = (building.properties?.height as number) || 12;
+    const coords = building.geometry.coordinates[0] as [number, number][];
+    if (!coords || coords.length < 4) continue;
+
+    // Scale shadow by building height
+    const heightFactor = height / 10;
+    const shadowDx = dx * heightFactor;
+    const shadowDy = dy * heightFactor;
+
+    // Create shadow polygon by offsetting building footprint
+    const shadowCoords: [number, number][] = coords.map(([lng, lat]) => [
+      lng + shadowDx,
+      lat + shadowDy,
+    ]);
+
+    shadows.push({
+      polygon: shadowCoords,
+      opacity: shadowOpacity,
+    });
+  }
+
+  return shadows;
+};
+
 const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   map,
   enabled,
@@ -293,37 +245,57 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   const loadingRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Get current hour for styling
-  const currentHour = useMemo(() => {
-    return dateTime ? dateTime.getHours() + dateTime.getMinutes() / 60 : new Date().getHours();
+  // Get current time for sun position
+  const currentDateTime = useMemo(() => {
+    return dateTime || new Date();
   }, [dateTime]);
 
-  const style = useMemo(() => getBuildingStyle(currentHour), [currentHour]);
+  const currentHour = currentDateTime.getHours() + currentDateTime.getMinutes() / 60;
 
-  // Create lighting effect with sun shadows
+  // Calculate sun position (simplified)
+  const sunPosition = useMemo(() => {
+    const hour = currentHour;
+    // Sun azimuth: 0° at 6am (east), 90° at noon (south), 180° at 6pm (west)
+    const azimuth = ((hour - 6) / 12) * Math.PI;
+    // Sun altitude: peaks at noon
+    const altitude = Math.sin(((hour - 6) / 12) * Math.PI) * (Math.PI / 3); // Max 60 degrees
+    return { azimuth, altitude };
+  }, [currentHour]);
+
+  // Create lighting effect with sun shadows - OSMBuildings style
   const lightingEffect = useMemo(() => {
+    const { altitude } = sunPosition;
+    const isDay = altitude > 0.05;
+
     const ambientLight = new AmbientLight({
       color: [255, 255, 255],
-      intensity: style.ambientIntensity,
+      intensity: isDay ? 0.4 : 0.2,
     });
 
-    const directionalLight = new DirectionalLight({
-      color: [255, 250, 240],
-      intensity: style.sunIntensity,
-      direction: style.sunDirection,
+    // Use SunLight for realistic sun-based shadows
+    const sunLight = new SunLight({
+      timestamp: currentDateTime.getTime(),
+      color: isDay ? [255, 250, 240] : [100, 100, 120],
+      intensity: isDay ? 1.5 : 0.2,
       _shadow: true,
     });
 
-    return new LightingEffect({ ambientLight, directionalLight });
-  }, [style]);
+    return new LightingEffect({ ambientLight, sunLight });
+  }, [sunPosition, currentDateTime]);
 
-  // Check if current viewport is within the previously fetched bounds (with small margin)
+  // Calculate shadow polygons
+  const shadowPolygons = useMemo(() => {
+    if (buildings.length === 0 || sunPosition.altitude <= 0.05) return [];
+    return calculateShadowPolygons(buildings, sunPosition.azimuth, sunPosition.altitude);
+  }, [buildings, sunPosition]);
+
+  // Check if current viewport is within the previously fetched bounds
   const isWithinFetchedBounds = useCallback((bounds: google.maps.LatLngBounds): boolean => {
     if (!lastFetchBoundsRef.current) return false;
 
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-    const margin = 0.05; // 5% margin before refetching (small to trigger prefetch early)
+    const margin = 0.05;
 
     const latRange = lastFetchBoundsRef.current.north - lastFetchBoundsRef.current.south;
     const lngRange = lastFetchBoundsRef.current.east - lastFetchBoundsRef.current.west;
@@ -344,11 +316,9 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     const zoom = map.getZoom();
 
     if (!bounds || !zoom || zoom < 15) {
-      // Don't clear existing buildings immediately - keep them for smooth transition
       return;
     }
 
-    // Skip if still within the previously fetched area
     if (buildings.length > 0 && isWithinFetchedBounds(bounds)) {
       return;
     }
@@ -356,7 +326,6 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     if (loadingRef.current) return;
     loadingRef.current = true;
 
-    // Only show loading indicator if we have no buildings yet
     if (buildings.length === 0) {
       setIsLoading(true);
     }
@@ -364,7 +333,6 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 
-    // Expand bounds by 20% in each direction (reduced from 50% to prevent timeout)
     const latPadding = (ne.lat() - sw.lat()) * 0.2;
     const lngPadding = (ne.lng() - sw.lng()) * 0.2;
 
@@ -383,15 +351,12 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
         fetchBounds.east
       );
 
-      // Only update if we got results
       if (features.length > 0) {
-        // Merge with existing buildings to prevent flicker
         setBuildings(prev => {
           if (prev.length === 0) return features;
-          // Keep existing buildings and add new ones
           const existingIds = new Set(prev.map(f => JSON.stringify(f.geometry.coordinates[0]?.slice(0, 2))));
           const newFeatures = features.filter(f => !existingIds.has(JSON.stringify(f.geometry.coordinates[0]?.slice(0, 2))));
-          return [...prev, ...newFeatures].slice(-2000); // Limit total buildings
+          return [...prev, ...newFeatures].slice(-2000);
         });
         lastFetchBoundsRef.current = fetchBounds;
       }
@@ -403,7 +368,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     }
   }, [map, enabled, buildings.length, isWithinFetchedBounds]);
 
-  // Debounced load with longer delay to prevent rapid reloads
+  // Debounced load
   const debouncedLoad = useCallback(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -411,7 +376,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     debounceRef.current = setTimeout(loadBuildings, 500);
   }, [loadBuildings]);
 
-  // Create/update deck.gl overlay with lighting
+  // Create/update deck.gl overlay with OSMBuildings style
   useEffect(() => {
     if (!map || !enabled) {
       if (overlayRef.current) {
@@ -426,46 +391,68 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       overlayRef.current.setMap(map);
     }
 
-    const buildingLayer = buildings.length
-      ? new GeoJsonLayer({
+    const layers = [];
+
+    // Shadow layer - rendered first (below buildings)
+    if (shadowPolygons.length > 0) {
+      layers.push(
+        new PolygonLayer({
+          id: 'building-shadows',
+          data: shadowPolygons,
+          getPolygon: (d: { polygon: [number, number][] }) => d.polygon,
+          getFillColor: (d: { opacity: number }) => [50, 40, 60, Math.floor(d.opacity * 180)],
+          getLineColor: [0, 0, 0, 0],
+          filled: true,
+          stroked: false,
+          extruded: false,
+          pickable: false,
+        })
+      );
+    }
+
+    // Building layer - OSMBuildings terracotta style
+    if (buildings.length > 0) {
+      layers.push(
+        new GeoJsonLayer({
           id: '3d-buildings',
           data: { type: 'FeatureCollection', features: buildings },
           filled: true,
           extruded: true,
           wireframe: false,
-          opacity: 0.92,
+          opacity: 1,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
-          getFillColor: style.wallColor,
-          getLineColor: [90, 80, 75, 120],
+          // Classic OSMBuildings terracotta color
+          getFillColor: OSM_COLORS.wallMid,
+          // Subtle outline for definition
+          getLineColor: [160, 140, 120, 100],
           lineWidthMinPixels: 1,
+          // Material for realistic shading
           material: {
-            ambient: 0.3,
-            diffuse: 0.8,
-            shininess: 20,
-            specularColor: [50, 45, 40],
+            ambient: 0.35,
+            diffuse: 0.7,
+            shininess: 10,
+            specularColor: [255, 255, 255],
           },
+          // Enable shadows
+          shadowEnabled: true,
           pickable: false,
-          // Smooth transitions to prevent flickering
+          // Smooth transitions
           transitions: {
-            getElevation: { duration: 800, easing: (t: number) => t * (2 - t) },
-            getFillColor: { duration: 600 },
+            getElevation: { duration: 600 },
+            getFillColor: { duration: 400 },
           },
           updateTriggers: {
             getFillColor: [currentHour],
           },
-          // Keep buildings stable during data updates
-          dataComparator: (newData: any, oldData: any) => {
-            if (!oldData || !newData) return false;
-            return newData.features?.length === oldData.features?.length;
-          },
         })
-      : null;
+      );
+    }
 
     overlayRef.current.setProps({
-      layers: buildingLayer ? [buildingLayer] : [],
+      layers,
       effects: [lightingEffect],
     });
-  }, [map, enabled, buildings, style, lightingEffect, currentHour]);
+  }, [map, enabled, buildings, shadowPolygons, lightingEffect, currentHour]);
 
   // Setup map listeners
   useEffect(() => {
@@ -499,8 +486,8 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   if (enabled && isLoading) {
     return (
       <div className="absolute top-24 left-4 z-[1000] bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg flex items-center gap-2">
-        <div className="w-4 h-4 border-2 border-slate-700 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-medium text-slate-700">Loading 3D buildings...</span>
+        <div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs font-medium text-amber-800">Loading 3D buildings...</span>
       </div>
     );
   }
