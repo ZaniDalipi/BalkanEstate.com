@@ -557,8 +557,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     minZoom: 6,
     maxZoom: 21, // No limit on zoom
     mapTypeId: mapType,
-    gestureHandling: 'greedy',
-    scrollwheel: true,
+    gestureHandling: isDrawing ? 'none' : 'greedy', // Disable gesture handling when drawing to allow touch events
+    scrollwheel: !isDrawing, // Disable scroll zoom when drawing
     draggable: !isDrawing, // Allow dragging in measurement mode, only disable during rectangle drawing
     styles: mapStyles,
     tilt: show3DBuildings ? 60 : 0, // Higher tilt for better 3D view
@@ -884,6 +884,88 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       });
     }
   }, [map, isDrawing, showMeasurement]);
+
+  // Mobile touch event handlers for drawing
+  useEffect(() => {
+    if (!map || !isDrawing || !isMobile) return;
+
+    const mapDiv = map.getDiv();
+    let touchStartLatLng: google.maps.LatLng | null = null;
+
+    const getLatLngFromTouch = (touch: Touch): google.maps.LatLng | null => {
+      const rect = mapDiv.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      const projection = map.getProjection();
+      if (!projection) return null;
+
+      const bounds = map.getBounds();
+      if (!bounds) return null;
+
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      const topRight = projection.fromLatLngToPoint(ne);
+      const bottomLeft = projection.fromLatLngToPoint(sw);
+      if (!topRight || !bottomLeft) return null;
+
+      const scale = Math.pow(2, map.getZoom() || 0);
+      const worldPoint = new google.maps.Point(
+        bottomLeft.x + (x / rect.width) * (topRight.x - bottomLeft.x),
+        topRight.y + (y / rect.height) * (bottomLeft.y - topRight.y)
+      );
+      return projection.fromPointToLatLng(worldPoint);
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      e.preventDefault();
+      const latLng = getLatLngFromTouch(e.touches[0]);
+      if (latLng) {
+        touchStartLatLng = latLng;
+        setDrawStartPos(latLng);
+        setTempDrawRect(null);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!touchStartLatLng || e.touches.length !== 1) return;
+      e.preventDefault();
+      const currentLatLng = getLatLngFromTouch(e.touches[0]);
+      if (currentLatLng) {
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(
+            Math.min(touchStartLatLng.lat(), currentLatLng.lat()),
+            Math.min(touchStartLatLng.lng(), currentLatLng.lng())
+          ),
+          new google.maps.LatLng(
+            Math.max(touchStartLatLng.lat(), currentLatLng.lat()),
+            Math.max(touchStartLatLng.lng(), currentLatLng.lng())
+          )
+        );
+        setTempDrawRect(bounds);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      if (touchStartLatLng && tempDrawRect) {
+        onDrawComplete(googleBoundsToLeaflet(tempDrawRect));
+      }
+      touchStartLatLng = null;
+      setDrawStartPos(null);
+      setTempDrawRect(null);
+    };
+
+    mapDiv.addEventListener('touchstart', handleTouchStart, { passive: false });
+    mapDiv.addEventListener('touchmove', handleTouchMove, { passive: false });
+    mapDiv.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      mapDiv.removeEventListener('touchstart', handleTouchStart);
+      mapDiv.removeEventListener('touchmove', handleTouchMove);
+      mapDiv.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [map, isDrawing, isMobile, onDrawComplete, tempDrawRect]);
 
   // Loading/error states
   if (loadError) {
