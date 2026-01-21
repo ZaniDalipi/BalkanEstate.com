@@ -553,6 +553,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     streetViewControl: false,
     rotateControl: show3DBuildings, // Enable rotate control for 3D navigation
     fullscreenControl: false,
+    clickableIcons: false, // Disable default POI info windows (ugly gray X popup)
     restriction: { latLngBounds: BALKAN_BOUNDS, strictBounds: false },
     minZoom: 6,
     maxZoom: 21, // No limit on zoom
