@@ -24,6 +24,7 @@ import SunPositionControl from './SunPositionControl';
 import SunArcAnimation, { type Season, type SunriseSunsetInfo } from './SunArcAnimation';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM, type CadastreLayerConfig } from '@/config/cadastreLayers';
 import GoogleMeasurementTool, { useMeasurementTool, type MeasurementPoint } from './GoogleMeasurementTool';
+import Google3DBuildingsLayer from './Google3DBuildingsLayer';
 
 // Balkan region bounds
 const BALKAN_BOUNDS = {
@@ -990,6 +991,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           <ClimateRiskLegend riskType={selectedClimateRisk} />
         </div>
       )}
+
+      {/* 3D Buildings Layer with deck.gl */}
+      <Google3DBuildingsLayer
+        map={map}
+        enabled={show3DBuildings}
+        dateTime={sunDateTime}
+      />
 
       {/* Measurement Tool UI Panel */}
       <GoogleMeasurementTool
