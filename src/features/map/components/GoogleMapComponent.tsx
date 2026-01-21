@@ -210,9 +210,10 @@ interface PropertyMarkerProps {
   property: Property;
   isHovered: boolean;
   onClick: () => void;
+  zoom: number;
 }
 
-const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHovered, onClick }) => {
+const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHovered, onClick, zoom }) => {
   const price = formatMarkerPrice(property.price);
   const baseColor = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
 
@@ -229,9 +230,18 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
 
   const position = { lat: property.lat!, lng: property.lng! };
 
-  // Calculate dynamic width based on price length
+  // Calculate scale factor based on zoom level
+  // Full size at zoom >= 14, scales down to 0.5 at zoom <= 8
+  const zoomScale = Math.max(0.5, Math.min(1, (zoom - 8) / 6));
+
+  // Calculate dynamic width based on price length and zoom
   const priceLen = price.length;
-  const minWidth = Math.max(42, priceLen * 8 + 16);
+  const baseMinWidth = Math.max(42, priceLen * 8 + 16);
+  const minWidth = baseMinWidth * zoomScale;
+  const height = 28 * zoomScale;
+  const fontSize = 11 * zoomScale;
+  const padding = 10 * zoomScale;
+  const borderRadius = 14 * zoomScale;
 
   return (
     <OverlayView
@@ -260,12 +270,12 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
           className={`flex items-center justify-center text-white font-bold whitespace-nowrap ${pulseClass}`}
           style={{
             minWidth: `${minWidth}px`,
-            height: '28px',
-            padding: '0 10px',
-            borderRadius: '14px',
+            height: `${height}px`,
+            padding: `0 ${padding}px`,
+            borderRadius: `${borderRadius}px`,
             backgroundColor: baseColor,
-            border: `${isHovered ? 3 : promotionColor ? 3 : 2}px solid ${isHovered ? '#fff' : promotionColor || '#fff'}`,
-            fontSize: '11px',
+            border: `${(isHovered ? 3 : promotionColor ? 3 : 2) * zoomScale}px solid ${isHovered ? '#fff' : promotionColor || '#fff'}`,
+            fontSize: `${fontSize}px`,
             boxShadow: !pulseClass ? (isHovered
               ? `0 0 16px 4px ${baseColor}70, 0 6px 16px rgba(0,0,0,0.35)`
               : '0 3px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2)') : undefined,
@@ -274,13 +284,16 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
         >
           {price}
         </div>
-        {/* Promotion badge */}
-        {promotionTier && (
+        {/* Promotion badge - only show at reasonable zoom */}
+        {promotionTier && zoomScale >= 0.7 && (
           <div
-            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold"
+            className="absolute -top-1 -right-1 rounded-full flex items-center justify-center font-bold"
             style={{
+              width: `${20 * zoomScale}px`,
+              height: `${20 * zoomScale}px`,
+              fontSize: `${9 * zoomScale}px`,
               backgroundColor: promotionColor,
-              border: '2px solid white',
+              border: `${2 * zoomScale}px solid white`,
               boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
               color: 'white',
             }}
@@ -291,13 +304,14 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
         )}
         {/* Pointer triangle at bottom */}
         <div
-          className="absolute left-1/2 -bottom-1.5"
+          className="absolute left-1/2"
           style={{
+            bottom: `${-6 * zoomScale}px`,
             width: 0,
             height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderTop: `6px solid ${baseColor}`,
+            borderLeft: `${6 * zoomScale}px solid transparent`,
+            borderRight: `${6 * zoomScale}px solid transparent`,
+            borderTop: `${6 * zoomScale}px solid ${baseColor}`,
             transform: 'translateX(-50%)',
             filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.2))',
           }}
@@ -1025,6 +1039,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             property={property}
             isHovered={hoveredPropertyId === property.id}
             onClick={() => handleMarkerClick(property)}
+            zoom={zoom}
           />
         ))}
 
