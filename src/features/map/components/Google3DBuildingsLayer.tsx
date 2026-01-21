@@ -444,31 +444,21 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           filled: true,
           extruded: true,
           wireframe: false,
-          opacity: 1,
+          opacity: 0.95,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
-          // Classic OSMBuildings terracotta color
-          getFillColor: OSM_COLORS.wallMid,
-          // Subtle outline for definition
-          getLineColor: [160, 140, 120, 100],
+          // Classic OSMBuildings terracotta/coral color
+          getFillColor: [210, 155, 125, 255],
+          // Dark outline for definition
+          getLineColor: [140, 110, 90, 200],
           lineWidthMinPixels: 1,
-          // Material for realistic shading
+          // Material for warm terracotta look - less shiny, more diffuse
           material: {
-            ambient: 0.35,
-            diffuse: 0.7,
-            shininess: 10,
-            specularColor: [255, 255, 255],
+            ambient: 0.6,
+            diffuse: 0.6,
+            shininess: 5,
+            specularColor: [60, 50, 40],
           },
-          // Enable shadows
-          shadowEnabled: true,
           pickable: false,
-          // Smooth transitions
-          transitions: {
-            getElevation: { duration: 600 },
-            getFillColor: { duration: 400 },
-          },
-          updateTriggers: {
-            getFillColor: [currentHour],
-          },
         })
       );
     }
