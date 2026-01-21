@@ -271,7 +271,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   const overlayRef = useRef<GoogleMapsOverlay | null>(null);
   const [buildings, setBuildings] = useState<GeoJSON.Feature[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const lastBoundsRef = useRef<string | null>(null);
+  const lastFetchBoundsRef = useRef<{ south: number; west: number; north: number; east: number } | null>(null);
   const loadingRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -299,7 +299,26 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     return new LightingEffect({ ambientLight, directionalLight });
   }, [style]);
 
-  // Load buildings when viewport changes
+  // Check if current viewport is within the previously fetched bounds (with margin)
+  const isWithinFetchedBounds = useCallback((bounds: google.maps.LatLngBounds): boolean => {
+    if (!lastFetchBoundsRef.current) return false;
+
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    const margin = 0.15; // 15% margin before refetching
+
+    const latRange = lastFetchBoundsRef.current.north - lastFetchBoundsRef.current.south;
+    const lngRange = lastFetchBoundsRef.current.east - lastFetchBoundsRef.current.west;
+
+    return (
+      sw.lat() > lastFetchBoundsRef.current.south + latRange * margin &&
+      sw.lng() > lastFetchBoundsRef.current.west + lngRange * margin &&
+      ne.lat() < lastFetchBoundsRef.current.north - latRange * margin &&
+      ne.lng() < lastFetchBoundsRef.current.east - lngRange * margin
+    );
+  }, []);
+
+  // Load buildings when viewport changes significantly
   const loadBuildings = useCallback(async () => {
     if (!map || !enabled) return;
 
@@ -307,33 +326,49 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     const zoom = map.getZoom();
 
     if (!bounds || !zoom || zoom < 15) {
-      if (buildings.length > 0) {
-        setBuildings([]);
-        lastBoundsRef.current = null;
-      }
+      // Don't clear existing buildings immediately - keep them for smooth transition
       return;
     }
 
-    const sw = bounds.getSouthWest();
-    const ne = bounds.getNorthEast();
-
-    // Create a bounds key for comparison
-    const boundsKey = `${sw.lat().toFixed(4)},${sw.lng().toFixed(4)},${ne.lat().toFixed(4)},${ne.lng().toFixed(4)}`;
-
-    if (boundsKey === lastBoundsRef.current && buildings.length > 0) {
+    // Skip if still within the previously fetched area
+    if (buildings.length > 0 && isWithinFetchedBounds(bounds)) {
       return;
     }
 
     if (loadingRef.current) return;
     loadingRef.current = true;
-    setIsLoading(buildings.length === 0);
+
+    // Only show loading indicator if we have no buildings yet
+    if (buildings.length === 0) {
+      setIsLoading(true);
+    }
+
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+
+    // Expand bounds by 50% in each direction to prefetch more area
+    const latPadding = (ne.lat() - sw.lat()) * 0.5;
+    const lngPadding = (ne.lng() - sw.lng()) * 0.5;
+
+    const fetchBounds = {
+      south: sw.lat() - latPadding,
+      west: sw.lng() - lngPadding,
+      north: ne.lat() + latPadding,
+      east: ne.lng() + lngPadding,
+    };
 
     try {
-      const features = await fetchBuildings(sw.lat(), sw.lng(), ne.lat(), ne.lng());
+      const features = await fetchBuildings(
+        fetchBounds.south,
+        fetchBounds.west,
+        fetchBounds.north,
+        fetchBounds.east
+      );
 
-      if (features.length > 0 || buildings.length === 0) {
+      // Only update if we got results or if we had no buildings before
+      if (features.length > 0) {
         setBuildings(features);
-        lastBoundsRef.current = boundsKey;
+        lastFetchBoundsRef.current = fetchBounds;
       }
     } catch (error) {
       console.warn('Failed to load buildings:', error);
@@ -341,14 +376,14 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       loadingRef.current = false;
       setIsLoading(false);
     }
-  }, [map, enabled, buildings.length]);
+  }, [map, enabled, buildings.length, isWithinFetchedBounds]);
 
-  // Debounced load to prevent rapid reloads
+  // Debounced load with longer delay to prevent rapid reloads
   const debouncedLoad = useCallback(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
-    debounceRef.current = setTimeout(loadBuildings, 300);
+    debounceRef.current = setTimeout(loadBuildings, 500);
   }, [loadBuildings]);
 
   // Create/update deck.gl overlay with lighting
@@ -385,12 +420,18 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
             specularColor: [50, 45, 40],
           },
           pickable: false,
+          // Smooth transitions to prevent flickering
           transitions: {
-            getElevation: 500,
-            getFillColor: 500,
+            getElevation: { duration: 800, easing: (t: number) => t * (2 - t) },
+            getFillColor: { duration: 600 },
           },
           updateTriggers: {
             getFillColor: [currentHour],
+          },
+          // Keep buildings stable during data updates
+          dataComparator: (newData: any, oldData: any) => {
+            if (!oldData || !newData) return false;
+            return newData.features?.length === oldData.features?.length;
           },
         })
       : null;
