@@ -22,7 +22,7 @@ const OSMB_TILE_URL_TEMPLATE = 'https://{s}.data.osmbuildings.org/0.2/59fcc2e8/t
 // Fallback to anonymous endpoint if API key doesn't work
 const OSMB_FALLBACK_URL = 'https://{s}.data.osmbuildings.org/0.2/anonymous/tile';
 
-// Cache for tile data
+// Cache for tile data - persistent across component remounts
 const tileCache = new Map<string, GeoJSON.Feature[]>();
 
 // Time periods for coloring
@@ -53,43 +53,43 @@ const getBuildingColors = (hour: number): {
   switch (period) {
     case 'night':
       return {
-        wallColor: [60, 50, 70, 230],      // Dark purple-gray
-        roofColor: [80, 75, 90, 220],      // Slightly lighter
+        wallColor: [60, 50, 70, 230],
+        roofColor: [80, 75, 90, 220],
       };
     case 'dawn':
       return {
-        wallColor: [200, 130, 110, 230],   // Warm terracotta with pink
-        roofColor: [180, 170, 165, 220],   // Light gray
+        wallColor: [200, 130, 110, 230],
+        roofColor: [180, 170, 165, 220],
       };
     case 'morning':
       return {
-        wallColor: [215, 135, 105, 230],   // Terracotta/coral
-        roofColor: [190, 185, 180, 220],   // Light gray
+        wallColor: [215, 135, 105, 230],
+        roofColor: [190, 185, 180, 220],
       };
     case 'noon':
       return {
-        wallColor: [220, 140, 110, 230],   // Classic terracotta/coral (like screenshot)
-        roofColor: [200, 195, 190, 220],   // Light gray roof
+        wallColor: [220, 140, 110, 230],
+        roofColor: [200, 195, 190, 220],
       };
     case 'afternoon':
       return {
-        wallColor: [218, 138, 108, 230],   // Terracotta/coral
-        roofColor: [195, 190, 185, 220],   // Light gray
+        wallColor: [218, 138, 108, 230],
+        roofColor: [195, 190, 185, 220],
       };
     case 'sunset':
       return {
-        wallColor: [210, 125, 90, 230],    // Warmer orange terracotta
-        roofColor: [200, 180, 160, 220],   // Warm gray
+        wallColor: [210, 125, 90, 230],
+        roofColor: [200, 180, 160, 220],
       };
     case 'dusk':
       return {
-        wallColor: [140, 100, 110, 230],   // Muted purple-brown
-        roofColor: [130, 125, 135, 220],   // Gray-purple
+        wallColor: [140, 100, 110, 230],
+        roofColor: [130, 125, 135, 220],
       };
     default:
       return {
-        wallColor: [220, 140, 110, 230],   // Default terracotta
-        roofColor: [200, 195, 190, 220],   // Default gray roof
+        wallColor: [220, 140, 110, 230],
+        roofColor: [200, 195, 190, 220],
       };
   }
 };
@@ -112,8 +112,6 @@ const latLngToTile = (lat: number, lng: number, zoom: number): { x: number; y: n
 const parseOSMBuildingsData = (data: unknown): GeoJSON.Feature[] => {
   const features: GeoJSON.Feature[] = [];
 
-  // OSMBuildings tile format: array of [footprint, height, minHeight, color, id]
-  // footprint is array of [lng, lat] pairs (flat array)
   if (Array.isArray(data)) {
     for (const building of data) {
       if (!Array.isArray(building) || building.length < 2) continue;
@@ -122,15 +120,13 @@ const parseOSMBuildingsData = (data: unknown): GeoJSON.Feature[] => {
       const height = building[1] || 12;
       const minHeight = building[2] || 0;
 
-      if (!Array.isArray(footprint) || footprint.length < 6) continue; // Need at least 3 points (6 values)
+      if (!Array.isArray(footprint) || footprint.length < 6) continue;
 
-      // Convert footprint to GeoJSON coordinates
       const coordinates: [number, number][] = [];
       for (let i = 0; i < footprint.length; i += 2) {
         coordinates.push([footprint[i], footprint[i + 1]]);
       }
 
-      // Close the polygon if needed
       if (coordinates.length >= 3) {
         const first = coordinates[0];
         const last = coordinates[coordinates.length - 1];
@@ -163,10 +159,8 @@ const fetchTile = async (z: number, x: number, y: number): Promise<GeoJSON.Featu
     return tileCache.get(cacheKey)!;
   }
 
-  // Select subdomain based on tile coords for load balancing
   const subdomain = OSMB_SUBDOMAINS[(x + y) % OSMB_SUBDOMAINS.length];
 
-  // Try primary URL first, then fallback
   const urls = [
     OSMB_TILE_URL_TEMPLATE.replace('{s}', subdomain) + `/${z}/${x}/${y}.json`,
     OSMB_FALLBACK_URL.replace('{s}', subdomain) + `/${z}/${x}/${y}.json`,
@@ -180,8 +174,7 @@ const fetchTile = async (z: number, x: number, y: number): Promise<GeoJSON.Featu
       const data = await response.json();
       const features = parseOSMBuildingsData(data);
 
-      // Cache even if empty to avoid repeated requests
-      if (tileCache.size > 100) {
+      if (tileCache.size > 150) {
         const firstKey = tileCache.keys().next().value;
         if (firstKey) tileCache.delete(firstKey);
       }
@@ -189,14 +182,32 @@ const fetchTile = async (z: number, x: number, y: number): Promise<GeoJSON.Featu
       tileCache.set(cacheKey, features);
       return features;
     } catch {
-      // Try next URL
       continue;
     }
   }
 
-  // All URLs failed, cache empty result
   tileCache.set(cacheKey, []);
   return [];
+};
+
+/**
+ * Get tile keys for bounds
+ */
+const getTileKeys = (bounds: google.maps.LatLngBounds, zoom: number): string[] => {
+  const tileZoom = Math.min(Math.max(15, Math.floor(zoom)), 17);
+  const sw = bounds.getSouthWest();
+  const ne = bounds.getNorthEast();
+
+  const minTile = latLngToTile(ne.lat(), sw.lng(), tileZoom);
+  const maxTile = latLngToTile(sw.lat(), ne.lng(), tileZoom);
+
+  const keys: string[] = [];
+  for (let x = minTile.x; x <= maxTile.x; x++) {
+    for (let y = minTile.y; y <= maxTile.y; y++) {
+      keys.push(`${tileZoom}/${x}/${y}`);
+    }
+  }
+  return keys;
 };
 
 /**
@@ -206,9 +217,7 @@ const getTilesForBounds = async (
   bounds: google.maps.LatLngBounds,
   zoom: number
 ): Promise<GeoJSON.Feature[]> => {
-  // OSMBuildings tiles work best at zoom 15
   const tileZoom = Math.min(Math.max(15, Math.floor(zoom)), 17);
-
   const sw = bounds.getSouthWest();
   const ne = bounds.getNorthEast();
 
@@ -234,9 +243,10 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 }) => {
   const overlayRef = useRef<GoogleMapsOverlay | null>(null);
   const [buildings, setBuildings] = useState<GeoJSON.Feature[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const lastBoundsRef = useRef<string | null>(null);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const lastTileKeysRef = useRef<Set<string>>(new Set());
   const loadingRef = useRef(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get current hour for coloring
   const currentHour = useMemo(() => {
@@ -245,36 +255,60 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
   const colors = useMemo(() => getBuildingColors(currentHour), [currentHour]);
 
-  // Load buildings when viewport changes
+  // Load buildings when viewport changes - with debouncing to prevent flicker
   const loadBuildings = useCallback(async () => {
-    if (!map || !enabled || loadingRef.current) return;
+    if (!map || !enabled) return;
 
     const bounds = map.getBounds();
     const zoom = map.getZoom();
 
     if (!bounds || !zoom || zoom < 15) {
-      setBuildings([]);
+      if (buildings.length > 0) {
+        setBuildings([]);
+        lastTileKeysRef.current = new Set();
+      }
       return;
     }
 
-    const boundsKey = `${bounds.getSouthWest().lat().toFixed(4)},${bounds.getSouthWest().lng().toFixed(4)},${zoom}`;
+    // Get current tile keys
+    const currentTileKeys = getTileKeys(bounds, zoom);
+    const currentKeySet = new Set(currentTileKeys);
 
-    if (boundsKey === lastBoundsRef.current) return;
-    lastBoundsRef.current = boundsKey;
+    // Check if we actually need to load new tiles
+    const hasNewTiles = currentTileKeys.some(key => !lastTileKeysRef.current.has(key));
+    if (!hasNewTiles && buildings.length > 0) {
+      return; // No new tiles needed
+    }
 
+    // Prevent concurrent loads
+    if (loadingRef.current) return;
     loadingRef.current = true;
-    setIsLoading(true);
 
     try {
       const features = await getTilesForBounds(bounds, zoom);
-      setBuildings(features);
+
+      // Only update if we got features or if we had none before
+      if (features.length > 0 || buildings.length === 0) {
+        setBuildings(features);
+        lastTileKeysRef.current = currentKeySet;
+        setIsFirstLoad(false);
+      }
     } catch (error) {
       console.warn('Failed to load buildings:', error);
     } finally {
       loadingRef.current = false;
-      setIsLoading(false);
     }
-  }, [map, enabled]);
+  }, [map, enabled, buildings.length]);
+
+  // Debounced load function to prevent rapid reloads during camera movement
+  const debouncedLoad = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      loadBuildings();
+    }, 150); // 150ms debounce
+  }, [loadBuildings]);
 
   // Create/update deck.gl overlay
   useEffect(() => {
@@ -301,7 +335,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           opacity: 0.95,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
           getFillColor: colors.wallColor,
-          getLineColor: [100, 90, 85, 150],  // Subtle outline matching terracotta
+          getLineColor: [100, 90, 85, 150],
           lineWidthMinPixels: 1,
           material: {
             ambient: 0.4,
@@ -311,6 +345,10 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           },
           pickable: false,
           _shadows: true,
+          transitions: {
+            getElevation: 300,
+            getFillColor: 300,
+          },
           updateTriggers: {
             getFillColor: [currentHour],
           },
@@ -322,20 +360,23 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     });
   }, [map, enabled, buildings, colors, currentHour]);
 
-  // Setup map listeners
+  // Setup map listeners with debouncing
   useEffect(() => {
     if (!map || !enabled) return;
 
+    // Initial load
     loadBuildings();
 
-    const idleListener = map.addListener('idle', () => {
-      setTimeout(loadBuildings, 200);
-    });
+    // Listen for map idle with debounce
+    const idleListener = map.addListener('idle', debouncedLoad);
 
     return () => {
       google.maps.event.removeListener(idleListener);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
     };
-  }, [map, enabled, loadBuildings]);
+  }, [map, enabled, loadBuildings, debouncedLoad]);
 
   // Cleanup
   useEffect(() => {
@@ -344,10 +385,14 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
         overlayRef.current.setMap(null);
         overlayRef.current = null;
       }
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
     };
   }, []);
 
-  if (enabled && isLoading && buildings.length === 0) {
+  // Only show loading on first load
+  if (enabled && isFirstLoad && buildings.length === 0) {
     return (
       <div className="absolute top-24 left-4 z-[1000] bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg flex items-center gap-2">
         <div className="w-4 h-4 border-2 border-slate-700 border-t-transparent rounded-full animate-spin" />
