@@ -262,25 +262,25 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
   const loadingRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Get current time for sun position
-  const currentDateTime = useMemo(() => {
-    return dateTime || new Date();
-  }, [dateTime]);
+  // Get current time for sun position - only calculate when enabled
+  const currentHour = useMemo(() => {
+    if (!enabled) return 12; // Default, won't be used
+    const dt = dateTime || new Date();
+    return dt.getHours() + dt.getMinutes() / 60;
+  }, [dateTime, enabled]);
 
-  const currentHour = currentDateTime.getHours() + currentDateTime.getMinutes() / 60;
-
-  // Calculate sun position (simplified)
+  // Calculate sun position - only when enabled
   const sunPosition = useMemo(() => {
+    if (!enabled) return { azimuth: 0, altitude: 0 };
     const hour = currentHour;
-    // Sun azimuth: 0° at 6am (east), 90° at noon (south), 180° at 6pm (west)
     const azimuth = ((hour - 6) / 12) * Math.PI;
-    // Sun altitude: peaks at noon
-    const altitude = Math.sin(((hour - 6) / 12) * Math.PI) * (Math.PI / 3); // Max 60 degrees
+    const altitude = Math.sin(((hour - 6) / 12) * Math.PI) * (Math.PI / 3);
     return { azimuth, altitude };
-  }, [currentHour]);
+  }, [currentHour, enabled]);
 
-  // Create lighting effect with sun shadows - OSMBuildings style
+  // Create lighting effect - only when enabled
   const lightingEffect = useMemo(() => {
+    if (!enabled) return null;
     const { azimuth, altitude } = sunPosition;
     const isDay = altitude > 0.05;
 
@@ -289,14 +289,12 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
       intensity: isDay ? 0.4 : 0.2,
     });
 
-    // Calculate sun direction from azimuth and altitude
     const sunDirection: [number, number, number] = [
       Math.sin(azimuth) * Math.cos(altitude),
       -Math.cos(azimuth) * Math.cos(altitude),
       -Math.sin(altitude),
     ];
 
-    // Use DirectionalLight for realistic sun-based shadows
     const directionalLight = new DirectionalLight({
       color: isDay ? [255, 250, 240] : [100, 100, 120],
       intensity: isDay ? 1.5 : 0.2,
@@ -305,13 +303,13 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     });
 
     return new LightingEffect({ ambientLight, directionalLight });
-  }, [sunPosition]);
+  }, [sunPosition, enabled]);
 
-  // Calculate shadow polygons
+  // Calculate shadow polygons - only when enabled and have buildings
   const shadowPolygons = useMemo(() => {
-    if (buildings.length === 0 || sunPosition.altitude <= 0.05) return [];
+    if (!enabled || buildings.length === 0 || sunPosition.altitude <= 0.05) return [];
     return calculateShadowPolygons(buildings, sunPosition.azimuth, sunPosition.altitude);
-  }, [buildings, sunPosition]);
+  }, [buildings, sunPosition, enabled]);
 
   // Check if current viewport is within the previously fetched bounds
   const isWithinFetchedBounds = useCallback((bounds: google.maps.LatLngBounds): boolean => {
@@ -477,7 +475,7 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
 
     overlayRef.current.setProps({
       layers,
-      effects: [lightingEffect],
+      effects: lightingEffect ? [lightingEffect] : [],
     });
   }, [map, enabled, buildings, shadowPolygons, lightingEffect, currentHour]);
 
