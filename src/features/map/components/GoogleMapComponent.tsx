@@ -1308,6 +1308,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         map={map}
         enabled={show3DBuildings}
         dateTime={sunDateTime}
+        properties={validProperties}
       />
 
       {/* Measurement Tool UI Panel */}
