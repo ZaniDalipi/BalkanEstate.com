@@ -22,6 +22,8 @@ import {
   FireIcon,
 } from '@/constants';
 import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
+import SunPositionControl from './SunPositionControl';
+import SunArcAnimation, { type Season, type SunriseSunsetInfo } from './SunArcAnimation';
 
 // Balkan region bounds
 const BALKAN_BOUNDS = {
@@ -220,6 +222,10 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
 
   const position = { lat: property.lat!, lng: property.lng! };
 
+  // Calculate dynamic width based on price length
+  const priceLen = price.length;
+  const minWidth = Math.max(42, priceLen * 8 + 16);
+
   return (
     <OverlayView
       position={position}
@@ -237,19 +243,26 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
         className="cursor-pointer"
         style={{
           transform: isHovered ? 'scale(1.15)' : 'scale(1)',
-          transition: 'transform 0.15s ease-out',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: isHovered ? 1000 : isActivelyPromoted ? 100 : 1,
           position: 'relative',
         }}
       >
+        {/* Main marker - circular pill shape */}
         <div
-          className={`px-2.5 py-1 rounded-full text-white text-[11px] font-bold whitespace-nowrap ${pulseClass}`}
+          className={`flex items-center justify-center text-white font-bold whitespace-nowrap ${pulseClass}`}
           style={{
+            minWidth: `${minWidth}px`,
+            height: '28px',
+            padding: '0 10px',
+            borderRadius: '14px',
             backgroundColor: baseColor,
-            border: `${isHovered ? 3 : promotionColor ? 3 : 2}px solid ${isHovered ? baseColor : promotionColor || '#fff'}`,
+            border: `${isHovered ? 3 : promotionColor ? 3 : 2}px solid ${isHovered ? '#fff' : promotionColor || '#fff'}`,
+            fontSize: '11px',
             boxShadow: !pulseClass ? (isHovered
-              ? `0 0 12px 3px ${baseColor}60, 0 4px 12px rgba(0,0,0,0.3)`
-              : '0 2px 6px rgba(0,0,0,0.3)') : undefined,
+              ? `0 0 16px 4px ${baseColor}70, 0 6px 16px rgba(0,0,0,0.35)`
+              : '0 3px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2)') : undefined,
+            textShadow: '0 1px 2px rgba(0,0,0,0.3)',
           }}
         >
           {price}
@@ -257,17 +270,31 @@ const PropertyMarkerOverlay: React.FC<PropertyMarkerProps> = ({ property, isHove
         {/* Promotion badge */}
         {promotionTier && (
           <div
-            className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px]"
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold"
             style={{
               backgroundColor: promotionColor,
               border: '2px solid white',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              color: 'white',
             }}
             title={promotionTier.charAt(0).toUpperCase() + promotionTier.slice(1)}
           >
             {promotionTier === 'premium' ? '★' : promotionTier === 'highlight' ? '✦' : '◆'}
           </div>
         )}
+        {/* Pointer triangle at bottom */}
+        <div
+          className="absolute left-1/2 -bottom-1.5"
+          style={{
+            width: 0,
+            height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: `6px solid ${baseColor}`,
+            transform: 'translateX(-50%)',
+            filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.2))',
+          }}
+        />
       </div>
     </OverlayView>
   );
@@ -401,10 +428,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
 
   // Sun simulation state for 3D buildings
-  const [sunHour, setSunHour] = useState(() => new Date().getHours() + new Date().getMinutes() / 60);
+  const [sunDateTime, setSunDateTime] = useState<Date>(new Date());
+  const [sunSeason, setSunSeason] = useState<Season>('current');
+  const [isNightMode, setIsNightMode] = useState(false);
 
   // Force re-render state for markers
   const [markersKey, setMarkersKey] = useState(0);
+
+  // Promoted listings agent state
+  const [showAgentPanel, setShowAgentPanel] = useState(false);
+  const [currentPromotedIndex, setCurrentPromotedIndex] = useState(0);
 
   // Drawing state
   const [drawStartPos, setDrawStartPos] = useState<google.maps.LatLng | null>(null);
@@ -460,15 +493,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [isLoaded, map, properties.length]);
 
-  // Sun simulation for 3D buildings - update sun position
-  useEffect(() => {
-    if (!show3DBuildings) return;
-    const interval = setInterval(() => {
-      const now = new Date();
-      setSunHour(now.getHours() + now.getMinutes() / 60);
-    }, 60000); // Update every minute
-    return () => clearInterval(interval);
-  }, [show3DBuildings]);
+  // Handle day/night change from sun animation
+  const handleDayNightChange = useCallback((isDay: boolean, sunInfo: SunriseSunsetInfo) => {
+    setIsNightMode(!isDay);
+  }, []);
+
+  // Get current sun hour from dateTime
+  const sunHour = useMemo(() => {
+    return sunDateTime.getHours() + sunDateTime.getMinutes() / 60;
+  }, [sunDateTime]);
 
   // Heat map data
   const heatMapData = useMemo(() => {
@@ -676,8 +709,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setTempDrawRect(null);
   }, [isDrawing, tempDrawRect, onDrawComplete]);
 
-  // Measurement click handler - separate from drawing
+  // Map click handler - close popup or add measurement point
   const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    // Close property popup when clicking on map
+    if (selectedProperty && !showMeasurement) {
+      setSelectedProperty(null);
+      return;
+    }
+    // Measurement mode
     if (!e.latLng || !showMeasurement) return;
     const newPoints = [...measurementPoints, e.latLng];
     setMeasurementPoints(newPoints);
@@ -690,7 +729,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       );
     }
     setTotalDistance(dist);
-  }, [showMeasurement, measurementPoints]);
+  }, [showMeasurement, measurementPoints, selectedProperty]);
 
   // Update cursor and draggable for drawing/measurement mode
   useEffect(() => {
@@ -784,45 +823,68 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           />
         ))}
 
-        {/* Info Window */}
+        {/* Property Info Card - Custom compact popup */}
         {selectedProperty && (
-          <InfoWindow
+          <OverlayView
             position={{ lat: selectedProperty.lat!, lng: selectedProperty.lng! }}
-            onCloseClick={() => setSelectedProperty(null)}
-            options={{ pixelOffset: new google.maps.Size(0, -20), maxWidth: 320 }}
+            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            getPixelPositionOffset={() => ({ x: 0, y: -50 })}
           >
-            <div className="cursor-pointer" onClick={() => handlePropertyClick(selectedProperty.id)}>
-              {selectedProperty.images && selectedProperty.images[0] && (
-                <img
-                  src={selectedProperty.images[0].url}
-                  alt={selectedProperty.title || selectedProperty.address}
-                  className="w-full h-36 object-cover rounded-t-lg -mt-3 -mx-3 mb-3"
-                  style={{ width: 'calc(100% + 24px)' }}
-                />
-              )}
-              <div className="px-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-bold text-xl text-primary">€{selectedProperty.price.toLocaleString()}</p>
-                  {selectedProperty.isPromoted && (
-                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-semibold rounded-full">
-                      {selectedProperty.promotionTier?.toUpperCase() || 'PROMOTED'}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-800 font-medium mt-1 line-clamp-2">{selectedProperty.title || selectedProperty.address}</p>
-                {(selectedProperty.beds || selectedProperty.baths || selectedProperty.sqft) && (
-                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
-                    {selectedProperty.beds && <span>🛏️ {selectedProperty.beds} beds</span>}
-                    {selectedProperty.baths && <span>🚿 {selectedProperty.baths} baths</span>}
-                    {selectedProperty.sqft && <span>📐 {selectedProperty.sqft}m²</span>}
+            <div
+              className="cursor-pointer bg-white rounded-xl shadow-2xl overflow-hidden animate-fade-in"
+              style={{ width: '180px', transform: 'translateX(-50%)' }}
+              onClick={() => { handlePropertyClick(selectedProperty.id); setSelectedProperty(null); }}
+            >
+              {/* Image container */}
+              <div className="relative w-full h-20 bg-gray-100 overflow-hidden">
+                {selectedProperty.images && selectedProperty.images[0] ? (
+                  <img
+                    src={selectedProperty.images[0].url}
+                    alt={selectedProperty.title || selectedProperty.address}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <span className="text-2xl">🏠</span>
                   </div>
                 )}
-                <button className="w-full mt-3 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors">
-                  View Details →
-                </button>
+                {/* Promotion badge on image */}
+                {selectedProperty.isPromoted && selectedProperty.promotionTier && (
+                  <div
+                    className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold text-white"
+                    style={{ backgroundColor: PROMOTION_COLORS[selectedProperty.promotionTier] }}
+                  >
+                    {selectedProperty.promotionTier.toUpperCase()}
+                  </div>
+                )}
               </div>
+              {/* Content */}
+              <div className="p-2">
+                <p className="font-bold text-sm text-primary">€{selectedProperty.price.toLocaleString()}</p>
+                <p className="text-[10px] text-gray-700 font-medium line-clamp-1 mt-0.5">
+                  {selectedProperty.title || selectedProperty.address}
+                </p>
+                <div className="flex items-center gap-2 mt-1 text-[9px] text-gray-500">
+                  {selectedProperty.beds && <span>🛏️{selectedProperty.beds}</span>}
+                  {selectedProperty.baths && <span>🚿{selectedProperty.baths}</span>}
+                  {selectedProperty.sqft && <span>📐{selectedProperty.sqft}m²</span>}
+                </div>
+              </div>
+              {/* Arrow pointer */}
+              <div
+                className="absolute left-1/2 -bottom-2"
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: '8px solid transparent',
+                  borderRight: '8px solid transparent',
+                  borderTop: '8px solid white',
+                  transform: 'translateX(-50%)',
+                  filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.1))',
+                }}
+              />
             </div>
-          </InfoWindow>
+          </OverlayView>
         )}
 
         {/* Drawn bounds rectangle */}
@@ -902,27 +964,31 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         </div>
       )}
 
+      {/* Sun Arc Animation - shows sun/moon moving across the map */}
+      {show3DBuildings && (
+        <SunArcAnimation
+          hour={sunHour}
+          enabled={show3DBuildings}
+          isNightMode={isNightMode}
+          longitude={center.lng}
+          latitude={center.lat}
+          useRealTime={false}
+          season={sunSeason}
+          onDayNightChange={handleDayNightChange}
+        />
+      )}
+
       {/* Sun Position Control for 3D Buildings */}
       {show3DBuildings && (
-        <div className="absolute top-20 left-4 z-[1000] bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-gray-200">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg">{sunHour >= 6 && sunHour < 18 ? '☀️' : '🌙'}</span>
-            <span className="text-xs font-medium text-gray-700">Sun Position</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="24"
-            step="0.5"
-            value={sunHour}
-            onChange={(e) => setSunHour(parseFloat(e.target.value))}
-            className="w-full h-2 bg-gradient-to-r from-blue-900 via-yellow-400 to-blue-900 rounded-lg appearance-none cursor-pointer"
+        <div className="absolute top-20 left-4 z-[1000]">
+          <SunPositionControl
+            onDateTimeChange={setSunDateTime}
+            onSeasonChange={setSunSeason}
+            isNightMode={isNightMode}
+            enabled={show3DBuildings}
+            latitude={center.lat}
+            compact={isMobile}
           />
-          <div className="flex justify-between text-[9px] text-gray-500 mt-1">
-            <span>00:00</span>
-            <span className="font-medium text-gray-700">{Math.floor(sunHour)}:{String(Math.round((sunHour % 1) * 60)).padStart(2, '0')}</span>
-            <span>24:00</span>
-          </div>
         </div>
       )}
 
