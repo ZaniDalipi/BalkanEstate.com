@@ -139,58 +139,33 @@ const createMarkerIcon = (
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
 
-  // Determine colors and effects
+  // Determine colors
   let bgColor = baseColor;
   let strokeColor = '#FFFFFF';
   let strokeWidth = 2;
-  let glowFilter = '';
 
   if (isActivelyPromoted && property.promotionTier) {
     strokeColor = PROMOTION_COLORS[property.promotionTier] || '#9ca3af';
     strokeWidth = 3;
-    // Add glow effect for promoted
-    if (property.promotionTier === 'premium') {
-      glowFilter = 'drop-shadow(0 0 8px rgba(255, 180, 0, 0.9)) drop-shadow(0 0 16px rgba(255, 140, 0, 0.6))';
-    } else if (property.promotionTier === 'highlight') {
-      glowFilter = 'drop-shadow(0 0 6px rgba(14, 165, 233, 0.8)) drop-shadow(0 0 14px rgba(2, 132, 199, 0.5))';
-    } else if (property.promotionTier === 'featured') {
-      glowFilter = 'drop-shadow(0 0 5px rgba(124, 58, 237, 0.6)) drop-shadow(0 0 10px rgba(124, 58, 237, 0.4))';
-    }
   }
 
   if (isHovered) {
     strokeColor = bgColor;
     strokeWidth = 4;
-    glowFilter = `drop-shadow(0 0 8px ${bgColor}80)`;
   }
 
-  // Scale based on zoom
-  const scale = zoom >= 14 ? 1 : zoom >= 12 ? 0.95 : zoom >= 10 ? 0.9 : 0.85;
-  const width = Math.max(50, price.length * 7 + 20) * scale;
-  const height = 28 * scale;
-  const fontSize = Math.round(11 * scale);
+  // Fixed dimensions for simpler markers
+  const width = Math.max(52, price.length * 8 + 16);
+  const height = 28;
   const rx = height / 2;
 
-  const filter = glowFilter || 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
+  // Simplified SVG without style attribute for better encoding
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+<rect x="${strokeWidth/2}" y="${strokeWidth/2}" width="${width - strokeWidth}" height="${height - strokeWidth}" rx="${rx}" fill="${bgColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
+<text x="${width/2}" y="${height/2 + 1}" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
+</svg>`;
 
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-      <defs>
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-      <rect x="${strokeWidth/2}" y="${strokeWidth/2}" width="${width - strokeWidth}" height="${height - strokeWidth}" rx="${rx}"
-        fill="${bgColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" style="filter: ${filter}"/>
-      <text x="${width/2}" y="${height/2 + 1}" font-family="system-ui, -apple-system, sans-serif" font-size="${fontSize}" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="middle">${price}</text>
-    </svg>
-  `;
-
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 };
 
 // Climate Risk Legend Component
@@ -531,26 +506,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
   }, [dispatch]);
 
-  // Drawing handlers
+  // Drawing handlers - for rectangle drawing
   const handleMapMouseDown = useCallback((e: google.maps.MapMouseEvent) => {
-    if (!e.latLng) return;
-    if (isDrawing) {
-      setDrawStartPos(e.latLng);
-      setTempDrawRect(null);
-    } else if (showMeasurement) {
-      const newPoints = [...measurementPoints, e.latLng];
-      setMeasurementPoints(newPoints);
-      // Calculate total distance
-      let dist = 0;
-      for (let i = 1; i < newPoints.length; i++) {
-        dist += calculateDistance(
-          newPoints[i-1].lat(), newPoints[i-1].lng(),
-          newPoints[i].lat(), newPoints[i].lng()
-        );
-      }
-      setTotalDistance(dist);
-    }
-  }, [isDrawing, showMeasurement, measurementPoints]);
+    if (!e.latLng || !isDrawing) return;
+    setDrawStartPos(e.latLng);
+    setTempDrawRect(null);
+  }, [isDrawing]);
 
   const handleMapMouseMove = useCallback((e: google.maps.MapMouseEvent) => {
     if (!isDrawing || !drawStartPos || !e.latLng) return;
@@ -576,6 +537,22 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setDrawStartPos(null);
     setTempDrawRect(null);
   }, [isDrawing, tempDrawRect, onDrawComplete]);
+
+  // Measurement click handler - separate from drawing
+  const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    if (!e.latLng || !showMeasurement) return;
+    const newPoints = [...measurementPoints, e.latLng];
+    setMeasurementPoints(newPoints);
+    // Calculate total distance
+    let dist = 0;
+    for (let i = 1; i < newPoints.length; i++) {
+      dist += calculateDistance(
+        newPoints[i-1].lat(), newPoints[i-1].lng(),
+        newPoints[i].lat(), newPoints[i].lng()
+      );
+    }
+    setTotalDistance(dist);
+  }, [showMeasurement, measurementPoints]);
 
   // Update cursor for drawing/measurement mode
   useEffect(() => {
@@ -630,6 +607,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         onLoad={onLoad}
         onUnmount={onUnmount}
         onIdle={handleIdle}
+        onClick={handleMapClick}
         onMouseDown={handleMapMouseDown}
         onMouseMove={handleMapMouseMove}
         onMouseUp={handleMapMouseUp}
@@ -731,6 +709,29 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             options={{ strokeColor: '#10b981', strokeWeight: 3, strokeOpacity: 1 }}
           />
         )}
+
+        {/* Measurement point markers */}
+        {showMeasurement && measurementPoints.map((point, index) => (
+          <Marker
+            key={`measure-${index}`}
+            position={{ lat: point.lat(), lng: point.lng() }}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 8,
+              fillColor: '#10b981',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 2,
+            }}
+            label={index > 0 ? {
+              text: String(index + 1),
+              color: '#ffffff',
+              fontSize: '10px',
+              fontWeight: 'bold',
+            } : undefined}
+            zIndex={2000}
+          />
+        ))}
       </GoogleMap>
 
       {/* Climate Risk Legend */}
@@ -742,26 +743,28 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
       {/* Measurement Display */}
       {showMeasurement && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-gray-200">
-          <div className="flex items-center gap-4">
-            <div className="text-sm">
-              <span className="text-gray-500">Distance:</span>
-              <span className="font-bold text-emerald-600 ml-2">{formatDistance(totalDistance)}</span>
+        <div className="absolute bottom-24 md:bottom-28 left-4 right-4 md:left-auto md:right-auto md:left-1/2 md:-translate-x-1/2 z-[1001] bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3 shadow-xl border border-emerald-200">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Total Distance</p>
+              <p className="text-xl font-bold text-emerald-600">{formatDistance(totalDistance)}</p>
             </div>
-            <button
-              onClick={clearMeasurement}
-              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
-            >
-              Clear
-            </button>
-            <button
-              onClick={() => setShowMeasurement(false)}
-              className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200"
-            >
-              Close
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={clearMeasurement}
+                className="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => { setShowMeasurement(false); clearMeasurement(); }}
+                className="px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </div>
-          <p className="text-[10px] text-gray-400 mt-1">Click on map to add points</p>
+          <p className="text-[10px] text-gray-400 mt-2">Click on map to add measurement points • {measurementPoints.length} points added</p>
         </div>
       )}
 
