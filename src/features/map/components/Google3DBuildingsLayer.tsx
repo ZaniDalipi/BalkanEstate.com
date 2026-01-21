@@ -35,7 +35,8 @@ const getTimePeriod = (hour: number): TimePeriod => {
 };
 
 /**
- * Get building colors based on time of day (matching Leaflet OSMBuildings style)
+ * Get building colors based on time of day
+ * Uses classic OSMBuildings terracotta/coral style for walls
  */
 const getBuildingColors = (hour: number): {
   wallColor: [number, number, number, number];
@@ -43,46 +44,47 @@ const getBuildingColors = (hour: number): {
 } => {
   const period = getTimePeriod(hour);
 
+  // Classic OSMBuildings terracotta/coral color scheme
   switch (period) {
     case 'night':
       return {
-        wallColor: [30, 40, 65, 235],
-        roofColor: [45, 55, 80, 225],
+        wallColor: [60, 50, 70, 230],      // Dark purple-gray
+        roofColor: [80, 75, 90, 220],      // Slightly lighter
       };
     case 'dawn':
       return {
-        wallColor: [180, 140, 130, 230],
-        roofColor: [200, 160, 140, 225],
+        wallColor: [200, 130, 110, 230],   // Warm terracotta with pink
+        roofColor: [180, 170, 165, 220],   // Light gray
       };
     case 'morning':
       return {
-        wallColor: [200, 195, 180, 230],
-        roofColor: [180, 175, 165, 225],
+        wallColor: [215, 135, 105, 230],   // Terracotta/coral
+        roofColor: [190, 185, 180, 220],   // Light gray
       };
     case 'noon':
       return {
-        wallColor: [220, 220, 215, 230],
-        roofColor: [195, 195, 190, 225],
+        wallColor: [220, 140, 110, 230],   // Classic terracotta/coral (like screenshot)
+        roofColor: [200, 195, 190, 220],   // Light gray roof
       };
     case 'afternoon':
       return {
-        wallColor: [210, 200, 180, 230],
-        roofColor: [190, 180, 165, 225],
+        wallColor: [218, 138, 108, 230],   // Terracotta/coral
+        roofColor: [195, 190, 185, 220],   // Light gray
       };
     case 'sunset':
       return {
-        wallColor: [200, 150, 100, 230],
-        roofColor: [220, 160, 90, 225],
+        wallColor: [210, 125, 90, 230],    // Warmer orange terracotta
+        roofColor: [200, 180, 160, 220],   // Warm gray
       };
     case 'dusk':
       return {
-        wallColor: [100, 90, 120, 230],
-        roofColor: [120, 100, 130, 225],
+        wallColor: [140, 100, 110, 230],   // Muted purple-brown
+        roofColor: [130, 125, 135, 220],   // Gray-purple
       };
     default:
       return {
-        wallColor: [200, 200, 200, 230],
-        roofColor: [180, 180, 180, 225],
+        wallColor: [220, 140, 110, 230],   // Default terracotta
+        roofColor: [200, 195, 190, 220],   // Default gray roof
       };
   }
 };
@@ -269,18 +271,19 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
           filled: true,
           extruded: true,
           wireframe: false,
-          opacity: 0.92,
+          opacity: 0.95,
           getElevation: (f: GeoJSON.Feature) => (f.properties?.height as number) || 12,
           getFillColor: colors.wallColor,
-          getLineColor: [60, 60, 70, 100],
+          getLineColor: [100, 90, 85, 150],  // Subtle outline matching terracotta
           lineWidthMinPixels: 1,
           material: {
-            ambient: 0.35,
-            diffuse: 0.6,
-            shininess: 15,
-            specularColor: [40, 40, 50],
+            ambient: 0.4,
+            diffuse: 0.7,
+            shininess: 10,
+            specularColor: [60, 50, 45],
           },
           pickable: false,
+          _shadows: true,
           updateTriggers: {
             getFillColor: [currentHour],
           },
