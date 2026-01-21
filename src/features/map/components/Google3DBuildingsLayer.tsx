@@ -216,7 +216,7 @@ const parseOverpassResponse = (data: any): GeoJSON.Feature[] => {
 };
 
 /**
- * Fetch buildings from Overpass API with fallback endpoints
+ * Fetch buildings from Overpass API with fallback endpoints and timeout
  */
 const fetchBuildings = async (
   south: number,
@@ -224,29 +224,48 @@ const fetchBuildings = async (
   north: number,
   east: number
 ): Promise<GeoJSON.Feature[]> => {
-  const cacheKey = `${south.toFixed(3)},${west.toFixed(3)},${north.toFixed(3)},${east.toFixed(3)}`;
+  // Limit query area to prevent timeout (max ~0.02 square degrees)
+  const maxSpan = 0.015;
+  const latSpan = Math.min(north - south, maxSpan);
+  const lngSpan = Math.min(east - west, maxSpan);
+  const centerLat = (south + north) / 2;
+  const centerLng = (west + east) / 2;
+
+  const clampedSouth = centerLat - latSpan / 2;
+  const clampedNorth = centerLat + latSpan / 2;
+  const clampedWest = centerLng - lngSpan / 2;
+  const clampedEast = centerLng + lngSpan / 2;
+
+  const cacheKey = `${clampedSouth.toFixed(4)},${clampedWest.toFixed(4)},${clampedNorth.toFixed(4)},${clampedEast.toFixed(4)}`;
 
   if (buildingCache.has(cacheKey)) {
     return buildingCache.get(cacheKey)!;
   }
 
-  const query = generateOverpassQuery(south, west, north, east);
+  const query = generateOverpassQuery(clampedSouth, clampedWest, clampedNorth, clampedEast);
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
+      // Add timeout with AbortController
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `data=${encodeURIComponent(query)}`,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) continue;
 
       const data = await response.json();
       const features = parseOverpassResponse(data);
 
-      // Cache the result
-      if (buildingCache.size > 30) {
+      // Cache the result (limit cache size)
+      if (buildingCache.size > 50) {
         const firstKey = buildingCache.keys().next().value;
         if (firstKey) buildingCache.delete(firstKey);
       }
@@ -258,8 +277,7 @@ const fetchBuildings = async (
     }
   }
 
-  // All endpoints failed
-  buildingCache.set(cacheKey, []);
+  // All endpoints failed - don't cache empty result to allow retry
   return [];
 };
 
@@ -299,13 +317,13 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     return new LightingEffect({ ambientLight, directionalLight });
   }, [style]);
 
-  // Check if current viewport is within the previously fetched bounds (with margin)
+  // Check if current viewport is within the previously fetched bounds (with small margin)
   const isWithinFetchedBounds = useCallback((bounds: google.maps.LatLngBounds): boolean => {
     if (!lastFetchBoundsRef.current) return false;
 
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-    const margin = 0.15; // 15% margin before refetching
+    const margin = 0.05; // 5% margin before refetching (small to trigger prefetch early)
 
     const latRange = lastFetchBoundsRef.current.north - lastFetchBoundsRef.current.south;
     const lngRange = lastFetchBoundsRef.current.east - lastFetchBoundsRef.current.west;
@@ -346,9 +364,9 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
 
-    // Expand bounds by 50% in each direction to prefetch more area
-    const latPadding = (ne.lat() - sw.lat()) * 0.5;
-    const lngPadding = (ne.lng() - sw.lng()) * 0.5;
+    // Expand bounds by 20% in each direction (reduced from 50% to prevent timeout)
+    const latPadding = (ne.lat() - sw.lat()) * 0.2;
+    const lngPadding = (ne.lng() - sw.lng()) * 0.2;
 
     const fetchBounds = {
       south: sw.lat() - latPadding,
@@ -365,9 +383,16 @@ const Google3DBuildingsLayer: React.FC<Google3DBuildingsLayerProps> = ({
         fetchBounds.east
       );
 
-      // Only update if we got results or if we had no buildings before
+      // Only update if we got results
       if (features.length > 0) {
-        setBuildings(features);
+        // Merge with existing buildings to prevent flicker
+        setBuildings(prev => {
+          if (prev.length === 0) return features;
+          // Keep existing buildings and add new ones
+          const existingIds = new Set(prev.map(f => JSON.stringify(f.geometry.coordinates[0]?.slice(0, 2))));
+          const newFeatures = features.filter(f => !existingIds.has(JSON.stringify(f.geometry.coordinates[0]?.slice(0, 2))));
+          return [...prev, ...newFeatures].slice(-2000); // Limit total buildings
+        });
         lastFetchBoundsRef.current = fetchBounds;
       }
     } catch (error) {
