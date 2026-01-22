@@ -13,10 +13,12 @@ console.log(`🌍 Environment: ${env.toUpperCase()}`);
 // Get credentials from environment variables
 const adminEmail = process.env.DEV_ADMIN_EMAIL || 'dev@balkanestateai.com';
 const adminPassword = process.env.DEV_ADMIN_PASSWORD;
+const adminRole = (process.env.DEV_ADMIN_ROLE === 'super_admin' ? 'super_admin' : 'admin') as 'admin' | 'super_admin';
 
 if (!adminPassword) {
   console.error('❌ Error: DEV_ADMIN_PASSWORD environment variable is required');
   console.error('   Usage: DEV_ADMIN_PASSWORD=yourpassword npm run seed:dev-admin');
+  console.error('   For super_admin: DEV_ADMIN_ROLE=super_admin DEV_ADMIN_PASSWORD=yourpassword npm run seed:dev-admin');
   console.error('   Or add DEV_ADMIN_PASSWORD to your .env file');
   process.exit(1);
 }
@@ -29,11 +31,11 @@ if (adminPassword.length < 6) {
 const DEV_ADMIN = {
   email: adminEmail,
   password: adminPassword,
-  name: 'Dev Admin',
-  role: 'admin' as const,
-  availableRoles: ['buyer', 'private_seller', 'agent', 'admin'] as const,
-  activeRole: 'admin' as const,
-  primaryRole: 'admin' as const,
+  name: adminRole === 'super_admin' ? 'Super Admin' : 'Dev Admin',
+  role: adminRole,
+  availableRoles: ['buyer', 'private_seller', 'agent', 'admin', 'super_admin'] as const,
+  activeRole: adminRole,
+  primaryRole: adminRole,
   isEmailVerified: true,
   provider: 'local' as const,
   subscription: {
@@ -70,16 +72,16 @@ async function seedDevAdmin() {
       console.log(`\n📝 Found existing user: ${user.email}`);
       console.log(`   Current role: ${user.role}`);
 
-      // Update to admin if not already
-      if (user.role !== 'admin' && user.role !== 'super_admin') {
-        user.role = 'admin';
-        user.availableRoles = ['buyer', 'private_seller', 'agent', 'admin'];
-        user.activeRole = 'admin';
-        user.primaryRole = 'admin';
+      // Update role
+      if (user.role !== adminRole) {
+        user.role = adminRole;
+        user.availableRoles = ['buyer', 'private_seller', 'agent', 'admin', 'super_admin'];
+        user.activeRole = adminRole;
+        user.primaryRole = adminRole;
         await user.save();
-        console.log(`✅ Updated user role to: admin`);
+        console.log(`✅ Updated user role to: ${adminRole}`);
       } else {
-        console.log(`✓ User already has admin access (${user.role})`);
+        console.log(`✓ User already has ${adminRole} role`);
       }
 
       // Update password
@@ -93,7 +95,7 @@ async function seedDevAdmin() {
     }
 
     console.log('\n═══════════════════════════════════════════');
-    console.log('       🔐 DEV ADMIN READY');
+    console.log(adminRole === 'super_admin' ? '       👑 SUPER ADMIN READY' : '       🔐 DEV ADMIN READY');
     console.log('═══════════════════════════════════════════');
     console.log(`   Email:    ${DEV_ADMIN.email}`);
     console.log(`   Password: (set via DEV_ADMIN_PASSWORD)`);
