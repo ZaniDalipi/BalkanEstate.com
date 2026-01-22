@@ -465,11 +465,32 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       const hasTour = !!tourUrl;
 
       if (hasTour) {
-        // Calculate the position on the building face at the correct floor level
-        // Find the edge of the building facing southwest (viewing direction)
-        const floorCenterHeight = (floorNum - 0.5) * adjustedFloorHeight;
+        // Find the southwest-facing edge of the building (viewing direction with pitch 60)
+        // This edge will appear as the "front" face from the default camera angle
+        const ring = scaledCoords[0];
+        let swEdgeStart = 0;
+        let minSum = Infinity;
 
-        // Create door marker with 360° indicator
+        // Find the vertex that is most southwest (lowest lng + lat sum)
+        for (let i = 0; i < ring.length - 1; i++) {
+          const sum = ring[i][0] + ring[i][1]; // lng + lat
+          if (sum < minSum) {
+            minSum = sum;
+            swEdgeStart = i;
+          }
+        }
+
+        // Get the midpoint of the edge starting from the southwest vertex
+        const nextIdx = (swEdgeStart + 1) % (ring.length - 1);
+        const edgeMidLng = (ring[swEdgeStart][0] + ring[nextIdx][0]) / 2;
+        const edgeMidLat = (ring[swEdgeStart][1] + ring[nextIdx][1]) / 2;
+
+        // Offset slightly outward from the building face so icon is visible
+        const outwardOffset = 0.00003; // ~3m outward
+        const doorLng = edgeMidLng - outwardOffset;
+        const doorLat = edgeMidLat - outwardOffset;
+
+        // Create door marker with 360° indicator and floor label
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
         doorEl.innerHTML = `
@@ -477,31 +498,44 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
             cursor: pointer;
           ">
+            <div style="
+              background: rgba(34,197,94,0.95);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 8px 8px 0 0;
+              font-size: 10px;
+              font-weight: bold;
+              white-space: nowrap;
+              border: 2px solid white;
+              border-bottom: none;
+            ">Floor ${floorNum}/${totalFlrs}</div>
             <div style="
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 44px;
-              height: 44px;
+              width: 40px;
+              height: 40px;
               background: linear-gradient(135deg, #22c55e, #16a34a);
-              border-radius: 12px;
+              border-radius: 8px;
               border: 3px solid white;
               box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
-              font-size: 22px;
+              font-size: 20px;
               animation: doorPulse 2s ease-in-out infinite;
             ">🚪</div>
             <div style="
-              background: rgba(0,0,0,0.8);
+              background: rgba(0,0,0,0.85);
               color: white;
               padding: 2px 8px;
-              border-radius: 10px;
-              font-size: 11px;
+              border-radius: 0 0 8px 8px;
+              font-size: 10px;
               font-weight: bold;
               white-space: nowrap;
-            ">360°</div>
+              border: 2px solid white;
+              border-top: none;
+            ">360° Tour</div>
           </div>
         `;
 
@@ -510,18 +544,13 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           doorEl.addEventListener('click', onEnterTour);
         }
 
-        // Position door on the building face at the correct floor height
-        // Calculate vertical offset based on floor position (pixels)
-        // Higher floors need more negative Y offset to appear higher on screen
-        const floorRatio = (floorNum - 0.5) / totalFlrs;
-        const verticalOffset = -Math.round(floorRatio * 200); // Scale to pixels
-
+        // Position door on the southwest building face
+        // No pixel offset needed - marker is positioned at the building edge
         new maplibregl.Marker({
           element: doorEl,
           anchor: 'center',
-          offset: [0, verticalOffset]
         })
-          .setLngLat([centroidLng, centroidLat])
+          .setLngLat([doorLng, doorLat])
           .addTo(mapInstance);
       }
     }
