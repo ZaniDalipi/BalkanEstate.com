@@ -20,6 +20,7 @@ import {
   handleLemonSqueezyWebhook,
   getLemonSqueezyConfig,
   getCustomerPortal,
+  verifyLemonSqueezyPayment,
 } from '../controllers/lemonSqueezyWebhookController';
 import { protect } from '../middleware/auth';
 
@@ -89,6 +90,9 @@ router.get('/lemonsqueezy/config', getLemonSqueezyConfig);
 
 // Get customer portal URL (protected)
 router.get('/lemonsqueezy/portal', protect, getCustomerPortal);
+
+// Verify LemonSqueezy payment and activate subscription (protected)
+router.get('/lemonsqueezy/verify', protect, verifyLemonSqueezyPayment);
 
 // ============================================================
 // SUBSCRIPTION MANAGEMENT

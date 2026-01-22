@@ -247,6 +247,51 @@ export async function verifyPaddlePayment(transactionId: string): Promise<Verify
 }
 
 /**
+ * Verify a LemonSqueezy payment with polling
+ */
+export async function verifyLemonSqueezyPayment(maxAttempts = 10): Promise<VerifyPaymentResponse> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await apiRequest<VerifyPaymentResponse>(
+        '/payments/lemonsqueezy/verify',
+        { method: 'GET', requiresAuth: true }
+      );
+
+      // If payment is confirmed, return success
+      if (response.paymentStatus === 'paid') {
+        return { ...response, provider: 'lemonsqueezy' };
+      }
+
+      // If still processing and not last attempt, wait and retry
+      if (response.paymentStatus === 'processing' && attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        continue;
+      }
+
+      return { ...response, provider: 'lemonsqueezy' };
+    } catch (error: any) {
+      console.error(`[LemonSqueezy] Verify attempt ${attempt} failed:`, error);
+      if (attempt === maxAttempts) {
+        return {
+          success: false,
+          paymentStatus: 'error',
+          provider: 'lemonsqueezy',
+          message: error.message || 'Failed to verify payment',
+        };
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+
+  return {
+    success: false,
+    paymentStatus: 'error',
+    provider: 'lemonsqueezy',
+    message: 'Payment verification timed out',
+  };
+}
+
+/**
  * Verify a payment (auto-detects provider from URL params)
  */
 export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaymentResponse> {
@@ -254,29 +299,9 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
   const sessionId = params.get('session_id');
   const orderId = params.get('order_id');
 
-  // LemonSqueezy payments are verified via webhooks, so we check subscription status
+  // LemonSqueezy payments - use dedicated verification with polling
   if (provider === 'lemonsqueezy') {
-    // LemonSqueezy processes via webhook, give it a moment then check status
-    const status = await getSubscriptionStatus();
-    if (status?.isSubscribed || status?.hasActiveSubscription) {
-      return {
-        success: true,
-        paymentStatus: 'paid',
-        provider: 'lemonsqueezy',
-        subscription: {
-          plan: status.subscriptionPlan || '',
-          expiresAt: status.subscriptionExpiresAt || '',
-          status: status.subscriptionStatus || 'active',
-        },
-      };
-    }
-    // Payment may still be processing
-    return {
-      success: true,
-      paymentStatus: 'processing',
-      provider: 'lemonsqueezy',
-      message: 'Payment is being processed. Your subscription will be activated shortly.',
-    };
+    return verifyLemonSqueezyPayment();
   }
 
   if (provider === 'paddle' && orderId) {
@@ -392,6 +417,7 @@ export default {
   getSupportedCountries,
   verifyStripePayment,
   verifyPaddlePayment,
+  verifyLemonSqueezyPayment,
   verifyPayment,
   getSubscriptionStatus,
   cancelSubscription,
