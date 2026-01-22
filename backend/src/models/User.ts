@@ -52,7 +52,10 @@ export interface IUser extends Document {
   isSubscribed: boolean;
   subscriptionPlan?: string; // Product ID (e.g., 'buyer_pro_monthly')
   subscriptionProductName?: string; // Human-readable name (e.g., 'Buyer Pro Monthly')
-  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'paddle' | 'web'; // Where subscription came from
+  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'paddle' | 'lemonsqueezy' | 'web'; // Where subscription came from
+  subscriptionExternalId?: string; // External subscription ID from payment provider
+  lemonSqueezyCustomerId?: string; // LemonSqueezy customer ID
+  lemonSqueezySubscriptionId?: string; // LemonSqueezy subscription ID
   subscriptionExpiresAt?: Date;
   subscriptionStartedAt?: Date;
   activeSubscriptionId?: mongoose.Types.ObjectId; // Link to active Subscription document
@@ -409,8 +412,20 @@ const UserSchema: Schema = new Schema(
     },
     subscriptionSource: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'paddle', 'web'],
+      enum: ['google', 'apple', 'stripe', 'paddle', 'lemonsqueezy', 'web'],
       index: true, // Index for querying by subscription source
+    },
+    subscriptionExternalId: {
+      type: String, // External subscription ID from payment provider
+      index: true,
+    },
+    lemonSqueezyCustomerId: {
+      type: String, // LemonSqueezy customer ID
+      index: true,
+    },
+    lemonSqueezySubscriptionId: {
+      type: String, // LemonSqueezy subscription ID
+      index: true,
     },
     subscriptionExpiresAt: {
       type: Date,

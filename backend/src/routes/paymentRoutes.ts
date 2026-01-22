@@ -16,6 +16,11 @@ import {
   verifyPaddlePayment,
   getPaddleConfig,
 } from '../controllers/paddleWebhookController';
+import {
+  handleLemonSqueezyWebhook,
+  getLemonSqueezyConfig,
+  getCustomerPortal,
+} from '../controllers/lemonSqueezyWebhookController';
 import { protect } from '../middleware/auth';
 
 const router = express.Router();
@@ -70,6 +75,20 @@ router.get('/paddle/config', getPaddleConfig);
 
 // Verify Paddle payment by transaction ID (protected)
 router.get('/paddle/verify/:transactionId', protect, verifyPaddlePayment);
+
+// ============================================================
+// LEMONSQUEEZY ENDPOINTS
+// ============================================================
+
+// LemonSqueezy Webhook (public but verified with signature)
+// LemonSqueezy sends POST request with JSON body
+router.post('/lemonsqueezy/webhook', handleLemonSqueezyWebhook);
+
+// Get LemonSqueezy configuration for frontend
+router.get('/lemonsqueezy/config', getLemonSqueezyConfig);
+
+// Get customer portal URL (protected)
+router.get('/lemonsqueezy/portal', protect, getCustomerPortal);
 
 // ============================================================
 // SUBSCRIPTION MANAGEMENT

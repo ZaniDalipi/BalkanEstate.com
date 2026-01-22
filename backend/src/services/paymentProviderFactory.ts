@@ -2,9 +2,9 @@
  * Payment Provider Factory
  *
  * Unified payment routing system for all Balkan countries.
- * Using Paddle as the primary payment provider for all regions.
+ * Using LemonSqueezy as the primary payment provider for all regions.
  *
- * Paddle acts as Merchant of Record (MoR), handling:
+ * LemonSqueezy acts as Merchant of Record (MoR), handling:
  * - Payment processing
  * - VAT/tax compliance automatically
  * - Chargeback protection
@@ -13,9 +13,11 @@
 
 import Stripe from 'stripe';
 import { paddleService } from './paddleService';
+import { lemonSqueezyService } from './lemonSqueezyService';
+import Product from '../models/Product';
 
 // Payment provider types
-export type PaymentProvider = 'stripe' | 'paddle';
+export type PaymentProvider = 'stripe' | 'paddle' | 'lemonsqueezy';
 
 // Country to provider mapping
 export interface CountryProviderMapping {
@@ -29,14 +31,14 @@ export interface CountryProviderMapping {
 
 /**
  * Country to Payment Provider Mapping
- * All countries use Paddle for unified payment processing and VAT compliance
+ * All countries use LemonSqueezy for unified payment processing and VAT compliance
  */
 export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   // EU Countries
   GR: {
     countryCode: 'GR',
     countryName: 'Greece',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -44,7 +46,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   HR: {
     countryCode: 'HR',
     countryName: 'Croatia',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -52,7 +54,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   BG: {
     countryCode: 'BG',
     countryName: 'Bulgaria',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -60,7 +62,15 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   RO: {
     countryCode: 'RO',
     countryName: 'Romania',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
+    currency: 'EUR',
+    isEU: true,
+    isSEPA: true,
+  },
+  SI: {
+    countryCode: 'SI',
+    countryName: 'Slovenia',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: true,
     isSEPA: true,
@@ -70,7 +80,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   RS: {
     countryCode: 'RS',
     countryName: 'Serbia',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -78,7 +88,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   AL: {
     countryCode: 'AL',
     countryName: 'Albania',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -86,7 +96,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   BA: {
     countryCode: 'BA',
     countryName: 'Bosnia and Herzegovina',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: false,
     isSEPA: false,
@@ -94,7 +104,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   MK: {
     countryCode: 'MK',
     countryName: 'North Macedonia',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -102,7 +112,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   ME: {
     countryCode: 'ME',
     countryName: 'Montenegro',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: false,
     isSEPA: true,
@@ -110,7 +120,7 @@ export const COUNTRY_PROVIDER_MAP: Record<string, CountryProviderMapping> = {
   XK: {
     countryCode: 'XK',
     countryName: 'Kosovo',
-    provider: 'paddle',
+    provider: 'lemonsqueezy',
     currency: 'EUR',
     isEU: false,
     isSEPA: false,
@@ -202,6 +212,12 @@ class PaymentProviderFactory {
    * Create a payment session using the appropriate provider
    */
   public async createPayment(params: CreatePaymentParams): Promise<PaymentResult> {
+    // Check if LemonSqueezy is configured - use it as primary provider
+    if (lemonSqueezyService.isConfigured()) {
+      return this.createLemonSqueezyPayment(params);
+    }
+
+    // Fallback to country-based provider selection
     const provider = this.getProviderForCountry(params.countryCode);
 
     switch (provider) {
@@ -209,6 +225,8 @@ class PaymentProviderFactory {
         return this.createStripePayment(params);
       case 'paddle':
         return this.createPaddlePayment(params);
+      case 'lemonsqueezy':
+        return this.createLemonSqueezyPayment(params);
       default:
         return {
           success: false,
@@ -335,6 +353,128 @@ class PaymentProviderFactory {
   }
 
   /**
+   * Create a LemonSqueezy payment
+   */
+  private async createLemonSqueezyPayment(params: CreatePaymentParams): Promise<PaymentResult> {
+    try {
+      // Check if LemonSqueezy is configured
+      if (!lemonSqueezyService.isConfigured()) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: 'LemonSqueezy is not configured. Please set API key and store ID.',
+        };
+      }
+
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+      // Get the LemonSqueezy variant ID from the product
+      const variantId = await this.getLemonSqueezyVariantId(params.planName, params.planInterval);
+
+      if (!variantId) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: `No LemonSqueezy variant found for plan: ${params.planName} (${params.planInterval})`,
+        };
+      }
+
+      const result = await lemonSqueezyService.createCheckout({
+        variantId,
+        userId: params.userId,
+        userEmail: params.userEmail,
+        userName: params.firstName ? `${params.firstName} ${params.lastName || ''}`.trim() : undefined,
+        productId: params.productId,
+        planName: params.planName,
+        planInterval: params.planInterval,
+        successUrl: `${baseUrl}/payment/success?provider=lemonsqueezy`,
+        cancelUrl: `${baseUrl}/payment/cancel?provider=lemonsqueezy`,
+      });
+
+      if (!result.success) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: result.error || 'Failed to create LemonSqueezy checkout',
+        };
+      }
+
+      return {
+        success: true,
+        provider: 'lemonsqueezy',
+        paymentUrl: result.checkoutUrl,
+        sessionId: result.checkoutId,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        provider: 'lemonsqueezy',
+        error: error.message || 'Failed to create payment session',
+      };
+    }
+  }
+
+  /**
+   * Get LemonSqueezy variant ID based on plan
+   * First tries to find in database, then falls back to env vars
+   */
+  private async getLemonSqueezyVariantId(planName: string, interval: string): Promise<string | null> {
+    // Try to find the product in database with LemonSqueezy variant ID
+    const product = await Product.findOne({
+      $or: [
+        { name: planName },
+        { productId: planName.toLowerCase().replace(/\s+/g, '_') },
+      ],
+    });
+
+    if (product?.lemonSqueezyVariantId) {
+      return product.lemonSqueezyVariantId;
+    }
+
+    // Fallback to environment variables
+    const variantMap: Record<string, Record<string, string>> = {
+      // Buyer plans
+      'Buyer Pro': {
+        'month': process.env.LEMONSQUEEZY_VARIANT_BUYER_PRO_MONTHLY || '',
+      },
+      'Buyer Pro Monthly': {
+        'month': process.env.LEMONSQUEEZY_VARIANT_BUYER_PRO_MONTHLY || '',
+      },
+      'buyer_pro_monthly': {
+        'month': process.env.LEMONSQUEEZY_VARIANT_BUYER_PRO_MONTHLY || '',
+      },
+      // Pro/Seller plans
+      'Pro': {
+        'month': process.env.LEMONSQUEEZY_VARIANT_PRO_MONTHLY || '',
+        'year': process.env.LEMONSQUEEZY_VARIANT_PRO_YEARLY || '',
+      },
+      'Pro Monthly': {
+        'month': process.env.LEMONSQUEEZY_VARIANT_PRO_MONTHLY || '',
+      },
+      'Pro Yearly': {
+        'year': process.env.LEMONSQUEEZY_VARIANT_PRO_YEARLY || '',
+      },
+      // Agency/Enterprise plans
+      'Agency': {
+        'year': process.env.LEMONSQUEEZY_VARIANT_ENTERPRISE_YEARLY || '',
+      },
+      'Enterprise': {
+        'year': process.env.LEMONSQUEEZY_VARIANT_ENTERPRISE_YEARLY || '',
+      },
+      'Enterprise Yearly': {
+        'year': process.env.LEMONSQUEEZY_VARIANT_ENTERPRISE_YEARLY || '',
+      },
+    };
+
+    const planVariants = variantMap[planName];
+    if (planVariants && planVariants[interval]) {
+      return planVariants[interval];
+    }
+
+    return null;
+  }
+
+  /**
    * Get Paddle price ID based on plan
    * These should be configured in Paddle dashboard and stored as env vars
    */
@@ -420,6 +560,12 @@ class PaymentProviderFactory {
           name: 'Paddle',
           description: 'Secure payments with automatic VAT handling',
           fees: '~5% + €0.50',
+        };
+      case 'lemonsqueezy':
+        return {
+          name: 'LemonSqueezy',
+          description: 'Secure payments with automatic VAT handling',
+          fees: '~5% + $0.50',
         };
       default:
         return {
