@@ -20,7 +20,7 @@ export const createCoupon = async (
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
 
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       res.status(403).json({ message: 'Admin access required' });
       return;
     }

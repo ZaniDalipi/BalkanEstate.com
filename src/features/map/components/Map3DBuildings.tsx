@@ -396,13 +396,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates to fully cover the original building on ALL sides
-    // and offset by a tiny amount to prevent z-fighting/flickering
-    const scaleFactor = 1.08; // 8% larger to ensure full coverage on all sides
-    const offsetMeters = 0.3; // Small offset to sit just outside original
-    const offsetDegrees = offsetMeters / 111320;
-
-    // Calculate centroid for scaling
+    // Use the exact building coordinates from the map API (no scaling)
+    // Calculate centroid for label positioning
     const outerRing = buildingCoords[0];
     let centroidLng = 0;
     let centroidLat = 0;
@@ -414,13 +409,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Scale coordinates from centroid and apply offset
-    const scaledCoords = buildingCoords.map(ring =>
-      ring.map(coord => [
-        centroidLng + (coord[0] - centroidLng) * scaleFactor + offsetDegrees,
-        centroidLat + (coord[1] - centroidLat) * scaleFactor + offsetDegrees
-      ])
-    );
+    // Use original building coordinates - exact same size as map API
+    const scaledCoords = buildingCoords;
 
     // Hide the original 3D buildings layer in this area by adding our custom one on top
     // Add source for the custom building using actual geometry
@@ -468,24 +458,44 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       const hasTour = !!tourUrl;
 
       if (hasTour) {
-        // Create door marker on the building at the floor level
+        // Calculate the position on the building face at the correct floor level
+        // Find the edge of the building facing southwest (viewing direction)
+        const floorCenterHeight = (floorNum - 0.5) * adjustedFloorHeight;
+
+        // Create door marker with 360° indicator
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
         doorEl.innerHTML = `
           <div style="
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
+            gap: 4px;
             cursor: pointer;
-            font-size: 18px;
-            animation: doorPulse 2s ease-in-out infinite;
-          ">🚪</div>
+          ">
+            <div style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 44px;
+              height: 44px;
+              background: linear-gradient(135deg, #22c55e, #16a34a);
+              border-radius: 12px;
+              border: 3px solid white;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
+              font-size: 22px;
+              animation: doorPulse 2s ease-in-out infinite;
+            ">🚪</div>
+            <div style="
+              background: rgba(0,0,0,0.8);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 10px;
+              font-size: 11px;
+              font-weight: bold;
+              white-space: nowrap;
+            ">360°</div>
+          </div>
         `;
 
         // Add click handler for 360 tour
@@ -493,12 +503,18 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           doorEl.addEventListener('click', onEnterTour);
         }
 
-        // Position door on the building face
+        // Position door on the building face at the correct floor height
+        // Offset slightly towards the viewer (southwest)
+        const metersToDegrees = 1 / 111320;
+        const offsetAmount = 15; // meters offset from centroid
+        const doorLng = centroidLng - (offsetAmount * metersToDegrees / Math.cos(centroidLat * Math.PI / 180));
+        const doorLat = centroidLat - (offsetAmount * metersToDegrees);
+
         new maplibregl.Marker({
           element: doorEl,
           anchor: 'center',
         })
-          .setLngLat([centroidLng, centroidLat])
+          .setLngLat([doorLng, doorLat])
           .addTo(mapInstance);
       }
     }
