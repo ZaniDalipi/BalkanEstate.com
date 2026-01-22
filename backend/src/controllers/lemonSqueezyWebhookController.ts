@@ -299,8 +299,8 @@ async function handleSubscriptionPaymentSuccess(event: any): Promise<void> {
     const currency = attributes.currency || 'EUR';
 
     // Find the product
-    const product = user.subscriptionProductId
-      ? await Product.findOne({ productId: user.subscriptionProductId })
+    const product = user.subscriptionPlan
+      ? await Product.findOne({ productId: user.subscriptionPlan })
       : null;
 
     // Calculate new expiration date
@@ -334,14 +334,15 @@ async function handleSubscriptionPaymentSuccess(event: any): Promise<void> {
       productId: product?.productId || 'unknown',
     });
 
-    // Log renewal
-    activityLogger.logSubscriptionRenewed(
+    // Log renewal (using logSubscriptionCreated since there's no dedicated renewal method)
+    activityLogger.logSubscriptionCreated(
       String(user._id),
       user.email,
       product?.name || 'Subscription',
       amount,
       currency.toUpperCase(),
-      renewsAt || new Date()
+      renewsAt || new Date(),
+      `${subscriptionId}_${Date.now()}`
     );
   } catch (error: any) {
     console.error('[LemonSqueezy] Error handling subscription_payment_success:', error);
@@ -531,15 +532,13 @@ async function handleSubscriptionPaymentFailed(event: any): Promise<void> {
         subscriptionStatus: 'past_due',
       });
 
-      // Send payment failed email
-      try {
-        await emailService.sendPaymentFailed(user.email, user.name || 'Customer', {
-          planName: user.subscriptionProductName || 'Subscription',
-          updatePaymentUrl: `${process.env.FRONTEND_URL}/account/subscription`,
-        });
-      } catch (emailError) {
-        console.error('[LemonSqueezy] Failed to send payment failed email:', emailError);
-      }
+      // Log payment failure
+      activityLogger.logPaymentFailed(
+        String(user._id),
+        user.email,
+        subscriptionId,
+        'Payment failed via LemonSqueezy'
+      );
     }
   } catch (error: any) {
     console.error('[LemonSqueezy] Error handling subscription_payment_failed:', error);

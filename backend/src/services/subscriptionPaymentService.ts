@@ -17,7 +17,7 @@ import { generateSecureRandomString } from '../utils/secureRandom';
 interface ProcessPaymentParams {
   userId: mongoose.Types.ObjectId | string;
   productId: string;
-  store: 'google' | 'apple' | 'stripe' | 'paddle' | 'web';
+  store: 'google' | 'apple' | 'stripe' | 'paddle' | 'lemonsqueezy' | 'web';
   amount: number;
   currency: string;
   purchaseToken?: string;
