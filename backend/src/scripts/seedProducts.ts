@@ -505,7 +505,8 @@ const PRODUCTS = [
     agentCoupons: 0,
     savedSearchesLimit: -1, // unlimited
     aiMessagesLimit: -1, // unlimited (rate limited)
-    generateInsightsLimit: -1, // unlimited
+    aiInsightsLimit: -1, // unlimited
+    imageDescriptionLimit: -1, // unlimited
   },
 
   // ============================================================================

@@ -103,7 +103,26 @@ const PricingManager: React.FC = () => {
   };
 
   const handleEdit = (product: Product) => {
-    setEditingProduct({ ...product });
+    // Ensure all numeric fields are properly initialized to prevent undefined issues
+    setEditingProduct({
+      ...product,
+      price: product.price ?? 0,
+      durationDays: product.durationDays ?? 30,
+      displayOrder: product.displayOrder ?? 0,
+      trialPeriodDays: product.trialPeriodDays ?? 0,
+      gracePeriodDays: product.gracePeriodDays ?? 3,
+      listingsLimit: product.listingsLimit ?? 3,
+      promotionCoupons: product.promotionCoupons ?? 0,
+      premiumCoupons: product.premiumCoupons ?? 0,
+      highlightedCoupons: product.highlightedCoupons ?? 0,
+      featuredCoupons: product.featuredCoupons ?? 0,
+      agentCoupons: product.agentCoupons ?? 0,
+      aiMessagesLimit: product.aiMessagesLimit ?? 3,
+      aiInsightsLimit: product.aiInsightsLimit ?? 3,
+      imageDescriptionLimit: product.imageDescriptionLimit ?? 0,
+      savedSearchesLimit: product.savedSearchesLimit ?? 3,
+      features: product.features ?? [],
+    });
     setNewFeature('');
     setIsEditModalOpen(true);
   };
@@ -129,18 +148,64 @@ const PricingManager: React.FC = () => {
 
     try {
       const token = localStorage.getItem('balkan_estate_token');
+
+      // Create update payload without _id (which is immutable) and ensure all fields are properly typed
+      const updatePayload = {
+        name: editingProduct.name,
+        description: editingProduct.description || '',
+        type: editingProduct.type,
+        tier: editingProduct.tier || '',
+        price: Number(editingProduct.price) || 0,
+        currency: editingProduct.currency,
+        billingPeriod: editingProduct.billingPeriod,
+        durationDays: Number(editingProduct.durationDays) || 30,
+        features: editingProduct.features || [],
+        targetRole: editingProduct.targetRole,
+        displayOrder: Number(editingProduct.displayOrder) || 0,
+        badge: editingProduct.badge || '',
+        badgeColor: editingProduct.badgeColor || '',
+        highlighted: Boolean(editingProduct.highlighted),
+        isActive: Boolean(editingProduct.isActive),
+        isVisible: Boolean(editingProduct.isVisible),
+        hasFreeTrial: Boolean(editingProduct.hasFreeTrial),
+        trialPeriodDays: Number(editingProduct.trialPeriodDays) || 0,
+        gracePeriodDays: Number(editingProduct.gracePeriodDays) || 0,
+        // Limits
+        listingsLimit: Number(editingProduct.listingsLimit),
+        promotionCoupons: Number(editingProduct.promotionCoupons) || 0,
+        premiumCoupons: Number(editingProduct.premiumCoupons) || 0,
+        highlightedCoupons: Number(editingProduct.highlightedCoupons) || 0,
+        featuredCoupons: Number(editingProduct.featuredCoupons) || 0,
+        agentCoupons: Number(editingProduct.agentCoupons) || 0,
+        // AI Limits
+        aiMessagesLimit: Number(editingProduct.aiMessagesLimit),
+        aiInsightsLimit: Number(editingProduct.aiInsightsLimit),
+        imageDescriptionLimit: Number(editingProduct.imageDescriptionLimit),
+        // Buyer features
+        savedSearchesLimit: Number(editingProduct.savedSearchesLimit),
+        earlyAccessListings: Boolean(editingProduct.earlyAccessListings),
+        advancedMarketInsights: Boolean(editingProduct.advancedMarketInsights),
+        // Stripe
+        stripeProductId: editingProduct.stripeProductId || '',
+        stripePriceId: editingProduct.stripePriceId || '',
+      };
+
+      console.log('Saving product update:', editingProduct._id, updatePayload);
+
       const response = await fetch(`${API_URL}/products/admin/${editingProduct._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(editingProduct),
+        body: JSON.stringify(updatePayload),
       });
 
+      const responseData = await response.json();
+      console.log('Save response:', responseData);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update product');
+        throw new Error(responseData.message || 'Failed to update product');
       }
 
       await fetchProducts();
@@ -149,6 +214,7 @@ const PricingManager: React.FC = () => {
       setSuccessMessage('Product updated successfully!');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
+      console.error('Save error:', err);
       setError(err.message || 'Failed to update product');
       setTimeout(() => setError(null), 5000);
     }

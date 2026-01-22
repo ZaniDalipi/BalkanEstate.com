@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import Product from '../models/Product';
-import { protect } from '../middleware/auth';
+import { protect, restrictTo } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -90,7 +90,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
  * @route   GET /api/products/admin/all
  * @access  Private/Admin
  */
-router.get('/admin/all', protect, async (_req: Request, res: Response): Promise<void> => {
+router.get('/admin/all', protect, restrictTo('admin', 'superadmin'), async (_req: Request, res: Response): Promise<void> => {
   try {
     const products = await Product.find().sort({ displayOrder: 1, createdAt: -1 });
 
@@ -114,7 +114,7 @@ router.get('/admin/all', protect, async (_req: Request, res: Response): Promise<
  * @route   POST /api/products/admin
  * @access  Private/Admin
  */
-router.post('/admin', protect, async (req: Request, res: Response): Promise<void> => {
+router.post('/admin', protect, restrictTo('admin', 'superadmin'), async (req: Request, res: Response): Promise<void> => {
   try {
     const product = await Product.create(req.body);
 
@@ -147,17 +147,26 @@ router.post('/admin', protect, async (req: Request, res: Response): Promise<void
  * @route   PUT /api/products/admin/:id
  * @access  Private/Admin
  */
-router.put('/admin/:id', protect, async (req: Request, res: Response): Promise<void> => {
+router.put('/admin/:id', protect, restrictTo('admin', 'superadmin'), async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const updateData = req.body;
+
+    // Log the update attempt for debugging
+    console.log(`📝 Product update request - ID: ${id}`);
+    console.log('📝 Update data:', JSON.stringify(updateData, null, 2));
+
+    // Remove _id from update data if present (immutable field)
+    delete updateData._id;
 
     const product = await Product.findByIdAndUpdate(
       id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
 
     if (!product) {
+      console.error(`❌ Product not found: ${id}`);
       res.status(404).json({
         success: false,
         message: 'Product not found',
@@ -165,17 +174,23 @@ router.put('/admin/:id', protect, async (req: Request, res: Response): Promise<v
       return;
     }
 
+    console.log(`✅ Product updated successfully: ${product.productId}`);
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
       product,
     });
   } catch (error: any) {
-    console.error('Error updating product:', error);
+    console.error('❌ Error updating product:', error);
+    console.error('Error details:', error.message);
+    if (error.errors) {
+      console.error('Validation errors:', JSON.stringify(error.errors, null, 2));
+    }
     res.status(500).json({
       success: false,
       message: 'Failed to update product',
       error: error.message,
+      validationErrors: error.errors ? Object.keys(error.errors) : undefined,
     });
   }
 });
@@ -185,7 +200,7 @@ router.put('/admin/:id', protect, async (req: Request, res: Response): Promise<v
  * @route   DELETE /api/products/admin/:id
  * @access  Private/Admin
  */
-router.delete('/admin/:id', protect, async (req: Request, res: Response): Promise<void> => {
+router.delete('/admin/:id', protect, restrictTo('admin', 'superadmin'), async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -218,7 +233,7 @@ router.delete('/admin/:id', protect, async (req: Request, res: Response): Promis
  * @route   PATCH /api/products/admin/:id/visibility
  * @access  Private/Admin
  */
-router.patch('/admin/:id/visibility', protect, async (req: Request, res: Response): Promise<void> => {
+router.patch('/admin/:id/visibility', protect, restrictTo('admin', 'superadmin'), async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -255,7 +270,7 @@ router.patch('/admin/:id/visibility', protect, async (req: Request, res: Respons
  * @route   PATCH /api/products/admin/:id/status
  * @access  Private/Admin
  */
-router.patch('/admin/:id/status', protect, async (req: Request, res: Response): Promise<void> => {
+router.patch('/admin/:id/status', protect, restrictTo('admin', 'superadmin'), async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
