@@ -1101,7 +1101,10 @@ export const renewProperty = async (
   res: Response
 ): Promise<void> => {
   try {
+    console.log('🔄 Renew property request:', req.params.id);
+
     if (!req.user) {
+      console.log('❌ Renew failed: Not authorized');
       res.status(401).json({ message: 'Not authorized' });
       return;
     }
@@ -1147,6 +1150,7 @@ export const renewProperty = async (
 
     property.lastRenewed = now;
     await property.save();
+    console.log('✅ Property renewed successfully:', property._id, 'lastRenewed:', now.toISOString());
 
     // Calculate when they can renew next
     const canRenewAt = new Date(now.getTime() + cooldownMs);

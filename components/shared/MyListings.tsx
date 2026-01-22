@@ -382,18 +382,20 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 dispatch({ type: 'RENEW_PROPERTY', payload: id });
             }
         } catch (error: any) {
-            if (error.code === 'RENEWAL_COOLDOWN') {
+            console.error('Failed to renew property:', error);
+            // Check for cooldown error - details are in error.details from apiRequest
+            const errorDetails = error.details || error;
+            if (error.code === 'RENEWAL_COOLDOWN' || errorDetails.code === 'RENEWAL_COOLDOWN') {
                 // Update the status with the server response
                 setRenewalStatuses(prev => ({
                     ...prev,
                     [id]: {
                         canRenew: false,
-                        hoursRemaining: error.hoursRemaining,
-                        minutesRemaining: error.minutesRemaining,
+                        hoursRemaining: errorDetails.hoursRemaining,
+                        minutesRemaining: errorDetails.minutesRemaining,
                     },
                 }));
             }
-            console.error('Failed to renew property:', error);
         }
     };
 
