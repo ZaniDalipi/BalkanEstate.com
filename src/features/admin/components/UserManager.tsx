@@ -11,8 +11,10 @@ import {
   PhoneIcon,
   ShieldCheckIcon,
   EyeIcon,
+  ArrowPathIcon,
 } from '@/constants';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import { useUsers, useUpdateUser, useDeleteUser } from '../hooks/useAdminData';
 
 interface User {
   _id: string;
@@ -45,11 +47,8 @@ interface User {
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
   const { confirm } = useConfirmation();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,61 +82,46 @@ const UserManager: React.FC = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalUsers, setTotalUsers] = useState(0);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [currentPage, filterRole, filterSubscription, filterVerification, searchQuery]);
-
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
-
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: '20',
-        ...(filterRole !== 'all' && { role: filterRole }),
-        ...(searchQuery && { search: searchQuery }),
-      });
-
-      const response = await fetch(`${API_URL}/admin/users?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch users');
-
-      const data = await response.json();
-
-      let filteredUsers = data.users || [];
-
-      // Apply subscription filter on frontend
-      if (filterSubscription === 'subscribed') {
-        filteredUsers = filteredUsers.filter((u: User) => u.isSubscribed);
-      } else if (filterSubscription === 'free') {
-        filteredUsers = filteredUsers.filter((u: User) => !u.isSubscribed);
-      }
-
-      // Apply verification filter on frontend
-      if (filterVerification === 'verified') {
-        filteredUsers = filteredUsers.filter((u: User) => u.isEmailVerified);
-      } else if (filterVerification === 'unverified') {
-        filteredUsers = filteredUsers.filter((u: User) => !u.isEmailVerified);
-      }
-
-      setUsers(filteredUsers);
-      setTotalPages(data.pagination?.totalPages || 1);
-      setTotalUsers(data.pagination?.total || filteredUsers.length);
-    } catch (err) {
-      setError('Failed to load users');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+  // React Query hooks for reactive data management
+  const queryParams = {
+    page: currentPage,
+    limit: 20,
+    ...(filterRole !== 'all' && { role: filterRole }),
+    ...(searchQuery && { search: searchQuery }),
   };
+
+  const { data: usersData, isLoading, error: queryError, isRefetching, refetch } = useUsers(queryParams);
+  const updateUserMutation = useUpdateUser();
+  const deleteUserMutation = useDeleteUser();
+
+  // Process users data with frontend filters
+  const processedData = React.useMemo(() => {
+    let filteredUsers = usersData?.users || [];
+
+    // Apply subscription filter on frontend
+    if (filterSubscription === 'subscribed') {
+      filteredUsers = filteredUsers.filter((u: User) => u.isSubscribed);
+    } else if (filterSubscription === 'free') {
+      filteredUsers = filteredUsers.filter((u: User) => !u.isSubscribed);
+    }
+
+    // Apply verification filter on frontend
+    if (filterVerification === 'verified') {
+      filteredUsers = filteredUsers.filter((u: User) => u.isEmailVerified);
+    } else if (filterVerification === 'unverified') {
+      filteredUsers = filteredUsers.filter((u: User) => !u.isEmailVerified);
+    }
+
+    return {
+      users: filteredUsers,
+      totalPages: usersData?.pagination?.totalPages || 1,
+      totalUsers: usersData?.pagination?.total || filteredUsers.length,
+    };
+  }, [usersData, filterSubscription, filterVerification]);
+
+  const { users, totalPages, totalUsers } = processedData;
+  const error = queryError ? 'Failed to load users' : localError;
 
   const handleEditUser = (user: User) => {
     setEditingUser(user);
@@ -169,76 +153,55 @@ const UserManager: React.FC = () => {
     e.preventDefault();
     if (!editingUser) return;
 
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/users/${editingUser._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+    updateUserMutation.mutate(
+      { userId: editingUser._id, data: editForm },
+      {
+        onSuccess: () => {
+          setIsEditModalOpen(false);
+          setEditingUser(null);
+          setSuccessMessage('User updated successfully');
+          setTimeout(() => setSuccessMessage(null), 3000);
         },
-        body: JSON.stringify(editForm),
-      });
-
-      if (!response.ok) throw new Error('Failed to update user');
-
-      await fetchUsers();
-      setIsEditModalOpen(false);
-      setEditingUser(null);
-      setSuccessMessage('User updated successfully');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to update user');
-      setTimeout(() => setError(null), 5000);
-    }
+        onError: () => {
+          setLocalError('Failed to update user');
+          setTimeout(() => setLocalError(null), 5000);
+        },
+      }
+    );
   };
 
   // Quick action: Toggle email verification
   const handleToggleEmailVerification = async (userId: string, currentStatus: boolean) => {
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+    updateUserMutation.mutate(
+      { userId, data: { isEmailVerified: !currentStatus } },
+      {
+        onSuccess: () => {
+          setSuccessMessage(`Email ${!currentStatus ? 'verified' : 'unverified'} successfully`);
+          setTimeout(() => setSuccessMessage(null), 3000);
         },
-        body: JSON.stringify({ isEmailVerified: !currentStatus }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update user');
-
-      await fetchUsers();
-      setSuccessMessage(`Email ${!currentStatus ? 'verified' : 'unverified'} successfully`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to update verification status');
-      setTimeout(() => setError(null), 5000);
-    }
+        onError: () => {
+          setLocalError('Failed to update verification status');
+          setTimeout(() => setLocalError(null), 5000);
+        },
+      }
+    );
   };
 
   // Quick action: Toggle license verification (for agents)
   const handleToggleLicenseVerification = async (userId: string, currentStatus: boolean) => {
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+    updateUserMutation.mutate(
+      { userId, data: { licenseVerified: !currentStatus } },
+      {
+        onSuccess: () => {
+          setSuccessMessage(`License ${!currentStatus ? 'verified' : 'unverified'} successfully`);
+          setTimeout(() => setSuccessMessage(null), 3000);
         },
-        body: JSON.stringify({ licenseVerified: !currentStatus }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update user');
-
-      await fetchUsers();
-      setSuccessMessage(`License ${!currentStatus ? 'verified' : 'unverified'} successfully`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to update license status');
-      setTimeout(() => setError(null), 5000);
-    }
+        onError: () => {
+          setLocalError('Failed to update license status');
+          setTimeout(() => setLocalError(null), 5000);
+        },
+      }
+    );
   };
 
   const handleDeleteUser = async (userId: string, userName: string) => {
@@ -251,24 +214,16 @@ const UserManager: React.FC = () => {
     });
     if (!confirmed) return;
 
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to delete user');
-
-      await fetchUsers();
-      setSuccessMessage('User deleted successfully');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to delete user');
-      setTimeout(() => setError(null), 5000);
-    }
+    deleteUserMutation.mutate(userId, {
+      onSuccess: () => {
+        setSuccessMessage('User deleted successfully');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      },
+      onError: () => {
+        setLocalError('Failed to delete user');
+        setTimeout(() => setLocalError(null), 5000);
+      },
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -310,6 +265,21 @@ const UserManager: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{t('admin:users.title')}</h2>
             <p className="text-sm text-gray-600 mt-1">{t('admin:dashboard.totalUsers')}: {totalUsers}</p>
+          </div>
+          {/* Sync Status & Refresh */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <span className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}></span>
+              <span className="text-gray-600">{isRefetching ? 'Syncing...' : 'Live'}</span>
+            </div>
+            <button
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+              title="Refresh users"
+            >
+              <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
 

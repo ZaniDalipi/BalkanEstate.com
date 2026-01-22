@@ -4,7 +4,7 @@ import Modal from '@/components/shared/Modal';
 import PaymentWindow from '@/components/shared/PaymentWindow';
 import { BuildingOfficeIcon, ChartBarIcon, CurrencyDollarIcon, BoltIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
-import { fetchSellerProducts, Product } from '@/utils/api';
+import { useSellerProducts, Product } from '@/src/shared/query';
 
 interface PricingPlansProps {
   isOpen: boolean;
@@ -32,21 +32,9 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ isOpen, onClose, onSubscrib
     discount: number;
     productId: string;
   } | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Fetch products from backend
-  useEffect(() => {
-    if (isOpen && products.length === 0) {
-      const loadProducts = async () => {
-        setLoading(true);
-        const fetchedProducts = await fetchSellerProducts();
-        setProducts(fetchedProducts);
-        setLoading(false);
-      };
-      loadProducts();
-    }
-  }, [isOpen]);
+  // Use React Query for reactive product data - automatically syncs with admin changes
+  const { data: products = [], isLoading: loading } = useSellerProducts();
 
   // Update URL when modal opens/closes
   useEffect(() => {

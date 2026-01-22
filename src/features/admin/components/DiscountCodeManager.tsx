@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { PlusIcon, TrashIcon, XMarkIcon } from '@/constants';
+import React, { useState, useMemo } from 'react';
+import { PlusIcon, TrashIcon, XMarkIcon, ArrowPathIcon } from '@/constants';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import {
+  useDiscountCodes,
+  useCreateFullDiscountCode,
+  useDeleteDiscountCode,
+  useDeactivateDiscountCode,
+  useBulkGenerateDiscountCodes,
+} from '../hooks/useAdminData';
 
 interface DiscountCode {
   _id: string;
@@ -22,17 +29,24 @@ interface DiscountCode {
 
 const DiscountCodeManager: React.FC = () => {
   const { confirm } = useConfirmation();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-  const [codes, setCodes] = useState<DiscountCode[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Filter states
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [filterSource, setFilterSource] = useState<string>('all');
+
+  // React Query hooks for reactive data management
+  const { data: codesData, isLoading, error: queryError, isRefetching, refetch } = useDiscountCodes();
+  const createCodeMutation = useCreateFullDiscountCode();
+  const deleteCodeMutation = useDeleteDiscountCode();
+  const deactivateCodeMutation = useDeactivateDiscountCode();
+  const bulkGenerateMutation = useBulkGenerateDiscountCodes();
+
+  const codes = codesData?.discountCodes || [];
+  const error = queryError ? 'Failed to load discount codes' : localError;
 
   // Form state for creating codes
   const [newCode, setNewCode] = useState({
@@ -76,104 +90,59 @@ const DiscountCodeManager: React.FC = () => {
     setBulkForm({ ...bulkForm, [field]: Math.max(parsed, min) });
   };
 
-  useEffect(() => {
-    fetchDiscountCodes();
-  }, []);
-
-  const fetchDiscountCodes = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/discount-codes`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch discount codes');
-
-      const data = await response.json();
-      setCodes(data.discountCodes || []);
-    } catch (err) {
-      setError('Failed to load discount codes');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleCreateCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/discount-codes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+    createCodeMutation.mutate(
+      {
+        ...newCode,
+        code: newCode.code.toUpperCase(),
+        validFrom: new Date().toISOString(),
+      },
+      {
+        onSuccess: () => {
+          setIsCreateModalOpen(false);
+          setSuccessMessage('Discount code created successfully!');
+          setTimeout(() => setSuccessMessage(null), 3000);
+          // Reset form
+          setNewCode({
+            code: '',
+            discountType: 'percentage',
+            discountValue: 10,
+            validUntil: '',
+            usageLimit: 1,
+            description: '',
+            applicablePlans: [],
+            minimumPurchaseAmount: 0,
+            source: 'admin',
+          });
         },
-        body: JSON.stringify({
-          ...newCode,
-          code: newCode.code.toUpperCase(),
-          validFrom: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create discount code');
+        onError: (err: any) => {
+          setLocalError(err.message || 'Failed to create discount code');
+          setTimeout(() => setLocalError(null), 5000);
+        },
       }
-
-      await fetchDiscountCodes();
-      setIsCreateModalOpen(false);
-      setSuccessMessage('Discount code created successfully!');
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      // Reset form
-      setNewCode({
-        code: '',
-        discountType: 'percentage',
-        discountValue: 10,
-        validUntil: '',
-        usageLimit: 1,
-        description: '',
-        applicablePlans: [],
-        minimumPurchaseAmount: 0,
-        source: 'admin',
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to create discount code');
-      setTimeout(() => setError(null), 5000);
-    }
+    );
   };
 
   const handleBulkGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/discount-codes/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+    bulkGenerateMutation.mutate(
+      {
+        ...bulkForm,
+        validFrom: new Date().toISOString(),
+      },
+      {
+        onSuccess: (data) => {
+          setIsBulkModalOpen(false);
+          setSuccessMessage(`Successfully generated ${data.codes?.length || bulkForm.count} discount codes!`);
+          setTimeout(() => setSuccessMessage(null), 3000);
         },
-        body: JSON.stringify({
-          ...bulkForm,
-          validFrom: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to generate discount codes');
-
-      const data = await response.json();
-      await fetchDiscountCodes();
-      setIsBulkModalOpen(false);
-      setSuccessMessage(`Successfully generated ${data.codes.length} discount codes!`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to generate discount codes');
-      setTimeout(() => setError(null), 5000);
-    }
+        onError: () => {
+          setLocalError('Failed to generate discount codes');
+          setTimeout(() => setLocalError(null), 5000);
+        },
+      }
+    );
   };
 
   const handleDeactivate = async (id: string) => {
@@ -186,24 +155,16 @@ const DiscountCodeManager: React.FC = () => {
     });
     if (!confirmed) return;
 
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/discount-codes/${id}/deactivate`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to deactivate code');
-
-      await fetchDiscountCodes();
-      setSuccessMessage('Discount code deactivated');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to deactivate discount code');
-      setTimeout(() => setError(null), 5000);
-    }
+    deactivateCodeMutation.mutate(id, {
+      onSuccess: () => {
+        setSuccessMessage('Discount code deactivated');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      },
+      onError: () => {
+        setLocalError('Failed to deactivate discount code');
+        setTimeout(() => setLocalError(null), 5000);
+      },
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -216,32 +177,24 @@ const DiscountCodeManager: React.FC = () => {
     });
     if (!confirmed) return;
 
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/admin/discount-codes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to delete code');
-
-      await fetchDiscountCodes();
-      setSuccessMessage('Discount code deleted');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to delete discount code');
-      setTimeout(() => setError(null), 5000);
-    }
+    deleteCodeMutation.mutate(id, {
+      onSuccess: () => {
+        setSuccessMessage('Discount code deleted');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      },
+      onError: () => {
+        setLocalError('Failed to delete discount code');
+        setTimeout(() => setLocalError(null), 5000);
+      },
+    });
   };
 
-  const filteredCodes = codes.filter(code => {
+  const filteredCodes = useMemo(() => codes.filter((code: DiscountCode) => {
     if (filterStatus === 'active' && !code.isActive) return false;
     if (filterStatus === 'inactive' && code.isActive) return false;
     if (filterSource !== 'all' && code.source !== filterSource) return false;
     return true;
-  });
+  }), [codes, filterStatus, filterSource]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -267,8 +220,23 @@ const DiscountCodeManager: React.FC = () => {
       {/* Header */}
       <div className="border-b border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">Discount Code Management</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold text-gray-900">Discount Code Management</h2>
+            {/* Sync Status */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}></span>
+              <span className="text-gray-600">{isRefetching ? 'Syncing...' : 'Live'}</span>
+            </div>
+          </div>
           <div className="flex gap-2">
+            <button
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+              title="Refresh discount codes"
+            >
+              <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
+            </button>
             <button
               onClick={() => {
                 // Set preset values for listing promotion code

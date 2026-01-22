@@ -6,6 +6,10 @@
  * - useMutation = suspend fun that triggers Flow updates
  * - invalidateQueries = Flow refresh/emit new value
  * - optimistic updates = immediate UI update before server confirmation
+ *
+ * KEY FEATURE: Cross-app cache invalidation
+ * When admin modifies data, BOTH admin AND public caches are invalidated.
+ * This ensures all components across the app stay in sync automatically.
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,23 +20,41 @@ import {
   toggleProductVisibility,
   getUsers,
   updateUserRole,
+  updateUser,
   deleteUser,
   getDiscountCodes,
   createDiscountCode,
+  createFullDiscountCode,
   deleteDiscountCode,
+  deactivateDiscountCode,
+  generateBulkDiscountCodes,
   Product,
+  UserUpdateData,
+  CreateDiscountCodeData,
+  BulkDiscountCodeData,
 } from '../api/adminApi';
+import {
+  productKeys,
+  userKeys,
+  discountKeys,
+  analyticsKeys,
+  getProductInvalidationKeys,
+  getUserInvalidationKeys,
+  getDiscountInvalidationKeys,
+} from '@/src/shared/query/queryKeys';
 
 // ============================================================================
-// Query Keys - Centralized cache key management
+// Query Keys - Using centralized keys from shared module
+// Re-export for backward compatibility
 // ============================================================================
 
 export const adminKeys = {
   all: ['admin'] as const,
-  products: () => [...adminKeys.all, 'products'] as const,
-  users: (params?: any) => [...adminKeys.all, 'users', params] as const,
-  discountCodes: () => [...adminKeys.all, 'discountCodes'] as const,
-  analytics: () => [...adminKeys.all, 'analytics'] as const,
+  products: () => productKeys.adminAll(),
+  users: (params?: { page?: number; limit?: number; role?: string; search?: string }) =>
+    userKeys.adminList(params),
+  discountCodes: () => discountKeys.adminList(),
+  analytics: () => analyticsKeys.dashboard(),
 };
 
 // ============================================================================
@@ -40,7 +62,7 @@ export const adminKeys = {
 // ============================================================================
 
 /**
- * useProducts - Fetches and subscribes to products data
+ * useProducts - Fetches and subscribes to products data (admin view - all products)
  * Automatically refetches on window focus and at intervals
  *
  * Similar to: viewModel.products.collectAsState()
@@ -55,6 +77,16 @@ export function useProducts() {
     staleTime: 30 * 1000, // Consider fresh for 30 seconds
     refetchOnWindowFocus: true, // Refetch when tab becomes active
     refetchInterval: 60 * 1000, // Poll every 60 seconds for real-time updates
+  });
+}
+
+/**
+ * Helper function to invalidate all product-related caches across the app
+ */
+function invalidateAllProductCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  // Invalidate all product-related keys (admin + public)
+  getProductInvalidationKeys().forEach((key) => {
+    queryClient.invalidateQueries({ queryKey: key });
   });
 }
 
@@ -94,9 +126,9 @@ export function useUpdateProduct() {
       }
     },
 
-    // Always refetch after mutation to ensure consistency
+    // Always refetch after mutation - invalidate ALL product caches (admin + public)
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.products() });
+      invalidateAllProductCaches(queryClient);
     },
   });
 }
@@ -128,8 +160,9 @@ export function useToggleProductStatus() {
       }
     },
 
+    // Invalidate ALL product caches - affects what public users see
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.products() });
+      invalidateAllProductCaches(queryClient);
     },
   });
 }
@@ -161,8 +194,9 @@ export function useToggleProductVisibility() {
       }
     },
 
+    // Invalidate ALL product caches - affects what public users see
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.products() });
+      invalidateAllProductCaches(queryClient);
     },
   });
 }
@@ -170,6 +204,15 @@ export function useToggleProductVisibility() {
 // ============================================================================
 // Users Hooks
 // ============================================================================
+
+/**
+ * Helper function to invalidate all user-related caches across the app
+ */
+function invalidateAllUserCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  getUserInvalidationKeys().forEach((key) => {
+    queryClient.invalidateQueries({ queryKey: key });
+  });
+}
 
 export function useUsers(params?: { page?: number; limit?: number; role?: string; search?: string }) {
   return useQuery({
@@ -186,8 +229,26 @@ export function useUpdateUserRole() {
   return useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
       updateUserRole(userId, role),
+    // Invalidate ALL user caches across the app
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      invalidateAllUserCaches(queryClient);
+    },
+  });
+}
+
+/**
+ * useUpdateUser - Full user update mutation
+ * Used for editing user details in admin panel
+ */
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, data }: { userId: string; data: UserUpdateData }) =>
+      updateUser(userId, data),
+    // Invalidate ALL user caches across the app
+    onSettled: () => {
+      invalidateAllUserCaches(queryClient);
     },
   });
 }
@@ -197,8 +258,9 @@ export function useDeleteUser() {
 
   return useMutation({
     mutationFn: (userId: string) => deleteUser(userId),
+    // Invalidate ALL user caches across the app
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      invalidateAllUserCaches(queryClient);
     },
   });
 }
@@ -206,6 +268,15 @@ export function useDeleteUser() {
 // ============================================================================
 // Discount Codes Hooks
 // ============================================================================
+
+/**
+ * Helper function to invalidate all discount-related caches across the app
+ */
+function invalidateAllDiscountCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  getDiscountInvalidationKeys().forEach((key) => {
+    queryClient.invalidateQueries({ queryKey: key });
+  });
+}
 
 export function useDiscountCodes() {
   return useQuery({
@@ -222,8 +293,9 @@ export function useCreateDiscountCode() {
   return useMutation({
     mutationFn: (data: { code: string; discountPercent: number; maxUses?: number; expiresAt?: string }) =>
       createDiscountCode(data),
+    // Invalidate ALL discount caches - affects payment validation
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.discountCodes() });
+      invalidateAllDiscountCaches(queryClient);
     },
   });
 }
@@ -253,8 +325,51 @@ export function useDeleteDiscountCode() {
       }
     },
 
+    // Invalidate ALL discount caches - affects payment validation
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.discountCodes() });
+      invalidateAllDiscountCaches(queryClient);
+    },
+  });
+}
+
+/**
+ * useDeactivateDiscountCode - Deactivate a discount code
+ */
+export function useDeactivateDiscountCode() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (codeId: string) => deactivateDiscountCode(codeId),
+    onSettled: () => {
+      invalidateAllDiscountCaches(queryClient);
+    },
+  });
+}
+
+/**
+ * useCreateFullDiscountCode - Create a discount code with all fields
+ */
+export function useCreateFullDiscountCode() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateDiscountCodeData) => createFullDiscountCode(data),
+    onSettled: () => {
+      invalidateAllDiscountCaches(queryClient);
+    },
+  });
+}
+
+/**
+ * useBulkGenerateDiscountCodes - Generate multiple discount codes at once
+ */
+export function useBulkGenerateDiscountCodes() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: BulkDiscountCodeData) => generateBulkDiscountCodes(data),
+    onSettled: () => {
+      invalidateAllDiscountCaches(queryClient);
     },
   });
 }
@@ -264,13 +379,35 @@ export function useDeleteDiscountCode() {
 // ============================================================================
 
 /**
- * useRefreshAdminData - Force refresh all admin data
- * Useful for manual refresh buttons
+ * useRefreshAdminData - Force refresh all admin data AND public data
+ * Useful for manual refresh buttons - ensures full app sync
  */
 export function useRefreshAdminData() {
   const queryClient = useQueryClient();
 
   return () => {
-    queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    // Invalidate ALL caches across the entire app
+    invalidateAllProductCaches(queryClient);
+    invalidateAllUserCaches(queryClient);
+    invalidateAllDiscountCaches(queryClient);
+  };
+}
+
+/**
+ * useInvalidateAllData - Hook to get functions for invalidating specific data types
+ * Useful when you need granular control over what gets invalidated
+ */
+export function useInvalidateAllData() {
+  const queryClient = useQueryClient();
+
+  return {
+    products: () => invalidateAllProductCaches(queryClient),
+    users: () => invalidateAllUserCaches(queryClient),
+    discounts: () => invalidateAllDiscountCaches(queryClient),
+    all: () => {
+      invalidateAllProductCaches(queryClient);
+      invalidateAllUserCaches(queryClient);
+      invalidateAllDiscountCaches(queryClient);
+    },
   };
 }

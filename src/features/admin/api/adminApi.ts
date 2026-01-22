@@ -57,6 +57,34 @@ export const updateUserRole = async (
   });
 };
 
+export interface UserUpdateData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  country?: string;
+  role?: string;
+  licenseNumber?: string;
+  licenseVerified?: boolean;
+  isEmailVerified?: boolean;
+  isSubscribed?: boolean;
+  subscriptionPlan?: string;
+  subscriptionStatus?: string;
+  agencyName?: string;
+  isEnterpriseTier?: boolean;
+}
+
+export const updateUser = async (
+  userId: string,
+  data: UserUpdateData
+): Promise<any> => {
+  return apiRequest(`/admin/users/${userId}`, {
+    method: 'PATCH',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
 export const deleteUser = async (userId: string): Promise<any> => {
   return apiRequest(`/admin/users/${userId}`, {
     method: 'DELETE',
@@ -128,6 +156,52 @@ export const createDiscountCode = async (data: {
 export const deleteDiscountCode = async (codeId: string): Promise<any> => {
   return apiRequest(`/admin/discount-codes/${codeId}`, {
     method: 'DELETE',
+    requiresAuth: true,
+  });
+};
+
+export const deactivateDiscountCode = async (codeId: string): Promise<any> => {
+  return apiRequest(`/admin/discount-codes/${codeId}/deactivate`, {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+};
+
+export interface CreateDiscountCodeData {
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  validFrom?: string;
+  validUntil: string;
+  usageLimit: number;
+  description?: string;
+  applicablePlans?: string[];
+  minimumPurchaseAmount?: number;
+  source?: string;
+}
+
+export const createFullDiscountCode = async (data: CreateDiscountCodeData): Promise<any> => {
+  return apiRequest('/admin/discount-codes', {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+export interface BulkDiscountCodeData {
+  count: number;
+  prefix: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  validFrom?: string;
+  validUntil: string;
+  usageLimit: number;
+}
+
+export const generateBulkDiscountCodes = async (data: BulkDiscountCodeData): Promise<any> => {
+  return apiRequest('/admin/discount-codes/generate', {
+    method: 'POST',
+    body: data,
     requiresAuth: true,
   });
 };

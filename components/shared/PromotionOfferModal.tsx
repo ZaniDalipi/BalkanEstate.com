@@ -4,7 +4,7 @@ import PaymentWindow from './PaymentWindow';
 import { SparklesIcon, BoltIcon, ChartBarIcon } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { Property } from '../../types';
-import { fetchSellerProducts, Product } from '../../utils/api';
+import { useSellerProducts, Product } from '@/src/shared/query';
 
 interface PromotionOfferModalProps {
     isOpen: boolean;
@@ -30,26 +30,14 @@ const PromotionOfferModal: React.FC<PromotionOfferModalProps> = ({
     const [showPaymentWindow, setShowPaymentWindow] = useState(false);
     const [showPaymentError, setShowPaymentError] = useState(false);
     const [paymentErrorMessage, setPaymentErrorMessage] = useState('');
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
     const [selectedPlan, setSelectedPlan] = useState<{
         name: string;
         price: number;
         productId: string;
     } | null>(null);
 
-    // Fetch promotion products
-    useEffect(() => {
-        if (isOpen && products.length === 0) {
-            const loadProducts = async () => {
-                setLoading(true);
-                const fetchedProducts = await fetchSellerProducts();
-                setProducts(fetchedProducts);
-                setLoading(false);
-            };
-            loadProducts();
-        }
-    }, [isOpen]);
+    // Use React Query for reactive product data - automatically syncs with admin changes
+    const { data: products = [], isLoading: loading } = useSellerProducts();
 
     // Reset state when modal opens/closes
     useEffect(() => {
