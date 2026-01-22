@@ -244,6 +244,13 @@ export interface Product {
   advancedMarketInsights?: boolean;
   stripeProductId?: string;
   stripePriceId?: string;
+  // Agency/Enterprise features
+  maxActiveSubscriptions?: number;
+  cardStyle?: {
+    backgroundColor?: string;
+    borderColor?: string;
+    textColor?: string;
+  };
 }
 
 export const getProducts = async (): Promise<{ products: Product[] }> => {

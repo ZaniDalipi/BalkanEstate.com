@@ -82,6 +82,8 @@ const PricingManager: React.FC = () => {
       imageDescriptionLimit: product.imageDescriptionLimit ?? 0,
       savedSearchesLimit: product.savedSearchesLimit ?? 3,
       features: product.features ?? [],
+      maxActiveSubscriptions: product.maxActiveSubscriptions ?? 0,
+      cardStyle: product.cardStyle ?? { backgroundColor: '', borderColor: '', textColor: '' },
     });
     setNewFeature('');
     setIsEditModalOpen(true);
@@ -105,6 +107,13 @@ const PricingManager: React.FC = () => {
 
   const handleSave = async () => {
     if (!editingProduct) return;
+
+    // Only include cardStyle if any value is set
+    const cardStyle = editingProduct.cardStyle?.backgroundColor ||
+      editingProduct.cardStyle?.borderColor ||
+      editingProduct.cardStyle?.textColor
+      ? editingProduct.cardStyle
+      : undefined;
 
     const updatePayload = {
       name: editingProduct.name,
@@ -140,6 +149,9 @@ const PricingManager: React.FC = () => {
       advancedMarketInsights: Boolean(editingProduct.advancedMarketInsights),
       stripeProductId: editingProduct.stripeProductId || '',
       stripePriceId: editingProduct.stripePriceId || '',
+      // Agency/Enterprise features
+      maxActiveSubscriptions: Number(editingProduct.maxActiveSubscriptions) || 0,
+      cardStyle,
     };
 
     try {
@@ -499,28 +511,7 @@ const PricingManager: React.FC = () => {
               {/* Limits */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="font-semibold text-green-900 mb-3">Limits & Quotas</h4>
-                <div className="grid grid-cols-4 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Listings Limit</label>
-                    <input
-                      type="number"
-                      value={editingProduct.listingsLimit}
-                      onChange={(e) => handleNumberChange('listingsLimit', e.target.value, -1)}
-                      min="-1"
-                      placeholder="-1 for unlimited"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Agent Coupons</label>
-                    <input
-                      type="number"
-                      value={editingProduct.agentCoupons}
-                      onChange={(e) => handleNumberChange('agentCoupons', e.target.value, 0)}
-                      min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Saved Searches</label>
                     <input
@@ -531,6 +522,7 @@ const PricingManager: React.FC = () => {
                       placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
+                    <p className="text-xs text-gray-500 mt-1">-1 = unlimited</p>
                   </div>
                 </div>
 
@@ -731,9 +723,26 @@ const PricingManager: React.FC = () => {
                 </div>
               </div>
 
-              {/* Display Settings */}
+              {/* Display Settings & Highlighted */}
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <h4 className="font-semibold text-purple-900 mb-3">Display Settings</h4>
+
+                {/* Highlighted - Make it prominent */}
+                <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editingProduct.highlighted}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, highlighted: e.target.checked })}
+                      className="w-5 h-5 text-yellow-600 rounded focus:ring-yellow-500"
+                    />
+                    <div>
+                      <span className="text-sm font-semibold text-yellow-800">Highlighted / Featured Plan</span>
+                      <p className="text-xs text-yellow-700">Show with special styling on pricing page (golden border, "Most Popular" effect)</p>
+                    </div>
+                  </label>
+                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Badge Text</label>
@@ -773,16 +782,92 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="mt-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
+
+                {/* Card Style Customization */}
+                <div className="mt-4 pt-4 border-t border-purple-200">
+                  <h5 className="text-sm font-medium text-purple-800 mb-2">Card Style (Optional)</h5>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Background Color</label>
+                      <input
+                        type="text"
+                        value={editingProduct.cardStyle?.backgroundColor || ''}
+                        onChange={(e) => setEditingProduct({
+                          ...editingProduct,
+                          cardStyle: { ...editingProduct.cardStyle, backgroundColor: e.target.value }
+                        })}
+                        placeholder="#ffffff or gradient"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Border Color</label>
+                      <input
+                        type="text"
+                        value={editingProduct.cardStyle?.borderColor || ''}
+                        onChange={(e) => setEditingProduct({
+                          ...editingProduct,
+                          cardStyle: { ...editingProduct.cardStyle, borderColor: e.target.value }
+                        })}
+                        placeholder="#e5e7eb"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Text Color</label>
+                      <input
+                        type="text"
+                        value={editingProduct.cardStyle?.textColor || ''}
+                        onChange={(e) => setEditingProduct({
+                          ...editingProduct,
+                          cardStyle: { ...editingProduct.cardStyle, textColor: e.target.value }
+                        })}
+                        placeholder="#1f2937"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agency/Enterprise Features */}
+              <div className="bg-violet-50 border border-violet-200 rounded-lg p-4">
+                <h4 className="font-semibold text-violet-900 mb-3">Agency / Enterprise Features</h4>
+                <p className="text-xs text-violet-700 mb-3">Special features for agency tier subscriptions</p>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Agent Coupons/month</label>
                     <input
-                      type="checkbox"
-                      checked={editingProduct.highlighted}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, highlighted: e.target.checked })}
-                      className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                      type="number"
+                      value={editingProduct.agentCoupons}
+                      onChange={(e) => handleNumberChange('agentCoupons', e.target.value, 0)}
+                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     />
-                    <span className="text-sm text-gray-700">Highlighted (Featured styling on pricing page)</span>
-                  </label>
+                    <p className="text-xs text-gray-500 mt-1">Coupons to invite agents to the agency</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Subscriptions</label>
+                    <input
+                      type="number"
+                      value={editingProduct.maxActiveSubscriptions || 0}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, maxActiveSubscriptions: parseInt(e.target.value) || 0 })}
+                      min="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">0 = unlimited</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Listings Limit</label>
+                    <input
+                      type="number"
+                      value={editingProduct.listingsLimit}
+                      onChange={(e) => handleNumberChange('listingsLimit', e.target.value, -1)}
+                      min="-1"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">-1 = unlimited, Agency: 500</p>
+                  </div>
                 </div>
               </div>
 
