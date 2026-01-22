@@ -1083,9 +1083,12 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Handle listing limit reached - show discount game option
             if (errorCode === 'LISTING_LIMIT_REACHED' || errorCode === 'FREE_LISTING_LIMIT_REACHED') {
                 // Save the property data so user doesn't lose their work
+                // Note: newProperty may not exist if error occurred during image upload
                 const propertyToSave = {
-                    ...formData,
-                    images: imageUrls,
+                    title: listingData.title,
+                    price: listingData.price,
+                    description: listingData.description,
+                    propertyType: listingData.propertyType,
                     createdAsRole: selectedRole,
                 };
                 dispatch({ type: 'SET_PENDING_PROPERTY', payload: propertyToSave });
