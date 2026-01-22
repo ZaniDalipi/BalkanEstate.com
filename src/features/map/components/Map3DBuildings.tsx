@@ -315,7 +315,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     totalFlrs: number
   ) => {
     // Building dimensions in meters - large size to cover the whole building footprint
-    const buildingSizeMeters = 55; // 55m x 55m building footprint (large apartment building)
+    const buildingSizeMeters = 100; // 100m x 100m building footprint (full building coverage)
     const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
@@ -382,8 +382,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       const markerHeight = 2.5; // Height of the marker box (covers most of the floor)
 
       // Create an extruded box on the front face of the building as the apartment marker
-      const markerDepth = 4; // meters - how far the marker protrudes
-      const markerWidth = 12; // meters - width of the marker
+      const markerDepth = 8; // meters - how far the marker protrudes
+      const markerWidth = 20; // meters - width of the marker
       const markerDepthDeg = (markerDepth / 111320);
       const markerWidthDeg = (markerWidth / 2 / 111320);
       const markerWidthLonAdj = markerWidthDeg / Math.cos(latitude * Math.PI / 180);
