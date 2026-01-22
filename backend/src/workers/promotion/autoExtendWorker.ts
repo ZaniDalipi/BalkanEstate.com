@@ -13,9 +13,13 @@ import {
   PromotionTierType,
 } from '../../config/promotionTiers';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2025-10-29.clover',
-});
+// Check if Stripe is properly configured
+const stripeKey = process.env.STRIPE_SECRET_KEY || '';
+const isStripeConfigured = stripeKey && stripeKey.startsWith('sk_') && !stripeKey.includes('placeholder');
+
+const stripe = isStripeConfigured
+  ? new Stripe(stripeKey, { apiVersion: '2025-10-29.clover' })
+  : null;
 
 /**
  * Process a single promotion for auto-extend
@@ -50,6 +54,15 @@ const processPromotion = async (promotion: any, property: any): Promise<boolean>
 
     console.log(`[AutoExtendWorker] Auto-extended promotion ${promotion._id} for free`);
     return true;
+  }
+
+  // Skip paid extensions if Stripe is not configured
+  if (!stripe) {
+    console.log(`[AutoExtendWorker] Stripe not configured, skipping paid auto-extend for promotion ${promotion._id}`);
+    promotion.autoExtendStatus = 'failed';
+    promotion.notes = (promotion.notes || '') + ` | Skipped: Payment provider not configured`;
+    await promotion.save();
+    return false;
   }
 
   // Create Stripe checkout session for paid extension
@@ -104,6 +117,11 @@ const processPromotion = async (promotion: any, property: any): Promise<boolean>
  */
 export const processAutoExtends = async (): Promise<void> => {
   try {
+    if (!isStripeConfigured) {
+      console.log('[AutoExtendWorker] Stripe not configured, skipping auto-extend processing');
+      return;
+    }
+
     console.log('[AutoExtendWorker] Processing auto-extend promotions...');
 
     const now = new Date();
