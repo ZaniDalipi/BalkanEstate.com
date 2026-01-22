@@ -511,17 +511,17 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         }
 
         // Position door on the building face at the correct floor height
-        // Offset slightly towards the viewer (southwest)
-        const metersToDegrees = 1 / 111320;
-        const offsetAmount = 15; // meters offset from centroid
-        const doorLng = centroidLng - (offsetAmount * metersToDegrees / Math.cos(centroidLat * Math.PI / 180));
-        const doorLat = centroidLat - (offsetAmount * metersToDegrees);
+        // Calculate vertical offset based on floor position (pixels)
+        // Higher floors need more negative Y offset to appear higher on screen
+        const floorRatio = (floorNum - 0.5) / totalFlrs;
+        const verticalOffset = -Math.round(floorRatio * 200); // Scale to pixels
 
         new maplibregl.Marker({
           element: doorEl,
           anchor: 'center',
+          offset: [0, verticalOffset]
         })
-          .setLngLat([doorLng, doorLat])
+          .setLngLat([centroidLng, centroidLat])
           .addTo(mapInstance);
       }
     }
