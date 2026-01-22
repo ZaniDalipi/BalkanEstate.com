@@ -307,6 +307,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   }, []);
 
   // Add custom 3D building cube with floor slices for apartments
+  // Uses the actual building geometry from the map data
   const addCustomBuilding3D = useCallback((
     mapInstance: maplibregl.Map,
     latitude: number,
@@ -314,28 +315,55 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     floorNum: number,
     totalFlrs: number
   ) => {
-    // Building dimensions in meters - large size to cover the whole building footprint
-    const buildingSizeMeters = 100; // 100m x 100m building footprint (full building coverage)
     const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
-    // Convert meters to approximate degrees (1 degree ≈ 111,320m at equator)
-    const metersToDegrees = 1 / 111320;
-    const halfSize = (buildingSizeMeters / 2) * metersToDegrees;
+    // Query the actual building at this location from the map's building layer
+    const point = mapInstance.project([longitude, latitude]);
+    const features = mapInstance.queryRenderedFeatures(point, {
+      layers: ['3d-buildings']
+    });
 
-    // Adjust for latitude (longitude degrees are smaller at higher latitudes)
-    const lonAdjust = halfSize / Math.cos(latitude * Math.PI / 180);
+    let buildingCoords: number[][][] | null = null;
 
-    // Building footprint coordinates
-    const buildingCoords = [
-      [longitude - lonAdjust, latitude - halfSize],
-      [longitude + lonAdjust, latitude - halfSize],
-      [longitude + lonAdjust, latitude + halfSize],
-      [longitude - lonAdjust, latitude + halfSize],
-      [longitude - lonAdjust, latitude - halfSize], // Close the polygon
-    ];
+    if (features.length > 0 && features[0].geometry.type === 'Polygon') {
+      // Use the actual building geometry from the map
+      buildingCoords = (features[0].geometry as GeoJSON.Polygon).coordinates;
+    } else {
+      // Fallback: Query a small area around the point
+      const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
+        [point.x - 50, point.y - 50],
+        [point.x + 50, point.y + 50]
+      ];
+      const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
+        layers: ['3d-buildings']
+      });
 
-    // Add source for the custom building
+      // Find the building that contains or is closest to our point
+      for (const feature of nearbyFeatures) {
+        if (feature.geometry.type === 'Polygon') {
+          buildingCoords = (feature.geometry as GeoJSON.Polygon).coordinates;
+          break;
+        }
+      }
+    }
+
+    // If we still don't have building coords, create a small default
+    if (!buildingCoords) {
+      const metersToDegrees = 1 / 111320;
+      const halfSize = 15 * metersToDegrees; // 15m fallback
+      const lonAdjust = halfSize / Math.cos(latitude * Math.PI / 180);
+      buildingCoords = [[
+        [longitude - lonAdjust, latitude - halfSize],
+        [longitude + lonAdjust, latitude - halfSize],
+        [longitude + lonAdjust, latitude + halfSize],
+        [longitude - lonAdjust, latitude + halfSize],
+        [longitude - lonAdjust, latitude - halfSize],
+      ]];
+    }
+
+    // Hide the original 3D buildings layer in this area by adding our custom one on top
+    // Add source for the custom building using actual geometry
     if (!mapInstance.getSource('custom-building')) {
       mapInstance.addSource('custom-building', {
         type: 'geojson',
@@ -344,7 +372,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           properties: { height: totalHeightM, totalFloors: totalFlrs },
           geometry: {
             type: 'Polygon',
-            coordinates: [buildingCoords],
+            coordinates: buildingCoords,
           },
         },
       });
@@ -366,7 +394,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             'fill-extrusion-color': isApartmentFloor
               ? '#22c55e' // Green for apartment floor
               : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-            'fill-extrusion-height': floorTop - 0.15, // Small gap between floors
+            'fill-extrusion-height': floorTop - 0.1, // Small gap between floors
             'fill-extrusion-base': floorBase,
             'fill-extrusion-opacity': isApartmentFloor ? 0.95 : 0.85,
           },
@@ -374,97 +402,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       }
     }
 
-    // Add 3D apartment marker on the building face at correct proportional height
+    // Add floor label marker
     if (floorNum > 0 && floorNum <= totalFlrs) {
-      // Calculate the floor height as a proportion of total building height
-      // Floor 5 of 10 = (5-0.5)/10 = 45% height (middle of floor 5)
-      const floorCenterHeight = (floorNum - 0.5) * floorHeightM;
-      const markerHeight = 2.5; // Height of the marker box (covers most of the floor)
-
-      // Create an extruded box on the front face of the building as the apartment marker
-      const markerDepth = 8; // meters - how far the marker protrudes
-      const markerWidth = 20; // meters - width of the marker
-      const markerDepthDeg = (markerDepth / 111320);
-      const markerWidthDeg = (markerWidth / 2 / 111320);
-      const markerWidthLonAdj = markerWidthDeg / Math.cos(latitude * Math.PI / 180);
-
-      // Position the marker on the front (east) face of the building
-      const markerCoords = [
-        [longitude + lonAdjust, latitude - markerWidthLonAdj],
-        [longitude + lonAdjust + markerDepthDeg, latitude - markerWidthLonAdj],
-        [longitude + lonAdjust + markerDepthDeg, latitude + markerWidthLonAdj],
-        [longitude + lonAdjust, latitude + markerWidthLonAdj],
-        [longitude + lonAdjust, latitude - markerWidthLonAdj], // Close polygon
-      ];
-
-      // Add source for apartment marker
-      if (!mapInstance.getSource('apartment-marker-3d')) {
-        mapInstance.addSource('apartment-marker-3d', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Polygon',
-              coordinates: [markerCoords],
-            },
-          },
-        });
-      }
-
-      // Add the 3D marker extrusion layer - positioned at correct floor height
-      if (!mapInstance.getLayer('apartment-marker-layer')) {
-        mapInstance.addLayer({
-          id: 'apartment-marker-layer',
-          type: 'fill-extrusion',
-          source: 'apartment-marker-3d',
-          paint: {
-            'fill-extrusion-color': '#4ade80', // Bright green
-            'fill-extrusion-height': floorCenterHeight + markerHeight,
-            'fill-extrusion-base': floorCenterHeight - markerHeight,
-            'fill-extrusion-opacity': 1,
-          },
-        });
-      }
-
-      // Add glowing outer ring around the marker (also at correct height)
-      const glowRingCoords = [
-        [longitude + lonAdjust - markerDepthDeg * 0.5, latitude - markerWidthLonAdj * 1.5],
-        [longitude + lonAdjust + markerDepthDeg * 1.5, latitude - markerWidthLonAdj * 1.5],
-        [longitude + lonAdjust + markerDepthDeg * 1.5, latitude + markerWidthLonAdj * 1.5],
-        [longitude + lonAdjust - markerDepthDeg * 0.5, latitude + markerWidthLonAdj * 1.5],
-        [longitude + lonAdjust - markerDepthDeg * 0.5, latitude - markerWidthLonAdj * 1.5],
-      ];
-
-      if (!mapInstance.getSource('apartment-glow-3d')) {
-        mapInstance.addSource('apartment-glow-3d', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Polygon',
-              coordinates: [glowRingCoords],
-            },
-          },
-        });
-      }
-
-      if (!mapInstance.getLayer('apartment-glow-layer')) {
-        mapInstance.addLayer({
-          id: 'apartment-glow-layer',
-          type: 'fill-extrusion',
-          source: 'apartment-glow-3d',
-          paint: {
-            'fill-extrusion-color': '#22c55e',
-            'fill-extrusion-height': floorCenterHeight + markerHeight * 1.2,
-            'fill-extrusion-base': floorCenterHeight - markerHeight * 1.2,
-            'fill-extrusion-opacity': 0.4,
-          },
-        });
-      }
-
-      // Add HTML label for the floor number positioned near the marker
       const labelEl = document.createElement('div');
       labelEl.className = 'apartment-floor-label';
       labelEl.innerHTML = `
@@ -484,12 +423,16 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         </div>
       `;
 
+      // Calculate offset position (slightly to the east of building)
+      const metersToDegrees = 1 / 111320;
+      const offsetLng = longitude + (20 * metersToDegrees / Math.cos(latitude * Math.PI / 180));
+
       new maplibregl.Marker({
         element: labelEl,
         anchor: 'left',
-        offset: [15, 0]
+        offset: [10, 0]
       })
-        .setLngLat([longitude + lonAdjust + markerDepthDeg, latitude])
+        .setLngLat([offsetLng, latitude])
         .addTo(mapInstance);
     }
   }, []);
