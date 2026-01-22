@@ -352,14 +352,11 @@ const RoleCard: React.FC<RoleCardProps> = ({
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {/* Show shared limit info for Pro users */}
+                                {/* Show shared limit info for Pro/Enterprise users - simple and clear */}
                                 {subscription.isPro ? (
                                     <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded">
                                         <p className="text-xs text-amber-800 font-medium">
                                             {t('seller:roleSelector.sharedLimit', { used: subscription.used, limit: subscription.limit })}
-                                        </p>
-                                        <p className="text-xs text-amber-700 mt-0.5">
-                                            {t('seller:roleSelector.asRole', { count: subscription.roleCount || 0, role: role === UserRole.AGENT ? t('seller:roleSelector.agent').toLowerCase() : t('seller:roleSelector.privateSeller').toLowerCase() })}
                                         </p>
                                     </div>
                                 ) : (
