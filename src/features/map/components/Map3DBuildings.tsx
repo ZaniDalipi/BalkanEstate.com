@@ -372,6 +372,47 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       ]];
     }
 
+    // Get actual building height from map data if available
+    let actualBuildingHeight = totalHeightM;
+    if (buildingFeature && buildingFeature.properties) {
+      const props = buildingFeature.properties;
+      if (props.render_height) {
+        actualBuildingHeight = props.render_height;
+      } else if (props['building:levels']) {
+        actualBuildingHeight = props['building:levels'] * 3.5;
+      }
+    }
+    // Use the larger of our calculated height or the map's height
+    const finalBuildingHeight = Math.max(totalHeightM, actualBuildingHeight);
+    // Recalculate floor height based on actual building
+    const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
+
+    // Scale up the building coordinates slightly (1.01x) to fully cover the original
+    // and offset by a tiny amount to prevent z-fighting/flickering
+    const scaleFactor = 1.01; // 1% larger
+    const offsetMeters = 0.5; // 0.5m offset to prevent z-fighting
+    const offsetDegrees = offsetMeters / 111320;
+
+    // Calculate centroid for scaling
+    const outerRing = buildingCoords[0];
+    let centroidLng = 0;
+    let centroidLat = 0;
+    const numPoints = outerRing.length - 1; // Exclude closing point
+    for (let i = 0; i < numPoints; i++) {
+      centroidLng += outerRing[i][0];
+      centroidLat += outerRing[i][1];
+    }
+    centroidLng /= numPoints;
+    centroidLat /= numPoints;
+
+    // Scale coordinates from centroid and apply offset
+    const scaledCoords = buildingCoords.map(ring =>
+      ring.map(coord => [
+        centroidLng + (coord[0] - centroidLng) * scaleFactor + offsetDegrees,
+        centroidLat + (coord[1] - centroidLat) * scaleFactor + offsetDegrees
+      ])
+    );
+
     // Hide the original 3D buildings layer in this area by adding our custom one on top
     // Add source for the custom building using actual geometry
     if (!mapInstance.getSource('custom-building')) {
@@ -382,16 +423,16 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           properties: { height: totalHeightM, totalFloors: totalFlrs },
           geometry: {
             type: 'Polygon',
-            coordinates: buildingCoords,
+            coordinates: scaledCoords,
           },
         },
       });
     }
 
-    // Add floor slice layers
+    // Add floor slice layers using adjusted height to match actual building
     for (let floor = 1; floor <= totalFlrs; floor++) {
-      const floorBase = (floor - 1) * floorHeightM;
-      const floorTop = floor * floorHeightM;
+      const floorBase = (floor - 1) * adjustedFloorHeight;
+      const floorTop = floor * adjustedFloorHeight;
       const isApartmentFloor = floor === floorNum;
       const layerId = `building-floor-${floor}`;
 
