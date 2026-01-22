@@ -396,8 +396,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Use the exact building coordinates from the map API (no scaling)
-    // Calculate centroid for label positioning
+    // Scale up the building coordinates slightly to cover the original and prevent z-fighting
+    const scaleFactor = 1.02; // 2% larger to prevent flickering
+
+    // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
     let centroidLng = 0;
     let centroidLat = 0;
@@ -409,8 +411,13 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     centroidLng /= numPoints;
     centroidLat /= numPoints;
 
-    // Use original building coordinates - exact same size as map API
-    const scaledCoords = buildingCoords;
+    // Scale coordinates from centroid to prevent z-fighting with original building
+    const scaledCoords = buildingCoords.map(ring =>
+      ring.map(coord => [
+        centroidLng + (coord[0] - centroidLng) * scaleFactor,
+        centroidLat + (coord[1] - centroidLat) * scaleFactor
+      ])
+    );
 
     // Hide the original 3D buildings layer in this area by adding our custom one on top
     // Add source for the custom building using actual geometry
