@@ -52,7 +52,7 @@ Unlock the full potential of your real estate business with BalkanEstate Pro. Ge
 
 **Billing:** Billed monthly. Cancel anytime.
 
-**Price:** €9.99/month
+**Price:** €25/month
 
 ---
 
@@ -61,10 +61,10 @@ Unlock the full potential of your real estate business with BalkanEstate Pro. Ge
 **Product Name:** BalkanEstate Pro Yearly
 
 **Short Description:**
-Save 40% with annual billing! All Pro features including 25 listings, analytics, promotion coupons, and priority support for one year.
+Save 33% with annual billing! All Pro features including 25 listings, analytics, promotion coupons, and priority support for one year.
 
 **Full Description:**
-Get the best value with our annual Pro subscription. Enjoy all the benefits of BalkanEstate Pro while saving 40% compared to monthly billing.
+Get the best value with our annual Pro subscription. Enjoy all the benefits of BalkanEstate Pro while saving 33% compared to monthly billing.
 
 **What's Included:**
 - Everything in Pro Monthly
@@ -76,7 +76,7 @@ Get the best value with our annual Pro subscription. Enjoy all the benefits of B
 - Saved searches with instant alerts
 - AI property description generator
 
-**Savings:** Save €48 per year compared to monthly billing!
+**Savings:** Save €100 per year compared to monthly billing!
 
 **Perfect for:**
 - Committed real estate professionals
@@ -85,7 +85,7 @@ Get the best value with our annual Pro subscription. Enjoy all the benefits of B
 
 **Billing:** Billed annually. 30-day money-back guarantee.
 
-**Price:** €71.88/year (equivalent to €5.99/month)
+**Price:** €200/year (equivalent to €16.67/month)
 
 ---
 
@@ -94,14 +94,14 @@ Get the best value with our annual Pro subscription. Enjoy all the benefits of B
 **Product Name:** BalkanEstate Enterprise
 
 **Short Description:**
-Complete solution for real estate agencies. Unlimited team members, 500 listings, dedicated agency page, featured placement, and full analytics suite.
+Complete solution for real estate agencies. 5 agents + creator included, 500 listings, dedicated agency page, featured placement, and full analytics suite.
 
 **Full Description:**
 The ultimate real estate platform for agencies and professional teams. BalkanEstate Enterprise gives your agency everything needed to dominate your market and showcase your team to thousands of potential clients.
 
 **What's Included:**
 - 500 active property listings
-- Unlimited team members
+- 5 agent accounts included (+ agency creator)
 - Dedicated branded agency page
 - Display all agents and their properties
 - Featured in rotating homepage advertisements
@@ -126,9 +126,9 @@ The ultimate real estate platform for agencies and professional teams. BalkanEst
 - Property management companies
 - Development companies
 
-**Billing:** Billed monthly. Cancel anytime.
+**Billing:** Billed annually.
 
-**Price:** €49.99/month
+**Price:** €1000/year (6 team members included: creator + 5 agents)
 
 ---
 
@@ -159,7 +159,7 @@ Stay ahead of the competition with BalkanEstate Buyer Pro. Be the first to know 
 
 **Billing:** Billed monthly. Cancel anytime.
 
-**Price:** €4.99/month
+**Price:** €3/month
 
 ---
 
