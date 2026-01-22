@@ -254,6 +254,31 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
   const sessionId = params.get('session_id');
   const orderId = params.get('order_id');
 
+  // LemonSqueezy payments are verified via webhooks, so we check subscription status
+  if (provider === 'lemonsqueezy') {
+    // LemonSqueezy processes via webhook, give it a moment then check status
+    const status = await getSubscriptionStatus();
+    if (status?.isSubscribed || status?.hasActiveSubscription) {
+      return {
+        success: true,
+        paymentStatus: 'paid',
+        provider: 'lemonsqueezy',
+        subscription: {
+          plan: status.subscriptionPlan || '',
+          expiresAt: status.subscriptionExpiresAt || '',
+          status: status.subscriptionStatus || 'active',
+        },
+      };
+    }
+    // Payment may still be processing
+    return {
+      success: true,
+      paymentStatus: 'processing',
+      provider: 'lemonsqueezy',
+      message: 'Payment is being processed. Your subscription will be activated shortly.',
+    };
+  }
+
   if (provider === 'paddle' && orderId) {
     return verifyPaddlePayment(orderId);
   } else if (sessionId) {
