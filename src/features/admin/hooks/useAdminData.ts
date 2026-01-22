@@ -74,25 +74,30 @@ export function useProducts() {
       const response = await getProducts();
       return response.products;
     },
-    staleTime: 30 * 1000, // Consider fresh for 30 seconds
+    staleTime: 0, // Always consider stale - ensures immediate refetch after mutations
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (garbage collection time)
     refetchOnWindowFocus: true, // Refetch when tab becomes active
-    refetchInterval: 60 * 1000, // Poll every 60 seconds for real-time updates
+    refetchOnMount: true, // Always refetch when component mounts
   });
 }
 
 /**
  * Helper function to invalidate all product-related caches across the app
+ * Forces immediate refetch by setting refetchType to 'all'
  */
 function invalidateAllProductCaches(queryClient: ReturnType<typeof useQueryClient>) {
-  // Invalidate all product-related keys (admin + public)
+  // Invalidate all product-related keys (admin + public) and force refetch
   getProductInvalidationKeys().forEach((key) => {
-    queryClient.invalidateQueries({ queryKey: key });
+    queryClient.invalidateQueries({
+      queryKey: key,
+      refetchType: 'all', // Force refetch even if query is not active
+    });
   });
 }
 
 /**
  * useUpdateProduct - Mutation hook for updating products
- * Implements optimistic updates for instant UI feedback
+ * Uses server response to update cache for guaranteed consistency
  *
  * Similar to: viewModel.updateProduct(product)
  */
@@ -103,30 +108,21 @@ export function useUpdateProduct() {
     mutationFn: ({ productId, data }: { productId: string; data: Partial<Product> }) =>
       updateProduct(productId, data),
 
-    // Optimistic update - update UI immediately before server confirms
-    onMutate: async ({ productId, data }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: adminKeys.products() });
-
-      // Snapshot previous value for rollback
-      const previousProducts = queryClient.getQueryData<Product[]>(adminKeys.products());
-
-      // Optimistically update the cache
-      queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
-        old?.map((p) => (p._id === productId ? { ...p, ...data } : p))
-      );
-
-      return { previousProducts };
-    },
-
-    // Rollback on error
-    onError: (_err, _variables, context) => {
-      if (context?.previousProducts) {
-        queryClient.setQueryData(adminKeys.products(), context.previousProducts);
+    // Update cache with actual server response for consistency
+    onSuccess: (response, { productId }) => {
+      const updatedProduct = response.product;
+      if (updatedProduct) {
+        queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
+          old?.map((p) => (p._id === productId ? updatedProduct : p))
+        );
       }
     },
 
-    // Always refetch after mutation - invalidate ALL product caches (admin + public)
+    onError: (error) => {
+      console.error('Update product error:', error);
+    },
+
+    // Always invalidate and force refetch to ensure all views are updated
     onSettled: () => {
       invalidateAllProductCaches(queryClient);
     },
@@ -135,7 +131,7 @@ export function useUpdateProduct() {
 
 /**
  * useToggleProductStatus - Toggle product active/inactive
- * With optimistic updates
+ * Uses server response to update cache instead of optimistic updates
  */
 export function useToggleProductStatus() {
   const queryClient = useQueryClient();
@@ -143,24 +139,21 @@ export function useToggleProductStatus() {
   return useMutation({
     mutationFn: (productId: string) => toggleProductStatus(productId),
 
-    onMutate: async (productId) => {
-      await queryClient.cancelQueries({ queryKey: adminKeys.products() });
-      const previousProducts = queryClient.getQueryData<Product[]>(adminKeys.products());
-
-      queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
-        old?.map((p) => (p._id === productId ? { ...p, isActive: !p.isActive } : p))
-      );
-
-      return { previousProducts };
-    },
-
-    onError: (_err, _variables, context) => {
-      if (context?.previousProducts) {
-        queryClient.setQueryData(adminKeys.products(), context.previousProducts);
+    // Update cache with actual server response
+    onSuccess: (response) => {
+      const updatedProduct = response.product;
+      if (updatedProduct) {
+        queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
+          old?.map((p) => (p._id === updatedProduct._id ? updatedProduct : p))
+        );
       }
     },
 
-    // Invalidate ALL product caches - affects what public users see
+    onError: (error) => {
+      console.error('Toggle product status error:', error);
+    },
+
+    // Always invalidate and force refetch to ensure consistency
     onSettled: () => {
       invalidateAllProductCaches(queryClient);
     },
@@ -169,7 +162,7 @@ export function useToggleProductStatus() {
 
 /**
  * useToggleProductVisibility - Toggle product visibility
- * With optimistic updates
+ * Uses server response to update cache instead of optimistic updates
  */
 export function useToggleProductVisibility() {
   const queryClient = useQueryClient();
@@ -177,24 +170,21 @@ export function useToggleProductVisibility() {
   return useMutation({
     mutationFn: (productId: string) => toggleProductVisibility(productId),
 
-    onMutate: async (productId) => {
-      await queryClient.cancelQueries({ queryKey: adminKeys.products() });
-      const previousProducts = queryClient.getQueryData<Product[]>(adminKeys.products());
-
-      queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
-        old?.map((p) => (p._id === productId ? { ...p, isVisible: !p.isVisible } : p))
-      );
-
-      return { previousProducts };
-    },
-
-    onError: (_err, _variables, context) => {
-      if (context?.previousProducts) {
-        queryClient.setQueryData(adminKeys.products(), context.previousProducts);
+    // Update cache with actual server response
+    onSuccess: (response) => {
+      const updatedProduct = response.product;
+      if (updatedProduct) {
+        queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
+          old?.map((p) => (p._id === updatedProduct._id ? updatedProduct : p))
+        );
       }
     },
 
-    // Invalidate ALL product caches - affects what public users see
+    onError: (error) => {
+      console.error('Toggle product visibility error:', error);
+    },
+
+    // Always invalidate and force refetch to ensure consistency
     onSettled: () => {
       invalidateAllProductCaches(queryClient);
     },
