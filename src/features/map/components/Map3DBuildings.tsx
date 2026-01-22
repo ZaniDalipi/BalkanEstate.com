@@ -320,38 +320,48 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
     // Query the actual building at this location from the map's building layer
     const point = mapInstance.project([longitude, latitude]);
-    const features = mapInstance.queryRenderedFeatures(point, {
+
+    let buildingCoords: number[][][] | null = null;
+    let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
+
+    // Try multiple query approaches to find the building
+    // 1. First try exact point query on the 3d-buildings layer
+    const exactFeatures = mapInstance.queryRenderedFeatures(point, {
       layers: ['3d-buildings']
     });
 
-    let buildingCoords: number[][][] | null = null;
-
-    if (features.length > 0 && features[0].geometry.type === 'Polygon') {
-      // Use the actual building geometry from the map
-      buildingCoords = (features[0].geometry as GeoJSON.Polygon).coordinates;
+    if (exactFeatures.length > 0) {
+      buildingFeature = exactFeatures[0];
     } else {
-      // Fallback: Query a small area around the point
+      // 2. Try a larger bounding box query
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 50, point.y - 50],
-        [point.x + 50, point.y + 50]
+        [point.x - 100, point.y - 100],
+        [point.x + 100, point.y + 100]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
         layers: ['3d-buildings']
       });
 
-      // Find the building that contains or is closest to our point
-      for (const feature of nearbyFeatures) {
-        if (feature.geometry.type === 'Polygon') {
-          buildingCoords = (feature.geometry as GeoJSON.Polygon).coordinates;
-          break;
-        }
+      // Find the building closest to our point
+      if (nearbyFeatures.length > 0) {
+        buildingFeature = nearbyFeatures[0];
       }
     }
 
-    // If we still don't have building coords, create a small default
+    // Extract coordinates from the building feature
+    if (buildingFeature) {
+      if (buildingFeature.geometry.type === 'Polygon') {
+        buildingCoords = (buildingFeature.geometry as GeoJSON.Polygon).coordinates;
+      } else if (buildingFeature.geometry.type === 'MultiPolygon') {
+        // For MultiPolygon, use the first polygon
+        buildingCoords = (buildingFeature.geometry as GeoJSON.MultiPolygon).coordinates[0];
+      }
+    }
+
+    // If we still don't have building coords, create a fallback based on typical building size
     if (!buildingCoords) {
       const metersToDegrees = 1 / 111320;
-      const halfSize = 15 * metersToDegrees; // 15m fallback
+      const halfSize = 20 * metersToDegrees; // 20m fallback
       const lonAdjust = halfSize / Math.cos(latitude * Math.PI / 180);
       buildingCoords = [[
         [longitude - lonAdjust, latitude - halfSize],
@@ -548,9 +558,41 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       // Add property marker with floor info
       addPropertyMarker(mapInstance, lat, lng, floorNumber, totalFloors, propertyType);
 
+      // Hide unnecessary map details (POIs, labels, etc.) for cleaner look
+      const layersToHide = [
+        'poi', 'poi_label', 'poi-level-1', 'poi-level-2', 'poi-level-3',
+        'place_label', 'place-city', 'place-town', 'place-village',
+        'road_label', 'road-label', 'transit_label',
+        'water_label', 'waterway_label', 'airport_label',
+        'natural_label', 'landuse_label'
+      ];
+
+      for (const layerId of layersToHide) {
+        if (mapInstance.getLayer(layerId)) {
+          mapInstance.setLayoutProperty(layerId, 'visibility', 'none');
+        }
+      }
+
+      // Also reduce visibility of minor roads and small details
+      const layersToReduce = mapInstance.getStyle().layers || [];
+      for (const layer of layersToReduce) {
+        // Hide POI icons and minor labels
+        if (layer.id.includes('poi') || layer.id.includes('label') || layer.id.includes('icon')) {
+          if (layer.type === 'symbol') {
+            mapInstance.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        }
+      }
+
       // Add custom 3D building with floor slices for apartments
+      // Wait for tiles to fully load before querying building geometry
       if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
-        addCustomBuilding3D(mapInstance, lat, lng, floorNumber, totalFloors);
+        // Use 'idle' event to ensure all tiles are loaded
+        const addBuildingOnIdle = () => {
+          addCustomBuilding3D(mapInstance, lat, lng, floorNumber, totalFloors);
+          mapInstance.off('idle', addBuildingOnIdle);
+        };
+        mapInstance.on('idle', addBuildingOnIdle);
       }
 
       // Add attribution
