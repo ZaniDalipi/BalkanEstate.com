@@ -301,6 +301,196 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     }
   }, []);
 
+  // Add custom 3D building cube with floor slices for apartments
+  const addCustomBuilding3D = useCallback((
+    mapInstance: maplibregl.Map,
+    latitude: number,
+    longitude: number,
+    floorNum: number,
+    totalFlrs: number
+  ) => {
+    // Building dimensions in meters (converted to degrees for coordinates)
+    const buildingSizeMeters = 15; // 15m x 15m building footprint
+    const floorHeightM = 3; // 3m per floor
+    const totalHeightM = totalFlrs * floorHeightM;
+
+    // Convert meters to approximate degrees (1 degree ≈ 111,320m at equator)
+    const metersToDegrees = 1 / 111320;
+    const halfSize = (buildingSizeMeters / 2) * metersToDegrees;
+
+    // Adjust for latitude (longitude degrees are smaller at higher latitudes)
+    const lonAdjust = halfSize / Math.cos(latitude * Math.PI / 180);
+
+    // Building footprint coordinates
+    const buildingCoords = [
+      [longitude - lonAdjust, latitude - halfSize],
+      [longitude + lonAdjust, latitude - halfSize],
+      [longitude + lonAdjust, latitude + halfSize],
+      [longitude - lonAdjust, latitude + halfSize],
+      [longitude - lonAdjust, latitude - halfSize], // Close the polygon
+    ];
+
+    // Add source for the custom building
+    if (!mapInstance.getSource('custom-building')) {
+      mapInstance.addSource('custom-building', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: { height: totalHeightM, totalFloors: totalFlrs },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [buildingCoords],
+          },
+        },
+      });
+    }
+
+    // Add floor slice layers
+    for (let floor = 1; floor <= totalFlrs; floor++) {
+      const floorBase = (floor - 1) * floorHeightM;
+      const floorTop = floor * floorHeightM;
+      const isApartmentFloor = floor === floorNum;
+      const layerId = `building-floor-${floor}`;
+
+      if (!mapInstance.getLayer(layerId)) {
+        mapInstance.addLayer({
+          id: layerId,
+          type: 'fill-extrusion',
+          source: 'custom-building',
+          paint: {
+            'fill-extrusion-color': isApartmentFloor
+              ? '#22c55e' // Green for apartment floor
+              : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
+            'fill-extrusion-height': floorTop - 0.15, // Small gap between floors
+            'fill-extrusion-base': floorBase,
+            'fill-extrusion-opacity': isApartmentFloor ? 0.95 : 0.85,
+          },
+        });
+      }
+    }
+
+    // Add glowing apartment marker on building surface
+    if (floorNum > 0 && floorNum <= totalFlrs) {
+      const apartmentHeight = (floorNum - 0.5) * floorHeightM;
+
+      // Create glowing marker on one face of the building
+      const markerLng = longitude + lonAdjust * 1.02; // Slightly outside the building face
+      const markerLat = latitude;
+
+      // Add glowing marker source
+      if (!mapInstance.getSource('apartment-glow')) {
+        mapInstance.addSource('apartment-glow', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: { height: apartmentHeight },
+            geometry: {
+              type: 'Point',
+              coordinates: [markerLng, markerLat],
+            },
+          },
+        });
+      }
+
+      // Add glowing circle layer
+      if (!mapInstance.getLayer('apartment-glow-outer')) {
+        mapInstance.addLayer({
+          id: 'apartment-glow-outer',
+          type: 'circle',
+          source: 'apartment-glow',
+          paint: {
+            'circle-radius': 18,
+            'circle-color': '#22c55e',
+            'circle-opacity': 0.3,
+            'circle-blur': 1,
+          },
+        });
+      }
+
+      if (!mapInstance.getLayer('apartment-glow-inner')) {
+        mapInstance.addLayer({
+          id: 'apartment-glow-inner',
+          type: 'circle',
+          source: 'apartment-glow',
+          paint: {
+            'circle-radius': 8,
+            'circle-color': '#4ade80',
+            'circle-opacity': 0.9,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
+          },
+        });
+      }
+
+      // Add 3D marker element for the apartment
+      const glowEl = document.createElement('div');
+      glowEl.className = 'apartment-3d-marker';
+      glowEl.innerHTML = `
+        <div style="
+          position: relative;
+          width: 60px;
+          height: 60px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <!-- Outer glow ring -->
+          <div style="
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(34,197,94,0.4) 0%, transparent 70%);
+            animation: glowPulse 2s ease-in-out infinite;
+          "></div>
+          <!-- Inner glow ring -->
+          <div style="
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(74,222,128,0.6) 0%, transparent 70%);
+            animation: glowPulse 2s ease-in-out infinite 0.3s;
+          "></div>
+          <!-- Center marker -->
+          <div style="
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e, #4ade80);
+            border: 3px solid white;
+            box-shadow: 0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.4);
+          "></div>
+          <!-- Floor label -->
+          <div style="
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          ">
+            Floor ${floorNum}
+          </div>
+        </div>
+      `;
+
+      new maplibregl.Marker({
+        element: glowEl,
+        anchor: 'center',
+        offset: [0, 0]
+      })
+        .setLngLat([markerLng, markerLat])
+        .addTo(mapInstance);
+    }
+  }, []);
+
   // Initialize map with OpenFreeMap style (free, includes 3D buildings)
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -372,6 +562,11 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       // Add property marker with floor info
       addPropertyMarker(mapInstance, lat, lng, floorNumber, totalFloors, propertyType);
 
+      // Add custom 3D building with floor slices for apartments
+      if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
+        addCustomBuilding3D(mapInstance, lat, lng, floorNumber, totalFloors);
+      }
+
       // Add attribution
       mapInstance.addControl(
         new maplibregl.AttributionControl({ compact: true }),
@@ -389,7 +584,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       mapInstance.remove();
       map.current = null;
     };
-  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, floorNumber, totalFloors, propertyType]);
+  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, floorNumber, totalFloors, propertyType]);
 
   // Update building colors based on time
   useEffect(() => {
@@ -759,6 +954,13 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         @keyframes floorPulse {
           0%, 100% { box-shadow: 0 2px 8px rgba(59,130,246,0.6); }
           50% { box-shadow: 0 2px 16px rgba(59,130,246,0.9), 0 0 20px rgba(139,92,246,0.5); }
+        }
+        @keyframes glowPulse {
+          0%, 100% { transform: scale(1); opacity: 0.6; }
+          50% { transform: scale(1.4); opacity: 0.3; }
+        }
+        .apartment-3d-marker {
+          z-index: 100;
         }
       `}</style>
     </div>
