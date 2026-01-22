@@ -119,7 +119,7 @@ class LemonSqueezyService {
       );
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
   }
 
   /**
