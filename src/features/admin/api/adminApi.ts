@@ -131,3 +131,74 @@ export const deleteDiscountCode = async (codeId: string): Promise<any> => {
     requiresAuth: true,
   });
 };
+
+// --- Admin Products/Pricing ---
+
+export interface Product {
+  _id: string;
+  productId: string;
+  name: string;
+  description?: string;
+  type: string;
+  tier: string;
+  price: number;
+  currency: string;
+  billingPeriod: string;
+  durationDays: number;
+  features: string[];
+  targetRole: string;
+  displayOrder: number;
+  badge?: string;
+  badgeColor?: string;
+  highlighted: boolean;
+  isActive: boolean;
+  isVisible: boolean;
+  hasFreeTrial: boolean;
+  trialPeriodDays?: number;
+  gracePeriodDays: number;
+  listingsLimit: number;
+  promotionCoupons: number;
+  premiumCoupons: number;
+  highlightedCoupons: number;
+  featuredCoupons: number;
+  agentCoupons: number;
+  aiMessagesLimit: number;
+  aiInsightsLimit: number;
+  imageDescriptionLimit: number;
+  savedSearchesLimit: number;
+  earlyAccessListings?: boolean;
+  advancedMarketInsights?: boolean;
+  stripeProductId?: string;
+  stripePriceId?: string;
+}
+
+export const getProducts = async (): Promise<{ products: Product[] }> => {
+  return apiRequest('/products/admin/all', {
+    requiresAuth: true,
+  });
+};
+
+export const updateProduct = async (
+  productId: string,
+  data: Partial<Product>
+): Promise<{ product: Product }> => {
+  return apiRequest(`/products/admin/${productId}`, {
+    method: 'PUT',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+export const toggleProductStatus = async (productId: string): Promise<{ product: Product }> => {
+  return apiRequest(`/products/admin/${productId}/status`, {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+};
+
+export const toggleProductVisibility = async (productId: string): Promise<{ product: Product }> => {
+  return apiRequest(`/products/admin/${productId}/visibility`, {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+};

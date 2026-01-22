@@ -1,59 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon } from '@/constants';
+/**
+ * PricingManager - Admin component for managing products/pricing
+ *
+ * Uses React Query hooks for reactive data management:
+ * - Data auto-refreshes on window focus
+ * - Optimistic updates for instant UI feedback
+ * - Automatic cache invalidation after mutations
+ *
+ * Similar to Android's ViewModel + StateFlow pattern
+ */
 
-interface Product {
-  _id: string;
-  productId: string;
-  name: string;
-  description?: string;
-  type: string;
-  tier: string;
-  price: number;
-  currency: string;
-  billingPeriod: string;
-  durationDays: number;
-  features: string[];
-  targetRole: string;
-  displayOrder: number;
-  badge?: string;
-  badgeColor?: string;
-  highlighted: boolean;
-  isActive: boolean;
-  isVisible: boolean;
-  hasFreeTrial: boolean;
-  trialPeriodDays?: number;
-  gracePeriodDays: number;
-  // Limits
-  listingsLimit: number;
-  promotionCoupons: number;
-  premiumCoupons: number;
-  highlightedCoupons: number;
-  featuredCoupons: number;
-  agentCoupons: number;
-  // AI Limits
-  aiMessagesLimit: number;
-  aiInsightsLimit: number;
-  imageDescriptionLimit: number;
-  // Buyer features
-  savedSearchesLimit: number;
-  earlyAccessListings?: boolean;
-  advancedMarketInsights?: boolean;
-  // Stripe
-  stripeProductId?: string;
-  stripePriceId?: string;
-}
+import React, { useState } from 'react';
+import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ArrowPathIcon } from '@/constants';
+import {
+  useProducts,
+  useUpdateProduct,
+  useToggleProductStatus,
+  useToggleProductVisibility,
+  useRefreshAdminData,
+} from '../hooks/useAdminData';
+import { Product } from '../api/adminApi';
 
 const PricingManager: React.FC = () => {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  // Reactive data - auto-updates like StateFlow.collectAsState()
+  const { data: products = [], isLoading, error, isRefetching } = useProducts();
+
+  // Mutations with optimistic updates
+  const updateProductMutation = useUpdateProduct();
+  const toggleStatusMutation = useToggleProductStatus();
+  const toggleVisibilityMutation = useToggleProductVisibility();
+  const refreshAll = useRefreshAdminData();
+
+  // Local UI state
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newFeature, setNewFeature] = useState('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Helper for validated number input - prevents negative values where min >= 0
+  // Derived state for mutation errors
+  const mutationError =
+    updateProductMutation.error ||
+    toggleStatusMutation.error ||
+    toggleVisibilityMutation.error;
+
+  // Helper for validated number input
   const handleNumberChange = (
     field: keyof Product,
     value: string,
@@ -62,7 +51,6 @@ const PricingManager: React.FC = () => {
   ) => {
     if (!editingProduct) return;
 
-    // Allow empty for editing
     if (value === '') {
       setEditingProduct({ ...editingProduct, [field]: min });
       return;
@@ -71,39 +59,11 @@ const PricingManager: React.FC = () => {
     const parsed = isFloat ? parseFloat(value) : parseInt(value, 10);
     if (isNaN(parsed)) return;
 
-    // Clamp to minimum (prevent negatives where not allowed)
     const clampedValue = Math.max(parsed, min);
     setEditingProduct({ ...editingProduct, [field]: clampedValue });
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/products/admin/all`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch products');
-
-      const data = await response.json();
-      setProducts(data.products || []);
-    } catch (err) {
-      setError('Failed to load products');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleEdit = (product: Product) => {
-    // Ensure all numeric fields are properly initialized to prevent undefined issues
     setEditingProduct({
       ...product,
       price: product.price ?? 0,
@@ -131,7 +91,7 @@ const PricingManager: React.FC = () => {
     if (!editingProduct || !newFeature.trim()) return;
     setEditingProduct({
       ...editingProduct,
-      features: [...(editingProduct.features || []), newFeature.trim()]
+      features: [...(editingProduct.features || []), newFeature.trim()],
     });
     setNewFeature('');
   };
@@ -146,119 +106,75 @@ const PricingManager: React.FC = () => {
   const handleSave = async () => {
     if (!editingProduct) return;
 
+    const updatePayload = {
+      name: editingProduct.name,
+      description: editingProduct.description || '',
+      type: editingProduct.type,
+      tier: editingProduct.tier || '',
+      price: Number(editingProduct.price) || 0,
+      currency: editingProduct.currency,
+      billingPeriod: editingProduct.billingPeriod,
+      durationDays: Number(editingProduct.durationDays) || 30,
+      features: editingProduct.features || [],
+      targetRole: editingProduct.targetRole,
+      displayOrder: Number(editingProduct.displayOrder) || 0,
+      badge: editingProduct.badge || '',
+      badgeColor: editingProduct.badgeColor || '',
+      highlighted: Boolean(editingProduct.highlighted),
+      isActive: Boolean(editingProduct.isActive),
+      isVisible: Boolean(editingProduct.isVisible),
+      hasFreeTrial: Boolean(editingProduct.hasFreeTrial),
+      trialPeriodDays: Number(editingProduct.trialPeriodDays) || 0,
+      gracePeriodDays: Number(editingProduct.gracePeriodDays) || 0,
+      listingsLimit: Number(editingProduct.listingsLimit),
+      promotionCoupons: Number(editingProduct.promotionCoupons) || 0,
+      premiumCoupons: Number(editingProduct.premiumCoupons) || 0,
+      highlightedCoupons: Number(editingProduct.highlightedCoupons) || 0,
+      featuredCoupons: Number(editingProduct.featuredCoupons) || 0,
+      agentCoupons: Number(editingProduct.agentCoupons) || 0,
+      aiMessagesLimit: Number(editingProduct.aiMessagesLimit),
+      aiInsightsLimit: Number(editingProduct.aiInsightsLimit),
+      imageDescriptionLimit: Number(editingProduct.imageDescriptionLimit),
+      savedSearchesLimit: Number(editingProduct.savedSearchesLimit),
+      earlyAccessListings: Boolean(editingProduct.earlyAccessListings),
+      advancedMarketInsights: Boolean(editingProduct.advancedMarketInsights),
+      stripeProductId: editingProduct.stripeProductId || '',
+      stripePriceId: editingProduct.stripePriceId || '',
+    };
+
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-
-      // Create update payload without _id (which is immutable) and ensure all fields are properly typed
-      const updatePayload = {
-        name: editingProduct.name,
-        description: editingProduct.description || '',
-        type: editingProduct.type,
-        tier: editingProduct.tier || '',
-        price: Number(editingProduct.price) || 0,
-        currency: editingProduct.currency,
-        billingPeriod: editingProduct.billingPeriod,
-        durationDays: Number(editingProduct.durationDays) || 30,
-        features: editingProduct.features || [],
-        targetRole: editingProduct.targetRole,
-        displayOrder: Number(editingProduct.displayOrder) || 0,
-        badge: editingProduct.badge || '',
-        badgeColor: editingProduct.badgeColor || '',
-        highlighted: Boolean(editingProduct.highlighted),
-        isActive: Boolean(editingProduct.isActive),
-        isVisible: Boolean(editingProduct.isVisible),
-        hasFreeTrial: Boolean(editingProduct.hasFreeTrial),
-        trialPeriodDays: Number(editingProduct.trialPeriodDays) || 0,
-        gracePeriodDays: Number(editingProduct.gracePeriodDays) || 0,
-        // Limits
-        listingsLimit: Number(editingProduct.listingsLimit),
-        promotionCoupons: Number(editingProduct.promotionCoupons) || 0,
-        premiumCoupons: Number(editingProduct.premiumCoupons) || 0,
-        highlightedCoupons: Number(editingProduct.highlightedCoupons) || 0,
-        featuredCoupons: Number(editingProduct.featuredCoupons) || 0,
-        agentCoupons: Number(editingProduct.agentCoupons) || 0,
-        // AI Limits
-        aiMessagesLimit: Number(editingProduct.aiMessagesLimit),
-        aiInsightsLimit: Number(editingProduct.aiInsightsLimit),
-        imageDescriptionLimit: Number(editingProduct.imageDescriptionLimit),
-        // Buyer features
-        savedSearchesLimit: Number(editingProduct.savedSearchesLimit),
-        earlyAccessListings: Boolean(editingProduct.earlyAccessListings),
-        advancedMarketInsights: Boolean(editingProduct.advancedMarketInsights),
-        // Stripe
-        stripeProductId: editingProduct.stripeProductId || '',
-        stripePriceId: editingProduct.stripePriceId || '',
-      };
-
-      console.log('Saving product update:', editingProduct._id, updatePayload);
-
-      const response = await fetch(`${API_URL}/products/admin/${editingProduct._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(updatePayload),
+      await updateProductMutation.mutateAsync({
+        productId: editingProduct._id,
+        data: updatePayload,
       });
 
-      const responseData = await response.json();
-      console.log('Save response:', responseData);
-
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to update product');
-      }
-
-      await fetchProducts();
       setIsEditModalOpen(false);
       setEditingProduct(null);
       setSuccessMessage('Product updated successfully!');
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
+    } catch (err) {
+      // Error is handled by mutation state
       console.error('Save error:', err);
-      setError(err.message || 'Failed to update product');
-      setTimeout(() => setError(null), 5000);
     }
   };
 
   const handleToggleStatus = async (product: Product) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/products/admin/${product._id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to toggle status');
-
-      await fetchProducts();
+      await toggleStatusMutation.mutateAsync(product._id);
       setSuccessMessage(`Product ${product.isActive ? 'deactivated' : 'activated'}`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError('Failed to toggle product status');
-      setTimeout(() => setError(null), 5000);
+      console.error('Toggle status error:', err);
     }
   };
 
   const handleToggleVisibility = async (product: Product) => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/products/admin/${product._id}/visibility`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to toggle visibility');
-
-      await fetchProducts();
+      await toggleVisibilityMutation.mutateAsync(product._id);
       setSuccessMessage(`Product ${product.isVisible ? 'hidden' : 'visible'}`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError('Failed to toggle product visibility');
-      setTimeout(() => setError(null), 5000);
+      console.error('Toggle visibility error:', err);
     }
   };
 
@@ -268,11 +184,16 @@ const PricingManager: React.FC = () => {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'free': return 'bg-gray-100 text-gray-800';
-      case 'pro': return 'bg-green-100 text-green-800';
-      case 'agency': return 'bg-purple-100 text-purple-800';
-      case 'buyer': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'free':
+        return 'bg-gray-100 text-gray-800';
+      case 'pro':
+        return 'bg-green-100 text-green-800';
+      case 'agency':
+        return 'bg-purple-100 text-purple-800';
+      case 'buyer':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -296,20 +217,47 @@ const PricingManager: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900">Pricing & Products</h2>
             <p className="text-gray-600 mt-1">Manage subscription plans and pricing</p>
           </div>
-          <div className="text-sm text-gray-500">
-            {products.length} product{products.length !== 1 ? 's' : ''}
+          <div className="flex items-center gap-4">
+            {/* Real-time indicator */}
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span
+                className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}
+              />
+              {isRefetching ? 'Syncing...' : 'Live'}
+            </div>
+
+            {/* Manual refresh */}
+            <button
+              onClick={refreshAll}
+              disabled={isRefetching}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Refresh data"
+            >
+              <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
+            </button>
+
+            <div className="text-sm text-gray-500">
+              {products.length} product{products.length !== 1 ? 's' : ''}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      {error && (
+      {(error || mutationError) && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
+          {(error as Error)?.message || (mutationError as Error)?.message || 'An error occurred'}
         </div>
       )}
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clipRule="evenodd"
+            />
+          </svg>
           {successMessage}
         </div>
       )}
@@ -320,12 +268,24 @@ const PricingManager: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Limits</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Product
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tier
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Limits
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -337,7 +297,9 @@ const PricingManager: React.FC = () => {
                         <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
                           {product.name}
                           {product.highlighted && (
-                            <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">Featured</span>
+                            <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                              Featured
+                            </span>
                           )}
                         </div>
                         <div className="text-sm text-gray-500">{product.productId}</div>
@@ -365,21 +327,23 @@ const PricingManager: React.FC = () => {
                     <div className="flex flex-col gap-1">
                       <button
                         onClick={() => handleToggleStatus(product)}
-                        className={`px-2 py-1 text-xs rounded-full ${
+                        disabled={toggleStatusMutation.isPending}
+                        className={`px-2 py-1 text-xs rounded-full transition-colors ${
                           product.isActive
                             ? 'bg-green-100 text-green-800 hover:bg-green-200'
                             : 'bg-red-100 text-red-800 hover:bg-red-200'
-                        }`}
+                        } ${toggleStatusMutation.isPending ? 'opacity-50' : ''}`}
                       >
                         {product.isActive ? 'Active' : 'Inactive'}
                       </button>
                       <button
                         onClick={() => handleToggleVisibility(product)}
-                        className={`px-2 py-1 text-xs rounded-full ${
+                        disabled={toggleVisibilityMutation.isPending}
+                        className={`px-2 py-1 text-xs rounded-full transition-colors ${
                           product.isVisible
                             ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
+                        } ${toggleVisibilityMutation.isPending ? 'opacity-50' : ''}`}
                       >
                         {product.isVisible ? 'Visible' : 'Hidden'}
                       </button>
@@ -570,7 +534,6 @@ const PricingManager: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Promotion Coupon Breakdown */}
                 <h5 className="font-medium text-green-800 mb-2 text-sm">Promotion Coupons (per month)</h5>
                 <div className="grid grid-cols-4 gap-4">
                   <div>
@@ -616,7 +579,7 @@ const PricingManager: React.FC = () => {
                 </div>
               </div>
 
-              {/* AI & Insights Limits */}
+              {/* AI Limits */}
               <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
                 <h4 className="font-semibold text-cyan-900 mb-3">AI & Insights Limits</h4>
                 <p className="text-xs text-cyan-700 mb-3">Use -1 for unlimited</p>
@@ -628,7 +591,6 @@ const PricingManager: React.FC = () => {
                       value={editingProduct.aiMessagesLimit ?? 0}
                       onChange={(e) => handleNumberChange('aiMessagesLimit', e.target.value, -1)}
                       min="-1"
-                      placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                     />
                   </div>
@@ -639,7 +601,6 @@ const PricingManager: React.FC = () => {
                       value={editingProduct.aiInsightsLimit ?? 0}
                       onChange={(e) => handleNumberChange('aiInsightsLimit', e.target.value, -1)}
                       min="-1"
-                      placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                     />
                   </div>
@@ -650,7 +611,6 @@ const PricingManager: React.FC = () => {
                       value={editingProduct.imageDescriptionLimit ?? 0}
                       onChange={(e) => handleNumberChange('imageDescriptionLimit', e.target.value, -1)}
                       min="-1"
-                      placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                     />
                   </div>
@@ -665,7 +625,9 @@ const PricingManager: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={editingProduct.earlyAccessListings || false}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, earlyAccessListings: e.target.checked })}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, earlyAccessListings: e.target.checked })
+                      }
                       className="w-4 h-4 text-sky-600 rounded focus:ring-sky-500"
                     />
                     <span className="text-sm text-gray-700">Early Access to New Listings</span>
@@ -674,7 +636,9 @@ const PricingManager: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={editingProduct.advancedMarketInsights || false}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, advancedMarketInsights: e.target.checked })}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, advancedMarketInsights: e.target.checked })
+                      }
                       className="w-4 h-4 text-sky-600 rounded focus:ring-sky-500"
                     />
                     <span className="text-sm text-gray-700">Advanced Market Insights</span>
@@ -682,7 +646,7 @@ const PricingManager: React.FC = () => {
                 </div>
               </div>
 
-              {/* Trial & Grace Period */}
+              {/* Trial & Grace */}
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <h4 className="font-semibold text-amber-900 mb-3">Trial & Grace Period</h4>
                 <div className="grid grid-cols-3 gap-4">
@@ -702,7 +666,9 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.trialPeriodDays || 0}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, trialPeriodDays: parseInt(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, trialPeriodDays: parseInt(e.target.value) || 0 })
+                      }
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
@@ -712,7 +678,9 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.gracePeriodDays}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, gracePeriodDays: parseInt(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, gracePeriodDays: parseInt(e.target.value) || 0 })
+                      }
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
@@ -725,7 +693,10 @@ const PricingManager: React.FC = () => {
                 <h4 className="font-semibold text-indigo-900 mb-3">Features (displayed in pricing page)</h4>
                 <div className="space-y-2 mb-3">
                   {(editingProduct.features || []).map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-indigo-100">
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-indigo-100"
+                    >
                       <span className="flex-1 text-sm text-gray-700">{feature}</span>
                       <button
                         type="button"
@@ -794,7 +765,9 @@ const PricingManager: React.FC = () => {
                     <input
                       type="number"
                       value={editingProduct.displayOrder}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, displayOrder: parseInt(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, displayOrder: parseInt(e.target.value) || 0 })
+                      }
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
@@ -813,7 +786,7 @@ const PricingManager: React.FC = () => {
                 </div>
               </div>
 
-              {/* Stripe Integration */}
+              {/* Stripe */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <h4 className="font-semibold text-gray-900 mb-3">Stripe Integration</h4>
                 <div className="grid grid-cols-2 gap-4">
@@ -850,10 +823,22 @@ const PricingManager: React.FC = () => {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                disabled={updateProductMutation.isPending}
+                className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 ${
+                  updateProductMutation.isPending ? 'opacity-70' : ''
+                }`}
               >
-                <ShieldCheckIcon className="w-4 h-4" />
-                Save Changes
+                {updateProductMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheckIcon className="w-4 h-4" />
+                    Save Changes
+                  </>
+                )}
               </button>
             </div>
           </div>
