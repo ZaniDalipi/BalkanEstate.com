@@ -165,6 +165,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   const timelapse = useShadowTimelapse(lat);
 
   // Add property marker with optional floor indicator
+  // For apartments with floor info, we skip this marker and use the 3D building visualization instead
   const addPropertyMarker = useCallback((
     mapInstance: maplibregl.Map,
     latitude: number,
@@ -173,13 +174,19 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     totalFlrs?: number,
     propType?: string
   ) => {
-    const showFloorMarker = propType === 'apartment' && floorNum != null && totalFlrs != null && totalFlrs > 0;
+    // Skip marker for apartments - we use 3D building visualization instead
+    const isApartmentWithFloors = propType === 'apartment' && floorNum != null && totalFlrs != null && totalFlrs > 0;
 
-    if (showFloorMarker) {
-      // Create a vertical pole with floor indicator for apartments
+    if (isApartmentWithFloors) {
+      // Don't add the blue pole marker for apartments - 3D building handles this
+      return;
+    }
+
+    if (false) {
+      // Dead code - keeping structure for non-apartment types
       const markerEl = document.createElement('div');
-      const poleHeight = Math.min(totalFlrs! * 8, 120); // Scale height, max 120px
-      const indicatorPosition = ((floorNum - 0.5) / totalFlrs!) * poleHeight;
+      const poleHeight = 0;
+      const indicatorPosition = 0;
 
       markerEl.innerHTML = `
         <div style="position: relative; width: 60px; display: flex; flex-direction: column; align-items: center;">
@@ -209,7 +216,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
               justify-content: center;
               animation: floorPulse 2s ease-in-out infinite;
             ">
-              <span style="color: white; font-size: 9px; font-weight: bold;">${floorNum}</span>
+              <span style="color: white; font-size: 9px; font-weight: bold;">0</span>
             </div>
             <!-- Floor label -->
             <div style="
@@ -225,7 +232,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
               font-weight: 500;
               box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             ">
-              Floor ${floorNum}
+              Floor 0
             </div>
           </div>
           <!-- Base marker -->
@@ -313,7 +320,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     latitude: number,
     longitude: number,
     floorNum: number,
-    totalFlrs: number
+    totalFlrs: number,
+    tourUrl?: string,
+    onEnterTour?: () => void
   ) => {
     const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
@@ -387,10 +396,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates slightly (1.01x) to fully cover the original
+    // Scale up the building coordinates to fully cover the original building
     // and offset by a tiny amount to prevent z-fighting/flickering
-    const scaleFactor = 1.01; // 1% larger
-    const offsetMeters = 0.5; // 0.5m offset to prevent z-fighting
+    const scaleFactor = 1.05; // 5% larger to ensure full coverage
+    const offsetMeters = 1.0; // 1m offset to prevent z-fighting
     const offsetDegrees = offsetMeters / 111320;
 
     // Calculate centroid for scaling
@@ -453,31 +462,66 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       }
     }
 
-    // Add floor label marker
+    // Add floor label marker with door icon for 360 tour
     if (floorNum > 0 && floorNum <= totalFlrs) {
       const labelEl = document.createElement('div');
       labelEl.className = 'apartment-floor-label';
+
+      // Show door icon if 360 tour is available
+      const hasTour = !!tourUrl;
+
       labelEl.innerHTML = `
         <div style="
+          display: flex;
+          align-items: center;
+          gap: 8px;
           background: linear-gradient(135deg, #22c55e, #16a34a);
           color: white;
-          padding: 6px 12px;
-          border-radius: 16px;
-          font-size: 13px;
+          padding: 8px 14px;
+          border-radius: 20px;
+          font-size: 14px;
           font-weight: bold;
           white-space: nowrap;
           box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 20px rgba(34,197,94,0.5);
           border: 2px solid white;
+          ${hasTour ? 'cursor: pointer;' : ''}
           animation: labelPulse 2s ease-in-out infinite;
         ">
-          Floor ${floorNum} / ${totalFlrs}
+          ${hasTour ? `
+            <span style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 28px;
+              height: 28px;
+              background: white;
+              border-radius: 50%;
+              font-size: 16px;
+            ">🚪</span>
+          ` : ''}
+          <span>Floor ${floorNum} / ${totalFlrs}</span>
+          ${hasTour ? `
+            <span style="
+              font-size: 11px;
+              opacity: 0.9;
+              background: rgba(255,255,255,0.2);
+              padding: 2px 6px;
+              border-radius: 8px;
+            ">360°</span>
+          ` : ''}
         </div>
       `;
+
+      // Add click handler for 360 tour
+      if (hasTour && onEnterTour) {
+        labelEl.addEventListener('click', onEnterTour);
+        labelEl.style.cursor = 'pointer';
+      }
 
       // Calculate offset position (southwest of building - facing the default camera view)
       // Default bearing is -17, camera looks from southwest, so label should be on southwest
       const metersToDegrees = 1 / 111320;
-      const offsetAmount = 25; // meters
+      const offsetAmount = 30; // meters
       const offsetLng = longitude - (offsetAmount * metersToDegrees / Math.cos(latitude * Math.PI / 180));
       const offsetLat = latitude - (offsetAmount * metersToDegrees);
 
@@ -633,7 +677,15 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
         // Use 'idle' event to ensure all tiles are loaded
         const addBuildingOnIdle = () => {
-          addCustomBuilding3D(mapInstance, lat, lng, floorNumber, totalFloors);
+          addCustomBuilding3D(
+            mapInstance,
+            lat,
+            lng,
+            floorNumber,
+            totalFloors,
+            virtualTour360Url,
+            virtualTour360Url ? handleEnterBuilding : undefined
+          );
           mapInstance.off('idle', addBuildingOnIdle);
         };
         mapInstance.on('idle', addBuildingOnIdle);
@@ -656,7 +708,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       mapInstance.remove();
       map.current = null;
     };
-  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, floorNumber, totalFloors, propertyType]);
+  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, floorNumber, totalFloors, propertyType, virtualTour360Url, handleEnterBuilding]);
 
   // Update building colors based on time
   useEffect(() => {
