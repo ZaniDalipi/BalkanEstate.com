@@ -474,16 +474,19 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         </div>
       `;
 
-      // Calculate offset position (slightly to the east of building)
+      // Calculate offset position (southwest of building - facing the default camera view)
+      // Default bearing is -17, camera looks from southwest, so label should be on southwest
       const metersToDegrees = 1 / 111320;
-      const offsetLng = longitude + (20 * metersToDegrees / Math.cos(latitude * Math.PI / 180));
+      const offsetAmount = 25; // meters
+      const offsetLng = longitude - (offsetAmount * metersToDegrees / Math.cos(latitude * Math.PI / 180));
+      const offsetLat = latitude - (offsetAmount * metersToDegrees);
 
       new maplibregl.Marker({
         element: labelEl,
-        anchor: 'left',
-        offset: [10, 0]
+        anchor: 'right',
+        offset: [-10, 0]
       })
-        .setLngLat([offsetLng, latitude])
+        .setLngLat([offsetLng, offsetLat])
         .addTo(mapInstance);
     }
   }, []);
