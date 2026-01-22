@@ -396,10 +396,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates to fully cover the original building
+    // Scale up the building coordinates to fully cover the original building on ALL sides
     // and offset by a tiny amount to prevent z-fighting/flickering
-    const scaleFactor = 1.05; // 5% larger to ensure full coverage
-    const offsetMeters = 1.0; // 1m offset to prevent z-fighting
+    const scaleFactor = 1.08; // 8% larger to ensure full coverage on all sides
+    const offsetMeters = 0.3; // Small offset to sit just outside original
     const offsetDegrees = offsetMeters / 111320;
 
     // Calculate centroid for scaling
@@ -518,19 +518,14 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         labelEl.style.cursor = 'pointer';
       }
 
-      // Calculate offset position (southwest of building - facing the default camera view)
-      // Default bearing is -17, camera looks from southwest, so label should be on southwest
-      const metersToDegrees = 1 / 111320;
-      const offsetAmount = 30; // meters
-      const offsetLng = longitude - (offsetAmount * metersToDegrees / Math.cos(latitude * Math.PI / 180));
-      const offsetLat = latitude - (offsetAmount * metersToDegrees);
-
+      // Position label directly on the building (at the centroid)
+      // The label will be glued to the building location
       new maplibregl.Marker({
         element: labelEl,
-        anchor: 'right',
-        offset: [-10, 0]
+        anchor: 'center',
+        offset: [0, -20] // Slight upward offset so it's visible above ground
       })
-        .setLngLat([offsetLng, offsetLat])
+        .setLngLat([centroidLng, centroidLat])
         .addTo(mapInstance);
     }
   }, []);
