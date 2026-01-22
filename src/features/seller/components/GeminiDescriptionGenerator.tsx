@@ -352,6 +352,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     const dragItem = useRef<number | null>(null);
     const dragOverItem = useRef<number | null>(null);
 
+    // Form container ref for scrolling
+    const formContainerRef = useRef<HTMLDivElement>(null);
+
     // Location State
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
@@ -729,6 +732,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 totalFloors: result.total_floors || 0,
             }));
             setStep('form');
+            // Scroll to top after generation completes
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) {
             console.error('⚠️ AI description generation failed:', e);
             if (e instanceof Error) {
