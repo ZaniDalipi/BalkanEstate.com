@@ -462,71 +462,45 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       }
     }
 
-    // Add floor label marker with door icon for 360 tour
+    // Add door icon directly on the highlighted floor for 360 tour
     if (floorNum > 0 && floorNum <= totalFlrs) {
-      const labelEl = document.createElement('div');
-      labelEl.className = 'apartment-floor-label';
-
       // Show door icon if 360 tour is available
       const hasTour = !!tourUrl;
 
-      labelEl.innerHTML = `
-        <div style="
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(135deg, #22c55e, #16a34a);
-          color: white;
-          padding: 8px 14px;
-          border-radius: 20px;
-          font-size: 14px;
-          font-weight: bold;
-          white-space: nowrap;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 20px rgba(34,197,94,0.5);
-          border: 2px solid white;
-          ${hasTour ? 'cursor: pointer;' : ''}
-          animation: labelPulse 2s ease-in-out infinite;
-        ">
-          ${hasTour ? `
-            <span style="
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 28px;
-              height: 28px;
-              background: white;
-              border-radius: 50%;
-              font-size: 16px;
-            ">🚪</span>
-          ` : ''}
-          <span>Floor ${floorNum} / ${totalFlrs}</span>
-          ${hasTour ? `
-            <span style="
-              font-size: 11px;
-              opacity: 0.9;
-              background: rgba(255,255,255,0.2);
-              padding: 2px 6px;
-              border-radius: 8px;
-            ">360°</span>
-          ` : ''}
-        </div>
-      `;
+      if (hasTour) {
+        // Create door marker on the building at the floor level
+        const doorEl = document.createElement('div');
+        doorEl.className = 'apartment-door-marker';
+        doorEl.innerHTML = `
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
+            cursor: pointer;
+            font-size: 18px;
+            animation: doorPulse 2s ease-in-out infinite;
+          ">🚪</div>
+        `;
 
-      // Add click handler for 360 tour
-      if (hasTour && onEnterTour) {
-        labelEl.addEventListener('click', onEnterTour);
-        labelEl.style.cursor = 'pointer';
+        // Add click handler for 360 tour
+        if (onEnterTour) {
+          doorEl.addEventListener('click', onEnterTour);
+        }
+
+        // Position door on the building face
+        new maplibregl.Marker({
+          element: doorEl,
+          anchor: 'center',
+        })
+          .setLngLat([centroidLng, centroidLat])
+          .addTo(mapInstance);
       }
-
-      // Position label directly on the building (at the centroid)
-      // The label will be glued to the building location
-      new maplibregl.Marker({
-        element: labelEl,
-        anchor: 'center',
-        offset: [0, -20] // Slight upward offset so it's visible above ground
-      })
-        .setLngLat([centroidLng, centroidLat])
-        .addTo(mapInstance);
     }
   }, []);
 
@@ -1141,14 +1115,14 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           0%, 100% { box-shadow: 0 2px 8px rgba(59,130,246,0.6); }
           50% { box-shadow: 0 2px 16px rgba(59,130,246,0.9), 0 0 20px rgba(139,92,246,0.5); }
         }
-        @keyframes labelPulse {
+        @keyframes doorPulse {
           0%, 100% {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 20px rgba(34,197,94,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 15px rgba(34,197,94,0.6);
             transform: scale(1);
           }
           50% {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 30px rgba(34,197,94,0.7);
-            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 25px rgba(34,197,94,0.8);
+            transform: scale(1.1);
           }
         }
         @keyframes fadeIn {
@@ -1158,7 +1132,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out forwards;
         }
-        .apartment-floor-label {
+        .apartment-door-marker {
           z-index: 100;
         }
       `}</style>
