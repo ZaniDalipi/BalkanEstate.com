@@ -20,7 +20,7 @@ export const createCoupon = async (
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
 
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       res.status(403).json({ message: 'Admin access required' });
       return;
     }
@@ -196,7 +196,7 @@ export const getAllCoupons = async (
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
 
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       res.status(403).json({ message: 'Admin access required' });
       return;
     }
@@ -288,7 +288,7 @@ export const getCouponDetails = async (
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
 
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       res.status(403).json({ message: 'Admin access required' });
       return;
     }
@@ -350,7 +350,7 @@ export const updateCoupon = async (
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
 
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       res.status(403).json({ message: 'Admin access required' });
       return;
     }
@@ -430,7 +430,7 @@ export const deleteCoupon = async (
     const currentUser = req.user as IUser;
     const user = await User.findById(String(currentUser._id));
 
-    if (!user || user.role !== 'admin') {
+    if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
       res.status(403).json({ message: 'Admin access required' });
       return;
     }

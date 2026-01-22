@@ -57,6 +57,34 @@ export const updateUserRole = async (
   });
 };
 
+export interface UserUpdateData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  country?: string;
+  role?: string;
+  licenseNumber?: string;
+  licenseVerified?: boolean;
+  isEmailVerified?: boolean;
+  isSubscribed?: boolean;
+  subscriptionPlan?: string;
+  subscriptionStatus?: string;
+  agencyName?: string;
+  isEnterpriseTier?: boolean;
+}
+
+export const updateUser = async (
+  userId: string,
+  data: UserUpdateData
+): Promise<any> => {
+  return apiRequest(`/admin/users/${userId}`, {
+    method: 'PATCH',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
 export const deleteUser = async (userId: string): Promise<any> => {
   return apiRequest(`/admin/users/${userId}`, {
     method: 'DELETE',
@@ -128,6 +156,130 @@ export const createDiscountCode = async (data: {
 export const deleteDiscountCode = async (codeId: string): Promise<any> => {
   return apiRequest(`/admin/discount-codes/${codeId}`, {
     method: 'DELETE',
+    requiresAuth: true,
+  });
+};
+
+export const deactivateDiscountCode = async (codeId: string): Promise<any> => {
+  return apiRequest(`/admin/discount-codes/${codeId}/deactivate`, {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+};
+
+export interface CreateDiscountCodeData {
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  validFrom?: string;
+  validUntil: string;
+  usageLimit: number;
+  description?: string;
+  applicablePlans?: string[];
+  minimumPurchaseAmount?: number;
+  source?: string;
+}
+
+export const createFullDiscountCode = async (data: CreateDiscountCodeData): Promise<any> => {
+  return apiRequest('/admin/discount-codes', {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+export interface BulkDiscountCodeData {
+  count: number;
+  prefix: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  validFrom?: string;
+  validUntil: string;
+  usageLimit: number;
+}
+
+export const generateBulkDiscountCodes = async (data: BulkDiscountCodeData): Promise<any> => {
+  return apiRequest('/admin/discount-codes/generate', {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+// --- Admin Products/Pricing ---
+
+export interface Product {
+  _id: string;
+  productId: string;
+  name: string;
+  description?: string;
+  type: string;
+  tier: string;
+  price: number;
+  currency: string;
+  billingPeriod: string;
+  durationDays: number;
+  features: string[];
+  targetRole: string;
+  displayOrder: number;
+  badge?: string;
+  badgeColor?: string;
+  highlighted: boolean;
+  isActive: boolean;
+  isVisible: boolean;
+  hasFreeTrial: boolean;
+  trialPeriodDays?: number;
+  gracePeriodDays: number;
+  listingsLimit: number;
+  promotionCoupons: number;
+  premiumCoupons: number;
+  highlightedCoupons: number;
+  featuredCoupons: number;
+  agentCoupons: number;
+  aiMessagesLimit: number;
+  aiInsightsLimit: number;
+  imageDescriptionLimit: number;
+  savedSearchesLimit: number;
+  earlyAccessListings?: boolean;
+  advancedMarketInsights?: boolean;
+  stripeProductId?: string;
+  stripePriceId?: string;
+  // Agency/Enterprise features
+  maxActiveSubscriptions?: number;
+  cardStyle?: {
+    backgroundColor?: string;
+    borderColor?: string;
+    textColor?: string;
+  };
+}
+
+export const getProducts = async (): Promise<{ products: Product[] }> => {
+  return apiRequest('/products/admin/all', {
+    requiresAuth: true,
+  });
+};
+
+export const updateProduct = async (
+  productId: string,
+  data: Partial<Product>
+): Promise<{ product: Product }> => {
+  return apiRequest(`/products/admin/${productId}`, {
+    method: 'PUT',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+export const toggleProductStatus = async (productId: string): Promise<{ product: Product }> => {
+  return apiRequest(`/products/admin/${productId}/status`, {
+    method: 'PATCH',
+    requiresAuth: true,
+  });
+};
+
+export const toggleProductVisibility = async (productId: string): Promise<{ product: Product }> => {
+  return apiRequest(`/products/admin/${productId}/visibility`, {
+    method: 'PATCH',
     requiresAuth: true,
   });
 };

@@ -1,7 +1,21 @@
 {
   "property": "Proprietate",
   "properties": "Proprietăți",
-  "listing": "Anunț",
+  "listing": {
+    "listedOn": "Listat pe",
+    "updatedOn": "Actualizat pe",
+    "listedDaysAgo": "Listat acum {{days}} zile",
+    "listedToday": "Listat astăzi",
+    "listedYesterday": "Listat ieri",
+    "listedWeeksAgo": "Listat acum {{weeks}} săptămână",
+    "listedWeeksAgoPlural": "Listat acum {{weeks}} săptămâni",
+    "listedMonthsAgo": "Listat acum {{months}} lună",
+    "listedMonthsAgoPlural": "Listat acum {{months}} luni",
+    "views": "vizualizări",
+    "viewsCount": "{{count}} vizualizări",
+    "inquiries": "Întrebări",
+    "id": "ID Anunț"
+  },
   "listings": "Anunțuri",
   "forSale": "De Vânzare",
   "forRent": "De Închiriat",
@@ -154,21 +168,6 @@
     "email": "Email",
     "website": "Website"
   },
-  "listing": {
-    "listedOn": "Listat pe",
-    "updatedOn": "Actualizat pe",
-    "listedDaysAgo": "Listat acum {{days}} zile",
-    "listedToday": "Listat astăzi",
-    "listedYesterday": "Listat ieri",
-    "listedWeeksAgo": "Listat acum {{weeks}} săptămână",
-    "listedWeeksAgoPlural": "Listat acum {{weeks}} săptămâni",
-    "listedMonthsAgo": "Listat acum {{months}} lună",
-    "listedMonthsAgoPlural": "Listat acum {{months}} luni",
-    "views": "vizualizări",
-    "viewsCount": "{{count}} vizualizări",
-    "inquiries": "Întrebări",
-    "id": "ID Anunț"
-  },
   "navigation": {
     "back": "Înapoi",
     "goBackToSearch": "Înapoi la rezultatele căutării"
@@ -284,6 +283,56 @@
     "title": "Vezi pe Hartă",
     "description": "Vrei să explorezi zona din jurul acestei proprietăți?",
     "button": "Vezi pe Harta de Căutare"
+  },
+  "cinematicMap": {
+    "title": "Locația proprietății",
+    "description": "Trăiți o călătorie cinematică până la locația acestei proprietăți",
+    "phases": {
+      "starting": "Pregătire pentru călătorie...",
+      "zoomingOut": "Ne ridicăm...",
+      "panning": "Călătorim spre locație...",
+      "zoomingIn": "Ne apropiem de proprietate...",
+      "orbiting": "Explorăm împrejurimile...",
+      "complete": "Am ajuns!"
+    },
+    "controls": {
+      "play": "Zbor spre proprietate",
+      "skip": "Sari",
+      "replay": "Reia",
+      "exploreMap": "Explorează harta"
+    },
+    "errors": {
+      "noLocation": "Datele de locație nu sunt disponibile"
+    }
+  },
+  "shadowTimelapse": {
+    "title": "Animație temporală a umbrelor",
+    "description": "Urmăriți cum se mișcă umbrele pe parcursul zilei",
+    "periods": {
+      "night": "Noapte",
+      "dawn": "Zori",
+      "morning": "Dimineață",
+      "noon": "Amiază",
+      "afternoon": "După-amiază",
+      "sunset": "Apus",
+      "dusk": "Amurg"
+    },
+    "sunrise": "Răsărit",
+    "noon": "Amiază",
+    "sunset": "Apus",
+    "speed": "Viteză",
+    "reset": "Resetare",
+    "tip": "Urmăriți cum se mișcă umbrele pentru a înțelege expunerea la lumina soarelui"
+  },
+  "floorIndicator": {
+    "title": "Etaj",
+    "ofFloors": "din {{total}} etaje",
+    "hide": "Ascunde",
+    "show": "Arată etajul",
+    "floorLevel": "Etajul {{floor}} din {{total}}",
+    "groundFloor": "Parter",
+    "topFloor": "Ultimul etaj",
+    "middleFloor": "Etaj mijlociu"
   },
   "guide": {
     "messages": {

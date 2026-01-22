@@ -9,6 +9,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useAlert } from '@/context/AlertContext';
 import MarketInsightsAnimation from './MarketInsightsAnimation';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
+import FloorInputCombined from '@/src/shared/components/ui/FloorInputCombined';
 import MapLocationPicker from './MapLocationPicker';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import * as api from '@/services/apiService';
@@ -351,6 +352,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     // Drag & Drop State
     const dragItem = useRef<number | null>(null);
     const dragOverItem = useRef<number | null>(null);
+
+    // Form container ref for scrolling
+    const formContainerRef = useRef<HTMLDivElement>(null);
 
     // Location State
     const [selectedCountry, setSelectedCountry] = useState('');
@@ -729,6 +733,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 totalFloors: result.total_floors || 0,
             }));
             setStep('form');
+            // Scroll to top after generation completes
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) {
             console.error('⚠️ AI description generation failed:', e);
             if (e instanceof Error) {
@@ -796,10 +802,22 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
         // Floor validation - skip for land
         if (listingData.propertyType !== 'land') {
-            if (listingData.propertyType === 'apartment' && (!listingData.floorNumber || listingData.floorNumber < 1)) {
-                showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
-                setIsSubmitting(false);
-                return;
+            if (listingData.propertyType === 'apartment') {
+                if (!listingData.floorNumber || listingData.floorNumber < 0) {
+                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (!listingData.totalFloors || listingData.totalFloors < 1) {
+                    showError(t('validation:invalidFloorCount'), t('newListing:validation.apartmentTotalFloors'));
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (listingData.floorNumber > listingData.totalFloors) {
+                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.floorExceedsTotal'));
+                    setIsSubmitting(false);
+                    return;
+                }
             }
             if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
                 showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
@@ -1065,9 +1083,12 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             // Handle listing limit reached - show discount game option
             if (errorCode === 'LISTING_LIMIT_REACHED' || errorCode === 'FREE_LISTING_LIMIT_REACHED') {
                 // Save the property data so user doesn't lose their work
+                // Note: newProperty may not exist if error occurred during image upload
                 const propertyToSave = {
-                    ...formData,
-                    images: imageUrls,
+                    title: listingData.title,
+                    price: listingData.price,
+                    description: listingData.description,
+                    propertyType: listingData.propertyType,
                     createdAsRole: selectedRole,
                 };
                 dispatch({ type: 'SET_PENDING_PROPERTY', payload: propertyToSave });
@@ -1477,7 +1498,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                         </div>
                         {listingData.propertyType === 'apartment' && (
-                            <NumberInputWithSteppers label={t('seller:createListing.fields.floorNumber')} value={listingData.floorNumber} onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))} min={1} />
+                            <FloorInputCombined
+                                label={t('seller:createListing.fields.floorNumber')}
+                                floorNumber={listingData.floorNumber}
+                                totalFloors={listingData.totalFloors}
+                                onFloorNumberChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
+                                onTotalFloorsChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
+                            />
                         )}
                         {(listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (
                             <NumberInputWithSteppers label={t('seller:createListing.fields.totalFloors')} value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} />

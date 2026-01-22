@@ -77,37 +77,19 @@ const AdminDashboard: React.FC = () => {
         return;
       }
 
+      // Wait for user data to load before checking role
+      if (!state.currentUser) {
+        return; // Will re-run when currentUser is loaded
+      }
+
       // Check if user has admin role
-      if (state.currentUser?.role !== 'admin' && state.currentUser?.role !== 'super_admin') {
+      if (state.currentUser.role !== 'admin' && state.currentUser.role !== 'super_admin') {
         setError('Admin access required');
         return;
       }
 
-      try {
-        // Test admin access by hitting a test endpoint
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        const response = await fetch(`${API_URL}/admin/stats`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === 403) {
-          const data = await response.json();
-          setError(data.message || 'Admin access denied');
-          return;
-        }
-
-        if (!response.ok) {
-          setError('Failed to connect to admin panel');
-          return;
-        }
-
-        setIsAuthorized(true);
-      } catch (err) {
-        setError('Failed to connect to admin panel');
-        console.error('Admin access check failed:', err);
-      }
+      // User is admin, authorize without extra API call
+      setIsAuthorized(true);
     };
 
     checkAdminAccess();

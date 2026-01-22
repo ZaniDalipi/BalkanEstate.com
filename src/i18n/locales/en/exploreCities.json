@@ -3,6 +3,10 @@
     "title": "Explore Balkan Cities",
     "description": "AI-powered market insights for {{count}} major cities across 10 countries"
   },
+  "cards": {
+    "title": "All Cities",
+    "subtitle": "Explore real estate markets across {{count}} cities in the Balkans"
+  },
   "hero": {
     "title": "Explore Balkan Cities",
     "subtitle": "AI-powered market insights for {{count}} major cities across 10 countries",

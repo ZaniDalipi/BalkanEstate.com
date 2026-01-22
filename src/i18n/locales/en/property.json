@@ -316,6 +316,56 @@
     "description": "Want to explore the area around this property?",
     "button": "View on Search Map"
   },
+  "cinematicMap": {
+    "title": "Property Location",
+    "description": "Experience a cinematic journey to this property's location",
+    "phases": {
+      "starting": "Preparing journey...",
+      "zoomingOut": "Rising above...",
+      "panning": "Traveling to location...",
+      "zoomingIn": "Approaching property...",
+      "orbiting": "Exploring surroundings...",
+      "complete": "Arrived!"
+    },
+    "controls": {
+      "play": "Fly to Property",
+      "skip": "Skip",
+      "replay": "Replay",
+      "exploreMap": "Explore Map"
+    },
+    "errors": {
+      "noLocation": "Location data unavailable"
+    }
+  },
+  "shadowTimelapse": {
+    "title": "Shadow Time-Lapse",
+    "description": "Watch how shadows move throughout the day",
+    "periods": {
+      "night": "Night",
+      "dawn": "Dawn",
+      "morning": "Morning",
+      "noon": "Noon",
+      "afternoon": "Afternoon",
+      "sunset": "Sunset",
+      "dusk": "Dusk"
+    },
+    "sunrise": "Sunrise",
+    "noon": "Noon",
+    "sunset": "Sunset",
+    "speed": "Speed",
+    "reset": "Reset",
+    "tip": "Watch how shadows move throughout the day to understand sunlight exposure"
+  },
+  "floorIndicator": {
+    "title": "Floor",
+    "ofFloors": "of {{total}} floors",
+    "hide": "Hide",
+    "show": "Show Floor",
+    "floorLevel": "Floor {{floor}} of {{total}}",
+    "groundFloor": "Ground Floor",
+    "topFloor": "Top Floor",
+    "middleFloor": "Middle Floor"
+  },
   "guide": {
     "messages": {
       "welcome": "Hey there! I'm Homey, your property guide. Let me show you around!",

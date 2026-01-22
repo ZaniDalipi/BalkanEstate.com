@@ -69,7 +69,9 @@ const ListingCard: React.FC<{
 
     const handleCardClick = () => {
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: property.id });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
         window.history.pushState({ propertyId: property.id }, '', `/property/${property.id}`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
     };
 
     const handleEditClick = (e: React.MouseEvent) => {
@@ -252,36 +254,39 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         return { canRenew: false, hoursRemaining, minutesRemaining };
     };
 
-    // Fetch ALL listings (no role filter) - we filter on the frontend for better UX
+    // Refetch function - can be called manually or on view change
+    const fetchMyListings = async () => {
+        setIsLoading(true);
+        try {
+            console.log(`🔄 Fetching ALL listings for user`);
+
+            // Fetch ALL listings without role filter
+            const listings = await api.getMyListings();
+            console.log(`✅ Fetched ${listings.length} total listings`);
+
+            setMyProperties(listings);
+
+            // Calculate renewal statuses
+            const statuses: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
+            listings.forEach(p => {
+                statuses[p.id] = calculateRenewalStatus(p.lastRenewed);
+            });
+            setRenewalStatuses(statuses);
+        } catch (error) {
+            console.error('Failed to fetch listings:', error);
+            setMyProperties([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fetch on mount and when navigating back to this view (after editing)
     useEffect(() => {
-        const fetchMyListings = async () => {
-            setIsLoading(true);
-            try {
-                console.log(`🔄 Fetching ALL listings for user`);
-
-                // Fetch ALL listings without role filter
-                const listings = await api.getMyListings();
-                console.log(`✅ Fetched ${listings.length} total listings`);
-
-                setMyProperties(listings);
-
-                // Calculate renewal statuses
-                const statuses: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
-                listings.forEach(p => {
-                    statuses[p.id] = calculateRenewalStatus(p.lastRenewed);
-                });
-                setRenewalStatuses(statuses);
-            } catch (error) {
-                console.error('Failed to fetch listings:', error);
-                setMyProperties([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchMyListings();
+    }, [state.activeView]); // Refetch when view changes (e.g., returning from edit-listing)
 
-        // Update renewal statuses every minute
+    // Update renewal statuses every minute
+    useEffect(() => {
         const interval = setInterval(() => {
             setRenewalStatuses(prev => {
                 const updated: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
@@ -293,7 +298,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         }, 60000);
 
         return () => clearInterval(interval);
-    }, []); // Fetch once on mount
+    }, [myProperties]);
 
     // Calculate counts for each role
     const roleCounts = useMemo(() => {
@@ -382,18 +387,20 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 dispatch({ type: 'RENEW_PROPERTY', payload: id });
             }
         } catch (error: any) {
-            if (error.code === 'RENEWAL_COOLDOWN') {
+            console.error('Failed to renew property:', error);
+            // Check for cooldown error - details are in error.details from apiRequest
+            const errorDetails = error.details || error;
+            if (error.code === 'RENEWAL_COOLDOWN' || errorDetails.code === 'RENEWAL_COOLDOWN') {
                 // Update the status with the server response
                 setRenewalStatuses(prev => ({
                     ...prev,
                     [id]: {
                         canRenew: false,
-                        hoursRemaining: error.hoursRemaining,
-                        minutesRemaining: error.minutesRemaining,
+                        hoursRemaining: errorDetails.hoursRemaining,
+                        minutesRemaining: errorDetails.minutesRemaining,
                     },
                 }));
             }
-            console.error('Failed to renew property:', error);
         }
     };
 

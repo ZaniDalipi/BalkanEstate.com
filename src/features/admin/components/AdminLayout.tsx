@@ -49,11 +49,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // Fetch admin stats for header
+  // Fetch admin stats for header - only if user is admin
   useEffect(() => {
+    // Only fetch if user is authenticated and is admin
+    const token = localStorage.getItem('balkan_estate_token');
+    const isAdmin = state.user?.role === 'admin';
+
+    if (!token || !isAdmin) {
+      setIsLoadingStats(false);
+      return;
+    }
+
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem('balkan_estate_token');
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const response = await fetch(`${API_URL}/admin/stats`, {
           headers: {
@@ -76,7 +84,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
     // Refresh every 60 seconds
     const interval = setInterval(fetchStats, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [state.user?.role]);
 
   const handleBackToSite = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });

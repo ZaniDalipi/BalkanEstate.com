@@ -3,6 +3,10 @@
 "title": "Eksploroni Qytetet Ballkanike",
 "description": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende"
 },
+"cards": {
+"title": "Të Gjitha Qytetet",
+"subtitle": "Eksploroni tregjet e pasurive të paluajtshme në {{count}} qytete në Ballkan"
+},
 "hero": {
 "title": "Eksploroni Qytetet Ballkanike",
 "subtitle": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende",

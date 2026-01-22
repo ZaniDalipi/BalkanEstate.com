@@ -1,7 +1,21 @@
 {
   "property": "Nekretnina",
   "properties": "Nekretnine",
-  "listing": "Oglas",
+  "listing": {
+    "listedOn": "Objavljeno",
+    "updatedOn": "Ažurirano",
+    "listedDaysAgo": "Objavljeno prije {{days}} dana",
+    "listedToday": "Objavljeno danas",
+    "listedYesterday": "Objavljeno jučer",
+    "listedWeeksAgo": "Objavljeno prije {{weeks}} tjedna",
+    "listedWeeksAgoPlural": "Objavljeno prije {{weeks}} tjedana",
+    "listedMonthsAgo": "Objavljeno prije {{months}} mjeseca",
+    "listedMonthsAgoPlural": "Objavljeno prije {{months}} mjeseci",
+    "views": "pregleda",
+    "viewsCount": "{{count}} pregleda",
+    "inquiries": "Upiti",
+    "id": "ID Oglasa"
+  },
   "listings": "Oglasi",
   "forSale": "Na Prodaju",
   "forRent": "Za Najam",
@@ -154,21 +168,6 @@
     "email": "Email",
     "website": "Web Stranica"
   },
-  "listing": {
-    "listedOn": "Objavljeno",
-    "updatedOn": "Ažurirano",
-    "listedDaysAgo": "Objavljeno prije {{days}} dana",
-    "listedToday": "Objavljeno danas",
-    "listedYesterday": "Objavljeno jučer",
-    "listedWeeksAgo": "Objavljeno prije {{weeks}} tjedna",
-    "listedWeeksAgoPlural": "Objavljeno prije {{weeks}} tjedana",
-    "listedMonthsAgo": "Objavljeno prije {{months}} mjeseca",
-    "listedMonthsAgoPlural": "Objavljeno prije {{months}} mjeseci",
-    "views": "pregleda",
-    "viewsCount": "{{count}} pregleda",
-    "inquiries": "Upiti",
-    "id": "ID Oglasa"
-  },
   "navigation": {
     "back": "Natrag",
     "goBackToSearch": "Vrati se na rezultate pretrage"
@@ -315,6 +314,56 @@
     "title": "Pogledaj na Karti",
     "description": "Želite istražiti područje oko ove nekretnine?",
     "button": "Pogledaj na Karti za Pretraživanje"
+  },
+  "cinematicMap": {
+    "title": "Lokacija nekretnine",
+    "description": "Doživite kinematografsko putovanje do lokacije ove nekretnine",
+    "phases": {
+      "starting": "Priprema za putovanje...",
+      "zoomingOut": "Uzdizanje...",
+      "panning": "Putovanje do lokacije...",
+      "zoomingIn": "Približavanje nekretnini...",
+      "orbiting": "Istraživanje okoline...",
+      "complete": "Stigli smo!"
+    },
+    "controls": {
+      "play": "Let do nekretnine",
+      "skip": "Preskoči",
+      "replay": "Ponovi",
+      "exploreMap": "Istraži kartu"
+    },
+    "errors": {
+      "noLocation": "Podaci o lokaciji nisu dostupni"
+    }
+  },
+  "shadowTimelapse": {
+    "title": "Vremenska animacija sjena",
+    "description": "Gledajte kako se sjene kreću tijekom dana",
+    "periods": {
+      "night": "Noć",
+      "dawn": "Zora",
+      "morning": "Jutro",
+      "noon": "Podne",
+      "afternoon": "Popodne",
+      "sunset": "Zalazak sunca",
+      "dusk": "Sumrak"
+    },
+    "sunrise": "Izlazak sunca",
+    "noon": "Podne",
+    "sunset": "Zalazak sunca",
+    "speed": "Brzina",
+    "reset": "Resetiraj",
+    "tip": "Gledajte kako se sjene kreću da biste razumjeli izloženost sunčevoj svjetlosti"
+  },
+  "floorIndicator": {
+    "title": "Kat",
+    "ofFloors": "od {{total}} katova",
+    "hide": "Sakrij",
+    "show": "Prikaži kat",
+    "floorLevel": "Kat {{floor}} od {{total}}",
+    "groundFloor": "Prizemlje",
+    "topFloor": "Zadnji kat",
+    "middleFloor": "Srednji kat"
   },
   "guide": {
     "messages": {
