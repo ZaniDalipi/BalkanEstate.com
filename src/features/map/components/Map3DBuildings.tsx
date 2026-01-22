@@ -26,6 +26,8 @@ interface Map3DBuildingsProps {
   floorNumber?: number;
   totalFloors?: number;
   propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'other';
+  // 360 Virtual Tour
+  virtualTour360Url?: string;
 }
 
 /**
@@ -140,6 +142,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   floorNumber,
   totalFloors,
   propertyType,
+  virtualTour360Url,
 }) => {
   const { t } = useTranslation(['property']);
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -148,6 +151,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   const [showTimelapse, setShowTimelapse] = useState(false);
   const [is3DMode, setIs3DMode] = useState(true);
   const [showFloorIndicator, setShowFloorIndicator] = useState(true);
+  const [show360Tour, setShow360Tour] = useState(false);
+  const [isEnteringBuilding, setIsEnteringBuilding] = useState(false);
 
   // Calculate floor visualization data
   const isApartment = propertyType === 'apartment';
@@ -491,6 +496,46 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     }
   }, []);
 
+  // Handle entering the building - animate and show 360 tour
+  const handleEnterBuilding = useCallback(() => {
+    if (!map.current || !virtualTour360Url) return;
+
+    setIsEnteringBuilding(true);
+
+    // Animate camera flying into the building
+    map.current.flyTo({
+      center: [lng, lat],
+      zoom: 19,
+      pitch: 75,
+      bearing: map.current.getBearing() + 45,
+      duration: 2000,
+      essential: true,
+    });
+
+    // After animation completes, show the 360 tour
+    setTimeout(() => {
+      setShow360Tour(true);
+      setIsEnteringBuilding(false);
+    }, 2000);
+  }, [lng, lat, virtualTour360Url]);
+
+  // Close 360 tour and reset view
+  const handleClose360Tour = useCallback(() => {
+    setShow360Tour(false);
+
+    // Animate back to original view
+    if (map.current) {
+      map.current.flyTo({
+        center: [lng, lat],
+        zoom: zoom,
+        pitch: pitch,
+        bearing: bearing,
+        duration: 1500,
+        essential: true,
+      });
+    }
+  }, [lng, lat, zoom, pitch, bearing]);
+
   // Initialize map with OpenFreeMap style (free, includes 3D buildings)
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -762,6 +807,27 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
               </div>
             </div>
 
+            {/* Enter Building button - only show if 360 tour available */}
+            {virtualTour360Url && (
+              <button
+                onClick={handleEnterBuilding}
+                disabled={isEnteringBuilding}
+                className="w-full py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-xs font-bold transition-all border-t border-slate-700/50 flex items-center justify-center gap-1.5 disabled:opacity-70"
+              >
+                {isEnteringBuilding ? (
+                  <>
+                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Entering...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🚪</span>
+                    <span>{t('property:floorIndicator.enterBuilding', 'Enter')}</span>
+                  </>
+                )}
+              </button>
+            )}
+
             {/* Toggle button */}
             <button
               onClick={() => setShowFloorIndicator(false)}
@@ -935,6 +1001,52 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         )}
       </div>
 
+      {/* 360 Virtual Tour Overlay */}
+      {show360Tour && virtualTour360Url && (
+        <div className="absolute inset-0 z-50 bg-black animate-fadeIn">
+          {/* Close button */}
+          <button
+            onClick={handleClose360Tour}
+            className="absolute top-4 right-4 z-60 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg shadow-lg transition-all border border-white/20"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            {t('property:virtualTour.exit', 'Exit Tour')}
+          </button>
+
+          {/* Floor indicator badge */}
+          <div className="absolute top-4 left-4 z-60 flex items-center gap-2 px-4 py-2 bg-green-500/90 backdrop-blur-sm text-white font-bold rounded-lg shadow-lg">
+            <span>🏢</span>
+            <span>{t('property:virtualTour.floor', 'Floor {{floor}}', { floor: floorNumber })}</span>
+          </div>
+
+          {/* 360 Tour iframe */}
+          <iframe
+            src={virtualTour360Url}
+            className="w-full h-full border-0"
+            allowFullScreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking"
+            title="360 Virtual Tour"
+          />
+
+          {/* Instructions hint */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-60 px-4 py-2 bg-black/60 backdrop-blur-sm text-white text-sm rounded-lg">
+            {t('property:virtualTour.hint', 'Drag to look around • Scroll to zoom')}
+          </div>
+        </div>
+      )}
+
+      {/* Entering building animation overlay */}
+      {isEnteringBuilding && (
+        <div className="absolute inset-0 z-40 bg-gradient-to-b from-transparent via-black/30 to-black/60 pointer-events-none flex items-center justify-center">
+          <div className="text-center animate-pulse">
+            <div className="text-4xl mb-2">🚪</div>
+            <p className="text-white font-bold text-lg">{t('property:virtualTour.entering', 'Entering building...')}</p>
+          </div>
+        </div>
+      )}
+
       {/* Loading indicator */}
       {!mapLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
@@ -958,6 +1070,13 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         @keyframes glowPulse {
           0%, 100% { transform: scale(1); opacity: 0.6; }
           50% { transform: scale(1.4); opacity: 0.3; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out forwards;
         }
         .apartment-3d-marker {
           z-index: 100;

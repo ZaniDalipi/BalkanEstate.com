@@ -121,6 +121,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             floorNumber={property.floorNumber}
             totalFloors={property.totalFloors}
             propertyType={property.propertyType}
+            virtualTour360Url={property.virtualTour360Url}
           />
         </Suspense>
       ) : (
