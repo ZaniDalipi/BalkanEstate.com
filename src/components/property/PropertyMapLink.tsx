@@ -118,6 +118,9 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             bearing={-20}
             zoom={16}
             enableShadowTimelapse={true}
+            floorNumber={property.floorNumber}
+            totalFloors={property.totalFloors}
+            propertyType={property.propertyType}
           />
         </Suspense>
       ) : (

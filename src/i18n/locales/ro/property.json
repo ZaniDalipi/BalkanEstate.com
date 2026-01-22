@@ -324,6 +324,16 @@
     "reset": "Resetare",
     "tip": "Urmăriți cum se mișcă umbrele pentru a înțelege expunerea la lumina soarelui"
   },
+  "floorIndicator": {
+    "title": "Etaj",
+    "ofFloors": "din {{total}} etaje",
+    "hide": "Ascunde",
+    "show": "Arată etajul",
+    "floorLevel": "Etajul {{floor}} din {{total}}",
+    "groundFloor": "Parter",
+    "topFloor": "Ultimul etaj",
+    "middleFloor": "Etaj mijlociu"
+  },
   "guide": {
     "messages": {
       "welcome": "Salut! Sunt Homey, ghidul tău imobiliar. Lasă-mă să îți arăt împrejurimile!",

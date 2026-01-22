@@ -355,6 +355,16 @@
     "reset": "Resetuj",
     "tip": "Gledajte kako se sjenke kreću da biste razumjeli izloženost sunčevoj svjetlosti"
   },
+  "floorIndicator": {
+    "title": "Sprat",
+    "ofFloors": "od {{total}} spratova",
+    "hide": "Sakrij",
+    "show": "Prikaži sprat",
+    "floorLevel": "Sprat {{floor}} od {{total}}",
+    "groundFloor": "Prizemlje",
+    "topFloor": "Posljednji sprat",
+    "middleFloor": "Srednji sprat"
+  },
   "guide": {
     "messages": {
       "welcome": "Hey there! I'm Homey, your property guide. Let me show you around!",

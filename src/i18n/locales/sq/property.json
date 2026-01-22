@@ -328,6 +328,16 @@
     "reset": "Rivendos",
     "tip": "Shikoni si lëvizin hijet për të kuptuar ekspozimin ndaj dritës së diellit"
   },
+  "floorIndicator": {
+    "title": "Kati",
+    "ofFloors": "nga {{total}} kate",
+    "hide": "Fshih",
+    "show": "Shfaq katin",
+    "floorLevel": "Kati {{floor}} nga {{total}}",
+    "groundFloor": "Kati përdhe",
+    "topFloor": "Kati i fundit",
+    "middleFloor": "Kati i mesëm"
+  },
   "guide": {
     "messages": {
       "welcome": "Përshëndetje! Unë jam Homey, udhëzuesi juaj i pronave. Më lejoni t'ju tregoj!",

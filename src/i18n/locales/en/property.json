@@ -356,6 +356,16 @@
     "reset": "Reset",
     "tip": "Watch how shadows move throughout the day to understand sunlight exposure"
   },
+  "floorIndicator": {
+    "title": "Floor",
+    "ofFloors": "of {{total}} floors",
+    "hide": "Hide",
+    "show": "Show Floor",
+    "floorLevel": "Floor {{floor}} of {{total}}",
+    "groundFloor": "Ground Floor",
+    "topFloor": "Top Floor",
+    "middleFloor": "Middle Floor"
+  },
   "guide": {
     "messages": {
       "welcome": "Hey there! I'm Homey, your property guide. Let me show you around!",

@@ -355,6 +355,16 @@
     "reset": "Resetiraj",
     "tip": "Gledajte kako se sjene kreću da biste razumjeli izloženost sunčevoj svjetlosti"
   },
+  "floorIndicator": {
+    "title": "Kat",
+    "ofFloors": "od {{total}} katova",
+    "hide": "Sakrij",
+    "show": "Prikaži kat",
+    "floorLevel": "Kat {{floor}} od {{total}}",
+    "groundFloor": "Prizemlje",
+    "topFloor": "Zadnji kat",
+    "middleFloor": "Srednji kat"
+  },
   "guide": {
     "messages": {
       "welcome": "Pozdrav! Ja sam Homey, vaš vodič za nekretnine. Dozvolite mi da vam pokažem!",

@@ -22,6 +22,10 @@ interface Map3DBuildingsProps {
   height?: string;
   enableShadowTimelapse?: boolean;
   onNavigateToMap?: () => void;
+  // Floor highlighting for apartments
+  floorNumber?: number;
+  totalFloors?: number;
+  propertyType?: 'house' | 'apartment' | 'villa' | 'land' | 'other';
 }
 
 /**
@@ -133,6 +137,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   height = '500px',
   enableShadowTimelapse = true,
   onNavigateToMap,
+  floorNumber,
+  totalFloors,
+  propertyType,
 }) => {
   const { t } = useTranslation(['property']);
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -140,9 +147,159 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [showTimelapse, setShowTimelapse] = useState(false);
   const [is3DMode, setIs3DMode] = useState(true);
+  const [showFloorIndicator, setShowFloorIndicator] = useState(true);
+
+  // Calculate floor visualization data
+  const isApartment = propertyType === 'apartment';
+  const hasFloorInfo = isApartment && floorNumber != null && totalFloors != null && totalFloors > 0;
+  const floorHeightMeters = 3; // Average floor height
+  const buildingHeightMeters = hasFloorInfo ? totalFloors * floorHeightMeters : 0;
+  const floorPositionPercent = hasFloorInfo ? ((floorNumber - 0.5) / totalFloors) * 100 : 0;
 
   // Shadow timelapse hook
   const timelapse = useShadowTimelapse(lat);
+
+  // Add property marker with optional floor indicator
+  const addPropertyMarker = useCallback((
+    mapInstance: maplibregl.Map,
+    latitude: number,
+    longitude: number,
+    floorNum?: number,
+    totalFlrs?: number,
+    propType?: string
+  ) => {
+    const showFloorMarker = propType === 'apartment' && floorNum != null && totalFlrs != null && totalFlrs > 0;
+
+    if (showFloorMarker) {
+      // Create a vertical pole with floor indicator for apartments
+      const markerEl = document.createElement('div');
+      const poleHeight = Math.min(totalFlrs! * 8, 120); // Scale height, max 120px
+      const indicatorPosition = ((floorNum - 0.5) / totalFlrs!) * poleHeight;
+
+      markerEl.innerHTML = `
+        <div style="position: relative; width: 60px; display: flex; flex-direction: column; align-items: center;">
+          <!-- Vertical pole representing building -->
+          <div style="
+            position: relative;
+            width: 8px;
+            height: ${poleHeight}px;
+            background: linear-gradient(180deg, rgba(100,116,139,0.6), rgba(100,116,139,0.9));
+            border-radius: 2px;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+          ">
+            <!-- Floor indicator -->
+            <div style="
+              position: absolute;
+              left: 50%;
+              bottom: ${indicatorPosition}px;
+              transform: translateX(-50%);
+              width: 28px;
+              height: 14px;
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              border-radius: 3px;
+              border: 2px solid white;
+              box-shadow: 0 2px 8px rgba(59,130,246,0.6);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              animation: floorPulse 2s ease-in-out infinite;
+            ">
+              <span style="color: white; font-size: 9px; font-weight: bold;">${floorNum}</span>
+            </div>
+            <!-- Floor label -->
+            <div style="
+              position: absolute;
+              left: 16px;
+              bottom: ${indicatorPosition - 2}px;
+              white-space: nowrap;
+              background: rgba(15,23,42,0.9);
+              padding: 2px 6px;
+              border-radius: 4px;
+              font-size: 10px;
+              color: white;
+              font-weight: 500;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            ">
+              Floor ${floorNum}
+            </div>
+          </div>
+          <!-- Base marker -->
+          <div style="
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            margin-top: -2px;
+          ">
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 6px;
+              height: 6px;
+              background: white;
+              border-radius: 50%;
+            "></div>
+          </div>
+          <!-- Pulse ring -->
+          <div style="
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.3);
+            animation: pulse3d 2s ease-in-out infinite;
+          "></div>
+        </div>
+      `;
+
+      new maplibregl.Marker({ element: markerEl, anchor: 'bottom' })
+        .setLngLat([longitude, latitude])
+        .addTo(mapInstance);
+    } else {
+      // Standard marker for houses/villas/land
+      const markerEl = document.createElement('div');
+      markerEl.innerHTML = `
+        <div style="position: relative; width: 48px; height: 48px;">
+          <div style="
+            position: absolute;
+            inset: 0;
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            animation: pulse3d 2s ease-in-out infinite;
+          "></div>
+          <div style="
+            position: absolute;
+            inset: 8px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+          "></div>
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+          "></div>
+        </div>
+      `;
+
+      new maplibregl.Marker({ element: markerEl, anchor: 'center' })
+        .setLngLat([longitude, latitude])
+        .addTo(mapInstance);
+    }
+  }, []);
 
   // Initialize map with OpenFreeMap style (free, includes 3D buildings)
   useEffect(() => {
@@ -158,9 +315,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       pitch: pitch,
       bearing: bearing,
       maxPitch: 85,
-      antialias: true,
+      antialias: true, // Enable antialiasing for smoother 3D buildings
       attributionControl: false,
-    });
+    } as maplibregl.MapOptions);
 
     map.current = mapInstance;
 
@@ -212,8 +369,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         );
       }
 
-      // Add property marker
-      addPropertyMarker(mapInstance, lat, lng);
+      // Add property marker with floor info
+      addPropertyMarker(mapInstance, lat, lng, floorNumber, totalFloors, propertyType);
 
       // Add attribution
       mapInstance.addControl(
@@ -232,45 +389,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       mapInstance.remove();
       map.current = null;
     };
-  }, [lat, lng, zoom, pitch, bearing]);
-
-  // Add property marker
-  const addPropertyMarker = (mapInstance: maplibregl.Map, latitude: number, longitude: number) => {
-    const markerEl = document.createElement('div');
-    markerEl.innerHTML = `
-      <div style="position: relative; width: 48px; height: 48px;">
-        <div style="
-          position: absolute;
-          inset: 0;
-          background: rgba(59, 130, 246, 0.3);
-          border-radius: 50%;
-          animation: pulse3d 2s ease-in-out infinite;
-        "></div>
-        <div style="
-          position: absolute;
-          inset: 8px;
-          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-          border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-        "></div>
-        <div style="
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 10px;
-          height: 10px;
-          background: white;
-          border-radius: 50%;
-        "></div>
-      </div>
-    `;
-
-    new maplibregl.Marker({ element: markerEl, anchor: 'center' })
-      .setLngLat([longitude, latitude])
-      .addTo(mapInstance);
-  };
+  }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, floorNumber, totalFloors, propertyType]);
 
   // Update building colors based on time
   useEffect(() => {
@@ -371,6 +490,103 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             {address && <p className="text-sm text-slate-300 truncate">{address}</p>}
           </div>
         </div>
+      )}
+
+      {/* Floor Level Indicator - for apartments */}
+      {hasFloorInfo && showFloorIndicator && is3DMode && (
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20">
+          <div className="bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-700/50 overflow-hidden w-20">
+            {/* Header */}
+            <div className="px-2 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-center">
+              <span className="text-xs font-bold text-white uppercase tracking-wide">
+                {t('property:floorIndicator.title', 'Floor')}
+              </span>
+            </div>
+
+            {/* Building visualization */}
+            <div className="relative px-3 py-4">
+              {/* Building outline */}
+              <div className="relative mx-auto w-10 rounded-t-sm overflow-hidden border-2 border-slate-600 bg-slate-800/80" style={{ height: '140px' }}>
+                {/* Floor segments */}
+                {Array.from({ length: totalFloors! }).map((_, i) => {
+                  const floor = totalFloors! - i;
+                  const isCurrentFloor = floor === floorNumber;
+                  return (
+                    <div
+                      key={floor}
+                      className={`absolute left-0 right-0 border-b border-slate-600/50 transition-all duration-500 ${
+                        isCurrentFloor ? 'z-10' : ''
+                      }`}
+                      style={{
+                        height: `${100 / totalFloors!}%`,
+                        top: `${(i / totalFloors!) * 100}%`,
+                        background: isCurrentFloor
+                          ? 'linear-gradient(90deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9))'
+                          : 'transparent',
+                      }}
+                    >
+                      {isCurrentFloor && (
+                        <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-400/30 to-purple-400/30" />
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Floor number labels on the side */}
+                {totalFloors! <= 10 && Array.from({ length: totalFloors! }).map((_, i) => {
+                  const floor = totalFloors! - i;
+                  const isCurrentFloor = floor === floorNumber;
+                  return (
+                    <div
+                      key={`label-${floor}`}
+                      className={`absolute -right-5 text-[9px] font-medium transition-all ${
+                        isCurrentFloor ? 'text-blue-400 font-bold' : 'text-slate-500'
+                      }`}
+                      style={{
+                        top: `${((i + 0.5) / totalFloors!) * 100}%`,
+                        transform: 'translateY(-50%)',
+                      }}
+                    >
+                      {floor}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Ground indicator */}
+              <div className="w-14 h-1 mx-auto bg-slate-600 rounded-b" />
+            </div>
+
+            {/* Floor info */}
+            <div className="px-2 py-2 border-t border-slate-700/50 text-center">
+              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                {floorNumber}
+              </div>
+              <div className="text-[10px] text-slate-400">
+                {t('property:floorIndicator.ofFloors', 'of {{total}} floors', { total: totalFloors })}
+              </div>
+            </div>
+
+            {/* Toggle button */}
+            <button
+              onClick={() => setShowFloorIndicator(false)}
+              className="w-full py-1.5 text-[10px] text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-all border-t border-slate-700/50"
+            >
+              {t('property:floorIndicator.hide', 'Hide')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Collapsed floor indicator button */}
+      {hasFloorInfo && !showFloorIndicator && is3DMode && (
+        <button
+          onClick={() => setShowFloorIndicator(true)}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex items-center gap-2 px-3 py-2 bg-slate-900/90 hover:bg-slate-800 text-white rounded-lg shadow-lg border border-slate-700/50 transition-all"
+        >
+          <span className="text-lg">🏢</span>
+          <span className="text-sm font-medium">{floorNumber}/{totalFloors}</span>
+        </button>
       )}
 
       {/* 2D/3D Toggle - top right, OneGeo style */}
@@ -539,6 +755,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         @keyframes pulse3d {
           0%, 100% { transform: scale(1); opacity: 0.4; }
           50% { transform: scale(1.6); opacity: 0; }
+        }
+        @keyframes floorPulse {
+          0%, 100% { box-shadow: 0 2px 8px rgba(59,130,246,0.6); }
+          50% { box-shadow: 0 2px 16px rgba(59,130,246,0.9), 0 0 20px rgba(139,92,246,0.5); }
         }
       `}</style>
     </div>
