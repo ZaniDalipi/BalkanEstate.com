@@ -314,8 +314,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     floorNum: number,
     totalFlrs: number
   ) => {
-    // Building dimensions in meters (converted to degrees for coordinates)
-    const buildingSizeMeters = 15; // 15m x 15m building footprint
+    // Building dimensions in meters - larger size to match typical apartment buildings
+    const buildingSizeMeters = 28; // 28m x 28m building footprint (realistic apartment building)
     const floorHeightM = 3; // 3m per floor
     const totalHeightM = totalFlrs * floorHeightM;
 
@@ -374,124 +374,122 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       }
     }
 
-    // Add glowing apartment marker on building surface
+    // Add 3D apartment marker on the building face at correct proportional height
     if (floorNum > 0 && floorNum <= totalFlrs) {
-      const apartmentHeight = (floorNum - 0.5) * floorHeightM;
+      // Calculate the floor height as a proportion of total building height
+      // Floor 5 of 10 = (5-0.5)/10 = 45% height (middle of floor 5)
+      const floorCenterHeight = (floorNum - 0.5) * floorHeightM;
+      const markerHeight = 1.5; // Height of the marker box (half a floor)
 
-      // Create glowing marker on one face of the building
-      const markerLng = longitude + lonAdjust * 1.02; // Slightly outside the building face
-      const markerLat = latitude;
+      // Create a small extruded box on the front face of the building as the apartment marker
+      const markerDepth = 2; // meters - how far the marker protrudes
+      const markerWidth = 6; // meters - width of the marker
+      const markerDepthDeg = (markerDepth / 111320);
+      const markerWidthDeg = (markerWidth / 2 / 111320);
+      const markerWidthLonAdj = markerWidthDeg / Math.cos(latitude * Math.PI / 180);
 
-      // Add glowing marker source
-      if (!mapInstance.getSource('apartment-glow')) {
-        mapInstance.addSource('apartment-glow', {
+      // Position the marker on the front (east) face of the building
+      const markerCoords = [
+        [longitude + lonAdjust, latitude - markerWidthLonAdj],
+        [longitude + lonAdjust + markerDepthDeg, latitude - markerWidthLonAdj],
+        [longitude + lonAdjust + markerDepthDeg, latitude + markerWidthLonAdj],
+        [longitude + lonAdjust, latitude + markerWidthLonAdj],
+        [longitude + lonAdjust, latitude - markerWidthLonAdj], // Close polygon
+      ];
+
+      // Add source for apartment marker
+      if (!mapInstance.getSource('apartment-marker-3d')) {
+        mapInstance.addSource('apartment-marker-3d', {
           type: 'geojson',
           data: {
             type: 'Feature',
-            properties: { height: apartmentHeight },
+            properties: {},
             geometry: {
-              type: 'Point',
-              coordinates: [markerLng, markerLat],
+              type: 'Polygon',
+              coordinates: [markerCoords],
             },
           },
         });
       }
 
-      // Add glowing circle layer
-      if (!mapInstance.getLayer('apartment-glow-outer')) {
+      // Add the 3D marker extrusion layer - positioned at correct floor height
+      if (!mapInstance.getLayer('apartment-marker-layer')) {
         mapInstance.addLayer({
-          id: 'apartment-glow-outer',
-          type: 'circle',
-          source: 'apartment-glow',
+          id: 'apartment-marker-layer',
+          type: 'fill-extrusion',
+          source: 'apartment-marker-3d',
           paint: {
-            'circle-radius': 18,
-            'circle-color': '#22c55e',
-            'circle-opacity': 0.3,
-            'circle-blur': 1,
+            'fill-extrusion-color': '#4ade80', // Bright green
+            'fill-extrusion-height': floorCenterHeight + markerHeight,
+            'fill-extrusion-base': floorCenterHeight - markerHeight,
+            'fill-extrusion-opacity': 1,
           },
         });
       }
 
-      if (!mapInstance.getLayer('apartment-glow-inner')) {
-        mapInstance.addLayer({
-          id: 'apartment-glow-inner',
-          type: 'circle',
-          source: 'apartment-glow',
-          paint: {
-            'circle-radius': 8,
-            'circle-color': '#4ade80',
-            'circle-opacity': 0.9,
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#ffffff',
+      // Add glowing outer ring around the marker (also at correct height)
+      const glowRingCoords = [
+        [longitude + lonAdjust - markerDepthDeg * 0.5, latitude - markerWidthLonAdj * 1.5],
+        [longitude + lonAdjust + markerDepthDeg * 1.5, latitude - markerWidthLonAdj * 1.5],
+        [longitude + lonAdjust + markerDepthDeg * 1.5, latitude + markerWidthLonAdj * 1.5],
+        [longitude + lonAdjust - markerDepthDeg * 0.5, latitude + markerWidthLonAdj * 1.5],
+        [longitude + lonAdjust - markerDepthDeg * 0.5, latitude - markerWidthLonAdj * 1.5],
+      ];
+
+      if (!mapInstance.getSource('apartment-glow-3d')) {
+        mapInstance.addSource('apartment-glow-3d', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: [glowRingCoords],
+            },
           },
         });
       }
 
-      // Add 3D marker element for the apartment
-      const glowEl = document.createElement('div');
-      glowEl.className = 'apartment-3d-marker';
-      glowEl.innerHTML = `
+      if (!mapInstance.getLayer('apartment-glow-layer')) {
+        mapInstance.addLayer({
+          id: 'apartment-glow-layer',
+          type: 'fill-extrusion',
+          source: 'apartment-glow-3d',
+          paint: {
+            'fill-extrusion-color': '#22c55e',
+            'fill-extrusion-height': floorCenterHeight + markerHeight * 1.2,
+            'fill-extrusion-base': floorCenterHeight - markerHeight * 1.2,
+            'fill-extrusion-opacity': 0.4,
+          },
+        });
+      }
+
+      // Add HTML label for the floor number positioned near the marker
+      const labelEl = document.createElement('div');
+      labelEl.className = 'apartment-floor-label';
+      labelEl.innerHTML = `
         <div style="
-          position: relative;
-          width: 60px;
-          height: 60px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          background: linear-gradient(135deg, #22c55e, #16a34a);
+          color: white;
+          padding: 6px 12px;
+          border-radius: 16px;
+          font-size: 13px;
+          font-weight: bold;
+          white-space: nowrap;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 20px rgba(34,197,94,0.5);
+          border: 2px solid white;
+          animation: labelPulse 2s ease-in-out infinite;
         ">
-          <!-- Outer glow ring -->
-          <div style="
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(34,197,94,0.4) 0%, transparent 70%);
-            animation: glowPulse 2s ease-in-out infinite;
-          "></div>
-          <!-- Inner glow ring -->
-          <div style="
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(74,222,128,0.6) 0%, transparent 70%);
-            animation: glowPulse 2s ease-in-out infinite 0.3s;
-          "></div>
-          <!-- Center marker -->
-          <div style="
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #22c55e, #4ade80);
-            border: 3px solid white;
-            box-shadow: 0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.4);
-          "></div>
-          <!-- Floor label -->
-          <div style="
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          ">
-            Floor ${floorNum}
-          </div>
+          Floor ${floorNum} / ${totalFlrs}
         </div>
       `;
 
       new maplibregl.Marker({
-        element: glowEl,
-        anchor: 'center',
-        offset: [0, 0]
+        element: labelEl,
+        anchor: 'left',
+        offset: [15, 0]
       })
-        .setLngLat([markerLng, markerLat])
+        .setLngLat([longitude + lonAdjust + markerDepthDeg, latitude])
         .addTo(mapInstance);
     }
   }, []);
@@ -1067,9 +1065,15 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           0%, 100% { box-shadow: 0 2px 8px rgba(59,130,246,0.6); }
           50% { box-shadow: 0 2px 16px rgba(59,130,246,0.9), 0 0 20px rgba(139,92,246,0.5); }
         }
-        @keyframes glowPulse {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.4); opacity: 0.3; }
+        @keyframes labelPulse {
+          0%, 100% {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 20px rgba(34,197,94,0.5);
+            transform: scale(1);
+          }
+          50% {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 30px rgba(34,197,94,0.7);
+            transform: scale(1.02);
+          }
         }
         @keyframes fadeIn {
           from { opacity: 0; }
@@ -1078,7 +1082,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out forwards;
         }
-        .apartment-3d-marker {
+        .apartment-floor-label {
           z-index: 100;
         }
       `}</style>
