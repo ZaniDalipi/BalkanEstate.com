@@ -97,7 +97,7 @@ function invalidateAllProductCaches(queryClient: ReturnType<typeof useQueryClien
 
 /**
  * useUpdateProduct - Mutation hook for updating products
- * Uses server response to update cache for guaranteed consistency
+ * Forces immediate refetch after mutation for guaranteed UI sync
  *
  * Similar to: viewModel.updateProduct(product)
  */
@@ -108,30 +108,26 @@ export function useUpdateProduct() {
     mutationFn: ({ productId, data }: { productId: string; data: Partial<Product> }) =>
       updateProduct(productId, data),
 
-    // Update cache with actual server response for consistency
-    onSuccess: (response, { productId }) => {
-      const updatedProduct = response.product;
-      if (updatedProduct) {
-        queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
-          old?.map((p) => (p._id === productId ? updatedProduct : p))
-        );
-      }
-    },
-
     onError: (error) => {
       console.error('Update product error:', error);
     },
 
-    // Always invalidate and force refetch to ensure all views are updated
-    onSettled: () => {
+    // Force immediate refetch after mutation completes (success or error)
+    onSettled: async () => {
+      // First invalidate all caches
       invalidateAllProductCaches(queryClient);
+      // Then force an immediate refetch of the admin products list
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.products(),
+        type: 'active',
+      });
     },
   });
 }
 
 /**
  * useToggleProductStatus - Toggle product active/inactive
- * Uses server response to update cache instead of optimistic updates
+ * Forces immediate refetch after mutation for guaranteed UI sync
  */
 export function useToggleProductStatus() {
   const queryClient = useQueryClient();
@@ -139,30 +135,26 @@ export function useToggleProductStatus() {
   return useMutation({
     mutationFn: (productId: string) => toggleProductStatus(productId),
 
-    // Update cache with actual server response
-    onSuccess: (response) => {
-      const updatedProduct = response.product;
-      if (updatedProduct) {
-        queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
-          old?.map((p) => (p._id === updatedProduct._id ? updatedProduct : p))
-        );
-      }
-    },
-
     onError: (error) => {
       console.error('Toggle product status error:', error);
     },
 
-    // Always invalidate and force refetch to ensure consistency
-    onSettled: () => {
+    // Force immediate refetch after mutation completes (success or error)
+    onSettled: async () => {
+      // First invalidate all caches
       invalidateAllProductCaches(queryClient);
+      // Then force an immediate refetch of the admin products list
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.products(),
+        type: 'active',
+      });
     },
   });
 }
 
 /**
  * useToggleProductVisibility - Toggle product visibility
- * Uses server response to update cache instead of optimistic updates
+ * Forces immediate refetch after mutation for guaranteed UI sync
  */
 export function useToggleProductVisibility() {
   const queryClient = useQueryClient();
@@ -170,23 +162,19 @@ export function useToggleProductVisibility() {
   return useMutation({
     mutationFn: (productId: string) => toggleProductVisibility(productId),
 
-    // Update cache with actual server response
-    onSuccess: (response) => {
-      const updatedProduct = response.product;
-      if (updatedProduct) {
-        queryClient.setQueryData<Product[]>(adminKeys.products(), (old) =>
-          old?.map((p) => (p._id === updatedProduct._id ? updatedProduct : p))
-        );
-      }
-    },
-
     onError: (error) => {
       console.error('Toggle product visibility error:', error);
     },
 
-    // Always invalidate and force refetch to ensure consistency
-    onSettled: () => {
+    // Force immediate refetch after mutation completes (success or error)
+    onSettled: async () => {
+      // First invalidate all caches
       invalidateAllProductCaches(queryClient);
+      // Then force an immediate refetch of the admin products list
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.products(),
+        type: 'active',
+      });
     },
   });
 }

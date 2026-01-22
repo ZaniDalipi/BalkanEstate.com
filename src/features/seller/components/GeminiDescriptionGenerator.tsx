@@ -9,6 +9,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useAlert } from '@/context/AlertContext';
 import MarketInsightsAnimation from './MarketInsightsAnimation';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
+import FloorInputCombined from '@/src/shared/components/ui/FloorInputCombined';
 import MapLocationPicker from './MapLocationPicker';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import * as api from '@/services/apiService';
@@ -801,10 +802,22 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
         // Floor validation - skip for land
         if (listingData.propertyType !== 'land') {
-            if (listingData.propertyType === 'apartment' && (!listingData.floorNumber || listingData.floorNumber < 1)) {
-                showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
-                setIsSubmitting(false);
-                return;
+            if (listingData.propertyType === 'apartment') {
+                if (!listingData.floorNumber || listingData.floorNumber < 0) {
+                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (!listingData.totalFloors || listingData.totalFloors < 1) {
+                    showError(t('validation:invalidFloorCount'), t('newListing:validation.apartmentTotalFloors'));
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (listingData.floorNumber > listingData.totalFloors) {
+                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.floorExceedsTotal'));
+                    setIsSubmitting(false);
+                    return;
+                }
             }
             if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
                 showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
@@ -1482,7 +1495,13 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                             <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                         </div>
                         {listingData.propertyType === 'apartment' && (
-                            <NumberInputWithSteppers label={t('seller:createListing.fields.floorNumber')} value={listingData.floorNumber} onChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))} min={1} />
+                            <FloorInputCombined
+                                label={t('seller:createListing.fields.floorNumber')}
+                                floorNumber={listingData.floorNumber}
+                                totalFloors={listingData.totalFloors}
+                                onFloorNumberChange={(val) => setListingData(p => ({ ...p, floorNumber: val }))}
+                                onTotalFloorsChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))}
+                            />
                         )}
                         {(listingData.propertyType === 'house' || listingData.propertyType === 'villa') && (
                             <NumberInputWithSteppers label={t('seller:createListing.fields.totalFloors')} value={listingData.totalFloors} min={1} onChange={(val) => setListingData(p => ({ ...p, totalFloors: val }))} />

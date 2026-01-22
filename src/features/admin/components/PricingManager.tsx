@@ -35,6 +35,7 @@ const PricingManager: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newFeature, setNewFeature] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [mutatingProductId, setMutatingProductId] = useState<string | null>(null);
 
   // Derived state for mutation errors
   const mutationError =
@@ -171,22 +172,32 @@ const PricingManager: React.FC = () => {
   };
 
   const handleToggleStatus = async (product: Product) => {
+    setMutatingProductId(product._id);
     try {
-      await toggleStatusMutation.mutateAsync(product._id);
-      setSuccessMessage(`Product ${product.isActive ? 'deactivated' : 'activated'}`);
+      const response = await toggleStatusMutation.mutateAsync(product._id);
+      // Use the response to show accurate message
+      const newStatus = response?.product?.isActive;
+      setSuccessMessage(`Product ${newStatus ? 'activated' : 'deactivated'} successfully`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       console.error('Toggle status error:', err);
+    } finally {
+      setMutatingProductId(null);
     }
   };
 
   const handleToggleVisibility = async (product: Product) => {
+    setMutatingProductId(product._id);
     try {
-      await toggleVisibilityMutation.mutateAsync(product._id);
-      setSuccessMessage(`Product ${product.isVisible ? 'hidden' : 'visible'}`);
+      const response = await toggleVisibilityMutation.mutateAsync(product._id);
+      // Use the response to show accurate message
+      const newVisibility = response?.product?.isVisible;
+      setSuccessMessage(`Product is now ${newVisibility ? 'visible' : 'hidden'}`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       console.error('Toggle visibility error:', err);
+    } finally {
+      setMutatingProductId(null);
     }
   };
 
@@ -339,25 +350,39 @@ const PricingManager: React.FC = () => {
                     <div className="flex flex-col gap-1">
                       <button
                         onClick={() => handleToggleStatus(product)}
-                        disabled={toggleStatusMutation.isPending}
+                        disabled={mutatingProductId === product._id}
                         className={`px-2 py-1 text-xs rounded-full transition-colors ${
                           product.isActive
                             ? 'bg-green-100 text-green-800 hover:bg-green-200'
                             : 'bg-red-100 text-red-800 hover:bg-red-200'
-                        } ${toggleStatusMutation.isPending ? 'opacity-50' : ''}`}
+                        } ${mutatingProductId === product._id ? 'opacity-50 cursor-wait' : ''}`}
                       >
-                        {product.isActive ? 'Active' : 'Inactive'}
+                        {mutatingProductId === product._id ? (
+                          <span className="flex items-center gap-1">
+                            <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            Updating...
+                          </span>
+                        ) : (
+                          product.isActive ? 'Active' : 'Inactive'
+                        )}
                       </button>
                       <button
                         onClick={() => handleToggleVisibility(product)}
-                        disabled={toggleVisibilityMutation.isPending}
+                        disabled={mutatingProductId === product._id}
                         className={`px-2 py-1 text-xs rounded-full transition-colors ${
                           product.isVisible
                             ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        } ${toggleVisibilityMutation.isPending ? 'opacity-50' : ''}`}
+                        } ${mutatingProductId === product._id ? 'opacity-50 cursor-wait' : ''}`}
                       >
-                        {product.isVisible ? 'Visible' : 'Hidden'}
+                        {mutatingProductId === product._id ? (
+                          <span className="flex items-center gap-1">
+                            <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            Updating...
+                          </span>
+                        ) : (
+                          product.isVisible ? 'Visible' : 'Hidden'
+                        )}
                       </button>
                     </div>
                   </td>
