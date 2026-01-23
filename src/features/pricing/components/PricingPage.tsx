@@ -152,7 +152,7 @@ const PricingPage: React.FC = () => {
       try {
         const token = localStorage.getItem('balkan_estate_token');
         console.log('Fetching listings with token:', token ? 'exists' : 'missing');
-        const response = await fetch(`${API_URL}/properties/my-listings`, {
+        const response = await fetch(`${API_URL}/properties/my/listings`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
