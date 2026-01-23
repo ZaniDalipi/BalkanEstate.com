@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
 import Footer from '@/components/shared/Footer';
+import { LiquidGlassSwitch } from '@/components/ui/LiquidGlassSwitch';
 import {
   FloatingSphere,
   GlossyPill,
@@ -488,52 +489,66 @@ const PricingPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Tab Switcher */}
+        {/* Tab Switcher - Liquid Glass Style */}
         <div className="flex justify-center mb-10 sm:mb-14">
-          <div className="bg-gray-100 p-1 sm:p-1.5 rounded-2xl inline-flex shadow-inner flex-wrap justify-center gap-1">
-            <button
-              onClick={() => setActiveTab('seller')}
-              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${
-                activeTab === 'seller'
-                  ? 'bg-white text-gray-900 shadow-lg'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {t('pricing:tabs.forSellers', 'For Sellers')}
-            </button>
-            <button
-              onClick={() => setActiveTab('buyer')}
-              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${
-                activeTab === 'buyer'
-                  ? 'bg-white text-gray-900 shadow-lg'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {t('pricing:tabs.forBuyers', 'For Buyers')}
-            </button>
-            <button
-              onClick={() => setActiveTab('listing')}
-              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
-                activeTab === 'listing'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <span>✨</span>
-              {t('pricing:tabs.listingHighlight', 'Listing Highlight')}
-            </button>
-            <button
-              onClick={() => setActiveTab('agency')}
-              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
-                activeTab === 'agency'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <BuildingOfficeIcon className="w-4 h-4" />
-              {t('pricing:tabs.agencyFeature', 'Agency Feature')}
-            </button>
-          </div>
+          <LiquidGlassSwitch
+            options={[
+              {
+                value: 'seller',
+                label: t('pricing:tabs.forSellers', 'Sellers'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                    <path d="M2 17l10 5 10-5" />
+                    <path d="M2 12l10 5 10-5" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'buyer',
+                label: t('pricing:tabs.forBuyers', 'Buyers'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                    <path d="M11 8v6" />
+                    <path d="M8 11h6" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'listing',
+                label: t('pricing:tabs.listingHighlight', 'Highlight'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                ),
+              },
+              {
+                value: 'agency',
+                label: t('pricing:tabs.agencyFeature', 'Agency'),
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="4" y="2" width="16" height="20" rx="2" />
+                    <path d="M9 22v-4h6v4" />
+                    <path d="M8 6h.01" />
+                    <path d="M16 6h.01" />
+                    <path d="M12 6h.01" />
+                    <path d="M12 10h.01" />
+                    <path d="M12 14h.01" />
+                    <path d="M16 10h.01" />
+                    <path d="M16 14h.01" />
+                    <path d="M8 10h.01" />
+                    <path d="M8 14h.01" />
+                  </svg>
+                ),
+              },
+            ]}
+            value={activeTab}
+            onChange={(val) => setActiveTab(val as 'seller' | 'buyer' | 'listing' | 'agency')}
+            size="lg"
+          />
         </div>
 
         {/* Loading State */}
