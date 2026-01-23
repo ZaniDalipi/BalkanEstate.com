@@ -52,7 +52,6 @@ const SavedSearchesPage = lazy(() => import('./src/features/saved/components/Sav
 const SavedPropertiesPage = lazy(() => import('./src/features/saved/components/SavedHomesPage'));
 const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPage'));
 const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
-const SubscriptionModal = lazy(() => import('./src/features/property-details/components/SubscriptionModal'));
 const AgentsPage = lazy(() => import('./src/features/agents/components/AgentsPage'));
 const AgenciesListPage = lazy(() => import('./components/AgenciesListPage'));
 const AgencyDetailPage = lazy(() => import('./components/AgencyDetailPage'));
@@ -528,7 +527,7 @@ const MainLayout: React.FC = () => {
   const showHeader = !(isMobile && (isSearchPage || !!state.selectedProperty));
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   
-  const anyNonAuthModalOpen = state.isSubscriptionModalOpen || state.isListingLimitWarningOpen || state.isDiscountGameOpen;
+  const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
   
   const isOverlayVisible = 
     state.isAuthModalOpen || 
@@ -583,13 +582,6 @@ const MainLayout: React.FC = () => {
             <DiscountGameModal
                 isOpen={state.isDiscountGameOpen}
                 onGameComplete={handleGameComplete}
-            />
-          )}
-          {state.isSubscriptionModalOpen && (
-            <SubscriptionModal
-                isOpen={state.isSubscriptionModalOpen}
-                onClose={() => dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: false } })}
-                initialEmail={state.subscriptionEmail || undefined}
             />
           )}
           {state.isEnterpriseModalOpen && (

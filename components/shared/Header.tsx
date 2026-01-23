@@ -43,8 +43,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   }, [isAuthenticated, dispatch, getLocalizedPath]);
 
   const handleSubscribeClick = useCallback(() => {
-    dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });
-  }, [dispatch]);
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    window.history.pushState({}, '', getLocalizedPath('/subscribe'));
+  }, [dispatch, getLocalizedPath]);
 
   const AuthButton: React.FC<{ floating?: boolean }> = ({ floating }) => {
     if (isAuthenticated && currentUser) {

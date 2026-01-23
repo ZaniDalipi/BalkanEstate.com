@@ -1262,7 +1262,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 });
                                 return;
                             }
-                            dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true, email: email.trim() } });
+                            // Navigate to pricing page with email saved
+                            dispatch({ type: 'SET_SUBSCRIPTION_EMAIL', payload: email.trim() });
+                            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                            const currentLang = window.location.pathname.split('/')[1] || 'en';
+                            const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+                            const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+                            window.history.pushState({}, '', `/${lang}/subscribe`);
                         }} className="flex gap-1.5">
                             <input
                                 type="email"
