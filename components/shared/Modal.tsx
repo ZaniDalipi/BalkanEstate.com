@@ -55,9 +55,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     ? 'fixed inset-0 sm:relative sm:inset-auto rounded-none sm:rounded-lg max-h-full sm:max-h-[95vh] md:max-h-[90vh]'
     : 'rounded-lg max-h-screen sm:max-h-[95vh] md:max-h-[90vh]';
 
+  // For fullScreenOnMobile: no backdrop on mobile (modal fills screen), blurry backdrop on desktop
+  // For regular modals: blurry backdrop on all screen sizes
   const backdropClasses = fullScreenOnMobile
-    ? 'fixed inset-0 bg-black bg-opacity-50 z-[5000] flex justify-center items-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto'
-    : 'fixed inset-0 bg-black bg-opacity-50 z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto';
+    ? 'fixed inset-0 bg-transparent sm:bg-black/30 sm:backdrop-blur-md z-[5000] flex justify-center items-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto'
+    : 'fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto';
 
   return (
     <div className={backdropClasses} onClick={handleBackdropClick}>
