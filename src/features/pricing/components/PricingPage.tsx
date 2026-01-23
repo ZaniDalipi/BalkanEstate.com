@@ -555,13 +555,15 @@ const PricingPage: React.FC = () => {
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value as 'seller' | 'buyer' | 'listing' | 'agency')}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ease-out transform active:scale-95 ${
                   activeTab === tab.value
-                    ? 'bg-white text-gray-900 shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-gray-900 shadow-md scale-100'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/30'
                 }`}
               >
-                {tab.icon}
+                <span className={`transition-transform duration-300 ${activeTab === tab.value ? 'scale-110' : ''}`}>
+                  {tab.icon}
+                </span>
                 <span>{tab.label}</span>
               </button>
             ))}
