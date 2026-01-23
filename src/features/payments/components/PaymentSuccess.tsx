@@ -6,6 +6,7 @@ import { verifyPayment as verifyPaymentApi, getSubscriptionStatus, type VerifyPa
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
 import { authApiClient } from '@/src/data/api/AuthApiClient';
+import { trackEcommerce, trackEvent } from '@/components/marketing/Analytics';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -116,6 +117,24 @@ const PaymentSuccess: React.FC = () => {
 
       // IMPORTANT: Refresh user data to update subscription status globally
       if (result.paymentStatus === 'paid') {
+        // Track successful payment in Google Analytics
+        trackEcommerce.subscribe(
+          result.subscription?.plan || 'Unknown Plan',
+          result.amountTotal || 0
+        );
+        trackEvent('purchase', {
+          transaction_id: result.orderId,
+          currency: 'EUR',
+          value: result.amountTotal || 0,
+          items: [{
+            item_id: result.subscription?.plan || 'subscription',
+            item_name: result.subscription?.plan || 'Subscription',
+            price: result.amountTotal || 0,
+            quantity: 1,
+          }],
+          payment_provider: result.provider || 'lemonsqueezy',
+        });
+
         try {
           const response = await authApiClient.getCurrentUser();
           if (response && response.user) {

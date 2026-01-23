@@ -7,7 +7,6 @@ import Product from '../models/Product';
 import Agency from '../models/Agency';
 import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
-import logger from '../utils/logger';
 
 const isProduction = process.env.NODE_ENV === 'production';
 

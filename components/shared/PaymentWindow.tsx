@@ -11,6 +11,7 @@ import {
 } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
+import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analytics';
 
 // Country code mapping from language to country code
 const LANGUAGE_TO_COUNTRY: Record<string, string> = {
@@ -263,6 +264,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           throw new Error(data.message || 'Failed to apply free subscription');
         }
 
+        // Track free subscription in Google Analytics
+        trackEcommerce.subscribe(planName, 0);
+        trackEvent('free_subscription_applied', {
+          plan_name: planName,
+          plan_interval: planInterval,
+          discount_code: appliedDiscountCode,
+        });
+
         // Success! Call the success handler with a special ID for free subscriptions
         setShowSuccess(true);
         setTimeout(() => {
@@ -328,6 +337,19 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           planInterval,
           productId: finalProductId,
         }));
+
+        // Track payment initiation in Google Analytics
+        trackEvent('begin_checkout', {
+          currency: 'EUR',
+          value: finalPrice,
+          items: [{
+            item_id: finalProductId,
+            item_name: planName,
+            price: finalPrice,
+            quantity: 1,
+          }],
+          payment_provider: data.provider,
+        });
 
         // Redirect to external payment page (LemonSqueezy)
         window.location.href = data.paymentUrl;
