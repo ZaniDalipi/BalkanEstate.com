@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { CheckCircleIcon, ArrowLeftIcon, LogoIcon, BuildingOfficeIcon, TicketIcon, ClipboardDocumentIcon } from '@/constants';
-import { verifyPayment as verifyPaymentApi, type VerifyPaymentResponse } from '../api/paymentApi';
+import { verifyPayment as verifyPaymentApi, getSubscriptionStatus, type VerifyPaymentResponse } from '../api/paymentApi';
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
+import { authApiClient } from '@/src/data/api/AuthApiClient';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -111,6 +112,18 @@ const PaymentSuccess: React.FC = () => {
       const pendingPayment = sessionStorage.getItem('pending_payment');
       if (pendingPayment) {
         sessionStorage.removeItem('pending_payment');
+      }
+
+      // IMPORTANT: Refresh user data to update subscription status globally
+      if (result.paymentStatus === 'paid') {
+        try {
+          const response = await authApiClient.getCurrentUser();
+          if (response && response.user) {
+            dispatch({ type: 'SET_CURRENT_USER', payload: response.user });
+          }
+        } catch (refreshError) {
+          console.error('Failed to refresh user data:', refreshError);
+        }
       }
 
       // If this was an Enterprise payment and we have pending agency data, create the agency
