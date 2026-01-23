@@ -1,15 +1,13 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
-import { SharePopover } from './SharePopover';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PencilIcon,
-  ShareIcon,
   VideoCameraIcon,
   BuildingOfficeIcon,
   StreetViewIcon,
@@ -51,22 +49,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [activeCategory, setActiveCategory] = useState<PropertyImageTag | 'all'>('all');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [mainImageError, setMainImageError] = useState(false);
-  const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const shareContainerRef = useRef<HTMLDivElement>(null);
-  const streetViewRef = useRef<HTMLIFrameElement>(null);
-
-  // Close share popover on outside click
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (shareContainerRef.current && !shareContainerRef.current.contains(event.target as Node)) {
-        setIsSharePopoverOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, []);
 
   // Combine all images
   const allImages = useMemo(() => {
@@ -187,36 +171,20 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </a>
         )}
 
-        {/* Action Buttons (Annotate, Share, 3D Tour) - Horizontal on mobile, vertical on larger screens */}
+        {/* Action Buttons (Annotate, 3D Tour) - Horizontal on mobile, vertical on larger screens */}
         {viewMode === 'photos' && (
           <>
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-row sm:flex-col items-center sm:items-end gap-1.5 sm:gap-2 z-10">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 z-10">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenEditor(currentImageUrl);
                 }}
-                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 w-9 h-9 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
+                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
               >
-                <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <PencilIcon className="w-5 h-5 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline font-semibold text-sm">{t('actions.annotate')}</span>
               </button>
-
-              <div className="relative flex-shrink-0" ref={shareContainerRef}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsSharePopoverOpen((prev) => !prev);
-                  }}
-                  className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 w-9 h-9 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
-                >
-                  <ShareIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                  <span className="hidden sm:inline font-semibold text-sm">{t('actions.share')}</span>
-                </button>
-                {isSharePopoverOpen && (
-                  <SharePopover property={property} onClose={() => setIsSharePopoverOpen(false)} />
-                )}
-              </div>
 
               {property.tourUrl && (
                 <a
@@ -224,9 +192,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 w-9 h-9 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
+                  className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
                 >
-                  <VideoCameraIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <VideoCameraIcon className="w-5 h-5 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline font-semibold text-sm">{t('actions.tour3d')}</span>
                 </a>
               )}
@@ -241,18 +209,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handlePrevImage();
                   }}
-                  className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0"
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
                 >
-                  <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800 flex-shrink-0" />
+                  <ChevronLeftIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNextImage();
                   }}
-                  className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0"
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
                 >
-                  <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800 flex-shrink-0" />
+                  <ChevronRightIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
                 </button>
 
                 {/* Image Counter - Top left corner, below 360 badge */}

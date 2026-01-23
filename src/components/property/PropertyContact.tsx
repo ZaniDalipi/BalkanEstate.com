@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
-import { PhoneIcon, UserCircleIcon, ShareIcon } from '../../../constants';
+import { PhoneIcon, ShareIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
 import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
 import RentVsBuyCalculator from '@/src/features/calculators/components/RentVsBuyCalculator';
@@ -231,7 +231,11 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all"
               />
             ) : (
-              <UserCircleIcon className="w-12 h-12 text-neutral-300 group-hover:text-blue-400 transition-colors" />
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all shadow-md">
+                <span className="text-white font-bold text-lg">
+                  {property.seller?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '👤'}
+                </span>
+              </div>
             )}
             <div className="flex-1">
               <p className="font-bold text-base text-neutral-900 group-hover:text-blue-600 transition-colors">{property.seller?.name}</p>
@@ -254,7 +258,11 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100"
               />
             ) : (
-              <UserCircleIcon className="w-12 h-12 text-neutral-300" />
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center ring-2 ring-neutral-100 shadow-md">
+                <span className="text-white font-bold text-lg">
+                  {property.seller?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '👤'}
+                </span>
+              </div>
             )}
             <div className="flex-1">
               <p className="font-bold text-base text-neutral-900">{property.seller?.name}</p>

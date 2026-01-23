@@ -455,7 +455,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
       <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Property Details */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10">
             {/* Image Gallery */}
             <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
               <PropertyGallery
@@ -481,8 +481,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
             {/* 360 Virtual Tour */}
             {property.virtualTour360Url && (
-              <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-                <div className="p-4 border-b border-neutral-200 bg-gradient-to-r from-purple-50 to-pink-50">
+              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
+                {/* Glass effects */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+                <div className="relative p-4 border-b border-neutral-200/50 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
                       <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

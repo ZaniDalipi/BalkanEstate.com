@@ -93,10 +93,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
 
   return (
-    <>
+    <div className="space-y-6">
       {/* Price, Address, and Key Stats */}
-      <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-        <div className="p-6">
+      <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
+        {/* Glass highlight */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+        <div className="relative p-6">
           {property.status === 'sold' && (
             <div className="mb-4 p-4 bg-gradient-to-r from-neutral-100 to-neutral-200 border-l-4 border-neutral-600 rounded-lg">
               <div className="flex items-center gap-2">
@@ -175,24 +178,31 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
       </div>
 
       {/* About This Home */}
-      <div className="bg-gradient-to-br from-white to-neutral-50/50 p-6 sm:p-8 rounded-2xl shadow-lg border border-neutral-100">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+      <div className="relative bg-white/70 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
+        {/* Glass effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+        <div className="relative flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">{t('details.about')}</h3>
         </div>
-        <div className="prose prose-neutral max-w-none text-neutral-600 leading-relaxed whitespace-pre-wrap">
+        <div className="relative prose prose-neutral max-w-none text-neutral-600 leading-relaxed whitespace-pre-wrap">
           {property.description}
         </div>
       </div>
 
       {/* Property Details */}
-      <div className="bg-gradient-to-br from-white to-neutral-50/50 p-6 sm:p-8 rounded-2xl shadow-lg border border-neutral-100">
+      <div className="relative bg-white/70 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
+        {/* Glass effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
         {/* Modern section header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="relative flex items-center gap-4 mb-8">
           <div className="relative">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/25">
               <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,7 +218,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
             {property.yearBuilt}
           </DetailItem>
@@ -333,9 +343,13 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         property.distanceToSea !== undefined ||
         property.distanceToSchool !== undefined ||
         property.distanceToHospital !== undefined) && (
-        <div className="bg-gradient-to-br from-white to-neutral-50/50 p-6 sm:p-8 rounded-2xl shadow-lg border border-neutral-100">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+        <div className="relative bg-white/70 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
+          {/* Glass effects */}
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-50/30 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+          <div className="relative flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
@@ -347,7 +361,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
 
           {/* Hashtag-style Amenities */}
           {property.amenities && property.amenities.length > 0 && (
-            <div className="mb-6">
+            <div className="relative mb-6">
               <h4 className="text-md font-semibold text-neutral-700 mb-3">{t('details.propertyAmenities')}</h4>
               <div className="flex flex-wrap gap-2">
                 {property.amenities.map((amenity, index) => (
@@ -370,7 +384,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             property.hasAirConditioning !== undefined ||
             property.hasPool !== undefined ||
             property.petsAllowed !== undefined) && (
-            <div className="mb-6">
+            <div className="relative mb-6">
               <h4 className="text-md font-semibold text-neutral-700 mb-3">{t('details.propertyFeatures')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {property.hasBalcony !== undefined && (
@@ -527,7 +541,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             property.distanceToSea !== undefined ||
             property.distanceToSchool !== undefined ||
             property.distanceToHospital !== undefined) && (
-            <div>
+            <div className="relative">
               <h4 className="text-md font-semibold text-neutral-700 mb-3">
                 {t('details.distanceInfo')}
               </h4>
@@ -581,6 +595,6 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           )}
         </div>
       )}
-    </>
+    </div>
   );
 };
