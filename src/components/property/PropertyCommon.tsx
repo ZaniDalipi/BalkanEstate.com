@@ -35,7 +35,7 @@ export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children })
 
       <div className="flex-1 min-w-0">
         <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">{label}</span>
-        <span className="text-base font-bold text-neutral-900 block truncate">{children}</span>
+        <span className="text-sm sm:text-base font-bold text-neutral-900 block leading-tight">{children}</span>
       </div>
     </div>
   </div>

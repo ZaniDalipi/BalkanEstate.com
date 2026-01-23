@@ -198,7 +198,7 @@ const FeaturedAgencies: React.FC = () => {
         </div>
 
         {/* Agencies grid with staggered entrance */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 justify-items-center">
           {isLoading ? (
             // Loading skeleton
             Array.from({ length: 4 }).map((_, index) => (
