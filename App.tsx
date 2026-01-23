@@ -562,7 +562,7 @@ const MainLayout: React.FC = () => {
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
             </Suspense>
-            <main id="main-content" className={`flex flex-col flex-grow overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
+            <main id="main-content" className={`flex flex-col flex-grow overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
         </div>

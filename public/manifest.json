@@ -94,14 +94,5 @@
     }
   ],
   "related_applications": [],
-  "handle_links": "preferred",
-  "share_target": {
-    "action": "/search",
-    "method": "GET",
-    "params": {
-      "title": "query",
-      "text": "query",
-      "url": "url"
-    }
-  }
+  "handle_links": "preferred"
 }

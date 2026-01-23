@@ -176,30 +176,30 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="absolute top-4 left-4 z-10 flex items-center gap-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-3 py-1.5 rounded-full hover:scale-105 transition-transform shadow-lg"
+            className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full hover:scale-105 transition-transform shadow-lg"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               <path d="M2 12h20" />
             </svg>
-            <span className="text-xs">360°</span>
+            <span className="text-[11px] sm:text-xs">360°</span>
           </a>
         )}
 
-        {/* Action Buttons (Annotate, Share, 3D Tour) */}
+        {/* Action Buttons (Annotate, Share, 3D Tour) - Horizontal on mobile, vertical on larger screens */}
         {viewMode === 'photos' && (
           <>
-            <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-10">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-row sm:flex-col items-center sm:items-end gap-1.5 sm:gap-2 z-10">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenEditor(currentImageUrl);
                 }}
-                className="flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-3 py-2 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 h-10 min-w-[40px]"
+                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 sm:gap-2 sm:px-3 sm:min-w-[40px]"
               >
-                <PencilIcon className="w-5 h-5 flex-shrink-0" />
-                <span className="hidden sm:inline">{t('actions.annotate')}</span>
+                <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden sm:inline font-semibold">{t('actions.annotate')}</span>
               </button>
 
               <div className="relative flex-shrink-0" ref={shareContainerRef}>
@@ -208,10 +208,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     setIsSharePopoverOpen((prev) => !prev);
                   }}
-                  className="flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-3 py-2 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 h-10 min-w-[40px]"
+                  className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 sm:gap-2 sm:px-3 sm:min-w-[40px]"
                 >
-                  <ShareIcon className="w-5 h-5 flex-shrink-0" />
-                  <span className="hidden sm:inline">{t('actions.share')}</span>
+                  <ShareIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <span className="hidden sm:inline font-semibold">{t('actions.share')}</span>
                 </button>
                 {isSharePopoverOpen && (
                   <SharePopover property={property} onClose={() => setIsSharePopoverOpen(false)} />
@@ -224,10 +224,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-3 py-2 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 h-10 min-w-[40px]"
+                  className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 sm:gap-2 sm:px-3 sm:min-w-[40px]"
                 >
-                  <VideoCameraIcon className="w-5 h-5 flex-shrink-0" />
-                  <span className="hidden sm:inline">{t('actions.tour3d')}</span>
+                  <VideoCameraIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <span className="hidden sm:inline font-semibold">{t('actions.tour3d')}</span>
                 </a>
               )}
 
@@ -241,51 +241,26 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handlePrevImage();
                   }}
-                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 flex items-center justify-center flex-shrink-0"
+                  className="absolute left-1.5 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0"
                 >
-                  <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-800 flex-shrink-0" />
+                  <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800 flex-shrink-0" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNextImage();
                   }}
-                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 flex items-center justify-center flex-shrink-0"
+                  className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0"
                 >
-                  <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-800 flex-shrink-0" />
+                  <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-800 flex-shrink-0" />
                 </button>
 
-                {/* Image Indicators - Show max 3 dots with counter */}
-                <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-10">
-                  <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full h-6 flex-shrink-0">
-                    {[0, 1, 2].map((dotIndex) => {
-                      const totalImages = imagesForCurrentCategory.length;
-                      const isActive = dotIndex === Math.min(currentImageIndex, 2) ||
-                        (currentImageIndex >= 2 && dotIndex === 2);
-                      return (
-                        <button
-                          key={dotIndex}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (dotIndex < totalImages) {
-                              setCurrentImageIndex(dotIndex);
-                            }
-                          }}
-                          className={`rounded-full transition-all duration-200 flex-shrink-0 ${
-                            (dotIndex === currentImageIndex || (currentImageIndex > 2 && dotIndex === 2))
-                              ? 'bg-white w-4 h-2'
-                              : 'bg-white/40 w-2 h-2'
-                          }`}
-                          style={{ aspectRatio: dotIndex === currentImageIndex || (currentImageIndex > 2 && dotIndex === 2) ? '2/1' : '1/1' }}
-                          aria-label={`Go to image ${dotIndex + 1}`}
-                        />
-                      );
-                    })}
-                    {imagesForCurrentCategory.length > 3 && (
-                      <span className="text-white text-[10px] font-medium ml-1 whitespace-nowrap flex-shrink-0">
-                        {currentImageIndex + 1}/{imagesForCurrentCategory.length}
-                      </span>
-                    )}
+                {/* Image Counter - Top left corner, below 360 badge */}
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10" style={{ marginTop: property.virtualTour360Url ? '40px' : '0' }}>
+                  <div className="flex items-center bg-black/60 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
+                    <span className="text-white text-[11px] sm:text-xs font-medium whitespace-nowrap">
+                      {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+                    </span>
                   </div>
                 </div>
               </>
@@ -294,11 +269,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         )}
 
         {/* View Mode Toggle (Photos / Street View) - Compact */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
-          <div className="flex items-center gap-0.5 bg-white/90 backdrop-blur-md p-0.5 rounded-full shadow-md">
+        <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
+          <div className="flex items-center gap-0.5 bg-white/95 backdrop-blur-md p-0.5 rounded-full shadow-lg border border-white/50">
             <button
               onClick={() => setViewMode('photos')}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold transition-all ${
                 viewMode === 'photos'
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-neutral-600 hover:bg-neutral-100'
@@ -308,13 +283,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             </button>
             <button
               onClick={() => setViewMode('streetview')}
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${
+              className={`px-2 sm:px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold transition-all flex items-center gap-0.5 sm:gap-1 ${
                 viewMode === 'streetview'
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-neutral-600 hover:bg-neutral-100'
               }`}
             >
-              <StreetViewIcon className="w-3.5 h-3.5" />
+              <StreetViewIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
               <span className="hidden sm:inline">{t('actions.streetView')}</span>
               <span className="sm:hidden">Street</span>
             </button>
