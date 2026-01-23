@@ -465,6 +465,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               />
             </div>
 
+            {/* Photo Thumbnails - Directly under gallery with less spacing */}
+            <div className="animate-slide-up -mt-4 sm:-mt-6 lg:-mt-8" style={{ animationDelay: '50ms' }}>
+              <PropertyPhotos
+                property={property}
+                activeCategory={activeCategory}
+                currentImageIndex={currentImageIndex}
+                onCategorySelect={handleCategorySelect}
+                onImageSelect={setCurrentImageIndex}
+              />
+            </div>
+
             {/* Mobile Only: Property Info (description) shown early */}
             <div className="lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
@@ -529,17 +540,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             {/* Property Info (Desktop only - mobile version shown above) */}
             <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
-            </div>
-
-            {/* Photo Thumbnails */}
-            <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
-              <PropertyPhotos
-                property={property}
-                activeCategory={activeCategory}
-                currentImageIndex={currentImageIndex}
-                onCategorySelect={handleCategorySelect}
-                onImageSelect={setCurrentImageIndex}
-              />
             </div>
 
             {/* Map Link */}

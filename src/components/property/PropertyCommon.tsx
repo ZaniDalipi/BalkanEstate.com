@@ -71,11 +71,16 @@ interface ThumbnailProps {
 export const Thumbnail: React.FC<ThumbnailProps> = ({ src, alt, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-      isActive ? 'border-primary scale-105' : 'border-transparent opacity-70 hover:opacity-100'
+    className={`relative flex-shrink-0 aspect-[4/3] rounded-xl overflow-hidden border-3 transition-all duration-300 ${
+      isActive
+        ? 'border-primary ring-2 ring-primary/30 scale-[1.02] shadow-lg'
+        : 'border-transparent opacity-60 hover:opacity-100 hover:scale-[1.01]'
     }`}
   >
     <img src={src} alt={alt} className="w-full h-full object-cover" />
+    {isActive && (
+      <div className="absolute inset-0 bg-primary/10 pointer-events-none" />
+    )}
   </button>
 );
 
