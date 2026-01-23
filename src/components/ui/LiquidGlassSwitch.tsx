@@ -16,7 +16,7 @@ interface LiquidGlassSwitchProps {
   onChange: (value: string) => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'orb' | 'pill';
+  variant?: 'orb' | 'pill'; // 'orb' shows the blue ball, 'pill' just highlights active with white background
 }
 
 /**
@@ -41,32 +41,32 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
     sm: {
       trackHeight: 40,
       trackPadding: 4,
-      orbSize: 52,
+      orbSize: 48,
       text: 'text-xs',
       iconSize: 'w-3.5 h-3.5',
       gap: 4,
-      optionMinWidth: 70,
-      orbIconSize: 'w-5 h-5',
+      optionMinWidth: 65,
+      orbIconSize: 'w-4 h-4',
     },
     md: {
       trackHeight: 48,
       trackPadding: 5,
-      orbSize: 62,
+      orbSize: 56,
       text: 'text-sm',
       iconSize: 'w-4 h-4',
       gap: 6,
-      optionMinWidth: 85,
-      orbIconSize: 'w-6 h-6',
+      optionMinWidth: 80,
+      orbIconSize: 'w-5 h-5',
     },
     lg: {
       trackHeight: 56,
       trackPadding: 6,
-      orbSize: 72,
+      orbSize: 68,
       text: 'text-base',
       iconSize: 'w-5 h-5',
       gap: 8,
       optionMinWidth: 100,
-      orbIconSize: 'w-7 h-7',
+      orbIconSize: 'w-6 h-6',
     },
   };
 
@@ -79,7 +79,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
   // Calculate option widths based on content
   const optionWidths = options.map(opt => {
     const baseWidth = config.optionMinWidth;
-    return opt.icon ? baseWidth + 16 : baseWidth;
+    return opt.icon ? baseWidth + 20 : baseWidth;
   });
 
   const trackWidth = optionWidths.reduce((a, b) => a + b, 0) + config.trackPadding * 2;
@@ -117,35 +117,28 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
     >
       {/* Track / Pill container */}
       <div
-        className="absolute left-0 right-0 flex items-center rounded-full backdrop-blur-xl"
+        className="absolute left-0 right-0 flex items-center rounded-full bg-gradient-to-b from-neutral-100/98 to-neutral-200/95 backdrop-blur-xl border border-white/40"
         style={{
           height: config.trackHeight,
           top: '50%',
           transform: 'translateY(-50%)',
-          background: `linear-gradient(180deg,
-            rgba(255,255,255,0.85) 0%,
-            rgba(245,247,250,0.9) 50%,
-            rgba(235,238,245,0.95) 100%
-          )`,
           boxShadow: `
-            0 2px 16px rgba(0,0,0,0.1),
-            0 8px 32px rgba(0,0,0,0.06),
-            inset 0 1px 0 rgba(255,255,255,0.8),
-            inset 0 -1px 2px rgba(0,0,0,0.05)
+            0 2px 12px rgba(0,0,0,0.08),
+            0 4px 20px rgba(0,0,0,0.04),
+            inset 0 2px 6px rgba(0,0,0,0.06),
+            inset 0 -2px 4px rgba(255,255,255,0.9)
           `,
-          border: '1px solid rgba(255,255,255,0.6)',
         }}
       >
         {/* Sliding Pill Highlight (for pill variant) */}
         {variant === 'pill' && (
           <div
-            className="absolute rounded-full bg-white transition-all duration-300 ease-out"
+            className="absolute rounded-full bg-white shadow-md transition-all duration-300 ease-out"
             style={{
               height: config.trackHeight - config.trackPadding * 2,
               width: optionWidths[activeIndex],
               left: getPillLeft(),
               top: config.trackPadding,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)',
             }}
           />
         )}
@@ -164,10 +157,10 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
                 onClick={() => onChange(option.value)}
                 className={`
                   relative z-20 flex items-center justify-center font-semibold
-                  transition-all duration-300 ease-out active:scale-95
+                  transition-all duration-300 ease-out
                   ${config.text}
                   ${variant === 'orb'
-                    ? (isActive ? 'text-white opacity-0' : 'text-neutral-600 hover:text-neutral-800')
+                    ? (isActive ? 'text-white' : 'text-neutral-500 hover:text-neutral-600')
                     : (isActive ? 'text-gray-900' : 'text-neutral-500 hover:text-neutral-700')
                   }
                 `}
@@ -178,7 +171,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
               >
                 {option.icon && (
                   <span
-                    className={`flex-shrink-0 ${config.iconSize} transition-all duration-300`}
+                    className={`flex-shrink-0 ${config.iconSize} transition-colors duration-300`}
                     style={{ color: 'inherit' }}
                   >
                     {option.icon}
@@ -191,120 +184,80 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
         </div>
 
         {/* Track inner highlight */}
-        <div
-          className="absolute inset-x-4 top-[1px] h-[1px] pointer-events-none rounded-full"
-          style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
-          }}
-        />
+        <div className="absolute inset-x-3 top-[1px] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none rounded-full" />
       </div>
 
       {/* Sliding Glass Orb - only for orb variant */}
       {variant === 'orb' && (
         <div
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           style={{
             width: config.orbSize,
             height: config.orbSize,
             top: 0,
             left: getOrbLeft(),
             zIndex: 10,
-            transition: 'left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          {/* Glass orb outer glow */}
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: 'radial-gradient(circle at 30% 30%, rgba(120,160,255,0.3) 0%, transparent 70%)',
-              filter: 'blur(8px)',
-              transform: 'scale(1.1)',
-            }}
-          />
-
-          {/* Main glass orb body */}
+          {/* Main orb body with 3D glass effect */}
           <div
             className="absolute inset-0 rounded-full overflow-hidden"
             style={{
               background: `
-                radial-gradient(ellipse 120% 80% at 25% 20%,
-                  rgba(255,255,255,0.5) 0%,
-                  rgba(200,220,255,0.15) 30%,
-                  rgba(100,140,220,0.25) 60%,
-                  rgba(60,100,180,0.4) 100%
+                linear-gradient(145deg,
+                  rgba(99,130,255,0.95) 0%,
+                  rgba(59,130,246,0.98) 50%,
+                  rgba(37,99,235,1) 100%
                 )
               `,
               boxShadow: `
-                0 8px 32px rgba(60,100,180,0.4),
-                0 16px 48px rgba(60,100,180,0.25),
-                inset 0 -8px 24px rgba(60,100,180,0.3),
-                inset 0 4px 8px rgba(255,255,255,0.4)
+                0 6px 24px rgba(59,130,246,0.55),
+                0 12px 40px rgba(59,130,246,0.35),
+                0 2px 8px rgba(0,0,0,0.2),
+                inset 0 2px 4px rgba(255,255,255,0.25),
+                inset 0 -3px 6px rgba(0,0,0,0.15)
               `,
-              backdropFilter: 'blur(8px)',
             }}
           >
-            {/* Primary curved glass reflection - top */}
+            {/* Glass shine - top curved reflection */}
             <div
               className="absolute"
               style={{
-                top: '8%',
-                left: '15%',
-                width: '70%',
-                height: '40%',
+                top: '6%',
+                left: '12%',
+                width: '76%',
+                height: '45%',
                 background: `
                   radial-gradient(ellipse 100% 100% at 50% 0%,
-                    rgba(255,255,255,0.7) 0%,
-                    rgba(255,255,255,0.4) 30%,
-                    rgba(255,255,255,0.1) 60%,
-                    transparent 100%
-                  )
-                `,
-                borderRadius: '50% 50% 45% 45%',
-              }}
-            />
-
-            {/* Secondary reflection - side highlight */}
-            <div
-              className="absolute"
-              style={{
-                top: '20%',
-                left: '5%',
-                width: '25%',
-                height: '35%',
-                background: `
-                  radial-gradient(ellipse at 30% 30%,
-                    rgba(255,255,255,0.3) 0%,
+                    rgba(255,255,255,0.45) 0%,
+                    rgba(255,255,255,0.15) 40%,
                     transparent 70%
                   )
                 `,
-                borderRadius: '50%',
-                transform: 'rotate(-20deg)',
+                borderRadius: '50% 50% 40% 40%',
               }}
             />
 
-            {/* Bottom edge reflection */}
+            {/* Secondary reflection - bottom edge */}
             <div
               className="absolute"
               style={{
-                bottom: '12%',
-                left: '25%',
-                width: '50%',
-                height: '15%',
-                background: 'linear-gradient(0deg, rgba(255,255,255,0.15) 0%, transparent 100%)',
+                bottom: '8%',
+                left: '20%',
+                width: '60%',
+                height: '20%',
+                background: 'linear-gradient(0deg, rgba(255,255,255,0.12) 0%, transparent 100%)',
                 borderRadius: '40% 40% 50% 50%',
               }}
             />
           </div>
 
-          {/* Glass rim / border */}
+          {/* Outer rim highlight */}
           <div
             className="absolute inset-0 rounded-full pointer-events-none"
             style={{
+              border: '1.5px solid rgba(255,255,255,0.25)',
               background: 'transparent',
-              boxShadow: `
-                inset 0 0 0 1.5px rgba(255,255,255,0.4),
-                inset 0 0 0 3px rgba(255,255,255,0.1)
-              `,
             }}
           />
 
@@ -314,21 +267,12 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
               <span
                 className={`${config.orbIconSize} text-white [&>svg]:w-full [&>svg]:h-full`}
                 style={{
-                  filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.8)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                  filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
                 }}
               >
                 {activeOption.icon}
               </span>
             )}
-            {/* Label inside orb */}
-            <span
-              className={`${config.text} font-semibold text-white ml-1.5 whitespace-nowrap`}
-              style={{
-                textShadow: '0 0 12px rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.2)',
-              }}
-            >
-              {activeOption?.label}
-            </span>
           </div>
         </div>
       )}
