@@ -160,7 +160,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
                   transition-all duration-300 ease-out
                   ${config.text}
                   ${variant === 'orb'
-                    ? (isActive ? 'text-white' : 'text-neutral-500 hover:text-neutral-600')
+                    ? (isActive ? 'opacity-0' : 'text-neutral-500 hover:text-neutral-600')
                     : (isActive ? 'text-gray-900' : 'text-neutral-500 hover:text-neutral-700')
                   }
                 `}
@@ -171,7 +171,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
               >
                 {option.icon && (
                   <span
-                    className={`flex-shrink-0 ${config.iconSize} transition-colors duration-300`}
+                    className={`flex-shrink-0 ${config.iconSize} transition-all duration-300`}
                     style={{ color: 'inherit' }}
                   >
                     {option.icon}
