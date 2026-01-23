@@ -127,7 +127,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         ) : (
           <div className={`relative w-full h-full ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
             <iframe
-              ref={streetViewRef}
               src={`https://www.google.com/maps?layer=c&cbll=${property.lat},${property.lng}&cbp=12,0,0,0,0&output=svembed`}
               className="w-full h-full border-0"
               allowFullScreen
