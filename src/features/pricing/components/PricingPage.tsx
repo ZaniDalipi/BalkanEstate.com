@@ -159,10 +159,10 @@ const PricingPage: React.FC = () => {
           // Map the properties to UserListing format
           const listings = (data.properties || []).map((p: any) => ({
             id: p._id || p.id,
-            address: p.address?.street
-              ? `${p.address.street}, ${p.address.city}`
-              : p.title || 'Untitled Property',
-            imageUrl: p.images?.[0]?.url || p.images?.[0] || '/placeholder-property.jpg',
+            address: p.address && p.city
+              ? `${p.address}, ${p.city}`
+              : p.address || p.title || 'Untitled Property',
+            imageUrl: p.imageUrl || p.images?.[0]?.url || p.images?.[0] || '/placeholder-property.jpg',
             price: p.price || 0,
             status: p.status || 'active',
           }));
