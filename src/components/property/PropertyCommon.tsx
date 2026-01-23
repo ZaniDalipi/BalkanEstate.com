@@ -35,7 +35,7 @@ export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children })
         {/* Glass reflection */}
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-transparent to-transparent" />
         <div className="absolute top-0 left-1 right-1 h-[40%] rounded-t-xl bg-gradient-to-b from-white/25 to-transparent" />
-        <div className="relative w-5 h-5">
+        <div className="relative w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
           {icon}
         </div>
       </div>
