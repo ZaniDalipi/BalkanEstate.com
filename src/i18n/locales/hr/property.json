@@ -74,6 +74,7 @@
   },
   "details": {
     "title": "Detalji Nekretnine",
+    "subtitle": "Osnovne specifikacije nekretnine",
     "description": "Opis",
     "about": "O Ovoj Nekretnini",
     "location": "Lokacija",

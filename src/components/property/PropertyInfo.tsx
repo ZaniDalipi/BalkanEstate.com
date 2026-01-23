@@ -204,7 +204,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           </div>
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">{t('details.title')}</h3>
-            <p className="text-sm text-neutral-500 mt-0.5">Essential property specifications</p>
+            <p className="text-sm text-neutral-500 mt-0.5">{t('details.subtitle')}</p>
           </div>
         </div>
 
