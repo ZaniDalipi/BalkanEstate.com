@@ -248,8 +248,12 @@ export async function verifyPaddlePayment(transactionId: string): Promise<Verify
 
 /**
  * Verify a LemonSqueezy payment with polling
+ * Polls up to 15 times with 3-second intervals (45 seconds total)
+ * This gives LemonSqueezy webhooks enough time to process
  */
-export async function verifyLemonSqueezyPayment(maxAttempts = 10): Promise<VerifyPaymentResponse> {
+export async function verifyLemonSqueezyPayment(maxAttempts = 15): Promise<VerifyPaymentResponse> {
+  const pollInterval = 3000; // 3 seconds between attempts
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const response = await apiRequest<VerifyPaymentResponse>(
@@ -264,13 +268,13 @@ export async function verifyLemonSqueezyPayment(maxAttempts = 10): Promise<Verif
 
       // If still processing and not last attempt, wait and retry
       if (response.paymentStatus === 'processing' && attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
         continue;
       }
 
       return { ...response, provider: 'lemonsqueezy' };
     } catch (error: any) {
-      console.error(`[LemonSqueezy] Verify attempt ${attempt} failed:`, error);
+      console.error(`[LemonSqueezy] Verify attempt ${attempt}/${maxAttempts} failed:`, error);
       if (attempt === maxAttempts) {
         return {
           success: false,
@@ -279,7 +283,7 @@ export async function verifyLemonSqueezyPayment(maxAttempts = 10): Promise<Verif
           message: error.message || 'Failed to verify payment',
         };
       }
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
   }
 
