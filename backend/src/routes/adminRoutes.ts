@@ -43,6 +43,15 @@ import {
 } from '../controllers/activityLogController';
 import { triggerDailyReportManually } from '../jobs/dailyActivityReportJob';
 import {
+  getAllSubscriptions,
+  getSubscriptionById,
+  getAllPayments,
+  getPaymentById,
+  getPaymentStats,
+  activateUserSubscription,
+  cancelSubscription,
+} from '../controllers/adminSubscriptionController';
+import {
   getAllContent,
   createContent,
   updateContent,
@@ -99,6 +108,15 @@ router.get('/inquiries/:id', logAdminAction('VIEW_INQUIRY'), getInquiryById);
 router.patch('/inquiries/bulk-status', logAdminAction('BULK_UPDATE_INQUIRIES'), bulkUpdateInquiryStatus);
 router.patch('/inquiries/:id', logAdminAction('UPDATE_INQUIRY'), updateInquiry);
 router.delete('/inquiries/:id', logAdminAction('DELETE_INQUIRY'), deleteInquiry);
+
+// ===== Subscription & Payment Management =====
+router.get('/subscriptions', logAdminAction('VIEW_SUBSCRIPTIONS'), getAllSubscriptions);
+router.get('/subscriptions/:id', logAdminAction('VIEW_SUBSCRIPTION'), getSubscriptionById);
+router.post('/subscriptions/activate', logAdminAction('ACTIVATE_SUBSCRIPTION'), activateUserSubscription);
+router.post('/subscriptions/:id/cancel', logAdminAction('CANCEL_SUBSCRIPTION'), cancelSubscription);
+router.get('/payments/stats', logAdminAction('VIEW_PAYMENT_STATS'), getPaymentStats);
+router.get('/payments', logAdminAction('VIEW_PAYMENTS'), getAllPayments);
+router.get('/payments/:id', logAdminAction('VIEW_PAYMENT'), getPaymentById);
 
 // ===== Test Email Endpoints =====
 // Send test monthly coupon email (Pro user)

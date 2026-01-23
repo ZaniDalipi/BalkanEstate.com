@@ -28,6 +28,9 @@ import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
 import emailService from '../services/emailService';
 import { activityLogger } from '../services/activityLogger';
+import logger from '../utils/logger';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Store processed event IDs to prevent duplicate processing (in production, use Redis)
 const processedEvents = new Set<string>();
@@ -136,7 +139,15 @@ const LEMONSQUEEZY_EVENTS = {
  */
 export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Promise<void> => {
   const requestId = crypto.randomUUID();
-  console.log(`[LemonSqueezy Webhook] Request ${requestId} received`);
+
+  // Only log detailed info in development
+  if (!isProduction) {
+    const timestamp = new Date().toISOString();
+    console.log(`[LemonSqueezy Webhook] ========================================`);
+    console.log(`[LemonSqueezy Webhook] Request ${requestId} received at ${timestamp}`);
+    console.log(`[LemonSqueezy Webhook] IP: ${req.ip}, User-Agent: ${req.headers['user-agent']?.substring(0, 50)}`);
+    console.log(`[LemonSqueezy Webhook] Has signature: ${!!req.headers['x-signature']}`);
+  }
 
   try {
     const signature = req.headers['x-signature'] as string;
@@ -234,9 +245,14 @@ export const handleLemonSqueezyWebhook = async (req: Request, res: Response): Pr
     }
 
     // LemonSqueezy expects a 200 response
+    if (!isProduction) {
+      console.log(`[LemonSqueezy Webhook] ${requestId} - Successfully processed event: ${eventName}`);
+      console.log(`[LemonSqueezy Webhook] ========================================`);
+    }
     res.status(200).json({ received: true });
   } catch (error: any) {
-    console.error('[LemonSqueezy Webhook] Error:', error);
+    // Always log errors
+    logger.error(`[LemonSqueezy Webhook] ${requestId} - Error:`, error.message);
     // Return 200 to prevent retries for unrecoverable errors
     res.status(200).json({ received: true, error: error.message });
   }

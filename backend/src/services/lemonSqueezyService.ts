@@ -199,21 +199,41 @@ class LemonSqueezyService {
 
   /**
    * Verify webhook signature
+   * PRODUCTION: Signature verification is mandatory for security
    */
   public verifyWebhookSignature(payload: string, signature: string): boolean {
+    const isProduction = process.env.NODE_ENV === 'production';
+
     if (!this.webhookSecret) {
-      console.warn('[LemonSqueezy] Webhook secret not configured, skipping verification');
-      return true; // Skip verification if no secret configured
+      if (isProduction) {
+        console.error('[LemonSqueezy] SECURITY: Webhook secret not configured in production - rejecting request');
+        return false;
+      }
+      console.warn('[LemonSqueezy] Webhook secret not configured, skipping verification (dev mode only)');
+      return true; // Skip verification only in development
     }
 
     try {
       const hmac = crypto.createHmac('sha256', this.webhookSecret);
       const digest = hmac.update(payload).digest('hex');
-      return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+      const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+
+      if (!isValid) {
+        console.error('[LemonSqueezy] Webhook signature mismatch');
+      }
+
+      return isValid;
     } catch (error) {
       console.error('[LemonSqueezy] Signature verification failed:', error);
       return false;
     }
+  }
+
+  /**
+   * Check if webhook secret is configured
+   */
+  public hasWebhookSecret(): boolean {
+    return !!this.webhookSecret;
   }
 
   /**

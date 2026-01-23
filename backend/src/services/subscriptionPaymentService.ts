@@ -7,6 +7,9 @@ import Product from '../models/Product';
 import Agency from '../models/Agency';
 import { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } from './emailService';
 import { generateSecureRandomString } from '../utils/secureRandom';
+import logger from '../utils/logger';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 /**
  * Secure Subscription Payment Service
@@ -78,7 +81,7 @@ export async function processSubscriptionPayment(
     }
 
     // 4. Create or update subscription
-    console.log('🔍 Checking for existing subscription...');
+    if (!isProduction) console.log('🔍 Checking for existing subscription...');
     let subscription = await Subscription.findOne({
       userId,
       productId,
@@ -86,7 +89,7 @@ export async function processSubscriptionPayment(
     }).session(session);
 
     if (subscription) {
-      console.log('🔄 Renewing existing subscription:', subscription._id);
+      if (!isProduction) console.log('🔄 Renewing existing subscription:', subscription._id);
       // Renew existing subscription
       subscription.expirationDate = expirationDate;
       subscription.renewalDate = expirationDate;
@@ -94,9 +97,9 @@ export async function processSubscriptionPayment(
       subscription.autoRenewing = true;
       subscription.lastUpdated = new Date();
       await subscription.save({ session });
-      console.log('✅ Subscription renewed successfully');
+      if (!isProduction) console.log('✅ Subscription renewed successfully');
     } else {
-      console.log('➕ Creating new subscription...');
+      if (!isProduction) console.log('➕ Creating new subscription...');
 
       // Generate unique tokens for web subscriptions if not provided (using secure random)
       // This prevents duplicate key errors when multiple users create free subscriptions
@@ -139,11 +142,11 @@ export async function processSubscriptionPayment(
         { session }
       );
       subscription = newSubscription;
-      console.log('✅ New subscription created:', subscription._id);
+      if (!isProduction) console.log('✅ New subscription created:', subscription._id);
     }
 
     // 5. Create payment record
-    console.log('💳 Creating payment record...');
+    if (!isProduction) console.log('💳 Creating payment record...');
 
     // Use the subscription's tokens or generate a unique transaction ID (secure random)
     const paymentTransactionId = subscription.transactionId
@@ -154,6 +157,8 @@ export async function processSubscriptionPayment(
       [
         {
           userId,
+          userEmail: user.email, // Store email for admin lookup
+          userName: user.name, // Store name for admin lookup
           subscriptionId: subscription._id,
           store,
           storeTransactionId: paymentTransactionId,
@@ -168,10 +173,10 @@ export async function processSubscriptionPayment(
       ],
       { session }
     );
-    console.log('✅ Payment record created:', paymentRecord._id);
+    if (!isProduction) console.log('✅ Payment record created:', paymentRecord._id, 'for user:', user.email);
 
     // 6. Update user with subscription info
-    console.log('👤 Updating user subscription info...');
+    if (!isProduction) console.log('👤 Updating user subscription info...');
     user.isSubscribed = true;
     user.subscriptionPlan = productId; // Product ID (e.g., 'buyer_pro_monthly')
     user.subscriptionProductName = product.name; // Human-readable name
@@ -184,7 +189,7 @@ export async function processSubscriptionPayment(
     user.totalPaid = (user.totalPaid || 0) + amount;
     user.subscriptionStatus = 'active';
     await user.save({ session });
-    console.log('✅ User updated with subscription info');
+    if (!isProduction) console.log('✅ User updated with subscription info');
 
     // 7. Create subscription event
     await SubscriptionEvent.create(
@@ -210,7 +215,7 @@ export async function processSubscriptionPayment(
     // Commit the transaction
     await session.commitTransaction();
 
-    console.log(`✅ Payment processed successfully for user ${userId}`);
+    if (!isProduction) console.log(`✅ Payment processed successfully for user ${userId}`);
 
     // After successful subscription, handle Enterprise-specific logic
     // This runs outside the transaction since it's not critical
@@ -220,7 +225,7 @@ export async function processSubscriptionPayment(
     if (isEnterpriseProduct && isNewSubscription) {
       try {
         await generateEnterpriseAgentCoupons(String(userId), user.name || 'Agency Owner', user.email);
-        console.log(`🎟️ Generated agent coupons for Enterprise subscription`);
+        if (!isProduction) console.log(`🎟️ Generated agent coupons for Enterprise subscription`);
       } catch (couponError) {
         // Don't fail the subscription if coupon generation fails
         console.error('⚠️ Error generating Enterprise agent coupons:', couponError);
@@ -476,7 +481,7 @@ async function generateEnterpriseAgentCoupons(
 
   if (!agency) {
     // If no agency exists yet, the coupons will be generated when they create the agency
-    console.log('📋 No agency found yet - coupons will be generated when agency is created');
+    if (!isProduction) console.log('📋 No agency found yet - coupons will be generated when agency is created');
     return;
   }
 
@@ -486,7 +491,7 @@ async function generateEnterpriseAgentCoupons(
   ).length;
 
   if (existingAvailableCoupons >= 5) {
-    console.log('✅ Agency already has 5 available coupons');
+    if (!isProduction) console.log('✅ Agency already has 5 available coupons');
     return;
   }
 
@@ -519,7 +524,7 @@ async function generateEnterpriseAgentCoupons(
 
   await agency.save();
 
-  console.log(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
+  if (!isProduction) console.log(`✅ Generated ${couponsToGenerate} agent coupons for agency ${agency.name}`);
 
   // Send emails with the coupon codes and welcome message
   try {
