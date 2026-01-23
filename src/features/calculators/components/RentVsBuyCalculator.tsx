@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatPrice, getCurrencySymbol } from '@/utils/currency';
-import { ScaleIcon, ChevronDownIcon, ChevronUpIcon, KeyIcon, BuildingOfficeIcon } from '@/constants';
+import { ChevronDownIcon, ChevronUpIcon } from '@/constants';
 import { InfoIcon } from 'lucide-react';
 
 interface RentVsBuyCalculatorProps {
@@ -341,7 +341,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 animate-fade-in">
       <div className="flex items-center gap-2 mb-3">
-        <ScaleIcon className="w-5 h-5 text-primary" />
+        <span className="text-xl">⚖️</span>
         <h3 className="text-base font-bold text-neutral-800">{t('calculators:rentVsBuy.title')}</h3>
       </div>
 
@@ -615,7 +615,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className={`p-2 rounded-lg border ${!isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${!isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <BuildingOfficeIcon className="w-4 h-4"/>
+                    <span>🏢</span>
                     <p className="text-sm">{t('calculators:rentVsBuy.results.rent')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.totalCostToRent')}</p>
@@ -625,7 +625,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 </div>
                 <div className={`p-2 rounded-lg border ${isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <KeyIcon className="w-4 h-4"/>
+                    <span>🏠</span>
                     <p className="text-sm">{t('calculators:rentVsBuy.results.own')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.netCostToOwn')}</p>
