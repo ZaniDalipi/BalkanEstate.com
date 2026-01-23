@@ -607,7 +607,7 @@ export interface PendingSubscription {
     planPrice: number;
     planInterval: 'month' | 'year';
     discountPercent?: number;
-    modalType: 'buyer' | 'seller'; // which modal to open
+    modalType: 'buyer' | 'seller' | 'listing' | 'agency'; // which tab to open
 }
 
 export interface AppState {

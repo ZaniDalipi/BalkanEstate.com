@@ -246,7 +246,6 @@ const PricingPage: React.FC = () => {
     return (
       user.availableRoles?.includes(UserRole.AGENT) ||
       user.role === UserRole.AGENT ||
-      user.role === 'agent' ||
       !!user.agentId ||
       !!user.licenseNumber
     );
@@ -266,8 +265,7 @@ const PricingPage: React.FC = () => {
     const isEnterpriseTier =
       user.subscription?.tier === 'agency_owner' ||
       user.subscriptionPlan?.toLowerCase().includes('enterprise') ||
-      user.subscriptionPlan?.toLowerCase().includes('agency') ||
-      user.isEnterpriseTier;
+      user.subscriptionPlan?.toLowerCase().includes('agency');
 
     const isActiveSubscription =
       user.subscriptionStatus === 'active' ||
