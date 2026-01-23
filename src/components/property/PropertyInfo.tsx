@@ -175,27 +175,40 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
       </div>
 
       {/* About This Home */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
-        <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4">{t('details.about')}</h3>
-        <div className="prose prose-sm max-w-none text-neutral-700 whitespace-pre-wrap">
+      <div className="bg-gradient-to-br from-white to-neutral-50/50 p-6 sm:p-8 rounded-2xl shadow-lg border border-neutral-100">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">{t('details.about')}</h3>
+        </div>
+        <div className="prose prose-neutral max-w-none text-neutral-600 leading-relaxed whitespace-pre-wrap">
           {property.description}
         </div>
       </div>
 
       {/* Property Details */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+      <div className="bg-gradient-to-br from-white to-neutral-50/50 p-6 sm:p-8 rounded-2xl shadow-lg border border-neutral-100">
+        {/* Modern section header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/25">
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            {/* Decorative ring */}
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-transparent -z-10 blur-sm" />
           </div>
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-neutral-800">{t('details.title')}</h3>
-            <p className="text-xs text-neutral-500">Key information about this property</p>
+            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">{t('details.title')}</h3>
+            <p className="text-sm text-neutral-500 mt-0.5">Essential property specifications</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
             {property.yearBuilt}
           </DetailItem>
@@ -320,10 +333,17 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         property.distanceToSea !== undefined ||
         property.distanceToSchool !== undefined ||
         property.distanceToHospital !== undefined) && (
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
-          <h3 className="text-lg sm:text-xl font-bold text-neutral-800 mb-6">
-            {t('details.amenitiesFeatures')}
-          </h3>
+        <div className="bg-gradient-to-br from-white to-neutral-50/50 p-6 sm:p-8 rounded-2xl shadow-lg border border-neutral-100">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">
+              {t('details.amenitiesFeatures')}
+            </h3>
+          </div>
 
           {/* Hashtag-style Amenities */}
           {property.amenities && property.amenities.length > 0 && (

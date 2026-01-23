@@ -21,13 +21,22 @@ interface DetailItemProps {
  * ```
  */
 export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children }) => (
-  <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-neutral-50 to-neutral-100/50 border border-neutral-200/60 hover:border-primary/30 hover:shadow-sm transition-all duration-200">
-    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-primary">
-      {icon}
-    </div>
-    <div className="flex-1 min-w-0">
-      <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wide block">{label}</span>
-      <span className="text-sm font-bold text-neutral-800 block truncate">{children}</span>
+  <div className="group relative overflow-hidden rounded-2xl bg-white border border-neutral-100 hover:border-primary/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+    {/* Subtle gradient background on hover */}
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+    <div className="relative p-4 flex items-center gap-4">
+      {/* Modern icon container with gradient */}
+      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+        <div className="w-6 h-6">
+          {icon}
+        </div>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">{label}</span>
+        <span className="text-base font-bold text-neutral-900 block truncate">{children}</span>
+      </div>
     </div>
   </div>
 );
