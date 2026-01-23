@@ -293,7 +293,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         }
       }
 
-      // Create unified payment session with backend (routes to Stripe or Paddle based on country)
+      // Create unified payment session with backend (routes to LemonSqueezy)
       const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
         headers: {
@@ -329,7 +329,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           productId: finalProductId,
         }));
 
-        // Redirect to external payment page (Stripe or Paddle)
+        // Redirect to external payment page (LemonSqueezy)
         window.location.href = data.paymentUrl;
       } else {
         throw new Error('No payment URL received');
@@ -603,14 +603,14 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <div className="flex-1">
                   <p className="text-xs sm:text-sm font-semibold text-blue-900 mb-0.5 sm:mb-1">Secure External Payment</p>
                   <p className="text-[10px] sm:text-xs text-blue-700 leading-relaxed">
-                    You'll be redirected to our secure payment partner (Paddle) to complete your purchase.
+                    You'll be redirected to our secure payment partner (LemonSqueezy) to complete your purchase.
                     We never store your card details - they're handled entirely by our certified payment processor.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Terms Acceptance Checkbox - Required by Paddle */}
+            {/* Terms Acceptance Checkbox - Required by LemonSqueezy */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
               <label className="flex items-start gap-3 cursor-pointer group">
                 <div className="relative flex-shrink-0 mt-0.5">
@@ -636,7 +636,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     {t('payment:termsAcceptance.refund', 'Refund Policy')}
                   </a>
                   {'. '}
-                  {t('payment:termsAcceptance.paddle', 'Payments are processed by Paddle.com as Merchant of Record.')}
+                  {t('payment:termsAcceptance.lemonsqueezy', 'Payments are processed by LemonSqueezy as Merchant of Record.')}
                 </span>
               </label>
             </div>
