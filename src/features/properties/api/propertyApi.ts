@@ -193,21 +193,6 @@ export const getProperty = async (id: string): Promise<Property> => {
   return transformBackendProperty(response.property);
 };
 
-export const getPropertiesBySellerId = async (sellerId: string): Promise<Property[]> => {
-  // Fetch both active and sold properties for the seller
-  const [activeResponse, soldResponse] = await Promise.all([
-    apiRequest<{ properties: any[]; pagination: any }>(`/properties?sellerId=${sellerId}&status=active&limit=1000`),
-    apiRequest<{ properties: any[]; pagination: any }>(`/properties?sellerId=${sellerId}&status=sold&limit=1000`),
-  ]);
-
-  const allProperties = [
-    ...activeResponse.properties,
-    ...soldResponse.properties,
-  ];
-
-  return allProperties.map(transformBackendProperty);
-};
-
 export const createProperty = async (
   propertyData: Property
 ): Promise<{ property: Property; updatedSubscription?: any }> => {
