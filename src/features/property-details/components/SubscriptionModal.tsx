@@ -446,7 +446,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="2xl" title={t('modals:subscription.title')}>
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl" title={t('modals:subscription.title')} fullScreenOnMobile>
           {/* Tabs - Compact on mobile */}
           <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-xs sm:max-w-md mx-auto mb-4 sm:mb-6">
               <button
