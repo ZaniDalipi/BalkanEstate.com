@@ -17,6 +17,11 @@ interface PropertyGalleryProps {
   property: Property;
   onOpenEditor: (imageUrl: string) => void;
   onOpenViewer: () => void;
+  // Controlled mode props
+  activeCategory?: PropertyImageTag | 'all';
+  currentImageIndex?: number;
+  onCategoryChange?: (category: PropertyImageTag | 'all') => void;
+  onImageIndexChange?: (index: number) => void;
 }
 
 /**
@@ -44,10 +49,44 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
   onOpenEditor,
   onOpenViewer,
+  activeCategory: controlledCategory,
+  currentImageIndex: controlledIndex,
+  onCategoryChange,
+  onImageIndexChange,
 }) => {
   const { t } = useTranslation(['property']);
-  const [activeCategory, setActiveCategory] = useState<PropertyImageTag | 'all'>('all');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Internal state for uncontrolled mode
+  const [internalCategory, setInternalCategory] = useState<PropertyImageTag | 'all'>('all');
+  const [internalIndex, setInternalIndex] = useState(0);
+
+  // Use controlled values if provided, otherwise use internal state
+  const activeCategory = controlledCategory ?? internalCategory;
+  const currentImageIndex = controlledIndex ?? internalIndex;
+
+  // Update handlers that work in both modes
+  const setActiveCategory = useCallback((category: PropertyImageTag | 'all') => {
+    if (onCategoryChange) {
+      onCategoryChange(category);
+    } else {
+      setInternalCategory(category);
+    }
+  }, [onCategoryChange]);
+
+  const setCurrentImageIndex = useCallback((index: number | ((prev: number) => number)) => {
+    if (onImageIndexChange) {
+      if (typeof index === 'function') {
+        // For function updates, we need the current value
+        const newIndex = index(controlledIndex ?? internalIndex);
+        onImageIndexChange(newIndex);
+      } else {
+        onImageIndexChange(index);
+      }
+    } else {
+      setInternalIndex(index as number);
+    }
+  }, [onImageIndexChange, controlledIndex, internalIndex]);
+
   const [mainImageError, setMainImageError] = useState(false);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -89,18 +128,48 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
-    setCurrentImageIndex(0);
-  }, []);
+    if (onImageIndexChange) {
+      onImageIndexChange(0);
+    } else {
+      setInternalIndex(0);
+    }
+  }, [setActiveCategory, onImageIndexChange]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex((prev) => (prev + 1) % imagesForCurrentCategory.length);
-  }, [imagesForCurrentCategory.length]);
+    const newIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
+    if (onImageIndexChange) {
+      onImageIndexChange(newIndex);
+    } else {
+      setInternalIndex(newIndex);
+    }
+  }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex(
-      (prev) => (prev - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length
-    );
-  }, [imagesForCurrentCategory.length]);
+    const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
+    if (onImageIndexChange) {
+      onImageIndexChange(newIndex);
+    } else {
+      setInternalIndex(newIndex);
+    }
+  }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
+
+  // Get category label for display
+  const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
+    const emojiMap: Record<string, string> = {
+      all: '📷',
+      exterior: '🏠',
+      interior: '🛋️',
+      bedroom: '🛏️',
+      bathroom: '🚿',
+      kitchen: '🍳',
+      living_room: '🛋️',
+      garden: '🌳',
+      pool: '🏊',
+      view: '🌅',
+      other: '📸',
+    };
+    return emojiMap[category] || '📷';
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -222,8 +291,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   <ChevronRightIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
                 </button>
 
-                {/* Image Counter - Top left corner, below 360 badge */}
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10" style={{ marginTop: property.virtualTour360Url ? '40px' : '0' }}>
+                {/* Image Counter & Category Badge - Top left corner */}
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5" style={{ marginTop: property.virtualTour360Url ? '40px' : '0' }}>
+                  {/* Category Badge - Shows when not viewing 'all' */}
+                  {activeCategory !== 'all' && (
+                    <div className="flex items-center gap-1.5 bg-primary/90 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg animate-fade-in">
+                      <span className="text-sm">{getCategoryEmoji(activeCategory)}</span>
+                      <span className="text-white text-[11px] sm:text-xs font-semibold capitalize">
+                        {t(`photos.categories.${activeCategory}`, { defaultValue: activeCategory.replace('_', ' ') })}
+                      </span>
+                    </div>
+                  )}
+                  {/* Image Counter */}
                   <div className="flex items-center bg-black/60 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
                     <span className="text-white text-[11px] sm:text-xs font-medium whitespace-nowrap">
                       {currentImageIndex + 1} / {imagesForCurrentCategory.length}

@@ -88,31 +88,48 @@ const AdvancedInput: React.FC<{
   };
 
   return (
-    <div className="flex justify-between items-center text-xs">
-      <div className="flex items-center gap-1">
-        <label htmlFor={id} className="text-neutral-600 font-medium">{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-1.5">
+        <label htmlFor={id} className="text-[11px] text-neutral-600 font-medium leading-tight">{label}</label>
         {tooltip && <Tooltip content={tooltip} />}
       </div>
-      <div className="relative w-28">
-        <input 
+      <div className="relative">
+        <input
           type="number"
           id={id}
           step="0.1"
           placeholder={placeholder}
           value={value}
-          onChange={e => handleChange(e.target.value)} 
-          className={`w-full text-xs font-semibold bg-neutral-100 border rounded-md p-1.5 text-right pr-7 focus:ring-1 focus:ring-primary focus:border-primary text-neutral-900 ${
-            error ? 'border-red-300' : 'border-neutral-200'
+          onChange={e => handleChange(e.target.value)}
+          className={`w-full text-sm font-semibold bg-neutral-50 border rounded-lg p-2.5 text-right pr-12 focus:ring-2 focus:ring-primary/20 focus:border-primary text-neutral-900 transition-all ${
+            error ? 'border-red-300 bg-red-50' : 'border-neutral-200'
           }`}
         />
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-500 font-medium pointer-events-none">{unit}</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 font-medium pointer-events-none">{unit}</span>
         {error && (
-          <div className="absolute -bottom-5 right-0 text-red-500 text-[10px]">{error}</div>
+          <div className="text-red-500 text-[10px] mt-1">{error}</div>
         )}
       </div>
     </div>
   );
 };
+
+// Group header component for advanced settings
+const SettingsGroup: React.FC<{
+  icon: string;
+  title: string;
+  children: React.ReactNode;
+}> = ({ icon, title, children }) => (
+  <div className="space-y-3">
+    <div className="flex items-center gap-2 pb-1 border-b border-neutral-100">
+      <span className="text-sm">{icon}</span>
+      <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wide">{title}</h4>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {children}
+    </div>
+  </div>
+);
 
 const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice, country }) => {
   const { t } = useTranslation(['calculators']);
@@ -472,117 +489,142 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
           </button>
           
           {showAdvanced && (
-            <div className="mt-3 space-y-3 pt-3 border-t animate-fade-in">
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.downPayment')}
-                value={downPaymentPercent}
-                onChange={setDownPaymentPercent}
-                placeholder="e.g., 20"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.downPayment')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.interestRate')}
-                value={interestRate}
-                onChange={setInterestRate}
-                placeholder="e.g., 3.5"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.interestRate')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.loanTerm')}
-                value={loanTerm}
-                onChange={setLoanTerm}
-                placeholder="e.g., 30"
-                unit={t('calculators:mortgage.fields.yrs')}
-                validate={validatePositive}
-                tooltip={t('calculators:rentVsBuy.tooltips.loanTerm')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.propertyTaxes')}
-                value={propertyTaxes}
-                onChange={setPropertyTaxes}
-                placeholder="e.g., 1.2"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.propertyTaxes')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.homeInsurance')}
-                value={homeInsurance}
-                onChange={setHomeInsurance}
-                placeholder="e.g., 0.4"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.homeInsurance')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.maintenance')}
-                value={maintenance}
-                onChange={setMaintenance}
-                placeholder="e.g., 1.0"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.maintenance')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.homeAppreciation')}
-                value={homeAppreciation}
-                onChange={setHomeAppreciation}
-                placeholder="e.g., 3.0"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.homeAppreciation')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.rentIncrease')}
-                value={rentIncrease}
-                onChange={setRentIncrease}
-                placeholder="e.g., 2.5"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.rentIncrease')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.closingCosts')}
-                value={closingCostsPercent}
-                onChange={setClosingCostsPercent}
-                placeholder="e.g., 3.0"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.closingCosts')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.sellingCosts')}
-                value={sellingCostsPercent}
-                onChange={setSellingCostsPercent}
-                placeholder="e.g., 6.0"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.sellingCosts')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.investmentReturn')}
-                value={investmentReturnPercent}
-                onChange={setInvestmentReturnPercent}
-                placeholder="e.g., 7.0"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.investmentReturn')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
+            <div className="mt-4 space-y-5 pt-4 border-t border-neutral-200 animate-fade-in">
+              {/* Loan Settings */}
+              <SettingsGroup icon="🏦" title={t('calculators:rentVsBuy.groups.loanSettings')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.downPayment')}
+                  value={downPaymentPercent}
+                  onChange={setDownPaymentPercent}
+                  placeholder="20"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.downPayment')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.interestRate')}
+                  value={interestRate}
+                  onChange={setInterestRate}
+                  placeholder="3.5"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.interestRate')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <div className="sm:col-span-2">
+                  <AdvancedInput
+                    label={t('calculators:rentVsBuy.advanced.loanTerm')}
+                    value={loanTerm}
+                    onChange={setLoanTerm}
+                    placeholder="30"
+                    unit={t('calculators:mortgage.fields.yrs')}
+                    validate={validatePositive}
+                    tooltip={t('calculators:rentVsBuy.tooltips.loanTerm')}
+                    invalidValueText={t('calculators:common.invalidValue')}
+                  />
+                </div>
+              </SettingsGroup>
+
+              {/* Property Costs */}
+              <SettingsGroup icon="🏠" title={t('calculators:rentVsBuy.groups.propertyCosts')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.propertyTaxes')}
+                  value={propertyTaxes}
+                  onChange={setPropertyTaxes}
+                  placeholder="1.2"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.propertyTaxes')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.homeInsurance')}
+                  value={homeInsurance}
+                  onChange={setHomeInsurance}
+                  placeholder="0.4"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.homeInsurance')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <div className="sm:col-span-2">
+                  <AdvancedInput
+                    label={t('calculators:rentVsBuy.advanced.maintenance')}
+                    value={maintenance}
+                    onChange={setMaintenance}
+                    placeholder="1.0"
+                    unit="%/yr"
+                    validate={validatePercentage}
+                    tooltip={t('calculators:rentVsBuy.tooltips.maintenance')}
+                    invalidValueText={t('calculators:common.invalidValue')}
+                  />
+                </div>
+              </SettingsGroup>
+
+              {/* Market Assumptions */}
+              <SettingsGroup icon="📈" title={t('calculators:rentVsBuy.groups.marketAssumptions')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.homeAppreciation')}
+                  value={homeAppreciation}
+                  onChange={setHomeAppreciation}
+                  placeholder="3.0"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.homeAppreciation')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.rentIncrease')}
+                  value={rentIncrease}
+                  onChange={setRentIncrease}
+                  placeholder="2.5"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.rentIncrease')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+              </SettingsGroup>
+
+              {/* Transaction Costs */}
+              <SettingsGroup icon="💰" title={t('calculators:rentVsBuy.groups.transactionCosts')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.closingCosts')}
+                  value={closingCostsPercent}
+                  onChange={setClosingCostsPercent}
+                  placeholder="3.0"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.closingCosts')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.sellingCosts')}
+                  value={sellingCostsPercent}
+                  onChange={setSellingCostsPercent}
+                  placeholder="6.0"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.sellingCosts')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+              </SettingsGroup>
+
+              {/* Investment */}
+              <SettingsGroup icon="📊" title={t('calculators:rentVsBuy.groups.investment')}>
+                <div className="sm:col-span-2">
+                  <AdvancedInput
+                    label={t('calculators:rentVsBuy.advanced.investmentReturn')}
+                    value={investmentReturnPercent}
+                    onChange={setInvestmentReturnPercent}
+                    placeholder="7.0"
+                    unit="%/yr"
+                    validate={validatePercentage}
+                    tooltip={t('calculators:rentVsBuy.tooltips.investmentReturn')}
+                    invalidValueText={t('calculators:common.invalidValue')}
+                  />
+                </div>
+              </SettingsGroup>
             </div>
           )}
         </div>

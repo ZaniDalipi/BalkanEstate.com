@@ -86,6 +86,13 @@
       "sellingCosts": "Kostot e Shitjes",
       "investmentReturn": "Kthimi i Investimit"
     },
+    "groups": {
+      "loanSettings": "Kredia",
+      "propertyCosts": "Kostot e Pronës",
+      "marketAssumptions": "Tregu",
+      "transactionCosts": "Transaksioni",
+      "investment": "Investimi"
+    },
     "tooltips": {
       "downPayment": "Përqindja e çmimit të shtëpisë e paguar paraprakisht",
       "interestRate": "Norma vjetore e interesit të kredisë",

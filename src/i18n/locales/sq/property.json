@@ -271,6 +271,9 @@
   "photos": {
     "title": "Foto",
     "all": "Të Gjitha",
+    "images": "foto",
+    "view": "Shiko",
+    "tapToView": "Prekni për të parë në galeri",
     "categories": {
       "exterior": "Jashtë",
       "interior": "Brenda",

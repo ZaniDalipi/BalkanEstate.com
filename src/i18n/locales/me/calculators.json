@@ -103,6 +103,13 @@
       "sellingCosts": "Selling Costs",
       "investmentReturn": "Investment Return"
     },
+    "groups": {
+      "loanSettings": "Kredit",
+      "propertyCosts": "Troškovi",
+      "marketAssumptions": "Tržište",
+      "transactionCosts": "Transakcija",
+      "investment": "Investicija"
+    },
     "tooltips": {
       "downPayment": "Percentage of home price paid upfront",
       "interestRate": "Annual mortgage interest rate",

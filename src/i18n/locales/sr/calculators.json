@@ -103,6 +103,13 @@
       "sellingCosts": "Трошкови Продаје",
       "investmentReturn": "Принос Инвестиције"
     },
+    "groups": {
+      "loanSettings": "Кредит",
+      "propertyCosts": "Трошкови",
+      "marketAssumptions": "Тржиште",
+      "transactionCosts": "Трансакција",
+      "investment": "Инвестиција"
+    },
     "tooltips": {
       "downPayment": "Проценат цене некретнине плаћен унапред",
       "interestRate": "Годишња каматна стопа кредита",

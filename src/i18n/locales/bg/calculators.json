@@ -81,6 +81,13 @@
       "sellingCosts": "Такси при продажбата",
       "investmentReturn": "Възвращаемост на инвестицията"
     },
+    "groups": {
+      "loanSettings": "Кредит",
+      "propertyCosts": "Разходи",
+      "marketAssumptions": "Пазар",
+      "transactionCosts": "Транзакция",
+      "investment": "Инвестиция"
+    },
     "tooltips": {
       "downPayment": "Процент от цената на дома, платен предварително",
       "interestRate": "Годишен ипотечен лихвен процент",

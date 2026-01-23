@@ -193,9 +193,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   };
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
-    window.scrollTo(0, 0);
+    // Smoothly scroll to top to show the gallery
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setActiveCategory(tag);
     setCurrentImageIndex(0);
+  }, []);
+
+  // Handler for image selection from thumbnails - scroll to gallery
+  const handleImageSelect = useCallback((index: number) => {
+    setCurrentImageIndex(index);
+    // Smoothly scroll to show the main gallery
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleShare = async () => {
@@ -462,6 +470,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                 property={property}
                 onOpenEditor={(url) => setIsEditorOpen(true)}
                 onOpenViewer={() => setIsViewerOpen(true)}
+                activeCategory={activeCategory}
+                currentImageIndex={currentImageIndex}
+                onCategoryChange={handleCategorySelect}
+                onImageIndexChange={setCurrentImageIndex}
               />
             </div>
 
@@ -472,7 +484,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                 activeCategory={activeCategory}
                 currentImageIndex={currentImageIndex}
                 onCategorySelect={handleCategorySelect}
-                onImageSelect={setCurrentImageIndex}
+                onImageSelect={handleImageSelect}
               />
             </div>
 

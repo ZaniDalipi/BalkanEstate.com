@@ -299,6 +299,9 @@
   "photos": {
     "title": "Photos",
     "all": "All",
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery",
     "categories": {
       "exterior": "Exterior",
       "interior": "Interior",
