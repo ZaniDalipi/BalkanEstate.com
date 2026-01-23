@@ -168,7 +168,7 @@ async function handleTransactionCompleted(data: any): Promise<void> {
     const result = await processSubscriptionPayment({
       userId,
       productId: product.productId,
-      store: 'paddle',
+      store: 'lemonsqueezy', // Legacy: was 'paddle', migrated to lemonsqueezy
       amount,
       currency: data.currency_code || 'EUR',
       transactionId: data.id,
@@ -288,7 +288,7 @@ async function handleSubscriptionCanceled(data: any): Promise<void> {
             subscriptionId: subscription._id,
             userId: user._id,
             eventType: 'subscription_canceled',
-            store: 'paddle',
+            store: 'lemonsqueezy', // Legacy: was 'paddle', migrated to lemonsqueezy
             metadata: {
               paddleSubscriptionId: data.id,
               canceledAt: new Date(),
@@ -460,7 +460,7 @@ async function handleRefund(data: any): Promise<void> {
     // Try to find the payment record
     const paymentRecord = await PaymentRecord.findOne({
       storeTransactionId: transactionId,
-      store: 'paddle',
+      store: 'lemonsqueezy', // Legacy: was 'paddle', migrated to lemonsqueezy
     });
 
     if (!paymentRecord) {
@@ -503,7 +503,7 @@ async function handleRefund(data: any): Promise<void> {
           subscriptionId: subscription._id,
           userId: user._id,
           eventType: 'subscription_refunded',
-          store: 'paddle',
+          store: 'lemonsqueezy', // Legacy: was 'paddle', migrated to lemonsqueezy
           hasFinancialImpact: true,
           amount: refundAmount,
           currency,
