@@ -81,6 +81,7 @@ import AgentReviewForm from '@/components/shared/AgentReviewForm';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { slugify } from '@/utils/slug';
 import { getAgencyAgents, getAllAgents } from '@/services/apiService';
+import { getPropertiesBySellerId } from '@/src/features/properties/api/propertyApi';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { updateAgentProfile, toggleSavedAgent, checkSavedAgent } from '@/src/features/agents/api/agentApi';
 import AgentInquiryModal from '@/src/features/inquiries/components/AgentInquiryModal';
@@ -149,6 +150,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [agentData, setAgentData] = useState(agent);
     const [agentAchievements, setAgentAchievements] = useState<Achievement[]>([]);
+    const [agentProperties, setAgentProperties] = useState<any[]>([]);
+    const [loadingAgentProperties, setLoadingAgentProperties] = useState(true);
     const { success, error: showError } = useNotification();
     const [editForm, setEditForm] = useState({
         bio: agent.bio || '',
@@ -174,7 +177,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         String(currentUser._id) === String(agent.id)
     );
     const agentUserId = agent.userId || agent.id;
-    const agentProperties = state.properties.filter(p => p.sellerId === agentUserId);
+    // Properties are fetched from API in useEffect below
     const activeListings = agentProperties.filter(p => p.status === 'active');
     const soldProperties = agentProperties.filter(p => p.status === 'sold');
 
@@ -260,6 +263,26 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         // Also try window scroll as fallback
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, [agent.id]);
+
+    // Fetch agent's properties from API
+    useEffect(() => {
+        const fetchAgentProperties = async () => {
+            if (!agentUserId) return;
+
+            setLoadingAgentProperties(true);
+            try {
+                const properties = await getPropertiesBySellerId(agentUserId);
+                setAgentProperties(properties);
+            } catch (error) {
+                console.error('Error fetching agent properties:', error);
+                setAgentProperties([]);
+            } finally {
+                setLoadingAgentProperties(false);
+            }
+        };
+
+        fetchAgentProperties();
+    }, [agentUserId]);
 
     // Fetch similar agents from same agency or city and fetch agency gradient
     useEffect(() => {
@@ -1464,22 +1487,24 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         </div>
 
                                         {/* Active Listings */}
-                                        {activeListings.length > 0 && (
+                                        {loadingAgentProperties ? (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                <PropertyCardSkeleton />
+                                                <PropertyCardSkeleton />
+                                                <PropertyCardSkeleton />
+                                            </div>
+                                        ) : activeListings.length > 0 ? (
                                             <div>
                                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                                {isLoadingProperties ? (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                        <PropertyCardSkeleton />
-                                                        <PropertyCardSkeleton />
-                                                        <PropertyCardSkeleton />
-                                                    </div>
-                                                ) : (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                        {activeListings.map(prop => (
-                                                            <PropertyCard key={prop.id} property={prop} />
-                                                        ))}
-                                                    </div>
-                                                )}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    {activeListings.map(prop => (
+                                                        <PropertyCard key={prop.id} property={prop} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : soldProperties.length === 0 && (
+                                            <div className="text-center py-8 text-gray-500">
+                                                {t('profilePage.listingsTab.noListings', 'No listings available')}
                                             </div>
                                         )}
 
