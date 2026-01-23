@@ -151,12 +151,22 @@ const PricingPage: React.FC = () => {
       setLoadingListings(true);
       try {
         const token = localStorage.getItem('balkan_estate_token');
-        const response = await fetch(`${API_URL}/properties/user/${state.currentUser.id}`, {
+        const response = await fetch(`${API_URL}/properties/my-listings`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {
           const data = await response.json();
-          setUserListings(data.properties || []);
+          // Map the properties to UserListing format
+          const listings = (data.properties || []).map((p: any) => ({
+            id: p._id || p.id,
+            address: p.address?.street
+              ? `${p.address.street}, ${p.address.city}`
+              : p.title || 'Untitled Property',
+            imageUrl: p.images?.[0]?.url || p.images?.[0] || '/placeholder-property.jpg',
+            price: p.price || 0,
+            status: p.status || 'active',
+          }));
+          setUserListings(listings);
         }
       } catch (err) {
         console.error('Error fetching user listings:', err);
