@@ -1346,7 +1346,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         if (val === 'map') setShowMapHint(false);
                                     }}
                                     size="md"
-                                    variant="pill"
                                 />
                             </div>
                         </div>
