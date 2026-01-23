@@ -16,13 +16,15 @@ interface LiquidGlassSwitchProps {
   onChange: (value: string) => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'orb' | 'pill'; // 'orb' shows the blue ball, 'pill' just highlights active with white background
 }
 
 /**
  * LiquidGlassSwitch Component
  *
- * A beautiful toggle switch with liquid glass styling featuring
- * a circular glass orb indicator with text and icon inside.
+ * A beautiful toggle switch with liquid glass styling.
+ * - variant='orb': Shows a circular glass orb indicator (default)
+ * - variant='pill': Shows a clean pill highlight without the orb
  */
 export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
   options,
@@ -30,6 +32,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
   onChange,
   className = '',
   size = 'md',
+  variant = 'orb',
 }) => {
   const activeIndex = options.findIndex((opt) => opt.value === value);
 
@@ -81,7 +84,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
 
   const trackWidth = optionWidths.reduce((a, b) => a + b, 0) + config.trackPadding * 2;
 
-  // Calculate orb position
+  // Calculate orb position (for orb variant)
   const getOrbLeft = () => {
     let left = config.trackPadding;
     for (let i = 0; i < activeIndex; i++) {
@@ -92,12 +95,24 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
     return optionCenter - config.orbSize / 2;
   };
 
+  // Calculate pill position (for pill variant)
+  const getPillLeft = () => {
+    let left = config.trackPadding;
+    for (let i = 0; i < activeIndex; i++) {
+      left += optionWidths[i];
+    }
+    return left;
+  };
+
+  // For pill variant, use a simpler container height
+  const containerHeight = variant === 'pill' ? config.trackHeight : config.orbSize;
+
   return (
     <div
       className={`relative inline-flex items-center ${className}`}
       style={{
         width: trackWidth,
-        height: config.orbSize,
+        height: containerHeight,
       }}
     >
       {/* Track / Pill container */}
@@ -115,9 +130,22 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
           `,
         }}
       >
+        {/* Sliding Pill Highlight (for pill variant) */}
+        {variant === 'pill' && (
+          <div
+            className="absolute rounded-full bg-white shadow-md transition-all duration-300 ease-out"
+            style={{
+              height: config.trackHeight - config.trackPadding * 2,
+              width: optionWidths[activeIndex],
+              left: getPillLeft(),
+              top: config.trackPadding,
+            }}
+          />
+        )}
+
         {/* Option labels inside track */}
         <div
-          className="flex items-center w-full"
+          className="flex items-center w-full relative z-10"
           style={{ padding: `0 ${config.trackPadding}px` }}
         >
           {options.map((option, index) => {
@@ -131,7 +159,10 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
                   relative z-20 flex items-center justify-center font-semibold
                   transition-all duration-300 ease-out
                   ${config.text}
-                  ${isActive ? 'text-white' : 'text-neutral-500 hover:text-neutral-600'}
+                  ${variant === 'orb'
+                    ? (isActive ? 'text-white' : 'text-neutral-500 hover:text-neutral-600')
+                    : (isActive ? 'text-gray-900' : 'text-neutral-500 hover:text-neutral-700')
+                  }
                 `}
                 style={{
                   width: optionWidths[index],
@@ -156,93 +187,95 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
         <div className="absolute inset-x-3 top-[1px] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none rounded-full" />
       </div>
 
-      {/* Sliding Glass Orb - extends beyond track */}
-      <div
-        className="absolute pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-        style={{
-          width: config.orbSize,
-          height: config.orbSize,
-          top: 0,
-          left: getOrbLeft(),
-          zIndex: 10,
-        }}
-      >
-        {/* Main orb body with 3D glass effect */}
+      {/* Sliding Glass Orb - only for orb variant */}
+      {variant === 'orb' && (
         <div
-          className="absolute inset-0 rounded-full overflow-hidden"
+          className="absolute pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           style={{
-            background: `
-              linear-gradient(145deg,
-                rgba(99,130,255,0.95) 0%,
-                rgba(59,130,246,0.98) 50%,
-                rgba(37,99,235,1) 100%
-              )
-            `,
-            boxShadow: `
-              0 6px 24px rgba(59,130,246,0.55),
-              0 12px 40px rgba(59,130,246,0.35),
-              0 2px 8px rgba(0,0,0,0.2),
-              inset 0 2px 4px rgba(255,255,255,0.25),
-              inset 0 -3px 6px rgba(0,0,0,0.15)
-            `,
+            width: config.orbSize,
+            height: config.orbSize,
+            top: 0,
+            left: getOrbLeft(),
+            zIndex: 10,
           }}
         >
-          {/* Glass shine - top curved reflection */}
+          {/* Main orb body with 3D glass effect */}
           <div
-            className="absolute"
+            className="absolute inset-0 rounded-full overflow-hidden"
             style={{
-              top: '6%',
-              left: '12%',
-              width: '76%',
-              height: '45%',
               background: `
-                radial-gradient(ellipse 100% 100% at 50% 0%,
-                  rgba(255,255,255,0.45) 0%,
-                  rgba(255,255,255,0.15) 40%,
-                  transparent 70%
+                linear-gradient(145deg,
+                  rgba(99,130,255,0.95) 0%,
+                  rgba(59,130,246,0.98) 50%,
+                  rgba(37,99,235,1) 100%
                 )
               `,
-              borderRadius: '50% 50% 40% 40%',
+              boxShadow: `
+                0 6px 24px rgba(59,130,246,0.55),
+                0 12px 40px rgba(59,130,246,0.35),
+                0 2px 8px rgba(0,0,0,0.2),
+                inset 0 2px 4px rgba(255,255,255,0.25),
+                inset 0 -3px 6px rgba(0,0,0,0.15)
+              `,
             }}
-          />
-
-          {/* Secondary reflection - bottom edge */}
-          <div
-            className="absolute"
-            style={{
-              bottom: '8%',
-              left: '20%',
-              width: '60%',
-              height: '20%',
-              background: 'linear-gradient(0deg, rgba(255,255,255,0.12) 0%, transparent 100%)',
-              borderRadius: '40% 40% 50% 50%',
-            }}
-          />
-        </div>
-
-        {/* Outer rim highlight */}
-        <div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            border: '1.5px solid rgba(255,255,255,0.25)',
-            background: 'transparent',
-          }}
-        />
-
-        {/* Content inside orb - icon with glow */}
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          {hasIcon && (
-            <span
-              className={`${config.orbIconSize} text-white [&>svg]:w-full [&>svg]:h-full`}
+          >
+            {/* Glass shine - top curved reflection */}
+            <div
+              className="absolute"
               style={{
-                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                top: '6%',
+                left: '12%',
+                width: '76%',
+                height: '45%',
+                background: `
+                  radial-gradient(ellipse 100% 100% at 50% 0%,
+                    rgba(255,255,255,0.45) 0%,
+                    rgba(255,255,255,0.15) 40%,
+                    transparent 70%
+                  )
+                `,
+                borderRadius: '50% 50% 40% 40%',
               }}
-            >
-              {activeOption.icon}
-            </span>
-          )}
+            />
+
+            {/* Secondary reflection - bottom edge */}
+            <div
+              className="absolute"
+              style={{
+                bottom: '8%',
+                left: '20%',
+                width: '60%',
+                height: '20%',
+                background: 'linear-gradient(0deg, rgba(255,255,255,0.12) 0%, transparent 100%)',
+                borderRadius: '40% 40% 50% 50%',
+              }}
+            />
+          </div>
+
+          {/* Outer rim highlight */}
+          <div
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              border: '1.5px solid rgba(255,255,255,0.25)',
+              background: 'transparent',
+            }}
+          />
+
+          {/* Content inside orb - icon with glow */}
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            {hasIcon && (
+              <span
+                className={`${config.orbIconSize} text-white [&>svg]:w-full [&>svg]:h-full`}
+                style={{
+                  filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                }}
+              >
+                {activeOption.icon}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

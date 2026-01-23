@@ -344,6 +344,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             value={viewMode}
             onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
             size="sm"
+            variant="pill"
           />
         </div>
       </div>
