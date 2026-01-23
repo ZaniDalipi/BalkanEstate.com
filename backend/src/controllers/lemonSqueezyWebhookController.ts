@@ -26,6 +26,8 @@ import Product from '../models/Product';
 import Subscription from '../models/Subscription';
 import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
+import Promotion from '../models/Promotion';
+import Property from '../models/Property';
 import emailService from '../services/emailService';
 import { activityLogger } from '../services/activityLogger';
 import logger from '../utils/logger';
@@ -407,6 +409,17 @@ async function handleOrderCreated(event: any): Promise<void> {
 
     // Only process if order is paid
     if (attributes.status === 'paid') {
+      // Check if this is a promotion payment (has propertyId in custom data)
+      const propertyId = sanitizeString(customData.propertyId || customData.property_id);
+      const promotionTier = sanitizeString(customData.promotionTier || customData.promotion_tier);
+
+      if (propertyId && promotionTier) {
+        // This is a promotion payment - handle it differently
+        await handlePromotionOrder(orderId, userId, user, customData, total, currency);
+        markEventProcessed(`order_created_${orderId}`);
+        return;
+      }
+
       // Process the subscription payment
       const result = await processSubscriptionPayment({
         userId,
@@ -463,6 +476,128 @@ async function handleOrderCreated(event: any): Promise<void> {
     console.error('[LemonSqueezy] Error handling order_created:', error);
     throw error;
   }
+}
+
+/**
+ * Handle promotion order (property highlighting payment)
+ */
+async function handlePromotionOrder(
+  orderId: string,
+  userId: string,
+  user: any,
+  customData: any,
+  amount: number,
+  currency: string
+): Promise<void> {
+  const propertyId = sanitizeString(customData.propertyId || customData.property_id);
+  const promotionTier = sanitizeString(customData.promotionTier || customData.promotion_tier) as 'featured' | 'highlight' | 'premium';
+  const duration = parseInt(customData.duration || '7') || 7;
+  const hasUrgentBadge = customData.hasUrgentBadge === 'true' || customData.has_urgent_badge === 'true';
+  const propertyTitle = sanitizeString(customData.propertyTitle || customData.property_title || '');
+  const couponCode = sanitizeString(customData.couponCode || customData.coupon_code);
+  const couponDiscount = parseFloat(customData.couponDiscount || customData.coupon_discount || '0');
+
+  console.log('[LemonSqueezy] Processing promotion order:', {
+    orderId,
+    userId,
+    propertyId,
+    promotionTier,
+    duration,
+    amount,
+  });
+
+  // Check if property exists
+  const property = await Property.findById(propertyId);
+  if (!property) {
+    console.error('[LemonSqueezy] Property not found for promotion:', propertyId);
+    return;
+  }
+
+  // Check for existing active promotion (prevent duplicates)
+  const existingPromotion = await Promotion.findOne({
+    propertyId,
+    isActive: true,
+    endDate: { $gt: new Date() },
+    paymentStatus: 'paid',
+  });
+
+  if (existingPromotion) {
+    console.log('[LemonSqueezy] Property already has active promotion:', existingPromotion._id);
+    // Could extend the existing promotion instead
+    return;
+  }
+
+  // Calculate dates
+  const startDate = new Date();
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() + duration);
+
+  // Calculate next refresh date for Highlight tier
+  let nextRefreshAt = null;
+  if (promotionTier === 'highlight') {
+    nextRefreshAt = new Date(startDate);
+    nextRefreshAt.setDate(nextRefreshAt.getDate() + 3); // Refresh every 3 days
+  }
+
+  // Create the promotion
+  const promotion = await Promotion.create({
+    userId,
+    propertyId,
+    startDate,
+    endDate,
+    isActive: true,
+    promotionType: promotionTier === 'highlight' ? 'highlighted' : promotionTier,
+    promotionTier,
+    duration,
+    hasUrgentBadge,
+    price: amount,
+    currency: currency.toUpperCase(),
+    paymentStatus: 'paid',
+    transactionId: orderId,
+    paymentId: orderId,
+    purchasedVia: 'web',
+    lastRefreshedAt: startDate,
+    nextRefreshAt,
+    refreshCount: 0,
+    notes: couponCode ? `Coupon applied: ${couponCode} (€${couponDiscount.toFixed(2)} discount)` : undefined,
+  });
+
+  // Update property
+  property.isPromoted = true;
+  property.promotionTier = promotionTier as 'standard' | 'featured' | 'highlight' | 'premium';
+  property.promotionStartDate = startDate;
+  property.promotionEndDate = endDate;
+  property.hasUrgentBadge = hasUrgentBadge;
+  await property.save();
+
+  // Update user's promoted ads count
+  await User.findByIdAndUpdate(userId, {
+    $inc: { promotedAdsCount: 1 },
+  });
+
+  // Create payment record for the promotion
+  await PaymentRecord.create({
+    userId,
+    userEmail: user.email,
+    userName: user.name,
+    store: 'lemonsqueezy',
+    storeTransactionId: orderId,
+    transactionType: 'charge',
+    transactionDate: new Date(),
+    amount,
+    currency: currency.toUpperCase(),
+    status: 'completed',
+    productId: `promotion_${promotionTier}_${duration}`,
+    description: `${promotionTier.charAt(0).toUpperCase() + promotionTier.slice(1)} promotion for "${propertyTitle || property.title}" (${duration} days)`,
+  });
+
+  console.log('[LemonSqueezy] Promotion created successfully:', {
+    promotionId: promotion._id,
+    propertyId,
+    tier: promotionTier,
+    duration,
+    endDate: endDate.toISOString(),
+  });
 }
 
 /**

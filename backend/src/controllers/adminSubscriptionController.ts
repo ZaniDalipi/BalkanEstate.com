@@ -6,6 +6,7 @@
  */
 
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Subscription from '../models/Subscription';
 import PaymentRecord from '../models/PaymentRecord';
 import SubscriptionEvent from '../models/SubscriptionEvent';
@@ -353,7 +354,7 @@ export const activateUserSubscription = async (req: Request, res: Response): Pro
     });
 
     // Update user with subscription ID
-    user.activeSubscriptionId = subscription._id;
+    user.activeSubscriptionId = subscription._id as mongoose.Types.ObjectId;
     await user.save();
 
     // Create event for audit trail

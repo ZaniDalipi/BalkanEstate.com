@@ -24,6 +24,7 @@ export interface LemonSqueezyCheckoutParams {
   planInterval: 'month' | 'year' | 'one_time';
   successUrl: string;
   cancelUrl?: string;
+  customData?: Record<string, string>; // Additional custom data for promotions, etc.
 }
 
 export interface LemonSqueezyCheckoutResult {
@@ -146,6 +147,7 @@ class LemonSqueezyService {
                 product_id: params.productId,
                 plan_name: params.planName,
                 plan_interval: params.planInterval,
+                ...(params.customData || {}), // Additional custom data for promotions, etc.
               },
             },
             checkout_options: {

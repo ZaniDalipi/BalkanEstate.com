@@ -575,6 +575,194 @@ class PaymentProviderFactory {
         };
     }
   }
+
+  /**
+   * Create a LemonSqueezy checkout for property promotions
+   * Promotions are one-time payments for highlighting properties
+   */
+  public async createPromotionPayment(params: {
+    userId: string;
+    userEmail: string;
+    userName?: string;
+    propertyId: string;
+    propertyTitle: string;
+    promotionTier: 'featured' | 'highlight' | 'premium';
+    duration: number;
+    hasUrgentBadge: boolean;
+    amount: number;
+    couponCode?: string;
+    couponDiscount?: number;
+  }): Promise<PaymentResult> {
+    try {
+      // Check if LemonSqueezy is configured
+      if (!lemonSqueezyService.isConfigured()) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: 'LemonSqueezy is not configured',
+        };
+      }
+
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+      // Get variant ID for the promotion tier
+      const variantId = this.getPromotionVariantId(params.promotionTier, params.duration);
+
+      if (!variantId) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: `No LemonSqueezy variant configured for ${params.promotionTier} promotion (${params.duration} days)`,
+        };
+      }
+
+      const result = await lemonSqueezyService.createCheckout({
+        variantId,
+        userId: params.userId,
+        userEmail: params.userEmail,
+        userName: params.userName,
+        productId: `promotion_${params.promotionTier}_${params.duration}`,
+        planName: `${params.promotionTier.charAt(0).toUpperCase() + params.promotionTier.slice(1)} Promotion`,
+        planInterval: 'one_time',
+        successUrl: `${baseUrl}/promotions/success?provider=lemonsqueezy&property_id=${params.propertyId}`,
+        cancelUrl: `${baseUrl}/promotions/cancel?property_id=${params.propertyId}`,
+        customData: {
+          propertyId: params.propertyId,
+          propertyTitle: params.propertyTitle,
+          promotionTier: params.promotionTier,
+          duration: String(params.duration),
+          hasUrgentBadge: String(params.hasUrgentBadge),
+          couponCode: params.couponCode || '',
+          couponDiscount: String(params.couponDiscount || 0),
+        },
+      });
+
+      if (!result.success) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: result.error || 'Failed to create promotion checkout',
+        };
+      }
+
+      return {
+        success: true,
+        provider: 'lemonsqueezy',
+        paymentUrl: result.checkoutUrl,
+        sessionId: result.checkoutId,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        provider: 'lemonsqueezy',
+        error: error.message || 'Failed to create promotion payment',
+      };
+    }
+  }
+
+  /**
+   * Get LemonSqueezy variant ID for promotion tier/duration
+   */
+  private getPromotionVariantId(tier: string, duration: number): string | null {
+    // Promotion variant IDs from environment variables
+    // Format: LEMONSQUEEZY_VARIANT_PROMO_{TIER}_{DURATION}
+    const variantKey = `LEMONSQUEEZY_VARIANT_PROMO_${tier.toUpperCase()}_${duration}`;
+    const variantId = process.env[variantKey];
+
+    if (variantId) {
+      return variantId;
+    }
+
+    // Fallback to tier-only variant (if using single product per tier)
+    const tierOnlyKey = `LEMONSQUEEZY_VARIANT_PROMO_${tier.toUpperCase()}`;
+    return process.env[tierOnlyKey] || null;
+  }
+
+  /**
+   * Create a LemonSqueezy checkout for agency featured subscription
+   */
+  public async createAgencyFeaturedPayment(params: {
+    userId: string;
+    userEmail: string;
+    userName?: string;
+    agencyId: string;
+    agencyName: string;
+    interval: 'weekly' | 'monthly' | 'yearly';
+    amount: number;
+  }): Promise<PaymentResult> {
+    try {
+      if (!lemonSqueezyService.isConfigured()) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: 'LemonSqueezy is not configured',
+        };
+      }
+
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+      // Get variant ID for agency featured subscription
+      const variantId = this.getAgencyFeaturedVariantId(params.interval);
+
+      if (!variantId) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: `No LemonSqueezy variant configured for agency featured (${params.interval})`,
+        };
+      }
+
+      const result = await lemonSqueezyService.createCheckout({
+        variantId,
+        userId: params.userId,
+        userEmail: params.userEmail,
+        userName: params.userName,
+        productId: `agency_featured_${params.interval}`,
+        planName: `Agency Featured (${params.interval})`,
+        planInterval: params.interval === 'weekly' ? 'one_time' : (params.interval === 'monthly' ? 'month' : 'year'),
+        successUrl: `${baseUrl}/agencies/${params.agencyId}/featured/success?provider=lemonsqueezy`,
+        cancelUrl: `${baseUrl}/agencies/${params.agencyId}/featured/cancel`,
+        customData: {
+          agencyId: params.agencyId,
+          agencyName: params.agencyName,
+          interval: params.interval,
+        },
+      });
+
+      if (!result.success) {
+        return {
+          success: false,
+          provider: 'lemonsqueezy',
+          error: result.error || 'Failed to create agency featured checkout',
+        };
+      }
+
+      return {
+        success: true,
+        provider: 'lemonsqueezy',
+        paymentUrl: result.checkoutUrl,
+        sessionId: result.checkoutId,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        provider: 'lemonsqueezy',
+        error: error.message || 'Failed to create agency featured payment',
+      };
+    }
+  }
+
+  /**
+   * Get LemonSqueezy variant ID for agency featured subscription
+   */
+  private getAgencyFeaturedVariantId(interval: string): string | null {
+    const variantMap: Record<string, string> = {
+      'weekly': process.env.LEMONSQUEEZY_VARIANT_AGENCY_FEATURED_WEEKLY || '',
+      'monthly': process.env.LEMONSQUEEZY_VARIANT_AGENCY_FEATURED_MONTHLY || '',
+      'yearly': process.env.LEMONSQUEEZY_VARIANT_AGENCY_FEATURED_YEARLY || '',
+    };
+    return variantMap[interval] || null;
+  }
 }
 
 // Export singleton instance
