@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
 import Footer from '@/components/shared/Footer';
-import { LiquidGlassSwitch } from '@/components/ui/LiquidGlassSwitch';
+import { LiquidGlassSwitch } from '../../../components/ui/LiquidGlassSwitch';
 import {
   FloatingSphere,
   GlossyPill,
