@@ -9,6 +9,7 @@ import { searchLocation } from '@/services/osmService';
 import Toast from '@/components/shared/Toast';
 import L from 'leaflet';
 import { Bars3Icon, SearchIcon, UserCircleIcon, XMarkIcon, AdjustmentsHorizontalIcon, MapPinIcon, Squares2x2Icon, BellIcon, PencilIcon, PlusIcon, SparklesIcon, CrosshairsIcon, XCircleIcon, MapIcon, SpinnerIcon } from '@/constants';
+import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { filterProperties } from '@/utils/propertyUtils';
 import AiSearch from './AiSearch';
 import Modal from '@/components/shared/Modal';
@@ -1327,32 +1328,20 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     </div>
                                 </div>
                             )}
-                            <nav
-                                className="pointer-events-auto mx-auto w-fit bg-white/80 text-neutral-800 p-1 sm:p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-0.5 sm:gap-1"
-                                role="tablist"
-                                aria-label="View toggle"
-                            >
-                                <button
-                                    onClick={() => updateSearchPageState({ mobileView: 'list' })}
-                                    className={`flex items-center gap-1 sm:gap-1.5 min-h-[40px] px-3 sm:px-4 py-1.5 rounded-full text-sm font-bold transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 ${mobileView === 'list' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200 active:bg-neutral-300'}`}
-                                    role="tab"
-                                    aria-selected={mobileView === 'list'}
-                                    aria-controls="property-list"
-                                >
-                                    <Squares2x2Icon className="w-4 h-4" aria-hidden="true" />
-                                    <span>List</span>
-                                </button>
-                                <button
-                                    onClick={() => { updateSearchPageState({ mobileView: 'map' }); setShowMapHint(false); }}
-                                    className={`flex items-center gap-1 sm:gap-1.5 min-h-[40px] px-3 sm:px-4 py-1.5 rounded-full text-sm font-bold transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 ${mobileView === 'map' ? 'bg-primary text-white shadow' : 'hover:bg-neutral-200 active:bg-neutral-300'}`}
-                                    role="tab"
-                                    aria-selected={mobileView === 'map'}
-                                    aria-controls="map-view"
-                                >
-                                    <MapIcon className="w-4 h-4" aria-hidden="true" />
-                                    <span>Map</span>
-                                </button>
-                            </nav>
+                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label="View toggle">
+                                <LiquidGlassSwitch
+                                    options={[
+                                        { value: 'list', label: 'List', icon: <Squares2x2Icon className="w-full h-full" /> },
+                                        { value: 'map', label: 'Map', icon: <MapIcon className="w-full h-full" /> },
+                                    ]}
+                                    value={mobileView}
+                                    onChange={(val) => {
+                                        updateSearchPageState({ mobileView: val as 'list' | 'map' });
+                                        if (val === 'map') setShowMapHint(false);
+                                    }}
+                                    size="md"
+                                />
+                            </div>
                         </div>
                     </>
                 )}

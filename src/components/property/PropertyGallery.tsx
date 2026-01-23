@@ -12,6 +12,7 @@ import {
   BuildingOfficeIcon,
   StreetViewIcon,
 } from '../../../constants';
+import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -314,32 +315,21 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </>
         )}
 
-        {/* View Mode Toggle (Photos / Street View) - Compact */}
+        {/* View Mode Toggle (Photos / Street View) - Liquid Glass Style */}
         <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
-          <div className="flex items-center gap-0.5 bg-white/95 backdrop-blur-md p-0.5 rounded-full shadow-lg border border-white/50">
-            <button
-              onClick={() => setViewMode('photos')}
-              className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold transition-all ${
-                viewMode === 'photos'
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-neutral-600 hover:bg-neutral-100'
-              }`}
-            >
-              {t('actions.photos')}
-            </button>
-            <button
-              onClick={() => setViewMode('streetview')}
-              className={`px-2 sm:px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold transition-all flex items-center gap-0.5 sm:gap-1 ${
-                viewMode === 'streetview'
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-neutral-600 hover:bg-neutral-100'
-              }`}
-            >
-              <StreetViewIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
-              <span className="hidden sm:inline">{t('actions.streetView')}</span>
-              <span className="sm:hidden">Street</span>
-            </button>
-          </div>
+          <LiquidGlassSwitch
+            options={[
+              { value: 'photos', label: t('actions.photos') },
+              {
+                value: 'streetview',
+                label: t('actions.streetView'),
+                icon: <StreetViewIcon className="w-full h-full" />,
+              },
+            ]}
+            value={viewMode}
+            onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
+            size="sm"
+          />
         </div>
       </div>
     </div>
