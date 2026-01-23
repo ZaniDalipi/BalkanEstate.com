@@ -197,25 +197,36 @@ const FeaturedAgencies: React.FC = () => {
           </p>
         </div>
 
-        {/* Agencies grid with staggered entrance */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+        {/* Agencies grid with staggered entrance - larger cards for better visual impact */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8">
           {isLoading ? (
-            // Loading skeleton
+            // Loading skeleton - matches new card design
             Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={`skeleton-${index}`}
                 className="animate-pulse h-full"
               >
-                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/30 overflow-hidden h-full flex flex-col">
-                  <div className="h-36 sm:h-40 bg-gradient-to-br from-gray-200 to-gray-300" />
-                  <div className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col">
-                    <div className="h-5 sm:h-6 bg-gray-200 rounded-lg w-3/4" />
-                    <div className="h-3 sm:h-4 bg-gray-200 rounded-md w-1/2" />
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 flex-1">
-                      <div className="bg-gray-200 rounded-xl" />
-                      <div className="bg-gray-200 rounded-xl" />
+                <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/30 overflow-hidden h-full flex flex-col">
+                  <div className="h-32 md:h-36 lg:h-40 bg-gradient-to-br from-gray-200 to-gray-300 relative">
+                    {/* Logo skeleton */}
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded-2xl ring-4 ring-white" />
                     </div>
-                    <div className="h-11 sm:h-12 bg-gray-200 rounded-xl w-full" />
+                  </div>
+                  <div className="px-5 pb-5 pt-12 md:px-6 md:pb-6 md:pt-14 space-y-4 flex-1 flex flex-col">
+                    <div className="h-5 md:h-6 bg-gray-200 rounded-lg w-3/4 mx-auto" />
+                    <div className="flex items-center justify-center gap-6 py-3 border-y border-neutral-100">
+                      <div className="text-center space-y-2">
+                        <div className="h-7 w-12 bg-gray-200 rounded mx-auto" />
+                        <div className="h-3 w-16 bg-gray-200 rounded mx-auto" />
+                      </div>
+                      <div className="w-px h-10 bg-neutral-200" />
+                      <div className="text-center space-y-2">
+                        <div className="h-7 w-12 bg-gray-200 rounded mx-auto" />
+                        <div className="h-3 w-16 bg-gray-200 rounded mx-auto" />
+                      </div>
+                    </div>
+                    <div className="h-11 md:h-12 bg-gray-200 rounded-xl w-full mt-auto" />
                   </div>
                 </div>
               </div>
@@ -247,11 +258,11 @@ const FeaturedAgencies: React.FC = () => {
                      animation: 'shimmer 2s infinite linear'
                    }} />
               
-              {/* Agency card */}
-              <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/40 overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
-                {/* Header with gradient or cover image */}
+              {/* Agency card - redesigned for better proportions */}
+              <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/40 overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-500 h-full flex flex-col group-hover:-translate-y-1">
+                {/* Header with gradient or cover image - increased height */}
                 <div
-                  className={`h-36 sm:h-40 relative overflow-hidden ${
+                  className={`h-32 md:h-36 lg:h-40 relative overflow-hidden ${
                     (agency as any).coverImage
                       ? ''
                       : (agency as any).coverGradient
@@ -276,74 +287,79 @@ const FeaturedAgencies: React.FC = () => {
                     />
                   ))}
 
-                  {/* Logo */}
-                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center overflow-hidden shadow-lg ring-2 ring-white/30">
-                      {agency.logo ? (
-                        <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
-                      ) : (
-                        <span className="text-2xl sm:text-3xl">{typeInfo.emoji}</span>
-                      )}
+                  {/* Featured Badge - top left */}
+                  <div className="absolute top-3 left-3 md:top-4 md:left-4 flex gap-2">
+                    <div className="flex items-center gap-1.5 bg-white/25 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg">
+                      <SparklesIcon className="w-4 h-4 text-yellow-300" />
+                      <span className="text-white font-semibold text-xs">{t('featured.badge')}</span>
                     </div>
                   </div>
 
-                  {/* Featured Badge */}
-                  <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 flex gap-2">
-                    <div className="flex items-center gap-1.5 sm:gap-2 bg-white/25 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg">
-                      <SparklesIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-300" />
-                      <span className="text-white font-semibold text-xs sm:text-sm">{t('featured.badge')}</span>
+                  {/* Type Badge - top right */}
+                  <div className="absolute top-3 right-3 md:top-4 md:right-4">
+                    <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full">
+                      <span className="text-sm">{typeInfo.emoji}</span>
+                      <span className="text-white text-xs font-medium">{typeInfo.label}</span>
+                    </div>
+                  </div>
+
+                  {/* Logo - centered at bottom, overlapping content */}
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl flex items-center justify-center overflow-hidden shadow-xl ring-4 ring-white">
+                      {agency.logo ? (
+                        <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className={`w-full h-full bg-gradient-to-br ${colorGradient} flex items-center justify-center`}>
+                          <span className="text-3xl md:text-4xl">{typeInfo.emoji}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-5 sm:p-6 flex-1 flex flex-col">
-                  <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2 leading-tight">
+                {/* Content - adjusted padding for logo overlap */}
+                <div className="px-5 pb-5 pt-12 md:px-6 md:pb-6 md:pt-14 flex-1 flex flex-col">
+                  {/* Agency Name - centered */}
+                  <h3 className="text-lg md:text-xl font-bold text-neutral-900 mb-3 group-hover:text-primary transition-colors duration-300 line-clamp-2 leading-tight text-center">
                     {agency.name}
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-neutral-600 mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-gradient-to-r from-purple-500 to-primary rounded-full animate-pulse flex-shrink-0" />
-                    <span className="truncate">{typeInfo.label}</span>
-                  </p>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5 flex-1">
-                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 sm:p-4 text-center border border-primary/10">
-                      <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">{agency.totalProperties || 0}</div>
-                      <div className="text-xs sm:text-sm text-neutral-600 font-medium">{t('featured.properties')}</div>
+                  {/* Stats Row - horizontal layout */}
+                  <div className="flex items-center justify-center gap-6 mb-5 py-3 border-y border-neutral-100">
+                    <div className="text-center">
+                      <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">{agency.totalProperties || 0}</div>
+                      <div className="text-xs text-neutral-500 font-medium mt-0.5">{t('featured.properties')}</div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 sm:p-4 text-center border border-purple-200">
-                      <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">{agency.totalAgents || 0}</div>
-                      <div className="text-xs sm:text-sm text-neutral-600 font-medium">{t('featured.agents')}</div>
+                    <div className="w-px h-10 bg-neutral-200" />
+
+                    <div className="text-center">
+                      <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">{agency.totalAgents || 0}</div>
+                      <div className="text-xs text-neutral-500 font-medium mt-0.5">{t('featured.agents')}</div>
                     </div>
                   </div>
 
                   {/* View Button */}
-                  <button className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 sm:py-3.5 px-4 rounded-xl font-semibold text-sm sm:text-base hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn">
+                  <button className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 md:py-3.5 px-4 rounded-xl font-semibold text-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn mt-auto">
                     <span>{t('featured.viewAgency')}</span>
-                    <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                    <ArrowRightIcon className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
                   </button>
                 </div>
 
-                {/* Magic corner accents - hidden on mobile for cleaner look */}
-                <div className="hidden sm:block absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-purple-400/40 rounded-tl-xl" />
-                <div className="hidden sm:block absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-400/40 rounded-tr-xl" />
-                <div className="hidden sm:block absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-purple-400/40 rounded-bl-xl" />
-                <div className="hidden sm:block absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-400/40 rounded-br-xl" />
+                {/* Decorative gradient border on hover */}
+                <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-gradient-to-r group-hover:from-purple-400/30 group-hover:to-primary/30 transition-all duration-500 pointer-events-none" />
               </div>
             </div>
               );
             })
           ) : (
             // Empty state
-            <div className="col-span-full text-center py-12 sm:py-16">
+            <div className="col-span-full text-center py-12 md:py-16">
               <div className="max-w-md mx-auto px-4">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
-                  <BuildingStorefrontIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
+                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center">
+                  <BuildingStorefrontIcon className="w-10 h-10 md:w-12 md:h-12 text-gray-400" />
                 </div>
-                <p className="text-neutral-600 text-base sm:text-lg font-medium mb-2">{t('featured.empty.title')}</p>
+                <p className="text-neutral-600 text-base md:text-lg font-medium mb-2">{t('featured.empty.title')}</p>
                 <p className="text-neutral-500 text-sm">{t('featured.empty.message')}</p>
               </div>
             </div>

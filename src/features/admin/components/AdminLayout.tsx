@@ -20,6 +20,7 @@ interface AdminStats {
 export type AdminView =
   | 'dashboard'
   | 'pricing'
+  | 'promotionPlans'
   | 'discounts'
   | 'promotionCoupons'
   | 'users'

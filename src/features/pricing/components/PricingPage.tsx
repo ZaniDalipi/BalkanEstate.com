@@ -96,22 +96,48 @@ const PricingPage: React.FC = () => {
   const [selectedListing, setSelectedListing] = useState<UserListing | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<7 | 30 | 90>(30);
 
+  // Promotion plans from API
+  const [listingPromotionPlans, setListingPromotionPlans] = useState<any[]>([]);
+  const [agencyFeaturePlans, setAgencyFeaturePlans] = useState<any[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(false);
+
   // Sales team contact info
   const salesEmail = 'sales@balkanestateai.com';
   const salesPhone = '+389 71 967 915';
 
-  // Promotion pricing
-  const promotionPricing = {
+  // Default/fallback promotion pricing (used if API fails or returns no data)
+  const defaultPromotionPricing: Record<string, Record<number, number>> = {
     featured: { 7: 9, 30: 29, 90: 69 },
     highlight: { 7: 19, 30: 49, 90: 119 },
     premium: { 7: 39, 30: 99, 90: 229 },
   };
 
-  // Agency feature pricing
-  const agencyFeaturePricing = {
+  // Default/fallback agency feature pricing
+  const defaultAgencyFeaturePricing: Record<string, { price: number; duration: string }> = {
     spotlight: { price: 49, duration: '30 days' },
     homepage: { price: 99, duration: '30 days' },
     premium: { price: 199, duration: '30 days' },
+  };
+
+  // Get dynamic pricing from API or fallback to defaults
+  const getPromotionPrice = (tier: string, duration: number): number => {
+    const plan = listingPromotionPlans.find(p => p.tier === tier);
+    if (plan?.pricing) {
+      const key = `duration${duration}` as 'duration7' | 'duration30' | 'duration90';
+      return plan.pricing[key] ?? defaultPromotionPricing[tier]?.[duration] ?? 0;
+    }
+    return defaultPromotionPricing[tier]?.[duration] ?? 0;
+  };
+
+  const getAgencyFeature = (tier: string): { price: number; duration: string } => {
+    const plan = agencyFeaturePlans.find(p => p.tier === tier);
+    if (plan?.pricing) {
+      return {
+        price: plan.pricing.fixedPrice ?? defaultAgencyFeaturePricing[tier]?.price ?? 0,
+        duration: plan.pricing.fixedDuration ?? defaultAgencyFeaturePricing[tier]?.duration ?? '30 days',
+      };
+    }
+    return defaultAgencyFeaturePricing[tier] ?? { price: 0, duration: '30 days' };
   };
 
   // Fetch products from API
@@ -134,6 +160,30 @@ const PricingPage: React.FC = () => {
     fetchProducts();
   }, [activeTab, t]);
 
+  // Fetch promotion plans from API
+  useEffect(() => {
+    const fetchPromotionPlans = async () => {
+      if (activeTab !== 'listing' && activeTab !== 'agency') return;
+
+      setLoadingPlans(true);
+      try {
+        const response = await fetch(`${API_URL}/promotion-plans`);
+        if (response.ok) {
+          const data = await response.json();
+          const plans = data.plans || [];
+          setListingPromotionPlans(plans.filter((p: any) => p.category === 'listing'));
+          setAgencyFeaturePlans(plans.filter((p: any) => p.category === 'agency'));
+        }
+      } catch (err) {
+        console.error('Error fetching promotion plans:', err);
+        // Fall back to defaults - no error shown to user
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+    fetchPromotionPlans();
+  }, [activeTab]);
+
   // Fetch user listings when on listing tab
   useEffect(() => {
     const fetchUserListings = async () => {
@@ -141,7 +191,7 @@ const PricingPage: React.FC = () => {
 
       setLoadingListings(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('balkan_estate_token');
         const response = await fetch(`${API_URL}/properties/my/listings`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -915,7 +965,7 @@ const PricingPage: React.FC = () => {
                         <div>
                           <p className="text-sm text-gray-600">Promoting: <span className="font-medium text-gray-900">{selectedListing.address}</span></p>
                           <p className="text-lg font-bold text-gray-900">
-                            €{promotionPricing[selectedPromoTier][selectedDuration]} for {selectedDuration} days
+                            €{getPromotionPrice(selectedPromoTier, selectedDuration)} for {selectedDuration} days
                           </p>
                         </div>
                         <button
@@ -948,7 +998,7 @@ const PricingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900">Featured</h4>
                 <p className="text-sm text-gray-600 mt-1">Priority in search</p>
                 <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-purple-600">€{promotionPricing.featured[selectedDuration]}</span>
+                  <span className="text-3xl font-extrabold text-purple-600">€{getPromotionPrice('featured', selectedDuration)}</span>
                   <span className="text-sm text-gray-500">+</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{selectedDuration} days</p>
@@ -986,7 +1036,7 @@ const PricingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900">Highlight</h4>
                 <p className="text-sm text-gray-600 mt-1">Stand out</p>
                 <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-cyan-600">€{promotionPricing.highlight[selectedDuration]}</span>
+                  <span className="text-3xl font-extrabold text-cyan-600">€{getPromotionPrice('highlight', selectedDuration)}</span>
                   <span className="text-sm text-gray-500">+</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{selectedDuration} days</p>
@@ -1018,7 +1068,7 @@ const PricingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900">Premium</h4>
                 <p className="text-sm text-gray-600 mt-1">Homepage featured</p>
                 <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-amber-600">€{promotionPricing.premium[selectedDuration]}</span>
+                  <span className="text-3xl font-extrabold text-amber-600">€{getPromotionPrice('premium', selectedDuration)}</span>
                   <span className="text-sm text-gray-500">+</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{selectedDuration} days</p>
@@ -1076,9 +1126,9 @@ const PricingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900">Spotlight</h4>
                 <p className="text-sm text-gray-600 mt-1">Increased visibility</p>
                 <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-gray-900">€{agencyFeaturePricing.spotlight.price}</span>
+                  <span className="text-3xl font-extrabold text-gray-900">€{getAgencyFeature('spotlight').price}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{agencyFeaturePricing.spotlight.duration}</p>
+                <p className="text-xs text-gray-500 mt-1">{getAgencyFeature('spotlight').duration}</p>
                 <ul className="mt-4 space-y-2 flex-grow">
                   <li className="flex items-center gap-2 text-sm text-gray-700">
                     <span className="text-gray-500">✓</span> Featured in agency directory
@@ -1110,9 +1160,9 @@ const PricingPage: React.FC = () => {
                 <h4 className="text-xl font-bold text-gray-900">Homepage</h4>
                 <p className="text-sm text-gray-600 mt-1">Featured on homepage</p>
                 <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-amber-600">€{agencyFeaturePricing.homepage.price}</span>
+                  <span className="text-3xl font-extrabold text-amber-600">€{getAgencyFeature('homepage').price}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{agencyFeaturePricing.homepage.duration}</p>
+                <p className="text-xs text-gray-500 mt-1">{getAgencyFeature('homepage').duration}</p>
                 <ul className="mt-4 space-y-2 flex-grow">
                   <li className="flex items-center gap-2 text-sm text-gray-700">
                     <span className="text-amber-500">✓</span> Spotlight benefits
@@ -1138,9 +1188,9 @@ const PricingPage: React.FC = () => {
                 <h4 className="text-xl font-bold">Premium</h4>
                 <p className="text-sm text-gray-400 mt-1">Maximum exposure</p>
                 <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-amber-400">€{agencyFeaturePricing.premium.price}</span>
+                  <span className="text-3xl font-extrabold text-amber-400">€{getAgencyFeature('premium').price}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{agencyFeaturePricing.premium.duration}</p>
+                <p className="text-xs text-gray-500 mt-1">{getAgencyFeature('premium').duration}</p>
                 <ul className="mt-4 space-y-2 flex-grow">
                   <li className="flex items-center gap-2 text-sm text-gray-300">
                     <span className="text-amber-400">✓</span> All Homepage benefits

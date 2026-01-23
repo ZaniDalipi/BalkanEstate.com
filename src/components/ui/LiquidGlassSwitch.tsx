@@ -36,36 +36,39 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
 }) => {
   const activeIndex = options.findIndex((opt) => opt.value === value);
 
-  // Size configurations
+  // Size configurations with generous padding for multi-language support
   const sizeConfig = {
     sm: {
       trackHeight: 40,
-      trackPadding: 4,
+      trackPadding: 6,
       orbSize: 48,
       text: 'text-xs',
       iconSize: 'w-3.5 h-3.5',
-      gap: 4,
-      optionMinWidth: 65,
+      gap: 6,
+      optionMinWidth: 75,
+      optionPaddingX: 16, // Horizontal padding per option
       orbIconSize: 'w-4 h-4',
     },
     md: {
       trackHeight: 48,
-      trackPadding: 5,
+      trackPadding: 8,
       orbSize: 56,
       text: 'text-sm',
       iconSize: 'w-4 h-4',
-      gap: 6,
-      optionMinWidth: 80,
+      gap: 8,
+      optionMinWidth: 90,
+      optionPaddingX: 20, // Horizontal padding per option
       orbIconSize: 'w-5 h-5',
     },
     lg: {
       trackHeight: 56,
-      trackPadding: 6,
+      trackPadding: 10,
       orbSize: 68,
       text: 'text-base',
       iconSize: 'w-5 h-5',
-      gap: 8,
-      optionMinWidth: 100,
+      gap: 10,
+      optionMinWidth: 110,
+      optionPaddingX: 24, // Horizontal padding per option
       orbIconSize: 'w-6 h-6',
     },
   };
@@ -76,10 +79,17 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
   const activeOption = options[activeIndex];
   const hasIcon = !!activeOption?.icon;
 
-  // Calculate option widths based on content
+  // Calculate option widths based on content with generous padding for all languages
+  // Use character count as rough estimate for text width + fixed padding
   const optionWidths = options.map(opt => {
-    const baseWidth = config.optionMinWidth;
-    return opt.icon ? baseWidth + 20 : baseWidth;
+    // Base width calculation: character count * approximate char width + padding
+    const charWidth = size === 'sm' ? 7 : size === 'md' ? 8 : 9;
+    const estimatedTextWidth = opt.label.length * charWidth;
+    const iconWidth = opt.icon ? (size === 'sm' ? 18 : size === 'md' ? 22 : 26) : 0;
+    const calculatedWidth = estimatedTextWidth + iconWidth + config.optionPaddingX * 2;
+
+    // Use the larger of calculated width or minimum width
+    return Math.max(calculatedWidth, config.optionMinWidth);
   });
 
   const trackWidth = optionWidths.reduce((a, b) => a + b, 0) + config.trackPadding * 2;
@@ -167,6 +177,8 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
                 style={{
                   width: optionWidths[index],
                   gap: config.gap,
+                  paddingLeft: config.optionPaddingX / 2,
+                  paddingRight: config.optionPaddingX / 2,
                 }}
               >
                 {option.icon && (
@@ -177,7 +189,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
                     {option.icon}
                   </span>
                 )}
-                <span className="whitespace-nowrap">{option.label}</span>
+                <span className="whitespace-nowrap overflow-hidden text-ellipsis">{option.label}</span>
               </button>
             );
           })}

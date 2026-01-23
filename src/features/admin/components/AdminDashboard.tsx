@@ -6,6 +6,7 @@ import AdminLayout from './AdminLayout';
 import type { AdminView } from './AdminLayout';
 import DiscountCodeManager from './DiscountCodeManager';
 import PromotionCouponManager from './PromotionCouponManager';
+import PromotionPlansManager from './PromotionPlansManager';
 import UserManager from './UserManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import PropertyManager from './PropertyManager';
@@ -26,6 +27,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'agent-requests': 'agentRequests',
   'discounts': 'discounts',
   'promotions': 'promotionCoupons',
+  'promotion-plans': 'promotionPlans',
   'properties': 'properties',
   'agencies': 'agencies',
   'pricing': 'pricing',
@@ -42,6 +44,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'agentRequests': 'agent-requests',
   'discounts': 'discounts',
   'promotionCoupons': 'promotions',
+  'promotionPlans': 'promotion-plans',
   'properties': 'properties',
   'agencies': 'agencies',
   'pricing': 'pricing',
@@ -178,6 +181,8 @@ const AdminDashboard: React.FC = () => {
         return <ActivityLog />;
       case 'pricing':
         return <PricingManager />;
+      case 'promotionPlans':
+        return <PromotionPlansManager />;
       case 'discounts':
         return <DiscountCodeManager />;
       case 'promotionCoupons':
