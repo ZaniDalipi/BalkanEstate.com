@@ -12,6 +12,8 @@
     "paid": "Paid",
     "amount": "Amount",
     "email": "Email",
+    "plan": "Plan",
+    "validUntil": "Valid Until",
     "sessionId": "Session ID",
     "whatsNext": "What's Next?",
     "subscriptionActive": "Your subscription is now active",

@@ -58,7 +58,7 @@ const PaymentSuccess: React.FC = () => {
   const [copiedCouponIndex, setCopiedCouponIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    // Get parameters from URL - supports both Stripe and Paddle
+    // Get parameters from URL - supports Stripe, LemonSqueezy
     const params = new URLSearchParams(window.location.search);
     const providerParam = params.get('provider') as PaymentProvider | null;
     const sid = params.get('session_id');
@@ -74,7 +74,8 @@ const PaymentSuccess: React.FC = () => {
     }
 
     // Verify payment based on available parameters
-    if (sid || oid) {
+    // LemonSqueezy only needs provider param - verification polls the API
+    if (sid || oid || providerParam === 'lemonsqueezy') {
       verifyPayment(params);
     } else {
       setError(t('success.noSessionFound'));
@@ -304,9 +305,27 @@ const PaymentSuccess: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Provider:</span>
                     <span className="font-medium text-neutral-800 capitalize">
-                      {paymentDetails.provider === 'stripe' ? 'Stripe' : 'Paddle'}
+                      {paymentDetails.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy'}
                     </span>
                   </div>
+                )}
+                {paymentDetails.subscription && (
+                  <>
+                    <div className="flex justify-between mt-4 pt-4 border-t border-neutral-300">
+                      <span className="text-neutral-600">{t('success.plan')}:</span>
+                      <span className="font-semibold text-neutral-800">
+                        {paymentDetails.subscription.plan}
+                      </span>
+                    </div>
+                    {paymentDetails.subscription.expiresAt && (
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600">{t('success.validUntil')}:</span>
+                        <span className="font-medium text-neutral-800">
+                          {new Date(paymentDetails.subscription.expiresAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
                 {(sessionId || orderId) && (
                   <div className="flex justify-between mt-4 pt-4 border-t border-neutral-300">
