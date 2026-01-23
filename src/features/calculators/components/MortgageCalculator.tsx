@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatPrice, getCurrencySymbol } from '@/utils/currency';
 
@@ -28,8 +28,16 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
     const [interestRate, setInterestRate] = useState(3.5);
     const [loanTerm, setLoanTerm] = useState(30);
     const [monthlyPayment, setMonthlyPayment] = useState(0);
+    const [isSliderActive, setIsSliderActive] = useState(false);
 
     const currencySymbol = getCurrencySymbol(country);
+
+    // Handle slider interaction states
+    const handleSliderStart = useCallback(() => setIsSliderActive(true), []);
+    const handleSliderEnd = useCallback(() => {
+        // Keep animation running briefly after release for smooth feel
+        setTimeout(() => setIsSliderActive(false), 800);
+    }, []);
 
     const downPaymentAmount = useMemo(() => {
         return downPaymentType === 'percent' ? propertyPrice * (downPayment / 100) : downPayment;
@@ -107,66 +115,95 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                         </div>
                     </div>
 
-                    {/* Magical Slider Container */}
-                    <div className="relative py-3">
-                        {/* Glow effect behind track */}
+                    {/* Premium Slider Container */}
+                    <div className="relative pt-6 pb-2">
+                        {/* Percentage markers positioned along the track */}
+                        <div className="absolute top-0 left-0 right-0 flex justify-between px-0">
+                            {[0, 25, 50, 75, 100].map(mark => (
+                                <div key={mark} className="flex flex-col items-center" style={{ width: '1px' }}>
+                                    <span
+                                        className={`text-[10px] font-semibold transition-all duration-300 ${
+                                            sliderPercent >= mark
+                                                ? 'text-primary scale-110'
+                                                : 'text-neutral-400'
+                                        }`}
+                                    >
+                                        {mark}%
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Smooth glow effect behind track - only when active */}
                         <div
-                            className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md transition-all duration-300"
+                            className={`absolute top-1/2 mt-1 -translate-y-1/2 h-5 rounded-full transition-all duration-500 ${
+                                isSliderActive ? 'opacity-100' : 'opacity-40'
+                            }`}
                             style={{
                                 left: 0,
                                 width: `${sliderPercent}%`,
-                                background: 'linear-gradient(90deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4), rgba(236,72,153,0.3))'
+                                background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.25), rgba(236,72,153,0.2))',
+                                filter: 'blur(8px)'
                             }}
                         />
 
-                        {/* Track background with glass effect */}
-                        <div className="relative h-3 rounded-full bg-gradient-to-r from-neutral-200/80 via-neutral-100 to-neutral-200/80 shadow-inner overflow-hidden">
-                            {/* Animated gradient fill */}
+                        {/* Track background - smooth glass effect */}
+                        <div className="relative h-2.5 rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden mt-2">
+                            {/* Smooth gradient fill with conditional animation */}
                             <div
-                                className="absolute inset-y-0 left-0 rounded-full transition-all duration-200 ease-out"
+                                className="absolute inset-y-0 left-0 rounded-full transition-all duration-150 ease-out"
                                 style={{
                                     width: `${sliderPercent}%`,
-                                    background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
-                                    backgroundSize: '200% 100%',
-                                    animation: 'shimmer 3s linear infinite'
+                                    background: 'linear-gradient(90deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #ec4899 100%)',
+                                    backgroundSize: isSliderActive ? '200% 100%' : '100% 100%',
+                                    animation: isSliderActive ? 'shimmer 2s ease-in-out infinite' : 'none'
                                 }}
                             />
 
-                            {/* Sparkle particles on the progress */}
-                            <div
-                                className="absolute inset-y-0 left-0 overflow-hidden rounded-full"
-                                style={{ width: `${sliderPercent}%` }}
-                            >
-                                <div className="absolute inset-0 opacity-60">
-                                    <div className="absolute top-1 left-[10%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.5s' }} />
-                                    <div className="absolute top-1.5 left-[30%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.3s' }} />
-                                    <div className="absolute top-0.5 left-[60%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.6s' }} />
-                                    <div className="absolute top-1 left-[85%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2.2s', animationDelay: '0.9s' }} />
+                            {/* Subtle sparkles - only visible when active */}
+                            {isSliderActive && sliderPercent > 10 && (
+                                <div
+                                    className="absolute inset-y-0 left-0 overflow-hidden rounded-full"
+                                    style={{ width: `${sliderPercent}%` }}
+                                >
+                                    <div className="absolute inset-0 opacity-70">
+                                        <div className="absolute top-0.5 left-[20%] w-1 h-1 bg-white rounded-full animate-pulse" />
+                                        <div className="absolute top-1 left-[50%] w-0.5 h-0.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                                        <div className="absolute top-0.5 left-[80%] w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Glass highlight on track */}
-                            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent rounded-t-full" />
+                            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full" />
                         </div>
 
-                        {/* Custom thumb */}
+                        {/* Premium custom thumb */}
                         <div
-                            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200"
+                            className={`absolute top-1/2 mt-1 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-150 ease-out ${
+                                isSliderActive ? 'scale-110' : 'scale-100'
+                            }`}
                             style={{ left: `${sliderPercent}%` }}
                         >
-                            {/* Outer glow ring */}
-                            <div className="absolute inset-0 -m-2 rounded-full bg-primary/20 animate-pulse" />
+                            {/* Outer glow ring - only animates when active */}
+                            <div className={`absolute inset-0 -m-2 rounded-full bg-primary/20 transition-opacity duration-300 ${
+                                isSliderActive ? 'opacity-100 animate-pulse' : 'opacity-0'
+                            }`} />
 
-                            {/* Thumb container */}
-                            <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-white via-white to-neutral-100 shadow-lg border-2 border-primary/50 flex items-center justify-center transition-transform">
-                                {/* Inner gradient */}
-                                <div className="absolute inset-1 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
+                            {/* Thumb container with glass effect */}
+                            <div className={`relative w-7 h-7 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
+                                isSliderActive
+                                    ? 'shadow-[0_4px_20px_rgba(99,102,241,0.4)] ring-2 ring-primary/30'
+                                    : 'shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
+                            }`}>
+                                {/* Inner gradient background */}
+                                <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
 
                                 {/* Money icon */}
-                                <span className="relative text-xs">💵</span>
+                                <span className="relative text-xs drop-shadow-sm">💵</span>
 
-                                {/* Shine effect */}
-                                <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/40 rounded-full blur-sm" />
+                                {/* Glass shine effect */}
+                                <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/50 rounded-full blur-[2px]" />
                             </div>
                         </div>
 
@@ -178,32 +215,26 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                             step={downPaymentType === 'percent' ? 1 : 1000}
                             value={downPayment}
                             onChange={handleDownPaymentChange}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            onMouseDown={handleSliderStart}
+                            onMouseUp={handleSliderEnd}
+                            onTouchStart={handleSliderStart}
+                            onTouchEnd={handleSliderEnd}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 mt-2"
                         />
                     </div>
 
-                    {/* Value display and markers */}
-                    <div className="flex items-center justify-between mt-1">
-                        <div className="flex gap-2">
-                            {[0, 25, 50, 75, 100].map(mark => (
-                                <span
-                                    key={mark}
-                                    className={`text-[10px] font-medium transition-colors ${
-                                        sliderPercent >= mark ? 'text-primary' : 'text-neutral-400'
-                                    }`}
-                                >
-                                    {downPaymentType === 'percent' ? `${mark}%` : ''}
-                                </span>
-                            ))}
-                        </div>
+                    {/* Value display with input */}
+                    <div className="flex items-center justify-between mt-2">
+                        <p className="text-sm font-semibold text-primary">{formatPrice(downPaymentAmount, country)}</p>
                         <input
                             type="number"
                             value={downPayment}
                             onChange={handleDownPaymentChange}
-                            className="w-20 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-md p-1.5 text-center text-neutral-900"
+                            onFocus={handleSliderStart}
+                            onBlur={handleSliderEnd}
+                            className="w-20 text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-lg p-2 text-center text-neutral-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         />
                     </div>
-                    <p className="text-[11px] text-right text-primary font-medium mt-1">({formatPrice(downPaymentAmount, country)})</p>
                 </div>
 
                  <div>
