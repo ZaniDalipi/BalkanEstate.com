@@ -136,7 +136,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
       {/* Recommendation Panel - Compact for mobile */}
       {showPanel && currentMapFeatured && (
         <div
-          className="animate-fade-in w-[180px] sm:w-[220px] md:w-[260px] bg-white/95 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] overflow-y-auto"
+          className="animate-fade-in w-[160px] xs:w-[180px] sm:w-[220px] md:w-[260px] max-w-[calc(100vw-24px)] bg-white/95 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[60vh] overflow-y-auto"
           style={{
             border: `2px solid ${tierConfig.color}`,
             boxShadow: `0 6px 24px ${tierConfig.color}25, 0 2px 8px rgba(0,0,0,0.1)`,

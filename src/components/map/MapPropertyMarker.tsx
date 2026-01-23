@@ -614,14 +614,14 @@ const PropertyPopup: React.FC<{
   // Standard popup - modern clean design, compact for mobile
   return (
     <div
-      className="w-[160px] sm:w-[200px] cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-white"
+      className="w-[140px] xs:w-[160px] sm:w-[200px] cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden bg-white"
       style={{
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
       }}
       onClick={() => onPopupClick(property.id)}
     >
       {/* Image section - smaller on mobile */}
-      <div className="relative h-[90px] sm:h-[120px]">
+      <div className="relative h-[80px] xs:h-[90px] sm:h-[120px]">
         {imageErrors.has(0) ? (
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
             <BuildingOfficeIcon className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-400" />
