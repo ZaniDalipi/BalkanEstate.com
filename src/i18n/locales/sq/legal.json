@@ -160,11 +160,11 @@
       "cancel": "Mund të anuloni abonimin tuaj në çdo kohë përmes cilësimeve të llogarisë",
       "refund": "Rimbursimet janë të disponueshme brenda 7 ditëve (mujore) ose 30 ditëve (vjetore) nga blerja nëse nuk jeni të kënaqur (shih Politikën tonë të Rimbursimit)",
       "price": "Mund të ndryshojmë çmimet e abonimit me 30 ditë njoftim",
-      "paddle": {
+      "lemonsqueezy": {
         "title": "Tregtari i Regjistruar",
-        "morStatement": "Procesi ynë i porosisë kryhet nga rishitësi ynë online Paddle.com. Paddle.com është Tregtari i Regjistruar për të gjitha porositë tona. Paddle ofron të gjitha pyetjet e shërbimit ndaj klientit dhe menaxhon kthimet.",
-        "text": "Kur bëni një blerje, po kryeni transaksion me Paddle, i cili menaxhon përpunimin e pagesave, faturimin, përputhshmërinë me TVSH/taksat dhe rimbursimet. Pagesa juaj do të shfaqet në deklaratën tuaj si një tarifë nga Paddle.",
-        "buyerTerms": "Duke bërë një blerje, pranoni gjithashtu Kushtet e Blerësit të Paddle."
+        "morStatement": "Procesi ynë i porosisë kryhet nga rishitësi ynë online LemonSqueezy. LemonSqueezy është Tregtari i Regjistruar për të gjitha porositë tona. LemonSqueezy ofron të gjitha pyetjet e shërbimit ndaj klientit dhe menaxhon kthimet.",
+        "text": "Kur bëni një blerje, po kryeni transaksion me LemonSqueezy, i cili menaxhon përpunimin e pagesave, faturimin, përputhshmërinë me TVSH/taksat dhe rimbursimet. Pagesa juaj do të shfaqet në deklaratën tuaj si një tarifë nga LemonSqueezy.",
+        "buyerTerms": "Duke bërë një blerje, pranoni gjithashtu Kushtet e Blerësit të LemonSqueezy."
       }
     },
     "prohibited": {

@@ -52,7 +52,7 @@ export interface IUser extends Document {
   isSubscribed: boolean;
   subscriptionPlan?: string; // Product ID (e.g., 'buyer_pro_monthly')
   subscriptionProductName?: string; // Human-readable name (e.g., 'Buyer Pro Monthly')
-  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'paddle' | 'lemonsqueezy' | 'web'; // Where subscription came from
+  subscriptionSource?: 'google' | 'apple' | 'stripe' | 'lemonsqueezy' | 'web'; // Where subscription came from
   subscriptionExternalId?: string; // External subscription ID from payment provider
   lemonSqueezyCustomerId?: string; // LemonSqueezy customer ID
   lemonSqueezySubscriptionId?: string; // LemonSqueezy subscription ID
@@ -412,7 +412,7 @@ const UserSchema: Schema = new Schema(
     },
     subscriptionSource: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'paddle', 'lemonsqueezy', 'web'],
+      enum: ['google', 'apple', 'stripe', 'lemonsqueezy', 'web'],
       index: true, // Index for querying by subscription source
     },
     subscriptionExternalId: {

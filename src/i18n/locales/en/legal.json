@@ -160,11 +160,11 @@
       "cancel": "You can cancel your subscription at any time through your account settings",
       "refund": "Refunds are available within 7 days (monthly) or 30 days (yearly) of purchase if you are not satisfied (see our Refund Policy)",
       "price": "We may change subscription prices with 30 days notice",
-      "paddle": {
+      "lemonsqueezy": {
         "title": "Merchant of Record",
-        "morStatement": "Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns.",
-        "text": "When you make a purchase, you are transacting with Paddle, who handles payment processing, invoicing, VAT/tax compliance, and refunds. Your payment will appear on your statement as a charge from Paddle.",
-        "buyerTerms": "By making a purchase, you also agree to Paddle's Buyer Terms and Conditions."
+        "morStatement": "Our order process is conducted by our online reseller LemonSqueezy. LemonSqueezy is the Merchant of Record for all our orders. LemonSqueezy provides all customer service inquiries and handles returns.",
+        "text": "When you make a purchase, you are transacting with LemonSqueezy, who handles payment processing, invoicing, VAT/tax compliance, and refunds. Your payment will appear on your statement as a charge from LemonSqueezy.",
+        "buyerTerms": "By making a purchase, you also agree to LemonSqueezy's Terms of Service."
       }
     },
     "prohibited": {

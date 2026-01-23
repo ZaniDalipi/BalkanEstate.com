@@ -11,14 +11,13 @@
  * - LemonSqueezy: Primary provider for all Balkan countries (Merchant of Record)
  *   Handles VAT/tax compliance globally - ~5% + $0.50 fees
  * - Stripe: Fallback for EU countries - ~2.9% + €0.25 fees
- * - Paddle: Legacy support - ~5% + €0.50 fees
  *
  * Easy to modify and maintain as payment options change over time
  */
 
 // ====== PAYMENT PROVIDERS ======
 
-export type PaymentProvider = 'stripe' | 'paddle' | 'lemonsqueezy';
+export type PaymentProvider = 'stripe' | 'lemonsqueezy';
 
 export interface PaymentProviderInfo {
   id: PaymentProvider;
@@ -48,15 +47,6 @@ export const PAYMENT_PROVIDERS: Record<PaymentProvider, PaymentProviderInfo> = {
     logo: 'stripe',
     supportedCountries: ['GR', 'HR', 'BG', 'RO', 'SI'],
     supportedMethods: ['card', 'sepa_debit', 'apple_pay', 'google_pay', 'klarna', 'ideal', 'bancontact', 'giropay', 'eps'],
-  },
-  paddle: {
-    id: 'paddle',
-    name: 'Paddle',
-    description: 'Secure payments with automatic VAT handling for Balkan countries',
-    fees: '~5% + €0.50',
-    logo: 'paddle',
-    supportedCountries: ['RS', 'AL', 'BA', 'MK', 'ME', 'XK'],
-    supportedMethods: ['card', 'paypal', 'apple_pay', 'google_pay'],
   },
 };
 

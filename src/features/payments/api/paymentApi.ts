@@ -2,11 +2,11 @@
  * Payment API Service
  *
  * Handles all payment-related API calls with support for multiple providers:
- * - Stripe for EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
- * - Paddle for non-EU Balkan countries (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ * - LemonSqueezy for all Balkan countries (Merchant of Record)
+ * - Stripe as fallback for EU countries
  *
  * The API automatically routes to the appropriate provider based on country.
- * Paddle is a Merchant of Record (MoR) handling VAT/tax compliance.
+ * LemonSqueezy is a Merchant of Record (MoR) handling VAT/tax compliance.
  */
 
 import { apiRequest } from '@/shared/api/httpClient';
@@ -75,7 +75,7 @@ export interface SupportedCountriesResponse {
     };
   }>;
   stripeCountries: Array<{ countryCode: string; countryName: string }>;
-  paddleCountries: Array<{ countryCode: string; countryName: string }>;
+  lemonSqueezyCountries: Array<{ countryCode: string; countryName: string }>;
 }
 
 export interface VerifyPaymentResponse {
@@ -150,7 +150,7 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         countryName: info.countryName,
         provider: info.provider,
         providerInfo: {
-          name: info.provider === 'stripe' ? 'Stripe' : 'Paddle',
+          name: info.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy',
           description: info.provider === 'stripe'
             ? 'Secure card payments'
             : 'Secure payments with automatic VAT handling',
@@ -161,7 +161,7 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         currency: info.currency,
         supportedMethods: info.provider === 'stripe'
           ? ['card', 'sepa_debit', 'apple_pay', 'google_pay']
-          : ['card', 'bank_transfer', 'wallet'],
+          : ['card', 'paypal', 'apple_pay', 'google_pay'],
       };
     }
     return null;
@@ -187,7 +187,7 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       countries: countries.map(c => ({
         ...c,
         providerInfo: {
-          name: c.provider === 'stripe' ? 'Stripe' : 'Paddle',
+          name: c.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy',
           description: c.provider === 'stripe'
             ? 'Secure card payments'
             : 'Secure payments with automatic VAT handling',
@@ -197,8 +197,8 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       stripeCountries: countries
         .filter(c => c.provider === 'stripe')
         .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
-      paddleCountries: countries
-        .filter(c => c.provider === 'paddle')
+      lemonSqueezyCountries: countries
+        .filter(c => c.provider === 'lemonsqueezy')
         .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
     };
   }
