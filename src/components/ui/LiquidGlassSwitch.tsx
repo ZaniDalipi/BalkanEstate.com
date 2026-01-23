@@ -139,7 +139,10 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
                 }}
               >
                 {option.icon && (
-                  <span className={`flex-shrink-0 ${config.iconSize} [&>svg]:w-full [&>svg]:h-full transition-colors duration-300`}>
+                  <span
+                    className={`flex-shrink-0 ${config.iconSize} transition-colors duration-300`}
+                    style={{ color: 'inherit' }}
+                  >
                     {option.icon}
                   </span>
                 )}
