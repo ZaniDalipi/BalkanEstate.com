@@ -558,7 +558,7 @@ const MainLayout: React.FC = () => {
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </Suspense>
 
-        <div className={`relative transition-all duration-300 ease-in-out h-screen flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
+        <div className={`relative transition-all duration-300 ease-in-out min-h-screen flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`} style={{ minHeight: '100dvh' }}>
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
             </Suspense>

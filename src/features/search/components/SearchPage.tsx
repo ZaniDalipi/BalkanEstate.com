@@ -1317,7 +1317,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             </div>
                         </div>
 
-                        <div className="absolute bottom-16 landscape:bottom-12 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none">
+                        <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">
