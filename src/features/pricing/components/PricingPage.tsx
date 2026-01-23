@@ -151,13 +151,19 @@ const PricingPage: React.FC = () => {
       setLoadingListings(true);
       try {
         const token = localStorage.getItem('balkan_estate_token');
+        console.log('Fetching listings with token:', token ? 'exists' : 'missing');
         const response = await fetch(`${API_URL}/properties/my-listings`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
+        console.log('Response status:', response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log('Raw API response:', data);
           // Map the properties to UserListing format
-          const listings = (data.properties || []).map((p: any) => ({
+          const listings = (data.properties || data || []).map((p: any) => ({
             id: p._id || p.id,
             address: p.address && p.city
               ? `${p.address}, ${p.city}`
@@ -166,7 +172,10 @@ const PricingPage: React.FC = () => {
             price: p.price || 0,
             status: p.status || 'active',
           }));
+          console.log('Mapped listings:', listings);
           setUserListings(listings);
+        } else {
+          console.error('API returned non-ok status:', response.status);
         }
       } catch (err) {
         console.error('Error fetching user listings:', err);
