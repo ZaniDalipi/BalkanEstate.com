@@ -347,21 +347,105 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
 
       <div className="space-y-4">
         <div>
-          <div className="flex justify-between items-baseline mb-1">
+          <div className="flex justify-between items-baseline mb-2">
             <label htmlFor="planning-to-stay" className="text-xs font-semibold text-neutral-700">
               {t('calculators:rentVsBuy.fields.planningToStay')}
             </label>
-            <span className="text-base font-bold text-neutral-900">{planningToStay} {t('calculators:rentVsBuy.fields.years')}</span>
+            <span className="text-lg font-bold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent animate-pulse">
+              {planningToStay} {t('calculators:rentVsBuy.fields.years')}
+            </span>
           </div>
-          <input
-            id="planning-to-stay"
-            type="range"
-            min={1}
-            max={30}
-            value={planningToStay}
-            onChange={e => setPlanningToStay(e.target.valueAsNumber)}
-            className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
-          />
+
+          {/* Magical Slider Container */}
+          <div className="relative py-3">
+            {/* Glow effect behind track */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md transition-all duration-300"
+              style={{
+                left: 0,
+                width: `${((planningToStay - 1) / 29) * 100}%`,
+                background: 'linear-gradient(90deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4), rgba(236,72,153,0.3))'
+              }}
+            />
+
+            {/* Track background with glass effect */}
+            <div className="relative h-3 rounded-full bg-gradient-to-r from-neutral-200/80 via-neutral-100 to-neutral-200/80 shadow-inner overflow-hidden">
+              {/* Animated gradient fill */}
+              <div
+                className="absolute inset-y-0 left-0 rounded-full transition-all duration-200 ease-out"
+                style={{
+                  width: `${((planningToStay - 1) / 29) * 100}%`,
+                  background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 3s linear infinite'
+                }}
+              />
+
+              {/* Sparkle particles on the progress */}
+              <div
+                className="absolute inset-y-0 left-0 overflow-hidden rounded-full"
+                style={{ width: `${((planningToStay - 1) / 29) * 100}%` }}
+              >
+                <div className="absolute inset-0 opacity-60">
+                  <div className="absolute top-1 left-[10%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.5s' }} />
+                  <div className="absolute top-1.5 left-[30%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.3s' }} />
+                  <div className="absolute top-0.5 left-[60%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.6s' }} />
+                  <div className="absolute top-1 left-[85%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2.2s', animationDelay: '0.9s' }} />
+                </div>
+              </div>
+
+              {/* Glass highlight on track */}
+              <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent rounded-t-full" />
+            </div>
+
+            {/* Custom thumb */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200"
+              style={{ left: `${((planningToStay - 1) / 29) * 100}%` }}
+            >
+              {/* Outer glow ring */}
+              <div className="absolute inset-0 -m-2 rounded-full bg-primary/20 animate-pulse" />
+
+              {/* Thumb container */}
+              <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-white via-white to-neutral-100 shadow-lg border-2 border-primary/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                {/* Inner gradient */}
+                <div className="absolute inset-1 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
+
+                {/* House icon */}
+                <svg className="relative w-3.5 h-3.5 text-white drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+
+                {/* Shine effect */}
+                <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/40 rounded-full blur-sm" />
+              </div>
+            </div>
+
+            {/* Invisible range input for interaction */}
+            <input
+              id="planning-to-stay"
+              type="range"
+              min={1}
+              max={30}
+              value={planningToStay}
+              onChange={e => setPlanningToStay(e.target.valueAsNumber)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
+          </div>
+
+          {/* Year markers */}
+          <div className="flex justify-between px-1 mt-1">
+            {[1, 10, 20, 30].map(year => (
+              <span
+                key={year}
+                className={`text-[10px] font-medium transition-colors ${
+                  planningToStay >= year ? 'text-primary' : 'text-neutral-400'
+                }`}
+              >
+                {year}y
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="relative">
