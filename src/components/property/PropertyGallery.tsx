@@ -190,27 +190,27 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         {/* Action Buttons (Annotate, Share, 3D Tour) */}
         {viewMode === 'photos' && (
           <>
-            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+            <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-10">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenEditor(currentImageUrl);
                 }}
-                className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-4 py-2 rounded-full hover:scale-105 transition-transform shadow-md"
+                className="flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-3 py-2 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 h-10 min-w-[40px]"
               >
-                <PencilIcon className="w-5 h-5" />
+                <PencilIcon className="w-5 h-5 flex-shrink-0" />
                 <span className="hidden sm:inline">{t('actions.annotate')}</span>
               </button>
 
-              <div className="relative" ref={shareContainerRef}>
+              <div className="relative flex-shrink-0" ref={shareContainerRef}>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsSharePopoverOpen((prev) => !prev);
                   }}
-                  className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-4 py-2 rounded-full hover:scale-105 transition-transform shadow-md"
+                  className="flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-3 py-2 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 h-10 min-w-[40px]"
                 >
-                  <ShareIcon className="w-5 h-5" />
+                  <ShareIcon className="w-5 h-5 flex-shrink-0" />
                   <span className="hidden sm:inline">{t('actions.share')}</span>
                 </button>
                 {isSharePopoverOpen && (
@@ -224,9 +224,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-4 py-2 rounded-full hover:scale-105 transition-transform shadow-md"
+                  className="flex items-center justify-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-3 py-2 rounded-full hover:scale-105 transition-transform shadow-md flex-shrink-0 h-10 min-w-[40px]"
                 >
-                  <VideoCameraIcon className="w-5 h-5" />
+                  <VideoCameraIcon className="w-5 h-5 flex-shrink-0" />
                   <span className="hidden sm:inline">{t('actions.tour3d')}</span>
                 </a>
               )}
@@ -241,23 +241,23 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handlePrevImage();
                   }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10"
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 flex items-center justify-center flex-shrink-0"
                 >
-                  <ChevronLeftIcon className="w-6 h-6 text-neutral-800" />
+                  <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-800 flex-shrink-0" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNextImage();
                   }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10"
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 flex items-center justify-center flex-shrink-0"
                 >
-                  <ChevronRightIcon className="w-6 h-6 text-neutral-800" />
+                  <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-800 flex-shrink-0" />
                 </button>
 
                 {/* Image Indicators - Show max 3 dots with counter */}
                 <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-10">
-                  <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
+                  <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full h-6 flex-shrink-0">
                     {[0, 1, 2].map((dotIndex) => {
                       const totalImages = imagesForCurrentCategory.length;
                       const isActive = dotIndex === Math.min(currentImageIndex, 2) ||
@@ -271,17 +271,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                               setCurrentImageIndex(dotIndex);
                             }
                           }}
-                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                          className={`rounded-full transition-all duration-200 flex-shrink-0 ${
                             (dotIndex === currentImageIndex || (currentImageIndex > 2 && dotIndex === 2))
-                              ? 'bg-white w-4'
-                              : 'bg-white/40'
+                              ? 'bg-white w-4 h-2'
+                              : 'bg-white/40 w-2 h-2'
                           }`}
+                          style={{ aspectRatio: dotIndex === currentImageIndex || (currentImageIndex > 2 && dotIndex === 2) ? '2/1' : '1/1' }}
                           aria-label={`Go to image ${dotIndex + 1}`}
                         />
                       );
                     })}
                     {imagesForCurrentCategory.length > 3 && (
-                      <span className="text-white text-[10px] font-medium ml-1">
+                      <span className="text-white text-[10px] font-medium ml-1 whitespace-nowrap flex-shrink-0">
                         {currentImageIndex + 1}/{imagesForCurrentCategory.length}
                       </span>
                     )}

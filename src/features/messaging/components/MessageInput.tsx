@@ -107,9 +107,9 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={disabled || isSending}
-                    className="bg-neutral-200 text-neutral-700 rounded-full p-2.5 sm:p-3.5 hover:bg-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+                    className="bg-neutral-200 text-neutral-700 rounded-full p-2.5 sm:p-3.5 hover:bg-neutral-300 disabled:bg-neutral-100 disabled:cursor-not-allowed transition-colors flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center"
                 >
-                    <PhotoIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <PhotoIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 </button>
                 <textarea
                     value={text}
@@ -129,12 +129,12 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, onTyping, di
                 <button
                     type="submit"
                     disabled={disabled || isSending || (!text.trim() && !imageFile)}
-                    className="bg-primary text-white rounded-full p-2.5 sm:p-3.5 hover:bg-primary-dark disabled:bg-primary/50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+                    className="bg-primary text-white rounded-full p-2.5 sm:p-3.5 hover:bg-primary-dark disabled:bg-primary/50 disabled:cursor-not-allowed transition-colors flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center"
                 >
                     {isSending ? (
-                        <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
                     ) : (
-                        <PaperAirplaneIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <PaperAirplaneIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                     )}
                 </button>
             </form>
