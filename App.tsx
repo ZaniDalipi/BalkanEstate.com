@@ -574,12 +574,12 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans overflow-x-hidden max-w-full">
+    <div className="min-h-screen bg-neutral-50 font-sans overflow-x-hidden max-w-full" style={{ height: '100dvh' }}>
         <Suspense fallback={null}>
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </Suspense>
 
-        <div className={`relative transition-all duration-300 ease-in-out min-h-screen flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`} style={{ minHeight: '100dvh' }}>
+        <div className={`relative transition-all duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
             </Suspense>
