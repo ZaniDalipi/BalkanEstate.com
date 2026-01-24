@@ -516,13 +516,14 @@ const PricingPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Tab Switcher - Glass Style */}
+        {/* Tab Switcher - Clean Pill Style */}
         <div className="flex justify-center mb-10 sm:mb-14">
-          <div className="bg-white/60 backdrop-blur-xl p-1.5 rounded-full inline-flex shadow-lg border border-white/30">
+          {/* Desktop: Single row with all tabs */}
+          <div className="hidden sm:inline-flex bg-gray-100 p-1.5 rounded-full shadow-lg">
             {[
               {
                 value: 'seller',
-                label: t('pricing:tabs.forSellers', 'Sellers'),
+                label: t('pricing:tabs.forSellers', 'For Sellers'),
                 icon: (
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -533,13 +534,11 @@ const PricingPage: React.FC = () => {
               },
               {
                 value: 'buyer',
-                label: t('pricing:tabs.forBuyers', 'Buyers'),
+                label: t('pricing:tabs.forBuyers', 'For Buyers'),
                 icon: (
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" />
                     <path d="M21 21l-4.35-4.35" />
-                    <path d="M11 8v6" />
-                    <path d="M8 11h6" />
                   </svg>
                 ),
               },
@@ -566,18 +565,42 @@ const PricingPage: React.FC = () => {
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value as 'seller' | 'buyer' | 'listing' | 'agency')}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ease-out transform active:scale-95 ${
+                className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
                   activeTab === tab.value
-                    ? 'bg-white text-gray-900 shadow-md scale-100'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/30'
+                    ? 'bg-white text-gray-900 shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <span className={`transition-transform duration-300 ${activeTab === tab.value ? 'scale-110' : ''}`}>
-                  {tab.icon}
-                </span>
+                {tab.icon}
                 <span>{tab.label}</span>
               </button>
             ))}
+          </div>
+
+          {/* Mobile: Stacked 2x2 grid for better touch targets */}
+          <div className="sm:hidden w-full max-w-sm">
+            <div className="bg-gray-100 p-1.5 rounded-2xl shadow-lg">
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { value: 'seller', label: t('pricing:tabs.forSellers', 'For Sellers') },
+                  { value: 'buyer', label: t('pricing:tabs.forBuyers', 'For Buyers') },
+                  { value: 'listing', label: t('pricing:tabs.listingHighlight', 'Highlight') },
+                  { value: 'agency', label: t('pricing:tabs.agencyFeature', 'Agency') },
+                ].map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value as 'seller' | 'buyer' | 'listing' | 'agency')}
+                    className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      activeTab === tab.value
+                        ? 'bg-white text-gray-900 shadow-md'
+                        : 'text-gray-600'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
