@@ -592,7 +592,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   }`}
                   title="Clean, minimal - properties stand out"
                 >
-                  Clean
+                  {t('search:map.clean', 'Clean')}
                 </button>
                 <button
                   onClick={() => setMapType('voyager')}
@@ -603,7 +603,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   }`}
                   title="Shows neighborhoods, parks, amenities"
                 >
-                  Color
+                  {t('search:map.color', 'Color')}
                 </button>
                 <button
                   onClick={() => setMapType('street')}
@@ -696,7 +696,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 title={t('search:map.buildings3D', '3D Buildings')}
               >
                 <span className="text-sm">🏢</span>
-                <span className="hidden sm:inline">3D</span>
+                <span className="hidden sm:inline">{t('search:map.buildings3D', '3D')}</span>
               </button>
 
               {/* Landmarks Toggle */}
@@ -710,7 +710,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 title={t('search:map.landmarks', 'Landmarks')}
               >
                 <span className="text-sm">🏛️</span>
-                <span className="hidden sm:inline">POI</span>
+                <span className="hidden sm:inline">{t('search:map.poi', 'POI')}</span>
               </button>
 
               {/* Cadastre Toggle - only in satellite/hybrid views */}
@@ -725,7 +725,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   title={t('search:map.cadastralParcels')}
                 >
                   <span className="text-sm">📐</span>
-                  <span className="hidden sm:inline">Parcels</span>
+                  <span className="hidden sm:inline">{t('search:map.parcels', 'Parcels')}</span>
                 </button>
               )}
 
@@ -737,10 +737,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     ? 'bg-emerald-600 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title="Measure land"
+                title={t('search:map.measure', 'Measure land')}
               >
                 <span className="text-sm">📏</span>
-                <span className="hidden sm:inline">Measure</span>
+                <span className="hidden sm:inline">{t('search:map.measure', 'Measure')}</span>
               </button>
 
               {/* Legend Toggle */}
@@ -842,7 +842,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     }`}
                   >
                     <MapLegendIcon className="w-5 h-5 flex-shrink-0" />
-                    <span className="text-[15px] font-semibold">Legend</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.legend', 'Legend')}</span>
                   </button>
 
                   {/* Landmarks Toggle */}
@@ -855,7 +855,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     }`}
                   >
                     <span className="text-xl flex-shrink-0">🏛️</span>
-                    <span className="text-[15px] font-semibold">Points of Interest</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.pointsOfInterest', 'Points of Interest')}</span>
                   </button>
 
                   {/* Measurement Tool Toggle */}
@@ -871,7 +871,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     }`}
                   >
                     <span className="text-xl flex-shrink-0">📏</span>
-                    <span className="text-[15px] font-semibold">Measure Distance</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.measureDistance', 'Measure Distance')}</span>
                   </button>
 
                   {/* 3D Buildings Toggle */}
@@ -884,7 +884,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     }`}
                   >
                     <span className="text-xl flex-shrink-0">🏢</span>
-                    <span className="text-[15px] font-semibold">3D Buildings</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.buildings3D', '3D Buildings')}</span>
                   </button>
 
                   {/* Cadastre Toggle - only in satellite/hybrid views */}
@@ -898,7 +898,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       }`}
                     >
                       <span className="text-xl flex-shrink-0">📐</span>
-                      <span className="text-[15px] font-semibold">Land Parcels</span>
+                      <span className="text-[15px] font-semibold">{t('search:map.landParcels', 'Land Parcels')}</span>
                     </button>
                   )}
                 </div>
