@@ -1,102 +1,227 @@
 {
-  "title": "Choose Your Selling Plan",
-  "subtitle": "Get your property in front of thousands of potential buyers",
-  "loading": "Loading plans...",
-  "limitedOffer": "Limited Time Offer Ends In:",
-  "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
-  "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
+  "pageTitle": "Planuri de Prețuri",
+  "title": "Alegeți Planul Dumneavoastră",
+  "subtitle": "Prezentați proprietatea dumneavoastră în fața miilor de cumpărători potențiali cu opțiunile noastre flexibile de prețuri.",
+  "loading": "Se încarcă planurile de prețuri...",
+  "noPlans": "Nu sunt disponibile planuri de prețuri în acest moment.",
+  "simpleTransparent": "Prețuri simple și transparente",
+  "tabs": {
+    "forSellers": "Pentru Vânzători",
+    "forBuyers": "Pentru Cumpărători",
+    "listingHighlight": "Evidențiere",
+    "agencyFeature": "Agenție"
+  },
+  "error": {
+    "loadFailed": "Încărcarea planurilor de prețuri a eșuat"
+  },
+  "limitedOffer": "Oferta limitată se încheie în:",
+  "offerTitle": "Felicitări! Ați deblocat reduceri exclusive!",
+  "offerSubtitle": "Bucurați-vă de această ofertă unică pentru planurile noastre de vânzare ca mulțumire.",
+  "badges": {
+    "mostPopular": "CEL MAI POPULAR",
+    "bestForTeams": "CEL MAI BUN PENTRU ECHIPE",
+    "buyerPro": "CUMPĂRĂTOR PRO",
+    "popular": "Popular"
+  },
   "plans": {
     "free": {
-      "name": "Free",
-      "description": "Perfect for getting started"
+      "name": "Gratuit",
+      "description": "Perfect pentru a începe"
     },
     "proMonthly": {
-      "name": "Pro Monthly",
-      "description": "Best for active sellers",
+      "name": "Pro Lunar",
+      "description": "Cel mai bun pentru vânzătorii activi",
       "badge": "Popular"
     },
     "proYearly": {
-      "name": "Pro Yearly",
-      "description": "Save {{percent}}% with annual billing",
-      "badge": "MOST POPULAR"
+      "name": "Pro Anual",
+      "description": "Economisiți {{percent}}% cu facturarea anuală",
+      "badge": "CEL MAI POPULAR",
+      "saveVsMonthly": "Economisiți 33% față de lunar"
     },
     "enterprise": {
-      "name": "Enterprise Plan",
-      "description": "For agencies and professionals"
+      "name": "Plan Enterprise",
+      "description": "Pentru agenții și profesioniști"
     }
   },
+  "metrics": {
+    "listingsYear": "Anunțuri/An",
+    "listingsMonth": "Anunțuri/Lună",
+    "promoCouponsMonth": "Cupoane Promo/Lună",
+    "listings": "Anunțuri",
+    "teamMembers": "Membri ai echipei"
+  },
   "features": {
-    "activeListings": "Up to {{count}} active property ads",
-    "promotedListings": "Promote {{count}} ads for {{days}} days",
-    "featuredListings": "{{count}} featured listings",
-    "prioritySupport": "Priority support",
-    "prioritySupportDesc": "Get help faster",
-    "analytics": "Advanced analytics dashboard",
-    "analyticsDesc": "Track your listing performance",
-    "premiumPlacement": "Premium listing placement",
-    "leadManagement": "Lead management system",
-    "teamMembers": "Up to {{count}} team members",
-    "apiAccess": "API access",
-    "customBranding": "Custom branding",
-    "dedicatedManager": "Dedicated account manager",
-    "mobileApp": "Mobile app access",
-    "mobileAppDesc": "Manage on the go",
-    "dedicatedAgencyPage": "Dedicated Agency Page",
-    "dedicatedAgencyPageDesc": "Your own branded page on our platform",
-    "displayAgents": "Display All Agents & Properties",
-    "displayAgentsDesc": "Showcase your team and listings",
-    "featuredAds": "Featured in Rotating Ads",
-    "featuredAdsDesc": "Monthly homepage advertising rotation",
-    "fullContact": "Full Contact Information",
-    "fullContactDesc": "Email, phone, and direct inquiries",
-    "perfectForActive": "Perfect for active sellers",
-    "featuredBoost": "Featured placement boost"
+    "activeListings": "Până la {{count}} anunțuri active de proprietăți",
+    "promotedListings": "Promovați {{count}} anunțuri pentru {{days}} zile",
+    "featuredListings": "{{count}} anunțuri recomandate",
+    "prioritySupport": "Suport prioritar",
+    "prioritySupportDesc": "Obțineți ajutor mai rapid",
+    "analytics": "Panou avansat de analiză",
+    "analyticsDesc": "Urmăriți performanța anunțurilor",
+    "premiumPlacement": "Plasament premium al anunțurilor",
+    "leadManagement": "Sistem de gestionare a potențialilor clienți",
+    "teamMembers": "Până la {{count}} membri ai echipei",
+    "apiAccess": "Acces API",
+    "customBranding": "Branding personalizat",
+    "dedicatedManager": "Manager de cont dedicat",
+    "mobileApp": "Acces la aplicația mobilă",
+    "mobileAppDesc": "Gestionați din mers",
+    "dedicatedAgencyPage": "Pagină dedicată pentru agenție",
+    "dedicatedAgencyPageDesc": "Pagina dumneavoastră de brand pe platforma noastră",
+    "displayAgents": "Afișează toți agenții și proprietățile",
+    "displayAgentsDesc": "Prezentați echipa și anunțurile",
+    "featuredAds": "Recomandat în reclame rotative",
+    "featuredAdsDesc": "Rotație publicitară lunară pe pagina principală",
+    "fullContact": "Informații de contact complete",
+    "fullContactDesc": "Email, telefon și solicitări directe",
+    "perfectForActive": "Perfect pentru vânzătorii activi",
+    "featuredBoost": "Impuls de plasament recomandat"
   },
   "buttons": {
-    "getStarted": "Get Started",
-    "getPro": "Get Pro",
-    "getProAnnual": "Get Pro Annual",
-    "getProMonthly": "Get Pro Monthly",
-    "getEnterprise": "Get Enterprise",
-    "contactSales": "Contact Sales",
-    "currentPlan": "Current Plan"
+    "getStarted": "Începeți",
+    "getStartedPrice": "Începeți - €{{price}}/{{period}}",
+    "getPro": "Obțineți Pro",
+    "getProAnnual": "Obțineți Pro Anual",
+    "getProMonthly": "Obțineți Pro Lunar",
+    "getEnterprise": "Obțineți Enterprise",
+    "contactSales": "Contactați Vânzările",
+    "currentPlan": "Planul Actual",
+    "getFeatured": "Obțineți Recomandat",
+    "getBundle": "Obțineți Pachetul",
+    "purchase": "Cumpărați"
   },
   "billing": {
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "perMonth": "/month",
-    "perYear": "/year",
-    "billedAnnually": "Billed annually",
-    "billedMonthly": "Billed monthly",
-    "youSave": "You save €{{amount}}!"
+    "monthly": "Lunar",
+    "yearly": "Anual",
+    "perMonth": "/lună",
+    "perYear": "/an",
+    "perWeek": "/săptămână",
+    "billedAnnually": "Facturat anual",
+    "billedMonthly": "Facturat lunar",
+    "youSave": "Economisiți €{{amount}}!"
   },
   "discount": {
-    "off": "{{percent}}% OFF"
+    "off": "{{percent}}% REDUCERE"
   },
   "benefits": {
-    "moneyBack": "30-day money-back guarantee",
-    "moreViews": "{{multiplier}}x more views than free listings",
-    "instantActivation": "Instant activation",
-    "cancelAnytime": "Cancel anytime"
+    "moneyBack": "Garanție de returnare a banilor în 30 de zile",
+    "moneyBackDesc": "Rambursare completă dacă nu sunteți mulțumit",
+    "moreViews": "De 3 ori mai multe vizualizări",
+    "moreViewsDesc": "Anunțurile premium au mai multă expunere",
+    "instantActivation": "Activare instantanee",
+    "instantActivationDesc": "Începeți să vindeți imediat",
+    "cancelAnytime": "Anulați oricând"
   },
   "enterprise": {
-    "required": "Enterprise Plan Required",
-    "message": "Subscribe to Enterprise to create your agency and showcase your team",
-    "contactUs": "Contact us to learn more about our Enterprise plan."
+    "required": "Plan Enterprise necesar",
+    "message": "Abonați-vă la Enterprise pentru a crea agenția și a prezenta echipa",
+    "contactUs": "Contactați-ne pentru a afla mai multe despre planul nostru Enterprise.",
+    "agentRequired": "Statut de agent necesar",
+    "agentRequiredMessage": "Doar agenții înregistrați pot crea o agenție. Vă rugăm să treceți mai întâi la tipul de cont Agent în profilul dumneavoastră.",
+    "alreadyHaveAgency": "Aveți deja o agenție",
+    "viewYourAgency": "Aveți deja o agenție. Vizitați contul pentru a o gestiona."
   },
   "exitModal": {
-    "title": "Are you sure you want to exit?",
-    "agencyMessage": "If you exit now, all agency information you entered will be lost and you'll need to start over.",
-    "offerMessage": "This is a one-time offer. If you leave now, you won't see these amazing discounts again.",
-    "stay": "Stay & Save!",
-    "leave": "Yes, Leave",
-    "continueSetup": "Continue Setup"
+    "title": "Sunteți sigur că doriți să ieșiți?",
+    "agencyMessage": "Dacă ieșiți acum, toate informațiile agenției pe care le-ați introdus vor fi pierdute și va trebui să o luați de la început.",
+    "offerMessage": "Aceasta este o ofertă unică. Dacă plecați acum, nu veți mai vedea aceste reduceri incredibile.",
+    "stay": "Rămâneți și economisiți!",
+    "leave": "Da, plec",
+    "continueSetup": "Continuați configurarea"
   },
   "success": {
-    "title": "Congratulations!",
-    "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
-    "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
-    "subscriptionActivated": "Subscription activated successfully!",
-    "startListing": "Start Listing Properties"
+    "title": "Felicitări!",
+    "message": "Abonamentul dumneavoastră {{plan}} este activat. Acum aveți acces la toate funcțiile premium.",
+    "agencyMessage": "Abonamentul Enterprise este activat și agenția dumneavoastră a fost creată cu succes! Sunteți acum administratorul agenției.",
+    "subscriptionActivated": "Abonament activat cu succes!",
+    "startListing": "Începeți să listați proprietăți"
+  },
+  "listing": {
+    "title": "Planuri de promovare a anunțurilor",
+    "subtitle": "Impulsionați anunțurile de proprietăți pentru a obține mai multă vizibilitate și solicitări",
+    "selectListing": "Selectați un anunț pentru promovare cu {{tier}}",
+    "loginRequired": "Vă rugăm să vă conectați pentru a vedea anunțurile",
+    "noListings": "Nu aveți încă niciun anunț",
+    "createListing": "+ Creați anunț",
+    "duration": "Durată:",
+    "days": "zile",
+    "promoting": "Promovare:",
+    "forDays": "pentru {{days}} zile",
+    "comingSoon": "În curând",
+    "promotionComingSoon": "Promovarea anunțurilor va fi disponibilă în curând!",
+    "howItWorks": "Cum funcționează:",
+    "howItWorksDescription": "Faceți clic pe un nivel de promovare de mai sus pentru a începe sau creați mai întâi un anunț.",
+    "purchase": "Cumpărați",
+    "tiers": {
+      "featured": {
+        "title": "Recomandat",
+        "description": "Prioritate în căutare",
+        "topOfSearch": "În topul căutării",
+        "featuredBadge": "Insignă recomandat",
+        "visibility": "Vizibilitate 2x"
+      },
+      "highlight": {
+        "title": "Evidențiere",
+        "description": "Ieșiți în evidență",
+        "featuredBenefits": "Beneficii recomandat",
+        "coloredHighlight": "Evidențiere colorată",
+        "visibility": "Vizibilitate 3x"
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "Recomandat pe pagina principală",
+        "highlightBenefits": "Beneficii evidențiere",
+        "homepageCarousel": "Carusel pe pagina principală",
+        "visibility": "Vizibilitate 5x"
+      }
+    }
+  },
+  "agency": {
+    "title": "Agenție Recomandată",
+    "subtitle": "Faceți-vă agenția recomandată peste tot pe platformă",
+    "featuredTitle": "Agenție Recomandată",
+    "featuredDescription": "Recomandată peste tot pe platformă",
+    "benefits": {
+      "featuredInDirectory": "Recomandată în directorul de agenții",
+      "priorityInSearch": "Prioritate în rezultatele căutării",
+      "homepageCarousel": "Carusel de agenții pe pagina principală",
+      "featuredBadge": "Insignă recomandată pe profil",
+      "boostedVisibility": "Vizibilitate crescută peste tot (3x)"
+    },
+    "mapMarker": {
+      "title": "Marker pe hartă",
+      "addon": "Supliment",
+      "description": "Afișați agenția pe harta proprietăților",
+      "benefits": {
+        "agencyMarker": "Marker de agenție pe harta proprietăților",
+        "customIcon": "Pictogramă personalizată de agenție pe hartă",
+        "clickableMarker": "Marker clicabil cu informații despre agenție",
+        "visibleToAll": "Vizibil pentru toți cei care caută proprietăți"
+      }
+    },
+    "total": {
+      "title": "Total pentru {{days}} zile",
+      "bundleDescription": "Agenție Recomandată + Marker pe hartă"
+    },
+    "needAgency": "Nu aveți încă o agenție?",
+    "needAgencyDescription": "Abonați-vă la planul nostru Enterprise pentru a crea agenția și a debloca aceste funcții.",
+    "viewEnterprise": "Vizualizați Planul Enterprise",
+    "comingSoon": "În curând",
+    "featureComingSoon": "Recomandarea agenției va fi disponibilă în curând!"
+  },
+  "contact": {
+    "haveQuestions": "Aveți întrebări?",
+    "contactSales": "Contactați echipa noastră de vânzări",
+    "sendEmail": "Trimiteți-ne un email",
+    "giveCall": "Sunați-ne"
+  },
+  "legal": {
+    "title": "Plăți securizate și politici",
+    "description": "Toate plățile sunt procesate în siguranță de Paddle. Prin abonare, sunteți de acord cu politicile noastre:",
+    "termsOfService": "Termeni și condiții",
+    "privacyPolicy": "Politica de confidențialitate",
+    "refundPolicy": "Politica de rambursare",
+    "paddleNote": "Plățile sunt gestionate de Paddle.com ca și Comerciant de Înregistrare. TVA/taxele sunt incluse acolo unde este cazul."
   }
 }

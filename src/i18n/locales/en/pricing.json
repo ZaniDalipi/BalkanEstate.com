@@ -4,9 +4,12 @@
   "subtitle": "Get your property in front of thousands of potential buyers with our flexible pricing options.",
   "loading": "Loading pricing plans...",
   "noPlans": "No pricing plans available at the moment.",
+  "simpleTransparent": "Simple, transparent pricing",
   "tabs": {
     "forSellers": "For Sellers",
-    "forBuyers": "For Buyers"
+    "forBuyers": "For Buyers",
+    "listingHighlight": "Highlight",
+    "agencyFeature": "Agency"
   },
   "error": {
     "loadFailed": "Failed to load pricing plans"
@@ -14,6 +17,12 @@
   "limitedOffer": "Limited Time Offer Ends In:",
   "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
   "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
+  "badges": {
+    "mostPopular": "MOST POPULAR",
+    "bestForTeams": "BEST FOR TEAMS",
+    "buyerPro": "BUYER PRO",
+    "popular": "Popular"
+  },
   "plans": {
     "free": {
       "name": "Free",
@@ -27,12 +36,20 @@
     "proYearly": {
       "name": "Pro Yearly",
       "description": "Save {{percent}}% with annual billing",
-      "badge": "MOST POPULAR"
+      "badge": "MOST POPULAR",
+      "saveVsMonthly": "Save 33% vs monthly"
     },
     "enterprise": {
       "name": "Enterprise Plan",
       "description": "For agencies and professionals"
     }
+  },
+  "metrics": {
+    "listingsYear": "Listings/Year",
+    "listingsMonth": "Listings/Month",
+    "promoCouponsMonth": "Promo Coupons/Mo",
+    "listings": "Listings",
+    "teamMembers": "Team Members"
   },
   "features": {
     "activeListings": "Up to {{count}} active property ads",
@@ -63,12 +80,16 @@
   },
   "buttons": {
     "getStarted": "Get Started",
+    "getStartedPrice": "Get Started - €{{price}}/{{period}}",
     "getPro": "Get Pro",
     "getProAnnual": "Get Pro Annual",
     "getProMonthly": "Get Pro Monthly",
     "getEnterprise": "Get Enterprise",
     "contactSales": "Contact Sales",
-    "currentPlan": "Current Plan"
+    "currentPlan": "Current Plan",
+    "getFeatured": "Get Featured",
+    "getBundle": "Get Bundle",
+    "purchase": "Purchase"
   },
   "billing": {
     "monthly": "Monthly",
@@ -95,7 +116,11 @@
   "enterprise": {
     "required": "Enterprise Plan Required",
     "message": "Subscribe to Enterprise to create your agency and showcase your team",
-    "contactUs": "Contact us to learn more about our Enterprise plan."
+    "contactUs": "Contact us to learn more about our Enterprise plan.",
+    "agentRequired": "Agent Status Required",
+    "agentRequiredMessage": "Only registered agents can create an agency. Please switch to Agent account type in your profile first.",
+    "alreadyHaveAgency": "You Already Have an Agency",
+    "viewYourAgency": "You already have an agency. Visit your account to manage it."
   },
   "exitModal": {
     "title": "Are you sure you want to exit?",
@@ -111,5 +136,92 @@
     "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
     "subscriptionActivated": "Subscription activated successfully!",
     "startListing": "Start Listing Properties"
+  },
+  "listing": {
+    "title": "Listing Promotion Plans",
+    "subtitle": "Boost your property listings to get more visibility and inquiries",
+    "selectListing": "Select a listing to promote with {{tier}}",
+    "loginRequired": "Please log in to see your listings",
+    "noListings": "You don't have any listings yet",
+    "createListing": "+ Create Listing",
+    "duration": "Duration:",
+    "days": "days",
+    "promoting": "Promoting:",
+    "forDays": "for {{days}} days",
+    "comingSoon": "Coming Soon",
+    "promotionComingSoon": "Listing promotion will be available soon!",
+    "howItWorks": "How it works:",
+    "howItWorksDescription": "Click on a promotion tier above to get started, or create a listing first.",
+    "purchase": "Purchase",
+    "tiers": {
+      "featured": {
+        "title": "Featured",
+        "description": "Priority in search",
+        "topOfSearch": "Top of search",
+        "featuredBadge": "Featured badge",
+        "visibility": "2x visibility"
+      },
+      "highlight": {
+        "title": "Highlight",
+        "description": "Stand out",
+        "featuredBenefits": "Featured benefits",
+        "coloredHighlight": "Colored highlight",
+        "visibility": "3x visibility"
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "Homepage featured",
+        "highlightBenefits": "Highlight benefits",
+        "homepageCarousel": "Homepage carousel",
+        "visibility": "5x visibility"
+      }
+    }
+  },
+  "agency": {
+    "title": "Agency Featured",
+    "subtitle": "Get your agency featured everywhere on the platform",
+    "featuredTitle": "Agency Featured",
+    "featuredDescription": "Featured everywhere on the platform",
+    "benefits": {
+      "featuredInDirectory": "Featured in agency directory",
+      "priorityInSearch": "Priority in search results",
+      "homepageCarousel": "Homepage agency carousel",
+      "featuredBadge": "Featured badge on profile",
+      "boostedVisibility": "Boosted visibility everywhere (3x)"
+    },
+    "mapMarker": {
+      "title": "Map Marker",
+      "addon": "Add-on",
+      "description": "Show your agency on the property map",
+      "benefits": {
+        "agencyMarker": "Agency marker on property map",
+        "customIcon": "Custom agency icon on map",
+        "clickableMarker": "Clickable marker with agency info",
+        "visibleToAll": "Visible to all property searchers"
+      }
+    },
+    "total": {
+      "title": "Total for {{days}} days",
+      "bundleDescription": "Agency Featured + Map Marker"
+    },
+    "needAgency": "Don't have an agency yet?",
+    "needAgencyDescription": "Subscribe to our Enterprise plan to create your agency and unlock these features.",
+    "viewEnterprise": "View Enterprise Plan",
+    "comingSoon": "Coming Soon",
+    "featureComingSoon": "Agency featuring will be available soon!"
+  },
+  "contact": {
+    "haveQuestions": "Have questions?",
+    "contactSales": "Contact our sales team",
+    "sendEmail": "Send us an email",
+    "giveCall": "Give us a call"
+  },
+  "legal": {
+    "title": "Secure Payments & Policies",
+    "description": "All payments are processed securely by Paddle. By subscribing, you agree to our policies:",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "refundPolicy": "Refund Policy",
+    "paddleNote": "Payments handled by Paddle.com as Merchant of Record. VAT/taxes included where applicable."
   }
 }
