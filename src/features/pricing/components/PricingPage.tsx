@@ -95,6 +95,8 @@ const PricingPage: React.FC = () => {
   const [selectedPromoTier, setSelectedPromoTier] = useState<'featured' | 'highlight' | 'premium' | null>(null);
   const [selectedListing, setSelectedListing] = useState<UserListing | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<7 | 30 | 90>(30);
+  const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 30 | 90>(30);
+  const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
   // Promotion plans from API
   const [listingPromotionPlans, setListingPromotionPlans] = useState<any[]>([]);
@@ -112,11 +114,10 @@ const PricingPage: React.FC = () => {
     premium: { 7: 39, 30: 99, 90: 229 },
   };
 
-  // Default/fallback agency feature pricing
-  const defaultAgencyFeaturePricing: Record<string, { price: number; duration: string }> = {
-    spotlight: { price: 49, duration: '30 days' },
-    homepage: { price: 99, duration: '30 days' },
-    premium: { price: 199, duration: '30 days' },
+  // Default/fallback agency feature pricing (using duration-based pricing now)
+  const defaultAgencyFeaturePricing: Record<string, Record<number, number>> = {
+    featured: { 7: 19, 30: 49, 90: 119 },
+    addon: { 7: 9, 30: 25, 90: 59 },
   };
 
   // Get dynamic pricing from API or fallback to defaults
@@ -129,15 +130,14 @@ const PricingPage: React.FC = () => {
     return defaultPromotionPricing[tier]?.[duration] ?? 0;
   };
 
-  const getAgencyFeature = (tier: string): { price: number; duration: string } => {
+  // Get agency feature pricing (now uses duration-based pricing like listing promotions)
+  const getAgencyPrice = (tier: string, duration: number): number => {
     const plan = agencyFeaturePlans.find(p => p.tier === tier);
     if (plan?.pricing) {
-      return {
-        price: plan.pricing.fixedPrice ?? defaultAgencyFeaturePricing[tier]?.price ?? 0,
-        duration: plan.pricing.fixedDuration ?? defaultAgencyFeaturePricing[tier]?.duration ?? '30 days',
-      };
+      const key = `duration${duration}` as 'duration7' | 'duration30' | 'duration90';
+      return plan.pricing[key] ?? defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
     }
-    return defaultAgencyFeaturePricing[tier] ?? { price: 0, duration: '30 days' };
+    return defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
   };
 
   // Fetch products from API
@@ -1128,111 +1128,171 @@ const PricingPage: React.FC = () => {
 
         {/* Agency Feature */}
         {activeTab === 'agency' && (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <BuildingOfficeIcon className="w-8 h-8 text-amber-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">{t('pricing:agency.title', 'Agency Feature Plans')}</h3>
-              <p className="mt-2 text-gray-600">{t('pricing:agency.subtitle', 'Get your agency in front of more buyers and sellers')}</p>
+              <h3 className="text-2xl font-bold text-gray-900">{t('pricing:agency.title', 'Agency Featured')}</h3>
+              <p className="mt-2 text-gray-600">{t('pricing:agency.subtitle', 'Get your agency featured everywhere on the platform')}</p>
             </div>
 
-            {/* Agency Feature Tiers */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Spotlight */}
-              <div className="relative rounded-3xl p-6 flex flex-col bg-white border border-gray-200 hover:shadow-lg hover:border-amber-300 transition-all cursor-pointer"
-                   onClick={() => handleAgencyFeature('spotlight')}>
-                <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center mb-4">
-                  <span className="text-2xl">🔦</span>
-                </div>
-                <h4 className="text-xl font-bold text-gray-900">Spotlight</h4>
-                <p className="text-sm text-gray-600 mt-1">Increased visibility</p>
-                <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-gray-900">€{getAgencyFeature('spotlight').price}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{getAgencyFeature('spotlight').duration}</p>
-                <ul className="mt-4 space-y-2 flex-grow">
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-gray-500">✓</span> Featured in agency directory
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-gray-500">✓</span> Priority in search
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-gray-500">✓</span> Spotlight badge
-                  </li>
-                </ul>
-                <button className="w-full mt-6 py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all">
-                  Get Spotlight
-                </button>
-              </div>
-
-              {/* Homepage */}
-              <div className="relative rounded-3xl p-6 flex flex-col bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 hover:shadow-xl transition-all cursor-pointer"
-                   onClick={() => handleAgencyFeature('homepage')}>
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                    <SparklesIcon className="w-3 h-3" />
-                    Recommended
-                  </span>
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-4 mt-2">
-                  <span className="text-2xl">🏠</span>
-                </div>
-                <h4 className="text-xl font-bold text-gray-900">Homepage</h4>
-                <p className="text-sm text-gray-600 mt-1">Featured on homepage</p>
-                <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-amber-600">€{getAgencyFeature('homepage').price}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{getAgencyFeature('homepage').duration}</p>
-                <ul className="mt-4 space-y-2 flex-grow">
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-amber-500">✓</span> Spotlight benefits
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-amber-500">✓</span> Homepage carousel
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-amber-500">✓</span> 3x more inquiries
-                  </li>
-                </ul>
-                <button className="w-full mt-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg">
-                  Get Homepage Feature
-                </button>
-              </div>
-
-              {/* Premium */}
-              <div className="relative rounded-3xl p-6 flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 text-white hover:shadow-2xl transition-all cursor-pointer"
-                   onClick={() => handleAgencyFeature('premium')}>
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mb-4">
-                  <span className="text-2xl">👑</span>
-                </div>
-                <h4 className="text-xl font-bold">Premium</h4>
-                <p className="text-sm text-gray-400 mt-1">Maximum exposure</p>
-                <div className="mt-4">
-                  <span className="text-3xl font-extrabold text-amber-400">€{getAgencyFeature('premium').price}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{getAgencyFeature('premium').duration}</p>
-                <ul className="mt-4 space-y-2 flex-grow">
-                  <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <span className="text-amber-400">✓</span> All Homepage benefits
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <span className="text-amber-400">✓</span> Featured agent spotlight
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <span className="text-amber-400">✓</span> Priority support
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <span className="text-amber-400">✓</span> 5x more inquiries
-                  </li>
-                </ul>
-                <button className="w-full mt-6 py-3 rounded-xl font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 transition-all shadow-lg">
-                  Get Premium
-                </button>
+            {/* Duration Selector */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-gray-100 p-1 rounded-full inline-flex">
+                {[
+                  { value: 7, label: '7 days' },
+                  { value: 30, label: '30 days' },
+                  { value: 90, label: '90 days' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedAgencyDuration(option.value as 7 | 30 | 90)}
+                    className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                      selectedAgencyDuration === option.value
+                        ? 'bg-white text-gray-900 shadow-md'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
             </div>
+
+            {/* Main Featured Plan */}
+            <div className="relative rounded-3xl p-8 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-xl mb-6">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
+                  <SparklesIcon className="w-3.5 h-3.5" />
+                  POPULAR
+                </span>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-start gap-6 pt-2">
+                {/* Left: Info */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center">
+                      <span className="text-3xl">🏢</span>
+                    </div>
+                    <div>
+                      <h4 className="text-2xl font-bold text-gray-900">Agency Featured</h4>
+                      <p className="text-sm text-gray-600">Featured everywhere on the platform</p>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3 mb-6">
+                    {[
+                      'Featured in agency directory',
+                      'Priority in search results',
+                      'Homepage agency carousel',
+                      'Featured badge on profile',
+                      'Boosted visibility everywhere (3x)',
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-3 text-sm text-gray-700">
+                        <div className="w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0">
+                          <CheckIcon className="w-3 h-3 text-amber-700" />
+                        </div>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Right: Pricing */}
+                <div className="md:w-64 bg-white rounded-2xl p-6 shadow-lg border border-amber-200">
+                  <div className="text-center">
+                    <div className="text-4xl font-extrabold text-amber-600">
+                      €{getAgencyPrice('featured', selectedAgencyDuration)}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{selectedAgencyDuration} days</p>
+                  </div>
+
+                  <button
+                    onClick={() => handleAgencyFeature('featured' as any)}
+                    className="w-full mt-4 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+                  >
+                    Get Featured
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Map Marker Add-on */}
+            <div className={`relative rounded-2xl p-6 border-2 transition-all cursor-pointer ${
+              includeMapMarker
+                ? 'bg-blue-50 border-blue-400 shadow-lg'
+                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
+            }`}
+                 onClick={() => setIncludeMapMarker(!includeMapMarker)}>
+              <div className="flex items-start gap-4">
+                {/* Checkbox */}
+                <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
+                  includeMapMarker ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
+                }`}>
+                  {includeMapMarker && <CheckIcon className="w-4 h-4 text-white" />}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">📍</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-lg font-bold text-gray-900">Map Marker</h4>
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">Add-on</span>
+                      </div>
+                      <p className="text-sm text-gray-600">Show your agency on the property map</p>
+                    </div>
+                  </div>
+
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                    {[
+                      'Agency marker on property map',
+                      'Custom agency icon on map',
+                      'Clickable marker with agency info',
+                      'Visible to all property searchers',
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                        <span className="text-blue-500">✓</span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Price */}
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-blue-600">
+                    +€{getAgencyPrice('addon', selectedAgencyDuration)}
+                  </div>
+                  <p className="text-xs text-gray-500">{selectedAgencyDuration} days</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Total */}
+            {includeMapMarker && (
+              <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Total for {selectedAgencyDuration} days</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      €{getAgencyPrice('featured', selectedAgencyDuration) + getAgencyPrice('addon', selectedAgencyDuration)}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Agency Featured + Map Marker</p>
+                  </div>
+                  <button
+                    onClick={() => handleAgencyFeature('featured' as any)}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg"
+                  >
+                    Get Bundle
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Note for non-agency users */}
             {(!state.currentUser?.agencyId) && (
