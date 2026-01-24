@@ -198,7 +198,7 @@ const FeaturedAgencies: React.FC = () => {
         </div>
 
         {/* Agencies grid with staggered entrance - larger cards for better visual impact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
           {isLoading ? (
             // Loading skeleton - matches new card design
             Array.from({ length: 4 }).map((_, index) => (
@@ -206,27 +206,27 @@ const FeaturedAgencies: React.FC = () => {
                 key={`skeleton-${index}`}
                 className="animate-pulse h-full"
               >
-                <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/30 overflow-hidden h-full flex flex-col">
-                  <div className="h-32 md:h-36 lg:h-40 bg-gradient-to-br from-gray-200 to-gray-300 relative">
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 overflow-hidden h-full flex flex-col">
+                  <div className="h-24 sm:h-32 md:h-36 lg:h-40 bg-gradient-to-br from-gray-200 to-gray-300 relative">
                     {/* Logo skeleton */}
-                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
-                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded-2xl ring-4 ring-white" />
+                    <div className="absolute -bottom-6 sm:-bottom-8 left-1/2 -translate-x-1/2">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gray-300 rounded-xl sm:rounded-2xl ring-2 sm:ring-4 ring-white" />
                     </div>
                   </div>
-                  <div className="px-5 pb-5 pt-12 md:px-6 md:pb-6 md:pt-14 space-y-4 flex-1 flex flex-col">
-                    <div className="h-5 md:h-6 bg-gray-200 rounded-lg w-3/4 mx-auto" />
-                    <div className="flex items-center justify-center gap-6 py-3 border-y border-neutral-100">
-                      <div className="text-center space-y-2">
-                        <div className="h-7 w-12 bg-gray-200 rounded mx-auto" />
-                        <div className="h-3 w-16 bg-gray-200 rounded mx-auto" />
+                  <div className="px-2 pb-3 pt-8 sm:px-5 sm:pb-5 sm:pt-12 md:px-6 md:pb-6 md:pt-14 space-y-3 sm:space-y-4 flex-1 flex flex-col">
+                    <div className="h-4 sm:h-5 md:h-6 bg-gray-200 rounded-lg w-3/4 mx-auto" />
+                    <div className="flex items-center justify-center gap-3 sm:gap-6 py-2 sm:py-3 border-y border-neutral-100">
+                      <div className="text-center space-y-1 sm:space-y-2">
+                        <div className="h-5 sm:h-7 w-8 sm:w-12 bg-gray-200 rounded mx-auto" />
+                        <div className="h-2 sm:h-3 w-10 sm:w-16 bg-gray-200 rounded mx-auto" />
                       </div>
-                      <div className="w-px h-10 bg-neutral-200" />
-                      <div className="text-center space-y-2">
-                        <div className="h-7 w-12 bg-gray-200 rounded mx-auto" />
-                        <div className="h-3 w-16 bg-gray-200 rounded mx-auto" />
+                      <div className="w-px h-8 sm:h-10 bg-neutral-200" />
+                      <div className="text-center space-y-1 sm:space-y-2">
+                        <div className="h-5 sm:h-7 w-8 sm:w-12 bg-gray-200 rounded mx-auto" />
+                        <div className="h-2 sm:h-3 w-10 sm:w-16 bg-gray-200 rounded mx-auto" />
                       </div>
                     </div>
-                    <div className="h-11 md:h-12 bg-gray-200 rounded-xl w-full mt-auto" />
+                    <div className="h-8 sm:h-11 md:h-12 bg-gray-200 rounded-lg sm:rounded-xl w-full mt-auto" />
                   </div>
                 </div>
               </div>
@@ -259,10 +259,10 @@ const FeaturedAgencies: React.FC = () => {
                    }} />
               
               {/* Agency card - redesigned for better proportions */}
-              <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/40 overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-500 h-full flex flex-col group-hover:-translate-y-1">
+              <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl border border-white/40 overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-500 h-full flex flex-col group-hover:-translate-y-1">
                 {/* Header with gradient or cover image - increased height */}
                 <div
-                  className={`h-32 md:h-36 lg:h-40 relative overflow-hidden ${
+                  className={`h-24 sm:h-32 md:h-36 lg:h-40 relative overflow-hidden ${
                     (agency as any).coverImage
                       ? ''
                       : (agency as any).coverGradient
@@ -288,29 +288,29 @@ const FeaturedAgencies: React.FC = () => {
                   ))}
 
                   {/* Featured Badge - top left */}
-                  <div className="absolute top-3 left-3 md:top-4 md:left-4 flex gap-2">
-                    <div className="flex items-center gap-1.5 bg-white/25 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg">
-                      <SparklesIcon className="w-4 h-4 text-yellow-300" />
-                      <span className="text-white font-semibold text-xs">{t('featured.badge')}</span>
+                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3 md:top-4 md:left-4 flex gap-1 sm:gap-2">
+                    <div className="flex items-center gap-1 sm:gap-1.5 bg-white/25 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg">
+                      <SparklesIcon className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-300" />
+                      <span className="text-white font-semibold text-[10px] sm:text-xs hidden sm:inline">{t('featured.badge')}</span>
                     </div>
                   </div>
 
-                  {/* Type Badge - top right */}
-                  <div className="absolute top-3 right-3 md:top-4 md:right-4">
-                    <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full">
-                      <span className="text-sm">{typeInfo.emoji}</span>
-                      <span className="text-white text-xs font-medium">{typeInfo.label}</span>
+                  {/* Type Badge - top right - hidden on very small screens */}
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 hidden sm:block">
+                    <div className="flex items-center gap-1 sm:gap-1.5 bg-black/30 backdrop-blur-md px-2 py-1 sm:px-3 sm:py-1.5 rounded-full">
+                      <span className="text-xs sm:text-sm">{typeInfo.emoji}</span>
+                      <span className="text-white text-[10px] sm:text-xs font-medium">{typeInfo.label}</span>
                     </div>
                   </div>
 
                   {/* Logo - centered at bottom, overlapping content */}
-                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl flex items-center justify-center overflow-hidden shadow-xl ring-4 ring-white">
+                  <div className="absolute -bottom-6 sm:-bottom-8 left-1/2 -translate-x-1/2">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center overflow-hidden shadow-xl ring-2 sm:ring-4 ring-white">
                       {agency.logo ? (
                         <img src={agency.logo} alt={agency.name} className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         <div className={`w-full h-full bg-gradient-to-br ${colorGradient} flex items-center justify-center`}>
-                          <span className="text-3xl md:text-4xl">{typeInfo.emoji}</span>
+                          <span className="text-2xl sm:text-3xl md:text-4xl">{typeInfo.emoji}</span>
                         </div>
                       )}
                     </div>
@@ -318,31 +318,31 @@ const FeaturedAgencies: React.FC = () => {
                 </div>
 
                 {/* Content - adjusted padding for logo overlap */}
-                <div className="px-5 pb-5 pt-12 md:px-6 md:pb-6 md:pt-14 flex-1 flex flex-col">
+                <div className="px-2 pb-3 pt-8 sm:px-5 sm:pb-5 sm:pt-12 md:px-6 md:pb-6 md:pt-14 flex-1 flex flex-col">
                   {/* Agency Name - centered */}
-                  <h3 className="text-lg md:text-xl font-bold text-neutral-900 mb-3 group-hover:text-primary transition-colors duration-300 line-clamp-2 leading-tight text-center">
+                  <h3 className="text-sm sm:text-lg md:text-xl font-bold text-neutral-900 mb-2 sm:mb-3 group-hover:text-primary transition-colors duration-300 line-clamp-2 leading-tight text-center">
                     {agency.name}
                   </h3>
 
                   {/* Stats Row - horizontal layout */}
-                  <div className="flex items-center justify-center gap-6 mb-5 py-3 border-y border-neutral-100">
+                  <div className="flex items-center justify-center gap-3 sm:gap-6 mb-3 sm:mb-5 py-2 sm:py-3 border-y border-neutral-100">
                     <div className="text-center">
-                      <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">{agency.totalProperties || 0}</div>
-                      <div className="text-xs text-neutral-500 font-medium mt-0.5">{t('featured.properties')}</div>
+                      <div className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">{agency.totalProperties || 0}</div>
+                      <div className="text-[10px] sm:text-xs text-neutral-500 font-medium mt-0.5">{t('featured.properties')}</div>
                     </div>
 
-                    <div className="w-px h-10 bg-neutral-200" />
+                    <div className="w-px h-8 sm:h-10 bg-neutral-200" />
 
                     <div className="text-center">
-                      <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">{agency.totalAgents || 0}</div>
-                      <div className="text-xs text-neutral-500 font-medium mt-0.5">{t('featured.agents')}</div>
+                      <div className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">{agency.totalAgents || 0}</div>
+                      <div className="text-[10px] sm:text-xs text-neutral-500 font-medium mt-0.5">{t('featured.agents')}</div>
                     </div>
                   </div>
 
                   {/* View Button */}
-                  <button className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 md:py-3.5 px-4 rounded-xl font-semibold text-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group/btn mt-auto">
+                  <button className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-2 sm:py-3 md:py-3.5 px-2 sm:px-4 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 group/btn mt-auto">
                     <span>{t('featured.viewAgency')}</span>
-                    <ArrowRightIcon className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                    <ArrowRightIcon className="w-3 h-3 sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
                   </button>
                 </div>
 
