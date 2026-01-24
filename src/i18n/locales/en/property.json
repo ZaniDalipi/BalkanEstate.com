@@ -261,6 +261,20 @@
       "highlight": "Highlight",
       "featured": "Featured"
     },
+    "popup": {
+      "bed": "bed",
+      "bath": "bath",
+      "viewDetails": "View details",
+      "recommendation": "Recommendation",
+      "prev": "Prev",
+      "next": "Next",
+      "tierLabels": {
+        "premium": "PREMIUM PREMIERE",
+        "highlight": "HIGHLIGHT",
+        "featured": "FEATURED",
+        "standard": "PROMOTED"
+      }
+    },
     "agentRecommendations": {
       "premium": {
         "1": "This premium property is our top pick for you!",

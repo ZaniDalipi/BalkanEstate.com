@@ -418,11 +418,11 @@ const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boo
 
 // Tier badge configurations for popup
 // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
-const POPUP_TIER_CONFIG: Record<string, { bg: string; border: string; icon: string; label: string }> = {
-  premium: { bg: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400', border: 'border-amber-400', icon: '👑', label: 'PREMIUM PREMIERE' },
-  highlight: { bg: 'bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400', border: 'border-sky-400', icon: '💎', label: 'HIGHLIGHT' },
-  featured: { bg: 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400', border: 'border-violet-500', icon: '⭐', label: 'FEATURED' },
-  standard: { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', border: 'border-gray-300', icon: '✨', label: 'PROMOTED' },
+const POPUP_TIER_CONFIG: Record<string, { bg: string; border: string; icon: string }> = {
+  premium: { bg: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400', border: 'border-amber-400', icon: '👑' },
+  highlight: { bg: 'bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400', border: 'border-sky-400', icon: '💎' },
+  featured: { bg: 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400', border: 'border-violet-500', icon: '⭐' },
+  standard: { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', border: 'border-gray-300', icon: '✨' },
 };
 
 /**
@@ -523,7 +523,7 @@ const PropertyPopup: React.FC<{
           {/* Promotion tier badge - smaller */}
           <div className={`absolute top-1.5 left-1.5 ${tierConfig.bg} text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow-lg flex items-center gap-1 z-10`}>
             <span className="text-[10px]">{tierConfig.icon}</span>
-            {tierConfig.label}
+            {t(`map.popup.tierLabels.${promotionTier}`)}
           </div>
 
           {/* Image navigation - smaller */}
@@ -598,8 +598,8 @@ const PropertyPopup: React.FC<{
             </div>
           ) : (
             <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
-              <span><b>{property.beds}</b> bed</span>
-              <span><b>{property.baths}</b> bath</span>
+              <span><b>{property.beds}</b> {t('map.popup.bed')}</span>
+              <span><b>{property.baths}</b> {t('map.popup.bath')}</span>
               <span><b>{property.sqft}</b> m²</span>
             </div>
           )}
@@ -703,7 +703,7 @@ const PropertyPopup: React.FC<{
 
         {/* CTA Button - touch-friendly */}
         <button className="w-full py-1.5 rounded-lg bg-primary hover:bg-primary-dark active:bg-primary-dark text-white text-[10px] font-semibold transition-colors flex items-center justify-center gap-1 touch-manipulation">
-          <span>View details</span>
+          <span>{t('map.popup.viewDetails')}</span>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>

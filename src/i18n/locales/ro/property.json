@@ -250,8 +250,53 @@
       "house": "Casă",
       "apartment": "Apartament",
       "villa": "Vilă",
+      "land": "Teren",
       "other": "Altele"
-    }
+    },
+    "promotedListings": "Anunțuri Promovate",
+    "agentHint": "Click pentru recomandări!",
+    "tiers": {
+      "premium": "Premium",
+      "highlight": "Evidențiat",
+      "featured": "Recomandat"
+    },
+    "popup": {
+      "bed": "dormitor",
+      "bath": "baie",
+      "viewDetails": "Vezi detalii",
+      "recommendation": "Recomandare",
+      "prev": "Anterior",
+      "next": "Următor",
+      "tierLabels": {
+        "premium": "PREMIUM PREMIERĂ",
+        "highlight": "EVIDENȚIAT",
+        "featured": "RECOMANDAT",
+        "standard": "PROMOVAT"
+      }
+    },
+    "agentRecommendations": {
+      "premium": {
+        "1": "Această proprietate premium este alegerea noastră de top pentru dumneavoastră!",
+        "2": "Anunț exclusiv! Nu ratați această oportunitate premium.",
+        "3": "Proprietatea noastră cea mai recomandată din această zonă.",
+        "4": "Alegere premium cu valoare excepțională!"
+      },
+      "highlight": {
+        "1": "Evidențiat pentru vânzare rapidă - merită privit!",
+        "2": "Alegere populară! Această proprietate primește multă atenție.",
+        "3": "Vânzător motivat - evidențiat pentru vizibilitate!",
+        "4": "Oportunitate excelentă - verificați acest anunț evidențiat!"
+      },
+      "featured": {
+        "1": "Anunț recomandat cu facilități speciale.",
+        "2": "Această proprietate se remarcă în cartier.",
+        "3": "Merită luat în considerare - recomandat de proprietar.",
+        "4": "Priviți mai atent această casă recomandată!"
+      }
+    },
+    "heatMapLegend": "Densitatea Proprietăților",
+    "low": "Scăzută",
+    "high": "Ridicată"
   },
   "neighborhood": {
     "title": "Informații Cartier",
@@ -362,5 +407,10 @@
       "tips": "Click pentru sfaturi!",
       "rightClick": "Click dreapta pentru acțiuni"
     }
+  },
+  "sections": {
+    "highlighted": "Proprietăți Recomandate",
+    "highlightedCount": "anunțuri premium",
+    "moreListings": "Mai Multe Anunțuri"
   }
 }

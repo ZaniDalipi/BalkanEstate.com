@@ -280,6 +280,20 @@
         "4": "Pogledajte pobliže ovaj izdvojeni dom!"
       }
     },
+    "popup": {
+      "bed": "soba",
+      "bath": "kupaonica",
+      "viewDetails": "Pogledaj detalje",
+      "recommendation": "Preporuka",
+      "prev": "Prethodno",
+      "next": "Sljedeće",
+      "tierLabels": {
+        "premium": "PREMIUM PREMIJERA",
+        "highlight": "ISTAKNUTO",
+        "featured": "IZDVOJENO",
+        "standard": "PROMOVIRANO"
+      }
+    },
     "heatMapLegend": "Gustoća Nekretnina",
     "low": "Niska",
     "high": "Visoka"

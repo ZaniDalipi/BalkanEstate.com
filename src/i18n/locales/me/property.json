@@ -280,9 +280,23 @@
         "4": "Take a closer look at this featured home!"
       }
     },
-    "heatMapLegend": "Property Density",
-    "low": "Low",
-    "high": "High"
+    "popup": {
+      "bed": "soba",
+      "bath": "kupatilo",
+      "viewDetails": "Pogledaj detalje",
+      "recommendation": "Preporuka",
+      "prev": "Prethodno",
+      "next": "Sljedeće",
+      "tierLabels": {
+        "premium": "PREMIUM PREMIJERA",
+        "highlight": "ISTAKNUTO",
+        "featured": "IZDVOJENO",
+        "standard": "PROMOVISANO"
+      }
+    },
+    "heatMapLegend": "Gustina nekretnina",
+    "low": "Niska",
+    "high": "Visoka"
   },
   "neighborhood": {
     "title": "Neighborhood Insights",
