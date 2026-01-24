@@ -12,6 +12,13 @@ import {
   Decorative3DStyles
 } from '@/components/shared/Decorative3D';
 import {
+  PageTransition,
+  Animated,
+  SlideIn,
+  FadeIn,
+  Skeleton,
+} from '@/components/ui/Animations';
+import {
   BuildingOfficeIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
@@ -501,20 +508,27 @@ const PricingPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16">
-        {/* Hero Section */}
-        <div className="text-center mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-            <SparklesIcon className="w-4 h-4" />
-            <span>Simple, transparent pricing</span>
+      <PageTransition>
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16">
+          {/* Hero Section */}
+          <div className="text-center mb-8 sm:mb-12">
+            <SlideIn direction="down" duration="normal">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+                <SparklesIcon className="w-4 h-4" />
+                <span>Simple, transparent pricing</span>
+              </div>
+            </SlideIn>
+            <Animated variant="fadeInUp" delay={100}>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
+                {t('pricing:title', 'Choose Your Plan')}
+              </h2>
+            </Animated>
+            <Animated variant="fadeInUp" delay={200}>
+              <p className="mt-4 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                {t('pricing:subtitle', 'Get your property in front of thousands of potential buyers with our flexible pricing options.')}
+              </p>
+            </Animated>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
-            {t('pricing:title', 'Choose Your Plan')}
-          </h2>
-          <p className="mt-4 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            {t('pricing:subtitle', 'Get your property in front of thousands of potential buyers with our flexible pricing options.')}
-          </p>
-        </div>
 
         {/* Tab Switcher - Clean Pill Style */}
         <div className="flex justify-center mb-10 sm:mb-14">
@@ -604,40 +618,55 @@ const PricingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="relative">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary mx-auto"></div>
+          {/* Loading State with Skeletons */}
+          {loading && (
+            <FadeIn>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-3xl p-6 shadow-lg" style={{ animationDelay: `${i * 100}ms` }}>
+                    <Skeleton variant="rectangular" height={24} className="rounded-lg mb-4 w-1/2 mx-auto" />
+                    <Skeleton variant="text" className="w-3/4 mx-auto mb-2" />
+                    <Skeleton variant="rectangular" height={48} className="rounded-lg w-2/3 mx-auto my-6" />
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                      <Skeleton variant="rounded" height={60} />
+                      <Skeleton variant="rounded" height={60} />
+                    </div>
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4].map((j) => (
+                        <Skeleton key={j} variant="text" className={j === 4 ? 'w-1/2' : 'w-full'} />
+                      ))}
+                    </div>
+                    <Skeleton variant="rounded" height={48} className="mt-6" />
+                  </div>
+                ))}
               </div>
-              <p className="mt-4 text-gray-600">{t('pricing:loading', 'Loading pricing plans...')}</p>
-            </div>
-          </div>
-        )}
+            </FadeIn>
+          )}
 
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-20">
-            <div className="bg-red-50 rounded-2xl p-8 max-w-md mx-auto">
-              <p className="text-red-600 font-medium">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-4 px-6 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors"
-              >
-                {t('common:tryAgain', 'Try Again')}
-              </button>
-            </div>
-          </div>
-        )}
+          {/* Error State */}
+          {error && (
+            <Animated variant="scaleIn">
+              <div className="text-center py-20">
+                <div className="bg-red-50 rounded-2xl p-8 max-w-md mx-auto">
+                  <p className="text-red-600 font-medium">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-6 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors"
+                  >
+                    {t('common:tryAgain', 'Try Again')}
+                  </button>
+                </div>
+              </div>
+            </Animated>
+          )}
 
-        {/* Seller Plans */}
-        {!loading && !error && activeTab === 'seller' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
+          {/* Seller Plans */}
+          {!loading && !error && activeTab === 'seller' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
 
-            {/* Pro Yearly - Most Popular */}
-            {proYearlyProduct && (
-              <div className="relative order-1 lg:order-1 pt-4 lg:-translate-y-4">
+              {/* Pro Yearly - Most Popular */}
+              {proYearlyProduct && (
+                <Animated variant="fadeInUp" delay={0} className="relative order-1 lg:order-1 pt-4 lg:-translate-y-4">
                 {/* Badge - Outside the card */}
                 <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
                   <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-red-500 to-rose-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
@@ -693,17 +722,17 @@ const PricingPage: React.FC = () => {
 
                   <button
                     onClick={() => handlePlanSelection(proYearlyProduct)}
-                    className="w-full mt-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base"
+                    className="w-full mt-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base press-effect"
                   >
                     Get Started - €{proYearlyProduct.price}/year
                   </button>
                 </div>
-              </div>
+              </Animated>
             )}
 
             {/* Pro Monthly */}
             {proMonthlyProduct && (
-              <div className="relative order-2 lg:order-2 pt-4">
+              <Animated variant="fadeInUp" delay={100} className="relative order-2 lg:order-2 pt-4">
                 <div className="rounded-3xl p-6 sm:p-8 flex flex-col bg-white border border-gray-200 shadow-lg h-full">
                   <div className="text-center pt-2">
                     <h3 className="text-2xl font-bold text-gray-900">{proMonthlyProduct.name}</h3>
@@ -749,17 +778,17 @@ const PricingPage: React.FC = () => {
 
                   <button
                     onClick={() => handlePlanSelection(proMonthlyProduct)}
-                    className="w-full mt-8 py-4 rounded-xl font-bold text-gray-700 bg-white border-2 border-gray-300 hover:border-primary hover:text-primary hover:shadow-lg transition-all duration-300 text-base"
+                    className="w-full mt-8 py-4 rounded-xl font-bold text-gray-700 bg-white border-2 border-gray-300 hover:border-primary hover:text-primary hover:shadow-lg transition-all duration-300 text-base press-effect"
                   >
                     Get Started - €{proMonthlyProduct.price}/month
                   </button>
                 </div>
-              </div>
+              </Animated>
             )}
 
             {/* Enterprise - For Teams */}
             {enterpriseProduct && (
-              <div className="relative order-3 lg:order-3 pt-4">
+              <Animated variant="fadeInUp" delay={200} className="relative order-3 lg:order-3 pt-4">
                 {/* Badge - Outside the card to prevent clipping */}
                 <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
                   <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
@@ -823,21 +852,21 @@ const PricingPage: React.FC = () => {
 
                   <button
                     onClick={() => handlePlanSelection(enterpriseProduct)}
-                    className="w-full mt-8 py-4 rounded-xl font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base relative z-10"
+                    className="w-full mt-8 py-4 rounded-xl font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 shadow-lg hover:shadow-xl transition-all duration-300 text-base relative z-10 press-effect"
                   >
                     Get Started - €{enterpriseProduct.price}/year
                   </button>
                 </div>
-              </div>
+              </Animated>
             )}
           </div>
         )}
 
         {/* Buyer Plans */}
         {!loading && !error && activeTab === 'buyer' && (
-          <div className="max-w-md mx-auto">
+          <Animated variant="fadeInUp" className="max-w-md mx-auto">
             {buyerProduct ? (
-              <div className="relative rounded-3xl p-8 flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 border-2 border-blue-300 shadow-xl">
+              <div className="relative rounded-3xl p-8 flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 border-2 border-blue-300 shadow-xl hover-lift">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
                     <SparklesIcon className="w-3.5 h-3.5" />
@@ -877,12 +906,12 @@ const PricingPage: React.FC = () => {
                 <p className="text-gray-600">No buyer plans available at the moment.</p>
               </div>
             )}
-          </div>
+          </Animated>
         )}
 
         {/* Listing Highlight / Promotion */}
         {activeTab === 'listing' && (
-          <div className="max-w-5xl mx-auto">
+          <Animated variant="fadeInUp" className="max-w-5xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -1123,12 +1152,12 @@ const PricingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </Animated>
         )}
 
         {/* Agency Feature */}
         {activeTab === 'agency' && (
-          <div className="max-w-3xl mx-auto">
+          <Animated variant="fadeInUp" className="max-w-3xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -1308,7 +1337,7 @@ const PricingPage: React.FC = () => {
                     </p>
                     <button
                       onClick={() => setActiveTab('seller')}
-                      className="mt-3 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors"
+                      className="mt-3 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors press-effect"
                     >
                       {t('pricing:agency.viewEnterprise', 'View Enterprise Plan')}
                     </button>
@@ -1316,7 +1345,7 @@ const PricingPage: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
+          </Animated>
         )}
 
         {/* No Products */}
@@ -1331,27 +1360,27 @@ const PricingPage: React.FC = () => {
         {/* Trust Badges */}
         <div className="mt-16 sm:mt-20">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100">
+            <Animated variant="fadeInUp" delay={0} className="flex flex-col items-center text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100 hover-lift">
               <div className="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-4">
                 <ShieldCheckIcon className="w-7 h-7 text-green-600" />
               </div>
               <h4 className="font-bold text-gray-900">{t('pricing:benefits.moneyBack', '30-Day Money Back')}</h4>
               <p className="text-sm text-gray-600 mt-1">Full refund if not satisfied</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100">
+            </Animated>
+            <Animated variant="fadeInUp" delay={100} className="flex flex-col items-center text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100 hover-lift">
               <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
                 <ChartBarIcon className="w-7 h-7 text-blue-600" />
               </div>
               <h4 className="font-bold text-gray-900">{t('pricing:benefits.moreViews', '3x More Views')}</h4>
               <p className="text-sm text-gray-600 mt-1">Premium listings get more exposure</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100">
+            </Animated>
+            <Animated variant="fadeInUp" delay={200} className="flex flex-col items-center text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100 hover-lift">
               <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mb-4">
                 <BoltIcon className="w-7 h-7 text-amber-600" />
               </div>
               <h4 className="font-bold text-gray-900">{t('pricing:benefits.instantActivation', 'Instant Activation')}</h4>
               <p className="text-sm text-gray-600 mt-1">Start selling immediately</p>
-            </div>
+            </Animated>
           </div>
         </div>
 
@@ -1465,7 +1494,8 @@ const PricingPage: React.FC = () => {
             }
           `}</style>
         </div>
-      </div>
+        </div>
+      </PageTransition>
 
       <Footer />
 
