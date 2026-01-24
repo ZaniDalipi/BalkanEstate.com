@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import PromotionPlan, { IPromotionPlan } from '../models/PromotionPlan';
+import PromotionPlan from '../models/PromotionPlan';
 
 // Get all promotion plans (public)
 export const getPromotionPlans = async (req: Request, res: Response) => {
@@ -44,7 +44,7 @@ export const createPromotionPlan = async (req: Request, res: Response) => {
 };
 
 // Update a promotion plan (admin only)
-export const updatePromotionPlan = async (req: Request, res: Response) => {
+export const updatePromotionPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const plan = await PromotionPlan.findByIdAndUpdate(
@@ -54,7 +54,8 @@ export const updatePromotionPlan = async (req: Request, res: Response) => {
     );
 
     if (!plan) {
-      return res.status(404).json({ error: 'Promotion plan not found' });
+      res.status(404).json({ error: 'Promotion plan not found' });
+      return;
     }
 
     res.json({ plan });
@@ -65,13 +66,14 @@ export const updatePromotionPlan = async (req: Request, res: Response) => {
 };
 
 // Delete a promotion plan (admin only)
-export const deletePromotionPlan = async (req: Request, res: Response) => {
+export const deletePromotionPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const plan = await PromotionPlan.findByIdAndDelete(id);
 
     if (!plan) {
-      return res.status(404).json({ error: 'Promotion plan not found' });
+      res.status(404).json({ error: 'Promotion plan not found' });
+      return;
     }
 
     res.json({ message: 'Promotion plan deleted successfully' });
@@ -82,13 +84,14 @@ export const deletePromotionPlan = async (req: Request, res: Response) => {
 };
 
 // Toggle plan active status (admin only)
-export const togglePromotionPlanStatus = async (req: Request, res: Response) => {
+export const togglePromotionPlanStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const plan = await PromotionPlan.findById(id);
 
     if (!plan) {
-      return res.status(404).json({ error: 'Promotion plan not found' });
+      res.status(404).json({ error: 'Promotion plan not found' });
+      return;
     }
 
     plan.isActive = !plan.isActive;
@@ -102,12 +105,13 @@ export const togglePromotionPlanStatus = async (req: Request, res: Response) => 
 };
 
 // Seed default promotion plans (admin utility)
-export const seedPromotionPlans = async (req: Request, res: Response) => {
+export const seedPromotionPlans = async (req: Request, res: Response): Promise<void> => {
   try {
     // Check if plans already exist
     const existingCount = await PromotionPlan.countDocuments();
     if (existingCount > 0) {
-      return res.json({ message: 'Promotion plans already exist', count: existingCount });
+      res.json({ message: 'Promotion plans already exist', count: existingCount });
+      return;
     }
 
     const defaultPlans = [
