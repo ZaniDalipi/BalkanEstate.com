@@ -248,7 +248,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   const seoImages = allImages.map(img => img.url).filter(Boolean);
 
   return (
-    <div className="bg-neutral-50 h-full overflow-y-auto animate-fade-in">
+    <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in">
       {/* SEO Meta Tags */}
       <SEO
         title={`${property.address}, ${property.city} - €${property.price?.toLocaleString()}`}
@@ -463,7 +463,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
       <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Property Details */}
-          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
             {/* Image Gallery */}
             <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
               <PropertyGallery
@@ -504,7 +504,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
             {/* 360 Virtual Tour */}
             {property.virtualTour360Url && (
-              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden">
+              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden max-w-full">
                 {/* Glass effects */}
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
@@ -523,10 +523,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                     </div>
                   </div>
                 </div>
-                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                <div className="relative w-full max-w-full" style={{ paddingBottom: '56.25%' }}>
                   <iframe
                     src={property.virtualTour360Url}
-                    className="absolute top-0 left-0 w-full h-full border-0"
+                    className="absolute top-0 left-0 w-full h-full border-0 max-w-full"
                     allowFullScreen
                     loading="lazy"
                     allow="xr-spatial-tracking; gyroscope; accelerometer"
@@ -578,7 +578,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           </div>
 
           {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
-          <div className="hidden lg:block lg:col-span-1 animate-slide-up" style={{ animationDelay: '150ms' }}>
+          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
             <PropertyContact
               property={property}
               isCreatingConversation={isCreatingConversation}
