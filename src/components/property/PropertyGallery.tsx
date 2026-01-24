@@ -1,10 +1,11 @@
 // PropertyGallery Component
-// Image gallery with carousel, street view, and interactive controls
+// Image gallery with carousel, street view, video player, and interactive controls
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import { SharePopover } from './SharePopover';
+import { VideoPlayer } from './VideoPlayer';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -52,10 +53,20 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [mainImageError, setMainImageError] = useState(false);
   const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'photos' | 'streetview'>('photos');
+  // Start with video mode if video URL exists, otherwise photos
+  const [viewMode, setViewMode] = useState<'video' | 'photos' | 'streetview'>(
+    property.videoUrl ? 'video' : 'photos'
+  );
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [videoHasPlayed, setVideoHasPlayed] = useState(false);
   const shareContainerRef = useRef<HTMLDivElement>(null);
   const streetViewRef = useRef<HTMLIFrameElement>(null);
+
+  // Handle video end - transition to photos
+  const handleVideoEnd = useCallback(() => {
+    setVideoHasPlayed(true);
+    setViewMode('photos');
+  }, []);
 
   // Close share popover on outside click
   useEffect(() => {
@@ -121,7 +132,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
       <div className="relative w-full h-[250px] sm:h-[400px] lg:h-[450px] bg-neutral-200">
-        {viewMode === 'photos' ? (
+        {viewMode === 'video' && property.videoUrl ? (
+          <VideoPlayer
+            videoUrl={property.videoUrl}
+            autoPlay={!videoHasPlayed}
+            muted={true}
+            onVideoEnd={handleVideoEnd}
+            showReplayButton={true}
+            className="w-full h-full"
+          />
+        ) : viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
             className="relative w-full h-full block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl"
@@ -140,7 +160,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               />
             )}
           </button>
-        ) : (
+        ) : viewMode === 'streetview' ? (
           <div className={`relative w-full h-full ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
             <iframe
               ref={streetViewRef}
@@ -167,7 +187,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               )}
             </button>
           </div>
-        )}
+        ) : null}
 
         {/* 360 Tour Badge - Top Left */}
         {viewMode === 'photos' && property.virtualTour360Url && (
@@ -292,9 +312,25 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </>
         )}
 
-        {/* View Mode Toggle (Photos / Street View) - Compact */}
+        {/* View Mode Toggle (Video / Photos / Street View) - Compact */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
           <div className="flex items-center gap-0.5 bg-white/90 backdrop-blur-md p-0.5 rounded-full shadow-md">
+            {/* Video button - only shown if property has video */}
+            {property.videoUrl && (
+              <button
+                onClick={() => setViewMode('video')}
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${
+                  viewMode === 'video'
+                    ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-sm'
+                    : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <span className="hidden sm:inline">{t('actions.video', 'Video')}</span>
+              </button>
+            )}
             <button
               onClick={() => setViewMode('photos')}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${

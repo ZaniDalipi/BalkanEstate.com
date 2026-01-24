@@ -32,6 +32,7 @@ export function transformBackendProperty(backendProp: any): Property {
     tourUrl: backendProp.tourUrl,
     virtualTour360Url: backendProp.virtualTour360Url,
     hasVirtualTour360: backendProp.hasVirtualTour360 || false,
+    videoUrl: backendProp.videoUrl,
     imageUrl: backendProp.imageUrl,
     images: backendProp.images || [],
     lat: backendProp.lat,
@@ -116,6 +117,7 @@ export function transformToBackendProperty(frontendProp: Property): any {
   } else if (frontendProp.hasVirtualTour360 !== undefined) {
     result.hasVirtualTour360 = frontendProp.hasVirtualTour360;
   }
+  if (frontendProp.videoUrl) result.videoUrl = frontendProp.videoUrl;
   if (frontendProp.floorplanUrl) result.floorplanUrl = frontendProp.floorplanUrl;
   if (frontendProp.floorNumber !== undefined && frontendProp.floorNumber > 0) {
     result.floorNumber = frontendProp.floorNumber;

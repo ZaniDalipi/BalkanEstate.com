@@ -222,6 +222,13 @@
       "hint": "Paste the embed or share URL from your 360 tour provider. The tour will be displayed as an interactive iframe on your listing.",
       "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
     },
+    "video": {
+      "title": "Property Video (Optional)",
+      "description": "Add a video to showcase your property! Videos auto-play when visitors view your listing, creating an engaging first impression.",
+      "label": "Video URL",
+      "placeholder": "https://youtube.com/watch?v=... or https://tiktok.com/...",
+      "hint": "Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!"
+    },
     "progress": {
       "compressing": "Compressing images...",
       "uploading": "Uploading to cloud...",

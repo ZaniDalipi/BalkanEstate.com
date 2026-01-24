@@ -44,6 +44,7 @@ export interface IProperty extends Document {
   tourUrl?: string;
   virtualTour360Url?: string; // URL for 360 virtual tour (e.g., Matterport, Kuula, etc.)
   hasVirtualTour360: boolean; // Flag indicating if 360 virtual tour is available
+  videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, etc.)
   imageUrl: string;
   imagePublicId?: string; // Cloudinary public_id for main image
   images: IPropertyImage[];
@@ -226,6 +227,9 @@ const PropertySchema: Schema = new Schema(
       type: Boolean,
       default: false,
       index: true,
+    },
+    videoUrl: {
+      type: String,
     },
     imageUrl: {
       type: String,
