@@ -809,15 +809,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
         <>
           {/* Mobile: Layers FAB with liquid glass dropdown */}
           <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-            {/* Liquid glass dropdown - instant appearance */}
+            {/* Glass pill dropdown - matching List button style */}
             {isLayerMenuOpen && (
-              <div className="absolute bottom-full left-0 mb-3 pointer-events-auto">
+              <div className="absolute bottom-full left-0 mb-3 pointer-events-auto animate-fade-in">
                 <div
-                  className="flex flex-col gap-1.5 p-3 rounded-2xl shadow-2xl border border-white/30"
+                  className="flex flex-col gap-0.5 p-2 rounded-3xl shadow-2xl border border-white/40"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(24px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                    background: 'rgba(255, 255, 255, 0.92)',
+                    backdropFilter: 'blur(20px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
                   }}
                 >
                   {/* Legend Toggle */}
@@ -826,23 +827,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       setIsLegendOpen((p) => !p);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      isLegendOpen ? 'bg-amber-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      isLegendOpen
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <MapLegendIcon className="w-5 h-5" />
-                    <span className="text-sm font-medium">Legend</span>
+                    <MapLegendIcon className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-[15px] font-semibold">Legend</span>
                   </button>
 
                   {/* Landmarks Toggle */}
                   <button
                     onClick={() => setShowLandmarks(!showLandmarks)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      showLandmarks ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      showLandmarks
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-lg">🏛️</span>
-                    <span className="text-sm font-medium">Points of Interest</span>
+                    <span className="text-xl flex-shrink-0">🏛️</span>
+                    <span className="text-[15px] font-semibold">Points of Interest</span>
                   </button>
 
                   {/* Measurement Tool Toggle */}
@@ -851,37 +856,43 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       setShowMeasurement(!showMeasurement);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      showMeasurement ? 'bg-emerald-600 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      showMeasurement
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-lg">📏</span>
-                    <span className="text-sm font-medium">Measure Distance</span>
+                    <span className="text-xl flex-shrink-0">📏</span>
+                    <span className="text-[15px] font-semibold">Measure Distance</span>
+                  </button>
+
+                  {/* 3D Buildings Toggle */}
+                  <button
+                    onClick={() => setShow3DBuildings(!show3DBuildings)}
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      show3DBuildings
+                        ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
+                    }`}
+                  >
+                    <span className="text-xl flex-shrink-0">🏢</span>
+                    <span className="text-[15px] font-semibold">3D Buildings</span>
                   </button>
 
                   {/* Cadastre Toggle - only in satellite/hybrid views */}
                   {(mapType === 'satellite' || mapType === 'hybrid') && (
                     <button
                       onClick={() => setShowCadastre(!showCadastre)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                        showCadastre ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                      className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                        showCadastre
+                          ? 'bg-gradient-to-r from-purple-500 to-violet-500 text-white shadow-lg'
+                          : 'text-neutral-700 hover:bg-neutral-100/80'
                       }`}
                     >
-                      <span className="text-lg">📐</span>
-                      <span className="text-sm font-medium">Land Parcels</span>
+                      <span className="text-xl flex-shrink-0">📐</span>
+                      <span className="text-[15px] font-semibold">Land Parcels</span>
                     </button>
                   )}
-
-                  {/* 3D Buildings Toggle */}
-                  <button
-                    onClick={() => setShow3DBuildings(!show3DBuildings)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      show3DBuildings ? 'bg-slate-700 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
-                    }`}
-                  >
-                    <span className="text-lg">🏢</span>
-                    <span className="text-sm font-medium">3D Buildings</span>
-                  </button>
                 </div>
               </div>
             )}
