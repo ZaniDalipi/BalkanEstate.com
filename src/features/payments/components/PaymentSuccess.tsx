@@ -6,7 +6,7 @@ import { verifyPayment as verifyPaymentApi, getSubscriptionStatus, type VerifyPa
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
 import { authApiClient } from '@/src/data/api/AuthApiClient';
-import { trackEcommerce, trackEvent } from '@/components/marketing/Analytics';
+import { trackEcommerce, trackEvent } from '@/src/components/marketing/Analytics';
 
 interface PaymentDetails {
   paymentStatus?: string;

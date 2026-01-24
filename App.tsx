@@ -82,6 +82,9 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
 
+// PWA Install Prompt (lazy loaded)
+const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
+
 // Lightweight loader (extracted for smaller initial bundle)
 import { Loader3D } from './components/shared/Loader3D';
 
@@ -731,6 +734,7 @@ const AppWrapper: React.FC = () => {
             <Suspense fallback={null}>
                 {state.isAuthModalOpen && <AuthPage />}
                 <CookieConsent />
+                <PWAInstallPrompt />
             </Suspense>
         </>
     );

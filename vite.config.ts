@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
     // Load env file based on `mode` in the current working directory.
@@ -54,7 +55,207 @@ export default defineConfig(({ mode }) => {
           },
         } : undefined, // No proxy in staging/production (direct API calls)
       },
-      plugins: [tailwindcss(), react()],
+      plugins: [
+        tailwindcss(),
+        react(),
+        VitePWA({
+          registerType: 'autoUpdate',
+          includeAssets: ['icons/*.svg', 'icons/*.png', 'og-image.svg', 'robots.txt'],
+          manifest: {
+            name: 'BalkanEstateAI',
+            short_name: 'BalkanEstate',
+            description: 'Find your dream property in the Balkans with AI. Browse houses, apartments, and villas for sale across Serbia, Montenegro, Croatia, Bosnia, North Macedonia, and Albania.',
+            start_url: '/',
+            id: '/',
+            display: 'standalone',
+            display_override: ['standalone', 'minimal-ui'],
+            background_color: '#ffffff',
+            theme_color: '#0252CD',
+            orientation: 'any',
+            scope: '/',
+            lang: 'en',
+            dir: 'ltr',
+            categories: ['real estate', 'property', 'housing', 'business'],
+            prefer_related_applications: false,
+            launch_handler: {
+              client_mode: ['navigate-existing', 'auto']
+            },
+            icons: [
+              {
+                src: '/icons/icon.svg',
+                sizes: 'any',
+                type: 'image/svg+xml',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-72x72.png',
+                sizes: '72x72',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-96x96.png',
+                sizes: '96x96',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-128x128.png',
+                sizes: '128x128',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-144x144.png',
+                sizes: '144x144',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-152x152.png',
+                sizes: '152x152',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-192x192.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-384x384.png',
+                sizes: '384x384',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-maskable-192x192.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'maskable'
+              },
+              {
+                src: '/icons/icon-maskable-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'maskable'
+              }
+            ],
+            shortcuts: [
+              {
+                name: 'Search Properties',
+                short_name: 'Search',
+                description: 'Search for properties in the Balkans',
+                url: '/search',
+                icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }]
+              },
+              {
+                name: 'Find Agents',
+                short_name: 'Agents',
+                description: 'Find verified real estate agents',
+                url: '/agents',
+                icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }]
+              },
+              {
+                name: 'Saved Properties',
+                short_name: 'Saved',
+                description: 'View your saved properties',
+                url: '/saved-properties',
+                icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }]
+              }
+            ]
+          },
+          workbox: {
+            globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+            maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+            runtimeCaching: [
+              {
+                urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'google-fonts-cache',
+                  expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'gstatic-fonts-cache',
+                  expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'cloudinary-images-cache',
+                  expiration: {
+                    maxEntries: 100,
+                    maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'unsplash-images-cache',
+                  expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /\/api\/.*/i,
+                handler: 'NetworkFirst',
+                options: {
+                  cacheName: 'api-cache',
+                  expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 60 * 5 // 5 minutes
+                  },
+                  networkTimeoutSeconds: 10,
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              }
+            ],
+            skipWaiting: true,
+            clientsClaim: true
+          },
+          devOptions: {
+            enabled: true
+          }
+        })
+      ],
       css: {
         // Disable Vite's built-in PostCSS processing - let @tailwindcss/vite handle it
         postcss: {

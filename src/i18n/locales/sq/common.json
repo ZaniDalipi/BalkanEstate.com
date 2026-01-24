@@ -357,5 +357,23 @@
     "m": "m",
     "sqm": "m²",
     "sqft": "sq ft"
+  },
+  "pwa": {
+    "installTitle": "Instalo BalkanEstate",
+    "installSubtitle": "Merr përvojën e aplikacionit",
+    "benefit1": "Punon offline - shfleto kurdo",
+    "benefit2": "Ngarkim më i shpejtë - qasje e menjëhershme",
+    "benefit3": "Ikonë në ekranin kryesor - hap shpejt",
+    "iosTitle": "Për të instaluar në iOS:",
+    "iosStep1": "Kliko butonin Share",
+    "iosStep2": "Shko poshtë dhe kliko \"Add to Home Screen\"",
+    "iosStep3": "Kliko \"Add\" për të konfirmuar",
+    "installButton": "Instalo Aplikacionin",
+    "notNow": "Jo tani",
+    "updateAvailable": "Përditësim i disponueshëm",
+    "updateMessage": "Një version i ri është i disponueshëm. Rifresko për të përditësuar.",
+    "updateButton": "Përditëso tani",
+    "offlineReady": "Aplikacioni gati për përdorim offline",
+    "offlineMessage": "Tani mund të përdorni BalkanEstate edhe pa lidhje interneti."
   }
 }

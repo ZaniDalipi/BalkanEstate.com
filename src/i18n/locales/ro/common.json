@@ -356,5 +356,23 @@
     "m": "m",
     "sqm": "mp",
     "sqft": "mp"
+  },
+  "pwa": {
+    "installTitle": "Instalează BalkanEstate",
+    "installSubtitle": "Obține experiența aplicației",
+    "benefit1": "Funcționează offline - navighează oricând",
+    "benefit2": "Încărcare mai rapidă - acces instant",
+    "benefit3": "Pictogramă pe ecranul principal - lansare rapidă",
+    "iosTitle": "Pentru instalare pe iOS:",
+    "iosStep1": "Apasă butonul de partajare",
+    "iosStep2": "Derulează în jos și apasă \"Adaugă pe ecranul principal\"",
+    "iosStep3": "Apasă \"Adaugă\" pentru a confirma",
+    "installButton": "Instalează aplicația",
+    "notNow": "Nu acum",
+    "updateAvailable": "Actualizare disponibilă",
+    "updateMessage": "O versiune nouă este disponibilă. Reîmprospătează pentru actualizare.",
+    "updateButton": "Actualizează acum",
+    "offlineReady": "Aplicația este pregătită pentru utilizare offline",
+    "offlineMessage": "Acum poți folosi BalkanEstate chiar și fără conexiune la internet."
   }
 }

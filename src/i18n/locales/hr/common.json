@@ -357,5 +357,23 @@
     "m": "m",
     "sqm": "m²",
     "sqft": "sq ft"
+  },
+  "pwa": {
+    "installTitle": "Instaliraj BalkanEstate",
+    "installSubtitle": "Dobij iskustvo aplikacije",
+    "benefit1": "Radi offline - pretražuj kad god",
+    "benefit2": "Brže učitavanje - trenutni pristup",
+    "benefit3": "Ikona na početnom zaslonu - brzo pokretanje",
+    "iosTitle": "Za instalaciju na iOS:",
+    "iosStep1": "Dodirni gumb za dijeljenje",
+    "iosStep2": "Skrolaj dolje i dodirni \"Dodaj na početni zaslon\"",
+    "iosStep3": "Dodirni \"Dodaj\" za potvrdu",
+    "installButton": "Instaliraj aplikaciju",
+    "notNow": "Ne sada",
+    "updateAvailable": "Dostupno ažuriranje",
+    "updateMessage": "Nova verzija je dostupna. Osvježi za ažuriranje.",
+    "updateButton": "Ažuriraj sada",
+    "offlineReady": "Aplikacija spremna za offline korištenje",
+    "offlineMessage": "Sada možeš koristiti BalkanEstate i bez internet veze."
   }
 }
