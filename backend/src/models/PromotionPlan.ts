@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export type PromotionPlanCategory = 'listing' | 'agency';
-export type PromotionPlanTier = 'featured' | 'highlight' | 'premium' | 'spotlight' | 'homepage';
+export type PromotionPlanTier = 'featured' | 'highlight' | 'premium' | 'spotlight' | 'homepage' | 'addon';
 
 export interface IPromotionPlan extends Document {
   category: PromotionPlanCategory;
@@ -10,15 +10,18 @@ export interface IPromotionPlan extends Document {
   description?: string;
   icon?: string; // Emoji or icon name
 
-  // Pricing for different durations (listing promotions)
+  // Pricing for different durations
   pricing: {
-    duration7?: number;
-    duration30?: number;
-    duration90?: number;
-    // For agency features (fixed duration)
+    duration7?: number;  // Weekly price
+    duration30?: number; // Monthly price
+    duration90?: number; // Quarterly price
+    // For fixed-price items (like add-ons)
     fixedPrice?: number;
     fixedDuration?: string; // e.g., "30 days"
   };
+
+  // Add-on flag - if true, this is an optional add-on to a main plan
+  isAddOn: boolean;
 
   // Features/benefits
   features: string[];
@@ -59,7 +62,7 @@ const PromotionPlanSchema: Schema = new Schema(
     },
     tier: {
       type: String,
-      enum: ['featured', 'highlight', 'premium', 'spotlight', 'homepage'],
+      enum: ['featured', 'highlight', 'premium', 'spotlight', 'homepage', 'addon'],
       required: true,
     },
     name: {
@@ -80,6 +83,11 @@ const PromotionPlanSchema: Schema = new Schema(
       duration90: { type: Number },
       fixedPrice: { type: Number },
       fixedDuration: { type: String },
+    },
+
+    isAddOn: {
+      type: Boolean,
+      default: false,
     },
 
     features: {

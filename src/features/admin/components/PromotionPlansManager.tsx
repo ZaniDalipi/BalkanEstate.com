@@ -33,6 +33,7 @@ interface PromotionPlan {
   badge?: string;
   badgeColor?: string;
   highlighted: boolean;
+  isAddOn: boolean;
   cardStyle?: {
     gradientFrom?: string;
     gradientTo?: string;
@@ -101,16 +102,10 @@ const PromotionPlansManager: React.FC = () => {
       return;
     }
 
-    if (editingPlan.category === 'listing') {
-      if (!editingPlan.pricing.duration7 && !editingPlan.pricing.duration30 && !editingPlan.pricing.duration90) {
-        setError('At least one duration price is required');
-        return;
-      }
-    } else {
-      if (!editingPlan.pricing.fixedPrice) {
-        setError('Price is required');
-        return;
-      }
+    // All plans now use duration-based pricing
+    if (!editingPlan.pricing.duration7 && !editingPlan.pricing.duration30 && !editingPlan.pricing.duration90) {
+      setError('At least one duration price is required');
+      return;
     }
 
     try {
@@ -203,24 +198,23 @@ const PromotionPlansManager: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleCreate = (category: 'listing' | 'agency') => {
+  const handleCreate = (category: 'listing' | 'agency', isAddOn: boolean = false) => {
     const defaultCardStyle = category === 'listing'
       ? colorPresets.purple
-      : colorPresets.gray;
+      : isAddOn ? colorPresets.cyan : colorPresets.amber;
 
     setEditingPlan({
       _id: '',
       category,
-      tier: category === 'listing' ? 'featured' : 'spotlight',
+      tier: category === 'listing' ? 'featured' : (isAddOn ? 'addon' : 'featured'),
       name: '',
       description: '',
-      icon: category === 'listing' ? '⭐' : '🔦',
-      pricing: category === 'listing'
-        ? { duration7: 0, duration30: 0, duration90: 0 }
-        : { fixedPrice: 0, fixedDuration: '30 days' },
+      icon: category === 'listing' ? '⭐' : (isAddOn ? '📍' : '🏢'),
+      pricing: { duration7: 0, duration30: 0, duration90: 0 },
       features: [],
       displayOrder: plans.filter(p => p.category === category).length + 1,
       highlighted: false,
+      isAddOn,
       isActive: true,
       isVisible: true,
       cardStyle: defaultCardStyle,
@@ -344,12 +338,21 @@ const PromotionPlansManager: React.FC = () => {
           </button>
           <div className="flex-1" />
           <button
-            onClick={() => handleCreate(activeTab)}
+            onClick={() => handleCreate(activeTab, false)}
             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-md hover:shadow-lg"
           >
             <PlusIcon className="w-5 h-5" />
             {t('admin:promotionPlans.addPlan', 'Add Plan')}
           </button>
+          {activeTab === 'agency' && (
+            <button
+              onClick={() => handleCreate('agency', true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg"
+            >
+              <PlusIcon className="w-5 h-5" />
+              {t('admin:promotionPlans.addAddon', 'Add-on')}
+            </button>
+          )}
         </div>
       </div>
 
@@ -426,25 +429,39 @@ const PlanCard: React.FC<{
       case 'premium': return 'bg-amber-100 text-amber-700';
       case 'spotlight': return 'bg-gray-100 text-gray-700';
       case 'homepage': return 'bg-orange-100 text-orange-700';
+      case 'addon': return 'bg-blue-100 text-blue-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
 
+  const getHeaderGradient = () => {
+    if (plan.isAddOn) return 'bg-gradient-to-r from-blue-500 to-indigo-500';
+    if (plan.category === 'listing') return 'bg-gradient-to-r from-purple-500 to-indigo-500';
+    return 'bg-gradient-to-r from-amber-500 to-orange-500';
+  };
+
   return (
     <div className={`bg-white rounded-2xl shadow-lg overflow-hidden border-2 transition-all hover:shadow-xl ${
-      !plan.isActive ? 'opacity-60 border-gray-200' : plan.highlighted ? 'border-amber-300' : 'border-transparent'
+      !plan.isActive ? 'opacity-60 border-gray-200' : plan.highlighted ? 'border-amber-300' : plan.isAddOn ? 'border-blue-300' : 'border-transparent'
     }`}>
       {/* Header */}
-      <div className={`p-4 ${plan.category === 'listing' ? 'bg-gradient-to-r from-purple-500 to-indigo-500' : 'bg-gradient-to-r from-amber-500 to-orange-500'}`}>
+      <div className={`p-4 ${getHeaderGradient()}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-3xl">{plan.icon}</span>
             <div>
-              <h3 className="font-bold text-white text-lg">{plan.name}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-white text-lg">{plan.name}</h3>
+                {plan.isAddOn && (
+                  <span className="px-2 py-0.5 bg-white/30 text-white text-xs font-bold rounded-full">
+                    Add-on
+                  </span>
+                )}
+              </div>
               <p className="text-white/80 text-sm">{plan.description}</p>
             </div>
           </div>
-          {plan.badge && (
+          {plan.badge && !plan.isAddOn && (
             <span className="px-2 py-1 bg-white/20 text-white text-xs font-bold rounded-full backdrop-blur-sm">
               {plan.badge}
             </span>
@@ -465,27 +482,20 @@ const PlanCard: React.FC<{
           )}
         </div>
 
-        {plan.category === 'listing' ? (
-          <div className="grid grid-cols-3 gap-2 mt-3">
-            <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">7 days</div>
-              <div className="font-bold text-gray-900">€{plan.pricing.duration7 || 0}</div>
-            </div>
-            <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">30 days</div>
-              <div className="font-bold text-gray-900">€{plan.pricing.duration30 || 0}</div>
-            </div>
-            <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500">90 days</div>
-              <div className="font-bold text-gray-900">€{plan.pricing.duration90 || 0}</div>
-            </div>
+        <div className="grid grid-cols-3 gap-2 mt-3">
+          <div className="text-center p-2 bg-gray-50 rounded-lg">
+            <div className="text-xs text-gray-500">7 days</div>
+            <div className="font-bold text-gray-900">€{plan.pricing.duration7 || 0}</div>
           </div>
-        ) : (
-          <div className="mt-3 p-3 bg-gray-50 rounded-lg text-center">
-            <div className="text-2xl font-bold text-gray-900">€{plan.pricing.fixedPrice || 0}</div>
-            <div className="text-sm text-gray-500">{plan.pricing.fixedDuration || '30 days'}</div>
+          <div className="text-center p-2 bg-gray-50 rounded-lg">
+            <div className="text-xs text-gray-500">30 days</div>
+            <div className="font-bold text-gray-900">€{plan.pricing.duration30 || 0}</div>
           </div>
-        )}
+          <div className="text-center p-2 bg-gray-50 rounded-lg">
+            <div className="text-xs text-gray-500">90 days</div>
+            <div className="font-bold text-gray-900">€{plan.pricing.duration90 || 0}</div>
+          </div>
+        </div>
       </div>
 
       {/* Features */}
@@ -631,9 +641,8 @@ const EditPlanModal: React.FC<{
                       </>
                     ) : (
                       <>
-                        <option value="spotlight">Spotlight</option>
-                        <option value="homepage">Homepage</option>
-                        <option value="premium">Premium</option>
+                        <option value="featured">Featured</option>
+                        <option value="addon">Add-on</option>
                       </>
                     )}
                   </select>
@@ -654,87 +663,59 @@ const EditPlanModal: React.FC<{
                 <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
                   <span className="text-lg">€</span>
                   {t('admin:promotionPlans.pricing', 'Pricing')}
+                  {plan.isAddOn && (
+                    <span className="px-2 py-0.5 bg-blue-200 text-blue-700 text-xs font-bold rounded-full ml-auto">
+                      Add-on
+                    </span>
+                  )}
                 </h4>
-                {plan.category === 'listing' ? (
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">7 {t('admin:common.days', 'Days')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={plan.pricing.duration7 || ''}
-                        onChange={(e) => onChange({
-                          ...plan,
-                          pricing: { ...plan.pricing, duration7: parseFloat(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">30 {t('admin:common.days', 'Days')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={plan.pricing.duration30 || ''}
-                        onChange={(e) => onChange({
-                          ...plan,
-                          pricing: { ...plan.pricing, duration30: parseFloat(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">90 {t('admin:common.days', 'Days')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={plan.pricing.duration90 || ''}
-                        onChange={(e) => onChange({
-                          ...plan,
-                          pricing: { ...plan.pricing, duration90: parseFloat(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                        placeholder="0"
-                      />
-                    </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">7 {t('admin:common.days', 'Days')}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={plan.pricing.duration7 || ''}
+                      onChange={(e) => onChange({
+                        ...plan,
+                        pricing: { ...plan.pricing, duration7: parseFloat(e.target.value) || 0 }
+                      })}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      placeholder="0"
+                    />
                   </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.price', 'Price')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={plan.pricing.fixedPrice || ''}
-                        onChange={(e) => onChange({
-                          ...plan,
-                          pricing: { ...plan.pricing, fixedPrice: parseFloat(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.duration', 'Duration')}</label>
-                      <input
-                        type="text"
-                        value={plan.pricing.fixedDuration || '30 days'}
-                        onChange={(e) => onChange({
-                          ...plan,
-                          pricing: { ...plan.pricing, fixedDuration: e.target.value }
-                        })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                        placeholder="30 days"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">30 {t('admin:common.days', 'Days')}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={plan.pricing.duration30 || ''}
+                      onChange={(e) => onChange({
+                        ...plan,
+                        pricing: { ...plan.pricing, duration30: parseFloat(e.target.value) || 0 }
+                      })}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      placeholder="0"
+                    />
                   </div>
-                )}
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">90 {t('admin:common.days', 'Days')}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={plan.pricing.duration90 || ''}
+                      onChange={(e) => onChange({
+                        ...plan,
+                        pricing: { ...plan.pricing, duration90: parseFloat(e.target.value) || 0 }
+                      })}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Features */}
