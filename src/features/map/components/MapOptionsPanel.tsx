@@ -1,12 +1,11 @@
 /**
  * MapOptionsPanel Component
  *
- * Zillow-style map options panel with:
+ * Glass pill style map options panel with:
  * - Map type selection (Automatic, Satellite, Street view)
  * - Climate risks overlay selection (Flood, Fire, Wind, Air, Heat)
  *
- * Styled to match Zillow's clean, minimal design with radio button groups.
- * Optimized for both desktop and mobile screens.
+ * Styled to match the frosted glass design language.
  */
 
 import React from 'react';
@@ -30,50 +29,26 @@ interface MapOptionsPanelProps {
 }
 
 /**
- * Compact radio button for FAB-style panel
+ * Pill button for options
  */
-const RadioOption: React.FC<{
-  id: string;
-  name: string;
-  value: string;
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-}> = ({ id, name, value, checked, onChange, label }) => (
-  <label
-    htmlFor={id}
-    className={`flex items-center gap-2 cursor-pointer rounded-md py-1.5 px-1.5 transition-colors active:bg-white/50 ${
-      checked ? 'bg-white/40' : 'hover:bg-white/30'
+const PillButton: React.FC<{
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  size?: 'sm' | 'md';
+}> = ({ selected, onClick, children, size = 'md' }) => (
+  <button
+    onClick={onClick}
+    className={`font-semibold rounded-xl transition-all active:scale-[0.97] ${
+      size === 'sm' ? 'px-3 py-2 text-[13px]' : 'px-4 py-2.5 text-[14px]'
+    } ${
+      selected
+        ? 'bg-primary text-white shadow-md'
+        : 'text-neutral-600 bg-neutral-100/80 hover:bg-neutral-200/80'
     }`}
   >
-    <div className="relative flex items-center justify-center">
-      <input
-        type="radio"
-        id={id}
-        name={name}
-        value={value}
-        checked={checked}
-        onChange={onChange}
-        className="sr-only"
-      />
-      <div
-        className={`w-4 h-4 rounded-full border-2 transition-all ${
-          checked
-            ? 'border-blue-500 bg-white'
-            : 'border-gray-400 bg-white/80'
-        }`}
-      >
-        {checked && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
-          </div>
-        )}
-      </div>
-    </div>
-    <span className={`text-xs ${checked ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
-      {label}
-    </span>
-  </label>
+    {children}
+  </button>
 );
 
 const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
@@ -96,7 +71,7 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
   ];
 
   const climateRisks: { value: ClimateRiskType; label: string }[] = [
-    { value: 'none', label: t('search:map.climateRisks.none', 'None') },
+    { value: 'none', label: t('search:map.climateRisks.none', 'None selected') },
     { value: 'flood', label: t('search:map.climateRisks.flood', 'Flood') },
     { value: 'fire', label: t('search:map.climateRisks.fire', 'Fire') },
     { value: 'wind', label: t('search:map.climateRisks.wind', 'Wind') },
@@ -104,65 +79,55 @@ const MapOptionsPanel: React.FC<MapOptionsPanelProps> = ({
     { value: 'heat', label: t('search:map.climateRisks.heat', 'Heat') },
   ];
 
-  // Responsive layout with auto-sizing buttons for different languages
+  const buttonSize = isMobile ? 'sm' : 'md';
+
   return (
     <div
-      className={`rounded-xl shadow-lg border border-white/30 overflow-hidden ${
-        isMobile ? 'min-w-[140px] max-w-[200px]' : 'min-w-[160px] max-w-[280px]'
-      }`}
+      className="rounded-3xl shadow-2xl border border-white/40 overflow-hidden animate-fade-in"
       style={{
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(16px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-        width: 'fit-content',
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(20px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+        minWidth: isMobile ? '200px' : '240px',
       }}
     >
-      {/* Map Options Section - only shown on mobile or when explicitly enabled */}
+      {/* Map Options Section */}
       {showMapOptions && (
-        <div className={`border-b border-gray-200/40 ${isMobile ? 'px-2 py-2' : 'px-3 py-2.5'}`}>
-          <h3 className={`font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
+        <div className={`border-b border-neutral-200/60 ${isMobile ? 'p-3' : 'p-4'}`}>
+          <h3 className={`font-bold text-neutral-400 uppercase tracking-wider mb-3 ${isMobile ? 'text-[10px]' : 'text-[11px]'}`}>
             {t('search:map.options.title', 'Map Options')}
           </h3>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-2">
             {mapOptions.map((option) => (
-              <button
+              <PillButton
                 key={option.value}
+                selected={selectedMapOption === option.value}
                 onClick={() => onMapOptionChange(option.value)}
-                className={`font-medium rounded transition-all whitespace-nowrap ${
-                  isMobile ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-1 text-[10px]'
-                } ${
-                  selectedMapOption === option.value
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100 bg-gray-50'
-                }`}
+                size={buttonSize}
               >
                 {option.label}
-              </button>
+              </PillButton>
             ))}
           </div>
         </div>
       )}
 
       {/* Climate Risks Section */}
-      <div className={isMobile ? 'px-2 py-2' : 'px-3 py-2.5'}>
-        <h3 className={`font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${isMobile ? 'text-[8px] mb-1.5' : 'text-[9px] mb-2'}`}>
+      <div className={isMobile ? 'p-3' : 'p-4'}>
+        <h3 className={`font-bold text-neutral-400 uppercase tracking-wider mb-3 ${isMobile ? 'text-[10px]' : 'text-[11px]'}`}>
           {t('search:map.climateRisks.title', 'Climate Risks')}
         </h3>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2">
           {climateRisks.map((risk) => (
-            <button
+            <PillButton
               key={risk.value}
+              selected={selectedClimateRisk === risk.value}
               onClick={() => onClimateRiskChange(risk.value)}
-              className={`font-medium rounded transition-all whitespace-nowrap ${
-                isMobile ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-1 text-[10px]'
-              } ${
-                selectedClimateRisk === risk.value
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 bg-gray-50'
-              }`}
+              size={buttonSize}
             >
               {risk.label}
-            </button>
+            </PillButton>
           ))}
         </div>
       </div>
