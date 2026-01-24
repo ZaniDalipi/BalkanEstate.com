@@ -198,7 +198,7 @@ const FeaturedAgencies: React.FC = () => {
         </div>
 
         {/* Agencies grid with staggered entrance - larger cards for better visual impact */}
-        <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
           {isLoading ? (
             // Loading skeleton - matches new card design
             Array.from({ length: 4 }).map((_, index) => (

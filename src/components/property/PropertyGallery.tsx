@@ -316,35 +316,70 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
         {/* View Mode Toggle (Photos / Street View) - Liquid Glass Style */}
         <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
-          <LiquidGlassSwitch
-            options={[
-              {
-                value: 'photos',
-                label: t('actions.photos'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                  </svg>
-                ),
-              },
-              {
-                value: 'streetview',
-                label: t('actions.streetView'),
-                icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="5" r="3" />
-                    <path d="M12 8v4" />
-                    <path d="M8 21l4-9 4 9" />
-                  </svg>
-                ),
-              },
-            ]}
-            value={viewMode}
-            onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
-            size="md"
-          />
+          {/* Mobile version - smaller */}
+          <div className="sm:hidden">
+            <LiquidGlassSwitch
+              options={[
+                {
+                  value: 'photos',
+                  label: t('actions.photos'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                    </svg>
+                  ),
+                },
+                {
+                  value: 'streetview',
+                  label: t('actions.streetView'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="5" r="3" />
+                      <path d="M12 8v4" />
+                      <path d="M8 21l4-9 4 9" />
+                    </svg>
+                  ),
+                },
+              ]}
+              value={viewMode}
+              onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
+              size="sm"
+            />
+          </div>
+          {/* Desktop version - medium */}
+          <div className="hidden sm:block">
+            <LiquidGlassSwitch
+              options={[
+                {
+                  value: 'photos',
+                  label: t('actions.photos'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                    </svg>
+                  ),
+                },
+                {
+                  value: 'streetview',
+                  label: t('actions.streetView'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="5" r="3" />
+                      <path d="M12 8v4" />
+                      <path d="M8 21l4-9 4 9" />
+                    </svg>
+                  ),
+                },
+              ]}
+              value={viewMode}
+              onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
+              size="md"
+            />
+          </div>
         </div>
       </div>
     </div>
