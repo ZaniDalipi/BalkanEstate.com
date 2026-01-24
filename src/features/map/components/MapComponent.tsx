@@ -760,12 +760,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
 
             {drawnBounds && !isDrawing && (
-              <div className="flex items-center gap-1.5 animate-fade-in">
+              <div
+                className="flex items-center gap-2 p-2 rounded-2xl shadow-2xl border border-white/40 animate-fade-in"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.92)',
+                  backdropFilter: 'blur(20px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+                }}
+              >
                 {isAuthenticated && (
                   <button
                     onClick={onSaveSearch}
                     disabled={isSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-blue-600 text-white text-xs font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                   >
                     <SearchPlusIcon className="w-4 h-4" />
                     <span className="hidden sm:inline">{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
@@ -774,7 +782,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 )}
                 <button
                   onClick={() => onDrawComplete(null)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-lg hover:bg-neutral-900"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white text-xs font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
                 >
                   <XCircleIcon className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('search:map.clearArea')}</span>
@@ -1024,34 +1032,35 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 />
               )}
 
-              {/* Drawn bounds actions - liquid glass effect */}
+              {/* Drawn bounds actions - glass pill style */}
               {drawnBounds && !isDrawing && (
                 <div
-                  className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30 animate-fade-in"
+                  className="flex items-center gap-2 p-2 rounded-2xl shadow-2xl border border-white/40 animate-fade-in"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(20px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    background: 'rgba(255, 255, 255, 0.92)',
+                    backdropFilter: 'blur(20px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
                   }}
                 >
                   {isAuthenticated && (
                     <button
                       onClick={onSaveSearch}
                       disabled={isSaving}
-                      className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded-lg disabled:opacity-50 transition-all"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl disabled:opacity-50 transition-all active:scale-[0.98] shadow-md"
                       title={isSaving ? t('search:map.saving') : t('search:map.saveArea')}
                     >
-                      <SearchPlusIcon className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-semibold">{t('search:map.save', 'Save')}</span>
+                      <SearchPlusIcon className="w-4 h-4" />
+                      <span className="text-[13px] font-semibold">{t('search:map.save', 'Save')}</span>
                     </button>
                   )}
                   <button
                     onClick={() => onDrawComplete(null)}
-                    className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded-lg transition-all"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl transition-all active:scale-[0.98] shadow-md"
                     title={t('search:map.clearArea')}
                   >
-                    <XCircleIcon className="w-3.5 h-3.5" />
-                    <span className="text-[10px] font-semibold">{t('search:map.clear', 'Clear')}</span>
+                    <XCircleIcon className="w-4 h-4" />
+                    <span className="text-[13px] font-semibold">{t('search:map.clear', 'Clear')}</span>
                   </button>
                 </div>
               )}
