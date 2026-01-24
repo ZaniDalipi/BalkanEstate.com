@@ -17,7 +17,7 @@ import {
   SlideIn,
   FadeIn,
   Skeleton,
-} from '@/components/ui/Animations';
+} from '@/src/components/ui/Animations';
 import {
   BuildingOfficeIcon,
   ChartBarIcon,

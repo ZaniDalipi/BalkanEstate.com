@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
-import { PageTransition, Animated } from '@/components/ui/Animations';
+import { PageTransition, Animated } from '@/src/components/ui/Animations';
 
 const TermsOfServicePage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
