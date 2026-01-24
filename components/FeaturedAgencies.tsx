@@ -143,7 +143,7 @@ const FeaturedAgencies: React.FC = () => {
                 >
                   <div className="relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer group-hover:-translate-y-2">
                     {/* Header with gradient or cover image */}
-                    <div className="relative h-48 sm:h-56 overflow-hidden">
+                    <div className="relative h-40 sm:h-48 overflow-hidden">
                       {(agency as any).coverImage ? (
                         <div
                           className="absolute inset-0 bg-cover bg-center"
@@ -162,25 +162,25 @@ const FeaturedAgencies: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Type Badge */}
-                      <div className="absolute top-4 left-4">
+                      {/* Type Badge - Bottom Left */}
+                      <div className="absolute bottom-4 left-4">
                         <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full">
                           <span className="text-lg">{typeInfo.emoji}</span>
                           <span className="text-white text-sm font-medium">{typeInfo.label}</span>
                         </div>
                       </div>
 
-                      {/* Featured Badge */}
-                      <div className="absolute top-4 right-4">
+                      {/* Featured Badge - Bottom Right */}
+                      <div className="absolute bottom-4 right-4">
                         <div className="flex items-center gap-1.5 bg-amber-400 text-amber-900 px-3 py-1.5 rounded-full shadow-lg">
                           <SparklesIcon className="w-4 h-4" />
                           <span className="text-sm font-bold">{t('featured.badge')}</span>
                         </div>
                       </div>
 
-                      {/* Logo */}
-                      <div className="absolute -bottom-10 left-6 sm:left-8">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl shadow-xl flex items-center justify-center overflow-hidden ring-4 ring-white">
+                      {/* Logo - Centered at Top */}
+                      <div className="absolute top-6 left-1/2 -translate-x-1/2">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl shadow-xl flex items-center justify-center overflow-hidden ring-4 ring-white/50">
                           {agency.logo ? (
                             <img
                               src={agency.logo}
@@ -198,23 +198,23 @@ const FeaturedAgencies: React.FC = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="pt-14 sm:pt-16 px-6 sm:px-8 pb-6 sm:pb-8">
-                      {/* Agency Name & Location */}
-                      <div className="mb-6">
+                    <div className="px-6 sm:px-8 py-6 sm:py-8">
+                      {/* Agency Name & Location - Centered */}
+                      <div className="mb-6 text-center">
                         <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2 group-hover:text-primary transition-colors">
                           {agency.name}
                         </h3>
                         {agency.city && (
-                          <div className="flex items-center gap-1.5 text-neutral-500">
+                          <div className="flex items-center justify-center gap-1.5 text-neutral-500">
                             <MapPinIcon className="w-4 h-4" />
                             <span className="text-sm">{agency.city}{agency.country ? `, ${agency.country}` : ''}</span>
                           </div>
                         )}
                       </div>
 
-                      {/* Stats */}
-                      <div className="flex items-center gap-8 sm:gap-12 mb-6 pb-6 border-b border-neutral-100">
-                        <div>
+                      {/* Stats - Centered */}
+                      <div className="flex items-center justify-center gap-8 sm:gap-12 mb-6 pb-6 border-b border-neutral-100">
+                        <div className="text-center">
                           <div className="text-3xl sm:text-4xl font-bold text-primary">
                             {agency.totalProperties || 0}
                           </div>
@@ -223,7 +223,7 @@ const FeaturedAgencies: React.FC = () => {
                           </div>
                         </div>
                         <div className="w-px h-12 bg-neutral-200" />
-                        <div>
+                        <div className="text-center">
                           <div className="text-3xl sm:text-4xl font-bold text-purple-600">
                             {agency.totalAgents || 0}
                           </div>
