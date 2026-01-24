@@ -12,6 +12,47 @@ interface PropertyCardProps {
   showCompareButton?: boolean;
 }
 
+// Seller Avatar component with error handling
+const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; size?: 'sm' | 'md' }> = ({
+  avatarUrl,
+  name,
+  type,
+  size = 'sm'
+}) => {
+  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const sizeClasses = size === 'sm'
+    ? 'w-8 h-8'
+    : 'w-10 h-10';
+  const iconSize = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
+
+  if (!avatarUrl || error) {
+    return (
+      <div className={`${sizeClasses} rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow border-2 border-white`}>
+        <UserCircleIcon className={`${iconSize} text-primary`} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${sizeClasses} rounded-full overflow-hidden border-2 border-white shadow bg-gradient-to-br from-primary/20 to-primary/40`}>
+      {!loaded && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
+      )}
+      <img
+        src={avatarUrl}
+        alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
+        loading="lazy"
+        decoding="async"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onError={() => setError(true)}
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+};
+
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
   const { t } = useTranslation(['property', 'common']);
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
@@ -342,19 +383,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           <div className="flex items-center gap-2">
             {/* Seller Avatar */}
             <div className="relative flex-shrink-0">
-              {safeProperty.seller.avatarUrl ? (
-                <img
-                  src={safeProperty.seller.avatarUrl}
-                  alt={`${safeProperty.seller.name} - Real Estate ${safeProperty.seller.type === 'agent' ? 'Agent' : 'Seller'}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow border-2 border-white">
-                  <UserCircleIcon className="w-5 h-5 text-primary" />
-                </div>
-              )}
+              <SellerAvatar
+                avatarUrl={safeProperty.seller.avatarUrl}
+                name={safeProperty.seller.name}
+                type={safeProperty.seller.type}
+                size="sm"
+              />
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
             </div>
 

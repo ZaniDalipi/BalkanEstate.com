@@ -23,6 +23,41 @@ interface HighlightedPropertyCardProps {
   showToast?: (message: string, type: 'success' | 'error') => void;
 }
 
+// Seller Avatar component with error handling
+const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string }> = ({
+  avatarUrl,
+  name,
+  type
+}) => {
+  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  if (!avatarUrl || error) {
+    return (
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow border-2 border-white">
+        <UserCircleIcon className="w-6 h-6 text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow bg-gradient-to-br from-primary/20 to-primary/40">
+      {!loaded && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
+      )}
+      <img
+        src={avatarUrl}
+        alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
+        loading="lazy"
+        decoding="async"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onError={() => setError(true)}
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+};
+
 const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ property, showToast }) => {
   const { t } = useTranslation(['property', 'common']);
   const { state, dispatch, toggleSavedHome } = useAppContext();
@@ -306,17 +341,11 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         {/* Seller Info */}
         <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {property.seller.avatarUrl ? (
-              <img
-                src={property.seller.avatarUrl}
-                alt={property.seller.name}
-                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow">
-                <UserCircleIcon className="w-6 h-6 text-primary" />
-              </div>
-            )}
+            <SellerAvatar
+              avatarUrl={property.seller.avatarUrl}
+              name={property.seller.name}
+              type={property.seller.type}
+            />
             <div>
               <p className="text-sm font-semibold text-neutral-800">{property.seller.name}</p>
               <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
