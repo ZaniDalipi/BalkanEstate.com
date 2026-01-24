@@ -294,7 +294,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           <button
             onClick={onContactSeller}
             disabled={isCreatingConversation || property.status === 'sold'}
-            className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border-2 border-primary text-primary rounded-xl shadow-sm text-sm font-semibold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-primary text-primary rounded-xl text-sm font-semibold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -310,7 +310,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           {property.status !== 'sold' && (
             <button
               onClick={() => setShowInquiryModal(true)}
-              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border-2 border-green-500 text-green-600 rounded-xl shadow-sm text-sm font-semibold bg-white hover:bg-green-50 transition-colors"
+              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-green-500 text-green-600 rounded-xl text-sm font-semibold bg-white hover:bg-green-50 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
