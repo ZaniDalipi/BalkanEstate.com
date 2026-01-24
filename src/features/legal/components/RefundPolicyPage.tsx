@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
+import { PageTransition, Animated } from '@/components/ui/Animations';
 
 const RefundPolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -17,26 +18,30 @@ const RefundPolicyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="font-medium">{t('common:back', 'Back')}</span>
-          </button>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            {t('legal:refund.title', 'Refund Policy')}
-          </h1>
-          <p className="text-gray-600">
-            {t('legal:refund.lastUpdated', 'Last updated')}: {lastUpdated}
-          </p>
-        </div>
+      <PageTransition>
+        <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+          {/* Header */}
+          <Animated variant="fadeInUp" delay={0}>
+            <div className="mb-8">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
+              >
+                <ArrowLeftIcon className="w-5 h-5" />
+                <span className="font-medium">{t('common:back', 'Back')}</span>
+              </button>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                {t('legal:refund.title', 'Refund Policy')}
+              </h1>
+              <p className="text-gray-600">
+                {t('legal:refund.lastUpdated', 'Last updated')}: {lastUpdated}
+              </p>
+            </div>
+          </Animated>
 
-        {/* Content */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
+          {/* Content */}
+          <Animated variant="fadeInUp" delay={100}>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
           {/* Introduction */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
@@ -265,8 +270,10 @@ const RefundPolicyPage: React.FC = () => {
               <p className="text-gray-700">Phone: +389 71 967 915</p>
             </div>
           </section>
+            </div>
+          </Animated>
         </div>
-      </div>
+      </PageTransition>
 
       <Footer />
     </div>

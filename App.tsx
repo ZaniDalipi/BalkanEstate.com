@@ -6,6 +6,7 @@ import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
 import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
+import { AnimationProvider } from './src/components/ui/Animations';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -391,13 +392,31 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
   // Scroll to top when active view changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Scroll window to top
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+    // Also scroll main content container if it exists
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
+
+    // Scroll any data-scroll-container elements
+    document.querySelectorAll('[data-scroll-container]').forEach(el => {
+      el.scrollTop = 0;
+    });
   }, [state.activeView]);
 
   // Also scroll to top when selected property or agency changes
   useEffect(() => {
     if (state.selectedProperty || state.selectedAgencyId) {
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+      // Also scroll main content container
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) {
+        mainContent.scrollTop = 0;
+      }
     }
   }, [state.selectedProperty, state.selectedAgencyId]);
 
@@ -561,7 +580,7 @@ const MainLayout: React.FC = () => {
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
             </Suspense>
-            <main id="main-content" className={`flex flex-col flex-grow overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-0' : 'overflow-y-auto'}`}>
+            <main id="main-content" data-scroll-container className={`flex flex-col flex-grow overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
         </div>
@@ -730,23 +749,25 @@ const App: React.FC = () => {
             <AlertProvider>
               <NotificationProvider>
                 <ConfirmationProvider>
-                  {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
-                  <Suspense fallback={null}>
-                    <SEO />
-                    <OrganizationSchema />
-                    <FAQSchema faqs={realEstateFAQs} />
-                    {/* Analytics - only loaded if IDs are provided */}
-                    {(googleAnalyticsId || facebookPixelId) && (
-                      <Analytics
-                        googleAnalyticsId={googleAnalyticsId}
-                        facebookPixelId={facebookPixelId}
-                      />
-                    )}
-                    {/* Microsoft Clarity - Heatmaps & Session Recordings */}
-                    <ClarityInit />
-                  </Suspense>
+                  <AnimationProvider>
+                    {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
+                    <Suspense fallback={null}>
+                      <SEO />
+                      <OrganizationSchema />
+                      <FAQSchema faqs={realEstateFAQs} />
+                      {/* Analytics - only loaded if IDs are provided */}
+                      {(googleAnalyticsId || facebookPixelId) && (
+                        <Analytics
+                          googleAnalyticsId={googleAnalyticsId}
+                          facebookPixelId={facebookPixelId}
+                        />
+                      )}
+                      {/* Microsoft Clarity - Heatmaps & Session Recordings */}
+                      <ClarityInit />
+                    </Suspense>
 
-                  <AppWrapper />
+                    <AppWrapper />
+                  </AnimationProvider>
                 </ConfirmationProvider>
               </NotificationProvider>
             </AlertProvider>

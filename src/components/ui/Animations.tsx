@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo, createContext, useContext } from 'react';
 
 // ============================================================================
 // Types & Interfaces
@@ -518,6 +518,250 @@ export function AnimatedList<T>({
 }
 
 // ============================================================================
+// useScrollToTop - Scroll to top on mount or dependency change
+// ============================================================================
+
+export function useScrollToTop(deps: React.DependencyList = []) {
+  useEffect(() => {
+    // Immediate scroll to top
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+    // Also reset any scrollable containers
+    const scrollableContainers = document.querySelectorAll('[data-scroll-container]');
+    scrollableContainers.forEach(container => {
+      container.scrollTop = 0;
+    });
+  }, deps);
+}
+
+// ============================================================================
+// usePageTransition - Combined hook for page animations
+// ============================================================================
+
+export function usePageTransition() {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+    // Trigger animation after a brief delay for DOM to settle
+    const timer = requestAnimationFrame(() => {
+      setIsReady(true);
+    });
+
+    return () => cancelAnimationFrame(timer);
+  }, []);
+
+  return isReady;
+}
+
+// ============================================================================
+// GlobalAnimationStyles - Inject global CSS for animations
+// ============================================================================
+
+export const GlobalAnimationStyles = memo(function GlobalAnimationStyles() {
+  return (
+    <style>{`
+      /* Smooth page transitions */
+      .page-enter {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      .page-enter-active {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 300ms ease-out, transform 300ms ease-out;
+      }
+
+      /* Shimmer animation for skeletons */
+      @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      .animate-shimmer {
+        animation: shimmer 1.5s ease-in-out infinite;
+      }
+
+      /* Pulse glow animation */
+      @keyframes pulse-glow {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.02); }
+      }
+      .animate-pulse-glow {
+        animation: pulse-glow 4s ease-in-out infinite;
+      }
+
+      /* Float animation */
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .animate-float {
+        animation: float 3s ease-in-out infinite;
+      }
+
+      /* Hover lift effect */
+      .hover-lift {
+        transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+      }
+      .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Press effect for buttons */
+      .press-effect {
+        transition: transform 100ms ease-out;
+      }
+      .press-effect:active {
+        transform: scale(0.98);
+      }
+
+      /* Stagger children animation */
+      .stagger-children > * {
+        opacity: 0;
+        transform: translateY(8px);
+        animation: stagger-fade-in 300ms ease-out forwards;
+      }
+      .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+      .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+      .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+      .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+      .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+      .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+      .stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+      .stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+
+      @keyframes stagger-fade-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Smooth content reveal */
+      .content-reveal {
+        opacity: 0;
+        transform: translateY(16px);
+        animation: content-reveal 400ms ease-out forwards;
+      }
+
+      @keyframes content-reveal {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Card hover effects */
+      .card-interactive {
+        transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out;
+      }
+      .card-interactive:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Blur in animation */
+      @keyframes blur-in {
+        from {
+          opacity: 0;
+          filter: blur(8px);
+        }
+        to {
+          opacity: 1;
+          filter: blur(0);
+        }
+      }
+      .animate-blur-in {
+        animation: blur-in 400ms ease-out forwards;
+      }
+
+      /* Scale in animation */
+      @keyframes scale-in {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .animate-scale-in {
+        animation: scale-in 300ms ease-out forwards;
+      }
+
+      /* Ensure no layout shift during animations */
+      .will-animate {
+        will-change: transform, opacity;
+      }
+
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        .animate-float,
+        .animate-pulse-glow,
+        .animate-shimmer {
+          animation: none !important;
+        }
+      }
+    `}</style>
+  );
+});
+
+// ============================================================================
+// AnimationProvider - Context for animation settings
+// ============================================================================
+
+interface AnimationContextType {
+  reducedMotion: boolean;
+  animationsEnabled: boolean;
+  setAnimationsEnabled: (enabled: boolean) => void;
+}
+
+const AnimationContext = createContext<AnimationContextType>({
+  reducedMotion: false,
+  animationsEnabled: true,
+  setAnimationsEnabled: () => {},
+});
+
+export function useAnimationContext() {
+  return useContext(AnimationContext);
+}
+
+export const AnimationProvider = memo(function AnimationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  return (
+    <AnimationContext.Provider value={{ reducedMotion, animationsEnabled, setAnimationsEnabled }}>
+      <GlobalAnimationStyles />
+      {children}
+    </AnimationContext.Provider>
+  );
+});
+
+// ============================================================================
 // Exports
 // ============================================================================
 
@@ -533,4 +777,9 @@ export default {
   LoadingSpinner,
   AnimatedList,
   useAnimation,
+  useScrollToTop,
+  usePageTransition,
+  GlobalAnimationStyles,
+  AnimationProvider,
+  useAnimationContext,
 };
