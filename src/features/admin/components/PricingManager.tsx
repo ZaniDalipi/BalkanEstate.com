@@ -536,6 +536,29 @@ const PricingManager: React.FC = () => {
               {/* Limits */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="font-semibold text-green-900 mb-3">Limits & Quotas</h4>
+
+                {/* Listings Limit - Most important for sellers/agents */}
+                <div className="bg-white border-2 border-green-300 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">🏠</span>
+                    <h5 className="font-semibold text-green-800">Listings Limit</h5>
+                  </div>
+                  <p className="text-xs text-gray-600 mb-2">Maximum number of active property listings allowed for this plan</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Active Listings</label>
+                      <input
+                        type="number"
+                        value={editingProduct.listingsLimit}
+                        onChange={(e) => handleNumberChange('listingsLimit', e.target.value, -1)}
+                        min="-1"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg font-semibold"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">-1 = unlimited | Free: 3 | Pro: 20 | Agency: 500</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Saved Searches</label>
@@ -859,7 +882,7 @@ const PricingManager: React.FC = () => {
               <div className="bg-violet-50 border border-violet-200 rounded-lg p-4">
                 <h4 className="font-semibold text-violet-900 mb-3">Agency / Enterprise Features</h4>
                 <p className="text-xs text-violet-700 mb-3">Special features for agency tier subscriptions</p>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Agent Coupons/month</label>
                     <input
@@ -881,17 +904,6 @@ const PricingManager: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     />
                     <p className="text-xs text-gray-500 mt-1">0 = unlimited</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Listings Limit</label>
-                    <input
-                      type="number"
-                      value={editingProduct.listingsLimit}
-                      onChange={(e) => handleNumberChange('listingsLimit', e.target.value, -1)}
-                      min="-1"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">-1 = unlimited, Agency: 500</p>
                   </div>
                 </div>
               </div>
