@@ -4,6 +4,7 @@ import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } fr
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
+import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -53,6 +54,19 @@ interface ProductData {
     borderColor?: string;
     textColor?: string;
   };
+  // Limit fields for placeholder replacement
+  listingsLimit?: number;
+  promotionCoupons?: number;
+  premiumCoupons?: number;
+  highlightedCoupons?: number;
+  featuredCoupons?: number;
+  agentCoupons?: number;
+  teamMembersLimit?: number;
+  savedSearchesLimit?: number;
+  aiMessagesLimit?: number;
+  aiInsightsLimit?: number;
+  imageDescriptionLimit?: number;
+  durationDays?: number;
 }
 
 // Plan structure for UI
@@ -493,6 +507,28 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       renewalDate,
     };
   }, [subscription, plans]);
+
+  // Get current product for placeholder replacement
+  const currentProduct = useMemo((): ProductValues | null => {
+    if (!subscription) return null;
+    const product = products.find(p => p.productId === subscription.productId);
+    if (!product) return null;
+    return {
+      listingsLimit: product.listingsLimit,
+      promotionCoupons: product.promotionCoupons,
+      premiumCoupons: product.premiumCoupons,
+      highlightedCoupons: product.highlightedCoupons,
+      featuredCoupons: product.featuredCoupons,
+      agentCoupons: product.agentCoupons,
+      teamMembersLimit: product.teamMembersLimit,
+      savedSearchesLimit: product.savedSearchesLimit,
+      aiMessagesLimit: product.aiMessagesLimit,
+      aiInsightsLimit: product.aiInsightsLimit,
+      imageDescriptionLimit: product.imageDescriptionLimit,
+      price: product.price,
+      durationDays: product.durationDays,
+    };
+  }, [subscription, products]);
 
   // Calculate upgrade price with pro-rated discount
   const calculateUpgradePrice = useCallback((targetPlanKey: string) => {
@@ -987,7 +1023,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {subscriptionDetails.currentPlan.features.map((feature, idx) => (
               <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-white/20 rounded-full text-xs">
                 <CheckCircleIcon className="w-3 h-3" />
-                {feature}
+                {currentProduct ? replacePlaceholders(feature, currentProduct) : feature}
               </span>
             ))}
           </div>
