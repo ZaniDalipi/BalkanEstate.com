@@ -226,27 +226,6 @@ export async function verifyStripePayment(sessionId: string): Promise<VerifyPaym
 }
 
 /**
- * Verify a Paddle payment by transaction ID
- */
-export async function verifyPaddlePayment(transactionId: string): Promise<VerifyPaymentResponse> {
-  try {
-    const response = await apiRequest<VerifyPaymentResponse>(
-      `/payments/paddle/verify/${transactionId}`,
-      { method: 'GET', requiresAuth: true }
-    );
-    return { ...response, provider: 'paddle' };
-  } catch (error: any) {
-    console.error('Error verifying Paddle payment:', error);
-    return {
-      success: false,
-      paymentStatus: 'error',
-      provider: 'paddle',
-      message: error.message,
-    };
-  }
-}
-
-/**
  * Verify a LemonSqueezy payment with polling
  * Polls up to 15 times with 3-second intervals (45 seconds total)
  * This gives LemonSqueezy webhooks enough time to process
@@ -308,9 +287,7 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
     return verifyLemonSqueezyPayment();
   }
 
-  if (provider === 'paddle' && orderId) {
-    return verifyPaddlePayment(orderId);
-  } else if (sessionId) {
+  if (sessionId) {
     return verifyStripePayment(sessionId);
   }
 
@@ -420,7 +397,6 @@ export default {
   getPaymentProvider,
   getSupportedCountries,
   verifyStripePayment,
-  verifyPaddlePayment,
   verifyLemonSqueezyPayment,
   verifyPayment,
   getSubscriptionStatus,

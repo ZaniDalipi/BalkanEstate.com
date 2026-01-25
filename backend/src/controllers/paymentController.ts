@@ -10,7 +10,7 @@ import { processSubscriptionPayment } from '../services/subscriptionPaymentServi
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
 
-// Stripe is not used - Paddle and PaySera are the active payment providers
+// Stripe is used as fallback - LemonSqueezy is the primary payment provider
 // Keeping Stripe initialization for legacy webhook handling only
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(STRIPE_SECRET_KEY || 'sk_not_configured', {
@@ -230,7 +230,7 @@ export const getSupportedCountries = async (_req: Request, res: Response): Promi
         providerInfo: paymentProviderFactory.getProviderInfo(c.provider),
       })),
       stripeCountries: paymentProviderFactory.getCountriesByProvider('stripe'),
-      paddleCountries: paymentProviderFactory.getCountriesByProvider('paddle'),
+      lemonSqueezyCountries: paymentProviderFactory.getCountriesByProvider('lemonsqueezy'),
     });
   } catch (error: any) {
     console.error('Error getting supported countries:', error);

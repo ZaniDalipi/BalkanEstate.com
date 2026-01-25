@@ -12,11 +12,6 @@ import {
   applyFreeSubscription,
 } from '../controllers/paymentController';
 import {
-  handlePaddleWebhook,
-  verifyPaddlePayment,
-  getPaddleConfig,
-} from '../controllers/paddleWebhookController';
-import {
   handleLemonSqueezyWebhook,
   getLemonSqueezyConfig,
   getCustomerPortal,
@@ -62,20 +57,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook
 
 // Verify Stripe payment session after redirect (protected)
 router.get('/verify-session/:sessionId', protect, verifySession);
-
-// ============================================================
-// PADDLE ENDPOINTS
-// ============================================================
-
-// Paddle Webhook (public but verified with signature)
-// Paddle sends POST request with JSON body
-router.post('/paddle/webhook', handlePaddleWebhook);
-
-// Get Paddle client configuration for frontend
-router.get('/paddle/config', getPaddleConfig);
-
-// Verify Paddle payment by transaction ID (protected)
-router.get('/paddle/verify/:transactionId', protect, verifyPaddlePayment);
 
 // ============================================================
 // LEMONSQUEEZY ENDPOINTS

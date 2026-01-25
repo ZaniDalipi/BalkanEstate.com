@@ -12,12 +12,11 @@
  */
 
 import Stripe from 'stripe';
-import { paddleService } from './paddleService';
 import { lemonSqueezyService } from './lemonSqueezyService';
 import Product from '../models/Product';
 
 // Payment provider types
-export type PaymentProvider = 'stripe' | 'paddle' | 'lemonsqueezy';
+export type PaymentProvider = 'stripe' | 'lemonsqueezy';
 
 // Country to provider mapping
 export interface CountryProviderMapping {
@@ -223,8 +222,6 @@ class PaymentProviderFactory {
     switch (provider) {
       case 'stripe':
         return this.createStripePayment(params);
-      case 'paddle':
-        return this.createPaddlePayment(params);
       case 'lemonsqueezy':
         return this.createLemonSqueezyPayment(params);
       default:
@@ -296,58 +293,6 @@ class PaymentProviderFactory {
         success: false,
         provider: 'stripe',
         error: error.message,
-      };
-    }
-  }
-
-  /**
-   * Create a Paddle payment
-   */
-  private async createPaddlePayment(params: CreatePaymentParams): Promise<PaymentResult> {
-    try {
-      // Check if Paddle is configured with real credentials
-      if (!paddleService.isConfigured()) {
-        return {
-          success: false,
-          provider: 'paddle',
-          error: 'Payment provider not configured. Please restart the backend server.',
-        };
-      }
-
-      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-
-      // For Paddle, we need to use their price IDs from dashboard
-      // Or create a transaction with inline pricing
-      const result = await paddleService.createCheckout({
-        priceId: this.getPaddlePriceId(params.planName, params.planInterval),
-        userId: params.userId,
-        userEmail: params.userEmail,
-        productId: params.productId,
-        planName: params.planName,
-        planInterval: params.planInterval,
-        successUrl: `${baseUrl}/payment/success?provider=paddle`,
-        cancelUrl: `${baseUrl}/payment/cancel?provider=paddle`,
-      });
-
-      if (!result.success) {
-        return {
-          success: false,
-          provider: 'paddle',
-          error: result.error || 'Failed to create Paddle checkout',
-        };
-      }
-
-      return {
-        success: true,
-        provider: 'paddle',
-        paymentUrl: result.checkoutUrl,
-        sessionId: result.transactionId,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        provider: 'paddle',
-        error: error.message || 'Failed to create payment session',
       };
     }
   }
@@ -475,60 +420,6 @@ class PaymentProviderFactory {
   }
 
   /**
-   * Get Paddle price ID based on plan
-   * These should be configured in Paddle dashboard and stored as env vars
-   */
-  private getPaddlePriceId(planName: string, interval: string): string {
-    // Map plan names to Paddle price IDs
-    const priceMap: Record<string, Record<string, string>> = {
-      // Buyer plans
-      'Buyer Pro': {
-        'month': process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '',
-        'year': process.env.PADDLE_PRICE_BUYER_PRO_YEARLY || '',
-      },
-      'Buyer Pro Monthly': {
-        'month': process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '',
-      },
-      'buyer_pro_monthly': {
-        'month': process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '',
-      },
-      // Pro/Seller plans
-      'Pro': {
-        'month': process.env.PADDLE_PRICE_PRO_MONTHLY || '',
-        'year': process.env.PADDLE_PRICE_PRO_YEARLY || '',
-      },
-      'Pro Monthly': {
-        'month': process.env.PADDLE_PRICE_PRO_MONTHLY || '',
-      },
-      'Pro Yearly': {
-        'year': process.env.PADDLE_PRICE_PRO_YEARLY || '',
-      },
-      // Agency plans
-      'Agency': {
-        'month': process.env.PADDLE_PRICE_AGENCY_MONTHLY || '',
-        'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
-      },
-      'Agency Monthly': {
-        'month': process.env.PADDLE_PRICE_AGENCY_MONTHLY || '',
-      },
-      'Agency Yearly': {
-        'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
-      },
-      'Enterprise': {
-        'year': process.env.PADDLE_PRICE_AGENCY_YEARLY || '',
-      },
-    };
-
-    const planPrices = priceMap[planName];
-    if (planPrices && planPrices[interval]) {
-      return planPrices[interval];
-    }
-
-    // Default to Buyer Pro monthly if no match
-    return process.env.PADDLE_PRICE_BUYER_PRO_MONTHLY || '';
-  }
-
-  /**
    * Map language code to Stripe locale
    */
   private mapStripeLocale(lang?: string): Stripe.Checkout.SessionCreateParams.Locale {
@@ -554,12 +445,6 @@ class PaymentProviderFactory {
           name: 'Stripe',
           description: 'Secure card payments with Stripe',
           fees: '~2.9% + €0.25',
-        };
-      case 'paddle':
-        return {
-          name: 'Paddle',
-          description: 'Secure payments with automatic VAT handling',
-          fees: '~5% + €0.50',
         };
       case 'lemonsqueezy':
         return {
