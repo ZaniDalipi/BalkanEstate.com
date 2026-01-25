@@ -96,12 +96,27 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
 
   useEffect(() => {
     const img = imageRef.current;
+    // Set crossOrigin before src to enable CORS
     img.crossOrigin = "anonymous";
-    img.src = imageUrl;
+
+    // Add cache-busting parameter to avoid service worker returning opaque cached response
+    // This forces a fresh fetch with proper CORS headers
+    const cacheBuster = `_cb=${Date.now()}`;
+    const urlWithCacheBuster = imageUrl.includes('?')
+      ? `${imageUrl}&${cacheBuster}`
+      : `${imageUrl}?${cacheBuster}`;
+
+    img.src = urlWithCacheBuster;
     img.onload = () => {
       setImageLoaded(true);
       // Small delay to ensure container is measured correctly
       setTimeout(fitImageToCanvas, 50);
+    };
+    img.onerror = () => {
+      // Fallback: try without cache buster if CORS still fails
+      console.warn('Image load failed with cache buster, trying original URL');
+      img.crossOrigin = "anonymous";
+      img.src = imageUrl;
     };
   }, [imageUrl, fitImageToCanvas]);
 

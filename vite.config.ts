@@ -209,7 +209,7 @@ export default defineConfig(({ mode }) => {
               },
               {
                 urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-                handler: 'CacheFirst',
+                handler: 'StaleWhileRevalidate',
                 options: {
                   cacheName: 'cloudinary-images-cache',
                   expiration: {
@@ -217,7 +217,9 @@ export default defineConfig(({ mode }) => {
                     maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
                   },
                   cacheableResponse: {
-                    statuses: [0, 200]
+                    // Only cache proper CORS responses (not opaque)
+                    // This prevents canvas taint errors when annotating images
+                    statuses: [200]
                   }
                 }
               },
