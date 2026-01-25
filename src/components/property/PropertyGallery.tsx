@@ -116,7 +116,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
     if (youtubeMatch) {
       return {
-        embedUrl: `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&mute=1&rel=0`,
+        embedUrl: `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`,
         platform: 'youtube'
       };
     }
@@ -125,7 +125,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
     if (vimeoMatch) {
       return {
-        embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&muted=1`,
+        embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&playsinline=1`,
         platform: 'vimeo'
       };
     }
@@ -134,7 +134,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     const tiktokMatch = url.match(/(?:tiktok\.com\/@[\w.-]+\/video\/|vm\.tiktok\.com\/)(\d+)/);
     if (tiktokMatch) {
       return {
-        embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`,
+        embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}?autoplay=1`,
         platform: 'tiktok'
       };
     }
@@ -143,7 +143,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     const instagramReelMatch = url.match(/(?:instagram\.com\/(?:reel|p)\/)([A-Za-z0-9_-]+)/);
     if (instagramReelMatch) {
       return {
-        embedUrl: `https://www.instagram.com/p/${instagramReelMatch[1]}/embed`,
+        embedUrl: `https://www.instagram.com/p/${instagramReelMatch[1]}/embed?autoplay=1`,
         platform: 'instagram'
       };
     }
@@ -152,7 +152,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     const facebookVideoMatch = url.match(/(?:facebook\.com|fb\.watch)\/(?:watch\/?\?v=|.*\/videos\/|reel\/)(\d+)/);
     if (facebookVideoMatch) {
       return {
-        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&muted=true`,
+        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`,
         platform: 'facebook'
       };
     }
@@ -160,7 +160,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     const fbWatchMatch = url.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
     if (fbWatchMatch) {
       return {
-        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&muted=true`,
+        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`,
         platform: 'facebook'
       };
     }
@@ -274,13 +274,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             )}
           </button>
         ) : viewMode === 'video' && hasVideo ? (
-          <div className="relative w-full h-full bg-black">
+          <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
             {/* Video embed */}
             <iframe
               src={videoInfo.embedUrl}
               className="absolute inset-0 w-full h-full border-0"
+              style={{ minHeight: '100%', minWidth: '100%' }}
               allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
               title="Property Video Tour"
             />
             {/* Platform badge */}
