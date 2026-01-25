@@ -2,6 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Ziggy Polyfill: Prevents errors from external scripts expecting Laravel Ziggy -->
+    <script>
+      window.Ziggy = window.Ziggy || {
+        url: window.location.origin,
+        port: null,
+        defaults: {},
+        routes: {}
+      };
+      window.route = window.route || function(name) {
+        return window.location.href;
+      };
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230252CD'%3e%3cpath d='M12 21V5L10 7V23L12 21Z M4 21V10L2 12V23L4 21Z' /%3e%3cpath d='M12 5H20V21H12V5Z M4 10H10V21H4V10Z' /%3e%3c/svg%3e" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
