@@ -99,11 +99,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   useEffect(() => {
     if (hasVideo && !videoEnded) {
       setViewMode('video');
-      // Auto-transition to photos after 8 seconds if user hasn't interacted
+      // Auto-transition to photos after 20 seconds if user hasn't interacted
       const timer = setTimeout(() => {
         setViewMode('photos');
         setVideoEnded(true);
-      }, 8000);
+      }, 20000);
       return () => clearTimeout(timer);
     }
   }, [hasVideo, videoEnded]);
