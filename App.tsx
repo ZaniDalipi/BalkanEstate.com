@@ -33,9 +33,9 @@ import './src/i18n';
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
-// Core layout components (loaded immediately - always visible)
-import Sidebar from './components/shared/Sidebar';
-import Header from './components/shared/Header';
+// Core layout components (lazy loaded - can render after initial paint)
+const Sidebar = lazy(() => import('./components/shared/Sidebar'));
+const Header = lazy(() => import('./components/shared/Header'));
 
 // Lazy load all pages and conditional components to reduce initial bundle
 const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));

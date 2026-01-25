@@ -303,51 +303,140 @@ export default defineConfig(({ mode }) => {
             chunkFileNames: `assets/[name].[hash].js`,
             assetFileNames: `assets/[name].[hash].[ext]`,
             manualChunks(id) {
-              // Only split third-party libraries to avoid circular dependencies
-              // Application code will be split automatically by dynamic imports
-
+              // ============================================================
+              // VENDOR CHUNKS - Third-party libraries split by functionality
+              // ============================================================
               if (id.includes('node_modules')) {
-                // Core React - must load first, keep separate
+                // Core React - must load first, keep separate and small
                 if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/scheduler/')) {
                   return 'react-vendor';
                 }
-                // Map functionality - lazy loaded
+                // React Query - data fetching (used by most pages)
+                if (id.includes('@tanstack/react-query')) {
+                  return 'react-query';
+                }
+                // Map functionality - lazy loaded only on map pages
                 if (id.includes('leaflet') || id.includes('react-leaflet')) {
                   return 'leaflet';
                 }
-                // 3D Map (MapLibre)
+                // 3D Map (MapLibre) - very large, lazy loaded
                 if (id.includes('maplibre-gl')) {
                   return 'maplibre';
                 }
-                // Internationalization
+                // Internationalization - needed early but separate
                 if (id.includes('i18next') || id.includes('react-i18next')) {
                   return 'i18n';
                 }
-                // Animation library
+                // Animation library - lazy loaded
                 if (id.includes('framer-motion')) {
                   return 'animation';
                 }
-                // Real-time messaging
+                // Real-time messaging - only for inbox/chat
                 if (id.includes('socket.io')) {
                   return 'realtime';
                 }
-                // AI/Gemini
+                // AI/Gemini - only for AI features
                 if (id.includes('@google/genai') || id.includes('@google/generative-ai')) {
                   return 'ai';
                 }
-                // Image compression
+                // Image compression - only for uploads
                 if (id.includes('browser-image-compression')) {
                   return 'image-utils';
+                }
+                // Form handling
+                if (id.includes('react-hook-form') || id.includes('@hookform')) {
+                  return 'forms';
+                }
+                // Zustand state management
+                if (id.includes('zustand')) {
+                  return 'state';
+                }
+                // Helmet for SEO
+                if (id.includes('react-helmet')) {
+                  return 'seo';
+                }
+                // Date handling
+                if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
+                  return 'date-utils';
                 }
                 // All other node_modules
                 return 'vendor';
               }
-              // Let Rollup handle application code splitting automatically
+
+              // ============================================================
+              // APPLICATION CHUNKS - Split by feature for better caching
+              // ============================================================
+
+              // Admin dashboard - large, only for admins
+              if (id.includes('/features/admin/') || id.includes('/AdminDashboard')) {
+                return 'admin';
+              }
+              // Seller dashboard - large, only for sellers
+              if (id.includes('/features/seller/') || id.includes('/SellerDashboard')) {
+                return 'seller';
+              }
+              // Property features (search, details, cards)
+              if (id.includes('/features/property-details/') || id.includes('/PropertyDetailsPage')) {
+                return 'property-details';
+              }
+              // Search functionality
+              if (id.includes('/features/search/')) {
+                return 'search';
+              }
+              // Agents/Agencies
+              if (id.includes('/features/agents/') || id.includes('/features/agencies/') ||
+                  id.includes('/AgentsPage') || id.includes('/AgenciesListPage') || id.includes('/AgencyDetailPage')) {
+                return 'agents';
+              }
+              // Messaging/Inbox
+              if (id.includes('/features/messaging/') || id.includes('/InboxPage')) {
+                return 'messaging';
+              }
+              // Pricing/Payments
+              if (id.includes('/features/pricing/') || id.includes('/features/payments/') ||
+                  id.includes('/PricingPage') || id.includes('/PaymentSuccess') || id.includes('/PaymentCancel')) {
+                return 'payments';
+              }
+              // Legal pages (small, can be grouped)
+              if (id.includes('/features/legal/')) {
+                return 'legal';
+              }
+              // Analytics
+              if (id.includes('/features/analytics/')) {
+                return 'analytics';
+              }
+              // Valuation/Calculators
+              if (id.includes('/features/valuation/') || id.includes('/features/calculators/')) {
+                return 'tools';
+              }
+              // Auth features
+              if (id.includes('/features/auth/')) {
+                return 'auth';
+              }
+              // Cities/Recommendations
+              if (id.includes('/features/cities/')) {
+                return 'cities';
+              }
+              // Saved items (searches, properties)
+              if (id.includes('/features/saved/')) {
+                return 'saved';
+              }
+              // Onboarding
+              if (id.includes('/features/onboarding/')) {
+                return 'onboarding';
+              }
+
+              // Let Rollup handle remaining code splitting automatically
             },
           },
         },
         // Improve chunk loading
         chunkSizeWarningLimit: 500,
+        // Enable tree-shaking for better dead code elimination
+        treeshake: {
+          moduleSideEffects: 'no-external',
+          propertyReadSideEffects: false,
+        },
         // Optimize CSS code splitting
         cssCodeSplit: true,
         // Security: Clear console logs in production build
