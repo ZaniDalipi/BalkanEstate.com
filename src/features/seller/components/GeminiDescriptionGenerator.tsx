@@ -695,6 +695,8 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
             return;
         }
         setStep('loading');
+        // Scroll to top when entering loading state
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         try {
             const imageFiles = images.map(img => img.file).filter((f): f is File => f !== null);
             if (imageFiles.length === 0) {
@@ -1307,7 +1309,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
     if (step === 'loading') {
         return (
-             <div className="text-center py-12 flex flex-col items-center">
+             <div className="text-center py-12 flex flex-col items-center min-h-[70vh]">
                 <MarketInsightsAnimation
                     city={selectedCity?.name}
                     country={selectedCountry || 'Serbia'}
