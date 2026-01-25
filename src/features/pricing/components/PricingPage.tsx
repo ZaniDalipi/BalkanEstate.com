@@ -1180,49 +1180,26 @@ const PricingPage: React.FC = () => {
 
         {/* Agency Feature */}
         {activeTab === 'agency' && (
-          <Animated variant="fadeInUp" className="max-w-3xl mx-auto">
+          <Animated variant="fadeInUp" className="max-w-2xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <BuildingOfficeIcon className="w-8 h-8 text-amber-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">{t('pricing:agency.title', 'Agency Featured')}</h3>
-              <p className="mt-2 text-gray-600">{t('pricing:agency.subtitle', 'Get your agency featured everywhere on the platform')}</p>
+              <h3 className="text-2xl font-bold text-gray-900">{t('pricing:agency.title', 'Featured Agency')}</h3>
+              <p className="mt-2 text-gray-600">{t('pricing:agency.subtitle', 'Get your agency featured everywhere on the platform for 1 week')}</p>
             </div>
 
-            {/* Duration Selector */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-gray-100 p-1 rounded-full inline-flex">
-                {[
-                  { value: 7, label: '7 days' },
-                  { value: 30, label: '30 days' },
-                  { value: 90, label: '90 days' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setSelectedAgencyDuration(option.value as 7 | 30 | 90)}
-                    className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                      selectedAgencyDuration === option.value
-                        ? 'bg-white text-gray-900 shadow-md'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Main Featured Plan */}
-            <div className="relative rounded-3xl p-8 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-xl mb-6">
+            {/* Single Featured Agency Package - 7 days */}
+            <div className="relative rounded-3xl p-8 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-xl">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
                   <SparklesIcon className="w-3.5 h-3.5" />
-                  {t('pricing:badges.popular', 'POPULAR')}
+                  {t('pricing:agency.oneWeek', '1 WEEK')}
                 </span>
               </div>
 
-              <div className="flex flex-col md:flex-row md:items-start gap-6 pt-2">
+              <div className="flex flex-col md:flex-row md:items-center gap-6 pt-4">
                 {/* Left: Info */}
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-4">
@@ -1230,18 +1207,19 @@ const PricingPage: React.FC = () => {
                       <span className="text-3xl">🏢</span>
                     </div>
                     <div>
-                      <h4 className="text-2xl font-bold text-gray-900">{t('pricing:agency.featuredTitle', 'Agency Featured')}</h4>
-                      <p className="text-sm text-gray-600">{t('pricing:agency.featuredDescription', 'Featured everywhere on the platform')}</p>
+                      <h4 className="text-2xl font-bold text-gray-900">{t('pricing:agency.featuredTitle', 'Featured Agency')}</h4>
+                      <p className="text-sm text-gray-600">{t('pricing:agency.featuredDescription', 'Shown everywhere on the platform')}</p>
                     </div>
                   </div>
 
-                  <ul className="space-y-3 mb-6">
+                  <ul className="space-y-3">
                     {[
                       t('pricing:agency.benefits.featuredInDirectory', 'Featured in agency directory'),
                       t('pricing:agency.benefits.priorityInSearch', 'Priority in search results'),
                       t('pricing:agency.benefits.homepageCarousel', 'Homepage agency carousel'),
                       t('pricing:agency.benefits.featuredBadge', 'Featured badge on profile'),
                       t('pricing:agency.benefits.boostedVisibility', 'Boosted visibility everywhere (3x)'),
+                      t('pricing:agency.benefits.mapMarker', 'Agency marker on property map'),
                     ].map((feature, i) => (
                       <li key={i} className="flex items-center gap-3 text-sm text-gray-700">
                         <div className="w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0">
@@ -1254,12 +1232,13 @@ const PricingPage: React.FC = () => {
                 </div>
 
                 {/* Right: Pricing */}
-                <div className="md:w-64 bg-white rounded-2xl p-6 shadow-lg border border-amber-200">
+                <div className="md:w-56 bg-white rounded-2xl p-6 shadow-lg border border-amber-200">
                   <div className="text-center">
                     <div className="text-4xl font-extrabold text-amber-600">
-                      €{getAgencyPrice('featured', selectedAgencyDuration)}
+                      €{getAgencyPrice('featured', 7)}
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">{selectedAgencyDuration} days</p>
+                    <p className="text-sm text-gray-500 mt-1">{t('pricing:agency.perWeek', 'per week')}</p>
+                    <p className="text-xs text-amber-600 font-medium mt-2">{t('pricing:agency.showsEverywhere', 'Shows everywhere!')}</p>
                   </div>
 
                   <button
@@ -1271,80 +1250,6 @@ const PricingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Map Marker Add-on */}
-            <div className={`relative rounded-2xl p-6 border-2 transition-all cursor-pointer ${
-              includeMapMarker
-                ? 'bg-blue-50 border-blue-400 shadow-lg'
-                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
-            }`}
-                 onClick={() => setIncludeMapMarker(!includeMapMarker)}>
-              <div className="flex items-start gap-4">
-                {/* Checkbox */}
-                <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
-                  includeMapMarker ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
-                }`}>
-                  {includeMapMarker && <CheckIcon className="w-4 h-4 text-white" />}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">📍</span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-lg font-bold text-gray-900">{t('pricing:agency.mapMarker.title', 'Map Marker')}</h4>
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">{t('pricing:agency.mapMarker.addon', 'Add-on')}</span>
-                      </div>
-                      <p className="text-sm text-gray-600">{t('pricing:agency.mapMarker.description', 'Show your agency on the property map')}</p>
-                    </div>
-                  </div>
-
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
-                    {[
-                      t('pricing:agency.mapMarker.benefits.agencyMarker', 'Agency marker on property map'),
-                      t('pricing:agency.mapMarker.benefits.customIcon', 'Custom agency icon on map'),
-                      t('pricing:agency.mapMarker.benefits.clickableMarker', 'Clickable marker with agency info'),
-                      t('pricing:agency.mapMarker.benefits.visibleToAll', 'Visible to all property searchers'),
-                    ].map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className="text-blue-500">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Price */}
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">
-                    +€{getAgencyPrice('addon', selectedAgencyDuration)}
-                  </div>
-                  <p className="text-xs text-gray-500">{selectedAgencyDuration} days</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Total */}
-            {includeMapMarker && (
-              <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">{t('pricing:agency.total.title', 'Total for {{days}} days').replace('{{days}}', String(selectedAgencyDuration))}</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      €{getAgencyPrice('featured', selectedAgencyDuration) + getAgencyPrice('addon', selectedAgencyDuration)}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">{t('pricing:agency.total.bundleDescription', 'Agency Featured + Map Marker')}</p>
-                  </div>
-                  <button
-                    onClick={() => handleAgencyFeature('featured' as any)}
-                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg"
-                  >
-                    {t('pricing:buttons.getBundle', 'Get Bundle')}
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* Note for non-agency users */}
             {(!state.currentUser?.agencyId) && (
