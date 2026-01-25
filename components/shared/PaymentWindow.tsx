@@ -85,6 +85,54 @@ const detectUserCountry = (userProfileCountry?: string): string => {
 const PAYMENTS_COMING_SOON = false;
 // ============================================
 
+// Check if we're in development mode - disable aggressive polling
+const IS_DEVELOPMENT = import.meta.env.DEV || window.location.hostname === 'localhost';
+
+// Helper to check if user already has an active subscription for this plan
+const checkExistingSubscription = (
+  currentUser: { subscriptionPlan?: string; subscriptionStatus?: string; subscriptionExpiresAt?: string | Date } | null,
+  productId: string | undefined,
+  planInterval: 'month' | 'year' | 'once'
+): { hasConflict: boolean; message: string; isUpgrade: boolean; isDowngrade: boolean; isSamePlan: boolean } => {
+  if (!currentUser?.subscriptionPlan || currentUser.subscriptionStatus !== 'active') {
+    return { hasConflict: false, message: '', isUpgrade: false, isDowngrade: false, isSamePlan: false };
+  }
+
+  const currentPlan = currentUser.subscriptionPlan.toLowerCase();
+  const targetPlan = (productId || '').toLowerCase();
+
+  // Check if it's the exact same plan
+  if (currentPlan === targetPlan) {
+    return {
+      hasConflict: true,
+      message: 'You already have this subscription active.',
+      isUpgrade: false,
+      isDowngrade: false,
+      isSamePlan: true
+    };
+  }
+
+  // Check for downgrade (yearly to monthly of same tier)
+  const currentIsYearly = currentPlan.includes('yearly') || currentPlan.includes('year');
+  const targetIsMonthly = planInterval === 'month' || targetPlan.includes('monthly') || targetPlan.includes('month');
+
+  // Extract tier names (e.g., 'buyer_pro', 'seller_premium', 'agent_pro')
+  const currentTier = currentPlan.replace(/_?(monthly|yearly|month|year)$/i, '');
+  const targetTier = targetPlan.replace(/_?(monthly|yearly|month|year)$/i, '');
+
+  if (currentTier === targetTier && currentIsYearly && targetIsMonthly) {
+    return {
+      hasConflict: true,
+      message: 'You have a yearly subscription active. Cancel it first before switching to monthly.',
+      isUpgrade: false,
+      isDowngrade: true,
+      isSamePlan: false
+    };
+  }
+
+  return { hasConflict: false, message: '', isUpgrade: false, isDowngrade: false, isSamePlan: false };
+};
+
 interface PaymentWindowProps {
   isOpen: boolean;
   onClose: () => void;
@@ -197,9 +245,25 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     };
   }, []);
 
+  // Check if user has conflicting subscription
+  const subscriptionCheck = checkExistingSubscription(state.currentUser, productId, planInterval);
+
   // Start polling for payment verification
-  // Use longer interval (6 seconds) and fewer attempts to avoid rate limiting (429)
-  const startPaymentPolling = (sessionId: string, maxAttempts = 30) => {
+  // In development: skip polling entirely to avoid rate limiting
+  // In production: poll every 6 seconds with max 30 attempts
+  const startPaymentPolling = (sessionId: string, maxAttempts = IS_DEVELOPMENT ? 3 : 30) => {
+    // In development, don't poll aggressively - just show success message
+    if (IS_DEVELOPMENT) {
+      setIsPolling(true);
+      setPollingMessage('Development mode: Payment window opened. Complete payment manually, then refresh to see subscription status.');
+      // Just do a few quick checks then stop
+      setTimeout(() => {
+        setIsPolling(false);
+        setPollingMessage('');
+      }, 10000); // Stop after 10 seconds in dev
+      return;
+    }
+
     let attempts = 0;
     setIsPolling(true);
     setPollingMessage(t('payment:polling.waitingForPayment', 'Waiting for payment confirmation...'));
@@ -502,6 +566,92 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   };
 
   if (!isOpen) return null;
+
+  // Show subscription conflict message if user already has this plan or is trying to downgrade
+  if (subscriptionCheck.hasConflict) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="">
+        <div className="max-w-md mx-auto">
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center pb-4 border-b border-neutral-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <CheckCircleIcon className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-neutral-800 mb-2">
+                {subscriptionCheck.isSamePlan ? 'Already Subscribed' : 'Subscription Active'}
+              </h2>
+              <p className="text-sm text-neutral-500">
+                {subscriptionCheck.message}
+              </p>
+            </div>
+
+            {/* Current Subscription Info */}
+            <div className="rounded-xl p-6 border bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-sm text-neutral-500 mb-1">Current Plan</p>
+                  <h3 className="text-lg font-bold text-neutral-800">
+                    {state.currentUser?.subscriptionProductName || state.currentUser?.subscriptionPlan || 'Pro'}
+                  </h3>
+                  <p className="text-sm text-green-600 font-medium mt-1">
+                    {state.currentUser?.subscriptionStatus === 'active' ? '✓ Active' : state.currentUser?.subscriptionStatus}
+                  </p>
+                </div>
+                {state.currentUser?.subscriptionExpiresAt && (
+                  <div className="text-right">
+                    <p className="text-xs text-neutral-500">Renews on</p>
+                    <p className="text-sm font-medium text-neutral-700">
+                      {new Date(state.currentUser.subscriptionExpiresAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Info Message */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900 mb-1">
+                    {subscriptionCheck.isDowngrade ? 'Want to switch plans?' : 'Manage your subscription'}
+                  </p>
+                  <p className="text-xs text-blue-700 leading-relaxed">
+                    {subscriptionCheck.isDowngrade
+                      ? 'To switch from yearly to monthly billing, please cancel your current subscription first. After it expires, you can subscribe to the monthly plan.'
+                      : 'You can manage your subscription from your Account Settings. Cancel anytime before the renewal date.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                // Navigate to account settings
+                window.location.href = '/account?tab=subscription';
+              }}
+              className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            >
+              Manage Subscription
+            </button>
+
+            <button
+              onClick={onClose}
+              className="w-full py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   // Coming Soon overlay
   if (PAYMENTS_COMING_SOON) {
