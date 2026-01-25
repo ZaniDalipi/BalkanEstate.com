@@ -1,9 +1,12 @@
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+
+// Lazy load NotificationCenter - only needed for authenticated users
+const NotificationCenter = lazy(() => import('@/src/shared/components/NotificationCenter'));
 
 interface HeaderProps {
     onToggleSidebar: () => void;
@@ -95,6 +98,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
               + {t('nav:newListing')}
           </button>
           <AuthButton floating />
+          {isAuthenticated && (
+            <Suspense fallback={null}>
+              <NotificationCenter />
+            </Suspense>
+          )}
         </nav>
       </header>
     );
@@ -129,6 +137,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
                 + {t('nav:newListing')}
             </button>
             <AuthButton />
+            {isAuthenticated && (
+              <Suspense fallback={null}>
+                <NotificationCenter />
+              </Suspense>
+            )}
           </nav>
         </div>
       </div>
