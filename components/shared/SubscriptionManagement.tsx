@@ -292,11 +292,16 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   }, []);
 
-  // Convert product to plan structure
+  // Convert product to plan structure - using actual DB values
   const productToPlan = useCallback((product: ProductData): Plan => {
     const tier = PLAN_TIERS[product.productId] || 0;
     const isPro = tier >= 1;
     const isEnterprise = tier >= 3;
+
+    // Use actual product values from DB, with fallbacks only for missing data
+    const savedSearches = product.savedSearchesLimit;
+    const promoCoupons = product.promotionCoupons;
+    const aiMessages = product.aiMessagesLimit;
 
     return {
       id: product.productId,
@@ -305,16 +310,18 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       period: product.billingPeriod === 'yearly' ? 'year' : product.billingPeriod === 'monthly' ? 'month' : product.billingPeriod,
       periodMonths: PERIOD_TO_MONTHS[product.billingPeriod] || 1,
       features: product.features,
-      listingLimit: LISTING_LIMITS[product.productId] || 3,
+      // Use actual DB values for all limits
+      listingLimit: product.listingsLimit ?? LISTING_LIMITS[product.productId] ?? 3,
       color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
       tier: tier,
       badge: product.badge,
       badgeColor: product.badgeColor,
       highlighted: product.highlighted,
-      // Dynamic feature limits based on tier
-      savedSearchesLimit: isEnterprise ? 'unlimited' : isPro ? 10 : 3,
-      promotionCouponsMonthly: isEnterprise ? 10 : isPro ? 3 : 0,
-      aiMessagesLimit: isEnterprise ? 'unlimited' : isPro ? 50 : 3,
+      // Use actual DB values - (-1 means unlimited)
+      savedSearchesLimit: savedSearches === -1 ? 'unlimited' : (savedSearches ?? 3),
+      promotionCouponsMonthly: promoCoupons ?? 0,
+      aiMessagesLimit: aiMessages === -1 ? 'unlimited' : (aiMessages ?? 3),
+      // These are tier-based features (not stored in DB)
       analyticsLevel: isEnterprise ? 'full' : isPro ? 'advanced' : 'basic',
       supportType: isEnterprise ? 'priority' : isPro ? 'priority' : 'email',
     };
