@@ -494,8 +494,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               />
             </div>
 
-            {/* Photo Thumbnails - Directly under gallery with less spacing */}
-            <div className="animate-slide-up -mt-4 sm:-mt-6 lg:-mt-8" style={{ animationDelay: '50ms' }}>
+            {/* Photo Thumbnails - Under gallery with spacing */}
+            <div className="animate-slide-up mt-4 sm:mt-6" style={{ animationDelay: '50ms' }}>
               <PropertyPhotos
                 property={property}
                 activeCategory={activeCategory}
