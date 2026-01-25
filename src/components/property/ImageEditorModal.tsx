@@ -218,6 +218,8 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
           if (!conversationId) {
             const newConv = await createConversation(property.id);
             conversationId = newConv.id;
+            // Add the new conversation to global state so it's available in inbox
+            dispatch({ type: 'CREATE_CONVERSATION', payload: newConv });
           }
 
           const file = new File([blob], 'annotated-image.png', { type: 'image/png' });
