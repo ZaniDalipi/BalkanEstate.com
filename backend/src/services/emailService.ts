@@ -2223,6 +2223,15 @@ Questions? Contact us at support@balkanestateai.com
     email: string;
     ownerName: string;
     agencyName: string;
+    promotionCoupons?: {
+      total: number;
+      premium: number;
+      highlighted: number;
+      featured: number;
+    };
+    agentCoupons?: number;
+    teamMembersLimit?: number;
+    listingsLimit?: number;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
@@ -2231,6 +2240,20 @@ Questions? Contact us at support@balkanestateai.com
     const safeAgencyName = escapeHtml(params.agencyName);
 
     const currentYear = new Date().getFullYear();
+
+    // Default values if not provided
+    const listingsLimit = params.listingsLimit || 500;
+    const teamMembersLimit = params.teamMembersLimit || 5;
+    const agentCoupons = params.agentCoupons || 5;
+    const promotionCoupons = params.promotionCoupons || {
+      total: 5,
+      premium: 2,
+      highlighted: 2,
+      featured: 1,
+    };
+
+    // Create promotion coupons breakdown string
+    const couponBreakdown = `${promotionCoupons.premium} Premium + ${promotionCoupons.highlighted} Highlighted + ${promotionCoupons.featured} Featured`;
 
     const html = `
 <!DOCTYPE html>
@@ -2276,19 +2299,30 @@ Questions? Contact us at support@balkanestateai.com
           <tr>
             <td style="padding: 8px 0;">
               <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
-              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>500 Listings</strong> - Expandable as you grow</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>${listingsLimit} Listings</strong> - Expandable as you grow</span>
             </td>
           </tr>
           <tr>
             <td style="padding: 8px 0;">
               <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
-              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>5 Team Members</strong> - Each with yearly Pro subscription</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>${agentCoupons} Agent Coupons</strong> - Each with yearly Pro subscription</span>
             </td>
           </tr>
           <tr>
             <td style="padding: 8px 0;">
               <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
-              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>5 Monthly Promotion Coupons</strong> - Boost your visibility</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>${promotionCoupons.total} Monthly Promotion Coupons</strong></span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; padding-left: 40px;">
+              <span style="color: #94a3b8; font-size: 13px;">${couponBreakdown}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0;">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>Up to ${teamMembersLimit} Team Members</strong></span>
             </td>
           </tr>
           <tr>
@@ -2362,7 +2396,7 @@ Questions? Contact us at support@balkanestateai.com
       to: params.email,
       subject: `🎉 Thank You for Choosing Enterprise! Welcome to BalkanEstateᴬᴵ`,
       html,
-      text: `Dear ${params.ownerName},\n\nWe're thrilled to have ${params.agencyName} join the BalkanEstateᴬᴵ Enterprise program!\n\nYour Enterprise Benefits:\n- 500 Listings (expandable)\n- 5 Team Members with yearly Pro subscription\n- 5 Monthly Promotion Coupons\n- Priority Support\n- Agency Branding\n\nNext Steps:\n1. Check your inbox for 5 agent registration codes\n2. Share codes with your team\n3. Set up your agency profile\n4. Start listing properties!\n\nGo to your dashboard: ${frontendUrl}/agency/dashboard\n\nThank you for trusting us!\n— The BalkanEstateᴬᴵ Team\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Dear ${params.ownerName},\n\nWe're thrilled to have ${params.agencyName} join the BalkanEstateᴬᴵ Enterprise program!\n\nYour Enterprise Benefits:\n- ${listingsLimit} Listings (expandable)\n- ${agentCoupons} Agent Coupons with yearly Pro subscription\n- ${promotionCoupons.total} Monthly Promotion Coupons (${couponBreakdown})\n- Up to ${teamMembersLimit} Team Members\n- Priority Support\n- Agency Branding\n\nNext Steps:\n1. Check your inbox for ${agentCoupons} agent registration codes\n2. Share codes with your team\n3. Set up your agency profile\n4. Start listing properties!\n\nGo to your dashboard: ${frontendUrl}/agency/dashboard\n\nThank you for trusting us!\n— The BalkanEstateᴬᴵ Team\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }

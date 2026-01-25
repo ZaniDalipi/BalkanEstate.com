@@ -527,6 +527,15 @@ async function generateEnterpriseAgentCoupons(
 
   // Send emails with the coupon codes and welcome message
   try {
+    // Fetch Enterprise product to get coupon breakdown values
+    const enterpriseProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+    const promotionCoupons = {
+      total: enterpriseProduct?.promotionCoupons || 5,
+      premium: enterpriseProduct?.premiumCoupons || 2,
+      highlighted: enterpriseProduct?.highlightedCoupons || 2,
+      featured: enterpriseProduct?.featuredCoupons || 1,
+    };
+
     // Send agent registration coupons email
     await sendAgentRegistrationCouponsEmail({
       email: ownerEmail,
@@ -536,13 +545,17 @@ async function generateEnterpriseAgentCoupons(
     });
     // Sent agent registration coupons email
 
-    // Send welcome/thank you email
+    // Send welcome/thank you email with promotion coupon breakdown
     await sendEnterpriseWelcomeEmail({
       email: ownerEmail,
       ownerName,
       agencyName: agency.name,
+      promotionCoupons,
+      agentCoupons: enterpriseProduct?.agentCoupons || 5,
+      teamMembersLimit: enterpriseProduct?.teamMembersLimit || 5,
+      listingsLimit: enterpriseProduct?.listingsLimit || 500,
     });
-    // Sent Enterprise welcome email
+    // Sent Enterprise welcome email with coupon breakdown
   } catch (emailError) {
     console.error('⚠️ Failed to send Enterprise emails:', emailError);
     // Don't throw - coupons were still generated successfully
