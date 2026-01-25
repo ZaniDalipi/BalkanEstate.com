@@ -274,7 +274,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[200px] xs:h-[250px] sm:h-[350px] md:h-[400px] lg:h-[450px] landscape:h-[50vh] landscape:min-h-[200px] bg-neutral-200">
+      <div className="relative w-full h-[200px] xs:h-[250px] sm:h-[350px] md:h-[400px] lg:h-[450px] landscape:h-[50vh] landscape:min-h-[200px] bg-black">
         {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
@@ -289,7 +289,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 key={currentImageUrl}
                 src={currentImageUrl}
                 alt={property.address}
-                className="w-full h-full object-contain bg-neutral-100 animate-image-fade"
+                className="w-full h-full object-contain bg-black animate-image-fade"
                 onError={() => setMainImageError(true)}
               />
             )}
