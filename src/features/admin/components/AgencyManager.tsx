@@ -522,27 +522,14 @@ const AgencyManager: React.FC = () => {
                 </div>
               ) : null}
 
-              {/* Featured Settings */}
+              {/* Featured Status */}
               {viewingAgency.isFeatured && (
                 <div className="border-t pt-4">
-                  <h5 className="font-semibold text-gray-900 mb-3">Featured Settings</h5>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                      <div className="text-gray-900">
-                        {viewingAgency.featuredStartDate ? formatDate(viewingAgency.featuredStartDate) : '-'}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                      <div className="text-gray-900">
-                        {viewingAgency.featuredEndDate ? formatDate(viewingAgency.featuredEndDate) : '-'}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Rotation Order</label>
-                      <div className="text-gray-900">{viewingAgency.adRotationOrder || 0}</div>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                      ⭐ Featured Agency
+                    </span>
+                    <span className="text-sm text-gray-500">Appears in featured section on homepage</span>
                   </div>
                 </div>
               )}
@@ -832,52 +819,13 @@ const AgencyManager: React.FC = () => {
                   <label htmlFor="isFeatured" className="ml-2 text-sm text-gray-700">
                     Featured Agency
                   </label>
+                  {editForm.isFeatured && (
+                    <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                      Will appear in featured section
+                    </span>
+                  )}
                 </div>
               </div>
-
-              {/* Featured Agency Settings */}
-              {editForm.isFeatured && (
-                <div className="border-t pt-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Featured Settings</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Featured Start Date
-                      </label>
-                      <input
-                        type="date"
-                        value={editForm.featuredStartDate}
-                        onChange={(e) => setEditForm({ ...editForm, featuredStartDate: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Featured End Date
-                      </label>
-                      <input
-                        type="date"
-                        value={editForm.featuredEndDate}
-                        onChange={(e) => setEditForm({ ...editForm, featuredEndDate: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Ad Rotation Order
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={editForm.adRotationOrder}
-                        onChange={(e) => setEditForm({ ...editForm, adRotationOrder: Number(e.target.value) })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Specialties */}
               <div className="border-t pt-4">
