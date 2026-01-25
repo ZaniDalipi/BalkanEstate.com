@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
@@ -33,6 +33,7 @@ import {
   ExclamationTriangleIcon
 } from '@/constants';
 import { UserRole } from '@/types';
+import { usePricingPageData, type Product } from '../hooks/usePricingData';
 
 // Helper to build localized path
 const buildLocalizedPath = (path: string): string => {
@@ -42,36 +43,12 @@ const buildLocalizedPath = (path: string): string => {
   return `/${lang}${path === '/' ? '' : path}`;
 };
 
-interface Product {
-  id: string;
-  productId: string;
-  name: string;
-  description?: string;
-  price: number;
-  currency: string;
-  billingPeriod?: string;
-  trialPeriodDays?: number;
-  features: string[];
-  targetRole: 'buyer' | 'seller' | 'agent' | 'all';
-  displayOrder: number;
-  badge?: string;
-  badgeColor?: string;
-  highlighted: boolean;
-  durationDays?: number;
-  listingsLimit?: number;
-  promotionCoupons?: number;
-  savedSearchesLimit?: number;
-  aiMessagesLimit?: number;
-}
-
 interface UserListing {
   id: string;
   address: string;
   price: number;
   imageUrl: string;
 }
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 // Format limit value for display (-1 = unlimited)
 const formatLimit = (value?: number): string => {
@@ -83,9 +60,6 @@ const formatLimit = (value?: number): string => {
 const PricingPage: React.FC = () => {
   const { t } = useTranslation(['pricing', 'common']);
   const { state, dispatch } = useAppContext();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>('seller');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
@@ -97,18 +71,27 @@ const PricingPage: React.FC = () => {
   const [showContactOptions, setShowContactOptions] = useState(false);
 
   // Listing promotion states
-  const [userListings, setUserListings] = useState<UserListing[]>([]);
-  const [loadingListings, setLoadingListings] = useState(false);
   const [selectedPromoTier, setSelectedPromoTier] = useState<'featured' | 'highlight' | 'premium' | null>(null);
   const [selectedListing, setSelectedListing] = useState<UserListing | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<7 | 30 | 90>(30);
   const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 30 | 90>(30);
   const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
-  // Promotion plans from API
-  const [listingPromotionPlans, setListingPromotionPlans] = useState<any[]>([]);
-  const [agencyFeaturePlans, setAgencyFeaturePlans] = useState<any[]>([]);
-  const [loadingPlans, setLoadingPlans] = useState(false);
+  // Use React Query for real-time data fetching
+  const {
+    products,
+    isLoadingProducts: loading,
+    productsError,
+    listingPromotionPlans,
+    agencyFeaturePlans,
+    isLoadingPromotionPlans: loadingPlans,
+    userListings,
+    isLoadingUserListings: loadingListings,
+    isRefetching,
+  } = usePricingPageData(activeTab, state.isAuthenticated);
+
+  // Convert error to string for display
+  const error = productsError ? t('pricing:error.loadFailed', 'Failed to load pricing plans') : null;
 
   // Sales team contact info
   const salesEmail = 'sales@balkanestateai.com';
@@ -146,81 +129,6 @@ const PricingPage: React.FC = () => {
     }
     return defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
   };
-
-  // Fetch products from API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`${API_URL}/products?role=${activeTab}`);
-        if (!response.ok) throw new Error('Failed to fetch products');
-        const data = await response.json();
-        setProducts(data.products || []);
-      } catch (err) {
-        console.error('Error fetching products:', err);
-        setError(t('pricing:error.loadFailed', 'Failed to load pricing plans'));
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, [activeTab, t]);
-
-  // Fetch promotion plans from API
-  useEffect(() => {
-    const fetchPromotionPlans = async () => {
-      if (activeTab !== 'listing' && activeTab !== 'agency') return;
-
-      setLoadingPlans(true);
-      try {
-        const response = await fetch(`${API_URL}/promotion-plans`);
-        if (response.ok) {
-          const data = await response.json();
-          const plans = data.plans || [];
-          setListingPromotionPlans(plans.filter((p: any) => p.category === 'listing'));
-          setAgencyFeaturePlans(plans.filter((p: any) => p.category === 'agency'));
-        }
-      } catch (err) {
-        console.error('Error fetching promotion plans:', err);
-        // Fall back to defaults - no error shown to user
-      } finally {
-        setLoadingPlans(false);
-      }
-    };
-    fetchPromotionPlans();
-  }, [activeTab]);
-
-  // Fetch user listings when on listing tab
-  useEffect(() => {
-    const fetchUserListings = async () => {
-      if (activeTab !== 'listing' || !state.isAuthenticated) return;
-
-      setLoadingListings(true);
-      try {
-        const token = localStorage.getItem('balkan_estate_token');
-        const response = await fetch(`${API_URL}/properties/my/listings`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUserListings(
-            (data.properties || []).map((p: any) => ({
-              id: p._id || p.id,
-              address: p.address || p.title || 'No address',
-              price: p.price || 0,
-              imageUrl: p.imageUrl || p.images?.[0] || '',
-            }))
-          );
-        }
-      } catch (err) {
-        console.error('Error fetching listings:', err);
-      } finally {
-        setLoadingListings(false);
-      }
-    };
-    fetchUserListings();
-  }, [activeTab, state.isAuthenticated]);
 
   const handleBack = () => {
     window.history.pushState({}, '', buildLocalizedPath('/'));
@@ -501,7 +409,12 @@ const PricingPage: React.FC = () => {
               <ArrowLeftIcon className="w-5 h-5" />
               <span className="font-medium text-sm sm:text-base">{t('common:back', 'Back')}</span>
             </button>
-            <h1 className="text-base sm:text-xl font-bold text-gray-900">{t('pricing:pageTitle', 'Pricing Plans')}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-xl font-bold text-gray-900">{t('pricing:pageTitle', 'Pricing Plans')}</h1>
+              {isRefetching && (
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" title="Updating..." />
+              )}
+            </div>
             <div className="w-16 sm:w-20" />
           </div>
         </div>
