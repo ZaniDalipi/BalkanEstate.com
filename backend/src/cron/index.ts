@@ -110,24 +110,66 @@ export const startCronJobs = () => {
   });
 
   // Send subscription renewal reminders - runs daily at 9 AM
+  // Sends reminders 7 days before expiration/renewal for both auto-renewing and non-auto-renewing
   subscriptionReminderTask = cron.schedule('0 9 * * *', async () => {
     try {
       console.log('📧 Sending subscription renewal reminders...');
+
+      // Calculate date ranges
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // 7 days from now (for auto-renewing subscriptions - renewal notice)
+      const sevenDaysStart = new Date();
+      sevenDaysStart.setDate(sevenDaysStart.getDate() + 7);
+      sevenDaysStart.setHours(0, 0, 0, 0);
+
+      const sevenDaysEnd = new Date(sevenDaysStart);
+      sevenDaysEnd.setHours(23, 59, 59, 999);
+
+      // 3 days from now (for non-auto-renewing - expiry warning)
       const threeDaysFromNow = new Date();
       threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
       threeDaysFromNow.setHours(23, 59, 59, 999);
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      let remindersSent = 0;
 
-      // Find subscriptions expiring in the next 3 days
-      const expiringSubscriptions = await Subscription.find({
+      // 1. Send "your subscription will renew" reminders for auto-renewing subscriptions (7 days before)
+      const autoRenewingSubscriptions = await Subscription.find({
         status: 'active',
-        autoRenewing: false, // Only for those not auto-renewing
-        expirationDate: { $gte: today, $lte: threeDaysFromNow },
+        autoRenewing: true,
+        expirationDate: { $gte: sevenDaysStart, $lte: sevenDaysEnd },
+        renewalReminderSent: { $ne: true }, // Don't send duplicate reminders
       }).populate('userId');
 
-      let remindersSent = 0;
+      for (const sub of autoRenewingSubscriptions) {
+        const user = sub.userId as any;
+        if (!user?.email) continue;
+
+        try {
+          await emailService.sendAutoRenewalReminder(
+            user.email,
+            user.name || 'Customer',
+            sub.expirationDate,
+            sub.productId || 'subscription'
+          );
+          // Mark reminder as sent
+          sub.renewalReminderSent = true;
+          await sub.save();
+          remindersSent++;
+        } catch (emailError) {
+          console.error(`Failed to send auto-renewal reminder to ${user.email}:`, emailError);
+        }
+      }
+
+      // 2. Send "your subscription is expiring" reminders for non-auto-renewing subscriptions (3 days before)
+      const expiringSubscriptions = await Subscription.find({
+        status: 'active',
+        autoRenewing: false,
+        expirationDate: { $gte: today, $lte: threeDaysFromNow },
+        expiryReminderSent: { $ne: true }, // Don't send duplicate reminders
+      }).populate('userId');
+
       for (const sub of expiringSubscriptions) {
         const user = sub.userId as any;
         if (!user?.email) continue;
@@ -139,13 +181,16 @@ export const startCronJobs = () => {
             sub.expirationDate,
             sub.productId || 'subscription'
           );
+          // Mark reminder as sent
+          sub.expiryReminderSent = true;
+          await sub.save();
           remindersSent++;
         } catch (emailError) {
-          console.error(`Failed to send reminder to ${user.email}:`, emailError);
+          console.error(`Failed to send expiry reminder to ${user.email}:`, emailError);
         }
       }
 
-      console.log(`✅ Sent ${remindersSent} subscription renewal reminders`);
+      console.log(`✅ Sent ${remindersSent} subscription reminders (auto-renewal: ${autoRenewingSubscriptions.length}, expiring: ${expiringSubscriptions.length})`);
     } catch (error) {
       console.error('Subscription reminder cron error:', error);
     }

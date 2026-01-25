@@ -9,6 +9,7 @@ import SubscriptionEvent from '../models/SubscriptionEvent';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import { paymentProviderFactory } from '../services/paymentProviderFactory';
 import emailService from '../services/emailService';
+import { lemonSqueezyService } from '../services/lemonSqueezyService';
 
 // Stripe is used as fallback - LemonSqueezy is the primary payment provider
 // Keeping Stripe initialization for legacy webhook handling only
@@ -1008,3 +1009,145 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
     console.error('❌ Error handling dispute:', error);
   }
 }
+
+/**
+ * @desc    Verify LemonSqueezy payment status (polling endpoint)
+ * @route   POST /api/payments/verify-lemonsqueezy
+ * @access  Private
+ */
+export const verifyLemonSqueezyPayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { productId, checkoutId } = req.body;
+    const userId = (req as any).user?._id;
+
+    if (!userId) {
+      res.status(401).json({ success: false, message: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    // Verify payment using LemonSqueezy service
+    const result = await lemonSqueezyService.verifyPayment(
+      userId.toString(),
+      user.email,
+      productId
+    );
+
+    if (!result.success) {
+      res.status(200).json({
+        success: false,
+        status: 'pending',
+        message: 'Payment not yet confirmed',
+      });
+      return;
+    }
+
+    // Payment verified - check if subscription already processed
+    const existingSubscription = await Subscription.findOne({
+      userId,
+      lemonSqueezyOrderId: result.order.id,
+    });
+
+    if (existingSubscription) {
+      // Already processed (likely by webhook)
+      res.status(200).json({
+        success: true,
+        status: 'completed',
+        message: 'Payment already processed',
+        subscription: {
+          id: existingSubscription._id,
+          plan: existingSubscription.productId,
+          expiresAt: existingSubscription.expirationDate,
+          status: existingSubscription.status,
+        },
+      });
+      return;
+    }
+
+    // Payment verified but not yet processed - process it now
+    const orderAttrs = result.order.attributes;
+    const customData = orderAttrs.first_order_item?.custom_data || {};
+
+    // Find product
+    const finalProductId = customData.product_id || productId || 'default';
+    let product = await Product.findOne({ productId: finalProductId });
+
+    if (!product) {
+      // Create default product
+      product = await Product.create({
+        productId: finalProductId,
+        name: customData.plan_name || 'Subscription',
+        description: 'Subscription',
+        price: orderAttrs.total / 100,
+        currency: orderAttrs.currency?.toUpperCase() || 'EUR',
+        billingPeriod: customData.plan_interval === 'year' ? 'yearly' : 'monthly',
+        isActive: true,
+      });
+    }
+
+    // Process subscription payment
+    const paymentResult = await processSubscriptionPayment({
+      userId,
+      productId: finalProductId,
+      store: 'lemonsqueezy',
+      amount: orderAttrs.total / 100,
+      currency: orderAttrs.currency?.toUpperCase() || 'EUR',
+    });
+
+    // Store LemonSqueezy order ID
+    if (paymentResult.subscription) {
+      paymentResult.subscription.lemonSqueezyOrderId = result.order.id;
+      if (result.subscription) {
+        paymentResult.subscription.lemonSqueezySubscriptionId = result.subscription.id;
+      }
+      await paymentResult.subscription.save();
+    }
+
+    // Send invoice email
+    try {
+      await emailService.sendSubscriptionInvoice(user.email, user.name || 'Customer', {
+        planName: product.name,
+        amount: orderAttrs.total / 100,
+        currency: orderAttrs.currency?.toUpperCase() || 'EUR',
+        billingPeriod: product.billingPeriod || 'monthly',
+        orderId: result.order.id,
+        subscriptionStartDate: new Date(),
+        nextBillingDate: paymentResult.subscription.expirationDate,
+        autoRenewing: paymentResult.subscription.autoRenewing !== false,
+      });
+    } catch (emailError) {
+      console.error('Failed to send invoice email:', emailError);
+      // Don't fail the payment verification if email fails
+    }
+
+    res.status(200).json({
+      success: true,
+      status: 'completed',
+      message: 'Payment verified and subscription activated',
+      subscription: {
+        id: paymentResult.subscription._id,
+        plan: finalProductId,
+        productName: product.name,
+        expiresAt: paymentResult.subscription.expirationDate,
+        status: paymentResult.subscription.status,
+      },
+      payment: {
+        id: paymentResult.paymentRecord._id,
+        amount: paymentResult.paymentRecord.amount,
+        currency: paymentResult.paymentRecord.currency,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error verifying LemonSqueezy payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying payment',
+      error: error.message,
+    });
+  }
+};

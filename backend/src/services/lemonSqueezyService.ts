@@ -353,6 +353,112 @@ class LemonSqueezyService {
       throw error;
     }
   }
+
+  /**
+   * Get order details by order ID
+   * Used to verify payment status
+   */
+  public async getOrder(orderId: string): Promise<any> {
+    try {
+      const response = await this.apiRequest<any>(`/orders/${orderId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('[LemonSqueezy] Failed to get order:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get checkout session details
+   * Used to verify payment status before webhook arrives
+   */
+  public async getCheckout(checkoutId: string): Promise<any> {
+    try {
+      const response = await this.apiRequest<any>(`/checkouts/${checkoutId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('[LemonSqueezy] Failed to get checkout:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * List orders for a customer (by email)
+   * Useful for finding recent orders
+   */
+  public async listOrdersByEmail(email: string): Promise<any[]> {
+    try {
+      const response = await this.apiRequest<any>(
+        `/orders?filter[store_id]=${this.storeId}&filter[user_email]=${encodeURIComponent(email)}&sort=-created_at&page[size]=5`
+      );
+      return response.data || [];
+    } catch (error: any) {
+      console.error('[LemonSqueezy] Failed to list orders:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Verify payment by checking if an order exists for user and product
+   * Returns order details if payment was successful
+   */
+  public async verifyPayment(userId: string, email: string, productId: string): Promise<{
+    success: boolean;
+    order?: any;
+    subscription?: any;
+    error?: string;
+  }> {
+    try {
+      // Get recent orders for this email
+      const orders = await this.listOrdersByEmail(email);
+
+      // Find an order that matches our criteria (created within last 30 minutes)
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+      for (const order of orders) {
+        const attrs = order.attributes;
+        const customData = attrs.first_order_item?.custom_data || {};
+        const createdAt = new Date(attrs.created_at);
+
+        // Check if this order was created recently and matches our user
+        if (
+          createdAt >= thirtyMinutesAgo &&
+          customData.user_id === userId &&
+          (customData.product_id === productId || !productId) &&
+          attrs.status === 'paid'
+        ) {
+          // Get subscription if this was a subscription order
+          let subscription = null;
+          if (attrs.first_subscription_item?.subscription_id) {
+            try {
+              subscription = await this.getSubscription(
+                attrs.first_subscription_item.subscription_id.toString()
+              );
+            } catch (e) {
+              // Subscription fetch failed, but order is still valid
+            }
+          }
+
+          return {
+            success: true,
+            order: order,
+            subscription: subscription,
+          };
+        }
+      }
+
+      return {
+        success: false,
+        error: 'No matching payment found',
+      };
+    } catch (error: any) {
+      console.error('[LemonSqueezy] Payment verification failed:', error);
+      return {
+        success: false,
+        error: error.message || 'Verification failed',
+      };
+    }
+  }
 }
 
 // Export singleton instance
