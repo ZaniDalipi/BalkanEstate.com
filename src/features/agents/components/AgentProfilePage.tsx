@@ -1239,7 +1239,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         </div>
 
                                         {/* Properties Map - Shows agent's active and sold properties */}
-                                        {agentProperties.length > 0 && agentProperties.some(p => p.lat && p.lng) && (
+                                        {allAgentProperties.length > 0 && allAgentProperties.some(p => p.lat && p.lng) && (
                                             <div>
                                                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                                     <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
@@ -1250,7 +1250,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                 </h3>
                                                 <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
                                                     <MapContainer
-                                                        center={agentProperties.filter(p => p.lat && p.lng)[0] ? [agentProperties.filter(p => p.lat && p.lng)[0].lat!, agentProperties.filter(p => p.lat && p.lng)[0].lng!] : [agent.lat || 42.0, agent.lng || 21.0]}
+                                                        center={allAgentProperties.filter(p => p.lat && p.lng)[0] ? [allAgentProperties.filter(p => p.lat && p.lng)[0].lat!, allAgentProperties.filter(p => p.lat && p.lng)[0].lng!] : [agent.lat || 42.0, agent.lng || 21.0]}
                                                         zoom={12}
                                                         scrollWheelZoom={true}
                                                         className="w-full h-[400px] sm:h-[500px]"
@@ -1263,7 +1263,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             maxZoom={22}
                                                         />
                                                         <MapInvalidator />
-                                                        {agentProperties.filter(p => p.lat && p.lng).map((property) => (
+                                                        {allAgentProperties.filter(p => p.lat && p.lng).map((property) => (
                                                             <Marker
                                                                 key={property.id}
                                                                 position={[property.lat!, property.lng!]}
