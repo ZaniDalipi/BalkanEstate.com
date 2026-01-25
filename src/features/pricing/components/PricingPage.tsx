@@ -736,8 +736,8 @@ const PricingPage: React.FC = () => {
                       <p className="text-xs text-gray-400">{t('pricing:metrics.listings', 'Listings')}</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
-                      <p className="text-2xl font-bold text-amber-400">{formatLimit(enterpriseProduct.teamMembersLimit)}</p>
-                      <p className="text-xs text-gray-400">{t('pricing:metrics.teamMembers', 'Team Members')}</p>
+                      <p className="text-2xl font-bold text-amber-400">{formatLimit(enterpriseProduct.promotionCoupons)}</p>
+                      <p className="text-xs text-gray-400">{t('pricing:metrics.promoCouponsMonth', 'Promo Coupons/Mo')}</p>
                     </div>
                   </div>
 
@@ -747,7 +747,7 @@ const PricingPage: React.FC = () => {
                       ? enterpriseProduct.features.slice(0, 6)
                       : [
                           '500 listings (expandable)',
-                          '5 team members included',
+                          'Unlimited team members',
                           'Agency branding page',
                           '5 promo coupons/month',
                           'Unlimited AI & insights',
