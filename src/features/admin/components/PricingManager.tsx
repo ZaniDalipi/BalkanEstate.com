@@ -11,7 +11,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ArrowPathIcon, CurrencyDollarIcon, CheckIcon } from '@/constants';
+import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ArrowPathIcon, CurrencyDollarIcon, CheckIcon, ChevronUpIcon, ChevronDownIcon } from '@/constants';
 import {
   useProducts,
   useUpdateProduct,
@@ -20,6 +20,7 @@ import {
   useRefreshAdminData,
 } from '../hooks/useAdminData';
 import { Product } from '../api/adminApi';
+import { availablePlaceholders, replacePlaceholders, hasPlaceholders } from '@/src/shared/utils/featurePlaceholders';
 
 const PricingManager: React.FC = () => {
   const { t } = useTranslation(['admin', 'common']);
@@ -107,6 +108,23 @@ const PricingManager: React.FC = () => {
     const newFeatures = [...editingProduct.features];
     newFeatures.splice(index, 1);
     setEditingProduct({ ...editingProduct, features: newFeatures });
+  };
+
+  const handleMoveFeature = (index: number, direction: 'up' | 'down') => {
+    if (!editingProduct) return;
+    const newFeatures = [...editingProduct.features];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+    // Check bounds
+    if (newIndex < 0 || newIndex >= newFeatures.length) return;
+
+    // Swap
+    [newFeatures[index], newFeatures[newIndex]] = [newFeatures[newIndex], newFeatures[index]];
+    setEditingProduct({ ...editingProduct, features: newFeatures });
+  };
+
+  const insertPlaceholder = (placeholder: string) => {
+    setNewFeature(prev => prev + placeholder);
   };
 
   const handleSave = async () => {
@@ -743,43 +761,112 @@ const PricingManager: React.FC = () => {
               {/* Features */}
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
                 <h4 className="font-semibold text-indigo-900 mb-3">Features (displayed in pricing page)</h4>
-                <div className="space-y-2 mb-3">
+
+                {/* Features List with Reordering */}
+                <div className="space-y-2 mb-4">
                   {(editingProduct.features || []).map((feature, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-indigo-100"
+                      className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-indigo-100 group"
                     >
-                      <span className="flex-1 text-sm text-gray-700">{feature}</span>
+                      {/* Reorder buttons */}
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveFeature(index, 'up')}
+                          disabled={index === 0}
+                          className={`p-0.5 rounded transition-colors ${
+                            index === 0
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'
+                          }`}
+                          title="Move up"
+                        >
+                          <ChevronUpIcon className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveFeature(index, 'down')}
+                          disabled={index === editingProduct.features.length - 1}
+                          className={`p-0.5 rounded transition-colors ${
+                            index === editingProduct.features.length - 1
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'
+                          }`}
+                          title="Move down"
+                        >
+                          <ChevronDownIcon className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      {/* Feature text */}
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-700">{feature}</div>
+                        {/* Preview with actual values */}
+                        {hasPlaceholders(feature) && (
+                          <div className="text-xs text-indigo-500 mt-0.5">
+                            Preview: {replacePlaceholders(feature, editingProduct)}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Delete button */}
                       <button
                         type="button"
                         onClick={() => handleRemoveFeature(index)}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                        className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors opacity-60 group-hover:opacity-100"
                       >
                         <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                   {(!editingProduct.features || editingProduct.features.length === 0) && (
-                    <p className="text-sm text-gray-500 italic">No features added yet</p>
+                    <p className="text-sm text-gray-500 italic py-2">No features added yet</p>
                   )}
                 </div>
-                <div className="flex gap-2">
+
+                {/* Add Feature Input */}
+                <div className="flex gap-2 mb-3">
                   <input
                     type="text"
                     value={newFeature}
                     onChange={(e) => setNewFeature(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddFeature())}
-                    placeholder="Add a feature..."
+                    placeholder="e.g., {listingsLimit} listings per month"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                   <button
                     type="button"
                     onClick={handleAddFeature}
-                    className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1"
+                    disabled={!newFeature.trim()}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <PlusIcon className="w-4 h-4" />
                     Add
                   </button>
+                </div>
+
+                {/* Available Placeholders */}
+                <div className="bg-white border border-indigo-200 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-indigo-800 mb-2">
+                    Available Placeholders (click to insert):
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availablePlaceholders.map((p) => (
+                      <button
+                        key={p.key}
+                        type="button"
+                        onClick={() => insertPlaceholder(p.key)}
+                        className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors font-mono"
+                        title={`${p.description} (e.g., ${p.example})`}
+                      >
+                        {p.key}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Use placeholders like <code className="bg-gray-100 px-1 rounded">{'{listingsLimit}'}</code> to dynamically show values from the product.
+                  </p>
                 </div>
               </div>
 
