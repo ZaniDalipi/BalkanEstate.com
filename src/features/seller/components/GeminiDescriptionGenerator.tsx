@@ -37,9 +37,8 @@ interface ListingData {
     amenities: string[];
     description: string;
     image_tags: { index: number; tag: string; }[];
-    tourUrl: string;
+    tourUrl: string; // URL for video (YouTube, TikTok, Instagram, Vimeo, Facebook)
     virtualTour360Url: string; // URL for 360 virtual tour (Matterport, Kuula, etc.)
-    videoUrl: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, etc.)
     propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other';
     floorNumber: number;
     totalFloors: number;
@@ -83,7 +82,6 @@ const initialListingData: ListingData = {
     image_tags: [],
     tourUrl: '',
     virtualTour360Url: '',
-    videoUrl: '',
     propertyType: 'house',
     floorNumber: 1,
     totalFloors: 1,
@@ -405,7 +403,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 description: propertyToEdit.description,
                 tourUrl: propertyToEdit.tourUrl || '',
                 virtualTour360Url: propertyToEdit.virtualTour360Url || '',
-                videoUrl: propertyToEdit.videoUrl || '',
                 propertyType: propertyToEdit.propertyType || 'house',
                 floorNumber: propertyToEdit.floorNumber || 0,
                 totalFloors: propertyToEdit.totalFloors || 0,
@@ -996,7 +993,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 tourUrl: listingData.tourUrl,
                 virtualTour360Url: listingData.virtualTour360Url || undefined,
                 hasVirtualTour360: !!listingData.virtualTour360Url,
-                videoUrl: listingData.videoUrl || undefined,
                 imageUrl: imageUrls.length > 0 ? imageUrls[0].url : 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500',
                 images: imageUrls,
                 lat: lat,
@@ -1825,36 +1821,6 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         )}
                     </div>
 
-                    {/* Video Tour URL (YouTube/Vimeo) */}
-                    <fieldset className="space-y-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
-                        <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
-                            <h3 className="text-base font-semibold text-red-900">{t('seller:createListing.videoTour.title', 'Video Tour')}</h3>
-                        </div>
-                        <p className="text-sm text-red-700 mb-3">
-                            {t('seller:createListing.videoTour.description', 'Add a YouTube or Vimeo video tour of your property to attract more buyers.')}
-                        </p>
-                        <div className="relative">
-                            <input
-                                type="url"
-                                id="tourUrl"
-                                name="tourUrl"
-                                value={listingData.tourUrl}
-                                onChange={handleInputChange}
-                                placeholder={t('seller:createListing.videoTour.placeholder', 'https://youtube.com/watch?v=... or https://vimeo.com/...')}
-                                className={`${floatingInputClasses} border-red-300 focus:border-red-500 focus:ring-red-500`}
-                            />
-                            <label htmlFor="tourUrl" className={`${floatingLabelClasses} text-red-700 peer-focus:text-red-600`}>
-                                {t('seller:createListing.videoTour.label', 'Video URL')}
-                            </label>
-                        </div>
-                        <p className="text-xs text-red-600">
-                            {t('seller:createListing.videoTour.hint', 'Supports YouTube and Vimeo links. The video will be embedded on your listing page.')}
-                        </p>
-                    </fieldset>
-
                     {/* 360 Virtual Tour URL */}
                     <fieldset className="space-y-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
                         <div className="flex items-center gap-2 mb-2">
@@ -1887,7 +1853,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         </p>
                     </fieldset>
 
-                    {/* Video URL (Social Media Embed) */}
+                    {/* Property Video URL */}
                     <fieldset className="space-y-4 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
                         <div className="flex items-center gap-2 mb-2">
                             <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
@@ -1901,14 +1867,14 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         <div className="relative">
                             <input
                                 type="url"
-                                id="videoUrl"
-                                name="videoUrl"
-                                value={listingData.videoUrl}
+                                id="tourUrl"
+                                name="tourUrl"
+                                value={listingData.tourUrl}
                                 onChange={handleInputChange}
                                 placeholder={t('seller:createListing.video.placeholder', 'https://youtube.com/watch?v=... or https://tiktok.com/...')}
                                 className={`${floatingInputClasses} border-red-300 focus:border-red-500 focus:ring-red-500`}
                             />
-                            <label htmlFor="videoUrl" className={`${floatingLabelClasses} text-red-700 peer-focus:text-red-600`}>
+                            <label htmlFor="tourUrl" className={`${floatingLabelClasses} text-red-700 peer-focus:text-red-600`}>
                                 {t('seller:createListing.video.label', 'Video URL')}
                             </label>
                         </div>
@@ -1926,12 +1892,16 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 Instagram
                             </span>
                             <span className="flex items-center gap-1 bg-red-100 px-2 py-1 rounded">
+                                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                                Facebook
+                            </span>
+                            <span className="flex items-center gap-1 bg-red-100 px-2 py-1 rounded">
                                 <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z" /></svg>
                                 Vimeo
                             </span>
                         </div>
                         <p className="text-xs text-red-600">
-                            {t('seller:createListing.video.hint', 'Paste a link from YouTube, TikTok, Instagram Reels, or Vimeo. The video will auto-play when visitors open your listing!')}
+                            {t('seller:createListing.video.hint', 'Paste a link from YouTube, TikTok, Instagram, Facebook, or Vimeo. The video will auto-play when visitors view your listing!')}
                         </p>
                     </fieldset>
 

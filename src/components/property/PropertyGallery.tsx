@@ -148,6 +148,23 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       };
     }
 
+    // Facebook URL patterns - videos and watch
+    const facebookVideoMatch = url.match(/(?:facebook\.com|fb\.watch)\/(?:watch\/?\?v=|.*\/videos\/|reel\/)(\d+)/);
+    if (facebookVideoMatch) {
+      return {
+        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&muted=true`,
+        platform: 'facebook'
+      };
+    }
+    // Facebook watch format (fb.watch short links)
+    const fbWatchMatch = url.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
+    if (fbWatchMatch) {
+      return {
+        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&muted=true`,
+        platform: 'facebook'
+      };
+    }
+
     // Default - return original URL
     return { embedUrl: url, platform: 'other' };
   }, []);
