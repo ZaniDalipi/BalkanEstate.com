@@ -134,6 +134,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
+  // Payment window tracking state
+  const [paymentWindow, setPaymentWindow] = useState<Window | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const [pollingMessage, setPollingMessage] = useState('');
+  const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+
   // Dynamically detect user country
   const userCountry = propUserCountry || detectUserCountry(state.currentUser?.country);
 
@@ -172,8 +178,111 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       setCodeValidation(null);
       setAppliedDiscountCode(null);
       setTermsAccepted(false);
+      setIsPolling(false);
+      setPollingMessage('');
+      // Clean up polling interval
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }
   }, [isOpen, state.isAuthenticated, onError, onClose, t]);
+
+  // Clean up payment window and polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Start polling for payment verification
+  const startPaymentPolling = (sessionId: string, maxAttempts = 60) => {
+    let attempts = 0;
+    setIsPolling(true);
+    setPollingMessage(t('payment:polling.waitingForPayment', 'Waiting for payment confirmation...'));
+
+    pollingIntervalRef.current = setInterval(async () => {
+      attempts++;
+
+      // Check if payment window was closed
+      if (paymentWindow && paymentWindow.closed) {
+        setPollingMessage(t('payment:polling.windowClosed', 'Payment window closed. Verifying payment...'));
+      }
+
+      try {
+        const token = localStorage.getItem('balkan_estate_token');
+        const response = await fetch(`${API_URL}/payments/lemonsqueezy/verify`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.paymentStatus === 'paid') {
+          // Payment successful!
+          clearInterval(pollingIntervalRef.current!);
+          pollingIntervalRef.current = null;
+          setIsPolling(false);
+
+          // Track successful payment
+          trackEcommerce.subscribe(planName, finalPrice);
+          trackEvent('purchase', {
+            currency: 'EUR',
+            value: finalPrice,
+            items: [{
+              item_id: productId || 'unknown',
+              item_name: planName,
+              price: finalPrice,
+              quantity: 1,
+            }],
+            transaction_id: sessionId,
+          });
+
+          setShowSuccess(true);
+          setTimeout(() => {
+            onSuccess(data.subscription?.id || sessionId);
+          }, 2000);
+          return;
+        }
+
+        // Update polling message based on status
+        if (data.paymentStatus === 'processing') {
+          setPollingMessage(t('payment:polling.processing', 'Payment is being processed...'));
+        } else if (attempts > 10 && paymentWindow?.closed) {
+          setPollingMessage(t('payment:polling.verifying', 'Verifying your payment with our payment provider...'));
+        }
+
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+
+      // Stop polling after max attempts
+      if (attempts >= maxAttempts) {
+        clearInterval(pollingIntervalRef.current!);
+        pollingIntervalRef.current = null;
+        setIsPolling(false);
+        setPollingMessage('');
+
+        // If window is closed and we haven't confirmed payment, show message
+        if (paymentWindow?.closed) {
+          setErrorMessage(t('payment:errors.verificationTimeout', 'Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.'));
+          setShowError(true);
+        }
+      }
+    }, 3000); // Poll every 3 seconds
+  };
+
+  // Handle payment window close
+  const handlePaymentWindowClosed = () => {
+    if (!showSuccess && isPolling) {
+      setPollingMessage(t('payment:polling.verifyingAfterClose', 'Verifying payment status...'));
+    }
+  };
 
   const handleValidateDiscountCode = async () => {
     if (!discountCode.trim()) {
@@ -325,7 +434,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         throw new Error(data.message || 'Failed to create payment session');
       }
 
-      // Redirect to payment checkout page (Stripe or Paddle based on country)
+      // Open payment checkout page in new window
       if (data.paymentUrl) {
 
         // Store payment info for callback
@@ -351,8 +460,32 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           payment_provider: data.provider,
         });
 
-        // Redirect to external payment page (LemonSqueezy)
-        window.location.href = data.paymentUrl;
+        // Open LemonSqueezy checkout in a new window
+        const checkoutWindow = window.open(
+          data.paymentUrl,
+          'PaymentWindow',
+          'width=600,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
+        );
+
+        if (checkoutWindow) {
+          setPaymentWindow(checkoutWindow);
+          setIsProcessing(false);
+
+          // Start polling for payment verification
+          startPaymentPolling(data.sessionId || data.orderId);
+
+          // Monitor if window is closed
+          const checkWindowClosed = setInterval(() => {
+            if (checkoutWindow.closed) {
+              clearInterval(checkWindowClosed);
+              handlePaymentWindowClosed();
+            }
+          }, 1000);
+        } else {
+          // Popup blocked - fall back to redirect
+          console.warn('Popup blocked, falling back to redirect');
+          window.location.href = data.paymentUrl;
+        }
       } else {
         throw new Error('No payment URL received');
       }
@@ -449,6 +582,101 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             >
               Close
             </button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
+  // Payment in Progress state (polling for confirmation)
+  if (isPolling) {
+    return (
+      <Modal isOpen={isOpen} onClose={() => {}} title="">
+        <div className="max-w-md mx-auto">
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center pb-4 border-b border-neutral-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="animate-spin rounded-full h-10 w-10 border-4 border-white border-t-transparent"></div>
+              </div>
+              <h2 className="text-2xl font-bold text-neutral-800 mb-2">
+                {t('payment:inProgress.title', 'Payment in Progress')}
+              </h2>
+              <p className="text-sm text-neutral-500">
+                {pollingMessage || t('payment:inProgress.description', 'Please complete your payment in the new window')}
+              </p>
+            </div>
+
+            {/* Plan Summary */}
+            <div className="rounded-xl p-6 border bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-800">{planName}</h3>
+                  <p className="text-sm text-neutral-500 capitalize">
+                    {t('payment:inProgress.billed', 'Billed')} {planInterval === 'year' ? t('payment:inProgress.yearly', 'yearly') : t('payment:inProgress.monthly', 'monthly')}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-primary">€{finalPrice.toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <ClockIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-900 mb-1">
+                    {t('payment:inProgress.waitingTitle', 'Waiting for Payment')}
+                  </p>
+                  <p className="text-xs text-amber-700 leading-relaxed">
+                    {t('payment:inProgress.waitingMessage', 'Complete your payment in the popup window. This page will update automatically once your payment is confirmed.')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Auto-renewal notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <CreditCardIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900 mb-1">
+                    {t('payment:inProgress.subscriptionInfo', 'Subscription Information')}
+                  </p>
+                  <ul className="text-xs text-blue-700 leading-relaxed space-y-1">
+                    <li>• {t('payment:inProgress.autoRenewal', 'Your subscription will automatically renew at the end of each billing period')}</li>
+                    <li>• {t('payment:inProgress.renewalReminder', 'You will receive a reminder email 7 days before renewal')}</li>
+                    <li>• {t('payment:inProgress.cancelAnytime', 'You can cancel anytime from your account settings')}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => {
+                if (pollingIntervalRef.current) {
+                  clearInterval(pollingIntervalRef.current);
+                  pollingIntervalRef.current = null;
+                }
+                setIsPolling(false);
+                setPollingMessage('');
+                if (paymentWindow && !paymentWindow.closed) {
+                  paymentWindow.close();
+                }
+                onClose();
+              }}
+              className="w-full py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors border border-neutral-300 rounded-xl hover:bg-neutral-50"
+            >
+              {t('payment:inProgress.cancel', 'Cancel and Close')}
+            </button>
+
+            {/* Help text */}
+            <p className="text-xs text-center text-neutral-400">
+              {t('payment:inProgress.helpText', 'If the payment window didn\'t open, please check your popup blocker')}
+            </p>
           </div>
         </div>
       </Modal>

@@ -4,6 +4,7 @@ import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } fr
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
+import { replacePlaceholders, ProductValues } from '../../src/shared/utils/featurePlaceholders';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -53,6 +54,19 @@ interface ProductData {
     borderColor?: string;
     textColor?: string;
   };
+  // Limit fields for placeholder replacement
+  listingsLimit?: number;
+  promotionCoupons?: number;
+  premiumCoupons?: number;
+  highlightedCoupons?: number;
+  featuredCoupons?: number;
+  agentCoupons?: number;
+  teamMembersLimit?: number;
+  savedSearchesLimit?: number;
+  aiMessagesLimit?: number;
+  aiInsightsLimit?: number;
+  imageDescriptionLimit?: number;
+  durationDays?: number;
 }
 
 // Plan structure for UI
@@ -278,11 +292,16 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
     }
   }, []);
 
-  // Convert product to plan structure
+  // Convert product to plan structure - using actual DB values
   const productToPlan = useCallback((product: ProductData): Plan => {
     const tier = PLAN_TIERS[product.productId] || 0;
     const isPro = tier >= 1;
     const isEnterprise = tier >= 3;
+
+    // Use actual product values from DB, with fallbacks only for missing data
+    const savedSearches = product.savedSearchesLimit;
+    const promoCoupons = product.promotionCoupons;
+    const aiMessages = product.aiMessagesLimit;
 
     return {
       id: product.productId,
@@ -291,16 +310,18 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       period: product.billingPeriod === 'yearly' ? 'year' : product.billingPeriod === 'monthly' ? 'month' : product.billingPeriod,
       periodMonths: PERIOD_TO_MONTHS[product.billingPeriod] || 1,
       features: product.features,
-      listingLimit: LISTING_LIMITS[product.productId] || 3,
+      // Use actual DB values for all limits
+      listingLimit: product.listingsLimit ?? LISTING_LIMITS[product.productId] ?? 3,
       color: PLAN_COLORS[product.productId] || 'from-gray-400 to-gray-500',
       tier: tier,
       badge: product.badge,
       badgeColor: product.badgeColor,
       highlighted: product.highlighted,
-      // Dynamic feature limits based on tier
-      savedSearchesLimit: isEnterprise ? 'unlimited' : isPro ? 10 : 3,
-      promotionCouponsMonthly: isEnterprise ? 10 : isPro ? 3 : 0,
-      aiMessagesLimit: isEnterprise ? 'unlimited' : isPro ? 50 : 3,
+      // Use actual DB values - (-1 means unlimited)
+      savedSearchesLimit: savedSearches === -1 ? 'unlimited' : (savedSearches ?? 3),
+      promotionCouponsMonthly: promoCoupons ?? 0,
+      aiMessagesLimit: aiMessages === -1 ? 'unlimited' : (aiMessages ?? 3),
+      // These are tier-based features (not stored in DB)
       analyticsLevel: isEnterprise ? 'full' : isPro ? 'advanced' : 'basic',
       supportType: isEnterprise ? 'priority' : isPro ? 'priority' : 'email',
     };
@@ -493,6 +514,28 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       renewalDate,
     };
   }, [subscription, plans]);
+
+  // Get current product for placeholder replacement
+  const currentProduct = useMemo((): ProductValues | null => {
+    if (!subscription) return null;
+    const product = products.find(p => p.productId === subscription.productId);
+    if (!product) return null;
+    return {
+      listingsLimit: product.listingsLimit,
+      promotionCoupons: product.promotionCoupons,
+      premiumCoupons: product.premiumCoupons,
+      highlightedCoupons: product.highlightedCoupons,
+      featuredCoupons: product.featuredCoupons,
+      agentCoupons: product.agentCoupons,
+      teamMembersLimit: product.teamMembersLimit,
+      savedSearchesLimit: product.savedSearchesLimit,
+      aiMessagesLimit: product.aiMessagesLimit,
+      aiInsightsLimit: product.aiInsightsLimit,
+      imageDescriptionLimit: product.imageDescriptionLimit,
+      price: product.price,
+      durationDays: product.durationDays,
+    };
+  }, [subscription, products]);
 
   // Calculate upgrade price with pro-rated discount
   const calculateUpgradePrice = useCallback((targetPlanKey: string) => {
@@ -987,7 +1030,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             {subscriptionDetails.currentPlan.features.map((feature, idx) => (
               <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-white/20 rounded-full text-xs">
                 <CheckCircleIcon className="w-3 h-3" />
-                {feature}
+                {currentProduct ? replacePlaceholders(feature, currentProduct) : feature}
               </span>
             ))}
           </div>
@@ -1004,13 +1047,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">Listing Limit</p>
               <p className="text-sm text-neutral-500">
-                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {subscriptionDetails.currentPlan.listingLimit} listings used
+                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} listings used
               </p>
             </div>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-neutral-800">
-              {subscriptionDetails.currentPlan.listingLimit - (user.subscription?.activeListingsCount || user.listingsCount || 0)}
+              {(currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) - (user.subscription?.activeListingsCount || user.listingsCount || 0)}
             </p>
             <p className="text-xs text-neutral-500">remaining</p>
           </div>
@@ -1018,7 +1061,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
           <div
             className="bg-blue-500 h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.min(100, ((user.subscription?.activeListingsCount || user.listingsCount || 0) / subscriptionDetails.currentPlan.listingLimit) * 100)}%` }}
+            style={{ width: `${Math.min(100, ((user.subscription?.activeListingsCount || user.listingsCount || 0) / (currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit)) * 100)}%` }}
           />
         </div>
       </div>
@@ -1031,14 +1074,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Listings - from plan */}
+          {/* Listings - from DB product */}
           <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
             <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <HomeIcon className="w-5 h-5 text-blue-600" />
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {subscriptionDetails.currentPlan.listingLimit} Active Listings
+                {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} Active Listings
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.period === 'year' ? 'Per year' : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
@@ -1046,7 +1089,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
 
-          {/* Saved Searches - from plan */}
+          {/* Saved Searches - from DB product */}
           <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
             <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
               <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1055,9 +1098,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {subscriptionDetails.currentPlan.savedSearchesLimit === 'unlimited'
+                {(currentProduct?.savedSearchesLimit ?? -1) === -1 || subscriptionDetails.currentPlan.savedSearchesLimit === 'unlimited'
                   ? 'Unlimited Saved Searches'
-                  : `${subscriptionDetails.currentPlan.savedSearchesLimit || user.subscription?.savedSearchesLimit || 3} Saved Searches`}
+                  : `${currentProduct?.savedSearchesLimit ?? subscriptionDetails.currentPlan.savedSearchesLimit ?? 3} Saved Searches`}
               </p>
               <p className="text-sm text-neutral-500">
                 {t('management.whatsIncluded.savedSearchesDesc')}
@@ -1065,28 +1108,35 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
 
-          {/* Promotion Coupons - from plan */}
-          <div className={`flex items-start gap-3 p-3 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <GiftIconComponent className={`w-5 h-5 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'text-amber-600' : 'text-neutral-400'}`} />
-            </div>
-            <div>
-              <p className={`font-semibold ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared'
-                  ? 'Shared Agency Pool'
-                  : subscriptionDetails.currentPlan.promotionCouponsMonthly && subscriptionDetails.currentPlan.promotionCouponsMonthly > 0
-                    ? `${subscriptionDetails.currentPlan.promotionCouponsMonthly} Promotion Coupons/Month`
-                    : t('management.whatsIncluded.noPromotionCoupons')}
-              </p>
-              <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared'
-                  ? 'Use promotion coupons from agency pool'
-                  : subscriptionDetails.currentPlan.promotionCouponsMonthly && subscriptionDetails.currentPlan.promotionCouponsMonthly > 0
-                    ? t('management.whatsIncluded.promotionCouponsDesc')
-                    : t('management.whatsIncluded.upgradeForPromotion')}
-              </p>
-            </div>
-          </div>
+          {/* Promotion Coupons - from DB product */}
+          {(() => {
+            const promoCoupons = currentProduct?.promotionCoupons ?? 0;
+            const isShared = subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared';
+            const hasPromoCoupons = promoCoupons > 0 || isShared;
+            return (
+              <div className={`flex items-start gap-3 p-3 ${hasPromoCoupons ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
+                <div className={`p-2 ${hasPromoCoupons ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+                  <GiftIconComponent className={`w-5 h-5 ${hasPromoCoupons ? 'text-amber-600' : 'text-neutral-400'}`} />
+                </div>
+                <div>
+                  <p className={`font-semibold ${hasPromoCoupons ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                    {isShared
+                      ? 'Shared Agency Pool'
+                      : promoCoupons > 0
+                        ? `${promoCoupons} Promotion Coupons/Month`
+                        : t('management.whatsIncluded.noPromotionCoupons')}
+                  </p>
+                  <p className="text-sm text-neutral-500">
+                    {isShared
+                      ? 'Use promotion coupons from agency pool'
+                      : promoCoupons > 0
+                        ? t('management.whatsIncluded.promotionCouponsDesc')
+                        : t('management.whatsIncluded.upgradeForPromotion')}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Analytics - from plan */}
           <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>

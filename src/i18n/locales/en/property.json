@@ -142,7 +142,14 @@
     "tour360": "360° Tour",
     "photos": "Photos",
     "streetView": "Street View",
+    "video": "Video",
     "all": "All"
+  },
+  "video": {
+    "loading": "Loading video...",
+    "errorLoading": "Failed to load video",
+    "replay": "Replay Video",
+    "video": "Video"
   },
   "seller": {
     "seller": "Seller",

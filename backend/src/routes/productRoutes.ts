@@ -64,10 +64,17 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
         cardStyle: product.cardStyle,
         listingsLimit: product.listingsLimit,
         promotionCoupons: product.promotionCoupons,
+        // Promotion coupon breakdown
+        premiumCoupons: product.premiumCoupons,
+        highlightedCoupons: product.highlightedCoupons,
+        featuredCoupons: product.featuredCoupons,
+        // Agency-specific
+        agentCoupons: product.agentCoupons,
         savedSearchesLimit: product.savedSearchesLimit,
         aiMessagesLimit: product.aiMessagesLimit,
         aiInsightsLimit: product.aiInsightsLimit,
         imageDescriptionLimit: product.imageDescriptionLimit,
+        teamMembersLimit: product.teamMembersLimit,
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,
@@ -347,10 +354,17 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
         cardStyle: product.cardStyle,
         listingsLimit: product.listingsLimit,
         promotionCoupons: product.promotionCoupons,
+        // Promotion coupon breakdown
+        premiumCoupons: product.premiumCoupons,
+        highlightedCoupons: product.highlightedCoupons,
+        featuredCoupons: product.featuredCoupons,
+        // Agency-specific
+        agentCoupons: product.agentCoupons,
         savedSearchesLimit: product.savedSearchesLimit,
         aiMessagesLimit: product.aiMessagesLimit,
         aiInsightsLimit: product.aiInsightsLimit,
         imageDescriptionLimit: product.imageDescriptionLimit,
+        teamMembersLimit: product.teamMembersLimit,
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,

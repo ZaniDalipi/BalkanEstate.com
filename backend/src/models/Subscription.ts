@@ -62,6 +62,14 @@ export interface ISubscription extends Document {
   // Cancellation
   cancellationReason?: string;
 
+  // Email reminders tracking
+  renewalReminderSent?: boolean; // For auto-renewing subscriptions (7-day reminder)
+  expiryReminderSent?: boolean; // For non-auto-renewing subscriptions (3-day reminder)
+
+  // LemonSqueezy integration
+  lemonSqueezyOrderId?: string;
+  lemonSqueezySubscriptionId?: string;
+
   // Audit
   lastUpdated: Date;
   lastValidated?: Date;
@@ -216,6 +224,28 @@ const SubscriptionSchema: Schema = new Schema(
     // Cancellation
     cancellationReason: {
       type: String,
+    },
+
+    // Email reminders tracking
+    renewalReminderSent: {
+      type: Boolean,
+      default: false,
+    },
+    expiryReminderSent: {
+      type: Boolean,
+      default: false,
+    },
+
+    // LemonSqueezy integration
+    lemonSqueezyOrderId: {
+      type: String,
+      index: true,
+      sparse: true,
+    },
+    lemonSqueezySubscriptionId: {
+      type: String,
+      index: true,
+      sparse: true,
     },
 
     // Audit

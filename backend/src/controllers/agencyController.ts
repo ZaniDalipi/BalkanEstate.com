@@ -5,10 +5,12 @@ import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import Property from '../models/Property';
 import Subscription from '../models/Subscription';
+import Product from '../models/Product';
 import { geocodeAgency } from '../services/geocodingService';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { sendAgentJoinedAgencyEmail, sendAgencyNewMemberEmail } from '../services/emailService';
+import { ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 
 // Helper function to generate unique Agent ID using secure random
 function generateAgentId(): string {
@@ -239,6 +241,15 @@ export const createAgency = async (
         try {
           const { sendAgentRegistrationCouponsEmail, sendEnterpriseWelcomeEmail } = await import('../services/emailService');
 
+          // Fetch Enterprise product to get coupon breakdown values
+          const enterpriseProduct = await Product.findOne({ productId: 'agency_yearly' }).lean();
+          const promotionCoupons = {
+            total: enterpriseProduct?.promotionCoupons || ENTERPRISE_TIER_LIMITS.PROMOTION_COUPONS,
+            premium: enterpriseProduct?.premiumCoupons || ENTERPRISE_TIER_LIMITS.PREMIUM_COUPONS,
+            highlighted: enterpriseProduct?.highlightedCoupons || ENTERPRISE_TIER_LIMITS.HIGHLIGHTED_COUPONS,
+            featured: enterpriseProduct?.featuredCoupons || ENTERPRISE_TIER_LIMITS.FEATURED_COUPONS,
+          };
+
           // Send agent registration coupons email
           await sendAgentRegistrationCouponsEmail({
             email: user.email,
@@ -248,13 +259,17 @@ export const createAgency = async (
           });
           // Sent agent registration coupons email
 
-          // Send welcome/thank you email
+          // Send welcome/thank you email with promotion coupon breakdown
           await sendEnterpriseWelcomeEmail({
             email: user.email,
             ownerName: user.name || 'Agency Owner',
             agencyName: agency.name,
+            promotionCoupons,
+            agentCoupons: enterpriseProduct?.agentCoupons || 5,
+            teamMembersLimit: enterpriseProduct?.teamMembersLimit || ENTERPRISE_TIER_LIMITS.TEAM_MEMBERS,
+            listingsLimit: enterpriseProduct?.listingsLimit || ENTERPRISE_TIER_LIMITS.LISTINGS,
           });
-          // Sent Enterprise welcome email
+          // Sent Enterprise welcome email with coupon breakdown
         } catch (emailError) {
           console.error('⚠️ Failed to send Enterprise emails:', emailError);
         }

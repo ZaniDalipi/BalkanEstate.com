@@ -1,5 +1,5 @@
 // PropertyGallery Component
-// Image gallery with carousel, street view, and interactive controls
+// Image gallery with carousel, street view, video player, and interactive controls
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -193,7 +193,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               />
             )}
           </button>
-        ) : (
+        ) : viewMode === 'streetview' ? (
           <div className={`relative w-full h-full ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
             <iframe
               src={`https://www.google.com/maps?layer=c&cbll=${property.lat},${property.lng}&cbp=12,0,0,0,0&output=svembed`}
@@ -219,7 +219,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               )}
             </button>
           </div>
-        )}
+        ) : null}
 
         {/* 360 Tour Badge - Top Left */}
         {viewMode === 'photos' && property.virtualTour360Url && (

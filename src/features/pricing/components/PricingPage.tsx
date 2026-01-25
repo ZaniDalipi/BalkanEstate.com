@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
+import { replacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
 import Footer from '@/components/shared/Footer';
 import {
   FloatingSphere,
@@ -33,6 +34,7 @@ import {
   ExclamationTriangleIcon
 } from '@/constants';
 import { UserRole } from '@/types';
+import { usePricingPageData, type Product } from '../hooks/usePricingData';
 
 // Helper to build localized path
 const buildLocalizedPath = (path: string): string => {
@@ -42,36 +44,12 @@ const buildLocalizedPath = (path: string): string => {
   return `/${lang}${path === '/' ? '' : path}`;
 };
 
-interface Product {
-  id: string;
-  productId: string;
-  name: string;
-  description?: string;
-  price: number;
-  currency: string;
-  billingPeriod?: string;
-  trialPeriodDays?: number;
-  features: string[];
-  targetRole: 'buyer' | 'seller' | 'agent' | 'all';
-  displayOrder: number;
-  badge?: string;
-  badgeColor?: string;
-  highlighted: boolean;
-  durationDays?: number;
-  listingsLimit?: number;
-  promotionCoupons?: number;
-  savedSearchesLimit?: number;
-  aiMessagesLimit?: number;
-}
-
 interface UserListing {
   id: string;
   address: string;
   price: number;
   imageUrl: string;
 }
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 // Format limit value for display (-1 = unlimited)
 const formatLimit = (value?: number): string => {
@@ -83,9 +61,6 @@ const formatLimit = (value?: number): string => {
 const PricingPage: React.FC = () => {
   const { t } = useTranslation(['pricing', 'common']);
   const { state, dispatch } = useAppContext();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>('seller');
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
@@ -97,18 +72,27 @@ const PricingPage: React.FC = () => {
   const [showContactOptions, setShowContactOptions] = useState(false);
 
   // Listing promotion states
-  const [userListings, setUserListings] = useState<UserListing[]>([]);
-  const [loadingListings, setLoadingListings] = useState(false);
   const [selectedPromoTier, setSelectedPromoTier] = useState<'featured' | 'highlight' | 'premium' | null>(null);
   const [selectedListing, setSelectedListing] = useState<UserListing | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<7 | 30 | 90>(30);
   const [selectedAgencyDuration, setSelectedAgencyDuration] = useState<7 | 30 | 90>(30);
   const [includeMapMarker, setIncludeMapMarker] = useState(false);
 
-  // Promotion plans from API
-  const [listingPromotionPlans, setListingPromotionPlans] = useState<any[]>([]);
-  const [agencyFeaturePlans, setAgencyFeaturePlans] = useState<any[]>([]);
-  const [loadingPlans, setLoadingPlans] = useState(false);
+  // Use React Query for real-time data fetching
+  const {
+    products,
+    isLoadingProducts: loading,
+    productsError,
+    listingPromotionPlans,
+    agencyFeaturePlans,
+    isLoadingPromotionPlans: loadingPlans,
+    userListings,
+    isLoadingUserListings: loadingListings,
+    isRefetching,
+  } = usePricingPageData(activeTab, state.isAuthenticated);
+
+  // Convert error to string for display
+  const error = productsError ? t('pricing:error.loadFailed', 'Failed to load pricing plans') : null;
 
   // Sales team contact info
   const salesEmail = 'sales@balkanestateai.com';
@@ -146,81 +130,6 @@ const PricingPage: React.FC = () => {
     }
     return defaultAgencyFeaturePricing[tier]?.[duration] ?? 0;
   };
-
-  // Fetch products from API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`${API_URL}/products?role=${activeTab}`);
-        if (!response.ok) throw new Error('Failed to fetch products');
-        const data = await response.json();
-        setProducts(data.products || []);
-      } catch (err) {
-        console.error('Error fetching products:', err);
-        setError(t('pricing:error.loadFailed', 'Failed to load pricing plans'));
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, [activeTab, t]);
-
-  // Fetch promotion plans from API
-  useEffect(() => {
-    const fetchPromotionPlans = async () => {
-      if (activeTab !== 'listing' && activeTab !== 'agency') return;
-
-      setLoadingPlans(true);
-      try {
-        const response = await fetch(`${API_URL}/promotion-plans`);
-        if (response.ok) {
-          const data = await response.json();
-          const plans = data.plans || [];
-          setListingPromotionPlans(plans.filter((p: any) => p.category === 'listing'));
-          setAgencyFeaturePlans(plans.filter((p: any) => p.category === 'agency'));
-        }
-      } catch (err) {
-        console.error('Error fetching promotion plans:', err);
-        // Fall back to defaults - no error shown to user
-      } finally {
-        setLoadingPlans(false);
-      }
-    };
-    fetchPromotionPlans();
-  }, [activeTab]);
-
-  // Fetch user listings when on listing tab
-  useEffect(() => {
-    const fetchUserListings = async () => {
-      if (activeTab !== 'listing' || !state.isAuthenticated) return;
-
-      setLoadingListings(true);
-      try {
-        const token = localStorage.getItem('balkan_estate_token');
-        const response = await fetch(`${API_URL}/properties/my/listings`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUserListings(
-            (data.properties || []).map((p: any) => ({
-              id: p._id || p.id,
-              address: p.address || p.title || 'No address',
-              price: p.price || 0,
-              imageUrl: p.imageUrl || p.images?.[0] || '',
-            }))
-          );
-        }
-      } catch (err) {
-        console.error('Error fetching listings:', err);
-      } finally {
-        setLoadingListings(false);
-      }
-    };
-    fetchUserListings();
-  }, [activeTab, state.isAuthenticated]);
 
   const handleBack = () => {
     window.history.pushState({}, '', buildLocalizedPath('/'));
@@ -501,7 +410,12 @@ const PricingPage: React.FC = () => {
               <ArrowLeftIcon className="w-5 h-5" />
               <span className="font-medium text-sm sm:text-base">{t('common:back', 'Back')}</span>
             </button>
-            <h1 className="text-base sm:text-xl font-bold text-gray-900">{t('pricing:pageTitle', 'Pricing Plans')}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-xl font-bold text-gray-900">{t('pricing:pageTitle', 'Pricing Plans')}</h1>
+              {isRefetching && (
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" title="Updating..." />
+              )}
+            </div>
             <div className="w-16 sm:w-20" />
           </div>
         </div>
@@ -700,8 +614,8 @@ const PricingPage: React.FC = () => {
 
                   {/* Features - with fallback */}
                   <ul className="mt-6 space-y-3 flex-grow">
-                    {(proYearlyProduct.features && proYearlyProduct.features.length > 1
-                      ? proYearlyProduct.features.slice(0, 6)
+                    {(proYearlyProduct.features && proYearlyProduct.features.length > 0
+                      ? proYearlyProduct.features
                       : [
                           '250 listings per year',
                           '3 promo coupons/month',
@@ -715,7 +629,7 @@ const PricingPage: React.FC = () => {
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5">
                           <CheckIcon className="w-3 h-3 text-emerald-600" />
                         </div>
-                        <span className="text-sm text-gray-700">{feature}</span>
+                        <span className="text-sm text-gray-700">{replacePlaceholders(feature, proYearlyProduct)}</span>
                       </li>
                     ))}
                   </ul>
@@ -757,8 +671,8 @@ const PricingPage: React.FC = () => {
 
                   {/* Features - with fallback */}
                   <ul className="mt-6 space-y-3 flex-grow">
-                    {(proMonthlyProduct.features && proMonthlyProduct.features.length > 1
-                      ? proMonthlyProduct.features.slice(0, 5)
+                    {(proMonthlyProduct.features && proMonthlyProduct.features.length > 0
+                      ? proMonthlyProduct.features
                       : [
                           '20 listings per month',
                           '3 promo coupons/month',
@@ -771,7 +685,7 @@ const PricingPage: React.FC = () => {
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center mt-0.5">
                           <CheckIcon className="w-3 h-3 text-gray-600" />
                         </div>
-                        <span className="text-sm text-gray-700">{feature}</span>
+                        <span className="text-sm text-gray-700">{replacePlaceholders(feature, proMonthlyProduct)}</span>
                       </li>
                     ))}
                   </ul>
@@ -823,18 +737,18 @@ const PricingPage: React.FC = () => {
                       <p className="text-xs text-gray-400">{t('pricing:metrics.listings', 'Listings')}</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
-                      <p className="text-2xl font-bold text-amber-400">5</p>
-                      <p className="text-xs text-gray-400">{t('pricing:metrics.teamMembers', 'Team Members')}</p>
+                      <p className="text-2xl font-bold text-amber-400">{formatLimit(enterpriseProduct.promotionCoupons)}</p>
+                      <p className="text-xs text-gray-400">{t('pricing:metrics.promoCouponsMonth', 'Promo Coupons/Mo')}</p>
                     </div>
                   </div>
 
                   {/* Features - with fallback */}
                   <ul className="mt-6 space-y-3 flex-grow relative z-10">
-                    {(enterpriseProduct.features && enterpriseProduct.features.length > 1
-                      ? enterpriseProduct.features.slice(0, 6)
+                    {(enterpriseProduct.features && enterpriseProduct.features.length > 0
+                      ? enterpriseProduct.features
                       : [
                           '500 listings (expandable)',
-                          '5 team members included',
+                          'Unlimited team members',
                           'Agency branding page',
                           '5 promo coupons/month',
                           'Unlimited AI & insights',
@@ -845,7 +759,7 @@ const PricingPage: React.FC = () => {
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center mt-0.5">
                           <CheckIcon className="w-3 h-3 text-amber-400" />
                         </div>
-                        <span className="text-sm text-gray-300">{feature}</span>
+                        <span className="text-sm text-gray-300">{replacePlaceholders(feature, enterpriseProduct)}</span>
                       </li>
                     ))}
                   </ul>
@@ -889,7 +803,7 @@ const PricingPage: React.FC = () => {
                       <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
                         <CheckIcon className="w-3 h-3 text-blue-600" />
                       </div>
-                      <span className="text-sm text-gray-700">{feature}</span>
+                      <span className="text-sm text-gray-700">{replacePlaceholders(feature, buyerProduct)}</span>
                     </li>
                   ))}
                 </ul>
@@ -1312,7 +1226,7 @@ const PricingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Legal Links - Required for Paddle Domain Approval */}
+        {/* Legal Links - Required for Payment Provider Domain Approval */}
         <div className="mt-12 sm:mt-16">
           <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 rounded-2xl border border-gray-200 p-6 sm:p-8 max-w-3xl mx-auto">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -1322,7 +1236,7 @@ const PricingPage: React.FC = () => {
               </h4>
             </div>
             <p className="text-sm text-gray-600 text-center mb-6">
-              {t('pricing:legal.description', 'All payments are processed securely by Paddle. By subscribing, you agree to our policies:')}
+              {t('pricing:legal.description', 'All payments are processed securely by LemonSqueezy. By subscribing, you agree to our policies:')}
             </p>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <button
@@ -1354,7 +1268,7 @@ const PricingPage: React.FC = () => {
               </button>
             </div>
             <p className="text-xs text-gray-500 text-center mt-4">
-              {t('pricing:legal.paddleNote', 'Payments handled by Paddle.com as Merchant of Record. VAT/taxes included where applicable.')}
+              {t('pricing:legal.providerNote', 'Payments handled by LemonSqueezy as Merchant of Record. VAT/taxes included where applicable.')}
             </p>
           </div>
         </div>

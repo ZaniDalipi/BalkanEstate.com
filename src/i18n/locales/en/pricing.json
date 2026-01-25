@@ -218,10 +218,37 @@
   },
   "legal": {
     "title": "Secure Payments & Policies",
-    "description": "All payments are processed securely by Paddle. By subscribing, you agree to our policies:",
+    "description": "All payments are processed securely by LemonSqueezy. By subscribing, you agree to our policies:",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "refundPolicy": "Refund Policy",
-    "paddleNote": "Payments handled by Paddle.com as Merchant of Record. VAT/taxes included where applicable."
+    "providerNote": "Payments handled by LemonSqueezy as Merchant of Record. VAT/taxes included where applicable."
+  },
+  "duration": {
+    "7days": "7 days",
+    "30days": "30 days",
+    "90days": "90 days"
+  },
+  "agency": {
+    "title": "Featured Agency",
+    "subtitle": "Get your agency featured everywhere on the platform for 1 week",
+    "featuredTitle": "Featured Agency",
+    "featuredDescription": "Shown everywhere on the platform",
+    "oneWeek": "1 WEEK",
+    "perWeek": "per week",
+    "showsEverywhere": "Shows everywhere!",
+    "benefits": {
+      "featuredInDirectory": "Featured in agency directory",
+      "priorityInSearch": "Priority in search results",
+      "homepageCarousel": "Homepage agency carousel",
+      "featuredBadge": "Featured badge on profile",
+      "boostedVisibility": "Boosted visibility everywhere (3x)",
+      "mapMarker": "Agency marker on property map"
+    },
+    "needAgency": "Don't have an agency yet?",
+    "needAgencyDescription": "Subscribe to our Enterprise plan to create your agency and unlock these features.",
+    "viewEnterprise": "View Enterprise Plan",
+    "comingSoon": "Coming Soon",
+    "featureComingSoon": "Agency featuring will be available soon!"
   }
 }
