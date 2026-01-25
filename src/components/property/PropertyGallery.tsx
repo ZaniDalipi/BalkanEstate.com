@@ -278,7 +278,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
-            className="relative w-full h-full block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl"
+            className="relative w-full h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl bg-black"
           >
             {mainImageError ? (
               <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
@@ -289,7 +289,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 key={currentImageUrl}
                 src={currentImageUrl}
                 alt={property.address}
-                className="w-full h-full object-contain bg-black animate-image-fade"
+                className="max-w-full max-h-full object-contain animate-image-fade"
                 onError={() => setMainImageError(true)}
               />
             )}
