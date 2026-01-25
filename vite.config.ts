@@ -175,6 +175,9 @@ export default defineConfig(({ mode }) => {
           workbox: {
             globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
             maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+            // Exclude API routes from service worker interception
+            // API calls (especially payments) should always be live, not cached
+            navigateFallbackDenylist: [/^\/api\//],
             runtimeCaching: [
               {
                 urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -231,22 +234,9 @@ export default defineConfig(({ mode }) => {
                     statuses: [0, 200]
                   }
                 }
-              },
-              {
-                urlPattern: /\/api\/.*/i,
-                handler: 'NetworkFirst',
-                options: {
-                  cacheName: 'api-cache',
-                  expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 5 // 5 minutes
-                  },
-                  networkTimeoutSeconds: 10,
-                  cacheableResponse: {
-                    statuses: [0, 200]
-                  }
-                }
               }
+              // NOTE: API routes are NOT cached by service worker
+              // Payment verification and other API calls must always be fresh
             ],
             skipWaiting: true,
             clientsClaim: true

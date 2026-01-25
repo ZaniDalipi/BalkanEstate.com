@@ -198,7 +198,8 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   }, []);
 
   // Start polling for payment verification
-  const startPaymentPolling = (sessionId: string, maxAttempts = 60) => {
+  // Use longer interval (6 seconds) and fewer attempts to avoid rate limiting (429)
+  const startPaymentPolling = (sessionId: string, maxAttempts = 30) => {
     let attempts = 0;
     setIsPolling(true);
     setPollingMessage(t('payment:polling.waitingForPayment', 'Waiting for payment confirmation...'));
@@ -274,7 +275,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           setShowError(true);
         }
       }
-    }, 3000); // Poll every 3 seconds
+    }, 6000); // Poll every 6 seconds to avoid rate limiting
   };
 
   // Handle payment window close
