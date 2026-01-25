@@ -210,13 +210,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
             <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
           </div>
         ) : (
-          <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden">
+          <div className="relative w-full h-40 sm:h-44 md:h-48 overflow-hidden bg-black">
+            {/* Blurred background image */}
+            <img
+              src={property.imageUrl}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60"
+            />
+            {/* Main image - contained to show full image */}
             <img
               src={property.imageUrl}
               alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for sale in ${property.city}, ${property.country}`}
               loading="lazy"
               decoding="async"
-              className={`w-full h-full object-cover transition-transform duration-700 ${
+              className={`relative w-full h-full object-contain transition-transform duration-700 ${
                 isHovered && !isSold ? 'scale-110' : 'scale-100'
               } ${isSold ? 'grayscale' : ''}`}
               onError={() => setImageError(true)}
