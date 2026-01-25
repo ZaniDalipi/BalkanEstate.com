@@ -289,7 +289,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 key={currentImageUrl}
                 src={currentImageUrl}
                 alt={property.address}
-                className="w-full h-full object-cover animate-image-fade"
+                className="w-full h-full object-contain bg-neutral-100 animate-image-fade"
                 onError={() => setMainImageError(true)}
               />
             )}
