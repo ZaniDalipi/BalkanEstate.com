@@ -233,66 +233,54 @@ export const getOptimizedExternalImageSrcSet = (
 // ============================================================================
 
 /**
- * Onboarding page images - optimized via Cloudinary fetch
+ * Onboarding page images - using Unsplash's built-in optimization
+ * Unsplash supports URL parameters for resizing and quality:
+ * - w=width, h=height, q=quality (1-100), fm=format (webp, jpg)
+ * - fit=crop for aspect ratio fitting
  */
 export const ONBOARDING_IMAGES = {
   // "Looking to Buy" card - couple looking at new home
   buyCard: {
-    src: getOptimizedExternalImage(
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-      { width: 400, height: 300, quality: 'auto:good' }
-    ),
-    srcSet: getOptimizedExternalImageSrcSet(
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-      [300, 400, 500],
-      300
-    ),
-    preload: getOptimizedExternalImage(
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-      { width: 400, height: 300, quality: 'auto:good' }
-    ),
+    src: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80&fm=webp',
+    srcSet: [
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=225&fit=crop&q=80&fm=webp 300w',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80&fm=webp 400w',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&h=375&fit=crop&q=80&fm=webp 500w',
+    ].join(', '),
+    preload: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80&fm=webp',
     alt: 'A couple looking at a new home',
   },
   // "Want to Sell" card - modern house exterior
   sellCard: {
-    src: getOptimizedExternalImage(
-      'https://images.unsplash.com/photo-1570129477492-45c003edd2be',
-      { width: 400, height: 300, quality: 'auto:good' }
-    ),
-    srcSet: getOptimizedExternalImageSrcSet(
-      'https://images.unsplash.com/photo-1570129477492-45c003edd2be',
-      [300, 400, 500],
-      300
-    ),
+    src: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop&q=80&fm=webp',
+    srcSet: [
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=300&h=225&fit=crop&q=80&fm=webp 300w',
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop&q=80&fm=webp 400w',
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=500&h=375&fit=crop&q=80&fm=webp 500w',
+    ].join(', '),
     alt: 'A modern house exterior',
   },
 };
 
 /**
- * Hero/Background images - optimized via Cloudinary fetch
+ * Hero/Background images - using Unsplash's built-in optimization
  */
 export const HERO_IMAGES = {
   // Agents page hero background
   agentsHero: {
-    src: getOptimizedExternalImage(
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
-      { width: 1600, height: 400, quality: 'auto:eco', crop: 'fill' }
-    ),
-    srcSet: getOptimizedExternalImageSrcSet(
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c',
-      [800, 1200, 1600],
-      400
-    ),
+    src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&h=400&fit=crop&q=70&fm=webp',
+    srcSet: [
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=200&fit=crop&q=70&fm=webp 800w',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=300&fit=crop&q=70&fm=webp 1200w',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&h=400&fit=crop&q=70&fm=webp 1600w',
+    ].join(', '),
   },
 };
 
 /**
- * Fallback/Placeholder images - optimized via Cloudinary fetch
+ * Fallback/Placeholder images - using Unsplash's built-in optimization
  */
 export const FALLBACK_IMAGES = {
   // Default property image when no images are uploaded
-  property: getOptimizedExternalImage(
-    'https://images.unsplash.com/photo-1568605114967-8130f3a36994',
-    { width: 500, height: 375, quality: 'auto:good', crop: 'fill' }
-  ),
+  property: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500&h=375&fit=crop&q=80&fm=webp',
 };
