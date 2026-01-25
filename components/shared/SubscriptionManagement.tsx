@@ -1040,13 +1040,13 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             <div>
               <p className="font-semibold text-neutral-800">Listing Limit</p>
               <p className="text-sm text-neutral-500">
-                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {subscriptionDetails.currentPlan.listingLimit} listings used
+                {user.subscription?.activeListingsCount || user.listingsCount || 0} of {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} listings used
               </p>
             </div>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-neutral-800">
-              {subscriptionDetails.currentPlan.listingLimit - (user.subscription?.activeListingsCount || user.listingsCount || 0)}
+              {(currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit) - (user.subscription?.activeListingsCount || user.listingsCount || 0)}
             </p>
             <p className="text-xs text-neutral-500">remaining</p>
           </div>
@@ -1054,7 +1054,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className="mt-3 w-full bg-neutral-100 rounded-full h-2 overflow-hidden">
           <div
             className="bg-blue-500 h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.min(100, ((user.subscription?.activeListingsCount || user.listingsCount || 0) / subscriptionDetails.currentPlan.listingLimit) * 100)}%` }}
+            style={{ width: `${Math.min(100, ((user.subscription?.activeListingsCount || user.listingsCount || 0) / (currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit)) * 100)}%` }}
           />
         </div>
       </div>
@@ -1067,14 +1067,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Listings - from plan */}
+          {/* Listings - from DB product */}
           <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
             <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <HomeIcon className="w-5 h-5 text-blue-600" />
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {subscriptionDetails.currentPlan.listingLimit} Active Listings
+                {currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit} Active Listings
               </p>
               <p className="text-sm text-neutral-500">
                 {subscriptionDetails.currentPlan.period === 'year' ? 'Per year' : subscriptionDetails.currentPlan.period === 'month' ? 'Per month' : 'Total available'}
@@ -1082,7 +1082,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
 
-          {/* Saved Searches - from plan */}
+          {/* Saved Searches - from DB product */}
           <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
             <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
               <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1091,9 +1091,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
             <div>
               <p className="font-semibold text-neutral-800">
-                {subscriptionDetails.currentPlan.savedSearchesLimit === 'unlimited'
+                {(currentProduct?.savedSearchesLimit ?? -1) === -1 || subscriptionDetails.currentPlan.savedSearchesLimit === 'unlimited'
                   ? 'Unlimited Saved Searches'
-                  : `${subscriptionDetails.currentPlan.savedSearchesLimit || user.subscription?.savedSearchesLimit || 3} Saved Searches`}
+                  : `${currentProduct?.savedSearchesLimit ?? subscriptionDetails.currentPlan.savedSearchesLimit ?? 3} Saved Searches`}
               </p>
               <p className="text-sm text-neutral-500">
                 {t('management.whatsIncluded.savedSearchesDesc')}
@@ -1101,28 +1101,35 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             </div>
           </div>
 
-          {/* Promotion Coupons - from plan */}
-          <div className={`flex items-start gap-3 p-3 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <GiftIconComponent className={`w-5 h-5 ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'text-amber-600' : 'text-neutral-400'}`} />
-            </div>
-            <div>
-              <p className={`font-semibold ${(subscriptionDetails.currentPlan.promotionCouponsMonthly || 0) > 0 || subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared' ? 'text-neutral-800' : 'text-neutral-400'}`}>
-                {subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared'
-                  ? 'Shared Agency Pool'
-                  : subscriptionDetails.currentPlan.promotionCouponsMonthly && subscriptionDetails.currentPlan.promotionCouponsMonthly > 0
-                    ? `${subscriptionDetails.currentPlan.promotionCouponsMonthly} Promotion Coupons/Month`
-                    : t('management.whatsIncluded.noPromotionCoupons')}
-              </p>
-              <p className="text-sm text-neutral-500">
-                {subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared'
-                  ? 'Use promotion coupons from agency pool'
-                  : subscriptionDetails.currentPlan.promotionCouponsMonthly && subscriptionDetails.currentPlan.promotionCouponsMonthly > 0
-                    ? t('management.whatsIncluded.promotionCouponsDesc')
-                    : t('management.whatsIncluded.upgradeForPromotion')}
-              </p>
-            </div>
-          </div>
+          {/* Promotion Coupons - from DB product */}
+          {(() => {
+            const promoCoupons = currentProduct?.promotionCoupons ?? 0;
+            const isShared = subscriptionDetails.currentPlan.promotionCouponsMonthly === 'shared';
+            const hasPromoCoupons = promoCoupons > 0 || isShared;
+            return (
+              <div className={`flex items-start gap-3 p-3 ${hasPromoCoupons ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
+                <div className={`p-2 ${hasPromoCoupons ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
+                  <GiftIconComponent className={`w-5 h-5 ${hasPromoCoupons ? 'text-amber-600' : 'text-neutral-400'}`} />
+                </div>
+                <div>
+                  <p className={`font-semibold ${hasPromoCoupons ? 'text-neutral-800' : 'text-neutral-400'}`}>
+                    {isShared
+                      ? 'Shared Agency Pool'
+                      : promoCoupons > 0
+                        ? `${promoCoupons} Promotion Coupons/Month`
+                        : t('management.whatsIncluded.noPromotionCoupons')}
+                  </p>
+                  <p className="text-sm text-neutral-500">
+                    {isShared
+                      ? 'Use promotion coupons from agency pool'
+                      : promoCoupons > 0
+                        ? t('management.whatsIncluded.promotionCouponsDesc')
+                        : t('management.whatsIncluded.upgradeForPromotion')}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Analytics - from plan */}
           <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
