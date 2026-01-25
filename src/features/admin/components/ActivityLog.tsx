@@ -24,8 +24,7 @@ import {
   ComputerDesktopIcon,
   GlobeAltIcon,
 } from '@/constants';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { apiRequest } from '@/src/shared/api';
 
 interface ActivityItem {
   _id: string;
@@ -98,8 +97,6 @@ const ActivityLog: React.FC = () => {
   const [filter, setFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<string>('week');
 
-  const getAuthToken = () => localStorage.getItem('token');
-
   useEffect(() => {
     if (activeTab === 'activity') {
       fetchActivities();
@@ -114,21 +111,15 @@ const ActivityLog: React.FC = () => {
   const fetchActivities = async () => {
     setIsLoading(true);
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_URL}/analytics/activity-log?page=${currentPage}&category=${filter}&dateRange=${dateRange}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const data = await apiRequest(
+        `/analytics/activity-log?page=${currentPage}&category=${filter}&dateRange=${dateRange}`,
+        { requiresAuth: true }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setActivities(data.activities);
-        setTotalPages(data.pagination.totalPages);
-      }
+      setActivities(data.activities || []);
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (err) {
       console.error('Failed to fetch activities:', err);
+      setActivities([]);
     } finally {
       setIsLoading(false);
     }
@@ -137,20 +128,14 @@ const ActivityLog: React.FC = () => {
   const fetchDashboardStats = async () => {
     setIsLoading(true);
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_URL}/analytics/dashboard?dateRange=${dateRange}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const data = await apiRequest(
+        `/analytics/dashboard?dateRange=${dateRange}`,
+        { requiresAuth: true }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setDashboardStats(data.summary);
-      }
+      setDashboardStats(data.summary || null);
     } catch (err) {
       console.error('Failed to fetch dashboard stats:', err);
+      setDashboardStats(null);
     } finally {
       setIsLoading(false);
     }
@@ -159,20 +144,14 @@ const ActivityLog: React.FC = () => {
   const fetchHeatmapData = async () => {
     setIsLoading(true);
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_URL}/analytics/heatmap?dateRange=${dateRange}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const data = await apiRequest(
+        `/analytics/heatmap?dateRange=${dateRange}`,
+        { requiresAuth: true }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setHeatmapData(data);
-      }
+      setHeatmapData(data || null);
     } catch (err) {
       console.error('Failed to fetch heatmap data:', err);
+      setHeatmapData(null);
     } finally {
       setIsLoading(false);
     }
@@ -180,20 +159,14 @@ const ActivityLog: React.FC = () => {
 
   const fetchRecentSubscriptions = async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `${API_URL}/analytics/subscriptions/recent?limit=5`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const data = await apiRequest(
+        `/analytics/subscriptions/recent?limit=5`,
+        { requiresAuth: true }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setRecentSubscriptions(data.events);
-      }
+      setRecentSubscriptions(data.events || []);
     } catch (err) {
       console.error('Failed to fetch recent subscriptions:', err);
+      setRecentSubscriptions([]);
     }
   };
 

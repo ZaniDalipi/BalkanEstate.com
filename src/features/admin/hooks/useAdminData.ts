@@ -528,7 +528,7 @@ export function useSeedPromotionPlans() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => seedPromotionPlans(),
+    mutationFn: (options?: { force?: boolean }) => seedPromotionPlans(options),
 
     onSettled: async () => {
       invalidateAllPromotionPlanCaches(queryClient);

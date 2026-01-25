@@ -294,20 +294,14 @@ const PromotionPlansManager: React.FC = () => {
             </span>
           </button>
           <div className="flex-1" />
-          <button
-            onClick={() => handleCreate(activeTab, false)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-md hover:shadow-lg"
-          >
-            <PlusIcon className="w-5 h-5" />
-            {t('admin:promotionPlans.addPlan', 'Add Plan')}
-          </button>
-          {activeTab === 'agency' && (
+{/* Only show Add Plan button for listing tab - Agency has a single Featured option */}
+          {activeTab === 'listing' && (
             <button
-              onClick={() => handleCreate('agency', true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg"
+              onClick={() => handleCreate(activeTab, false)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-md hover:shadow-lg"
             >
               <PlusIcon className="w-5 h-5" />
-              {t('admin:promotionPlans.addAddon', 'Add-on')}
+              {t('admin:promotionPlans.addPlan', 'Add Plan')}
             </button>
           )}
         </div>
@@ -443,20 +437,29 @@ const PlanCard: React.FC<{
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mt-3">
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
-            <div className="text-xs text-gray-500">7 days</div>
-            <div className="font-bold text-gray-900">€{plan.pricing.duration7 || 0}</div>
+{/* Agency Featured shows only weekly price, listing plans show all durations */}
+        {plan.category === 'agency' ? (
+          <div className="mt-3 text-center p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+            <div className="text-xs text-amber-600 font-medium">per week</div>
+            <div className="text-3xl font-bold text-amber-600">€{plan.pricing.duration7 || 0}</div>
+            <div className="text-xs text-gray-500 mt-1">Featured everywhere on platform</div>
           </div>
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
-            <div className="text-xs text-gray-500">30 days</div>
-            <div className="font-bold text-gray-900">€{plan.pricing.duration30 || 0}</div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500">7 days</div>
+              <div className="font-bold text-gray-900">€{plan.pricing.duration7 || 0}</div>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500">30 days</div>
+              <div className="font-bold text-gray-900">€{plan.pricing.duration30 || 0}</div>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500">90 days</div>
+              <div className="font-bold text-gray-900">€{plan.pricing.duration90 || 0}</div>
+            </div>
           </div>
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
-            <div className="text-xs text-gray-500">90 days</div>
-            <div className="font-bold text-gray-900">€{plan.pricing.duration90 || 0}</div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Features */}
@@ -633,59 +636,82 @@ const EditPlanModal: React.FC<{
                 <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
                   <span className="text-lg">€</span>
                   {t('admin:promotionPlans.pricing', 'Pricing')}
-                  {plan.isAddOn && (
-                    <span className="px-2 py-0.5 bg-blue-200 text-blue-700 text-xs font-bold rounded-full ml-auto">
-                      Add-on
+                  {plan.category === 'agency' && (
+                    <span className="px-2 py-0.5 bg-amber-200 text-amber-700 text-xs font-bold rounded-full ml-auto">
+                      Weekly
                     </span>
                   )}
                 </h4>
-                <div className="grid grid-cols-3 gap-4">
+                {/* Agency plans only have weekly pricing */}
+                {plan.category === 'agency' ? (
                   <div>
-                    <label className="block text-sm text-gray-700 mb-1">7 {t('admin:common.days', 'Days')}</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={plan.pricing.duration7 || ''}
-                      onChange={(e) => onChange({
-                        ...plan,
-                        pricing: { ...plan.pricing, duration7: parseFloat(e.target.value) || 0 }
-                      })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      placeholder="0"
-                    />
+                    <label className="block text-sm text-gray-700 mb-1">{t('admin:promotionPlans.weeklyPrice', 'Weekly Price (7 Days)')}</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={plan.pricing.duration7 || ''}
+                        onChange={(e) => onChange({
+                          ...plan,
+                          pricing: { duration7: parseFloat(e.target.value) || 0 }
+                        })}
+                        className="w-full pl-8 pr-3 py-2 border rounded-lg text-2xl font-bold"
+                        placeholder="19"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Featured Agency is a single weekly package shown everywhere on the platform</p>
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">30 {t('admin:common.days', 'Days')}</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={plan.pricing.duration30 || ''}
-                      onChange={(e) => onChange({
-                        ...plan,
-                        pricing: { ...plan.pricing, duration30: parseFloat(e.target.value) || 0 }
-                      })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      placeholder="0"
-                    />
+                ) : (
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">7 {t('admin:common.days', 'Days')}</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={plan.pricing.duration7 || ''}
+                        onChange={(e) => onChange({
+                          ...plan,
+                          pricing: { ...plan.pricing, duration7: parseFloat(e.target.value) || 0 }
+                        })}
+                        className="w-full px-3 py-2 border rounded-lg"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">30 {t('admin:common.days', 'Days')}</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={plan.pricing.duration30 || ''}
+                        onChange={(e) => onChange({
+                          ...plan,
+                          pricing: { ...plan.pricing, duration30: parseFloat(e.target.value) || 0 }
+                        })}
+                        className="w-full px-3 py-2 border rounded-lg"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">90 {t('admin:common.days', 'Days')}</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={plan.pricing.duration90 || ''}
+                        onChange={(e) => onChange({
+                          ...plan,
+                          pricing: { ...plan.pricing, duration90: parseFloat(e.target.value) || 0 }
+                        })}
+                        className="w-full px-3 py-2 border rounded-lg"
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">90 {t('admin:common.days', 'Days')}</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={plan.pricing.duration90 || ''}
-                      onChange={(e) => onChange({
-                        ...plan,
-                        pricing: { ...plan.pricing, duration90: parseFloat(e.target.value) || 0 }
-                      })}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Features */}

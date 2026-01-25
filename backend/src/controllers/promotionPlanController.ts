@@ -107,12 +107,8 @@ export const togglePromotionPlanStatus = async (req: Request, res: Response): Pr
 // Seed default promotion plans (admin utility)
 export const seedPromotionPlans = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Check if plans already exist
-    const existingCount = await PromotionPlan.countDocuments();
-    if (existingCount > 0) {
-      res.json({ message: 'Promotion plans already exist', count: existingCount });
-      return;
-    }
+    // Check for force parameter to override existing data
+    const { force } = req.query;
 
     const defaultPlans = [
       // Listing promotion plans
@@ -127,6 +123,9 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
         visibilityMultiplier: '2x',
         displayOrder: 1,
         isAddOn: false,
+        highlighted: false,
+        isActive: true,
+        isVisible: true,
         cardStyle: {
           gradientFrom: 'purple-50',
           gradientTo: 'purple-100/50',
@@ -148,6 +147,8 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
         badge: 'Popular',
         highlighted: true,
         isAddOn: false,
+        isActive: true,
+        isVisible: true,
         cardStyle: {
           gradientFrom: 'cyan-50',
           gradientTo: 'cyan-100/50',
@@ -167,6 +168,9 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
         visibilityMultiplier: '5x',
         displayOrder: 3,
         isAddOn: false,
+        highlighted: false,
+        isActive: true,
+        isVisible: true,
         cardStyle: {
           gradientFrom: 'amber-50',
           gradientTo: 'yellow-100/50',
@@ -175,14 +179,14 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
           priceColor: 'amber-600',
         },
       },
-      // Agency feature plan - one simple plan with weekly pricing
+      // Agency Featured - Single weekly package shown everywhere
       {
         category: 'agency',
         tier: 'featured',
-        name: 'Agency Featured',
+        name: 'Featured Agency',
         description: 'Featured everywhere on the platform',
         icon: '🏢',
-        pricing: { duration7: 19, duration30: 49, duration90: 119 },
+        pricing: { duration7: 19 }, // Only weekly pricing
         features: [
           'Featured in agency directory',
           'Priority in search results',
@@ -195,6 +199,8 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
         isAddOn: false,
         highlighted: true,
         badge: 'Popular',
+        isActive: true,
+        isVisible: true,
         cardStyle: {
           gradientFrom: 'amber-50',
           gradientTo: 'orange-50',
@@ -203,31 +209,30 @@ export const seedPromotionPlans = async (req: Request, res: Response): Promise<v
           priceColor: 'amber-600',
         },
       },
-      // Map Marker add-on - shows agency on the map
-      {
-        category: 'agency',
-        tier: 'addon',
-        name: 'Map Marker',
-        description: 'Show your agency on the map',
-        icon: '📍',
-        pricing: { duration7: 9, duration30: 25, duration90: 59 },
-        features: [
-          'Agency marker on property map',
-          'Custom agency icon on map',
-          'Clickable marker with agency info',
-          'Visible to all property searchers',
-        ],
-        displayOrder: 2,
-        isAddOn: true,
-        cardStyle: {
-          gradientFrom: 'blue-50',
-          gradientTo: 'indigo-50',
-          borderColor: 'blue-200',
-          iconBgColor: 'gradient-to-br from-blue-400 to-indigo-500',
-          priceColor: 'blue-600',
-        },
-      },
     ];
+
+    if (force === 'true') {
+      // Delete existing plans and insert new ones
+      await PromotionPlan.deleteMany({});
+      await PromotionPlan.insertMany(defaultPlans);
+      res.json({ message: 'Promotion plans force-seeded successfully (replaced all)', count: defaultPlans.length });
+      return;
+    }
+
+    // Check if plans already exist
+    const existingCount = await PromotionPlan.countDocuments();
+    if (existingCount > 0) {
+      // Upsert mode - update existing, add new
+      for (const plan of defaultPlans) {
+        await PromotionPlan.findOneAndUpdate(
+          { category: plan.category, tier: plan.tier, name: plan.name },
+          plan,
+          { upsert: true, new: true }
+        );
+      }
+      res.json({ message: 'Promotion plans updated successfully', count: defaultPlans.length });
+      return;
+    }
 
     await PromotionPlan.insertMany(defaultPlans);
     res.json({ message: 'Promotion plans seeded successfully', count: defaultPlans.length });

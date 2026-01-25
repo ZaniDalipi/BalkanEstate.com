@@ -368,8 +368,9 @@ export const togglePromotionPlanStatus = async (planId: string): Promise<{ plan:
   });
 };
 
-export const seedPromotionPlans = async (): Promise<{ message: string; count?: number }> => {
-  return apiRequest('/promotion-plans/seed', {
+export const seedPromotionPlans = async (options?: { force?: boolean }): Promise<{ message: string; count?: number }> => {
+  const queryParams = options?.force ? '?force=true' : '';
+  return apiRequest(`/promotion-plans/seed${queryParams}`, {
     method: 'POST',
     requiresAuth: true,
   });
