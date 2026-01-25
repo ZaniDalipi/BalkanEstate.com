@@ -174,6 +174,10 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         properties: state.properties.map(p =>
           p.id === action.payload.id ? action.payload : p
         ),
+        // Also update selectedProperty if it matches the updated property
+        selectedProperty: state.selectedProperty?.id === action.payload.id
+          ? action.payload
+          : state.selectedProperty,
       };
     case 'RENEW_PROPERTY':
         // Find the property and update its lastRenewed timestamp.
