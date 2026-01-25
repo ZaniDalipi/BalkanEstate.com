@@ -116,111 +116,116 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                     </div>
 
                     {/* Premium Slider Container */}
-                    <div className="relative pt-6 pb-2">
-                        {/* Percentage markers positioned along the track */}
-                        <div className="absolute top-0 left-0 right-0 flex justify-between px-0">
+                    <div className="relative mt-2">
+                        {/* Percentage markers positioned above the track */}
+                        <div className="flex justify-between items-center mb-3 px-1">
                             {[0, 25, 50, 75, 100].map(mark => (
-                                <div key={mark} className="flex flex-col items-center" style={{ width: '1px' }}>
-                                    <span
-                                        className={`text-[10px] font-semibold transition-all duration-300 ${
-                                            sliderPercent >= mark
-                                                ? 'text-primary scale-110'
-                                                : 'text-neutral-400'
-                                        }`}
-                                    >
-                                        {mark}%
-                                    </span>
-                                </div>
+                                <span
+                                    key={mark}
+                                    className={`text-[10px] sm:text-xs font-semibold transition-all duration-300 min-w-[28px] text-center ${
+                                        sliderPercent >= mark
+                                            ? 'text-primary'
+                                            : 'text-neutral-400'
+                                    }`}
+                                >
+                                    {mark}%
+                                </span>
                             ))}
                         </div>
 
-                        {/* Smooth glow effect behind track - only when active */}
-                        <div
-                            className={`absolute top-1/2 mt-1 -translate-y-1/2 h-5 rounded-full transition-all duration-500 ${
-                                isSliderActive ? 'opacity-100' : 'opacity-40'
-                            }`}
-                            style={{
-                                left: 0,
-                                width: `${sliderPercent}%`,
-                                background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.25), rgba(236,72,153,0.2))',
-                                filter: 'blur(8px)'
-                            }}
-                        />
-
-                        {/* Track background - smooth glass effect */}
-                        <div className="relative h-2.5 rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden mt-2">
-                            {/* Smooth gradient fill with conditional animation */}
+                        {/* Slider track container with proper touch target */}
+                        <div className="relative h-12 flex items-center">
+                            {/* Smooth glow effect behind track - only when active */}
                             <div
-                                className="absolute inset-y-0 left-0 rounded-full transition-all duration-150 ease-out"
+                                className={`absolute top-1/2 -translate-y-1/2 h-6 rounded-full transition-all duration-500 pointer-events-none ${
+                                    isSliderActive ? 'opacity-100' : 'opacity-40'
+                                }`}
                                 style={{
-                                    width: `${sliderPercent}%`,
-                                    background: 'linear-gradient(90deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #ec4899 100%)',
-                                    backgroundSize: isSliderActive ? '200% 100%' : '100% 100%',
-                                    animation: isSliderActive ? 'shimmer 2s ease-in-out infinite' : 'none'
+                                    left: '6px',
+                                    width: `calc(${sliderPercent}% - 6px)`,
+                                    background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.25), rgba(236,72,153,0.2))',
+                                    filter: 'blur(8px)'
                                 }}
                             />
 
-                            {/* Subtle sparkles - only visible when active */}
-                            {isSliderActive && sliderPercent > 10 && (
+                            {/* Track background - smooth glass effect */}
+                            <div className="relative w-full h-3 rounded-full bg-gradient-to-r from-neutral-200 via-neutral-100 to-neutral-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)] overflow-hidden">
+                                {/* Smooth gradient fill with conditional animation */}
                                 <div
-                                    className="absolute inset-y-0 left-0 overflow-hidden rounded-full"
-                                    style={{ width: `${sliderPercent}%` }}
-                                >
-                                    <div className="absolute inset-0 opacity-70">
-                                        <div className="absolute top-0.5 left-[20%] w-1 h-1 bg-white rounded-full animate-pulse" />
-                                        <div className="absolute top-1 left-[50%] w-0.5 h-0.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                                        <div className="absolute top-0.5 left-[80%] w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                                    className="absolute inset-y-0 left-0 rounded-full transition-all duration-150 ease-out"
+                                    style={{
+                                        width: `${sliderPercent}%`,
+                                        background: 'linear-gradient(90deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #ec4899 100%)',
+                                        backgroundSize: isSliderActive ? '200% 100%' : '100% 100%',
+                                        animation: isSliderActive ? 'shimmer 2s ease-in-out infinite' : 'none'
+                                    }}
+                                />
+
+                                {/* Subtle sparkles - only visible when active */}
+                                {isSliderActive && sliderPercent > 10 && (
+                                    <div
+                                        className="absolute inset-y-0 left-0 overflow-hidden rounded-full pointer-events-none"
+                                        style={{ width: `${sliderPercent}%` }}
+                                    >
+                                        <div className="absolute inset-0 opacity-70">
+                                            <div className="absolute top-0.5 left-[20%] w-1 h-1 bg-white rounded-full animate-pulse" />
+                                            <div className="absolute top-1 left-[50%] w-0.5 h-0.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                                            <div className="absolute top-0.5 left-[80%] w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Glass highlight on track */}
-                            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full" />
-                        </div>
-
-                        {/* Premium custom thumb */}
-                        <div
-                            className={`absolute top-1/2 mt-1 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-150 ease-out ${
-                                isSliderActive ? 'scale-110' : 'scale-100'
-                            }`}
-                            style={{ left: `${sliderPercent}%` }}
-                        >
-                            {/* Outer glow ring - only animates when active */}
-                            <div className={`absolute inset-0 -m-2 rounded-full bg-primary/20 transition-opacity duration-300 ${
-                                isSliderActive ? 'opacity-100 animate-pulse' : 'opacity-0'
-                            }`} />
-
-                            {/* Thumb container with glass effect */}
-                            <div className={`relative w-7 h-7 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
-                                isSliderActive
-                                    ? 'shadow-[0_4px_20px_rgba(99,102,241,0.4)] ring-2 ring-primary/30'
-                                    : 'shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
-                            }`}>
-                                {/* Inner gradient background */}
-                                <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
-
-                                {/* Money icon */}
-                                <span className="relative text-xs drop-shadow-sm">💵</span>
-
-                                {/* Glass shine effect */}
-                                <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/50 rounded-full blur-[2px]" />
+                                {/* Glass highlight on track */}
+                                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none" />
                             </div>
-                        </div>
 
-                        {/* Invisible range input for interaction */}
-                        <input
-                            type="range"
-                            min={0}
-                            max={downPaymentType === 'percent' ? 100 : propertyPrice}
-                            step={downPaymentType === 'percent' ? 1 : 1000}
-                            value={downPayment}
-                            onChange={handleDownPaymentChange}
-                            onMouseDown={handleSliderStart}
-                            onMouseUp={handleSliderEnd}
-                            onTouchStart={handleSliderStart}
-                            onTouchEnd={handleSliderEnd}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 mt-2"
-                        />
+                            {/* Premium custom thumb - positioned relative to track */}
+                            <div
+                                className={`absolute top-1/2 -translate-y-1/2 pointer-events-none transition-all duration-150 ease-out z-10 ${
+                                    isSliderActive ? 'scale-110' : 'scale-100'
+                                }`}
+                                style={{
+                                    left: `calc(${sliderPercent}% - ${sliderPercent * 0.28}px)`,
+                                }}
+                            >
+                                {/* Outer glow ring - only animates when active */}
+                                <div className={`absolute inset-0 -m-2 rounded-full bg-primary/20 transition-opacity duration-300 ${
+                                    isSliderActive ? 'opacity-100 animate-pulse' : 'opacity-0'
+                                }`} />
+
+                                {/* Thumb container with glass effect */}
+                                <div className={`relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-200 ${
+                                    isSliderActive
+                                        ? 'shadow-[0_4px_20px_rgba(99,102,241,0.4)] ring-2 ring-primary/30'
+                                        : 'shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
+                                }`}>
+                                    {/* Inner gradient background */}
+                                    <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
+
+                                    {/* Money icon */}
+                                    <span className="relative text-xs sm:text-sm drop-shadow-sm">💵</span>
+
+                                    {/* Glass shine effect */}
+                                    <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/50 rounded-full blur-[2px]" />
+                                </div>
+                            </div>
+
+                            {/* Invisible range input for interaction - full height for better touch target */}
+                            <input
+                                type="range"
+                                min={0}
+                                max={downPaymentType === 'percent' ? 100 : propertyPrice}
+                                step={downPaymentType === 'percent' ? 1 : 1000}
+                                value={downPayment}
+                                onChange={handleDownPaymentChange}
+                                onMouseDown={handleSliderStart}
+                                onMouseUp={handleSliderEnd}
+                                onTouchStart={handleSliderStart}
+                                onTouchEnd={handleSliderEnd}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                aria-label={t('calculators:mortgage.fields.downPayment')}
+                            />
+                        </div>
                     </div>
 
                     {/* Value display with input */}
