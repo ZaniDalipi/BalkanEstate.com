@@ -1,5 +1,5 @@
 // SocialVideoEmbed Component
-// Embeds TikTok and Instagram videos to play directly in the app
+// Embeds TikTok and Instagram videos using official embed methods
 
 import React, { useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,10 +16,19 @@ const detectPlatform = (url: string): 'tiktok' | 'instagram' | null => {
   return null;
 };
 
-// Extract TikTok video ID
-const extractTikTokId = (url: string): string => {
-  const match = url.match(/(?:tiktok\.com\/@[\w.-]+\/video\/|vm\.tiktok\.com\/)(\d+)/);
-  return match?.[1] || '';
+// Extract TikTok video ID and username
+const extractTikTokInfo = (url: string): { id: string; username: string } => {
+  // Format: tiktok.com/@username/video/1234567890
+  const fullMatch = url.match(/tiktok\.com\/@([\w.-]+)\/video\/(\d+)/);
+  if (fullMatch) {
+    return { username: fullMatch[1], id: fullMatch[2] };
+  }
+  // Format: vm.tiktok.com/1234567890
+  const shortMatch = url.match(/vm\.tiktok\.com\/(\w+)/);
+  if (shortMatch) {
+    return { username: '', id: shortMatch[1] };
+  }
+  return { username: '', id: '' };
 };
 
 // Extract Instagram post/reel ID
@@ -36,11 +45,33 @@ const isInstagramReel = (url: string): boolean => {
 export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) => {
   const { t } = useTranslation(['property']);
   const containerRef = useRef<HTMLDivElement>(null);
+  const tiktokContainerRef = useRef<HTMLDivElement>(null);
 
   const platform = useMemo(() => detectPlatform(videoUrl), [videoUrl]);
-  const tiktokId = useMemo(() => extractTikTokId(videoUrl), [videoUrl]);
+  const tiktokInfo = useMemo(() => extractTikTokInfo(videoUrl), [videoUrl]);
   const instagramId = useMemo(() => extractInstagramId(videoUrl), [videoUrl]);
   const isReel = useMemo(() => isInstagramReel(videoUrl), [videoUrl]);
+
+  // Load TikTok embed script
+  useEffect(() => {
+    if (platform === 'tiktok' && tiktokInfo.id) {
+      // Load TikTok embed script
+      const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = 'https://www.tiktok.com/embed.js';
+        script.async = true;
+        document.body.appendChild(script);
+      } else {
+        // Re-process embeds if script already loaded
+        setTimeout(() => {
+          if ((window as any).tiktokEmbed?.lib?.render) {
+            (window as any).tiktokEmbed.lib.render();
+          }
+        }, 100);
+      }
+    }
+  }, [platform, tiktokInfo.id]);
 
   // Load Instagram embed script
   useEffect(() => {
@@ -77,12 +108,17 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
 
   // Don't render if no valid platform or ID
   if (!platform) return null;
-  if (platform === 'tiktok' && !tiktokId) return null;
+  if (platform === 'tiktok' && !tiktokInfo.id) return null;
   if (platform === 'instagram' && !instagramId) return null;
 
   const instagramPermalink = isReel
     ? `https://www.instagram.com/reel/${instagramId}/`
     : `https://www.instagram.com/p/${instagramId}/`;
+
+  // TikTok cite URL
+  const tiktokCiteUrl = tiktokInfo.username
+    ? `https://www.tiktok.com/@${tiktokInfo.username}/video/${tiktokInfo.id}`
+    : videoUrl;
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -114,16 +150,36 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
 
       {/* Video Embed Container */}
       <div ref={containerRef} className="flex justify-center bg-neutral-50 p-4">
-        {/* TikTok Embed - Using official player */}
+        {/* TikTok Embed - Using official blockquote method */}
         {platform === 'tiktok' && (
-          <div className="w-full max-w-[400px]" style={{ aspectRatio: '9/16', maxHeight: '600px' }}>
-            <iframe
-              src={`https://www.tiktok.com/player/v1/${tiktokId}?music_info=1&description=1`}
-              className="w-full h-full border-0 rounded-lg"
-              allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              title="TikTok video"
-            />
+          <div ref={tiktokContainerRef} className="w-full flex justify-center">
+            <blockquote
+              className="tiktok-embed"
+              cite={tiktokCiteUrl}
+              data-video-id={tiktokInfo.id}
+              style={{
+                maxWidth: '605px',
+                minWidth: '325px',
+              }}
+            >
+              <section>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={tiktokCiteUrl}
+                  className="block text-center p-8"
+                >
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                      </svg>
+                    </div>
+                    <span className="text-neutral-600 text-sm">Loading TikTok video...</span>
+                  </div>
+                </a>
+              </section>
+            </blockquote>
           </div>
         )}
 

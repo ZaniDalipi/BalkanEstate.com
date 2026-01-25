@@ -107,10 +107,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const videoPlatform = useMemo(() => getVideoPlatform(property.tourUrl || ''), [property.tourUrl, getVideoPlatform]);
 
-  // All video platforms can play in gallery intro
-  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook', 'tiktok', 'instagram'].includes(videoPlatform);
+  // Only YouTube, Vimeo, and Facebook can be embedded via iframe (TikTok/Instagram block iframes)
+  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook'].includes(videoPlatform);
   const hasVideo = !!property.tourUrl && isEmbeddableVideo;
-  const isVerticalVideo = ['tiktok', 'instagram'].includes(videoPlatform);
 
   // Start with video view if available (only for YouTube/Vimeo)
   useEffect(() => {
@@ -296,29 +295,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             )}
           </button>
         ) : viewMode === 'video' && hasVideo ? (
-          // Video player for all platforms
+          // Video player for YouTube, Vimeo, Facebook
           <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
-              {/* Vertical video (TikTok/Instagram) */}
-              {isVerticalVideo ? (
-                <div className="relative h-full" style={{ aspectRatio: '9/16', maxWidth: '100%' }}>
-                  <iframe
-                    src={videoInfo.embedUrl}
-                    className="w-full h-full border-0"
-                    allowFullScreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                    title="Property Video Tour"
-                  />
-                </div>
-              ) : (
-                <iframe
-                  src={videoInfo.embedUrl}
-                  className="absolute inset-0 w-full h-full border-0"
-                  style={{ minHeight: '100%', minWidth: '100%' }}
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                  title="Property Video Tour"
-                />
-              )}
+              <iframe
+                src={videoInfo.embedUrl}
+                className="absolute inset-0 w-full h-full border-0"
+                style={{ minHeight: '100%', minWidth: '100%' }}
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                title="Property Video Tour"
+              />
               {/* Platform badge */}
               <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
                 {videoInfo.platform === 'youtube' && (
