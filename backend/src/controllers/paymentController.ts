@@ -1017,7 +1017,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
  */
 export const verifyLemonSqueezyPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId, checkoutId } = req.body;
+    const { productId } = req.body;
     const userId = (req as any).user?._id;
 
     if (!userId) {
