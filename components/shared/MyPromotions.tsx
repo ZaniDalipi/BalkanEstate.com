@@ -46,6 +46,7 @@ const MyPromotions: React.FC = () => {
   // Handlers
   const handleViewProperty = (propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
   };
 
