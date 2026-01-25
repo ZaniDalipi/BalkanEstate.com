@@ -1,7 +1,7 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, video player, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import {
@@ -13,230 +13,24 @@ import {
 } from '../../../constants';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
-// Cinema Modal for TikTok/Instagram videos
-const VideoCinemaModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  videoUrl: string;
-  platform: 'tiktok' | 'instagram' | 'facebook';
-  backgroundImage: string;
-}> = ({ isOpen, onClose, videoUrl, platform, backgroundImage }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation(['property']);
+// Platform icons
+const TikTokIcon = () => (
+  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+  </svg>
+);
 
-  // Load embed scripts when modal opens
-  useEffect(() => {
-    if (!isOpen) return;
+const InstagramIcon = () => (
+  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+  </svg>
+);
 
-    // Load TikTok embed script
-    if (platform === 'tiktok') {
-      const existingScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
-      if (!existingScript) {
-        const script = document.createElement('script');
-        script.src = 'https://www.tiktok.com/embed.js';
-        script.async = true;
-        document.body.appendChild(script);
-      } else {
-        // Re-process embeds if script already loaded
-        if ((window as any).tiktokEmbed?.lib?.render) {
-          (window as any).tiktokEmbed.lib.render();
-        }
-      }
-    }
-
-    // Load Instagram embed script
-    if (platform === 'instagram') {
-      const existingScript = document.querySelector('script[src*="instagram.com/embed.js"]');
-      if (!existingScript) {
-        const script = document.createElement('script');
-        script.src = 'https://www.instagram.com/embed.js';
-        script.async = true;
-        document.body.appendChild(script);
-      } else {
-        // Re-process embeds if script already loaded
-        if ((window as any).instgrm?.Embeds?.process) {
-          (window as any).instgrm.Embeds.process();
-        }
-      }
-    }
-
-    // Auto-close after 10 seconds
-    const timer = setTimeout(() => {
-      onClose();
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  }, [isOpen, platform, onClose]);
-
-  // Process embeds after render
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const processTimer = setTimeout(() => {
-      if (platform === 'tiktok' && (window as any).tiktokEmbed?.lib?.render) {
-        (window as any).tiktokEmbed.lib.render();
-      }
-      if (platform === 'instagram' && (window as any).instgrm?.Embeds?.process) {
-        (window as any).instgrm.Embeds.process();
-      }
-    }, 100);
-
-    return () => clearTimeout(processTimer);
-  }, [isOpen, platform]);
-
-  // Close on escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  // Extract video ID for TikTok
-  const tiktokMatch = videoUrl.match(/(?:tiktok\.com\/@[\w.-]+\/video\/|vm\.tiktok\.com\/)(\d+)/);
-  const tiktokVideoId = tiktokMatch?.[1] || '';
-
-  // Extract post ID for Instagram
-  const instagramMatch = videoUrl.match(/(?:instagram\.com\/(?:reel|p)\/)([A-Za-z0-9_-]+)/);
-  const instagramPostId = instagramMatch?.[1] || '';
-
-  return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center"
-      onClick={onClose}
-    >
-      {/* Blurred background */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'blur(50px) brightness(0.2) saturate(1.3)',
-          transform: 'scale(1.2)',
-        }}
-      />
-      {/* Dark overlay with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/50" />
-
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 z-50 p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-colors"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      {/* Skip text */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 text-white/60 text-sm">
-        {t('property:gallery.tapToSkip', 'Tap anywhere to skip')}
-      </div>
-
-      {/* Video container - 9:16 aspect ratio */}
-      <div
-        ref={containerRef}
-        className="relative z-10 w-full max-w-sm mx-4"
-        style={{ aspectRatio: '9/16', maxHeight: '85vh' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/20 bg-black">
-          {/* TikTok Embed */}
-          {platform === 'tiktok' && tiktokVideoId && (
-            <blockquote
-              className="tiktok-embed w-full h-full"
-              cite={videoUrl}
-              data-video-id={tiktokVideoId}
-              style={{
-                maxWidth: '100%',
-                minWidth: '100%',
-                height: '100%',
-                margin: 0,
-                border: 'none',
-              }}
-            >
-              <section className="flex items-center justify-center h-full">
-                <div className="animate-pulse text-white/50">Loading TikTok...</div>
-              </section>
-            </blockquote>
-          )}
-
-          {/* Instagram Embed */}
-          {platform === 'instagram' && instagramPostId && (
-            <blockquote
-              className="instagram-media w-full h-full"
-              data-instgrm-permalink={`https://www.instagram.com/reel/${instagramPostId}/`}
-              data-instgrm-version="14"
-              data-instgrm-captioned
-              style={{
-                maxWidth: '100%',
-                minWidth: '100%',
-                height: '100%',
-                margin: 0,
-                border: 'none',
-                background: 'transparent',
-              }}
-            >
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-pulse text-white/50">Loading Instagram...</div>
-              </div>
-            </blockquote>
-          )}
-
-          {/* Facebook - use iframe as fallback */}
-          {platform === 'facebook' && (
-            <iframe
-              src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(videoUrl)}&show_text=false&autoplay=true`}
-              className="w-full h-full border-0"
-              allowFullScreen
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            />
-          )}
-        </div>
-
-        {/* Platform badge */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/80 backdrop-blur-sm text-white font-semibold px-4 py-2 rounded-full text-sm shadow-lg">
-          {platform === 'tiktok' && (
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-            </svg>
-          )}
-          {platform === 'instagram' && (
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          )}
-          {platform === 'facebook' && (
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-          )}
-          <span className="capitalize">{platform}</span>
-        </div>
-
-        {/* Open in app button */}
-        <a
-          href={videoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="absolute -bottom-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-white text-neutral-900 font-semibold px-5 py-2.5 rounded-full hover:bg-white/90 transition-all shadow-lg text-sm"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-          {t('property:gallery.openInApp', 'Open in App')}
-        </a>
-      </div>
-    </div>
-  );
-};
+const FacebookIcon = () => (
+  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
 
 interface PropertyGalleryProps {
   property: Property;
@@ -318,7 +112,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
-  const [showCinemaModal, setShowCinemaModal] = useState(false);
 
   // Check if property has a video tour
   const hasVideo = !!property.tourUrl;
@@ -337,16 +130,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const videoPlatform = useMemo(() => getVideoPlatform(property.tourUrl || ''), [property.tourUrl, getVideoPlatform]);
   const isVerticalVideoPlatform = ['tiktok', 'instagram', 'facebook'].includes(videoPlatform);
 
-  // Start with cinema modal for vertical videos, or inline view for horizontal
+  // Start with video view if available
   useEffect(() => {
     if (hasVideo && !videoEnded) {
-      if (isVerticalVideoPlatform) {
-        // Show cinema modal for TikTok/Instagram/Facebook
-        setShowCinemaModal(true);
-        setViewMode('photos'); // Keep photos as background
-      } else {
-        // Use inline video for YouTube/Vimeo
-        setViewMode('video');
+      setViewMode('video');
+      // For YouTube/Vimeo, auto-transition after 10 seconds
+      if (!isVerticalVideoPlatform) {
         const timer = setTimeout(() => {
           setViewMode('photos');
           setVideoEnded(true);
@@ -356,21 +145,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [hasVideo, videoEnded, isVerticalVideoPlatform]);
 
-  // Handle view mode change - open cinema modal for vertical videos
+  // Handle view mode change
   const handleViewModeChange = useCallback((val: string) => {
-    if (val === 'video' && isVerticalVideoPlatform) {
-      // For TikTok/Instagram/Facebook, open cinema modal instead of inline
-      setShowCinemaModal(true);
-      setVideoEnded(false); // Reset so modal can auto-close
-    } else {
-      setViewMode(val as 'photos' | 'streetview' | 'video');
-    }
-  }, [isVerticalVideoPlatform]);
-
-  // Handle cinema modal close
-  const handleCinemaModalClose = useCallback(() => {
-    setShowCinemaModal(false);
-    setVideoEnded(true);
+    setViewMode(val as 'photos' | 'streetview' | 'video');
   }, []);
 
   // Helper to convert video URLs to embed format (YouTube, Vimeo, TikTok, Instagram)
@@ -517,21 +294,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   };
 
   return (
-    <>
-      {/* Cinema Modal for TikTok/Instagram/Facebook videos */}
-      {isVerticalVideoPlatform && (
-        <VideoCinemaModal
-          isOpen={showCinemaModal}
-          onClose={handleCinemaModalClose}
-          videoUrl={property.tourUrl || ''}
-          platform={videoPlatform as 'tiktok' | 'instagram' | 'facebook'}
-          backgroundImage={property.imageUrl}
-        />
-      )}
-
-      <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-        <div className="relative w-full h-[200px] xs:h-[250px] sm:h-[350px] md:h-[400px] lg:h-[450px] landscape:h-[50vh] landscape:min-h-[200px] bg-neutral-200">
-          {viewMode === 'photos' ? (
+    <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+      <div className="relative w-full h-[200px] xs:h-[250px] sm:h-[350px] md:h-[400px] lg:h-[450px] landscape:h-[50vh] landscape:min-h-[200px] bg-neutral-200">
+        {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
             className="relative w-full h-full block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl"
@@ -550,32 +315,117 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               />
             )}
           </button>
-        ) : viewMode === 'video' && hasVideo && !isVerticalVideoPlatform ? (
-          // Inline video player for YouTube/Vimeo only
-          <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
-            <iframe
-              src={videoInfo.embedUrl}
-              className="absolute inset-0 w-full h-full border-0"
-              style={{ minHeight: '100%', minWidth: '100%' }}
-              allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-              title="Property Video Tour"
-            />
-            {/* Platform badge */}
-            <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
-              {videoInfo.platform === 'youtube' && (
-                <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              )}
-              {videoInfo.platform === 'vimeo' && (
-                <svg className="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z"/>
-                </svg>
-              )}
-              <span className="capitalize">{t('property:gallery.videoTour', 'Video Tour')}</span>
+        ) : viewMode === 'video' && hasVideo ? (
+          isVerticalVideoPlatform ? (
+            // TikTok/Instagram/Facebook - Beautiful preview card that opens video directly
+            <a
+              href={property.tourUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative w-full h-full block overflow-hidden group"
+            >
+              {/* Blurred background using property image - HDR effect */}
+              <div
+                className="absolute inset-0 scale-125"
+                style={{
+                  backgroundImage: `url(${property.imageUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  filter: 'blur(40px) brightness(0.3) saturate(1.4)',
+                }}
+              />
+              {/* Gradient overlays for HDR pop effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-transparent to-pink-900/30" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/50" />
+
+              {/* Centered 9:16 video preview container */}
+              <div className="relative z-10 h-full flex items-center justify-center py-4">
+                <div
+                  className="relative bg-black/40 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/20 flex flex-col items-center justify-center group-hover:scale-[1.02] transition-transform duration-300"
+                  style={{
+                    aspectRatio: '9/16',
+                    height: 'calc(100% - 24px)',
+                    maxHeight: '100%',
+                  }}
+                >
+                  {/* Property image as preview */}
+                  <img
+                    src={property.imageUrl}
+                    alt={property.address}
+                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                  />
+
+                  {/* Platform icon and play button */}
+                  <div className="relative z-10 flex flex-col items-center gap-4">
+                    {/* Platform logo */}
+                    <div className="text-white opacity-90">
+                      {videoPlatform === 'tiktok' && <TikTokIcon />}
+                      {videoPlatform === 'instagram' && <InstagramIcon />}
+                      {videoPlatform === 'facebook' && <FacebookIcon />}
+                    </div>
+
+                    {/* Big play button */}
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300 ring-2 ring-white/40">
+                      <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+
+                    {/* Watch text */}
+                    <div className="text-white font-semibold text-sm sm:text-base bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full">
+                      {t('property:gallery.watchOn', 'Watch on')} {videoPlatform.charAt(0).toUpperCase() + videoPlatform.slice(1)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Platform badge */}
+              <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
+                {videoPlatform === 'tiktok' && (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                  </svg>
+                )}
+                {videoPlatform === 'instagram' && (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                )}
+                {videoPlatform === 'facebook' && (
+                  <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                )}
+                <span className="capitalize">{t('property:gallery.videoTour', 'Video Tour')}</span>
+              </div>
+            </a>
+          ) : (
+            // YouTube/Vimeo - Inline video player
+            <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
+              <iframe
+                src={videoInfo.embedUrl}
+                className="absolute inset-0 w-full h-full border-0"
+                style={{ minHeight: '100%', minWidth: '100%' }}
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                title="Property Video Tour"
+              />
+              {/* Platform badge */}
+              <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
+                {videoInfo.platform === 'youtube' && (
+                  <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                )}
+                {videoInfo.platform === 'vimeo' && (
+                  <svg className="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z"/>
+                  </svg>
+                )}
+                <span className="capitalize">{t('property:gallery.videoTour', 'Video Tour')}</span>
+              </div>
             </div>
-          </div>
+          )
         ) : viewMode === 'streetview' ? (
           <div className={`relative w-full h-full ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
             <iframe
@@ -788,6 +638,5 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         </div>
       </div>
     </div>
-    </>
   );
 };
