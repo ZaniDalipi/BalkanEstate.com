@@ -68,6 +68,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
         aiMessagesLimit: product.aiMessagesLimit,
         aiInsightsLimit: product.aiInsightsLimit,
         imageDescriptionLimit: product.imageDescriptionLimit,
+        teamMembersLimit: product.teamMembersLimit,
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,
@@ -351,6 +352,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
         aiMessagesLimit: product.aiMessagesLimit,
         aiInsightsLimit: product.aiInsightsLimit,
         imageDescriptionLimit: product.imageDescriptionLimit,
+        teamMembersLimit: product.teamMembersLimit,
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,

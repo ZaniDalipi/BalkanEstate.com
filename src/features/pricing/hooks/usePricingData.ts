@@ -27,6 +27,7 @@ export interface Product {
   aiMessagesLimit?: number;
   aiInsightsLimit?: number;
   imageDescriptionLimit?: number;
+  teamMembersLimit?: number;
 }
 
 export interface PromotionPlan {

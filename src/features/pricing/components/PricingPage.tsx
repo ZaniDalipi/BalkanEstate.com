@@ -736,7 +736,7 @@ const PricingPage: React.FC = () => {
                       <p className="text-xs text-gray-400">{t('pricing:metrics.listings', 'Listings')}</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
-                      <p className="text-2xl font-bold text-amber-400">5</p>
+                      <p className="text-2xl font-bold text-amber-400">{formatLimit(enterpriseProduct.teamMembersLimit)}</p>
                       <p className="text-xs text-gray-400">{t('pricing:metrics.teamMembers', 'Team Members')}</p>
                     </div>
                   </div>
