@@ -364,7 +364,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           />
         </div>
 
-        <div className="p-4 pt-2 flex items-center justify-between">
+        <div className="p-4 pt-14 flex items-center justify-between">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-primary font-semibold hover:underline"
