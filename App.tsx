@@ -488,7 +488,12 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'agencies':
         return <AgenciesListPage />;
       case 'admin':
-        return <AdminDashboard />;
+        // Only load admin dashboard for admin/super_admin users
+        if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
+          return <AdminDashboard />;
+        }
+        // Redirect non-admins to home
+        return <Onboarding />;
       case 'reset-password':
         return <ResetPasswordPage />;
       case 'verify-email':
