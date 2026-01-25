@@ -1378,49 +1378,44 @@ const PricingPage: React.FC = () => {
               </svg>
             </button>
 
-            {showContactOptions && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-xl shadow-xl border border-gray-200 py-2 min-w-[280px] z-20 animate-fade-in">
-                <a
-                  href={`mailto:${salesEmail}?subject=BalkanEstate%20Pricing%20Inquiry`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">{t('pricing:contact.sendEmail', 'Send us an email')}</p>
-                    <p className="text-xs text-gray-500">{salesEmail}</p>
-                  </div>
-                </a>
-                <a
-                  href={`tel:${salesPhone.replace(/\s/g, '')}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">{t('pricing:contact.giveCall', 'Give us a call')}</p>
-                    <p className="text-xs text-gray-500">{salesPhone}</p>
-                  </div>
-                </a>
-              </div>
-            )}
+            {/* Contact popup - positioned above button with smooth fade */}
+            <div
+              className={`absolute bottom-full left-1/2 mb-2 bg-white rounded-xl shadow-xl border border-gray-200 py-2 min-w-[280px] z-20 transition-all duration-200 ease-out ${
+                showContactOptions
+                  ? 'opacity-100 visible -translate-x-1/2 translate-y-0'
+                  : 'opacity-0 invisible -translate-x-1/2 translate-y-2 pointer-events-none'
+              }`}
+            >
+              <a
+                href={`mailto:${salesEmail}?subject=BalkanEstate%20Pricing%20Inquiry`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-900">{t('pricing:contact.sendEmail', 'Send us an email')}</p>
+                  <p className="text-xs text-gray-500">{salesEmail}</p>
+                </div>
+              </a>
+              <a
+                href={`tel:${salesPhone.replace(/\s/g, '')}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-900">{t('pricing:contact.giveCall', 'Give us a call')}</p>
+                  <p className="text-xs text-gray-500">{salesPhone}</p>
+                </div>
+              </a>
+            </div>
           </div>
-
-          <style>{`
-            @keyframes fade-in {
-              from { opacity: 0; transform: translate(-50%, 10px); }
-              to { opacity: 1; transform: translate(-50%, 0); }
-            }
-            .animate-fade-in {
-              animation: fade-in 0.2s ease-out;
-            }
-          `}</style>
         </div>
         </div>
       </PageTransition>
