@@ -107,8 +107,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const videoPlatform = useMemo(() => getVideoPlatform(property.tourUrl || ''), [property.tourUrl, getVideoPlatform]);
 
-  // All video platforms can be shown in gallery
-  const isEmbeddableVideo = ['youtube', 'vimeo', 'tiktok', 'instagram', 'facebook'].includes(videoPlatform);
+  // All video platforms can play in gallery intro
+  const isEmbeddableVideo = ['youtube', 'vimeo', 'facebook', 'tiktok', 'instagram'].includes(videoPlatform);
   const hasVideo = !!property.tourUrl && isEmbeddableVideo;
   const isVerticalVideo = ['tiktok', 'instagram'].includes(videoPlatform);
 
@@ -298,7 +298,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         ) : viewMode === 'video' && hasVideo ? (
           // Video player for all platforms
           <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
-              {/* Vertical video container for TikTok/Instagram */}
+              {/* Vertical video (TikTok/Instagram) */}
               {isVerticalVideo ? (
                 <div className="relative h-full" style={{ aspectRatio: '9/16', maxWidth: '100%' }}>
                   <iframe
