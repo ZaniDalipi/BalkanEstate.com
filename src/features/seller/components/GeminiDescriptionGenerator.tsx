@@ -1825,6 +1825,36 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         )}
                     </div>
 
+                    {/* Video Tour URL (YouTube/Vimeo) */}
+                    <fieldset className="space-y-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200">
+                        <div className="flex items-center gap-2 mb-2">
+                            <svg className="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            <h3 className="text-base font-semibold text-red-900">{t('seller:createListing.videoTour.title', 'Video Tour')}</h3>
+                        </div>
+                        <p className="text-sm text-red-700 mb-3">
+                            {t('seller:createListing.videoTour.description', 'Add a YouTube or Vimeo video tour of your property to attract more buyers.')}
+                        </p>
+                        <div className="relative">
+                            <input
+                                type="url"
+                                id="tourUrl"
+                                name="tourUrl"
+                                value={listingData.tourUrl}
+                                onChange={handleInputChange}
+                                placeholder={t('seller:createListing.videoTour.placeholder', 'https://youtube.com/watch?v=... or https://vimeo.com/...')}
+                                className={`${floatingInputClasses} border-red-300 focus:border-red-500 focus:ring-red-500`}
+                            />
+                            <label htmlFor="tourUrl" className={`${floatingLabelClasses} text-red-700 peer-focus:text-red-600`}>
+                                {t('seller:createListing.videoTour.label', 'Video URL')}
+                            </label>
+                        </div>
+                        <p className="text-xs text-red-600">
+                            {t('seller:createListing.videoTour.hint', 'Supports YouTube and Vimeo links. The video will be embedded on your listing page.')}
+                        </p>
+                    </fieldset>
+
                     {/* 360 Virtual Tour URL */}
                     <fieldset className="space-y-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
                         <div className="flex items-center gap-2 mb-2">

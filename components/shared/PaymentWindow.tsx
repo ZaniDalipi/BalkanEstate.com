@@ -860,6 +860,23 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               </div>
             )}
 
+            {/* Tax/VAT Notice */}
+            {finalPrice > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-semibold text-amber-900 mb-0.5 sm:mb-1">
+                    {t('payment:taxNotice.title', 'Taxes May Apply')}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-amber-700 leading-relaxed">
+                    {t('payment:taxNotice.description', 'The final price at checkout may include applicable VAT/taxes based on your location. LemonSqueezy, as Merchant of Record, handles all tax compliance automatically.')}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Terms Acceptance Checkbox - Required by LemonSqueezy */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4">
               <label className="flex items-start gap-3 cursor-pointer group">

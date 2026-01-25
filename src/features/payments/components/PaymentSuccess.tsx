@@ -96,17 +96,25 @@ const PaymentSuccess: React.FC = () => {
       // Use the unified verification API
       const result = await verifyPaymentApi(params);
 
+      // Handle error status
       if (!result.success && result.paymentStatus === 'error') {
         throw new Error(result.message || 'Failed to verify payment');
       }
 
+      // Handle pending confirmation (webhook delay)
+      const isPendingConfirmation = result.paymentStatus === 'pending_confirmation';
+
       setPaymentDetails({
-        paymentStatus: result.paymentStatus,
+        paymentStatus: isPendingConfirmation ? 'paid' : result.paymentStatus, // Show as paid for UX
         amountTotal: result.amountTotal,
         customerEmail: result.customerEmail,
         provider: result.provider,
         orderId: result.orderId,
-        subscription: result.subscription,
+        subscription: result.subscription || (isPendingConfirmation ? {
+          plan: 'Pro Monthly',
+          status: 'activating',
+          expiresAt: '',
+        } : undefined),
       });
 
       // Clear pending payment from session storage

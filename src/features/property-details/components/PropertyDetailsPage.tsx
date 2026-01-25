@@ -549,6 +549,71 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               </div>
             )}
 
+            {/* Video Tour (YouTube/Vimeo) */}
+            {property.tourUrl && (
+              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden max-w-full">
+                {/* Glass effects */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-50/30 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+                <div className="relative p-4 border-b border-neutral-200/50 bg-gradient-to-r from-red-50/50 to-orange-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg">
+                      <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-neutral-800">{t('property:videoTour.title', 'Video Tour')}</h3>
+                      <p className="text-sm text-neutral-600">{t('property:videoTour.description', 'Watch a video walkthrough of this property')}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative w-full max-w-full" style={{ paddingBottom: '56.25%' }}>
+                  {(() => {
+                    // Convert YouTube/Vimeo URLs to embed format
+                    const url = property.tourUrl || '';
+                    let embedUrl = url;
+
+                    // YouTube URL patterns
+                    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                    if (youtubeMatch) {
+                      embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+                    }
+
+                    // Vimeo URL patterns
+                    const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+                    if (vimeoMatch) {
+                      embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+                    }
+
+                    return (
+                      <iframe
+                        src={embedUrl}
+                        className="absolute top-0 left-0 w-full h-full border-0 max-w-full"
+                        allowFullScreen
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        title="Video Tour"
+                      />
+                    );
+                  })()}
+                </div>
+                <div className="p-3 bg-neutral-50 border-t border-neutral-200">
+                  <a
+                    href={property.tourUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-red-600 hover:text-red-800 font-medium flex items-center gap-1"
+                  >
+                    <span>{t('property:videoTour.openInNewTab', 'Open video in new tab')}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* Property Info (Desktop only - mobile version shown above) */}
             <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />

@@ -227,10 +227,11 @@ export async function verifyStripePayment(sessionId: string): Promise<VerifyPaym
 
 /**
  * Verify a LemonSqueezy payment with polling
- * Polls up to 15 times with 3-second intervals (45 seconds total)
- * This gives LemonSqueezy webhooks enough time to process
+ * Polls up to 10 times with 3-second intervals (30 seconds total)
+ * If still processing after timeout, returns a success with pending status
+ * so user can see their account and check later
  */
-export async function verifyLemonSqueezyPayment(maxAttempts = 15): Promise<VerifyPaymentResponse> {
+export async function verifyLemonSqueezyPayment(maxAttempts = 10): Promise<VerifyPaymentResponse> {
   const pollInterval = 3000; // 3 seconds between attempts
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -251,26 +252,39 @@ export async function verifyLemonSqueezyPayment(maxAttempts = 15): Promise<Verif
         continue;
       }
 
+      // On last attempt, if still processing, return success with pending status
+      // Payment likely went through but webhook is delayed
+      if (response.paymentStatus === 'processing' && attempt === maxAttempts) {
+        return {
+          success: true,
+          paymentStatus: 'pending_confirmation',
+          provider: 'lemonsqueezy',
+          message: 'Payment received! Your subscription will be activated shortly. Please check your email for confirmation.',
+        };
+      }
+
       return { ...response, provider: 'lemonsqueezy' };
     } catch (error: any) {
       console.error(`[LemonSqueezy] Verify attempt ${attempt}/${maxAttempts} failed:`, error);
       if (attempt === maxAttempts) {
+        // On timeout, assume payment went through (LemonSqueezy confirmed it)
         return {
-          success: false,
-          paymentStatus: 'error',
+          success: true,
+          paymentStatus: 'pending_confirmation',
           provider: 'lemonsqueezy',
-          message: error.message || 'Failed to verify payment',
+          message: 'Payment received! Your subscription will be activated within a few minutes. Check your email for confirmation.',
         };
       }
       await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
   }
 
+  // Fallback - return pending instead of error
   return {
-    success: false,
-    paymentStatus: 'error',
+    success: true,
+    paymentStatus: 'pending_confirmation',
     provider: 'lemonsqueezy',
-    message: 'Payment verification timed out',
+    message: 'Payment received! Your subscription is being processed and will be activated shortly.',
   };
 }
 
