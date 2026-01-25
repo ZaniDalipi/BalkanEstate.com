@@ -331,10 +331,7 @@ export default defineConfig(({ mode }) => {
                 if (id.includes('framer-motion')) {
                   return 'animation';
                 }
-                // Real-time messaging - only for inbox/chat
-                if (id.includes('socket.io')) {
-                  return 'realtime';
-                }
+                // NOTE: socket.io removed from manual chunks due to circular dep with vendor
                 // AI/Gemini - only for AI features
                 if (id.includes('@google/genai') || id.includes('@google/generative-ai')) {
                   return 'ai';
@@ -364,42 +361,29 @@ export default defineConfig(({ mode }) => {
               }
 
               // ============================================================
-              // APPLICATION CHUNKS - Split by feature for better caching
-              // Note: Keep chunks simple to avoid circular dependencies
+              // APPLICATION CHUNKS - Only truly standalone features
+              // Let Rollup handle features with cross-dependencies
               // ============================================================
 
-              // Admin dashboard - large, only for admins (standalone)
-              if (id.includes('/features/admin/')) {
-                return 'admin';
-              }
               // Auth features (standalone, no deps on other features)
               if (id.includes('/features/auth/')) {
                 return 'auth';
               }
-              // Messaging/Inbox (standalone)
-              if (id.includes('/features/messaging/')) {
-                return 'messaging';
-              }
-              // Pricing/Payments (standalone)
-              if (id.includes('/features/pricing/') || id.includes('/features/payments/')) {
-                return 'payments';
-              }
               // Legal pages (standalone, small)
               if (id.includes('/features/legal/')) {
                 return 'legal';
-              }
-              // Analytics (standalone)
-              if (id.includes('/features/analytics/')) {
-                return 'analytics';
               }
               // Onboarding (standalone)
               if (id.includes('/features/onboarding/')) {
                 return 'onboarding';
               }
 
-              // NOTE: Removed these to avoid circular dependencies:
+              // NOTE: Let Rollup handle these automatically to avoid circular deps:
+              // - admin (circular with payments)
+              // - payments/pricing (circular with admin)
+              // - messaging (depends on shared components)
+              // - analytics (depends on shared hooks)
               // - search, property-details, agents, seller, saved, cities, tools
-              // These will be handled by Rollup's automatic splitting
 
               // Let Rollup handle remaining code splitting automatically
             },
