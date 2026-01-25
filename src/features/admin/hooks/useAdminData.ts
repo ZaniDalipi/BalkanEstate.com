@@ -28,7 +28,14 @@ import {
   deleteDiscountCode,
   deactivateDiscountCode,
   generateBulkDiscountCodes,
+  getPromotionPlans,
+  createPromotionPlan,
+  updatePromotionPlan,
+  deletePromotionPlan,
+  togglePromotionPlanStatus,
+  seedPromotionPlans,
   Product,
+  PromotionPlan,
   UserUpdateData,
   CreateDiscountCodeData,
   BulkDiscountCodeData,
@@ -38,9 +45,11 @@ import {
   userKeys,
   discountKeys,
   analyticsKeys,
+  promotionPlanKeys,
   getProductInvalidationKeys,
   getUserInvalidationKeys,
   getDiscountInvalidationKeys,
+  getPromotionPlanInvalidationKeys,
 } from '@/src/shared/query/queryKeys';
 
 // ============================================================================
@@ -55,6 +64,7 @@ export const adminKeys = {
     userKeys.adminList(params),
   discountCodes: () => discountKeys.adminList(),
   analytics: () => analyticsKeys.dashboard(),
+  promotionPlans: () => promotionPlanKeys.adminList(),
 };
 
 // ============================================================================
@@ -353,6 +363,184 @@ export function useBulkGenerateDiscountCodes() {
 }
 
 // ============================================================================
+// Promotion Plans Hooks - Reactive promotion plan management
+// ============================================================================
+
+/**
+ * Helper function to invalidate all promotion plan caches across the app
+ */
+function invalidateAllPromotionPlanCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  getPromotionPlanInvalidationKeys().forEach((key) => {
+    queryClient.invalidateQueries({
+      queryKey: key,
+      refetchType: 'all',
+    });
+  });
+}
+
+/**
+ * usePromotionPlans - Fetches and subscribes to promotion plans data (admin view - all plans)
+ * Automatically refetches on window focus
+ */
+export function usePromotionPlans() {
+  return useQuery({
+    queryKey: adminKeys.promotionPlans(),
+    queryFn: async () => {
+      const response = await getPromotionPlans();
+      return response.plans;
+    },
+    staleTime: 0, // Always consider stale for real-time updates
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+  });
+}
+
+/**
+ * useCreatePromotionPlan - Create a new promotion plan
+ */
+export function useCreatePromotionPlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Omit<PromotionPlan, '_id' | 'createdAt' | 'updatedAt'>) =>
+      createPromotionPlan(data),
+
+    onError: (error) => {
+      console.error('Create promotion plan error:', error);
+    },
+
+    onSettled: async () => {
+      invalidateAllPromotionPlanCaches(queryClient);
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.promotionPlans(),
+        type: 'active',
+      });
+    },
+  });
+}
+
+/**
+ * useUpdatePromotionPlan - Update an existing promotion plan
+ */
+export function useUpdatePromotionPlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ planId, data }: { planId: string; data: Partial<PromotionPlan> }) =>
+      updatePromotionPlan(planId, data),
+
+    onError: (error) => {
+      console.error('Update promotion plan error:', error);
+    },
+
+    onSettled: async () => {
+      invalidateAllPromotionPlanCaches(queryClient);
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.promotionPlans(),
+        type: 'active',
+      });
+    },
+  });
+}
+
+/**
+ * useDeletePromotionPlan - Delete a promotion plan
+ */
+export function useDeletePromotionPlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (planId: string) => deletePromotionPlan(planId),
+
+    // Optimistic delete
+    onMutate: async (planId) => {
+      await queryClient.cancelQueries({ queryKey: adminKeys.promotionPlans() });
+      const previousPlans = queryClient.getQueryData(adminKeys.promotionPlans());
+
+      queryClient.setQueryData(adminKeys.promotionPlans(), (old: PromotionPlan[] | undefined) =>
+        old?.filter((plan) => plan._id !== planId)
+      );
+
+      return { previousPlans };
+    },
+
+    onError: (_err, _planId, context) => {
+      if (context?.previousPlans) {
+        queryClient.setQueryData(adminKeys.promotionPlans(), context.previousPlans);
+      }
+    },
+
+    onSettled: async () => {
+      invalidateAllPromotionPlanCaches(queryClient);
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.promotionPlans(),
+        type: 'active',
+      });
+    },
+  });
+}
+
+/**
+ * useTogglePromotionPlanStatus - Toggle promotion plan active/inactive status
+ * Includes optimistic update for instant UI feedback
+ */
+export function useTogglePromotionPlanStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (planId: string) => togglePromotionPlanStatus(planId),
+
+    // Optimistic update for instant feedback
+    onMutate: async (planId) => {
+      await queryClient.cancelQueries({ queryKey: adminKeys.promotionPlans() });
+      const previousPlans = queryClient.getQueryData(adminKeys.promotionPlans());
+
+      queryClient.setQueryData(adminKeys.promotionPlans(), (old: PromotionPlan[] | undefined) =>
+        old?.map((plan) =>
+          plan._id === planId ? { ...plan, isActive: !plan.isActive } : plan
+        )
+      );
+
+      return { previousPlans };
+    },
+
+    onError: (_err, _planId, context) => {
+      if (context?.previousPlans) {
+        queryClient.setQueryData(adminKeys.promotionPlans(), context.previousPlans);
+      }
+    },
+
+    onSettled: async () => {
+      invalidateAllPromotionPlanCaches(queryClient);
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.promotionPlans(),
+        type: 'active',
+      });
+    },
+  });
+}
+
+/**
+ * useSeedPromotionPlans - Seed default promotion plans
+ */
+export function useSeedPromotionPlans() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => seedPromotionPlans(),
+
+    onSettled: async () => {
+      invalidateAllPromotionPlanCaches(queryClient);
+      await queryClient.refetchQueries({
+        queryKey: adminKeys.promotionPlans(),
+        type: 'active',
+      });
+    },
+  });
+}
+
+// ============================================================================
 // Utility Hooks
 // ============================================================================
 
@@ -368,6 +556,7 @@ export function useRefreshAdminData() {
     invalidateAllProductCaches(queryClient);
     invalidateAllUserCaches(queryClient);
     invalidateAllDiscountCaches(queryClient);
+    invalidateAllPromotionPlanCaches(queryClient);
   };
 }
 
@@ -382,10 +571,12 @@ export function useInvalidateAllData() {
     products: () => invalidateAllProductCaches(queryClient),
     users: () => invalidateAllUserCaches(queryClient),
     discounts: () => invalidateAllDiscountCaches(queryClient),
+    promotionPlans: () => invalidateAllPromotionPlanCaches(queryClient),
     all: () => {
       invalidateAllProductCaches(queryClient);
       invalidateAllUserCaches(queryClient);
       invalidateAllDiscountCaches(queryClient);
+      invalidateAllPromotionPlanCaches(queryClient);
     },
   };
 }

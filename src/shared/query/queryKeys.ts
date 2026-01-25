@@ -145,6 +145,24 @@ export const agencyKeys = {
 };
 
 // ============================================================================
+// Promotion Plans Query Keys
+// Used by: Admin PromotionPlansManager, public promotion pages
+// ============================================================================
+
+export const promotionPlanKeys = {
+  all: ['promotion-plans'] as const,
+
+  // Admin - all plans including inactive
+  admin: () => [...promotionPlanKeys.all, 'admin'] as const,
+  adminList: () => [...promotionPlanKeys.admin(), 'list'] as const,
+
+  // Public - active and visible plans only
+  public: () => [...promotionPlanKeys.all, 'public'] as const,
+  publicByCategory: (category?: 'listing' | 'agency') =>
+    [...promotionPlanKeys.public(), { category }] as const,
+};
+
+// ============================================================================
 // Backward Compatibility - Admin Keys Alias
 // Used by existing admin hooks
 // ============================================================================
@@ -161,6 +179,7 @@ export const adminKeys = {
   coupons: () => couponKeys.adminList(),
   featured: (params?: { status?: string; page?: number; limit?: number }) =>
     featuredKeys.adminList(params),
+  promotionPlans: () => promotionPlanKeys.adminList(),
 };
 
 // ============================================================================
@@ -204,6 +223,16 @@ export function getPropertyInvalidationKeys() {
 export function getDiscountInvalidationKeys() {
   return [
     discountKeys.all,
+    analyticsKeys.all,
+  ];
+}
+
+/**
+ * Get all promotion plan keys that should be invalidated when plans change
+ */
+export function getPromotionPlanInvalidationKeys() {
+  return [
+    promotionPlanKeys.all,
     analyticsKeys.all,
   ];
 }

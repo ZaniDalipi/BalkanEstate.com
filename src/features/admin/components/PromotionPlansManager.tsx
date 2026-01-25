@@ -1,4 +1,13 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * PromotionPlansManager - Admin component for managing promotion plans
+ *
+ * Uses React Query hooks for reactive data management:
+ * - Data auto-refreshes on window focus
+ * - Optimistic updates for instant UI feedback
+ * - Automatic cache invalidation after mutations
+ */
+
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   PencilIcon,
@@ -12,40 +21,16 @@ import {
   CheckIcon,
   StarIcon,
 } from '@/constants';
-
-interface PromotionPlan {
-  _id: string;
-  category: 'listing' | 'agency';
-  tier: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  pricing: {
-    duration7?: number;
-    duration30?: number;
-    duration90?: number;
-    fixedPrice?: number;
-    fixedDuration?: string;
-  };
-  features: string[];
-  visibilityMultiplier?: string;
-  displayOrder: number;
-  badge?: string;
-  badgeColor?: string;
-  highlighted: boolean;
-  isAddOn: boolean;
-  cardStyle?: {
-    gradientFrom?: string;
-    gradientTo?: string;
-    borderColor?: string;
-    iconBgColor?: string;
-    priceColor?: string;
-  };
-  isActive: boolean;
-  isVisible: boolean;
-}
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import {
+  usePromotionPlans,
+  useCreatePromotionPlan,
+  useUpdatePromotionPlan,
+  useDeletePromotionPlan,
+  useTogglePromotionPlanStatus,
+  useSeedPromotionPlans,
+  useRefreshAdminData,
+} from '../hooks/useAdminData';
+import { PromotionPlan } from '../api/adminApi';
 
 // Color presets for card styling
 const colorPresets = {
@@ -58,138 +43,100 @@ const colorPresets = {
 
 const PromotionPlansManager: React.FC = () => {
   const { t } = useTranslation(['admin', 'common']);
-  const [plans, setPlans] = useState<PromotionPlan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // React Query hooks for reactive data management
+  const { data: plans = [], isLoading, error, isRefetching } = usePromotionPlans();
+  const createPlanMutation = useCreatePromotionPlan();
+  const updatePlanMutation = useUpdatePromotionPlan();
+  const deletePlanMutation = useDeletePromotionPlan();
+  const toggleStatusMutation = useTogglePromotionPlanStatus();
+  const seedPlansMutation = useSeedPromotionPlans();
+  const refreshAll = useRefreshAdminData();
+
+  // Local UI state
   const [editingPlan, setEditingPlan] = useState<PromotionPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newFeature, setNewFeature] = useState('');
   const [activeTab, setActiveTab] = useState<'listing' | 'agency'>('listing');
   const [showPreview, setShowPreview] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [mutatingPlanId, setMutatingPlanId] = useState<string | null>(null);
 
-  const fetchPlans = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/promotion-plans/admin`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to fetch plans');
-      }
-      const data = await response.json();
-      setPlans(data.plans || []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPlans();
-  }, []);
+  // Derived state for mutation errors
+  const mutationError =
+    createPlanMutation.error ||
+    updatePlanMutation.error ||
+    deletePlanMutation.error ||
+    toggleStatusMutation.error ||
+    seedPlansMutation.error;
 
   const handleSave = async () => {
     if (!editingPlan) return;
 
     // Validation
     if (!editingPlan.name.trim()) {
-      setError('Plan name is required');
       return;
     }
 
-    // All plans now use duration-based pricing
     if (!editingPlan.pricing.duration7 && !editingPlan.pricing.duration30 && !editingPlan.pricing.duration90) {
-      setError('At least one duration price is required');
       return;
     }
 
     try {
-      const token = localStorage.getItem('balkan_estate_token');
       const isNew = !editingPlan._id;
-      const url = isNew
-        ? `${API_URL}/promotion-plans`
-        : `${API_URL}/promotion-plans/${editingPlan._id}`;
-      const method = isNew ? 'POST' : 'PUT';
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(editingPlan),
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to save plan');
+      if (isNew) {
+        // Remove _id for creation
+        const { _id, createdAt, updatedAt, ...createData } = editingPlan as PromotionPlan & { createdAt?: string; updatedAt?: string };
+        await createPlanMutation.mutateAsync(createData);
+      } else {
+        await updatePlanMutation.mutateAsync({
+          planId: editingPlan._id,
+          data: editingPlan,
+        });
       }
 
-      setSuccessMessage(isNew ? t('admin:promotionPlans.createSuccess', 'Plan created successfully!') : t('admin:promotionPlans.updateSuccess', 'Plan updated successfully!'));
-      setTimeout(() => setSuccessMessage(null), 3000);
       setIsModalOpen(false);
       setEditingPlan(null);
-      fetchPlans();
-    } catch (err: any) {
-      setError(err.message);
+      setSuccessMessage(isNew ? t('admin:promotionPlans.createSuccess', 'Plan created successfully!') : t('admin:promotionPlans.updateSuccess', 'Plan updated successfully!'));
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error('Save error:', err);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('admin:promotionPlans.confirmDelete', 'Are you sure you want to delete this plan?'))) return;
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/promotion-plans/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to delete plan');
-      }
+      await deletePlanMutation.mutateAsync(id);
       setSuccessMessage(t('admin:promotionPlans.deleteSuccess', 'Plan deleted successfully!'));
       setTimeout(() => setSuccessMessage(null), 3000);
-      fetchPlans();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      console.error('Delete error:', err);
     }
   };
 
   const handleToggleStatus = async (plan: PromotionPlan) => {
+    setMutatingPlanId(plan._id);
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/promotion-plans/${plan._id}/toggle-status`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to toggle status');
-      }
-      fetchPlans();
-    } catch (err: any) {
-      setError(err.message);
+      const response = await toggleStatusMutation.mutateAsync(plan._id);
+      const newStatus = response?.plan?.isActive;
+      setSuccessMessage(`Plan ${newStatus ? 'activated' : 'deactivated'} successfully`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error('Toggle status error:', err);
+    } finally {
+      setMutatingPlanId(null);
     }
   };
 
   const handleSeedPlans = async () => {
     try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/promotion-plans/seed`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      setSuccessMessage(data.message);
+      const response = await seedPlansMutation.mutateAsync();
+      setSuccessMessage(response.message);
       setTimeout(() => setSuccessMessage(null), 3000);
-      fetchPlans();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      console.error('Seed error:', err);
     }
   };
 
@@ -248,7 +195,7 @@ const PromotionPlansManager: React.FC = () => {
 
   const filteredPlans = plans.filter(p => p.category === activeTab).sort((a, b) => a.displayOrder - b.displayOrder);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-8">
         <div className="flex items-center justify-center">
@@ -272,30 +219,40 @@ const PromotionPlansManager: React.FC = () => {
             <p className="text-purple-200 mt-1">{t('admin:promotionPlans.subtitle', 'Manage listing promotion and agency feature pricing')}</p>
           </div>
           <div className="flex items-center gap-3">
+            {/* Real-time indicator */}
+            <div className="flex items-center gap-2 text-sm text-purple-200">
+              <span
+                className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}
+              />
+              {isRefetching ? 'Syncing...' : 'Live'}
+            </div>
+
             {plans.length === 0 && (
               <button
                 onClick={handleSeedPlans}
-                className="px-4 py-2 text-sm bg-white/20 hover:bg-white/30 rounded-xl transition-colors backdrop-blur-sm"
+                disabled={seedPlansMutation.isPending}
+                className="px-4 py-2 text-sm bg-white/20 hover:bg-white/30 rounded-xl transition-colors backdrop-blur-sm disabled:opacity-50"
               >
-                {t('admin:promotionPlans.seedDefaults', 'Seed Default Plans')}
+                {seedPlansMutation.isPending ? 'Seeding...' : t('admin:promotionPlans.seedDefaults', 'Seed Default Plans')}
               </button>
             )}
             <button
-              onClick={fetchPlans}
+              onClick={refreshAll}
+              disabled={isRefetching}
               className="p-2.5 bg-white/20 hover:bg-white/30 rounded-xl transition-colors backdrop-blur-sm"
               title={t('common:refresh', 'Refresh')}
             >
-              <ArrowPathIcon className="w-5 h-5" />
+              <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      {error && (
+      {(error || mutationError) && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center justify-between">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="p-1 hover:bg-red-100 rounded">&times;</button>
+          <span>{(error as Error)?.message || (mutationError as Error)?.message || 'An error occurred'}</span>
+          <button className="p-1 hover:bg-red-100 rounded">&times;</button>
         </div>
       )}
       {successMessage && (
@@ -365,6 +322,7 @@ const PromotionPlansManager: React.FC = () => {
             onEdit={() => handleEdit(plan)}
             onDelete={() => handleDelete(plan._id)}
             onToggleStatus={() => handleToggleStatus(plan)}
+            isMutating={mutatingPlanId === plan._id}
           />
         ))}
         {filteredPlans.length === 0 && (
@@ -384,9 +342,10 @@ const PromotionPlansManager: React.FC = () => {
               </button>
               <button
                 onClick={handleSeedPlans}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={seedPlansMutation.isPending}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                {t('admin:promotionPlans.seedDefaults', 'Seed Default Plans')}
+                {seedPlansMutation.isPending ? 'Seeding...' : t('admin:promotionPlans.seedDefaults', 'Seed Default Plans')}
               </button>
             </div>
           </div>
@@ -407,6 +366,7 @@ const PromotionPlansManager: React.FC = () => {
           onApplyPreset={applyColorPreset}
           showPreview={showPreview}
           setShowPreview={setShowPreview}
+          isSaving={createPlanMutation.isPending || updatePlanMutation.isPending}
         />
       )}
     </div>
@@ -419,7 +379,8 @@ const PlanCard: React.FC<{
   onEdit: () => void;
   onDelete: () => void;
   onToggleStatus: () => void;
-}> = ({ plan, onEdit, onDelete, onToggleStatus }) => {
+  isMutating?: boolean;
+}> = ({ plan, onEdit, onDelete, onToggleStatus, isMutating }) => {
   const { t } = useTranslation(['admin']);
 
   const getTierColor = (tier: string) => {
@@ -518,13 +479,21 @@ const PlanCard: React.FC<{
       <div className="p-4 flex items-center justify-between">
         <button
           onClick={onToggleStatus}
+          disabled={isMutating}
           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
             plan.isActive
               ? 'bg-green-100 text-green-700 hover:bg-green-200'
               : 'bg-red-100 text-red-700 hover:bg-red-200'
-          }`}
+          } ${isMutating ? 'opacity-50 cursor-wait' : ''}`}
         >
-          {plan.isActive ? t('admin:common.active', 'Active') : t('admin:common.inactive', 'Inactive')}
+          {isMutating ? (
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              Updating...
+            </span>
+          ) : (
+            plan.isActive ? t('admin:common.active', 'Active') : t('admin:common.inactive', 'Inactive')
+          )}
         </button>
         <div className="flex items-center gap-2">
           <button
@@ -560,7 +529,8 @@ const EditPlanModal: React.FC<{
   onApplyPreset: (preset: 'purple' | 'cyan' | 'amber' | 'gray' | 'slate') => void;
   showPreview: boolean;
   setShowPreview: (v: boolean) => void;
-}> = ({ plan, onChange, onSave, onClose, newFeature, setNewFeature, onAddFeature, onRemoveFeature, onApplyPreset, showPreview, setShowPreview }) => {
+  isSaving?: boolean;
+}> = ({ plan, onChange, onSave, onClose, newFeature, setNewFeature, onAddFeature, onRemoveFeature, onApplyPreset, showPreview, setShowPreview, isSaving }) => {
   const { t } = useTranslation(['admin', 'common']);
 
   return (
@@ -803,6 +773,15 @@ const EditPlanModal: React.FC<{
                     />
                     <span className="text-sm font-medium text-gray-700">{t('admin:promotionPlans.visible', 'Visible')}</span>
                   </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={plan.isActive}
+                      onChange={(e) => onChange({ ...plan, isActive: e.target.checked })}
+                      className="w-4 h-4 text-purple-600 rounded"
+                    />
+                    <span className="text-sm font-medium text-gray-700">{t('admin:common.active', 'Active')}</span>
+                  </label>
                 </div>
 
                 {/* Color Presets */}
@@ -855,9 +834,19 @@ const EditPlanModal: React.FC<{
           </button>
           <button
             onClick={onSave}
-            className="px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
+            disabled={isSaving}
+            className={`px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors flex items-center gap-2 ${
+              isSaving ? 'opacity-70' : ''
+            }`}
           >
-            {t('common:save', 'Save Changes')}
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Saving...
+              </>
+            ) : (
+              t('common:save', 'Save Changes')
+            )}
           </button>
         </div>
       </div>
