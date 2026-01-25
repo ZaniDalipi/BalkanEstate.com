@@ -614,8 +614,8 @@ const PricingPage: React.FC = () => {
 
                   {/* Features - with fallback */}
                   <ul className="mt-6 space-y-3 flex-grow">
-                    {(proYearlyProduct.features && proYearlyProduct.features.length > 1
-                      ? proYearlyProduct.features.slice(0, 6)
+                    {(proYearlyProduct.features && proYearlyProduct.features.length > 0
+                      ? proYearlyProduct.features
                       : [
                           '250 listings per year',
                           '3 promo coupons/month',
@@ -671,8 +671,8 @@ const PricingPage: React.FC = () => {
 
                   {/* Features - with fallback */}
                   <ul className="mt-6 space-y-3 flex-grow">
-                    {(proMonthlyProduct.features && proMonthlyProduct.features.length > 1
-                      ? proMonthlyProduct.features.slice(0, 5)
+                    {(proMonthlyProduct.features && proMonthlyProduct.features.length > 0
+                      ? proMonthlyProduct.features
                       : [
                           '20 listings per month',
                           '3 promo coupons/month',
@@ -744,8 +744,8 @@ const PricingPage: React.FC = () => {
 
                   {/* Features - with fallback */}
                   <ul className="mt-6 space-y-3 flex-grow relative z-10">
-                    {(enterpriseProduct.features && enterpriseProduct.features.length > 1
-                      ? enterpriseProduct.features.slice(0, 6)
+                    {(enterpriseProduct.features && enterpriseProduct.features.length > 0
+                      ? enterpriseProduct.features
                       : [
                           '500 listings (expandable)',
                           'Unlimited team members',

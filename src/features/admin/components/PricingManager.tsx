@@ -493,7 +493,7 @@ const PricingManager: React.FC = () => {
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.productName', 'Product Name')}</label>
                   <input
                     type="text"
                     value={editingProduct.name}
@@ -502,7 +502,7 @@ const PricingManager: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Product ID</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.productId', 'Product ID')}</label>
                   <input
                     type="text"
                     value={editingProduct.productId}
@@ -514,36 +514,36 @@ const PricingManager: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Target Role</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.targetRole', 'Target Role')}</label>
                   <select
                     value={editingProduct.targetRole}
                     onChange={(e) => setEditingProduct({ ...editingProduct, targetRole: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="buyer">Buyer</option>
-                    <option value="seller">Seller</option>
-                    <option value="agent">Agent</option>
-                    <option value="all">All</option>
+                    <option value="buyer">{t('admin:pricing.form.roles.buyer', 'Buyer')}</option>
+                    <option value="seller">{t('admin:pricing.form.roles.seller', 'Seller')}</option>
+                    <option value="agent">{t('admin:pricing.form.roles.agent', 'Agent')}</option>
+                    <option value="all">{t('admin:pricing.form.roles.all', 'All')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tier</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.tier', 'Tier')}</label>
                   <select
                     value={editingProduct.tier || ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, tier: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">None</option>
-                    <option value="free">Free</option>
-                    <option value="pro">Pro</option>
-                    <option value="agency">Agency</option>
-                    <option value="buyer">Buyer</option>
+                    <option value="">{t('admin:pricing.form.tiers.none', 'None')}</option>
+                    <option value="free">{t('admin:pricing.form.tiers.free', 'Free')}</option>
+                    <option value="pro">{t('admin:pricing.form.tiers.pro', 'Pro')}</option>
+                    <option value="agency">{t('admin:pricing.form.tiers.agency', 'Agency')}</option>
+                    <option value="buyer">{t('admin:pricing.form.tiers.buyer', 'Buyer')}</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.description', 'Description')}</label>
                 <textarea
                   value={editingProduct.description || ''}
                   onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
@@ -554,10 +554,10 @@ const PricingManager: React.FC = () => {
 
               {/* Pricing */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 mb-3">Pricing</h4>
+                <h4 className="font-semibold text-blue-900 mb-3">{t('admin:pricing.form.pricingSection', 'Pricing')}</h4>
                 <div className="grid grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Price (€)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.priceEuro', 'Price (€)')}</label>
                     <input
                       type="number"
                       value={editingProduct.price}
@@ -568,7 +568,7 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.currency', 'Currency')}</label>
                     <select
                       value={editingProduct.currency}
                       onChange={(e) => setEditingProduct({ ...editingProduct, currency: e.target.value })}
@@ -580,21 +580,21 @@ const PricingManager: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Billing Period</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.billingPeriod', 'Billing Period')}</label>
                     <select
                       value={editingProduct.billingPeriod}
                       onChange={(e) => setEditingProduct({ ...editingProduct, billingPeriod: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Yearly</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="quarterly">Quarterly</option>
-                      <option value="one_time">One-time</option>
+                      <option value="monthly">{t('admin:pricing.form.billingPeriods.monthly', 'Monthly')}</option>
+                      <option value="yearly">{t('admin:pricing.form.billingPeriods.yearly', 'Yearly')}</option>
+                      <option value="weekly">{t('admin:pricing.form.billingPeriods.weekly', 'Weekly')}</option>
+                      <option value="quarterly">{t('admin:pricing.form.billingPeriods.quarterly', 'Quarterly')}</option>
+                      <option value="one_time">{t('admin:pricing.form.billingPeriods.oneTime', 'One-time')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.durationDays', 'Duration (days)')}</label>
                     <input
                       type="number"
                       value={editingProduct.durationDays}
@@ -608,18 +608,18 @@ const PricingManager: React.FC = () => {
 
               {/* Limits */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-900 mb-3">Limits & Quotas</h4>
+                <h4 className="font-semibold text-green-900 mb-3">{t('admin:pricing.form.limitsSection', 'Limits & Quotas')}</h4>
 
                 {/* Listings Limit - Most important for sellers/agents */}
                 <div className="bg-white border-2 border-green-300 rounded-lg p-4 mb-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">🏠</span>
-                    <h5 className="font-semibold text-green-800">Listings Limit</h5>
+                    <h5 className="font-semibold text-green-800">{t('admin:pricing.form.listingsLimit', 'Listings Limit')}</h5>
                   </div>
-                  <p className="text-xs text-gray-600 mb-2">Maximum number of active property listings allowed for this plan</p>
+                  <p className="text-xs text-gray-600 mb-2">{t('admin:pricing.form.listingsLimitDesc', 'Maximum number of active property listings allowed for this plan')}</p>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Active Listings</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.activeListings', 'Active Listings')}</label>
                       <input
                         type="number"
                         value={editingProduct.listingsLimit}
@@ -627,14 +627,14 @@ const PricingManager: React.FC = () => {
                         min="-1"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg font-semibold"
                       />
-                      <p className="text-xs text-gray-500 mt-1">-1 = unlimited | Free: 3 | Pro: 20 | Agency: 500</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('admin:pricing.form.listingsLimitHelp', '-1 = unlimited | Free: 3 | Pro: 20 | Agency: 500')}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Saved Searches</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.savedSearches', 'Saved Searches')}</label>
                     <input
                       type="number"
                       value={editingProduct.savedSearchesLimit}
@@ -643,14 +643,14 @@ const PricingManager: React.FC = () => {
                       placeholder="-1 for unlimited"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">-1 = unlimited</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('admin:pricing.form.unlimitedHelp', '-1 = unlimited')}</p>
                   </div>
                 </div>
 
-                <h5 className="font-medium text-green-800 mb-2 text-sm">Promotion Coupons (per month)</h5>
+                <h5 className="font-medium text-green-800 mb-2 text-sm">{t('admin:pricing.form.promoCouponsPerMonth', 'Promotion Coupons (per month)')}</h5>
                 <div className="grid grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Promos</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.totalPromos', 'Total Promos')}</label>
                     <input
                       type="number"
                       value={editingProduct.promotionCoupons}
@@ -660,7 +660,7 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Premium</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.premium', 'Premium')}</label>
                     <input
                       type="number"
                       value={editingProduct.premiumCoupons || 0}
@@ -670,7 +670,7 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Highlighted</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.highlighted', 'Highlighted')}</label>
                     <input
                       type="number"
                       value={editingProduct.highlightedCoupons || 0}
@@ -680,7 +680,7 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Featured</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.featured', 'Featured')}</label>
                     <input
                       type="number"
                       value={editingProduct.featuredCoupons || 0}
@@ -694,11 +694,11 @@ const PricingManager: React.FC = () => {
 
               {/* AI Limits */}
               <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-                <h4 className="font-semibold text-cyan-900 mb-3">AI & Insights Limits</h4>
-                <p className="text-xs text-cyan-700 mb-3">Use -1 for unlimited</p>
+                <h4 className="font-semibold text-cyan-900 mb-3">{t('admin:pricing.form.aiSection', 'AI & Insights Limits')}</h4>
+                <p className="text-xs text-cyan-700 mb-3">{t('admin:pricing.form.aiSectionHelp', 'Use -1 for unlimited')}</p>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">AI Messages/mo</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.aiMessagesPerMonth', 'AI Messages/mo')}</label>
                     <input
                       type="number"
                       value={editingProduct.aiMessagesLimit ?? 0}
@@ -708,7 +708,7 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Insights/mo</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.insightsPerMonth', 'Insights/mo')}</label>
                     <input
                       type="number"
                       value={editingProduct.aiInsightsLimit ?? 0}
@@ -718,7 +718,7 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Image Desc/mo</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.imageDescPerMonth', 'Image Desc/mo')}</label>
                     <input
                       type="number"
                       value={editingProduct.imageDescriptionLimit ?? 0}
@@ -732,7 +732,7 @@ const PricingManager: React.FC = () => {
 
               {/* Buyer Features */}
               <div className="bg-sky-50 border border-sky-200 rounded-lg p-4">
-                <h4 className="font-semibold text-sky-900 mb-3">Buyer Features</h4>
+                <h4 className="font-semibold text-sky-900 mb-3">{t('admin:pricing.form.buyerSection', 'Buyer Features')}</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -743,7 +743,7 @@ const PricingManager: React.FC = () => {
                       }
                       className="w-4 h-4 text-sky-600 rounded focus:ring-sky-500"
                     />
-                    <span className="text-sm text-gray-700">Early Access to New Listings</span>
+                    <span className="text-sm text-gray-700">{t('admin:pricing.form.earlyAccess', 'Early Access to New Listings')}</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -754,14 +754,14 @@ const PricingManager: React.FC = () => {
                       }
                       className="w-4 h-4 text-sky-600 rounded focus:ring-sky-500"
                     />
-                    <span className="text-sm text-gray-700">Advanced Market Insights</span>
+                    <span className="text-sm text-gray-700">{t('admin:pricing.form.advancedInsights', 'Advanced Market Insights')}</span>
                   </label>
                 </div>
               </div>
 
               {/* Trial & Grace */}
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h4 className="font-semibold text-amber-900 mb-3">Trial & Grace Period</h4>
+                <h4 className="font-semibold text-amber-900 mb-3">{t('admin:pricing.form.trialSection', 'Trial & Grace Period')}</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="flex items-center gap-2 cursor-pointer mb-2">
@@ -771,11 +771,11 @@ const PricingManager: React.FC = () => {
                         onChange={(e) => setEditingProduct({ ...editingProduct, hasFreeTrial: e.target.checked })}
                         className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
                       />
-                      <span className="text-sm font-medium text-gray-700">Has Free Trial</span>
+                      <span className="text-sm font-medium text-gray-700">{t('admin:pricing.form.hasFreeTrial', 'Has Free Trial')}</span>
                     </label>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Trial Days</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.trialDays', 'Trial Days')}</label>
                     <input
                       type="number"
                       value={editingProduct.trialPeriodDays || 0}
@@ -787,7 +787,7 @@ const PricingManager: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Grace Period (days)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.gracePeriodDays', 'Grace Period (days)')}</label>
                     <input
                       type="number"
                       value={editingProduct.gracePeriodDays}
@@ -934,7 +934,7 @@ const PricingManager: React.FC = () => {
 
               {/* Display Settings & Highlighted */}
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <h4 className="font-semibold text-purple-900 mb-3">Display Settings</h4>
+                <h4 className="font-semibold text-purple-900 mb-3">{t('admin:pricing.form.displaySection', 'Display Settings')}</h4>
 
                 {/* Highlighted - Make it prominent */}
                 <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
@@ -946,40 +946,40 @@ const PricingManager: React.FC = () => {
                       className="w-5 h-5 text-yellow-600 rounded focus:ring-yellow-500"
                     />
                     <div>
-                      <span className="text-sm font-semibold text-yellow-800">Highlighted / Featured Plan</span>
-                      <p className="text-xs text-yellow-700">Show with special styling on pricing page (golden border, "Most Popular" effect)</p>
+                      <span className="text-sm font-semibold text-yellow-800">{t('admin:pricing.form.highlightedPlan', 'Highlighted / Featured Plan')}</span>
+                      <p className="text-xs text-yellow-700">{t('admin:pricing.form.highlightedPlanDesc', 'Show with special styling on pricing page (golden border, "Most Popular" effect)')}</p>
                     </div>
                   </label>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Badge Text</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.badgeText', 'Badge Text')}</label>
                     <input
                       type="text"
                       value={editingProduct.badge || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, badge: e.target.value })}
-                      placeholder="e.g., BEST VALUE"
+                      placeholder={t('admin:pricing.form.badgePlaceholder', 'e.g., BEST VALUE')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Badge Color</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.badgeColor', 'Badge Color')}</label>
                     <select
                       value={editingProduct.badgeColor || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, badgeColor: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     >
-                      <option value="">Default</option>
-                      <option value="red">Red</option>
-                      <option value="green">Green</option>
-                      <option value="blue">Blue</option>
-                      <option value="amber">Amber</option>
-                      <option value="purple">Purple</option>
+                      <option value="">{t('admin:pricing.form.colors.default', 'Default')}</option>
+                      <option value="red">{t('admin:pricing.form.colors.red', 'Red')}</option>
+                      <option value="green">{t('admin:pricing.form.colors.green', 'Green')}</option>
+                      <option value="blue">{t('admin:pricing.form.colors.blue', 'Blue')}</option>
+                      <option value="amber">{t('admin:pricing.form.colors.amber', 'Amber')}</option>
+                      <option value="purple">{t('admin:pricing.form.colors.purple', 'Purple')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.displayOrder', 'Display Order')}</label>
                     <input
                       type="number"
                       value={editingProduct.displayOrder}
@@ -994,10 +994,10 @@ const PricingManager: React.FC = () => {
 
                 {/* Card Style Customization */}
                 <div className="mt-4 pt-4 border-t border-purple-200">
-                  <h5 className="text-sm font-medium text-purple-800 mb-2">Card Style (Optional)</h5>
+                  <h5 className="text-sm font-medium text-purple-800 mb-2">{t('admin:pricing.form.cardStyle', 'Card Style (Optional)')}</h5>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Background Color</label>
+                      <label className="block text-xs text-gray-600 mb-1">{t('admin:pricing.form.backgroundColor', 'Background Color')}</label>
                       <input
                         type="text"
                         value={editingProduct.cardStyle?.backgroundColor || ''}
@@ -1005,12 +1005,12 @@ const PricingManager: React.FC = () => {
                           ...editingProduct,
                           cardStyle: { ...editingProduct.cardStyle, backgroundColor: e.target.value }
                         })}
-                        placeholder="#ffffff or gradient"
+                        placeholder={t('admin:pricing.form.backgroundPlaceholder', '#ffffff or gradient')}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Border Color</label>
+                      <label className="block text-xs text-gray-600 mb-1">{t('admin:pricing.form.borderColor', 'Border Color')}</label>
                       <input
                         type="text"
                         value={editingProduct.cardStyle?.borderColor || ''}
@@ -1018,12 +1018,12 @@ const PricingManager: React.FC = () => {
                           ...editingProduct,
                           cardStyle: { ...editingProduct.cardStyle, borderColor: e.target.value }
                         })}
-                        placeholder="#e5e7eb"
+                        placeholder={t('admin:pricing.form.borderPlaceholder', '#e5e7eb')}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Text Color</label>
+                      <label className="block text-xs text-gray-600 mb-1">{t('admin:pricing.form.textColor', 'Text Color')}</label>
                       <input
                         type="text"
                         value={editingProduct.cardStyle?.textColor || ''}
@@ -1031,7 +1031,7 @@ const PricingManager: React.FC = () => {
                           ...editingProduct,
                           cardStyle: { ...editingProduct.cardStyle, textColor: e.target.value }
                         })}
-                        placeholder="#1f2937"
+                        placeholder={t('admin:pricing.form.textPlaceholder', '#1f2937')}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                       />
                     </div>
@@ -1041,11 +1041,11 @@ const PricingManager: React.FC = () => {
 
               {/* Agency/Enterprise Features */}
               <div className="bg-violet-50 border border-violet-200 rounded-lg p-4">
-                <h4 className="font-semibold text-violet-900 mb-3">Agency / Enterprise Features</h4>
-                <p className="text-xs text-violet-700 mb-3">Special features for agency tier subscriptions</p>
+                <h4 className="font-semibold text-violet-900 mb-3">{t('admin:pricing.form.agencySection', 'Agency / Enterprise Features')}</h4>
+                <p className="text-xs text-violet-700 mb-3">{t('admin:pricing.form.agencySectionDesc', 'Special features for agency tier subscriptions')}</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Agent Coupons/month</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.agentCouponsPerMonth', 'Agent Coupons/month')}</label>
                     <input
                       type="number"
                       value={editingProduct.agentCoupons}
@@ -1053,10 +1053,10 @@ const PricingManager: React.FC = () => {
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Coupons to invite agents to the agency</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('admin:pricing.form.agentCouponsHelp', 'Coupons to invite agents to the agency')}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Subscriptions</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.maxSubscriptions', 'Max Subscriptions')}</label>
                     <input
                       type="number"
                       value={editingProduct.maxActiveSubscriptions || 0}
@@ -1064,32 +1064,32 @@ const PricingManager: React.FC = () => {
                       min="0"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     />
-                    <p className="text-xs text-gray-500 mt-1">0 = unlimited</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('admin:pricing.form.maxSubscriptionsHelp', '0 = unlimited')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Stripe */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Stripe Integration</h4>
+                <h4 className="font-semibold text-gray-900 mb-3">{t('admin:pricing.form.stripeSection', 'Stripe Integration')}</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Stripe Product ID</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.stripeProductId', 'Stripe Product ID')}</label>
                     <input
                       type="text"
                       value={editingProduct.stripeProductId || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, stripeProductId: e.target.value })}
-                      placeholder="prod_..."
+                      placeholder={t('admin:pricing.form.stripeProductPlaceholder', 'prod_...')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Stripe Price ID</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin:pricing.form.stripePriceId', 'Stripe Price ID')}</label>
                     <input
                       type="text"
                       value={editingProduct.stripePriceId || ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, stripePriceId: e.target.value })}
-                      placeholder="price_..."
+                      placeholder={t('admin:pricing.form.stripePricePlaceholder', 'price_...')}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
                     />
                   </div>
