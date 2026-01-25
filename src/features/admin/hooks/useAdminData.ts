@@ -73,7 +73,7 @@ export const adminKeys = {
 
 /**
  * useProducts - Fetches and subscribes to products data (admin view - all products)
- * Automatically refetches on window focus and at intervals
+ * Automatically refetches on window focus and at intervals for real-time updates
  *
  * Similar to: viewModel.products.collectAsState()
  */
@@ -88,6 +88,7 @@ export function useProducts() {
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (garbage collection time)
     refetchOnWindowFocus: true, // Refetch when tab becomes active
     refetchOnMount: true, // Always refetch when component mounts
+    refetchInterval: 30 * 1000, // Poll every 30 seconds for real-time updates
   });
 }
 
@@ -380,7 +381,7 @@ function invalidateAllPromotionPlanCaches(queryClient: ReturnType<typeof useQuer
 
 /**
  * usePromotionPlans - Fetches and subscribes to promotion plans data (admin view - all plans)
- * Automatically refetches on window focus
+ * Automatically refetches on window focus and at intervals for real-time updates
  */
 export function usePromotionPlans() {
   return useQuery({
@@ -393,6 +394,7 @@ export function usePromotionPlans() {
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchInterval: 30 * 1000, // Poll every 30 seconds for real-time updates
   });
 }
 

@@ -10,7 +10,8 @@
  */
 
 import React, { useState } from 'react';
-import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ArrowPathIcon } from '@/constants';
+import { useTranslation } from 'react-i18next';
+import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ArrowPathIcon, CurrencyDollarIcon, CheckIcon } from '@/constants';
 import {
   useProducts,
   useUpdateProduct,
@@ -21,6 +22,8 @@ import {
 import { Product } from '../api/adminApi';
 
 const PricingManager: React.FC = () => {
+  const { t } = useTranslation(['admin', 'common']);
+
   // Reactive data - auto-updates like StateFlow.collectAsState()
   const { data: products = [], isLoading, error, isRefetching } = useProducts();
 
@@ -222,10 +225,10 @@ const PricingManager: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="bg-white rounded-2xl shadow-lg p-8">
         <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading products...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="ml-3 text-gray-600">{t('admin:pricing.loading', 'Loading products...')}</span>
         </div>
       </div>
     );
@@ -234,33 +237,36 @@ const PricingManager: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Pricing & Products</h2>
-            <p className="text-gray-600 mt-1">Manage subscription plans and pricing</p>
+            <h2 className="text-2xl font-bold flex items-center gap-3">
+              <CurrencyDollarIcon className="w-7 h-7" />
+              {t('admin:pricing.title', 'Pricing & Products')}
+            </h2>
+            <p className="text-blue-200 mt-1">{t('admin:pricing.subtitle', 'Manage subscription plans and pricing')}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* Real-time indicator */}
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-blue-200">
               <span
                 className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}
               />
-              {isRefetching ? 'Syncing...' : 'Live'}
+              {isRefetching ? t('common:syncing', 'Syncing...') : t('common:live', 'Live')}
             </div>
 
             {/* Manual refresh */}
             <button
               onClick={refreshAll}
               disabled={isRefetching}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Refresh data"
+              className="p-2.5 bg-white/20 hover:bg-white/30 rounded-xl transition-colors backdrop-blur-sm"
+              title={t('common:refresh', 'Refresh')}
             >
               <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
             </button>
 
-            <div className="text-sm text-gray-500">
-              {products.length} product{products.length !== 1 ? 's' : ''}
+            <div className="px-3 py-1.5 bg-white/20 rounded-xl text-sm backdrop-blur-sm">
+              {products.length} {products.length !== 1 ? t('admin:pricing.products', 'products') : t('admin:pricing.product', 'product')}
             </div>
           </div>
         </div>
@@ -268,120 +274,123 @@ const PricingManager: React.FC = () => {
 
       {/* Messages */}
       {(error || mutationError) && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {(error as Error)?.message || (mutationError as Error)?.message || 'An error occurred'}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center justify-between">
+          <span>{(error as Error)?.message || (mutationError as Error)?.message || t('common:error', 'An error occurred')}</span>
+          <button className="p-1 hover:bg-red-100 rounded">&times;</button>
         </div>
       )}
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-2">
+          <CheckIcon className="w-5 h-5" />
           {successMessage}
         </div>
       )}
 
       {/* Products Table */}
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {t('admin:pricing.product', 'Product')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tier
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {t('admin:pricing.tier', 'Tier')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {t('admin:pricing.price', 'Price')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Limits
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {t('admin:pricing.limits', 'Limits')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {t('admin:pricing.status', 'Status')}
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {t('admin:pricing.actions', 'Actions')}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-100">
               {products.map((product) => (
-                <tr key={product._id} className={!product.isActive ? 'bg-gray-50 opacity-60' : ''}>
+                <tr key={product._id} className={`transition-colors hover:bg-blue-50/50 ${!product.isActive ? 'bg-gray-50/50 opacity-60' : ''}`}>
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <div>
-                        <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                        <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                           {product.name}
                           {product.highlighted && (
-                            <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                              Featured
+                            <span className="px-2 py-0.5 text-xs bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800 rounded-full font-medium border border-amber-200">
+                              ⭐ {t('admin:common.featured', 'Featured')}
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-500">{product.productId}</div>
+                        <div className="text-xs text-gray-500 font-mono">{product.productId}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTierColor(product.tier)}`}>
+                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getTierColor(product.tier)}`}>
                       {product.tier?.toUpperCase() || 'N/A'}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm font-bold text-gray-900">
+                    <div className="text-base font-bold text-gray-900">
                       {formatPrice(product.price, product.currency, product.billingPeriod)}
                     </div>
-                    <div className="text-xs text-gray-500">{product.durationDays} days</div>
+                    <div className="text-xs text-gray-500">{product.durationDays} {t('admin:common.days', 'days')}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    <div>{product.listingsLimit > 0 ? `${product.listingsLimit} listings` : '-'}</div>
-                    <div className="text-xs text-gray-400">
-                      {product.promotionCoupons > 0 ? `${product.promotionCoupons} promo/mo` : ''}
+                    <div className="flex flex-col gap-1">
+                      {product.listingsLimit > 0 && (
+                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full inline-block w-fit">
+                          {product.listingsLimit} {t('admin:pricing.listings', 'listings')}
+                        </span>
+                      )}
+                      {product.promotionCoupons > 0 && (
+                        <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full inline-block w-fit">
+                          {product.promotionCoupons} {t('admin:pricing.promoPerMonth', 'promo/mo')}
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1.5">
                       <button
                         onClick={() => handleToggleStatus(product)}
                         disabled={mutatingProductId === product._id}
-                        className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
                           product.isActive
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                            : 'bg-red-100 text-red-800 hover:bg-red-200'
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-red-100 text-red-700 hover:bg-red-200'
                         } ${mutatingProductId === product._id ? 'opacity-50 cursor-wait' : ''}`}
                       >
                         {mutatingProductId === product._id ? (
                           <span className="flex items-center gap-1">
                             <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                            Updating...
+                            {t('common:updating', 'Updating...')}
                           </span>
                         ) : (
-                          product.isActive ? 'Active' : 'Inactive'
+                          product.isActive ? t('admin:common.active', 'Active') : t('admin:common.inactive', 'Inactive')
                         )}
                       </button>
                       <button
                         onClick={() => handleToggleVisibility(product)}
                         disabled={mutatingProductId === product._id}
-                        className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
                           product.isVisible
-                            ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                            ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         } ${mutatingProductId === product._id ? 'opacity-50 cursor-wait' : ''}`}
                       >
                         {mutatingProductId === product._id ? (
                           <span className="flex items-center gap-1">
                             <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                            Updating...
+                            {t('common:updating', 'Updating...')}
                           </span>
                         ) : (
-                          product.isVisible ? 'Visible' : 'Hidden'
+                          product.isVisible ? t('admin:common.visible', 'Visible') : t('admin:common.hidden', 'Hidden')
                         )}
                       </button>
                     </div>
@@ -389,10 +398,10 @@ const PricingManager: React.FC = () => {
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => handleEdit(product)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md"
                     >
                       <PencilIcon className="w-4 h-4" />
-                      Edit
+                      {t('admin:common.edit', 'Edit')}
                     </button>
                   </td>
                 </tr>
@@ -405,18 +414,21 @@ const PricingManager: React.FC = () => {
       {/* Edit Modal */}
       {isEditModalOpen && editingProduct && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-900">Edit Product</h3>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <PencilIcon className="w-5 h-5" />
+                {t('admin:pricing.editProduct', 'Edit Product')}
+              </h3>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
               >
-                <XMarkIcon className="w-5 h-5 text-gray-500" />
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -936,29 +948,29 @@ const PricingManager: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+            <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 text-gray-700 bg-white border rounded-xl hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t('common:cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleSave}
                 disabled={updateProductMutation.isPending}
-                className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 ${
+                className={`px-5 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors flex items-center gap-2 ${
                   updateProductMutation.isPending ? 'opacity-70' : ''
                 }`}
               >
                 {updateProductMutation.isPending ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Saving...
+                    {t('common:saving', 'Saving...')}
                   </>
                 ) : (
                   <>
                     <ShieldCheckIcon className="w-4 h-4" />
-                    Save Changes
+                    {t('common:save', 'Save Changes')}
                   </>
                 )}
               </button>
