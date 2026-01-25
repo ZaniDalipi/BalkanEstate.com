@@ -875,14 +875,54 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             </div>
           </div>
         ) : showSuccess ? (
-          <div className="text-center py-6 sm:py-8">
-            <CheckCircleIcon className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 mx-auto mb-3 sm:mb-4" />
-            <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-1.5 sm:mb-2">
+          <div className="text-center py-8">
+            {/* Success Animation */}
+            <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce">
+              <CheckCircleIcon className="w-14 h-14 text-white" />
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-3">
               {t('payment:success.title', 'Payment Successful!')}
             </h2>
-            <p className="text-sm sm:text-base text-neutral-600">
+
+            <p className="text-base text-neutral-600 mb-6">
               {t('payment:success.message', 'Your subscription has been activated.')}
             </p>
+
+            {/* Plan activated info */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-green-800">{planName}</p>
+                  <p className="text-sm text-green-600">Now active on your account</p>
+                </div>
+              </div>
+            </div>
+
+            {/* What's next */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left">
+              <p className="font-semibold text-blue-900 mb-2">What happens next?</p>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• You now have access to all premium features</li>
+                <li>• A confirmation email has been sent to you</li>
+                <li>• Manage your subscription in Account Settings</li>
+              </ul>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={() => {
+                onClose();
+                // Refresh to update user subscription state
+                window.location.reload();
+              }}
+              className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            >
+              {t('payment:success.continue', 'Continue to Dashboard')}
+            </button>
           </div>
         ) : (
           <div className="space-y-4 sm:space-y-6">
