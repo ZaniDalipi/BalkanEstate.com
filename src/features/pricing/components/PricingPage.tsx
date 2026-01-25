@@ -1226,7 +1226,7 @@ const PricingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Legal Links - Required for Paddle Domain Approval */}
+        {/* Legal Links - Required for Payment Provider Domain Approval */}
         <div className="mt-12 sm:mt-16">
           <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 rounded-2xl border border-gray-200 p-6 sm:p-8 max-w-3xl mx-auto">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -1236,7 +1236,7 @@ const PricingPage: React.FC = () => {
               </h4>
             </div>
             <p className="text-sm text-gray-600 text-center mb-6">
-              {t('pricing:legal.description', 'All payments are processed securely by Paddle. By subscribing, you agree to our policies:')}
+              {t('pricing:legal.description', 'All payments are processed securely by LemonSqueezy. By subscribing, you agree to our policies:')}
             </p>
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <button
@@ -1268,7 +1268,7 @@ const PricingPage: React.FC = () => {
               </button>
             </div>
             <p className="text-xs text-gray-500 text-center mt-4">
-              {t('pricing:legal.paddleNote', 'Payments handled by Paddle.com as Merchant of Record. VAT/taxes included where applicable.')}
+              {t('pricing:legal.providerNote', 'Payments handled by LemonSqueezy as Merchant of Record. VAT/taxes included where applicable.')}
             </p>
           </div>
         </div>

@@ -184,7 +184,7 @@ const RefundPolicyPage: React.FC = () => {
               {t('legal:refund.processing.title', 'Refund Processing')}
             </h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              {t('legal:refund.processing.text', 'Refunds are processed by Paddle, our Merchant of Record. Here is what to expect:')}
+              {t('legal:refund.processing.text', 'Refunds are processed by LemonSqueezy, our Merchant of Record. Here is what to expect:')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
@@ -205,13 +205,13 @@ const RefundPolicyPage: React.FC = () => {
             </p>
           </section>
 
-          {/* Paddle as MoR */}
+          {/* LemonSqueezy as MoR */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              {t('legal:refund.paddle.title', 'Payment Processing')}
+              {t('legal:refund.provider.title', 'Payment Processing')}
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              {t('legal:refund.paddle.text', 'All payments and refunds are processed by Paddle.com, our Merchant of Record. Paddle handles payment processing, tax compliance, and refund disbursements on our behalf. When you receive a refund, it will appear on your statement from Paddle. For any payment-related inquiries, you may also contact Paddle directly, though we recommend contacting us first for the fastest resolution.')}
+              {t('legal:refund.provider.text', 'All payments and refunds are processed by LemonSqueezy, our Merchant of Record. LemonSqueezy handles payment processing, tax compliance, and refund disbursements on our behalf. When you receive a refund, it will appear on your statement from LemonSqueezy. For any payment-related inquiries, you may also contact LemonSqueezy directly, though we recommend contacting us first for the fastest resolution.')}
             </p>
           </section>
 

@@ -218,10 +218,10 @@
   },
   "legal": {
     "title": "Plăți securizate și politici",
-    "description": "Toate plățile sunt procesate în siguranță de Paddle. Prin abonare, sunteți de acord cu politicile noastre:",
+    "description": "Toate plățile sunt procesate în siguranță de LemonSqueezy. Prin abonare, sunteți de acord cu politicile noastre:",
     "termsOfService": "Termeni și condiții",
     "privacyPolicy": "Politica de confidențialitate",
     "refundPolicy": "Politica de rambursare",
-    "paddleNote": "Plățile sunt gestionate de Paddle.com ca și Comerciant de Înregistrare. TVA/taxele sunt incluse acolo unde este cazul."
+    "providerNote": "Plățile sunt gestionate de LemonSqueezy ca și Comerciant de Înregistrare. TVA/taxele sunt incluse acolo unde este cazul."
   }
 }

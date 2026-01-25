@@ -218,10 +218,10 @@
   },
   "legal": {
     "title": "Sigurna plaćanja i politike",
-    "description": "Sva plaćanja se sigurno obrađuju putem Paddle-a. Pretplatom prihvatate naše politike:",
+    "description": "Sva plaćanja se sigurno obrađuju putem LemonSqueezy-a. Pretplatom prihvatate naše politike:",
     "termsOfService": "Uslovi korištenja",
     "privacyPolicy": "Politika privatnosti",
     "refundPolicy": "Politika povrata",
-    "paddleNote": "Plaćanja obrađuje Paddle.com kao trgovac. PDV/porezi uključeni gdje je primjenjivo."
+    "providerNote": "Plaćanja obrađuje LemonSqueezy kao trgovac. PDV/porezi uključeni gdje je primjenjivo."
   }
 }

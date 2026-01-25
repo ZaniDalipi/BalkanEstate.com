@@ -177,17 +177,26 @@
       }
     }
   },
+  "duration": {
+    "7days": "7 ditë",
+    "30days": "30 ditë",
+    "90days": "90 ditë"
+  },
   "agency": {
     "title": "Agjenci e Veçantë",
-    "subtitle": "Bëni agjencin tuaj të veçantë kudo në platformë",
+    "subtitle": "Bëni agjencin tuaj të veçantë kudo në platformë për 1 javë",
     "featuredTitle": "Agjenci e Veçantë",
     "featuredDescription": "E veçantë kudo në platformë",
+    "oneWeek": "1 JAVË",
+    "perWeek": "në javë",
+    "showsEverywhere": "Shfaqet kudo!",
     "benefits": {
       "featuredInDirectory": "E veçantë në direktorinë e agjencive",
       "priorityInSearch": "Prioritet në rezultatet e kërkimit",
       "homepageCarousel": "Karusel i agjencive në faqen kryesore",
       "featuredBadge": "Distinktiv i veçantë në profil",
-      "boostedVisibility": "Dukshmëri e rritur kudo (3x)"
+      "boostedVisibility": "Dukshmëri e rritur kudo (3x)",
+      "mapMarker": "Shënues i agjencisë në hartën e pronave"
     },
     "mapMarker": {
       "title": "Shënuesi i Hartës",
@@ -218,10 +227,10 @@
   },
   "legal": {
     "title": "Pagesa të Sigurta & Politikat",
-    "description": "Të gjitha pagesat përpunohen në mënyrë të sigurt nga Paddle. Duke u abonuar, pranoni politikat tona:",
+    "description": "Të gjitha pagesat përpunohen në mënyrë të sigurt nga LemonSqueezy. Duke u abonuar, pranoni politikat tona:",
     "termsOfService": "Kushtet e Shërbimit",
     "privacyPolicy": "Politika e Privatësisë",
     "refundPolicy": "Politika e Rimbursimit",
-    "paddleNote": "Pagesat menaxhohen nga Paddle.com si Tregtari i Regjistruar. TVSH/taksat janë përfshirë ku aplikohen."
+    "providerNote": "Pagesat menaxhohen nga LemonSqueezy si Tregtari i Regjistruar. TVSH/taksat janë përfshirë ku aplikohen."
   }
 }
