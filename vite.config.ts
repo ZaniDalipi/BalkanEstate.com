@@ -365,66 +365,41 @@ export default defineConfig(({ mode }) => {
 
               // ============================================================
               // APPLICATION CHUNKS - Split by feature for better caching
+              // Note: Keep chunks simple to avoid circular dependencies
               // ============================================================
 
-              // Admin dashboard - large, only for admins
-              if (id.includes('/features/admin/') || id.includes('/AdminDashboard')) {
+              // Admin dashboard - large, only for admins (standalone)
+              if (id.includes('/features/admin/')) {
                 return 'admin';
               }
-              // Seller dashboard - large, only for sellers
-              if (id.includes('/features/seller/') || id.includes('/SellerDashboard')) {
-                return 'seller';
-              }
-              // Property features (search, details, cards)
-              if (id.includes('/features/property-details/') || id.includes('/PropertyDetailsPage')) {
-                return 'property-details';
-              }
-              // Search functionality
-              if (id.includes('/features/search/')) {
-                return 'search';
-              }
-              // Agents/Agencies
-              if (id.includes('/features/agents/') || id.includes('/features/agencies/') ||
-                  id.includes('/AgentsPage') || id.includes('/AgenciesListPage') || id.includes('/AgencyDetailPage')) {
-                return 'agents';
-              }
-              // Messaging/Inbox
-              if (id.includes('/features/messaging/') || id.includes('/InboxPage')) {
-                return 'messaging';
-              }
-              // Pricing/Payments
-              if (id.includes('/features/pricing/') || id.includes('/features/payments/') ||
-                  id.includes('/PricingPage') || id.includes('/PaymentSuccess') || id.includes('/PaymentCancel')) {
-                return 'payments';
-              }
-              // Legal pages (small, can be grouped)
-              if (id.includes('/features/legal/')) {
-                return 'legal';
-              }
-              // Analytics
-              if (id.includes('/features/analytics/')) {
-                return 'analytics';
-              }
-              // Valuation/Calculators
-              if (id.includes('/features/valuation/') || id.includes('/features/calculators/')) {
-                return 'tools';
-              }
-              // Auth features
+              // Auth features (standalone, no deps on other features)
               if (id.includes('/features/auth/')) {
                 return 'auth';
               }
-              // Cities/Recommendations
-              if (id.includes('/features/cities/')) {
-                return 'cities';
+              // Messaging/Inbox (standalone)
+              if (id.includes('/features/messaging/')) {
+                return 'messaging';
               }
-              // Saved items (searches, properties)
-              if (id.includes('/features/saved/')) {
-                return 'saved';
+              // Pricing/Payments (standalone)
+              if (id.includes('/features/pricing/') || id.includes('/features/payments/')) {
+                return 'payments';
               }
-              // Onboarding
+              // Legal pages (standalone, small)
+              if (id.includes('/features/legal/')) {
+                return 'legal';
+              }
+              // Analytics (standalone)
+              if (id.includes('/features/analytics/')) {
+                return 'analytics';
+              }
+              // Onboarding (standalone)
               if (id.includes('/features/onboarding/')) {
                 return 'onboarding';
               }
+
+              // NOTE: Removed these to avoid circular dependencies:
+              // - search, property-details, agents, seller, saved, cities, tools
+              // These will be handled by Rollup's automatic splitting
 
               // Let Rollup handle remaining code splitting automatically
             },
