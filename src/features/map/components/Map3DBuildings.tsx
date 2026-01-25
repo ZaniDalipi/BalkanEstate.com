@@ -545,11 +545,18 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           doorEl.addEventListener('click', onEnterTour);
         }
 
-        // Position door on the southwest building face
-        // No pixel offset needed - marker is positioned at the building edge
+        // Calculate vertical pixel offset to position door at the correct floor level
+        // At pitch 60 and zoom 16-19, each floor is approximately 8-12 pixels visually
+        // We offset upward (negative y) based on the floor position
+        const pixelsPerFloor = 10; // Approximate pixels per floor at typical viewing angle
+        const floorsFromBottom = floorNum - 1; // 0-indexed from ground
+        const verticalOffset = -(floorsFromBottom * pixelsPerFloor);
+
+        // Position door on the southwest building face at the correct floor level
         const doorMarker = new maplibregl.Marker({
           element: doorEl,
-          anchor: 'center',
+          anchor: 'bottom',
+          offset: [0, verticalOffset],
         })
           .setLngLat([doorLng, doorLat])
           .addTo(mapInstance);
