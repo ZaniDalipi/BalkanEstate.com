@@ -48,17 +48,20 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
   if (platform === 'tiktok' && !tiktokId) return null;
   if (platform === 'instagram' && !instagramId) return null;
 
-  // Build embed URLs for direct iframe playback
+  // Build embed URLs for direct iframe playback with autoplay
   const getEmbedUrl = () => {
     switch (platform) {
       case 'tiktok':
-        return `https://www.tiktok.com/embed/v2/${tiktokId}`;
+        // TikTok embed v2 with autoplay parameter
+        return `https://www.tiktok.com/embed/v2/${tiktokId}?autoplay=1&mute=0`;
       case 'instagram':
+        // Instagram embed with captioned view (better UX)
         return isReel
-          ? `https://www.instagram.com/reel/${instagramId}/embed/`
-          : `https://www.instagram.com/p/${instagramId}/embed/`;
+          ? `https://www.instagram.com/reel/${instagramId}/embed/captioned/`
+          : `https://www.instagram.com/p/${instagramId}/embed/captioned/`;
       case 'facebook':
-        return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(videoUrl)}&show_text=false&autoplay=true`;
+        // Facebook with autoplay and unmuted
+        return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(videoUrl)}&show_text=false&autoplay=true&mute=false`;
       default:
         return '';
     }
@@ -127,7 +130,8 @@ export const SocialVideoEmbed: React.FC<SocialVideoEmbedProps> = ({ videoUrl }) 
             src={embedUrl}
             className="w-full h-full border-0"
             allowFullScreen
-            allow="autoplay; encrypted-media; gyroscope; picture-in-picture; clipboard-write"
+            scrolling="no"
+            allow="autoplay *; encrypted-media *; gyroscope; picture-in-picture; clipboard-write; fullscreen"
             onLoad={() => setIsLoading(false)}
             title={`${platform} video`}
           />
