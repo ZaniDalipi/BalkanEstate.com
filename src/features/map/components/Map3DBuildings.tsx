@@ -545,21 +545,36 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           doorEl.addEventListener('click', onEnterTour);
         }
 
-        // Calculate vertical pixel offset to position door at the correct floor level
-        // At pitch 60 and zoom 16-19, each floor is approximately 8-12 pixels visually
-        // We offset upward (negative y) based on the floor position
-        const pixelsPerFloor = 10; // Approximate pixels per floor at typical viewing angle
-        const floorsFromBottom = floorNum - 1; // 0-indexed from ground
-        const verticalOffset = -(floorsFromBottom * pixelsPerFloor);
+        // Function to calculate vertical offset based on zoom level
+        // The offset needs to scale with zoom to keep marker at correct floor level
+        const calculateFloorOffset = (currentZoom: number) => {
+          // Base pixels per floor at zoom 16, scales exponentially with zoom
+          const basePixelsPerFloor = 2.5;
+          const zoomFactor = Math.pow(2, currentZoom - 16);
+          const pixelsPerFloor = basePixelsPerFloor * zoomFactor;
+          const floorsFromBottom = floorNum - 1;
+          return -(floorsFromBottom * pixelsPerFloor);
+        };
 
         // Position door on the southwest building face at the correct floor level
+        const initialOffset = calculateFloorOffset(mapInstance.getZoom());
         const doorMarker = new maplibregl.Marker({
           element: doorEl,
           anchor: 'bottom',
-          offset: [0, verticalOffset],
+          offset: [0, initialOffset],
         })
           .setLngLat([doorLng, doorLat])
           .addTo(mapInstance);
+
+        // Update marker offset when zoom changes to keep it at correct floor level
+        const updateMarkerOffset = () => {
+          const newOffset = calculateFloorOffset(mapInstance.getZoom());
+          doorMarker.setOffset([0, newOffset]);
+        };
+
+        // Listen for zoom changes
+        mapInstance.on('zoom', updateMarkerOffset);
+        mapInstance.on('pitch', updateMarkerOffset);
 
         // Store marker reference for later removal
         doorMarkerRef.current = doorMarker;
