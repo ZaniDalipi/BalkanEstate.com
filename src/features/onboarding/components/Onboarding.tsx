@@ -11,6 +11,7 @@ import {
   SparklesIcon,
   KeyIcon,
 } from '@/constants';
+import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
 
 /* ---------------- CONFIG ---------------- */
 
@@ -179,13 +180,13 @@ const Onboarding: React.FC = () => {
 
   return (
     <>
-      {/* Preload LCP image for this page */}
+      {/* Preload LCP image for this page - using Cloudinary CDN for faster loading */}
       <Helmet>
         <link
           rel="preload"
           as="image"
-          href="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop"
-          imageSrcSet="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=300&auto=format&fit=crop 300w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=500&auto=format&fit=crop 500w"
+          href={ONBOARDING_IMAGES.buyCard.preload}
+          imageSrcSet={ONBOARDING_IMAGES.buyCard.srcSet}
           imageSizes="(max-width: 768px) calc(100vw - 80px), 400px"
         />
       </Helmet>
@@ -227,10 +228,10 @@ const Onboarding: React.FC = () => {
               className="group p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             >
               <img
-                src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop"
-                srcSet="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=300&auto=format&fit=crop 300w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=500&auto=format&fit=crop 500w"
+                src={ONBOARDING_IMAGES.buyCard.src}
+                srcSet={ONBOARDING_IMAGES.buyCard.srcSet}
                 sizes="(max-width: 768px) calc(100vw - 80px), 400px"
-                alt="A couple looking at a new home"
+                alt={ONBOARDING_IMAGES.buyCard.alt}
                 className="rounded-lg mb-6 h-48 w-full object-cover"
                 loading="eager"
                 decoding="async"
@@ -253,10 +254,10 @@ const Onboarding: React.FC = () => {
               className="group p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             >
               <img
-                src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop"
-                srcSet="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=300&auto=format&fit=crop 300w, https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop 400w, https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=500&auto=format&fit=crop 500w"
+                src={ONBOARDING_IMAGES.sellCard.src}
+                srcSet={ONBOARDING_IMAGES.sellCard.srcSet}
                 sizes="(max-width: 768px) calc(100vw - 80px), 400px"
-                alt="A modern house exterior"
+                alt={ONBOARDING_IMAGES.sellCard.alt}
                 className="rounded-lg mb-6 h-48 w-full object-cover"
                 loading="lazy"
                 decoding="async"

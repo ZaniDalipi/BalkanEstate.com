@@ -23,6 +23,8 @@ export interface IProduct extends Document {
   appStoreProductId?: string;
   stripeProductId?: string;
   stripePriceId?: string;
+  lemonSqueezyProductId?: string;
+  lemonSqueezyVariantId?: string;
 
   // Trial
   trialPeriodDays?: number;
@@ -66,6 +68,7 @@ export interface IProduct extends Document {
 
   // Agency-specific Benefits
   agentCoupons?: number; // Number of agent coupons (5 for agency tier)
+  teamMembersLimit?: number; // Number of team members allowed (for agency/enterprise plans)
 
   // AI & Insights Limits
   aiMessagesLimit?: number; // AI chat messages limit per month (-1 = unlimited)
@@ -138,6 +141,12 @@ const ProductSchema: Schema = new Schema(
       type: String,
     },
     stripePriceId: {
+      type: String,
+    },
+    lemonSqueezyProductId: {
+      type: String,
+    },
+    lemonSqueezyVariantId: {
       type: String,
     },
 
@@ -241,6 +250,10 @@ const ProductSchema: Schema = new Schema(
     agentCoupons: {
       type: Number,
       default: 0, // 5 for agency tier
+    },
+    teamMembersLimit: {
+      type: Number,
+      default: 1, // 1 for solo, 5 for agency/enterprise
     },
 
     // AI & Insights Limits

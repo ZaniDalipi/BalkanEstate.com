@@ -74,6 +74,7 @@
   },
   "details": {
     "title": "Detalji nekretnine",
+    "subtitle": "Osnovne specifikacije nekretnine",
     "description": "Opis",
     "about": "O ovom domu",
     "location": "Lokacija",
@@ -277,6 +278,20 @@
         "2": "Ova nekretnina se ističe u naselja.",
         "3": "Vrijedi razmotriti - izdvojeno od strane vlasnika.",
         "4": "Pogledajte bliže ovaj izdvojeni dom!"
+      }
+    },
+    "popup": {
+      "bed": "soba",
+      "bath": "kupatilo",
+      "viewDetails": "Pogledaj detalje",
+      "recommendation": "Preporuka",
+      "prev": "Prethodno",
+      "next": "Sljedeće",
+      "tierLabels": {
+        "premium": "PREMIUM PREMIJERA",
+        "highlight": "ISTAKNUTO",
+        "featured": "IZDVOJENO",
+        "standard": "PROMOVISANO"
       }
     },
     "heatMapLegend": "Gustina nekretnina",

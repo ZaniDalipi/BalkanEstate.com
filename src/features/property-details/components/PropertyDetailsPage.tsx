@@ -193,9 +193,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   };
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
-    window.scrollTo(0, 0);
+    // Smoothly scroll to top to show the gallery
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setActiveCategory(tag);
     setCurrentImageIndex(0);
+  }, []);
+
+  // Handler for image selection from thumbnails - scroll to gallery
+  const handleImageSelect = useCallback((index: number) => {
+    setCurrentImageIndex(index);
+    // Smoothly scroll to show the main gallery
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleShare = async () => {
@@ -240,7 +248,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   const seoImages = allImages.map(img => img.url).filter(Boolean);
 
   return (
-    <div className="bg-neutral-50 h-full overflow-y-auto animate-fade-in">
+    <div className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in">
       {/* SEO Meta Tags */}
       <SEO
         title={`${property.address}, ${property.city} - €${property.price?.toLocaleString()}`}
@@ -455,13 +463,28 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
       <main className="max-w-screen-xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Property Details */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:space-y-10 min-w-0">
             {/* Image Gallery */}
             <div className="animate-slide-up" style={{ animationDelay: '0ms' }}>
               <PropertyGallery
                 property={property}
                 onOpenEditor={(url) => setIsEditorOpen(true)}
                 onOpenViewer={() => setIsViewerOpen(true)}
+                activeCategory={activeCategory}
+                currentImageIndex={currentImageIndex}
+                onCategoryChange={handleCategorySelect}
+                onImageIndexChange={setCurrentImageIndex}
+              />
+            </div>
+
+            {/* Photo Thumbnails - Directly under gallery with less spacing */}
+            <div className="animate-slide-up -mt-4 sm:-mt-6 lg:-mt-8" style={{ animationDelay: '50ms' }}>
+              <PropertyPhotos
+                property={property}
+                activeCategory={activeCategory}
+                currentImageIndex={currentImageIndex}
+                onCategorySelect={handleCategorySelect}
+                onImageSelect={handleImageSelect}
               />
             </div>
 
@@ -481,8 +504,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
             {/* 360 Virtual Tour */}
             {property.virtualTour360Url && (
-              <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-                <div className="p-4 border-b border-neutral-200 bg-gradient-to-r from-purple-50 to-pink-50">
+              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 overflow-hidden max-w-full">
+                {/* Glass effects */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+                <div className="relative p-4 border-b border-neutral-200/50 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
                       <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -497,10 +523,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                     </div>
                   </div>
                 </div>
-                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                <div className="relative w-full max-w-full" style={{ paddingBottom: '56.25%' }}>
                   <iframe
                     src={property.virtualTour360Url}
-                    className="absolute top-0 left-0 w-full h-full border-0"
+                    className="absolute top-0 left-0 w-full h-full border-0 max-w-full"
                     allowFullScreen
                     loading="lazy"
                     allow="xr-spatial-tracking; gyroscope; accelerometer"
@@ -528,17 +554,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
               <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
             </div>
 
-            {/* Photo Thumbnails */}
-            <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
-              <PropertyPhotos
-                property={property}
-                activeCategory={activeCategory}
-                currentImageIndex={currentImageIndex}
-                onCategorySelect={handleCategorySelect}
-                onImageSelect={setCurrentImageIndex}
-              />
-            </div>
-
             {/* Map Link */}
             <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
               <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
@@ -563,7 +578,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           </div>
 
           {/* Right Column - Contact Sidebar (Desktop only - mobile version shown above) */}
-          <div className="hidden lg:block lg:col-span-1 animate-slide-up" style={{ animationDelay: '150ms' }}>
+          <div className="hidden lg:block lg:col-span-1 min-w-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
             <PropertyContact
               property={property}
               isCreatingConversation={isCreatingConversation}

@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { CheckCircleIcon, ArrowLeftIcon, LogoIcon, BuildingOfficeIcon, TicketIcon, ClipboardDocumentIcon } from '@/constants';
-import { verifyPayment as verifyPaymentApi, type VerifyPaymentResponse } from '../api/paymentApi';
+import { verifyPayment as verifyPaymentApi, getSubscriptionStatus, type VerifyPaymentResponse } from '../api/paymentApi';
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
+import { authApiClient } from '@/src/data/api/AuthApiClient';
+import { trackEcommerce, trackEvent } from '@/src/components/marketing/Analytics';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -58,7 +60,7 @@ const PaymentSuccess: React.FC = () => {
   const [copiedCouponIndex, setCopiedCouponIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    // Get parameters from URL - supports both Stripe and Paddle
+    // Get parameters from URL - supports Stripe, LemonSqueezy
     const params = new URLSearchParams(window.location.search);
     const providerParam = params.get('provider') as PaymentProvider | null;
     const sid = params.get('session_id');
@@ -74,7 +76,8 @@ const PaymentSuccess: React.FC = () => {
     }
 
     // Verify payment based on available parameters
-    if (sid || oid) {
+    // LemonSqueezy only needs provider param - verification polls the API
+    if (sid || oid || providerParam === 'lemonsqueezy') {
       verifyPayment(params);
     } else {
       setError(t('success.noSessionFound'));
@@ -110,6 +113,36 @@ const PaymentSuccess: React.FC = () => {
       const pendingPayment = sessionStorage.getItem('pending_payment');
       if (pendingPayment) {
         sessionStorage.removeItem('pending_payment');
+      }
+
+      // IMPORTANT: Refresh user data to update subscription status globally
+      if (result.paymentStatus === 'paid') {
+        // Track successful payment in Google Analytics
+        trackEcommerce.subscribe(
+          result.subscription?.plan || 'Unknown Plan',
+          result.amountTotal || 0
+        );
+        trackEvent('purchase', {
+          transaction_id: result.orderId,
+          currency: 'EUR',
+          value: result.amountTotal || 0,
+          items: [{
+            item_id: result.subscription?.plan || 'subscription',
+            item_name: result.subscription?.plan || 'Subscription',
+            price: result.amountTotal || 0,
+            quantity: 1,
+          }],
+          payment_provider: result.provider || 'lemonsqueezy',
+        });
+
+        try {
+          const response = await authApiClient.getCurrentUser();
+          if (response && response.user) {
+            dispatch({ type: 'SET_CURRENT_USER', payload: response.user });
+          }
+        } catch (refreshError) {
+          console.error('Failed to refresh user data:', refreshError);
+        }
       }
 
       // If this was an Enterprise payment and we have pending agency data, create the agency
@@ -304,9 +337,27 @@ const PaymentSuccess: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-neutral-600">Provider:</span>
                     <span className="font-medium text-neutral-800 capitalize">
-                      {paymentDetails.provider === 'stripe' ? 'Stripe' : 'Paddle'}
+                      {paymentDetails.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy'}
                     </span>
                   </div>
+                )}
+                {paymentDetails.subscription && (
+                  <>
+                    <div className="flex justify-between mt-4 pt-4 border-t border-neutral-300">
+                      <span className="text-neutral-600">{t('success.plan')}:</span>
+                      <span className="font-semibold text-neutral-800">
+                        {paymentDetails.subscription.plan}
+                      </span>
+                    </div>
+                    {paymentDetails.subscription.expiresAt && (
+                      <div className="flex justify-between">
+                        <span className="text-neutral-600">{t('success.validUntil')}:</span>
+                        <span className="font-medium text-neutral-800">
+                          {new Date(paymentDetails.subscription.expiresAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
                 {(sessionId || orderId) && (
                   <div className="flex justify-between mt-4 pt-4 border-t border-neutral-300">

@@ -160,11 +160,11 @@
       "cancel": "Puteți anula abonamentul în orice moment prin setările contului",
       "refund": "Rambursările sunt disponibile în termen de 7 zile (lunar) sau 30 de zile (anual) de la cumpărare dacă nu sunteți mulțumit (consultați Politica noastră de rambursare)",
       "price": "Putem modifica prețurile abonamentelor cu preaviz de 30 de zile",
-      "paddle": {
+      "lemonsqueezy": {
         "title": "Comerciant înregistrat",
-        "morStatement": "Procesul nostru de comandă este gestionat de revânzătorul nostru online Paddle.com. Paddle.com este Comerciantul înregistrat pentru toate comenzile noastre. Paddle gestionează toate întrebările de asistență pentru clienți și retururile.",
-        "text": "Când faceți o achiziție, efectuați o tranzacție cu Paddle, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările. Plata dumneavoastră va apărea pe extrasul dvs. ca o taxă de la Paddle.",
-        "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii pentru cumpărători Paddle."
+        "morStatement": "Procesul nostru de comandă este gestionat de revânzătorul nostru online LemonSqueezy. LemonSqueezy este Comerciantul înregistrat pentru toate comenzile noastre. LemonSqueezy gestionează toate întrebările de asistență pentru clienți și retururile.",
+        "text": "Când faceți o achiziție, efectuați o tranzacție cu LemonSqueezy, care gestionează procesarea plăților, facturarea, conformitatea TVA/impozite și rambursările. Plata dumneavoastră va apărea pe extrasul dvs. ca o taxă de la LemonSqueezy.",
+        "buyerTerms": "Prin efectuarea unei achiziții, acceptați și Termenii pentru cumpărători LemonSqueezy."
       }
     },
     "prohibited": {

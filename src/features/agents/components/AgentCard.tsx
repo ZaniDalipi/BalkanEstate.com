@@ -192,7 +192,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
             ) : (
               <BuildingOfficeIcon className="w-4 h-4 text-slate-300" />
             )}
-            <span className="text-[11px] text-white font-semibold max-w-[70px] truncate">{agent.agencyName}</span>
+            <span className="text-[11px] text-white font-semibold max-w-[100px] sm:max-w-[120px] truncate">{agent.agencyName}</span>
             <ChevronRightIcon className="w-3 h-3 text-slate-400" />
           </button>
         </div>

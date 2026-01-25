@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
+import { PageTransition, Animated } from '@/src/components/ui/Animations';
 
 const TermsOfServicePage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -17,26 +18,30 @@ const TermsOfServicePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="font-medium">{t('common:back', 'Back')}</span>
-          </button>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            {t('legal:terms.title', 'Terms of Service')}
-          </h1>
-          <p className="text-gray-600">
-            {t('legal:terms.lastUpdated', 'Last updated')}: {lastUpdated}
-          </p>
-        </div>
+      <PageTransition>
+        <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+          {/* Header */}
+          <Animated variant="fadeInUp" delay={0}>
+            <div className="mb-8">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
+              >
+                <ArrowLeftIcon className="w-5 h-5" />
+                <span className="font-medium">{t('common:back', 'Back')}</span>
+              </button>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                {t('legal:terms.title', 'Terms of Service')}
+              </h1>
+              <p className="text-gray-600">
+                {t('legal:terms.lastUpdated', 'Last updated')}: {lastUpdated}
+              </p>
+            </div>
+          </Animated>
 
-        {/* Content */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
+          {/* Content */}
+          <Animated variant="fadeInUp" delay={100}>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
           {/* Introduction */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
@@ -111,19 +116,19 @@ const TermsOfServicePage: React.FC = () => {
               <li>{t('legal:terms.payments.price', 'We may change subscription prices with 30 days notice')}</li>
             </ul>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-              <h4 className="font-semibold text-gray-800 mb-2">{t('legal:terms.payments.paddle.title', 'Merchant of Record')}</h4>
+              <h4 className="font-semibold text-gray-800 mb-2">{t('legal:terms.payments.provider.title', 'Merchant of Record')}</h4>
               <p className="text-gray-700 text-sm mb-3">
-                {t('legal:terms.payments.paddle.morStatement', 'Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns.')}
+                {t('legal:terms.payments.provider.morStatement', 'Our order process is conducted by our online reseller LemonSqueezy. LemonSqueezy is the Merchant of Record for all our orders. LemonSqueezy provides all customer service inquiries and handles returns.')}
               </p>
               <p className="text-gray-600 text-sm mb-3">
-                {t('legal:terms.payments.paddle.text', 'When you make a purchase, you are transacting with Paddle, who handles payment processing, invoicing, VAT/tax compliance, and refunds. Your payment will appear on your statement as a charge from Paddle.')}
+                {t('legal:terms.payments.provider.text', 'When you make a purchase, you are transacting with LemonSqueezy, who handles payment processing, invoicing, VAT/tax compliance, and refunds. Your payment will appear on your statement as a charge from LemonSqueezy.')}
               </p>
               <p className="text-gray-600 text-sm mb-3">
-                {t('legal:terms.payments.paddle.buyerTerms', 'By making a purchase, you also agree to Paddle\'s Buyer Terms and Conditions.')}
+                {t('legal:terms.payments.provider.buyerTerms', 'By making a purchase, you also agree to LemonSqueezy\'s Terms of Service.')}
               </p>
               <div className="flex flex-wrap gap-3 mt-3">
-                <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Paddle Buyer Terms →</a>
-                <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Paddle Privacy Policy →</a>
+                <a href="https://www.lemonsqueezy.com/terms" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">LemonSqueezy Terms →</a>
+                <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">LemonSqueezy Privacy Policy →</a>
               </div>
             </div>
           </section>
@@ -346,8 +351,10 @@ const TermsOfServicePage: React.FC = () => {
               <p className="text-gray-700">Phone: +389 71 967 915</p>
             </div>
           </section>
+            </div>
+          </Animated>
         </div>
-      </div>
+      </PageTransition>
 
       <Footer />
     </div>

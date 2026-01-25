@@ -8,9 +8,10 @@ interface ModalProps {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
   maxWidth?: string;
+  fullScreenOnMobile?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg', maxWidth }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'lg', maxWidth, fullScreenOnMobile = false }) => {
   // Lock body scroll when modal is open to prevent map jumping
   useEffect(() => {
     if (isOpen) {
@@ -49,10 +50,21 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     sizeClass = sizeMap[size || 'lg'] || 'max-w-lg';
   }
 
+  // Full screen mobile classes
+  const mobileFullScreenClasses = fullScreenOnMobile
+    ? 'fixed inset-0 sm:relative sm:inset-auto rounded-none sm:rounded-lg max-h-full sm:max-h-[95vh] md:max-h-[90vh]'
+    : 'rounded-lg max-h-screen sm:max-h-[95vh] md:max-h-[90vh]';
+
+  // For fullScreenOnMobile: no backdrop on mobile (modal fills screen), blurry backdrop on desktop
+  // For regular modals: blurry backdrop on all screen sizes
+  const backdropClasses = fullScreenOnMobile
+    ? 'fixed inset-0 bg-transparent sm:bg-black/30 sm:backdrop-blur-md z-[5000] flex justify-center items-center p-0 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto'
+    : 'fixed inset-0 bg-black/30 backdrop-blur-md z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto';
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-[5000] flex justify-center items-center p-2 sm:p-3 md:p-4 overflow-x-hidden overflow-y-auto" onClick={handleBackdropClick}>
+    <div className={backdropClasses} onClick={handleBackdropClick}>
       <div
-        className={`bg-white rounded-lg shadow-xl p-3 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto max-h-screen sm:max-h-[95vh] md:max-h-[90vh]`}
+        className={`bg-white shadow-xl p-4 sm:p-4 md:p-6 w-full ${sizeClass} relative overflow-y-auto ${mobileFullScreenClasses}`}
         onClick={handleContentClick}
       >
         <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-500 hover:text-neutral-800 z-10 p-1" aria-label="Close modal">

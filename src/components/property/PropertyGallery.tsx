@@ -1,25 +1,27 @@
 // PropertyGallery Component
 // Image gallery with carousel, street view, video player, and interactive controls
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
-import { SharePopover } from './SharePopover';
-import { VideoPlayer } from './VideoPlayer';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PencilIcon,
-  ShareIcon,
   VideoCameraIcon,
   BuildingOfficeIcon,
-  StreetViewIcon,
 } from '../../../constants';
+import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
   property: Property;
   onOpenEditor: (imageUrl: string) => void;
   onOpenViewer: () => void;
+  // Controlled mode props
+  activeCategory?: PropertyImageTag | 'all';
+  currentImageIndex?: number;
+  onCategoryChange?: (category: PropertyImageTag | 'all') => void;
+  onImageIndexChange?: (index: number) => void;
 }
 
 /**
@@ -47,37 +49,47 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
   onOpenEditor,
   onOpenViewer,
+  activeCategory: controlledCategory,
+  currentImageIndex: controlledIndex,
+  onCategoryChange,
+  onImageIndexChange,
 }) => {
   const { t } = useTranslation(['property']);
-  const [activeCategory, setActiveCategory] = useState<PropertyImageTag | 'all'>('all');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [mainImageError, setMainImageError] = useState(false);
-  const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
-  // Start with video mode if video URL exists, otherwise photos
-  const [viewMode, setViewMode] = useState<'video' | 'photos' | 'streetview'>(
-    property.videoUrl ? 'video' : 'photos'
-  );
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [videoHasPlayed, setVideoHasPlayed] = useState(false);
-  const shareContainerRef = useRef<HTMLDivElement>(null);
-  const streetViewRef = useRef<HTMLIFrameElement>(null);
 
-  // Handle video end - transition to photos
-  const handleVideoEnd = useCallback(() => {
-    setVideoHasPlayed(true);
-    setViewMode('photos');
-  }, []);
+  // Internal state for uncontrolled mode
+  const [internalCategory, setInternalCategory] = useState<PropertyImageTag | 'all'>('all');
+  const [internalIndex, setInternalIndex] = useState(0);
 
-  // Close share popover on outside click
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (shareContainerRef.current && !shareContainerRef.current.contains(event.target as Node)) {
-        setIsSharePopoverOpen(false);
+  // Use controlled values if provided, otherwise use internal state
+  const activeCategory = controlledCategory ?? internalCategory;
+  const currentImageIndex = controlledIndex ?? internalIndex;
+
+  // Update handlers that work in both modes
+  const setActiveCategory = useCallback((category: PropertyImageTag | 'all') => {
+    if (onCategoryChange) {
+      onCategoryChange(category);
+    } else {
+      setInternalCategory(category);
+    }
+  }, [onCategoryChange]);
+
+  const setCurrentImageIndex = useCallback((index: number | ((prev: number) => number)) => {
+    if (onImageIndexChange) {
+      if (typeof index === 'function') {
+        // For function updates, we need the current value
+        const newIndex = index(controlledIndex ?? internalIndex);
+        onImageIndexChange(newIndex);
+      } else {
+        onImageIndexChange(index);
       }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, []);
+    } else {
+      setInternalIndex(index as number);
+    }
+  }, [onImageIndexChange, controlledIndex, internalIndex]);
+
+  const [mainImageError, setMainImageError] = useState(false);
+  const [viewMode, setViewMode] = useState<'photos' | 'streetview'>('photos');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Combine all images
   const allImages = useMemo(() => {
@@ -116,32 +128,53 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
-    setCurrentImageIndex(0);
-  }, []);
+    if (onImageIndexChange) {
+      onImageIndexChange(0);
+    } else {
+      setInternalIndex(0);
+    }
+  }, [setActiveCategory, onImageIndexChange]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex((prev) => (prev + 1) % imagesForCurrentCategory.length);
-  }, [imagesForCurrentCategory.length]);
+    const newIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
+    if (onImageIndexChange) {
+      onImageIndexChange(newIndex);
+    } else {
+      setInternalIndex(newIndex);
+    }
+  }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex(
-      (prev) => (prev - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length
-    );
-  }, [imagesForCurrentCategory.length]);
+    const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
+    if (onImageIndexChange) {
+      onImageIndexChange(newIndex);
+    } else {
+      setInternalIndex(newIndex);
+    }
+  }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
+
+  // Get category label for display
+  const getCategoryEmoji = (category: PropertyImageTag | 'all'): string => {
+    const emojiMap: Record<string, string> = {
+      all: '📷',
+      exterior: '🏠',
+      interior: '🛋️',
+      bedroom: '🛏️',
+      bathroom: '🚿',
+      kitchen: '🍳',
+      living_room: '🛋️',
+      garden: '🌳',
+      pool: '🏊',
+      view: '🌅',
+      other: '📸',
+    };
+    return emojiMap[category] || '📷';
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
-      <div className="relative w-full h-[250px] sm:h-[400px] lg:h-[450px] bg-neutral-200">
-        {viewMode === 'video' && property.videoUrl ? (
-          <VideoPlayer
-            videoUrl={property.videoUrl}
-            autoPlay={!videoHasPlayed}
-            muted={true}
-            onVideoEnd={handleVideoEnd}
-            showReplayButton={true}
-            className="w-full h-full"
-          />
-        ) : viewMode === 'photos' ? (
+      <div className="relative w-full h-[200px] xs:h-[250px] sm:h-[350px] md:h-[400px] lg:h-[450px] landscape:h-[50vh] landscape:min-h-[200px] bg-neutral-200">
+        {viewMode === 'photos' ? (
           <button
             onClick={onOpenViewer}
             className="relative w-full h-full block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-t-xl"
@@ -163,7 +196,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         ) : viewMode === 'streetview' ? (
           <div className={`relative w-full h-full ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
             <iframe
-              ref={streetViewRef}
               src={`https://www.google.com/maps?layer=c&cbll=${property.lat},${property.lng}&cbp=12,0,0,0,0&output=svembed`}
               className="w-full h-full border-0"
               allowFullScreen
@@ -196,47 +228,31 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="absolute top-4 left-4 z-10 flex items-center gap-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-3 py-1.5 rounded-full hover:scale-105 transition-transform shadow-lg"
+            className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full hover:scale-105 transition-transform shadow-lg"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               <path d="M2 12h20" />
             </svg>
-            <span className="text-xs">360°</span>
+            <span className="text-[11px] sm:text-xs">360°</span>
           </a>
         )}
 
-        {/* Action Buttons (Annotate, Share, 3D Tour) */}
+        {/* Action Buttons (Annotate, 3D Tour) - Horizontal on mobile, vertical on larger screens */}
         {viewMode === 'photos' && (
           <>
-            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 z-10">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onOpenEditor(currentImageUrl);
                 }}
-                className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-4 py-2 rounded-full hover:scale-105 transition-transform shadow-md"
+                className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
               >
-                <PencilIcon className="w-5 h-5" />
-                <span className="hidden sm:inline">{t('actions.annotate')}</span>
+                <PencilIcon className="w-5 h-5 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline font-semibold text-sm">{t('actions.annotate')}</span>
               </button>
-
-              <div className="relative" ref={shareContainerRef}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsSharePopoverOpen((prev) => !prev);
-                  }}
-                  className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-4 py-2 rounded-full hover:scale-105 transition-transform shadow-md"
-                >
-                  <ShareIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline">{t('actions.share')}</span>
-                </button>
-                {isSharePopoverOpen && (
-                  <SharePopover property={property} onClose={() => setIsSharePopoverOpen(false)} />
-                )}
-              </div>
 
               {property.tourUrl && (
                 <a
@@ -244,10 +260,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-neutral-800 font-semibold px-4 py-2 rounded-full hover:scale-105 transition-transform shadow-md"
+                  className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
                 >
-                  <VideoCameraIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline">{t('actions.tour3d')}</span>
+                  <VideoCameraIcon className="w-5 h-5 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline font-semibold text-sm">{t('actions.tour3d')}</span>
                 </a>
               )}
 
@@ -261,50 +277,36 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     e.stopPropagation();
                     handlePrevImage();
                   }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10"
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
                 >
-                  <ChevronLeftIcon className="w-6 h-6 text-neutral-800" />
+                  <ChevronLeftIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNextImage();
                   }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/70 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-md z-10"
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-md z-10 w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center"
                 >
-                  <ChevronRightIcon className="w-6 h-6 text-neutral-800" />
+                  <ChevronRightIcon className="w-5 h-5 sm:w-5 sm:h-5 text-neutral-800" />
                 </button>
 
-                {/* Image Indicators - Show max 3 dots with counter */}
-                <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-10">
-                  <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
-                    {[0, 1, 2].map((dotIndex) => {
-                      const totalImages = imagesForCurrentCategory.length;
-                      const isActive = dotIndex === Math.min(currentImageIndex, 2) ||
-                        (currentImageIndex >= 2 && dotIndex === 2);
-                      return (
-                        <button
-                          key={dotIndex}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (dotIndex < totalImages) {
-                              setCurrentImageIndex(dotIndex);
-                            }
-                          }}
-                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                            (dotIndex === currentImageIndex || (currentImageIndex > 2 && dotIndex === 2))
-                              ? 'bg-white w-4'
-                              : 'bg-white/40'
-                          }`}
-                          aria-label={`Go to image ${dotIndex + 1}`}
-                        />
-                      );
-                    })}
-                    {imagesForCurrentCategory.length > 3 && (
-                      <span className="text-white text-[10px] font-medium ml-1">
-                        {currentImageIndex + 1}/{imagesForCurrentCategory.length}
+                {/* Image Counter & Category Badge - Top left corner */}
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-1.5" style={{ marginTop: property.virtualTour360Url ? '40px' : '0' }}>
+                  {/* Category Badge - Shows when not viewing 'all' */}
+                  {activeCategory !== 'all' && (
+                    <div className="flex items-center gap-1.5 bg-primary/90 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg animate-fade-in">
+                      <span className="text-sm">{getCategoryEmoji(activeCategory)}</span>
+                      <span className="text-white text-[11px] sm:text-xs font-semibold capitalize">
+                        {t(`photos.categories.${activeCategory}`, { defaultValue: activeCategory.replace('_', ' ') })}
                       </span>
-                    )}
+                    </div>
+                  )}
+                  {/* Image Counter */}
+                  <div className="flex items-center bg-black/60 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
+                    <span className="text-white text-[11px] sm:text-xs font-medium whitespace-nowrap">
+                      {currentImageIndex + 1} / {imagesForCurrentCategory.length}
+                    </span>
                   </div>
                 </div>
               </>
@@ -312,47 +314,71 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </>
         )}
 
-        {/* View Mode Toggle (Video / Photos / Street View) - Compact */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
-          <div className="flex items-center gap-0.5 bg-white/90 backdrop-blur-md p-0.5 rounded-full shadow-md">
-            {/* Video button - only shown if property has video */}
-            {property.videoUrl && (
-              <button
-                onClick={() => setViewMode('video')}
-                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${
-                  viewMode === 'video'
-                    ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-sm'
-                    : 'text-neutral-600 hover:bg-neutral-100'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                <span className="hidden sm:inline">{t('actions.video', 'Video')}</span>
-              </button>
-            )}
-            <button
-              onClick={() => setViewMode('photos')}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                viewMode === 'photos'
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-neutral-600 hover:bg-neutral-100'
-              }`}
-            >
-              {t('actions.photos')}
-            </button>
-            <button
-              onClick={() => setViewMode('streetview')}
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${
-                viewMode === 'streetview'
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-neutral-600 hover:bg-neutral-100'
-              }`}
-            >
-              <StreetViewIcon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('actions.streetView')}</span>
-              <span className="sm:hidden">Street</span>
-            </button>
+        {/* View Mode Toggle (Photos / Street View) - Liquid Glass Style */}
+        <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
+          {/* Mobile version - smaller */}
+          <div className="sm:hidden">
+            <LiquidGlassSwitch
+              options={[
+                {
+                  value: 'photos',
+                  label: t('actions.photos'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                    </svg>
+                  ),
+                },
+                {
+                  value: 'streetview',
+                  label: t('actions.streetView'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="5" r="3" />
+                      <path d="M12 8v4" />
+                      <path d="M8 21l4-9 4 9" />
+                    </svg>
+                  ),
+                },
+              ]}
+              value={viewMode}
+              onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
+              size="sm"
+            />
+          </div>
+          {/* Desktop version - medium */}
+          <div className="hidden sm:block">
+            <LiquidGlassSwitch
+              options={[
+                {
+                  value: 'photos',
+                  label: t('actions.photos'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
+                    </svg>
+                  ),
+                },
+                {
+                  value: 'streetview',
+                  label: t('actions.streetView'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="5" r="3" />
+                      <path d="M12 8v4" />
+                      <path d="M8 21l4-9 4 9" />
+                    </svg>
+                  ),
+                },
+              ]}
+              value={viewMode}
+              onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
+              size="md"
+            />
           </div>
         </div>
       </div>

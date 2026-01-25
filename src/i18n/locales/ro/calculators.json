@@ -81,6 +81,13 @@
       "sellingCosts": "Selling Costs",
       "investmentReturn": "Investment Return"
     },
+    "groups": {
+      "loanSettings": "Credit",
+      "propertyCosts": "Costuri",
+      "marketAssumptions": "Piață",
+      "transactionCosts": "Tranzacție",
+      "investment": "Investiție"
+    },
     "tooltips": {
       "downPayment": "Percentage of home price paid upfront",
       "interestRate": "Annual mortgage interest rate",

@@ -283,3 +283,95 @@ export const toggleProductVisibility = async (productId: string): Promise<{ prod
     requiresAuth: true,
   });
 };
+
+// --- Admin Promotion Plans ---
+
+export interface PromotionPlan {
+  _id: string;
+  category: 'listing' | 'agency';
+  tier: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  pricing: {
+    duration7?: number;
+    duration30?: number;
+    duration90?: number;
+    fixedPrice?: number;
+    fixedDuration?: string;
+  };
+  features: string[];
+  visibilityMultiplier?: string;
+  displayOrder: number;
+  badge?: string;
+  badgeColor?: string;
+  highlighted: boolean;
+  isAddOn: boolean;
+  cardStyle?: {
+    gradientFrom?: string;
+    gradientTo?: string;
+    borderColor?: string;
+    iconBgColor?: string;
+    priceColor?: string;
+  };
+  isActive: boolean;
+  isVisible: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const getPromotionPlans = async (): Promise<{ plans: PromotionPlan[] }> => {
+  return apiRequest('/promotion-plans/admin', {
+    requiresAuth: true,
+  });
+};
+
+export const getPublicPromotionPlans = async (category?: string): Promise<{ plans: PromotionPlan[] }> => {
+  const queryParams = category ? `?category=${category}` : '';
+  return apiRequest(`/promotion-plans${queryParams}`, {
+    requiresAuth: false,
+  });
+};
+
+export const createPromotionPlan = async (
+  data: Omit<PromotionPlan, '_id' | 'createdAt' | 'updatedAt'>
+): Promise<{ plan: PromotionPlan }> => {
+  return apiRequest('/promotion-plans', {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+export const updatePromotionPlan = async (
+  planId: string,
+  data: Partial<PromotionPlan>
+): Promise<{ plan: PromotionPlan }> => {
+  return apiRequest(`/promotion-plans/${planId}`, {
+    method: 'PUT',
+    body: data,
+    requiresAuth: true,
+  });
+};
+
+export const deletePromotionPlan = async (planId: string): Promise<{ message: string }> => {
+  return apiRequest(`/promotion-plans/${planId}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+};
+
+export const togglePromotionPlanStatus = async (planId: string): Promise<{ plan: PromotionPlan }> => {
+  return apiRequest(`/promotion-plans/${planId}/toggle-status`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};
+
+export const seedPromotionPlans = async (options?: { force?: boolean }): Promise<{ message: string; count?: number }> => {
+  const queryParams = options?.force ? '?force=true' : '';
+  return apiRequest(`/promotion-plans/seed${queryParams}`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+};

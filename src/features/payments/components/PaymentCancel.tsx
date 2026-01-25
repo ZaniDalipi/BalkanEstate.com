@@ -8,9 +8,11 @@ const PaymentCancel: React.FC = () => {
   const { dispatch } = useAppContext();
 
   const handleReturnToSubscriptions = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-    dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });
-    window.history.pushState({}, '', '/account');
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    const currentLang = window.location.pathname.split('/')[1] || 'en';
+    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+    window.history.pushState({}, '', `/${lang}/subscribe`);
   };
 
   const handleReturnHome = () => {

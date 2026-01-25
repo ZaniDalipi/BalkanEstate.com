@@ -21,7 +21,7 @@
       "emailLabel": "Email Address",
       "emailPlaceholder": "you@example.com",
       "continueToPayment": "Continue to Payment",
-      "securePayment": "Secure payment powered by Stripe"
+      "securePayment": "Secure payment powered by LemonSqueezy"
     }
   },
   "sellerPlan": {
@@ -212,7 +212,7 @@
     "processing": "Processing payment...",
     "success": "Payment successful!",
     "error": "Payment failed",
-    "securePayment": "Secure payment powered by Stripe",
+    "securePayment": "Secure payment powered by LemonSqueezy",
     "cardDetails": "Card Details",
     "payNow": "Pay Now",
     "cancel": "Cancel"

@@ -21,6 +21,8 @@ export type PaymentStatus =
 
 export interface IPaymentRecord extends Document {
   userId: mongoose.Types.ObjectId;
+  userEmail?: string; // Store email for easy admin lookup
+  userName?: string; // Store name for easy admin lookup
   subscriptionId?: mongoose.Types.ObjectId;
   subscriptionEventId?: mongoose.Types.ObjectId;
 
@@ -45,6 +47,7 @@ export interface IPaymentRecord extends Document {
 
   // Product
   productId?: string;
+  description?: string; // Human readable description
 
   // User location (for tax/reporting)
   country?: string;
@@ -76,6 +79,13 @@ const PaymentRecordSchema: Schema = new Schema(
       required: true,
       index: true,
     },
+    userEmail: {
+      type: String,
+      index: true,
+    },
+    userName: {
+      type: String,
+    },
     subscriptionId: {
       type: Schema.Types.ObjectId,
       ref: 'Subscription',
@@ -89,7 +99,7 @@ const PaymentRecordSchema: Schema = new Schema(
     // Store
     store: {
       type: String,
-      enum: ['google', 'apple', 'stripe', 'paddle', 'web'],
+      enum: ['google', 'apple', 'stripe', 'paddle', 'lemonsqueezy', 'web'],
       required: true,
       index: true,
     },
@@ -146,6 +156,9 @@ const PaymentRecordSchema: Schema = new Schema(
 
     // Product
     productId: {
+      type: String,
+    },
+    description: {
       type: String,
     },
 

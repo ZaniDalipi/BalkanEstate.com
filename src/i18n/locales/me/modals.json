@@ -14,7 +14,7 @@
     "emailAddress": "Email Address",
     "emailPlaceholder": "you@example.com",
     "continueToPayment": "Continue to Payment",
-    "securePayment": "Secure payment powered by Stripe",
+    "securePayment": "Secure payment powered by LemonSqueezy",
     "loadingPlans": "Loading plans...",
     "buyerPro": {
       "name": "Buyer Pro",

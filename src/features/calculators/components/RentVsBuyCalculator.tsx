@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatPrice, getCurrencySymbol } from '@/utils/currency';
-import { ScaleIcon, ChevronDownIcon, ChevronUpIcon, KeyIcon, BuildingOfficeIcon } from '@/constants';
+import { ChevronDownIcon, ChevronUpIcon } from '@/constants';
 import { InfoIcon } from 'lucide-react';
 
 interface RentVsBuyCalculatorProps {
@@ -88,31 +88,48 @@ const AdvancedInput: React.FC<{
   };
 
   return (
-    <div className="flex justify-between items-center text-xs">
-      <div className="flex items-center gap-1">
-        <label htmlFor={id} className="text-neutral-600 font-medium">{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-1.5">
+        <label htmlFor={id} className="text-[11px] text-neutral-600 font-medium leading-tight">{label}</label>
         {tooltip && <Tooltip content={tooltip} />}
       </div>
-      <div className="relative w-28">
-        <input 
+      <div className="relative">
+        <input
           type="number"
           id={id}
           step="0.1"
           placeholder={placeholder}
           value={value}
-          onChange={e => handleChange(e.target.value)} 
-          className={`w-full text-xs font-semibold bg-neutral-100 border rounded-md p-1.5 text-right pr-7 focus:ring-1 focus:ring-primary focus:border-primary text-neutral-900 ${
-            error ? 'border-red-300' : 'border-neutral-200'
+          onChange={e => handleChange(e.target.value)}
+          className={`w-full text-sm font-semibold bg-neutral-50 border rounded-lg p-2.5 text-right pr-12 focus:ring-2 focus:ring-primary/20 focus:border-primary text-neutral-900 transition-all ${
+            error ? 'border-red-300 bg-red-50' : 'border-neutral-200'
           }`}
         />
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-500 font-medium pointer-events-none">{unit}</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 font-medium pointer-events-none">{unit}</span>
         {error && (
-          <div className="absolute -bottom-5 right-0 text-red-500 text-[10px]">{error}</div>
+          <div className="text-red-500 text-[10px] mt-1">{error}</div>
         )}
       </div>
     </div>
   );
 };
+
+// Group header component for advanced settings
+const SettingsGroup: React.FC<{
+  icon: string;
+  title: string;
+  children: React.ReactNode;
+}> = ({ icon, title, children }) => (
+  <div className="space-y-3">
+    <div className="flex items-center gap-2 pb-1 border-b border-neutral-100">
+      <span className="text-sm">{icon}</span>
+      <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wide">{title}</h4>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {children}
+    </div>
+  </div>
+);
 
 const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice, country }) => {
   const { t } = useTranslation(['calculators']);
@@ -341,27 +358,111 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 animate-fade-in">
       <div className="flex items-center gap-2 mb-3">
-        <ScaleIcon className="w-5 h-5 text-primary" />
+        <span className="text-xl">⚖️</span>
         <h3 className="text-base font-bold text-neutral-800">{t('calculators:rentVsBuy.title')}</h3>
       </div>
 
       <div className="space-y-4">
         <div>
-          <div className="flex justify-between items-baseline mb-1">
+          <div className="flex justify-between items-baseline mb-2">
             <label htmlFor="planning-to-stay" className="text-xs font-semibold text-neutral-700">
               {t('calculators:rentVsBuy.fields.planningToStay')}
             </label>
-            <span className="text-base font-bold text-neutral-900">{planningToStay} {t('calculators:rentVsBuy.fields.years')}</span>
+            <span className="text-lg font-bold bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent animate-pulse">
+              {planningToStay} {t('calculators:rentVsBuy.fields.years')}
+            </span>
           </div>
-          <input
-            id="planning-to-stay"
-            type="range"
-            min={1}
-            max={30}
-            value={planningToStay}
-            onChange={e => setPlanningToStay(e.target.valueAsNumber)}
-            className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
-          />
+
+          {/* Magical Slider Container */}
+          <div className="relative py-3">
+            {/* Glow effect behind track */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 h-4 rounded-full blur-md transition-all duration-300"
+              style={{
+                left: 0,
+                width: `${((planningToStay - 1) / 29) * 100}%`,
+                background: 'linear-gradient(90deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4), rgba(236,72,153,0.3))'
+              }}
+            />
+
+            {/* Track background with glass effect */}
+            <div className="relative h-3 rounded-full bg-gradient-to-r from-neutral-200/80 via-neutral-100 to-neutral-200/80 shadow-inner overflow-hidden">
+              {/* Animated gradient fill */}
+              <div
+                className="absolute inset-y-0 left-0 rounded-full transition-all duration-200 ease-out"
+                style={{
+                  width: `${((planningToStay - 1) / 29) * 100}%`,
+                  background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 3s linear infinite'
+                }}
+              />
+
+              {/* Sparkle particles on the progress */}
+              <div
+                className="absolute inset-y-0 left-0 overflow-hidden rounded-full"
+                style={{ width: `${((planningToStay - 1) / 29) * 100}%` }}
+              >
+                <div className="absolute inset-0 opacity-60">
+                  <div className="absolute top-1 left-[10%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.5s' }} />
+                  <div className="absolute top-1.5 left-[30%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.3s' }} />
+                  <div className="absolute top-0.5 left-[60%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '1.8s', animationDelay: '0.6s' }} />
+                  <div className="absolute top-1 left-[85%] w-0.5 h-0.5 bg-white rounded-full animate-ping" style={{ animationDuration: '2.2s', animationDelay: '0.9s' }} />
+                </div>
+              </div>
+
+              {/* Glass highlight on track */}
+              <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent rounded-t-full" />
+            </div>
+
+            {/* Custom thumb */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200"
+              style={{ left: `${((planningToStay - 1) / 29) * 100}%` }}
+            >
+              {/* Outer glow ring */}
+              <div className="absolute inset-0 -m-2 rounded-full bg-primary/20 animate-pulse" />
+
+              {/* Thumb container */}
+              <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-white via-white to-neutral-100 shadow-lg border-2 border-primary/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                {/* Inner gradient */}
+                <div className="absolute inset-1 rounded-full bg-gradient-to-br from-primary via-violet-500 to-pink-500" />
+
+                {/* House icon */}
+                <svg className="relative w-3.5 h-3.5 text-white drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+
+                {/* Shine effect */}
+                <div className="absolute top-0.5 left-1 w-2 h-2 bg-white/40 rounded-full blur-sm" />
+              </div>
+            </div>
+
+            {/* Invisible range input for interaction */}
+            <input
+              id="planning-to-stay"
+              type="range"
+              min={1}
+              max={30}
+              value={planningToStay}
+              onChange={e => setPlanningToStay(e.target.valueAsNumber)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
+          </div>
+
+          {/* Year markers */}
+          <div className="flex justify-between px-1 mt-1">
+            {[1, 10, 20, 30].map(year => (
+              <span
+                key={year}
+                className={`text-[10px] font-medium transition-colors ${
+                  planningToStay >= year ? 'text-primary' : 'text-neutral-400'
+                }`}
+              >
+                {year}y
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="relative">
@@ -388,117 +489,142 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
           </button>
           
           {showAdvanced && (
-            <div className="mt-3 space-y-3 pt-3 border-t animate-fade-in">
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.downPayment')}
-                value={downPaymentPercent}
-                onChange={setDownPaymentPercent}
-                placeholder="e.g., 20"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.downPayment')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.interestRate')}
-                value={interestRate}
-                onChange={setInterestRate}
-                placeholder="e.g., 3.5"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.interestRate')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.loanTerm')}
-                value={loanTerm}
-                onChange={setLoanTerm}
-                placeholder="e.g., 30"
-                unit={t('calculators:mortgage.fields.yrs')}
-                validate={validatePositive}
-                tooltip={t('calculators:rentVsBuy.tooltips.loanTerm')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.propertyTaxes')}
-                value={propertyTaxes}
-                onChange={setPropertyTaxes}
-                placeholder="e.g., 1.2"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.propertyTaxes')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.homeInsurance')}
-                value={homeInsurance}
-                onChange={setHomeInsurance}
-                placeholder="e.g., 0.4"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.homeInsurance')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.maintenance')}
-                value={maintenance}
-                onChange={setMaintenance}
-                placeholder="e.g., 1.0"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.maintenance')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.homeAppreciation')}
-                value={homeAppreciation}
-                onChange={setHomeAppreciation}
-                placeholder="e.g., 3.0"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.homeAppreciation')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.rentIncrease')}
-                value={rentIncrease}
-                onChange={setRentIncrease}
-                placeholder="e.g., 2.5"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.rentIncrease')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.closingCosts')}
-                value={closingCostsPercent}
-                onChange={setClosingCostsPercent}
-                placeholder="e.g., 3.0"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.closingCosts')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.sellingCosts')}
-                value={sellingCostsPercent}
-                onChange={setSellingCostsPercent}
-                placeholder="e.g., 6.0"
-                unit="%"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.sellingCosts')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
-              <AdvancedInput
-                label={t('calculators:rentVsBuy.advanced.investmentReturn')}
-                value={investmentReturnPercent}
-                onChange={setInvestmentReturnPercent}
-                placeholder="e.g., 7.0"
-                unit="%/yr"
-                validate={validatePercentage}
-                tooltip={t('calculators:rentVsBuy.tooltips.investmentReturn')}
-                invalidValueText={t('calculators:common.invalidValue')}
-              />
+            <div className="mt-4 space-y-5 pt-4 border-t border-neutral-200 animate-fade-in">
+              {/* Loan Settings */}
+              <SettingsGroup icon="🏦" title={t('calculators:rentVsBuy.groups.loanSettings')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.downPayment')}
+                  value={downPaymentPercent}
+                  onChange={setDownPaymentPercent}
+                  placeholder="20"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.downPayment')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.interestRate')}
+                  value={interestRate}
+                  onChange={setInterestRate}
+                  placeholder="3.5"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.interestRate')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <div className="sm:col-span-2">
+                  <AdvancedInput
+                    label={t('calculators:rentVsBuy.advanced.loanTerm')}
+                    value={loanTerm}
+                    onChange={setLoanTerm}
+                    placeholder="30"
+                    unit={t('calculators:mortgage.fields.yrs')}
+                    validate={validatePositive}
+                    tooltip={t('calculators:rentVsBuy.tooltips.loanTerm')}
+                    invalidValueText={t('calculators:common.invalidValue')}
+                  />
+                </div>
+              </SettingsGroup>
+
+              {/* Property Costs */}
+              <SettingsGroup icon="🏠" title={t('calculators:rentVsBuy.groups.propertyCosts')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.propertyTaxes')}
+                  value={propertyTaxes}
+                  onChange={setPropertyTaxes}
+                  placeholder="1.2"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.propertyTaxes')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.homeInsurance')}
+                  value={homeInsurance}
+                  onChange={setHomeInsurance}
+                  placeholder="0.4"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.homeInsurance')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <div className="sm:col-span-2">
+                  <AdvancedInput
+                    label={t('calculators:rentVsBuy.advanced.maintenance')}
+                    value={maintenance}
+                    onChange={setMaintenance}
+                    placeholder="1.0"
+                    unit="%/yr"
+                    validate={validatePercentage}
+                    tooltip={t('calculators:rentVsBuy.tooltips.maintenance')}
+                    invalidValueText={t('calculators:common.invalidValue')}
+                  />
+                </div>
+              </SettingsGroup>
+
+              {/* Market Assumptions */}
+              <SettingsGroup icon="📈" title={t('calculators:rentVsBuy.groups.marketAssumptions')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.homeAppreciation')}
+                  value={homeAppreciation}
+                  onChange={setHomeAppreciation}
+                  placeholder="3.0"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.homeAppreciation')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.rentIncrease')}
+                  value={rentIncrease}
+                  onChange={setRentIncrease}
+                  placeholder="2.5"
+                  unit="%/yr"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.rentIncrease')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+              </SettingsGroup>
+
+              {/* Transaction Costs */}
+              <SettingsGroup icon="💰" title={t('calculators:rentVsBuy.groups.transactionCosts')}>
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.closingCosts')}
+                  value={closingCostsPercent}
+                  onChange={setClosingCostsPercent}
+                  placeholder="3.0"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.closingCosts')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+                <AdvancedInput
+                  label={t('calculators:rentVsBuy.advanced.sellingCosts')}
+                  value={sellingCostsPercent}
+                  onChange={setSellingCostsPercent}
+                  placeholder="6.0"
+                  unit="%"
+                  validate={validatePercentage}
+                  tooltip={t('calculators:rentVsBuy.tooltips.sellingCosts')}
+                  invalidValueText={t('calculators:common.invalidValue')}
+                />
+              </SettingsGroup>
+
+              {/* Investment */}
+              <SettingsGroup icon="📊" title={t('calculators:rentVsBuy.groups.investment')}>
+                <div className="sm:col-span-2">
+                  <AdvancedInput
+                    label={t('calculators:rentVsBuy.advanced.investmentReturn')}
+                    value={investmentReturnPercent}
+                    onChange={setInvestmentReturnPercent}
+                    placeholder="7.0"
+                    unit="%/yr"
+                    validate={validatePercentage}
+                    tooltip={t('calculators:rentVsBuy.tooltips.investmentReturn')}
+                    invalidValueText={t('calculators:common.invalidValue')}
+                  />
+                </div>
+              </SettingsGroup>
             </div>
           )}
         </div>
@@ -531,7 +657,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className={`p-2 rounded-lg border ${!isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${!isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <BuildingOfficeIcon className="w-4 h-4"/>
+                    <span>🏢</span>
                     <p className="text-sm">{t('calculators:rentVsBuy.results.rent')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.totalCostToRent')}</p>
@@ -541,7 +667,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 </div>
                 <div className={`p-2 rounded-lg border ${isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <KeyIcon className="w-4 h-4"/>
+                    <span>🏠</span>
                     <p className="text-sm">{t('calculators:rentVsBuy.results.own')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.netCostToOwn')}</p>

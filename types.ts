@@ -607,7 +607,7 @@ export interface PendingSubscription {
     planPrice: number;
     planInterval: 'month' | 'year';
     discountPercent?: number;
-    modalType: 'buyer' | 'seller'; // which modal to open
+    modalType: 'buyer' | 'seller' | 'listing' | 'agency'; // which tab to open
 }
 
 export interface AppState {
@@ -664,7 +664,7 @@ export interface AppState {
     isSessionExpiredModalOpen: boolean;
 }
 
-export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'how-it-works';
+export type AdminSection = 'dashboard' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'how-it-works';
 
 export type AppAction =
     | { type: 'AUTH_CHECK_START' }

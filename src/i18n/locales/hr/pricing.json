@@ -1,115 +1,227 @@
 {
-  "pageTitle": "Cjenovni Planovi",
-  "title": "Odaberite Svoj Plan",
-  "subtitle": "Stavite svoju nekretninu pred tisuće potencijalnih kupaca s našim fleksibilnim opcijama cijena.",
-  "loading": "Učitavanje cjenovnih planova...",
-  "noPlans": "Trenutno nema dostupnih cjenovnih planova.",
+  "pageTitle": "Cjenik",
+  "title": "Odaberite svoj plan",
+  "subtitle": "Predstavite svoju nekretninu tisućama potencijalnih kupaca s našim fleksibilnim opcijama cijena.",
+  "loading": "Učitavanje cjenika...",
+  "noPlans": "Trenutno nema dostupnih planova.",
+  "simpleTransparent": "Jednostavne, transparentne cijene",
   "tabs": {
-    "forSellers": "Za Prodavače",
-    "forBuyers": "Za Kupce"
+    "forSellers": "Za prodavatelje",
+    "forBuyers": "Za kupce",
+    "listingHighlight": "Isticanje",
+    "agencyFeature": "Agencija"
   },
   "error": {
-    "loadFailed": "Učitavanje cjenovnih planova nije uspjelo"
+    "loadFailed": "Učitavanje cjenika nije uspjelo"
   },
-  "limitedOffer": "Ponuda Ograničenog Vremena Istječe Za:",
-  "offerTitle": "Čestitamo! Otključali Ste Ekskluzivne Popuste!",
-  "offerSubtitle": "Uživajte u ovoj jednokratnoj ponudi na naše planove prodaje kao znak zahvalnosti.",
+  "limitedOffer": "Ograničena ponuda završava za:",
+  "offerTitle": "Čestitamo! Otključali ste ekskluzivne popuste!",
+  "offerSubtitle": "Uživajte u ovoj jednokratnoj ponudi na naše planove za prodaju kao znak zahvalnosti.",
+  "badges": {
+    "mostPopular": "NAJPOPULARNIJE",
+    "bestForTeams": "NAJBOLJE ZA TIMOVE",
+    "buyerPro": "KUPAC PRO",
+    "popular": "Popularno"
+  },
   "plans": {
     "free": {
       "name": "Besplatno",
       "description": "Savršeno za početak"
     },
     "proMonthly": {
-      "name": "Pro Mjesečno",
-      "description": "Najbolje za aktivne prodavače",
+      "name": "Pro mjesečno",
+      "description": "Najbolje za aktivne prodavatelje",
       "badge": "Popularno"
     },
     "proYearly": {
-      "name": "Pro Godišnje",
+      "name": "Pro godišnje",
       "description": "Uštedite {{percent}}% s godišnjom naplatom",
-      "badge": "NAJPOPULARNIJE"
+      "badge": "NAJPOPULARNIJE",
+      "saveVsMonthly": "Uštedite 33% u odnosu na mjesečno"
     },
     "enterprise": {
-      "name": "Enterprise Plan",
+      "name": "Enterprise plan",
       "description": "Za agencije i profesionalce"
     }
   },
+  "metrics": {
+    "listingsYear": "Oglasi/Godišnje",
+    "listingsMonth": "Oglasi/Mjesečno",
+    "promoCouponsMonth": "Promo kuponi/Mj.",
+    "listings": "Oglasi",
+    "teamMembers": "Članovi tima"
+  },
   "features": {
-    "activeListings": "Do {{count}} aktivnih oglasa nekretnina",
-    "promotedListings": "Promovirajte {{count}} oglasa {{days}} dana",
+    "activeListings": "Do {{count}} aktivnih oglasa za nekretnine",
+    "promotedListings": "Promoviranje {{count}} oglasa tijekom {{days}} dana",
     "featuredListings": "{{count}} istaknutih oglasa",
     "prioritySupport": "Prioritetna podrška",
-    "prioritySupportDesc": "Brža pomoć",
+    "prioritySupportDesc": "Dobijte pomoć brže",
     "analytics": "Napredna analitička ploča",
-    "analyticsDesc": "Pratite performanse svojih oglasa",
+    "analyticsDesc": "Pratite učinkovitost svojih oglasa",
     "premiumPlacement": "Premium pozicioniranje oglasa",
-    "leadManagement": "Sustav upravljanja potencijalnim klijentima",
+    "leadManagement": "Sustav za upravljanje kontaktima",
     "teamMembers": "Do {{count}} članova tima",
     "apiAccess": "API pristup",
-    "customBranding": "Prilagođeni branding",
-    "dedicatedManager": "Posvećeni upravitelj računa",
+    "customBranding": "Prilagođeni brending",
+    "dedicatedManager": "Posvećeni voditelj računa",
     "mobileApp": "Pristup mobilnoj aplikaciji",
     "mobileAppDesc": "Upravljajte u pokretu",
-    "dedicatedAgencyPage": "Posvećena Stranica Agencije",
-    "dedicatedAgencyPageDesc": "Vaša vlastita brendirana stranica na našoj platformi",
-    "displayAgents": "Prikaz Svih Agenata i Nekretnina",
+    "dedicatedAgencyPage": "Posvećena stranica agencije",
+    "dedicatedAgencyPageDesc": "Vaša brendirana stranica na našoj platformi",
+    "displayAgents": "Prikaz svih agenata i nekretnina",
     "displayAgentsDesc": "Predstavite svoj tim i oglase",
-    "featuredAds": "Istaknuto u Rotacijskim Oglasima",
-    "featuredAdsDesc": "Mjesečna rotacija oglašavanja na početnoj stranici",
-    "fullContact": "Potpune Kontakt Informacije",
-    "fullContactDesc": "E-mail, telefon i izravni upiti",
-    "perfectForActive": "Savršeno za aktivne prodavače",
+    "featuredAds": "Istaknuto u rotirajućim oglasima",
+    "featuredAdsDesc": "Mjesečna rotacija oglasa na početnoj stranici",
+    "fullContact": "Potpune kontakt informacije",
+    "fullContactDesc": "E-pošta, telefon i izravni upiti",
+    "perfectForActive": "Savršeno za aktivne prodavatelje",
     "featuredBoost": "Pojačanje istaknutog pozicioniranja"
   },
   "buttons": {
-    "getStarted": "Počnite",
+    "getStarted": "Započnite",
+    "getStartedPrice": "Započnite - €{{price}}/{{period}}",
     "getPro": "Nabavite Pro",
-    "getProAnnual": "Nabavite Pro Godišnje",
-    "getProMonthly": "Nabavite Pro Mjesečno",
+    "getProAnnual": "Nabavite Pro godišnje",
+    "getProMonthly": "Nabavite Pro mjesečno",
     "getEnterprise": "Nabavite Enterprise",
-    "contactSales": "Kontaktirajte Prodaju",
-    "currentPlan": "Trenutni Plan"
+    "contactSales": "Kontaktirajte prodaju",
+    "currentPlan": "Trenutni plan",
+    "getFeatured": "Istaknite se",
+    "getBundle": "Nabavite paket",
+    "purchase": "Kupi"
   },
   "billing": {
     "monthly": "Mjesečno",
     "yearly": "Godišnje",
-    "perMonth": "/mjesec",
-    "perYear": "/godinu",
-    "perWeek": "/tjedan",
-    "billedAnnually": "Naplaćuje se godišnje",
-    "billedMonthly": "Naplaćuje se mjesečno",
+    "perMonth": "/mjesečno",
+    "perYear": "/godišnje",
+    "perWeek": "/tjedno",
+    "billedAnnually": "Godišnja naplata",
+    "billedMonthly": "Mjesečna naplata",
     "youSave": "Uštedite €{{amount}}!"
   },
   "discount": {
     "off": "{{percent}}% POPUSTA"
   },
   "benefits": {
-    "moneyBack": "30-Dnevno Vraćanje Novca",
-    "moneyBackDesc": "Puni povrat ako niste zadovoljni",
-    "moreViews": "3x Više Pregleda",
-    "moreViewsDesc": "Premium oglasi dobivaju više izloženosti",
-    "instantActivation": "Trenutna Aktivacija",
+    "moneyBack": "30 dana jamstva povrata novca",
+    "moneyBackDesc": "Puni povrat novca ako niste zadovoljni",
+    "moreViews": "3x više pregleda",
+    "moreViewsDesc": "Premium oglasi dobivaju veću vidljivost",
+    "instantActivation": "Trenutna aktivacija",
     "instantActivationDesc": "Počnite prodavati odmah",
     "cancelAnytime": "Otkažite bilo kada"
   },
   "enterprise": {
-    "required": "Enterprise Plan Potreban",
-    "message": "Pretplatite se na Enterprise kako biste kreirali svoju agenciju i predstavili svoj tim",
-    "contactUs": "Kontaktirajte nas kako biste saznali više o našem Enterprise planu."
+    "required": "Potreban je Enterprise plan",
+    "message": "Pretplatite se na Enterprise da biste kreirali svoju agenciju i predstavili svoj tim",
+    "contactUs": "Kontaktirajte nas da saznate više o našem Enterprise planu.",
+    "agentRequired": "Potreban je status agenta",
+    "agentRequiredMessage": "Samo registrirani agenti mogu kreirati agenciju. Molimo vas da prvo promijenite tip računa na Agent u svom profilu.",
+    "alreadyHaveAgency": "Već imate agenciju",
+    "viewYourAgency": "Već imate agenciju. Posjetite svoj račun da biste je upravljali."
   },
   "exitModal": {
     "title": "Jeste li sigurni da želite izaći?",
     "agencyMessage": "Ako sada izađete, sve informacije o agenciji koje ste unijeli bit će izgubljene i morat ćete početi ispočetka.",
-    "offerMessage": "Ovo je jednokratna ponuda. Ako sada odete, više nećete vidjeti ove nevjerojatne popuste.",
-    "stay": "Ostanite i Uštedite!",
-    "leave": "Da, Izađi",
-    "continueSetup": "Nastavi Postavljanje"
+    "offerMessage": "Ovo je jednokratna ponuda. Ako sada odete, nećete ponovno vidjeti ove nevjerojatne popuste.",
+    "stay": "Ostanite i uštedite!",
+    "leave": "Da, napusti",
+    "continueSetup": "Nastavite postavljanje"
   },
   "success": {
     "title": "Čestitamo!",
-    "message": "Vaša {{plan}} pretplata je aktivirana. Sada imate pristup svim premium funkcijama.",
+    "message": "Vaša {{plan}} pretplata je aktivirana. Sada imate pristup svim premium značajkama.",
     "agencyMessage": "Vaša Enterprise pretplata je aktivirana i vaša agencija je uspješno kreirana! Sada ste administrator svoje agencije.",
     "subscriptionActivated": "Pretplata uspješno aktivirana!",
-    "startListing": "Počnite Oglašavati Nekretnine"
+    "startListing": "Počnite objavljivati nekretnine"
+  },
+  "listing": {
+    "title": "Planovi za promociju oglasa",
+    "subtitle": "Pojačajte svoje oglase nekretnina da biste dobili veću vidljivost i više upita",
+    "selectListing": "Odaberite oglas za promociju s {{tier}}",
+    "loginRequired": "Molimo prijavite se da vidite svoje oglase",
+    "noListings": "Još nemate nijedan oglas",
+    "createListing": "+ Kreiraj oglas",
+    "duration": "Trajanje:",
+    "days": "dana",
+    "promoting": "Promoviranje:",
+    "forDays": "tijekom {{days}} dana",
+    "comingSoon": "Uskoro",
+    "promotionComingSoon": "Promocija oglasa bit će uskoro dostupna!",
+    "howItWorks": "Kako funkcionira:",
+    "howItWorksDescription": "Kliknite na razinu promocije iznad da biste započeli, ili prvo kreirajte oglas.",
+    "purchase": "Kupi",
+    "tiers": {
+      "featured": {
+        "title": "Istaknuto",
+        "description": "Prioritet u pretrazi",
+        "topOfSearch": "Vrh pretrage",
+        "featuredBadge": "Oznaka istaknuto",
+        "visibility": "2x vidljivost"
+      },
+      "highlight": {
+        "title": "Naglašeno",
+        "description": "Istaknite se",
+        "featuredBenefits": "Prednosti istaknutog",
+        "coloredHighlight": "Obojena pozadina",
+        "visibility": "3x vidljivost"
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "Istaknuto na početnoj",
+        "highlightBenefits": "Prednosti naglašenog",
+        "homepageCarousel": "Karusel na početnoj stranici",
+        "visibility": "5x vidljivost"
+      }
+    }
+  },
+  "agency": {
+    "title": "Istaknuta agencija",
+    "subtitle": "Neka vaša agencija bude istaknuta svuda na platformi",
+    "featuredTitle": "Istaknuta agencija",
+    "featuredDescription": "Istaknuto svuda na platformi",
+    "benefits": {
+      "featuredInDirectory": "Istaknuto u direktoriju agencija",
+      "priorityInSearch": "Prioritet u rezultatima pretrage",
+      "homepageCarousel": "Karusel agencija na početnoj stranici",
+      "featuredBadge": "Oznaka istaknuto na profilu",
+      "boostedVisibility": "Pojačana vidljivost svuda (3x)"
+    },
+    "mapMarker": {
+      "title": "Oznaka na karti",
+      "addon": "Dodatak",
+      "description": "Prikažite svoju agenciju na karti nekretnina",
+      "benefits": {
+        "agencyMarker": "Oznaka agencije na karti nekretnina",
+        "customIcon": "Prilagođena ikona agencije na karti",
+        "clickableMarker": "Klikabilna oznaka s informacijama o agenciji",
+        "visibleToAll": "Vidljivo svim pretraživačima nekretnina"
+      }
+    },
+    "total": {
+      "title": "Ukupno za {{days}} dana",
+      "bundleDescription": "Istaknuta agencija + Oznaka na karti"
+    },
+    "needAgency": "Još nemate agenciju?",
+    "needAgencyDescription": "Pretplatite se na naš Enterprise plan da kreirate svoju agenciju i otključate ove značajke.",
+    "viewEnterprise": "Pogledajte Enterprise plan",
+    "comingSoon": "Uskoro",
+    "featureComingSoon": "Isticanje agencije bit će uskoro dostupno!"
+  },
+  "contact": {
+    "haveQuestions": "Imate pitanja?",
+    "contactSales": "Kontaktirajte naš prodajni tim",
+    "sendEmail": "Pošaljite nam e-poruku",
+    "giveCall": "Nazovite nas"
+  },
+  "legal": {
+    "title": "Sigurna plaćanja i politike",
+    "description": "Sva plaćanja se sigurno obrađuju putem LemonSqueezy-a. Pretplatom prihvaćate naše politike:",
+    "termsOfService": "Uvjeti korištenja",
+    "privacyPolicy": "Politika privatnosti",
+    "refundPolicy": "Politika povrata",
+    "providerNote": "Plaćanja obrađuje LemonSqueezy kao trgovac. PDV/porezi uključeni gdje je primjenjivo."
   }
 }

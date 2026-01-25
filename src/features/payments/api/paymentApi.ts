@@ -2,11 +2,11 @@
  * Payment API Service
  *
  * Handles all payment-related API calls with support for multiple providers:
- * - Stripe for EU countries (Greece, Croatia, Bulgaria, Romania, Slovenia)
- * - Paddle for non-EU Balkan countries (Serbia, Albania, Bosnia, N. Macedonia, Montenegro, Kosovo)
+ * - LemonSqueezy for all Balkan countries (Merchant of Record)
+ * - Stripe as fallback for EU countries
  *
  * The API automatically routes to the appropriate provider based on country.
- * Paddle is a Merchant of Record (MoR) handling VAT/tax compliance.
+ * LemonSqueezy is a Merchant of Record (MoR) handling VAT/tax compliance.
  */
 
 import { apiRequest } from '@/shared/api/httpClient';
@@ -75,7 +75,7 @@ export interface SupportedCountriesResponse {
     };
   }>;
   stripeCountries: Array<{ countryCode: string; countryName: string }>;
-  paddleCountries: Array<{ countryCode: string; countryName: string }>;
+  lemonSqueezyCountries: Array<{ countryCode: string; countryName: string }>;
 }
 
 export interface VerifyPaymentResponse {
@@ -150,7 +150,7 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         countryName: info.countryName,
         provider: info.provider,
         providerInfo: {
-          name: info.provider === 'stripe' ? 'Stripe' : 'Paddle',
+          name: info.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy',
           description: info.provider === 'stripe'
             ? 'Secure card payments'
             : 'Secure payments with automatic VAT handling',
@@ -161,7 +161,7 @@ export async function getPaymentProvider(countryCode: string): Promise<PaymentPr
         currency: info.currency,
         supportedMethods: info.provider === 'stripe'
           ? ['card', 'sepa_debit', 'apple_pay', 'google_pay']
-          : ['card', 'bank_transfer', 'wallet'],
+          : ['card', 'paypal', 'apple_pay', 'google_pay'],
       };
     }
     return null;
@@ -187,7 +187,7 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       countries: countries.map(c => ({
         ...c,
         providerInfo: {
-          name: c.provider === 'stripe' ? 'Stripe' : 'Paddle',
+          name: c.provider === 'stripe' ? 'Stripe' : 'LemonSqueezy',
           description: c.provider === 'stripe'
             ? 'Secure card payments'
             : 'Secure payments with automatic VAT handling',
@@ -197,8 +197,8 @@ export async function getSupportedCountries(): Promise<SupportedCountriesRespons
       stripeCountries: countries
         .filter(c => c.provider === 'stripe')
         .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
-      paddleCountries: countries
-        .filter(c => c.provider === 'paddle')
+      lemonSqueezyCountries: countries
+        .filter(c => c.provider === 'lemonsqueezy')
         .map(c => ({ countryCode: c.countryCode, countryName: c.countryName })),
     };
   }
@@ -226,24 +226,52 @@ export async function verifyStripePayment(sessionId: string): Promise<VerifyPaym
 }
 
 /**
- * Verify a Paddle payment by transaction ID
+ * Verify a LemonSqueezy payment with polling
+ * Polls up to 15 times with 3-second intervals (45 seconds total)
+ * This gives LemonSqueezy webhooks enough time to process
  */
-export async function verifyPaddlePayment(transactionId: string): Promise<VerifyPaymentResponse> {
-  try {
-    const response = await apiRequest<VerifyPaymentResponse>(
-      `/payments/paddle/verify/${transactionId}`,
-      { method: 'GET', requiresAuth: true }
-    );
-    return { ...response, provider: 'paddle' };
-  } catch (error: any) {
-    console.error('Error verifying Paddle payment:', error);
-    return {
-      success: false,
-      paymentStatus: 'error',
-      provider: 'paddle',
-      message: error.message,
-    };
+export async function verifyLemonSqueezyPayment(maxAttempts = 15): Promise<VerifyPaymentResponse> {
+  const pollInterval = 3000; // 3 seconds between attempts
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = await apiRequest<VerifyPaymentResponse>(
+        '/payments/lemonsqueezy/verify',
+        { method: 'GET', requiresAuth: true }
+      );
+
+      // If payment is confirmed, return success
+      if (response.paymentStatus === 'paid') {
+        return { ...response, provider: 'lemonsqueezy' };
+      }
+
+      // If still processing and not last attempt, wait and retry
+      if (response.paymentStatus === 'processing' && attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+        continue;
+      }
+
+      return { ...response, provider: 'lemonsqueezy' };
+    } catch (error: any) {
+      console.error(`[LemonSqueezy] Verify attempt ${attempt}/${maxAttempts} failed:`, error);
+      if (attempt === maxAttempts) {
+        return {
+          success: false,
+          paymentStatus: 'error',
+          provider: 'lemonsqueezy',
+          message: error.message || 'Failed to verify payment',
+        };
+      }
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
   }
+
+  return {
+    success: false,
+    paymentStatus: 'error',
+    provider: 'lemonsqueezy',
+    message: 'Payment verification timed out',
+  };
 }
 
 /**
@@ -254,9 +282,12 @@ export async function verifyPayment(params: URLSearchParams): Promise<VerifyPaym
   const sessionId = params.get('session_id');
   const orderId = params.get('order_id');
 
-  if (provider === 'paddle' && orderId) {
-    return verifyPaddlePayment(orderId);
-  } else if (sessionId) {
+  // LemonSqueezy payments - use dedicated verification with polling
+  if (provider === 'lemonsqueezy') {
+    return verifyLemonSqueezyPayment();
+  }
+
+  if (sessionId) {
     return verifyStripePayment(sessionId);
   }
 
@@ -366,7 +397,7 @@ export default {
   getPaymentProvider,
   getSupportedCountries,
   verifyStripePayment,
-  verifyPaddlePayment,
+  verifyLemonSqueezyPayment,
   verifyPayment,
   getSubscriptionStatus,
   cancelSubscription,

@@ -103,6 +103,13 @@
       "sellingCosts": "Selling Costs",
       "investmentReturn": "Investment Return"
     },
+    "groups": {
+      "loanSettings": "Loan",
+      "propertyCosts": "Property Costs",
+      "marketAssumptions": "Market",
+      "transactionCosts": "Transaction",
+      "investment": "Investment"
+    },
     "tooltips": {
       "downPayment": "Percentage of home price paid upfront",
       "interestRate": "Annual mortgage interest rate",

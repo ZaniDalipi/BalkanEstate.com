@@ -60,6 +60,7 @@
   },
   "details": {
     "title": "Property Details",
+    "subtitle": "Essential property specifications",
     "description": "Description",
     "about": "About This Home",
     "location": "Location",
@@ -267,6 +268,20 @@
       "highlight": "Highlight",
       "featured": "Featured"
     },
+    "popup": {
+      "bed": "bed",
+      "bath": "bath",
+      "viewDetails": "View details",
+      "recommendation": "Recommendation",
+      "prev": "Prev",
+      "next": "Next",
+      "tierLabels": {
+        "premium": "PREMIUM PREMIERE",
+        "highlight": "HIGHLIGHT",
+        "featured": "FEATURED",
+        "standard": "PROMOTED"
+      }
+    },
     "agentRecommendations": {
       "premium": {
         "1": "This premium property is our top pick for you!",
@@ -305,6 +320,9 @@
   "photos": {
     "title": "Photos",
     "all": "All",
+    "images": "photos",
+    "view": "View",
+    "tapToView": "Tap to view in gallery",
     "categories": {
       "exterior": "Exterior",
       "interior": "Interior",

@@ -160,11 +160,11 @@
       "cancel": "Možete otkazati pretplatu u bilo kom trenutku putem podešavanja naloga",
       "refund": "Povrati su dostupni u roku od 7 dana (mjesečno) ili 30 dana (godišnje) od kupovine ako nijeste zadovoljni (pogledajte našu Politiku povrata)",
       "price": "Možemo promijeniti cijene pretplate uz obavještenje od 30 dana",
-      "paddle": {
+      "lemonsqueezy": {
         "title": "Trgovac evidencije",
-        "morStatement": "Naš proces naručivanja vodi naš online preprodavač Paddle.com. Paddle.com je Trgovac evidencije za sve naše narudžbe. Paddle pruža sve upite korisničke podrške i upravlja povratima.",
-        "text": "Kada izvršite kupovinu, obavljate transakciju sa Paddle-om, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima. Vaše plaćanje će se pojaviti na vašem izvodu kao naplata od Paddle-a.",
-        "buyerTerms": "Kupovinom takođe prihvatate Paddle-ove Uslove za kupce."
+        "morStatement": "Naš proces naručivanja vodi naš online preprodavač LemonSqueezy. LemonSqueezy je Trgovac evidencije za sve naše narudžbe. LemonSqueezy pruža sve upite korisničke podrške i upravlja povratima.",
+        "text": "Kada izvršite kupovinu, obavljate transakciju sa LemonSqueezy-om, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima. Vaše plaćanje će se pojaviti na vašem izvodu kao naplata od LemonSqueezy-a.",
+        "buyerTerms": "Kupovinom takođe prihvatate LemonSqueezy-ove Uslove za kupce."
       }
     },
     "prohibited": {

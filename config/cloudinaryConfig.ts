@@ -140,3 +140,147 @@ export const SUPPORTED_CITIES = [
   // Bulgaria
   'sofia', 'plovdiv', 'varna', 'burgas', 'ruse',
 ] as const;
+
+// ============================================================================
+// External Image Optimization (Cloudinary Fetch)
+// ============================================================================
+
+/**
+ * Cloudinary fetch base URL for optimizing external images
+ * This fetches, caches, and optimizes images from external URLs
+ */
+export const CLOUDINARY_FETCH_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/fetch`;
+
+/**
+ * Optimizes an external image URL using Cloudinary's fetch feature
+ * Benefits:
+ * - Automatic format conversion (WebP for supported browsers)
+ * - Compression and quality optimization
+ * - CDN caching for faster global delivery
+ * - Responsive image sizing
+ *
+ * @param externalUrl - The external image URL (e.g., Unsplash, Pexels)
+ * @param options - Transformation options
+ * @returns Optimized Cloudinary fetch URL
+ */
+export const getOptimizedExternalImage = (
+  externalUrl: string,
+  options: {
+    width?: number;
+    height?: number;
+    quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best' | number;
+    format?: 'auto' | 'webp' | 'jpg' | 'png';
+    crop?: 'fill' | 'scale' | 'fit' | 'thumb' | 'limit';
+    gravity?: 'auto' | 'center' | 'face' | 'faces';
+  } = {}
+): string => {
+  const {
+    width,
+    height,
+    quality = 'auto:good',
+    format = 'auto',
+    crop = 'fill',
+    gravity = 'auto',
+  } = options;
+
+  // Build transformation string
+  const transformations: string[] = [];
+
+  if (width) transformations.push(`w_${width}`);
+  if (height) transformations.push(`h_${height}`);
+  if (crop) transformations.push(`c_${crop}`);
+  if (gravity) transformations.push(`g_${gravity}`);
+  transformations.push(`q_${quality}`);
+  transformations.push(`f_${format}`);
+
+  const transformString = transformations.join(',');
+
+  // Encode the external URL
+  const encodedUrl = encodeURIComponent(externalUrl);
+
+  return `${CLOUDINARY_FETCH_URL}/${transformString}/${encodedUrl}`;
+};
+
+/**
+ * Generates srcSet for responsive external images
+ * @param externalUrl - The external image URL
+ * @param sizes - Array of widths for srcSet (default: [300, 400, 500, 600])
+ * @returns srcSet string
+ */
+export const getOptimizedExternalImageSrcSet = (
+  externalUrl: string,
+  sizes: number[] = [300, 400, 500, 600],
+  height?: number
+): string => {
+  return sizes
+    .map((width) => {
+      const url = getOptimizedExternalImage(externalUrl, {
+        width,
+        height: height ? Math.round(height * (width / sizes[sizes.length - 1])) : undefined,
+        quality: 'auto:good',
+        format: 'auto',
+        crop: 'fill',
+        gravity: 'auto',
+      });
+      return `${url} ${width}w`;
+    })
+    .join(', ');
+};
+
+// ============================================================================
+// Pre-defined Optimized Asset URLs
+// These are commonly used images cached via Cloudinary fetch for faster loading
+// ============================================================================
+
+/**
+ * Onboarding page images - using Unsplash's built-in optimization
+ * Unsplash supports URL parameters for resizing and quality:
+ * - w=width, h=height, q=quality (1-100), fm=format (webp, jpg)
+ * - fit=crop for aspect ratio fitting
+ */
+export const ONBOARDING_IMAGES = {
+  // "Looking to Buy" card - couple looking at new home
+  buyCard: {
+    src: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80&fm=webp',
+    srcSet: [
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=225&fit=crop&q=80&fm=webp 300w',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80&fm=webp 400w',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&h=375&fit=crop&q=80&fm=webp 500w',
+    ].join(', '),
+    preload: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80&fm=webp',
+    alt: 'A couple looking at a new home',
+  },
+  // "Want to Sell" card - modern house exterior
+  sellCard: {
+    src: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop&q=80&fm=webp',
+    srcSet: [
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=300&h=225&fit=crop&q=80&fm=webp 300w',
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop&q=80&fm=webp 400w',
+      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=500&h=375&fit=crop&q=80&fm=webp 500w',
+    ].join(', '),
+    alt: 'A modern house exterior',
+  },
+};
+
+/**
+ * Hero/Background images - using Unsplash's built-in optimization
+ */
+export const HERO_IMAGES = {
+  // Agents page hero background
+  agentsHero: {
+    src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&h=400&fit=crop&q=70&fm=webp',
+    srcSet: [
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=200&fit=crop&q=70&fm=webp 800w',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=300&fit=crop&q=70&fm=webp 1200w',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&h=400&fit=crop&q=70&fm=webp 1600w',
+    ].join(', '),
+  },
+};
+
+/**
+ * Fallback/Placeholder images - using Unsplash's built-in optimization
+ */
+export const FALLBACK_IMAGES = {
+  // Default property image when no images are uploaded
+  property: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500&h=375&fit=crop&q=80&fm=webp',
+};

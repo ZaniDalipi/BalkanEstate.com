@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -627,6 +627,73 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
 const ITEMS_PER_PAGE = 20;
 
+// Animated wrapper for property cards
+const AnimatedPropertyCard: React.FC<{
+  property: Property;
+  index: number;
+  onHover?: (id: string | null) => void;
+  isNew?: boolean;
+}> = ({ property, index, onHover, isNew = false }) => {
+  const animationDelay = `${Math.min(index * 50, 300)}ms`;
+
+  return (
+    <div
+      className={`property-card-animated ${isNew ? 'property-card-new' : ''}`}
+      style={{ animationDelay }}
+      onMouseEnter={() => onHover?.(property.id)}
+      onMouseLeave={() => onHover?.(null)}
+    >
+      <PropertyCard property={property} />
+    </div>
+  );
+};
+
+// CSS for property card animations
+const PropertyListStyles = () => (
+  <style>{`
+    .property-card-animated {
+      opacity: 0;
+      transform: translateY(15px);
+      animation: property-fade-in 0.4s ease-out forwards;
+    }
+
+    .property-card-new {
+      animation: property-slide-in 0.5s ease-out forwards;
+    }
+
+    @keyframes property-fade-in {
+      0% {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes property-slide-in {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .property-grid-transition {
+      transition: opacity 0.2s ease-out;
+    }
+
+    .property-grid-loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  `}</style>
+);
+
 const PropertyList: React.FC<PropertyListProps> = (props) => {
     const { t } = useTranslation(['search', 'common']);
     const { state, dispatch } = useAppContext();
@@ -740,19 +807,23 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             </div>
                         </div>
                         <div className="p-4 md:p-3 relative z-0">
+                            <PropertyListStyles />
                             {isLoadingProperties ? (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
                                     {Array.from({ length: 6 }).map((_, index) => (
-                                        <PropertyCardSkeleton key={index} />
+                                        <PropertyCardSkeleton key={index} index={index} />
                                     ))}
                                 </div>
                             ) : properties.length > 0 ? (
                                 <>
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
-                                        {properties.slice(0, visibleCount).map(prop => (
-                                            <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
-                                                <PropertyCard property={prop} />
-                                            </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3 property-grid-transition">
+                                        {properties.slice(0, visibleCount).map((prop, index) => (
+                                            <AnimatedPropertyCard
+                                                key={prop.id}
+                                                property={prop}
+                                                index={index}
+                                                onHover={onPropertyHover}
+                                            />
                                         ))}
                                     </div>
                                     {visibleCount < properties.length && (
@@ -840,19 +911,23 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             </div>
 
                             <div className="p-4 md:p-3 relative z-0">
+                                <PropertyListStyles />
                                 {isLoadingProperties ? (
                                     <div className="grid grid-cols-1 gap-4 md:gap-3">
                                         {Array.from({ length: 4 }).map((_, index) => (
-                                            <PropertyCardSkeleton key={index} />
+                                            <PropertyCardSkeleton key={index} index={index} />
                                         ))}
                                     </div>
                                 ) : properties.length > 0 ? (
                                     <>
-                                        <div className="grid grid-cols-1 gap-4 md:gap-3">
-                                            {properties.slice(0, visibleCount).map(prop => (
-                                                <div key={prop.id} onMouseEnter={() => onPropertyHover?.(prop.id)} onMouseLeave={() => onPropertyHover?.(null)}>
-                                                    <PropertyCard property={prop} />
-                                                </div>
+                                        <div className="grid grid-cols-1 gap-4 md:gap-3 property-grid-transition">
+                                            {properties.slice(0, visibleCount).map((prop, index) => (
+                                                <AnimatedPropertyCard
+                                                    key={prop.id}
+                                                    property={prop}
+                                                    index={index}
+                                                    onHover={onPropertyHover}
+                                                />
                                             ))}
                                         </div>
                                         {visibleCount < properties.length && (

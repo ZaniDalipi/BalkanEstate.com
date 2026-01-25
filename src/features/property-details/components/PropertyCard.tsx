@@ -12,6 +12,47 @@ interface PropertyCardProps {
   showCompareButton?: boolean;
 }
 
+// Seller Avatar component with error handling
+const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; size?: 'sm' | 'md' }> = ({
+  avatarUrl,
+  name,
+  type,
+  size = 'sm'
+}) => {
+  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const sizeClasses = size === 'sm'
+    ? 'w-8 h-8'
+    : 'w-10 h-10';
+  const iconSize = size === 'sm' ? 'w-5 h-5' : 'w-6 h-6';
+
+  if (!avatarUrl || error) {
+    return (
+      <div className={`${sizeClasses} rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow border-2 border-white`}>
+        <UserCircleIcon className={`${iconSize} text-primary`} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${sizeClasses} rounded-full overflow-hidden border-2 border-white shadow bg-gradient-to-br from-primary/20 to-primary/40`}>
+      {!loaded && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
+      )}
+      <img
+        src={avatarUrl}
+        alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
+        loading="lazy"
+        decoding="async"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onError={() => setError(true)}
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+};
+
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton }) => {
   const { t } = useTranslation(['property', 'common']);
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
@@ -54,7 +95,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         <div className="p-3 sm:p-4">
           <div className="h-4 bg-neutral-200 rounded w-3/4 mb-2 animate-pulse" />
           <div className="h-3 bg-neutral-200 rounded w-1/2 mb-3 animate-pulse" />
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-2 xs:grid-cols-4 gap-1.5">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-10 bg-neutral-100 rounded-lg animate-pulse" />
             ))}
@@ -316,7 +357,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         </div>
 
         {/* Property Stats - Grid layout for better fit */}
-        <div className="grid grid-cols-4 gap-1.5 mb-3">
+        <div className="grid grid-cols-2 xs:grid-cols-4 gap-1.5 mb-3">
           <div className="flex flex-col items-center bg-neutral-100 py-1.5 px-1 rounded-lg" title={`${safeProperty.beds} ${t('property:features.bedrooms')}`}>
             <BedIcon className="w-3.5 h-3.5 text-primary mb-0.5" />
             <span className="font-bold text-xs text-neutral-800">{safeProperty.beds}</span>
@@ -342,19 +383,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
           <div className="flex items-center gap-2">
             {/* Seller Avatar */}
             <div className="relative flex-shrink-0">
-              {safeProperty.seller.avatarUrl ? (
-                <img
-                  src={safeProperty.seller.avatarUrl}
-                  alt={`${safeProperty.seller.name} - Real Estate ${safeProperty.seller.type === 'agent' ? 'Agent' : 'Seller'}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-white shadow"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow border-2 border-white">
-                  <UserCircleIcon className="w-5 h-5 text-primary" />
-                </div>
-              )}
+              <SellerAvatar
+                avatarUrl={safeProperty.seller.avatarUrl}
+                name={safeProperty.seller.name}
+                type={safeProperty.seller.type}
+                size="sm"
+              />
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
             </div>
 

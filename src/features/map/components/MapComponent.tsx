@@ -592,7 +592,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   }`}
                   title="Clean, minimal - properties stand out"
                 >
-                  Clean
+                  {t('search:map.clean', 'Clean')}
                 </button>
                 <button
                   onClick={() => setMapType('voyager')}
@@ -603,7 +603,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   }`}
                   title="Shows neighborhoods, parks, amenities"
                 >
-                  Color
+                  {t('search:map.color', 'Color')}
                 </button>
                 <button
                   onClick={() => setMapType('street')}
@@ -696,7 +696,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 title={t('search:map.buildings3D', '3D Buildings')}
               >
                 <span className="text-sm">🏢</span>
-                <span className="hidden sm:inline">3D</span>
+                <span className="hidden sm:inline">{t('search:map.buildings3D', '3D')}</span>
               </button>
 
               {/* Landmarks Toggle */}
@@ -710,7 +710,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 title={t('search:map.landmarks', 'Landmarks')}
               >
                 <span className="text-sm">🏛️</span>
-                <span className="hidden sm:inline">POI</span>
+                <span className="hidden sm:inline">{t('search:map.poi', 'POI')}</span>
               </button>
 
               {/* Cadastre Toggle - only in satellite/hybrid views */}
@@ -725,7 +725,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   title={t('search:map.cadastralParcels')}
                 >
                   <span className="text-sm">📐</span>
-                  <span className="hidden sm:inline">Parcels</span>
+                  <span className="hidden sm:inline">{t('search:map.parcels', 'Parcels')}</span>
                 </button>
               )}
 
@@ -737,10 +737,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     ? 'bg-emerald-600 text-white'
                     : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title="Measure land"
+                title={t('search:map.measure', 'Measure land')}
               >
                 <span className="text-sm">📏</span>
-                <span className="hidden sm:inline">Measure</span>
+                <span className="hidden sm:inline">{t('search:map.measure', 'Measure')}</span>
               </button>
 
               {/* Legend Toggle */}
@@ -760,12 +760,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
 
             {drawnBounds && !isDrawing && (
-              <div className="flex items-center gap-1.5 animate-fade-in">
+              <div
+                className="flex items-center gap-2 p-2 rounded-2xl shadow-2xl border border-white/40 animate-fade-in"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.92)',
+                  backdropFilter: 'blur(20px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+                }}
+              >
                 {isAuthenticated && (
                   <button
                     onClick={onSaveSearch}
                     disabled={isSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-full shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-blue-600 text-white text-xs font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                   >
                     <SearchPlusIcon className="w-4 h-4" />
                     <span className="hidden sm:inline">{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
@@ -774,7 +782,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 )}
                 <button
                   onClick={() => onDrawComplete(null)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-lg hover:bg-neutral-900"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white text-xs font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
                 >
                   <XCircleIcon className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('search:map.clearArea')}</span>
@@ -809,15 +817,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
         <>
           {/* Mobile: Layers FAB with liquid glass dropdown */}
           <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-            {/* Liquid glass dropdown - instant appearance */}
+            {/* Glass pill dropdown - matching List button style */}
             {isLayerMenuOpen && (
-              <div className="absolute bottom-full left-0 mb-3 pointer-events-auto">
+              <div className="absolute bottom-full left-0 mb-3 pointer-events-auto animate-fade-in">
                 <div
-                  className="flex flex-col gap-1.5 p-3 rounded-2xl shadow-2xl border border-white/30"
+                  className="flex flex-col gap-0.5 p-2 rounded-3xl shadow-2xl border border-white/40"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(24px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                    background: 'rgba(255, 255, 255, 0.92)',
+                    backdropFilter: 'blur(20px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
                   }}
                 >
                   {/* Legend Toggle */}
@@ -826,23 +835,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       setIsLegendOpen((p) => !p);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      isLegendOpen ? 'bg-amber-500 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      isLegendOpen
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <MapLegendIcon className="w-5 h-5" />
-                    <span className="text-sm font-medium">Legend</span>
+                    <MapLegendIcon className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-[15px] font-semibold">{t('search:map.legend', 'Legend')}</span>
                   </button>
 
                   {/* Landmarks Toggle */}
                   <button
                     onClick={() => setShowLandmarks(!showLandmarks)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      showLandmarks ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      showLandmarks
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-lg">🏛️</span>
-                    <span className="text-sm font-medium">Points of Interest</span>
+                    <span className="text-xl flex-shrink-0">🏛️</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.pointsOfInterest', 'Points of Interest')}</span>
                   </button>
 
                   {/* Measurement Tool Toggle */}
@@ -851,37 +864,43 @@ const MapComponent: React.FC<MapComponentProps> = ({
                       setShowMeasurement(!showMeasurement);
                       setIsLayerMenuOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      showMeasurement ? 'bg-emerald-600 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      showMeasurement
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <span className="text-lg">📏</span>
-                    <span className="text-sm font-medium">Measure Distance</span>
+                    <span className="text-xl flex-shrink-0">📏</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.measureDistance', 'Measure Distance')}</span>
+                  </button>
+
+                  {/* 3D Buildings Toggle */}
+                  <button
+                    onClick={() => setShow3DBuildings(!show3DBuildings)}
+                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                      show3DBuildings
+                        ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg'
+                        : 'text-neutral-700 hover:bg-neutral-100/80'
+                    }`}
+                  >
+                    <span className="text-xl flex-shrink-0">🏢</span>
+                    <span className="text-[15px] font-semibold">{t('search:map.buildings3D', '3D Buildings')}</span>
                   </button>
 
                   {/* Cadastre Toggle - only in satellite/hybrid views */}
                   {(mapType === 'satellite' || mapType === 'hybrid') && (
                     <button
                       onClick={() => setShowCadastre(!showCadastre)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                        showCadastre ? 'bg-primary text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
+                      className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
+                        showCadastre
+                          ? 'bg-gradient-to-r from-purple-500 to-violet-500 text-white shadow-lg'
+                          : 'text-neutral-700 hover:bg-neutral-100/80'
                       }`}
                     >
-                      <span className="text-lg">📐</span>
-                      <span className="text-sm font-medium">Land Parcels</span>
+                      <span className="text-xl flex-shrink-0">📐</span>
+                      <span className="text-[15px] font-semibold">{t('search:map.landParcels', 'Land Parcels')}</span>
                     </button>
                   )}
-
-                  {/* 3D Buildings Toggle */}
-                  <button
-                    onClick={() => setShow3DBuildings(!show3DBuildings)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl active:scale-95 ${
-                      show3DBuildings ? 'bg-slate-700 text-white shadow-md' : 'text-neutral-700 hover:bg-white/60'
-                    }`}
-                  >
-                    <span className="text-lg">🏢</span>
-                    <span className="text-sm font-medium">3D Buildings</span>
-                  </button>
                 </div>
               </div>
             )}
@@ -1013,34 +1032,35 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 />
               )}
 
-              {/* Drawn bounds actions - liquid glass effect */}
+              {/* Drawn bounds actions - glass pill style */}
               {drawnBounds && !isDrawing && (
                 <div
-                  className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30 animate-fade-in"
+                  className="flex items-center gap-2 p-2 rounded-2xl shadow-2xl border border-white/40 animate-fade-in"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(20px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    background: 'rgba(255, 255, 255, 0.92)',
+                    backdropFilter: 'blur(20px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
                   }}
                 >
                   {isAuthenticated && (
                     <button
                       onClick={onSaveSearch}
                       disabled={isSaving}
-                      className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded-lg disabled:opacity-50 transition-all"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl disabled:opacity-50 transition-all active:scale-[0.98] shadow-md"
                       title={isSaving ? t('search:map.saving') : t('search:map.saveArea')}
                     >
-                      <SearchPlusIcon className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-semibold">{t('search:map.save', 'Save')}</span>
+                      <SearchPlusIcon className="w-4 h-4" />
+                      <span className="text-[13px] font-semibold">{t('search:map.save', 'Save')}</span>
                     </button>
                   )}
                   <button
                     onClick={() => onDrawComplete(null)}
-                    className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded-lg transition-all"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl transition-all active:scale-[0.98] shadow-md"
                     title={t('search:map.clearArea')}
                   >
-                    <XCircleIcon className="w-3.5 h-3.5" />
-                    <span className="text-[10px] font-semibold">{t('search:map.clear', 'Clear')}</span>
+                    <XCircleIcon className="w-4 h-4" />
+                    <span className="text-[13px] font-semibold">{t('search:map.clear', 'Clear')}</span>
                   </button>
                 </div>
               )}

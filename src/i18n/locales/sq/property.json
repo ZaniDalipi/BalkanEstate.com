@@ -74,6 +74,7 @@
   },
   "details": {
     "title": "Detajet e Pronës",
+    "subtitle": "Specifikimet esenciale të pronës",
     "description": "Përshkrimi",
     "about": "Rreth Kësaj Shtëpie",
     "location": "Vendndodhja",
@@ -252,6 +253,47 @@
       "land": "Tokë",
       "other": "Tjetër"
     },
+    "promotedListings": "Shpallje të Promovuara",
+    "agentHint": "Kliko për rekomandime!",
+    "tiers": {
+      "premium": "Premium",
+      "highlight": "Të Theksuar",
+      "featured": "Të Veçuar"
+    },
+    "popup": {
+      "bed": "dhomë",
+      "bath": "banjë",
+      "viewDetails": "Shiko detajet",
+      "recommendation": "Rekomandim",
+      "prev": "Prapa",
+      "next": "Para",
+      "tierLabels": {
+        "premium": "PREMIUM PREMIERË",
+        "highlight": "TË THEKSUAR",
+        "featured": "TË VEÇUAR",
+        "standard": "PROMOVUAR"
+      }
+    },
+    "agentRecommendations": {
+      "premium": {
+        "1": "Kjo pronë premium është zgjedhja jonë më e mirë për ju!",
+        "2": "Shpallje ekskluzive! Mos humbisni këtë mundësi premium.",
+        "3": "Prona jonë më e rekomanduar në këtë zonë.",
+        "4": "Zgjedhje premium me vlerë të jashtëzakonshme!"
+      },
+      "highlight": {
+        "1": "E theksuar për shitje të shpejtë - ia vlen të shikohet!",
+        "2": "Zgjedhje popullore! Kjo pronë po merr shumë vëmendje.",
+        "3": "Shitësi i motivuar - e theksuar për dukshmëri!",
+        "4": "Mundësi e madhe - shikoni këtë shpallje të theksuar!"
+      },
+      "featured": {
+        "1": "Shpallje e veçuar me komoditete speciale.",
+        "2": "Kjo pronë dallohet në lagje.",
+        "3": "Ia vlen të merret në konsideratë - e veçuar nga pronari.",
+        "4": "Shikoni nga afër këtë shtëpi të veçuar!"
+      }
+    },
     "heatMapLegend": "Dendësia e Pronave",
     "low": "E ulët",
     "high": "E lartë"
@@ -270,6 +312,9 @@
   "photos": {
     "title": "Foto",
     "all": "Të Gjitha",
+    "images": "foto",
+    "view": "Shiko",
+    "tapToView": "Prekni për të parë në galeri",
     "categories": {
       "exterior": "Jashtë",
       "interior": "Brenda",
@@ -365,5 +410,10 @@
       "tips": "Klikoni për këshilla!",
       "rightClick": "Kliko djathtas për veprime"
     }
+  },
+  "sections": {
+    "highlighted": "Prona të Veçuara",
+    "highlightedCount": "shpallje premium",
+    "moreListings": "Më Shumë Shpallje"
   }
 }

@@ -393,5 +393,23 @@
     }
   },
   "saving": "Saving...",
-  "saveChanges": "Save Changes"
+  "saveChanges": "Save Changes",
+  "pwa": {
+    "installTitle": "Install BalkanEstate",
+    "installSubtitle": "Get the app experience",
+    "benefit1": "Works offline - browse anytime",
+    "benefit2": "Faster loading - instant access",
+    "benefit3": "Home screen icon - quick launch",
+    "iosTitle": "To install on iOS:",
+    "iosStep1": "Tap the Share button",
+    "iosStep2": "Scroll down and tap \"Add to Home Screen\"",
+    "iosStep3": "Tap \"Add\" to confirm",
+    "installButton": "Install App",
+    "notNow": "Not now",
+    "updateAvailable": "Update available",
+    "updateMessage": "A new version is available. Refresh to update.",
+    "updateButton": "Update now",
+    "offlineReady": "App ready for offline use",
+    "offlineMessage": "You can now use BalkanEstate even without internet connection."
+  }
 }

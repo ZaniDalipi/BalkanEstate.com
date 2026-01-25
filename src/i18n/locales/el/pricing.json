@@ -1,102 +1,227 @@
 {
-  "title": "Choose Your Selling Plan",
-  "subtitle": "Get your property in front of thousands of potential buyers",
-  "loading": "Loading plans...",
-  "limitedOffer": "Limited Time Offer Ends In:",
-  "offerTitle": "Congratulations! You've Unlocked Exclusive Discounts!",
-  "offerSubtitle": "Enjoy this one-time offer on our selling plans as a thank you.",
+  "pageTitle": "Πλάνα Τιμολόγησης",
+  "title": "Επιλέξτε το Πλάνο σας",
+  "subtitle": "Παρουσιάστε το ακίνητό σας σε χιλιάδες πιθανούς αγοραστές με τις ευέλικτες επιλογές τιμολόγησής μας.",
+  "loading": "Φόρτωση πλάνων τιμολόγησης...",
+  "noPlans": "Δεν υπάρχουν διαθέσιμα πλάνα τιμολόγησης αυτή τη στιγμή.",
+  "simpleTransparent": "Απλή, διαφανής τιμολόγηση",
+  "tabs": {
+    "forSellers": "Για Πωλητές",
+    "forBuyers": "Για Αγοραστές",
+    "listingHighlight": "Επισήμανση",
+    "agencyFeature": "Μεσιτικό"
+  },
+  "error": {
+    "loadFailed": "Αποτυχία φόρτωσης πλάνων τιμολόγησης"
+  },
+  "limitedOffer": "Η περιορισμένη προσφορά λήγει σε:",
+  "offerTitle": "Συγχαρητήρια! Ξεκλειδώσατε αποκλειστικές εκπτώσεις!",
+  "offerSubtitle": "Απολαύστε αυτή τη μοναδική προσφορά στα πλάνα πώλησής μας ως ευχαριστώ.",
+  "badges": {
+    "mostPopular": "ΠΙΟ ΔΗΜΟΦΙΛΕΣ",
+    "bestForTeams": "ΚΑΛΥΤΕΡΟ ΓΙΑ ΟΜΑΔΕΣ",
+    "buyerPro": "ΑΓΟΡΑΣΤΗΣ PRO",
+    "popular": "Δημοφιλές"
+  },
   "plans": {
     "free": {
-      "name": "Free",
-      "description": "Perfect for getting started"
+      "name": "Δωρεάν",
+      "description": "Ιδανικό για να ξεκινήσετε"
     },
     "proMonthly": {
-      "name": "Pro Monthly",
-      "description": "Best for active sellers",
-      "badge": "Popular"
+      "name": "Pro Μηνιαίο",
+      "description": "Ιδανικό για ενεργούς πωλητές",
+      "badge": "Δημοφιλές"
     },
     "proYearly": {
-      "name": "Pro Yearly",
-      "description": "Save {{percent}}% with annual billing",
-      "badge": "MOST POPULAR"
+      "name": "Pro Ετήσιο",
+      "description": "Εξοικονομήστε {{percent}}% με ετήσια χρέωση",
+      "badge": "ΠΙΟ ΔΗΜΟΦΙΛΕΣ",
+      "saveVsMonthly": "Εξοικονομήστε 33% σε σχέση με το μηνιαίο"
     },
     "enterprise": {
-      "name": "Enterprise Plan",
-      "description": "For agencies and professionals"
+      "name": "Πλάνο Enterprise",
+      "description": "Για μεσιτικά γραφεία και επαγγελματίες"
     }
   },
+  "metrics": {
+    "listingsYear": "Αγγελίες/Έτος",
+    "listingsMonth": "Αγγελίες/Μήνα",
+    "promoCouponsMonth": "Κουπόνια Προσφ./Μήνα",
+    "listings": "Αγγελίες",
+    "teamMembers": "Μέλη ομάδας"
+  },
   "features": {
-    "activeListings": "Up to {{count}} active property ads",
-    "promotedListings": "Promote {{count}} ads for {{days}} days",
-    "featuredListings": "{{count}} featured listings",
-    "prioritySupport": "Priority support",
-    "prioritySupportDesc": "Get help faster",
-    "analytics": "Advanced analytics dashboard",
-    "analyticsDesc": "Track your listing performance",
-    "premiumPlacement": "Premium listing placement",
-    "leadManagement": "Lead management system",
-    "teamMembers": "Up to {{count}} team members",
-    "apiAccess": "API access",
-    "customBranding": "Custom branding",
-    "dedicatedManager": "Dedicated account manager",
-    "mobileApp": "Mobile app access",
-    "mobileAppDesc": "Manage on the go",
-    "dedicatedAgencyPage": "Dedicated Agency Page",
-    "dedicatedAgencyPageDesc": "Your own branded page on our platform",
-    "displayAgents": "Display All Agents & Properties",
-    "displayAgentsDesc": "Showcase your team and listings",
-    "featuredAds": "Featured in Rotating Ads",
-    "featuredAdsDesc": "Monthly homepage advertising rotation",
-    "fullContact": "Full Contact Information",
-    "fullContactDesc": "Email, phone, and direct inquiries",
-    "perfectForActive": "Perfect for active sellers",
-    "featuredBoost": "Featured placement boost"
+    "activeListings": "Έως {{count}} ενεργές αγγελίες ακινήτων",
+    "promotedListings": "Προωθήστε {{count}} αγγελίες για {{days}} ημέρες",
+    "featuredListings": "{{count}} προτεινόμενες αγγελίες",
+    "prioritySupport": "Προτεραιότητα υποστήριξης",
+    "prioritySupportDesc": "Λάβετε βοήθεια πιο γρήγορα",
+    "analytics": "Προηγμένος πίνακας αναλυτικών στοιχείων",
+    "analyticsDesc": "Παρακολουθήστε την απόδοση των αγγελιών σας",
+    "premiumPlacement": "Premium τοποθέτηση αγγελιών",
+    "leadManagement": "Σύστημα διαχείρισης πιθανών πελατών",
+    "teamMembers": "Έως {{count}} μέλη ομάδας",
+    "apiAccess": "Πρόσβαση API",
+    "customBranding": "Προσαρμοσμένη επωνυμία",
+    "dedicatedManager": "Αποκλειστικός διαχειριστής λογαριασμού",
+    "mobileApp": "Πρόσβαση σε εφαρμογή κινητού",
+    "mobileAppDesc": "Διαχειριστείτε εν κινήσει",
+    "dedicatedAgencyPage": "Αποκλειστική σελίδα μεσιτικού",
+    "dedicatedAgencyPageDesc": "Η δική σας επώνυμη σελίδα στην πλατφόρμα μας",
+    "displayAgents": "Εμφάνιση όλων των μεσιτών και ακινήτων",
+    "displayAgentsDesc": "Παρουσιάστε την ομάδα και τις αγγελίες σας",
+    "featuredAds": "Προτεινόμενο σε εναλλασσόμενες διαφημίσεις",
+    "featuredAdsDesc": "Μηνιαία εναλλαγή διαφημίσεων στην αρχική σελίδα",
+    "fullContact": "Πλήρη στοιχεία επικοινωνίας",
+    "fullContactDesc": "Email, τηλέφωνο και άμεσες ερωτήσεις",
+    "perfectForActive": "Ιδανικό για ενεργούς πωλητές",
+    "featuredBoost": "Ενίσχυση προτεινόμενης τοποθέτησης"
   },
   "buttons": {
-    "getStarted": "Get Started",
-    "getPro": "Get Pro",
-    "getProAnnual": "Get Pro Annual",
-    "getProMonthly": "Get Pro Monthly",
-    "getEnterprise": "Get Enterprise",
-    "contactSales": "Contact Sales",
-    "currentPlan": "Current Plan"
+    "getStarted": "Ξεκινήστε",
+    "getStartedPrice": "Ξεκινήστε - €{{price}}/{{period}}",
+    "getPro": "Αποκτήστε Pro",
+    "getProAnnual": "Αποκτήστε Pro Ετήσιο",
+    "getProMonthly": "Αποκτήστε Pro Μηνιαίο",
+    "getEnterprise": "Αποκτήστε Enterprise",
+    "contactSales": "Επικοινωνήστε με τις πωλήσεις",
+    "currentPlan": "Τρέχον Πλάνο",
+    "getFeatured": "Αποκτήστε Προτεινόμενο",
+    "getBundle": "Αποκτήστε Πακέτο",
+    "purchase": "Αγορά"
   },
   "billing": {
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "perMonth": "/month",
-    "perYear": "/year",
-    "billedAnnually": "Billed annually",
-    "billedMonthly": "Billed monthly",
-    "youSave": "You save €{{amount}}!"
+    "monthly": "Μηνιαία",
+    "yearly": "Ετήσια",
+    "perMonth": "/μήνα",
+    "perYear": "/έτος",
+    "perWeek": "/εβδομάδα",
+    "billedAnnually": "Ετήσια χρέωση",
+    "billedMonthly": "Μηνιαία χρέωση",
+    "youSave": "Εξοικονομείτε €{{amount}}!"
   },
   "discount": {
-    "off": "{{percent}}% OFF"
+    "off": "{{percent}}% ΕΚΠΤΩΣΗ"
   },
   "benefits": {
-    "moneyBack": "30-day money-back guarantee",
-    "moreViews": "{{multiplier}}x more views than free listings",
-    "instantActivation": "Instant activation",
-    "cancelAnytime": "Cancel anytime"
+    "moneyBack": "Εγγύηση επιστροφής χρημάτων 30 ημερών",
+    "moneyBackDesc": "Πλήρης επιστροφή αν δεν μείνετε ικανοποιημένοι",
+    "moreViews": "3 φορές περισσότερες προβολές",
+    "moreViewsDesc": "Οι premium αγγελίες έχουν μεγαλύτερη έκθεση",
+    "instantActivation": "Άμεση ενεργοποίηση",
+    "instantActivationDesc": "Ξεκινήστε να πουλάτε αμέσως",
+    "cancelAnytime": "Ακύρωση ανά πάσα στιγμή"
   },
   "enterprise": {
-    "required": "Enterprise Plan Required",
-    "message": "Subscribe to Enterprise to create your agency and showcase your team",
-    "contactUs": "Contact us to learn more about our Enterprise plan."
+    "required": "Απαιτείται Πλάνο Enterprise",
+    "message": "Εγγραφείτε στο Enterprise για να δημιουργήσετε το μεσιτικό σας και να παρουσιάσετε την ομάδα σας",
+    "contactUs": "Επικοινωνήστε μαζί μας για να μάθετε περισσότερα για το πλάνο Enterprise.",
+    "agentRequired": "Απαιτείται κατάσταση μεσίτη",
+    "agentRequiredMessage": "Μόνο εγγεγραμμένοι μεσίτες μπορούν να δημιουργήσουν μεσιτικό γραφείο. Παρακαλώ αλλάξτε πρώτα σε τύπο λογαριασμού Μεσίτη στο προφίλ σας.",
+    "alreadyHaveAgency": "Έχετε ήδη μεσιτικό γραφείο",
+    "viewYourAgency": "Έχετε ήδη μεσιτικό γραφείο. Επισκεφθείτε τον λογαριασμό σας για να το διαχειριστείτε."
   },
   "exitModal": {
-    "title": "Are you sure you want to exit?",
-    "agencyMessage": "If you exit now, all agency information you entered will be lost and you'll need to start over.",
-    "offerMessage": "This is a one-time offer. If you leave now, you won't see these amazing discounts again.",
-    "stay": "Stay & Save!",
-    "leave": "Yes, Leave",
-    "continueSetup": "Continue Setup"
+    "title": "Είστε σίγουροι ότι θέλετε να αποχωρήσετε;",
+    "agencyMessage": "Αν αποχωρήσετε τώρα, όλες οι πληροφορίες του μεσιτικού που εισαγάγατε θα χαθούν και θα πρέπει να ξεκινήσετε από την αρχή.",
+    "offerMessage": "Αυτή είναι μια μοναδική προσφορά. Αν φύγετε τώρα, δεν θα δείτε ξανά αυτές τις καταπληκτικές εκπτώσεις.",
+    "stay": "Μείνετε και εξοικονομήστε!",
+    "leave": "Ναι, αποχωρώ",
+    "continueSetup": "Συνέχεια ρύθμισης"
   },
   "success": {
-    "title": "Congratulations!",
-    "message": "Your {{plan}} subscription is activated. You now have access to all premium features.",
-    "agencyMessage": "Your Enterprise subscription is activated and your agency has been created successfully! You are now the admin of your agency.",
-    "subscriptionActivated": "Subscription activated successfully!",
-    "startListing": "Start Listing Properties"
+    "title": "Συγχαρητήρια!",
+    "message": "Η συνδρομή σας {{plan}} ενεργοποιήθηκε. Τώρα έχετε πρόσβαση σε όλες τις premium λειτουργίες.",
+    "agencyMessage": "Η συνδρομή Enterprise ενεργοποιήθηκε και το μεσιτικό σας δημιουργήθηκε με επιτυχία! Είστε τώρα ο διαχειριστής του μεσιτικού σας.",
+    "subscriptionActivated": "Η συνδρομή ενεργοποιήθηκε με επιτυχία!",
+    "startListing": "Ξεκινήστε να καταχωρείτε ακίνητα"
+  },
+  "listing": {
+    "title": "Πλάνα προώθησης αγγελιών",
+    "subtitle": "Ενισχύστε τις αγγελίες ακινήτων σας για μεγαλύτερη ορατότητα και περισσότερες ερωτήσεις",
+    "selectListing": "Επιλέξτε μια αγγελία για προώθηση με {{tier}}",
+    "loginRequired": "Παρακαλώ συνδεθείτε για να δείτε τις αγγελίες σας",
+    "noListings": "Δεν έχετε ακόμα αγγελίες",
+    "createListing": "+ Δημιουργία αγγελίας",
+    "duration": "Διάρκεια:",
+    "days": "ημέρες",
+    "promoting": "Προώθηση:",
+    "forDays": "για {{days}} ημέρες",
+    "comingSoon": "Σύντομα διαθέσιμο",
+    "promotionComingSoon": "Η προώθηση αγγελιών θα είναι διαθέσιμη σύντομα!",
+    "howItWorks": "Πώς λειτουργεί:",
+    "howItWorksDescription": "Κάντε κλικ σε ένα επίπεδο προώθησης παραπάνω για να ξεκινήσετε ή δημιουργήστε πρώτα μια αγγελία.",
+    "purchase": "Αγορά",
+    "tiers": {
+      "featured": {
+        "title": "Προτεινόμενο",
+        "description": "Προτεραιότητα στην αναζήτηση",
+        "topOfSearch": "Στην κορυφή της αναζήτησης",
+        "featuredBadge": "Σήμα προτεινόμενου",
+        "visibility": "2x ορατότητα"
+      },
+      "highlight": {
+        "title": "Επισήμανση",
+        "description": "Ξεχωρίστε",
+        "featuredBenefits": "Οφέλη προτεινόμενου",
+        "coloredHighlight": "Χρωματική επισήμανση",
+        "visibility": "3x ορατότητα"
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "Προτεινόμενο στην αρχική",
+        "highlightBenefits": "Οφέλη επισήμανσης",
+        "homepageCarousel": "Καρουσέλ αρχικής σελίδας",
+        "visibility": "5x ορατότητα"
+      }
+    }
+  },
+  "agency": {
+    "title": "Προτεινόμενο Μεσιτικό",
+    "subtitle": "Κάντε το μεσιτικό σας προτεινόμενο παντού στην πλατφόρμα",
+    "featuredTitle": "Προτεινόμενο Μεσιτικό",
+    "featuredDescription": "Προτεινόμενο παντού στην πλατφόρμα",
+    "benefits": {
+      "featuredInDirectory": "Προτεινόμενο στον κατάλογο μεσιτικών",
+      "priorityInSearch": "Προτεραιότητα στα αποτελέσματα αναζήτησης",
+      "homepageCarousel": "Καρουσέλ μεσιτικών στην αρχική σελίδα",
+      "featuredBadge": "Σήμα προτεινόμενου στο προφίλ",
+      "boostedVisibility": "Ενισχυμένη ορατότητα παντού (3x)"
+    },
+    "mapMarker": {
+      "title": "Δείκτης χάρτη",
+      "addon": "Πρόσθετο",
+      "description": "Εμφανίστε το μεσιτικό σας στον χάρτη ακινήτων",
+      "benefits": {
+        "agencyMarker": "Δείκτης μεσιτικού στον χάρτη ακινήτων",
+        "customIcon": "Προσαρμοσμένο εικονίδιο μεσιτικού στον χάρτη",
+        "clickableMarker": "Κλικ δείκτης με πληροφορίες μεσιτικού",
+        "visibleToAll": "Ορατό σε όλους όσους αναζητούν ακίνητα"
+      }
+    },
+    "total": {
+      "title": "Σύνολο για {{days}} ημέρες",
+      "bundleDescription": "Προτεινόμενο Μεσιτικό + Δείκτης χάρτη"
+    },
+    "needAgency": "Δεν έχετε ακόμα μεσιτικό;",
+    "needAgencyDescription": "Εγγραφείτε στο πλάνο Enterprise για να δημιουργήσετε το μεσιτικό σας και να ξεκλειδώσετε αυτές τις λειτουργίες.",
+    "viewEnterprise": "Δείτε το Πλάνο Enterprise",
+    "comingSoon": "Σύντομα διαθέσιμο",
+    "featureComingSoon": "Η προβολή μεσιτικού θα είναι διαθέσιμη σύντομα!"
+  },
+  "contact": {
+    "haveQuestions": "Έχετε ερωτήσεις;",
+    "contactSales": "Επικοινωνήστε με την ομάδα πωλήσεων",
+    "sendEmail": "Στείλτε μας email",
+    "giveCall": "Καλέστε μας"
+  },
+  "legal": {
+    "title": "Ασφαλείς πληρωμές και πολιτικές",
+    "description": "Όλες οι πληρωμές επεξεργάζονται με ασφάλεια από την LemonSqueezy. Με την εγγραφή, συμφωνείτε με τις πολιτικές μας:",
+    "termsOfService": "Όροι χρήσης",
+    "privacyPolicy": "Πολιτική απορρήτου",
+    "refundPolicy": "Πολιτική επιστροφών",
+    "providerNote": "Οι πληρωμές διαχειρίζονται από την LemonSqueezy ως Έμπορος Καταγραφής. ΦΠΑ/φόροι συμπεριλαμβάνονται όπου ισχύει."
   }
 }

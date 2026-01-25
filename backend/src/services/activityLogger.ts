@@ -203,6 +203,26 @@ class ActivityLogger {
     });
   }
 
+  async logDiscountUsed(
+    userId: string,
+    orderId: string,
+    discountAmount: number,
+    discountPercentage: number,
+    discountType: string
+  ): Promise<void> {
+    await this.log({
+      category: 'subscription',
+      action: 'discount_applied',
+      userId,
+      metadata: {
+        orderId,
+        discountAmount,
+        discountPercentage: discountPercentage.toFixed(2),
+        discountType,
+      },
+    });
+  }
+
   // ============ SECURITY EVENTS ============
 
   async logSuspiciousActivity(

@@ -6,6 +6,7 @@ import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
 import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
+import { AnimationProvider } from './src/components/ui/Animations';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -32,9 +33,9 @@ import './src/i18n';
 // Language routing utilities
 import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
 
-// Core layout components (loaded immediately - always visible)
-import Sidebar from './components/shared/Sidebar';
-import Header from './components/shared/Header';
+// Core layout components (lazy loaded - can render after initial paint)
+const Sidebar = lazy(() => import('./components/shared/Sidebar'));
+const Header = lazy(() => import('./components/shared/Header'));
 
 // Lazy load all pages and conditional components to reduce initial bundle
 const Onboarding = lazy(() => import('./src/features/onboarding/components/Onboarding'));
@@ -52,7 +53,6 @@ const SavedSearchesPage = lazy(() => import('./src/features/saved/components/Sav
 const SavedPropertiesPage = lazy(() => import('./src/features/saved/components/SavedHomesPage'));
 const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPage'));
 const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
-const SubscriptionModal = lazy(() => import('./src/features/property-details/components/SubscriptionModal'));
 const AgentsPage = lazy(() => import('./src/features/agents/components/AgentsPage'));
 const AgenciesListPage = lazy(() => import('./components/AgenciesListPage'));
 const AgencyDetailPage = lazy(() => import('./components/AgencyDetailPage'));
@@ -81,6 +81,9 @@ const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
+
+// PWA Install Prompt (lazy loaded)
+const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
 
 // Lightweight loader (extracted for smaller initial bundle)
 import { Loader3D } from './components/shared/Loader3D';
@@ -392,13 +395,31 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
   // Scroll to top when active view changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Scroll window to top
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+    // Also scroll main content container if it exists
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
+
+    // Scroll any data-scroll-container elements
+    document.querySelectorAll('[data-scroll-container]').forEach(el => {
+      el.scrollTop = 0;
+    });
   }, [state.activeView]);
 
   // Also scroll to top when selected property or agency changes
   useEffect(() => {
     if (state.selectedProperty || state.selectedAgencyId) {
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+
+      // Also scroll main content container
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) {
+        mainContent.scrollTop = 0;
+      }
     }
   }, [state.selectedProperty, state.selectedAgencyId]);
 
@@ -467,7 +488,12 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       case 'agencies':
         return <AgenciesListPage />;
       case 'admin':
-        return <AdminDashboard />;
+        // Only load admin dashboard for admin/super_admin users
+        if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
+          return <AdminDashboard />;
+        }
+        // Redirect non-admins to home
+        return <Onboarding />;
       case 'reset-password':
         return <ResetPasswordPage />;
       case 'verify-email':
@@ -528,7 +554,7 @@ const MainLayout: React.FC = () => {
   const showHeader = !(isMobile && (isSearchPage || !!state.selectedProperty));
   // Note: Agency detail pages WILL show header on mobile to allow sidebar access
   
-  const anyNonAuthModalOpen = state.isSubscriptionModalOpen || state.isListingLimitWarningOpen || state.isDiscountGameOpen;
+  const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
   
   const isOverlayVisible = 
     state.isAuthModalOpen || 
@@ -553,16 +579,16 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans overflow-x-hidden max-w-full">
+    <div className="min-h-screen bg-neutral-50 font-sans overflow-x-hidden max-w-full" style={{ height: '100dvh' }}>
         <Suspense fallback={null}>
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </Suspense>
 
-        <div className={`relative transition-all duration-300 ease-in-out h-screen flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
+        <div className={`relative transition-all duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isSearchPage} />}
             </Suspense>
-            <main id="main-content" className={`flex flex-col flex-grow overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
+            <main id="main-content" data-scroll-container className={`flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}>
                 <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
             </main>
         </div>
@@ -583,13 +609,6 @@ const MainLayout: React.FC = () => {
             <DiscountGameModal
                 isOpen={state.isDiscountGameOpen}
                 onGameComplete={handleGameComplete}
-            />
-          )}
-          {state.isSubscriptionModalOpen && (
-            <SubscriptionModal
-                isOpen={state.isSubscriptionModalOpen}
-                onClose={() => dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: false } })}
-                initialEmail={state.subscriptionEmail || undefined}
             />
           )}
           {state.isEnterpriseModalOpen && (
@@ -720,6 +739,7 @@ const AppWrapper: React.FC = () => {
             <Suspense fallback={null}>
                 {state.isAuthModalOpen && <AuthPage />}
                 <CookieConsent />
+                <PWAInstallPrompt />
             </Suspense>
         </>
     );
@@ -738,23 +758,25 @@ const App: React.FC = () => {
             <AlertProvider>
               <NotificationProvider>
                 <ConfirmationProvider>
-                  {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
-                  <Suspense fallback={null}>
-                    <SEO />
-                    <OrganizationSchema />
-                    <FAQSchema faqs={realEstateFAQs} />
-                    {/* Analytics - only loaded if IDs are provided */}
-                    {(googleAnalyticsId || facebookPixelId) && (
-                      <Analytics
-                        googleAnalyticsId={googleAnalyticsId}
-                        facebookPixelId={facebookPixelId}
-                      />
-                    )}
-                    {/* Microsoft Clarity - Heatmaps & Session Recordings */}
-                    <ClarityInit />
-                  </Suspense>
+                  <AnimationProvider>
+                    {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
+                    <Suspense fallback={null}>
+                      <SEO />
+                      <OrganizationSchema />
+                      <FAQSchema faqs={realEstateFAQs} />
+                      {/* Analytics - only loaded if IDs are provided */}
+                      {(googleAnalyticsId || facebookPixelId) && (
+                        <Analytics
+                          googleAnalyticsId={googleAnalyticsId}
+                          facebookPixelId={facebookPixelId}
+                        />
+                      )}
+                      {/* Microsoft Clarity - Heatmaps & Session Recordings */}
+                      <ClarityInit />
+                    </Suspense>
 
-                  <AppWrapper />
+                    <AppWrapper />
+                  </AnimationProvider>
                 </ConfirmationProvider>
               </NotificationProvider>
             </AlertProvider>

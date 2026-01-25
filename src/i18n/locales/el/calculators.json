@@ -81,6 +81,13 @@
       "sellingCosts": "Selling Costs",
       "investmentReturn": "Investment Return"
     },
+    "groups": {
+      "loanSettings": "Δάνειο",
+      "propertyCosts": "Κόστη",
+      "marketAssumptions": "Αγορά",
+      "transactionCosts": "Συναλλαγή",
+      "investment": "Επένδυση"
+    },
     "tooltips": {
       "downPayment": "Percentage of home price paid upfront",
       "interestRate": "Annual mortgage interest rate",

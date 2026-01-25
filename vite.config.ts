@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
     // Load env file based on `mode` in the current working directory.
@@ -54,7 +55,207 @@ export default defineConfig(({ mode }) => {
           },
         } : undefined, // No proxy in staging/production (direct API calls)
       },
-      plugins: [tailwindcss(), react()],
+      plugins: [
+        tailwindcss(),
+        react(),
+        VitePWA({
+          registerType: 'autoUpdate',
+          includeAssets: ['icons/*.svg', 'icons/*.png', 'og-image.svg', 'robots.txt'],
+          manifest: {
+            name: 'BalkanEstateAI',
+            short_name: 'BalkanEstate',
+            description: 'Find your dream property in the Balkans with AI. Browse houses, apartments, and villas for sale across Serbia, Montenegro, Croatia, Bosnia, North Macedonia, and Albania.',
+            start_url: '/',
+            id: '/',
+            display: 'standalone',
+            display_override: ['standalone', 'minimal-ui'],
+            background_color: '#ffffff',
+            theme_color: '#0252CD',
+            orientation: 'any',
+            scope: '/',
+            lang: 'en',
+            dir: 'ltr',
+            categories: ['real estate', 'property', 'housing', 'business'],
+            prefer_related_applications: false,
+            launch_handler: {
+              client_mode: ['navigate-existing', 'auto']
+            },
+            icons: [
+              {
+                src: '/icons/icon.svg',
+                sizes: 'any',
+                type: 'image/svg+xml',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-72x72.png',
+                sizes: '72x72',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-96x96.png',
+                sizes: '96x96',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-128x128.png',
+                sizes: '128x128',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-144x144.png',
+                sizes: '144x144',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-152x152.png',
+                sizes: '152x152',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-192x192.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-384x384.png',
+                sizes: '384x384',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'any'
+              },
+              {
+                src: '/icons/icon-maskable-192x192.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'maskable'
+              },
+              {
+                src: '/icons/icon-maskable-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'maskable'
+              }
+            ],
+            shortcuts: [
+              {
+                name: 'Search Properties',
+                short_name: 'Search',
+                description: 'Search for properties in the Balkans',
+                url: '/search',
+                icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }]
+              },
+              {
+                name: 'Find Agents',
+                short_name: 'Agents',
+                description: 'Find verified real estate agents',
+                url: '/agents',
+                icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }]
+              },
+              {
+                name: 'Saved Properties',
+                short_name: 'Saved',
+                description: 'View your saved properties',
+                url: '/saved-properties',
+                icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }]
+              }
+            ]
+          },
+          workbox: {
+            globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+            maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+            runtimeCaching: [
+              {
+                urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'google-fonts-cache',
+                  expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'gstatic-fonts-cache',
+                  expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'cloudinary-images-cache',
+                  expiration: {
+                    maxEntries: 100,
+                    maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'unsplash-images-cache',
+                  expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              },
+              {
+                urlPattern: /\/api\/.*/i,
+                handler: 'NetworkFirst',
+                options: {
+                  cacheName: 'api-cache',
+                  expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 60 * 5 // 5 minutes
+                  },
+                  networkTimeoutSeconds: 10,
+                  cacheableResponse: {
+                    statuses: [0, 200]
+                  }
+                }
+              }
+            ],
+            skipWaiting: true,
+            clientsClaim: true
+          },
+          devOptions: {
+            enabled: true
+          }
+        })
+      ],
       css: {
         // Disable Vite's built-in PostCSS processing - let @tailwindcss/vite handle it
         postcss: {
@@ -102,51 +303,99 @@ export default defineConfig(({ mode }) => {
             chunkFileNames: `assets/[name].[hash].js`,
             assetFileNames: `assets/[name].[hash].[ext]`,
             manualChunks(id) {
-              // Only split third-party libraries to avoid circular dependencies
-              // Application code will be split automatically by dynamic imports
-
+              // ============================================================
+              // VENDOR CHUNKS - Third-party libraries split by functionality
+              // ============================================================
               if (id.includes('node_modules')) {
-                // Core React - must load first, keep separate
+                // Core React - must load first, keep separate and small
                 if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/scheduler/')) {
                   return 'react-vendor';
                 }
-                // Map functionality - lazy loaded
+                // React Query - data fetching (used by most pages)
+                if (id.includes('@tanstack/react-query')) {
+                  return 'react-query';
+                }
+                // Map functionality - lazy loaded only on map pages
                 if (id.includes('leaflet') || id.includes('react-leaflet')) {
                   return 'leaflet';
                 }
-                // 3D Map (MapLibre)
+                // 3D Map (MapLibre) - very large, lazy loaded
                 if (id.includes('maplibre-gl')) {
                   return 'maplibre';
                 }
-                // Internationalization
+                // Internationalization - needed early but separate
                 if (id.includes('i18next') || id.includes('react-i18next')) {
                   return 'i18n';
                 }
-                // Animation library
+                // Animation library - lazy loaded
                 if (id.includes('framer-motion')) {
                   return 'animation';
                 }
-                // Real-time messaging
-                if (id.includes('socket.io')) {
-                  return 'realtime';
-                }
-                // AI/Gemini
+                // NOTE: socket.io removed from manual chunks due to circular dep with vendor
+                // AI/Gemini - only for AI features
                 if (id.includes('@google/genai') || id.includes('@google/generative-ai')) {
                   return 'ai';
                 }
-                // Image compression
+                // Image compression - only for uploads
                 if (id.includes('browser-image-compression')) {
                   return 'image-utils';
+                }
+                // Form handling
+                if (id.includes('react-hook-form') || id.includes('@hookform')) {
+                  return 'forms';
+                }
+                // Zustand state management
+                if (id.includes('zustand')) {
+                  return 'state';
+                }
+                // Helmet for SEO
+                if (id.includes('react-helmet')) {
+                  return 'seo';
+                }
+                // Date handling
+                if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
+                  return 'date-utils';
                 }
                 // All other node_modules
                 return 'vendor';
               }
-              // Let Rollup handle application code splitting automatically
+
+              // ============================================================
+              // APPLICATION CHUNKS - Only truly standalone features
+              // Let Rollup handle features with cross-dependencies
+              // ============================================================
+
+              // Auth features (standalone, no deps on other features)
+              if (id.includes('/features/auth/')) {
+                return 'auth';
+              }
+              // Legal pages (standalone, small)
+              if (id.includes('/features/legal/')) {
+                return 'legal';
+              }
+              // Onboarding (standalone)
+              if (id.includes('/features/onboarding/')) {
+                return 'onboarding';
+              }
+
+              // NOTE: Let Rollup handle these automatically to avoid circular deps:
+              // - admin (circular with payments)
+              // - payments/pricing (circular with admin)
+              // - messaging (depends on shared components)
+              // - analytics (depends on shared hooks)
+              // - search, property-details, agents, seller, saved, cities, tools
+
+              // Let Rollup handle remaining code splitting automatically
             },
           },
         },
         // Improve chunk loading
         chunkSizeWarningLimit: 500,
+        // Enable tree-shaking for better dead code elimination
+        treeshake: {
+          moduleSideEffects: 'no-external',
+          propertyReadSideEffects: false,
+        },
         // Optimize CSS code splitting
         cssCodeSplit: true,
         // Security: Clear console logs in production build

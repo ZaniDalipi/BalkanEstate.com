@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
+import { PageTransition, Animated } from '@/src/components/ui/Animations';
 
 const PrivacyPolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -17,26 +18,30 @@ const PrivacyPolicyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="font-medium">{t('common:back', 'Back')}</span>
-          </button>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            {t('legal:privacy.title', 'Privacy Policy')}
-          </h1>
-          <p className="text-gray-600">
-            {t('legal:privacy.lastUpdated', 'Last updated')}: {lastUpdated}
-          </p>
-        </div>
+      <PageTransition>
+        <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+          {/* Header */}
+          <Animated variant="fadeInUp" delay={0}>
+            <div className="mb-8">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
+              >
+                <ArrowLeftIcon className="w-5 h-5" />
+                <span className="font-medium">{t('common:back', 'Back')}</span>
+              </button>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                {t('legal:privacy.title', 'Privacy Policy')}
+              </h1>
+              <p className="text-gray-600">
+                {t('legal:privacy.lastUpdated', 'Last updated')}: {lastUpdated}
+              </p>
+            </div>
+          </Animated>
 
-        {/* Content */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
+          {/* Content */}
+          <Animated variant="fadeInUp" delay={100}>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
           {/* Introduction */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
@@ -63,7 +68,7 @@ const PrivacyPolicyPage: React.FC = () => {
               <li>{t('legal:privacy.collect.personal.name', 'Name and contact information (email, phone number)')}</li>
               <li>{t('legal:privacy.collect.personal.account', 'Account credentials (username, password)')}</li>
               <li>{t('legal:privacy.collect.personal.profile', 'Profile information (photo, bio, preferences)')}</li>
-              <li>{t('legal:privacy.collect.personal.payment', 'Payment information (processed securely via Paddle, our Merchant of Record)')}</li>
+              <li>{t('legal:privacy.collect.personal.payment', 'Payment information (processed securely via LemonSqueezy, our Merchant of Record)')}</li>
               <li>{t('legal:privacy.collect.personal.communication', 'Communications and messages you send through our platform')}</li>
             </ul>
 
@@ -105,7 +110,7 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
               <li><strong>{t('legal:privacy.share.agents', 'With Property Agents:')}</strong> {t('legal:privacy.share.agentsDesc', 'When you inquire about a property, your contact information is shared with the listing agent.')}</li>
-              <li><strong>{t('legal:privacy.share.providers', 'Service Providers:')}</strong> {t('legal:privacy.share.providersDesc', 'We work with third parties for payment processing (Paddle), email services, and analytics.')}</li>
+              <li><strong>{t('legal:privacy.share.providers', 'Service Providers:')}</strong> {t('legal:privacy.share.providersDesc', 'We work with third parties for payment processing (LemonSqueezy), email services, and analytics.')}</li>
               <li><strong>{t('legal:privacy.share.legal', 'Legal Requirements:')}</strong> {t('legal:privacy.share.legalDesc', 'When required by law or to protect our rights.')}</li>
               <li><strong>{t('legal:privacy.share.business', 'Business Transfers:')}</strong> {t('legal:privacy.share.businessDesc', 'In connection with a merger, acquisition, or sale of assets.')}</li>
             </ul>
@@ -201,9 +206,9 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <div className="space-y-3">
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-1">Paddle</h4>
-                <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.paddle', 'Paddle is our Merchant of Record for payment processing. As MoR, Paddle handles all payment transactions, VAT/tax compliance, invoicing, and refunds on our behalf. Paddle processes your payment information securely and we do not store your full credit card details. Paddle may collect your name, email, billing address, and payment method details to process transactions.')}</p>
-                <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+                <h4 className="font-semibold text-gray-800 mb-1">LemonSqueezy</h4>
+                <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.provider', 'LemonSqueezy is our Merchant of Record for payment processing. As MoR, LemonSqueezy handles all payment transactions, VAT/tax compliance, invoicing, and refunds on our behalf. LemonSqueezy processes your payment information securely and we do not store your full credit card details. LemonSqueezy may collect your name, email, billing address, and payment method details to process transactions.')}</p>
+                <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-semibold text-gray-800 mb-1">Google Analytics</h4>
@@ -282,8 +287,10 @@ const PrivacyPolicyPage: React.FC = () => {
               <p className="text-gray-700">{t('legal:privacy.contact.address', 'Address: Skopje, North Macedonia')}</p>
             </div>
           </section>
+          </div>
+          </Animated>
         </div>
-      </div>
+      </PageTransition>
 
       <Footer />
     </div>

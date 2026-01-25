@@ -12,6 +12,8 @@
     "paid": "Paid",
     "amount": "Amount",
     "email": "Email",
+    "plan": "Plan",
+    "validUntil": "Valid Until",
     "sessionId": "Session ID",
     "whatsNext": "What's Next?",
     "subscriptionActive": "Your subscription is now active",
@@ -52,7 +54,7 @@
     "secureCheckout": "Secure Checkout",
     "secureCheckoutDescription": "Complete your purchase on our secure payment partner",
     "secureExternalPayment": "Secure External Payment",
-    "secureExternalPaymentDescription": "You'll be redirected to our secure payment partner (Paddle) to complete your purchase. We never store your card details - they're handled entirely by our certified payment processor.",
+    "secureExternalPaymentDescription": "You'll be redirected to our secure payment partner (LemonSqueezy) to complete your purchase. We never store your card details - they're handled entirely by our certified payment processor.",
     "freeSubscriptionActivated": "Free Subscription Activated",
     "freeSubscriptionDescription": "Your discount code provides 100% off! Click the button below to activate your free subscription immediately. No payment required.",
     "continueToPayment": "Continue to Payment",
@@ -82,6 +84,6 @@
     "privacy": "Privacy Policy",
     "refund": "Refund Policy",
     "and": "and",
-    "paddle": "Payments are processed by Paddle.com as Merchant of Record."
+    "lemonsqueezy": "Payments are processed by LemonSqueezy as Merchant of Record."
   }
 }

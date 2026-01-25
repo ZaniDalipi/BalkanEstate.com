@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
+import { PageTransition, Animated } from '@/src/components/ui/Animations';
 
 const RefundPolicyPage: React.FC = () => {
   const { t } = useTranslation(['legal', 'common']);
@@ -17,26 +18,30 @@ const RefundPolicyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span className="font-medium">{t('common:back', 'Back')}</span>
-          </button>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            {t('legal:refund.title', 'Refund Policy')}
-          </h1>
-          <p className="text-gray-600">
-            {t('legal:refund.lastUpdated', 'Last updated')}: {lastUpdated}
-          </p>
-        </div>
+      <PageTransition>
+        <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+          {/* Header */}
+          <Animated variant="fadeInUp" delay={0}>
+            <div className="mb-8">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors mb-4"
+              >
+                <ArrowLeftIcon className="w-5 h-5" />
+                <span className="font-medium">{t('common:back', 'Back')}</span>
+              </button>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                {t('legal:refund.title', 'Refund Policy')}
+              </h1>
+              <p className="text-gray-600">
+                {t('legal:refund.lastUpdated', 'Last updated')}: {lastUpdated}
+              </p>
+            </div>
+          </Animated>
 
-        {/* Content */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
+          {/* Content */}
+          <Animated variant="fadeInUp" delay={100}>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 space-y-8">
           {/* Introduction */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
@@ -179,7 +184,7 @@ const RefundPolicyPage: React.FC = () => {
               {t('legal:refund.processing.title', 'Refund Processing')}
             </h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              {t('legal:refund.processing.text', 'Refunds are processed by Paddle, our Merchant of Record. Here is what to expect:')}
+              {t('legal:refund.processing.text', 'Refunds are processed by LemonSqueezy, our Merchant of Record. Here is what to expect:')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
@@ -200,13 +205,13 @@ const RefundPolicyPage: React.FC = () => {
             </p>
           </section>
 
-          {/* Paddle as MoR */}
+          {/* LemonSqueezy as MoR */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">
-              {t('legal:refund.paddle.title', 'Payment Processing')}
+              {t('legal:refund.provider.title', 'Payment Processing')}
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              {t('legal:refund.paddle.text', 'All payments and refunds are processed by Paddle.com, our Merchant of Record. Paddle handles payment processing, tax compliance, and refund disbursements on our behalf. When you receive a refund, it will appear on your statement from Paddle. For any payment-related inquiries, you may also contact Paddle directly, though we recommend contacting us first for the fastest resolution.')}
+              {t('legal:refund.provider.text', 'All payments and refunds are processed by LemonSqueezy, our Merchant of Record. LemonSqueezy handles payment processing, tax compliance, and refund disbursements on our behalf. When you receive a refund, it will appear on your statement from LemonSqueezy. For any payment-related inquiries, you may also contact LemonSqueezy directly, though we recommend contacting us first for the fastest resolution.')}
             </p>
           </section>
 
@@ -265,8 +270,10 @@ const RefundPolicyPage: React.FC = () => {
               <p className="text-gray-700">Phone: +389 71 967 915</p>
             </div>
           </section>
+            </div>
+          </Animated>
         </div>
-      </div>
+      </PageTransition>
 
       <Footer />
     </div>

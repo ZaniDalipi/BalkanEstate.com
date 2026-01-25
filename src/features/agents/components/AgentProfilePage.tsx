@@ -81,6 +81,7 @@ import AgentReviewForm from '@/components/shared/AgentReviewForm';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import { slugify } from '@/utils/slug';
 import { getAgencyAgents, getAllAgents } from '@/services/apiService';
+import { getPropertiesBySellerId } from '@/src/features/properties/api/propertyApi';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { updateAgentProfile, toggleSavedAgent, checkSavedAgent } from '@/src/features/agents/api/agentApi';
 import AgentInquiryModal from '@/src/features/inquiries/components/AgentInquiryModal';
@@ -149,6 +150,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [agentData, setAgentData] = useState(agent);
     const [agentAchievements, setAgentAchievements] = useState<Achievement[]>([]);
+    const [fetchedProperties, setFetchedProperties] = useState<any[]>([]);
+    const [loadingProperties, setLoadingProperties] = useState(true);
     const { success, error: showError } = useNotification();
     const [editForm, setEditForm] = useState({
         bio: agent.bio || '',
@@ -174,9 +177,26 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         String(currentUser._id) === String(agent.id)
     );
     const agentUserId = agent.userId || agent.id;
-    const agentProperties = state.properties.filter(p => p.sellerId === agentUserId);
-    const activeListings = agentProperties.filter(p => p.status === 'active');
-    const soldProperties = agentProperties.filter(p => p.status === 'sold');
+
+    // Combine fetched properties with state.properties, removing duplicates
+    const stateProperties = state.properties.filter(p =>
+        String(p.sellerId) === String(agentUserId) ||
+        String(p.sellerId) === String(agent.userId) ||
+        String(p.sellerId) === String(agent.id)
+    );
+    const allAgentProperties = useMemo(() => {
+        const propertyMap = new Map();
+        // Add fetched properties first
+        fetchedProperties.forEach(p => propertyMap.set(p.id, p));
+        // Add state properties (won't overwrite if already exists)
+        stateProperties.forEach(p => {
+            if (!propertyMap.has(p.id)) propertyMap.set(p.id, p);
+        });
+        return Array.from(propertyMap.values());
+    }, [fetchedProperties, stateProperties]);
+
+    const activeListings = allAgentProperties.filter(p => p.status === 'active');
+    const soldProperties = allAgentProperties.filter(p => p.status === 'sold');
 
     const stats = useMemo(() => ({
         totalSales: agent.propertiesSold || 0,
@@ -260,6 +280,28 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         // Also try window scroll as fallback
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, [agent.id]);
+
+    // Fetch agent's properties from API
+    useEffect(() => {
+        const fetchAgentProperties = async () => {
+            setLoadingProperties(true);
+            try {
+                // Try fetching with agent.userId first, then agent.id
+                const userId = agent.userId || agent.id;
+                if (userId) {
+                    const properties = await getPropertiesBySellerId(String(userId));
+                    setFetchedProperties(properties);
+                }
+            } catch (error) {
+                console.error('Error fetching agent properties:', error);
+                // Don't clear - we still have state.properties as fallback
+            } finally {
+                setLoadingProperties(false);
+            }
+        };
+
+        fetchAgentProperties();
+    }, [agent.userId, agent.id]);
 
     // Fetch similar agents from same agency or city and fetch agency gradient
     useEffect(() => {
@@ -1197,7 +1239,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         </div>
 
                                         {/* Properties Map - Shows agent's active and sold properties */}
-                                        {agentProperties.length > 0 && agentProperties.some(p => p.lat && p.lng) && (
+                                        {allAgentProperties.length > 0 && allAgentProperties.some(p => p.lat && p.lng) && (
                                             <div>
                                                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                                     <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
@@ -1208,7 +1250,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                 </h3>
                                                 <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
                                                     <MapContainer
-                                                        center={agentProperties.filter(p => p.lat && p.lng)[0] ? [agentProperties.filter(p => p.lat && p.lng)[0].lat!, agentProperties.filter(p => p.lat && p.lng)[0].lng!] : [agent.lat || 42.0, agent.lng || 21.0]}
+                                                        center={allAgentProperties.filter(p => p.lat && p.lng)[0] ? [allAgentProperties.filter(p => p.lat && p.lng)[0].lat!, allAgentProperties.filter(p => p.lat && p.lng)[0].lng!] : [agent.lat || 42.0, agent.lng || 21.0]}
                                                         zoom={12}
                                                         scrollWheelZoom={true}
                                                         className="w-full h-[400px] sm:h-[500px]"
@@ -1221,7 +1263,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                             maxZoom={22}
                                                         />
                                                         <MapInvalidator />
-                                                        {agentProperties.filter(p => p.lat && p.lng).map((property) => (
+                                                        {allAgentProperties.filter(p => p.lat && p.lng).map((property) => (
                                                             <Marker
                                                                 key={property.id}
                                                                 position={[property.lat!, property.lng!]}
@@ -1464,24 +1506,29 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                         </div>
 
                                         {/* Active Listings */}
-                                        {activeListings.length > 0 && (
+                                        {loadingProperties ? (
                                             <div>
                                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                                {isLoadingProperties ? (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                        <PropertyCardSkeleton />
-                                                        <PropertyCardSkeleton />
-                                                        <PropertyCardSkeleton />
-                                                    </div>
-                                                ) : (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                        {activeListings.map(prop => (
-                                                            <PropertyCard key={prop.id} property={prop} />
-                                                        ))}
-                                                    </div>
-                                                )}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    <PropertyCardSkeleton />
+                                                    <PropertyCardSkeleton />
+                                                    <PropertyCardSkeleton />
+                                                </div>
                                             </div>
-                                        )}
+                                        ) : activeListings.length > 0 ? (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    {activeListings.map(prop => (
+                                                        <PropertyCard key={prop.id} property={prop} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : soldProperties.length === 0 ? (
+                                            <div className="text-center py-12 bg-gray-50 rounded-2xl">
+                                                <p className="text-gray-500">{t('profilePage.listingsTab.noListings', 'No listings available')}</p>
+                                            </div>
+                                        ) : null}
 
                                     
                                         {soldProperties.length > 0 && (

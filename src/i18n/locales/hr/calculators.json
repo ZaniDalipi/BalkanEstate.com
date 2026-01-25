@@ -103,6 +103,13 @@
       "sellingCosts": "Troškovi Prodaje",
       "investmentReturn": "Povrat na Investiciju"
     },
+    "groups": {
+      "loanSettings": "Kredit",
+      "propertyCosts": "Troškovi",
+      "marketAssumptions": "Tržište",
+      "transactionCosts": "Transakcija",
+      "investment": "Investicija"
+    },
     "tooltips": {
       "downPayment": "Postotak cijene doma plaćen unaprijed",
       "interestRate": "Godišnja kamatna stopa hipoteke",

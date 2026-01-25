@@ -4,9 +4,12 @@
   "subtitle": "Vendosni pronën tuaj përpara mijëra blerësve potencialë me opsionet tona fleksibël të çmimeve.",
   "loading": "Duke ngarkuar planet e çmimeve...",
   "noPlans": "Nuk ka plane çmimesh të disponueshme për momentin.",
+  "simpleTransparent": "Çmime të thjeshta dhe transparente",
   "tabs": {
     "forSellers": "Për Shitës",
-    "forBuyers": "Për Blerës"
+    "forBuyers": "Për Blerës",
+    "listingHighlight": "Theksim",
+    "agencyFeature": "Agjenci"
   },
   "error": {
     "loadFailed": "Dështoi ngarkimi i planeve të çmimeve"
@@ -14,6 +17,12 @@
   "limitedOffer": "Oferta e Kufizuar Përfundon Në:",
   "offerTitle": "Urime! Keni Hapur Zbritje Ekskluzive!",
   "offerSubtitle": "Shijoni këtë ofertë një herë në planet tona të shitjes si falënderim.",
+  "badges": {
+    "mostPopular": "MË POPULLORI",
+    "bestForTeams": "MË E MIRA PËR EKIPE",
+    "buyerPro": "BLERËS PRO",
+    "popular": "Popullor"
+  },
   "plans": {
     "free": {
       "name": "Falas",
@@ -27,12 +36,20 @@
     "proYearly": {
       "name": "Pro Vjetor",
       "description": "Kurse {{percent}}% me faturim vjetor",
-      "badge": "MË POPULLORI"
+      "badge": "MË POPULLORI",
+      "saveVsMonthly": "Kurse 33% krahasuar me mujorin"
     },
     "enterprise": {
       "name": "Plani Ndërmarrje",
       "description": "Për agjenci dhe profesionistë"
     }
+  },
+  "metrics": {
+    "listingsYear": "Shpallje/Vit",
+    "listingsMonth": "Shpallje/Muaj",
+    "promoCouponsMonth": "Kupona Promo/Muaj",
+    "listings": "Shpallje",
+    "teamMembers": "Anëtarë Ekipi"
   },
   "features": {
     "activeListings": "Deri në {{count}} shpallje aktive",
@@ -63,12 +80,16 @@
   },
   "buttons": {
     "getStarted": "Fillo Tani",
+    "getStartedPrice": "Fillo Tani - €{{price}}/{{period}}",
     "getPro": "Merr Pro",
     "getProAnnual": "Merr Pro Vjetor",
     "getProMonthly": "Merr Pro Mujor",
     "getEnterprise": "Merr Ndërmarrje",
     "contactSales": "Kontakto Shitjet",
-    "currentPlan": "Plani Aktual"
+    "currentPlan": "Plani Aktual",
+    "getFeatured": "Bëhu i Veçantë",
+    "getBundle": "Merr Paketin",
+    "purchase": "Bli"
   },
   "billing": {
     "monthly": "Mujor",
@@ -95,7 +116,11 @@
   "enterprise": {
     "required": "Kërkohet Plani Ndërmarrje",
     "message": "Abonohu në Ndërmarrje për të krijuar agjencin tuaj dhe për të ekspozuar ekipin tuaj",
-    "contactUs": "Na kontaktoni për të mësuar më shumë rreth planit tonë Ndërmarrje."
+    "contactUs": "Na kontaktoni për të mësuar më shumë rreth planit tonë Ndërmarrje.",
+    "agentRequired": "Kërkohet Statusi i Agjentit",
+    "agentRequiredMessage": "Vetëm agjentët e regjistruar mund të krijojnë agjenci. Ju lutem kaloni në llogarinë e Agjentit në profilin tuaj.",
+    "alreadyHaveAgency": "Ju Keni Tashmë një Agjenci",
+    "viewYourAgency": "Ju tashmë keni një agjenci. Vizitoni llogarinë tuaj për ta menaxhuar."
   },
   "exitModal": {
     "title": "A jeni i sigurt që dëshironi të dilni?",
@@ -111,5 +136,101 @@
     "agencyMessage": "Abonimi juaj Ndërmarrje është aktivizuar dhe agjencia juaj është krijuar me sukses! Tani jeni admini i agjencisë suaj.",
     "subscriptionActivated": "Abonimi u aktivizua me sukses!",
     "startListing": "Fillo të Listosh Prona"
+  },
+  "listing": {
+    "title": "Planet e Promovimit të Listimeve",
+    "subtitle": "Rritni dukshmërinë e listimeve tuaja të pronave dhe merrni më shumë pyetje",
+    "selectListing": "Zgjidhni një listim për ta promovuar me {{tier}}",
+    "loginRequired": "Ju lutem hyni për të parë listimet tuaja",
+    "noListings": "Nuk keni ende ndonjë listim",
+    "createListing": "+ Krijo Listim",
+    "duration": "Kohëzgjatja:",
+    "days": "ditë",
+    "promoting": "Promovimi:",
+    "forDays": "për {{days}} ditë",
+    "comingSoon": "Së Shpejti",
+    "promotionComingSoon": "Promovimi i listimeve do të jetë i disponueshëm së shpejti!",
+    "howItWorks": "Si funksionon:",
+    "howItWorksDescription": "Klikoni në një nivel promovimi më sipër për të filluar, ose krijoni një listim fillimisht.",
+    "purchase": "Bli",
+    "tiers": {
+      "featured": {
+        "title": "I Veçantë",
+        "description": "Prioritet në kërkim",
+        "topOfSearch": "Në krye të kërkimit",
+        "featuredBadge": "Distinktiv i veçantë",
+        "visibility": "2x dukshmëri"
+      },
+      "highlight": {
+        "title": "I Theksuar",
+        "description": "Dallohuni",
+        "featuredBenefits": "Përfitimet e veçantë",
+        "coloredHighlight": "Theksim me ngjyrë",
+        "visibility": "3x dukshmëri"
+      },
+      "premium": {
+        "title": "Premium",
+        "description": "Në faqen kryesore",
+        "highlightBenefits": "Përfitimet e theksuar",
+        "homepageCarousel": "Karusel në faqen kryesore",
+        "visibility": "5x dukshmëri"
+      }
+    }
+  },
+  "duration": {
+    "7days": "7 ditë",
+    "30days": "30 ditë",
+    "90days": "90 ditë"
+  },
+  "agency": {
+    "title": "Agjenci e Veçantë",
+    "subtitle": "Bëni agjencin tuaj të veçantë kudo në platformë për 1 javë",
+    "featuredTitle": "Agjenci e Veçantë",
+    "featuredDescription": "E veçantë kudo në platformë",
+    "oneWeek": "1 JAVË",
+    "perWeek": "në javë",
+    "showsEverywhere": "Shfaqet kudo!",
+    "benefits": {
+      "featuredInDirectory": "E veçantë në direktorinë e agjencive",
+      "priorityInSearch": "Prioritet në rezultatet e kërkimit",
+      "homepageCarousel": "Karusel i agjencive në faqen kryesore",
+      "featuredBadge": "Distinktiv i veçantë në profil",
+      "boostedVisibility": "Dukshmëri e rritur kudo (3x)",
+      "mapMarker": "Shënues i agjencisë në hartën e pronave"
+    },
+    "mapMarker": {
+      "title": "Shënuesi i Hartës",
+      "addon": "Shtesë",
+      "description": "Shfaqni agjencin tuaj në hartën e pronave",
+      "benefits": {
+        "agencyMarker": "Shënues i agjencisë në hartën e pronave",
+        "customIcon": "Ikonë e personalizuar e agjencisë në hartë",
+        "clickableMarker": "Shënues i klikueshëm me info agjencisë",
+        "visibleToAll": "E dukshme për të gjithë kërkuesit e pronave"
+      }
+    },
+    "total": {
+      "title": "Totali për {{days}} ditë",
+      "bundleDescription": "Agjenci e Veçantë + Shënuesi i Hartës"
+    },
+    "needAgency": "Nuk keni akoma agjenci?",
+    "needAgencyDescription": "Abonohu në planin tonë Ndërmarrje për të krijuar agjencin tënde dhe për të zhbllokuar këto veçori.",
+    "viewEnterprise": "Shiko Planin Ndërmarrje",
+    "comingSoon": "Së Shpejti",
+    "featureComingSoon": "Veçoritë e agjencisë do të jenë të disponueshme së shpejti!"
+  },
+  "contact": {
+    "haveQuestions": "Keni pyetje?",
+    "contactSales": "Kontaktoni ekipin tonë të shitjeve",
+    "sendEmail": "Na dërgoni email",
+    "giveCall": "Na telefononi"
+  },
+  "legal": {
+    "title": "Pagesa të Sigurta & Politikat",
+    "description": "Të gjitha pagesat përpunohen në mënyrë të sigurt nga LemonSqueezy. Duke u abonuar, pranoni politikat tona:",
+    "termsOfService": "Kushtet e Shërbimit",
+    "privacyPolicy": "Politika e Privatësisë",
+    "refundPolicy": "Politika e Rimbursimit",
+    "providerNote": "Pagesat menaxhohen nga LemonSqueezy si Tregtari i Regjistruar. TVSH/taksat janë përfshirë ku aplikohen."
   }
 }

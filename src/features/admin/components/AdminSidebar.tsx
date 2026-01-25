@@ -17,6 +17,7 @@ import {
   ChevronDownIcon,
   XMarkIcon,
   PlayCircleIcon,
+  RocketLaunchIcon,
 } from '@/constants';
 import type { AdminView } from './AdminLayout';
 
@@ -137,6 +138,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           id: 'pricing',
           label: t('admin:sidebar.pricing', 'Pricing & Plans'),
           icon: <CurrencyEuroIcon className="w-5 h-5" />
+        },
+        {
+          id: 'promotionPlans',
+          label: t('admin:sidebar.promotionPlans', 'Promotion Plans'),
+          icon: <RocketLaunchIcon className="w-5 h-5" />
         },
         {
           id: 'discounts',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import {
@@ -22,6 +22,10 @@ import {
   TrophyIcon,
   ExclamationTriangleIcon,
   ClockIcon,
+  SparklesIcon,
+  FireIcon,
+  BoltIcon,
+  RocketLaunchIcon,
 } from '@/constants';
 import {
   StatCard,
@@ -34,6 +38,57 @@ import {
   PERIOD_OPTIONS,
   truncateText,
 } from '@/src/features/analytics';
+
+// Animated number counter hook
+const useAnimatedCounter = (end: number, duration: number = 1000) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (end === 0) {
+      setCount(0);
+      return;
+    }
+
+    let startTime: number | null = null;
+    const startValue = 0;
+
+    const animate = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(startValue + (end - startValue) * easeOutQuart));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [end, duration]);
+
+  return count;
+};
+
+// Floating particle component
+const FloatingParticle: React.FC<{ delay: number; size: 'sm' | 'md' | 'lg' }> = ({ delay, size }) => {
+  const sizeClasses = {
+    sm: 'w-1 h-1',
+    md: 'w-1.5 h-1.5',
+    lg: 'w-2 h-2',
+  };
+
+  return (
+    <div
+      className={`absolute ${sizeClasses[size]} rounded-full bg-gradient-to-r from-primary/40 to-purple-400/40 animate-float`}
+      style={{
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${delay}s`,
+        animationDuration: `${3 + Math.random() * 4}s`,
+      }}
+    />
+  );
+};
 
 /**
  * Analytics Dashboard Page
@@ -126,18 +181,24 @@ const AnalyticsPage: React.FC = () => {
   // Auth required screen
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-        <div className="text-center bg-white rounded-2xl shadow-lg border border-neutral-200 p-8 max-w-sm w-full">
-          <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <LockClosedIcon className="h-8 w-8 text-neutral-400" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+
+        <div className="relative text-center bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 max-w-sm w-full">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30">
+            <ChartBarIcon className="h-10 w-10 text-white" />
           </div>
-          <h2 className="text-lg font-bold text-neutral-900 mb-2">{t('analytics:signInRequired')}</h2>
-          <p className="text-neutral-500 text-sm mb-6">
+          <h2 className="text-xl font-bold text-white mb-2">{t('analytics:signInRequired')}</h2>
+          <p className="text-white/60 text-sm mb-6">
             {t('analytics:signInMessage')}
           </p>
           <button
             onClick={openAuthModal}
-            className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+            className="w-full px-6 py-3.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40"
           >
             {t('analytics:signIn')}
           </button>
@@ -147,29 +208,167 @@ const AnalyticsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 overflow-y-auto">
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Header */}
-        <Header
-          period={period}
-          onPeriodChange={setPeriod}
-          isPremium={isPremium}
-          onDownload={() => downloadReport.mutateAsync(period)}
-          isDownloading={downloadReport.isPending}
-        />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 overflow-y-auto relative">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-purple-200/30 via-blue-200/20 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-blue-200/20 via-purple-200/10 to-transparent rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
+        {/* Floating particles */}
+        {[...Array(12)].map((_, i) => (
+          <FloatingParticle key={i} delay={i * 0.5} size={i % 3 === 0 ? 'lg' : i % 2 === 0 ? 'md' : 'sm'} />
+        ))}
+      </div>
+
+      {/* CSS for animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
+          25% { transform: translateY(-20px) translateX(10px); opacity: 0.8; }
+          50% { transform: translateY(-10px) translateX(-10px); opacity: 0.6; }
+          75% { transform: translateY(-30px) translateX(5px); opacity: 0.9; }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .animate-shimmer {
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+          background-size: 200% 100%;
+          animation: shimmer 2s infinite;
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
+        {/* Hero Header */}
+        <div className="relative mb-8 rounded-3xl overflow-hidden">
+          {/* Gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
+
+          {/* Animated orbs */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 animate-pulse-glow" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/4 animate-pulse-glow" style={{ animationDelay: '2s' }} />
+
+          <div className="relative px-6 py-8 md:px-8 md:py-10">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              {/* Left side - Title and stats */}
+              <div className="flex items-start gap-4">
+                <button
+                  onClick={() => window.history.back()}
+                  className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all group"
+                >
+                  <ArrowLeftIcon className="h-5 w-5 text-white group-hover:-translate-x-0.5 transition-transform" />
+                </button>
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
+                      <RocketLaunchIcon className="h-6 w-6 text-white" />
+                    </div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-white">
+                      {t('analytics:title')}
+                    </h1>
+                    {isPremium && (
+                      <span className="flex items-center gap-1 px-2.5 py-1 bg-amber-400/90 text-amber-900 text-xs font-bold rounded-full">
+                        <StarIcon className="h-3 w-3" />
+                        PRO
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-white/70 text-sm md:text-base">{t('analytics:subtitle')}</p>
+                </div>
+              </div>
+
+              {/* Right side - Controls */}
+              <div className="flex items-center gap-3">
+                {/* Period selector - Glass style */}
+                <div className="flex bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-1">
+                  {PERIOD_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setPeriod(opt.value)}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                        period === opt.value
+                          ? 'bg-white text-purple-700 shadow-lg'
+                          : 'text-white/80 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {t(`analytics:periods.${opt.value}`)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Download button */}
+                {isPremium && (
+                  <button
+                    onClick={() => downloadReport.mutateAsync(period)}
+                    disabled={downloadReport.isPending}
+                    className="p-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all border border-white/20 disabled:opacity-50 group"
+                  >
+                    <DocumentArrowDownIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Quick stats row */}
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <QuickStat
+                label={t('analytics:stats.today')}
+                value={dashboard?.overview?.todayViews || 0}
+                icon={<BoltIcon className="h-4 w-4" />}
+                color="from-yellow-400 to-orange-400"
+                loading={isLoading}
+              />
+              <QuickStat
+                label={t('analytics:stats.weekly')}
+                value={dashboard?.overview?.weeklyViews || 0}
+                change={dashboard?.overview?.weeklyChange}
+                icon={<FireIcon className="h-4 w-4" />}
+                color="from-pink-400 to-rose-400"
+                loading={isLoading}
+              />
+              <QuickStat
+                label={t('analytics:stats.monthly')}
+                value={dashboard?.overview?.monthlyViews || 0}
+                change={dashboard?.overview?.monthlyChange}
+                icon={<ChartBarIcon className="h-4 w-4" />}
+                color="from-cyan-400 to-blue-400"
+                loading={isLoading}
+              />
+              <QuickStat
+                label={t('analytics:stats.properties')}
+                value={dashboard?.overview?.totalProperties || 0}
+                icon={<HomeIcon className="h-4 w-4" />}
+                color="from-emerald-400 to-teal-400"
+                loading={isLoading}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Error state */}
         {dashboardError && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl p-5 mb-6 shadow-sm">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
-                <p className="text-red-600 text-sm">{getErrorMessage(dashboardError)}</p>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-xl">
+                  <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-red-700 font-medium text-sm">{t('analytics:errors.title', 'Error loading data')}</p>
+                  <p className="text-red-600 text-xs">{getErrorMessage(dashboardError)}</p>
+                </div>
               </div>
               <button
                 onClick={handleRetry}
                 disabled={isFetching}
-                className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-colors disabled:opacity-50"
               >
                 {isFetching ? t('analytics:errors.retrying') : t('analytics:errors.retry')}
               </button>
@@ -177,8 +376,8 @@ const AnalyticsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+        {/* Stats Grid - Glass cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <StatCard
             title={t('analytics:stats.today')}
             value={dashboard?.overview?.todayViews || 0}
@@ -273,6 +472,51 @@ const AnalyticsPage: React.FC = () => {
 // ============================================================================
 // Sub-components
 // ============================================================================
+
+// Quick stat component for hero header
+interface QuickStatProps {
+  label: string;
+  value: number;
+  change?: number;
+  icon: React.ReactNode;
+  color: string;
+  loading?: boolean;
+}
+
+const QuickStat: React.FC<QuickStatProps> = ({ label, value, change, icon, color, loading }) => {
+  const animatedValue = useAnimatedCounter(loading ? 0 : value, 1200);
+
+  if (loading) {
+    return (
+      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 animate-pulse">
+        <div className="h-4 bg-white/20 rounded w-16 mb-2" />
+        <div className="h-6 bg-white/20 rounded w-12" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all group">
+      <div className="flex items-center gap-2 mb-1">
+        <div className={`p-1.5 rounded-lg bg-gradient-to-r ${color}`}>
+          {icon}
+        </div>
+        <span className="text-white/70 text-xs font-medium">{label}</span>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">
+          {animatedValue.toLocaleString()}
+        </span>
+        {change !== undefined && (
+          <span className={`text-xs font-semibold flex items-center gap-0.5 ${change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {change >= 0 ? '↑' : '↓'}
+            {Math.abs(change)}%
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
 
 interface HeaderProps {
   period: Period;

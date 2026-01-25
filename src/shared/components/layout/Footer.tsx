@@ -74,7 +74,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
 
   return (
     <footer
-      className={`relative bg-gray-50 text-gray-900 border-t border-gray-200 mt-auto pb-4 ${className}`}
+      className={`relative bg-gray-50 text-gray-900 border-t border-gray-200 mt-auto pb-4 overflow-hidden ${className}`}
     >
       {/* Subtle Background Pattern */}
       <div

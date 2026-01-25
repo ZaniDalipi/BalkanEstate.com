@@ -52,7 +52,7 @@
     "secureCheckout": "Sigurna Naplata",
     "secureCheckoutDescription": "Dovršite svoju kupnju na našem sigurnom platnom partneru",
     "secureExternalPayment": "Sigurno Vanjsko Plaćanje",
-    "secureExternalPaymentDescription": "Bit ćete preusmjereni na našeg sigurnog partnera za plaćanje (Paddle) da dovršite kupnju. Nikada ne pohranjujemo vaše podatke o kartici - njima u potpunosti upravlja naš certificirani procesor plaćanja.",
+    "secureExternalPaymentDescription": "Bit ćete preusmjereni na našeg sigurnog partnera za plaćanje (LemonSqueezy) da dovršite kupnju. Nikada ne pohranjujemo vaše podatke o kartici - njima u potpunosti upravlja naš certificirani procesor plaćanja.",
     "freeSubscriptionActivated": "Besplatna Pretplata Aktivirana",
     "freeSubscriptionDescription": "Vaš kod popusta pruža 100% popusta! Kliknite gumb ispod da odmah aktivirate svoju besplatnu pretplatu. Plaćanje nije potrebno.",
     "continueToPayment": "Nastavi na Plaćanje",
@@ -82,6 +82,6 @@
     "privacy": "Politiku privatnosti",
     "refund": "Politiku povrata",
     "and": "i",
-    "paddle": "Plaćanja obrađuje Paddle.com kao Trgovac evidencije."
+    "lemonsqueezy": "Plaćanja obrađuje LemonSqueezy kao Trgovac evidencije."
   }
 }

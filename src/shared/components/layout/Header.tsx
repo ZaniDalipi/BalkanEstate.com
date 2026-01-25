@@ -37,7 +37,13 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   }, [isAuthenticated, dispatch]);
 
   const handleSubscribeClick = useCallback(() => {
-    dispatch({ type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: true } });
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+    const currentLang = window.location.pathname.split('/')[1] || 'en';
+    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
+    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
+    window.history.pushState({}, '', `/${lang}/subscribe`);
   }, [dispatch]);
 
   const AuthButton: React.FC<{ floating?: boolean }> = ({ floating }) => {

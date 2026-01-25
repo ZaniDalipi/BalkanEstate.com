@@ -103,6 +103,13 @@
       "sellingCosts": "Трошоци за продажба",
       "investmentReturn": "Враќање на инвестиција"
     },
+    "groups": {
+      "loanSettings": "Кредит",
+      "propertyCosts": "Трошоци",
+      "marketAssumptions": "Пазар",
+      "transactionCosts": "Трансакција",
+      "investment": "Инвестиција"
+    },
     "tooltips": {
       "downPayment": "Процент од цената на домот платен однапред",
       "interestRate": "Годишна хипотекарна каматна стапка",

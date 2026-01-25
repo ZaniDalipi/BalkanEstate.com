@@ -70,13 +70,44 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, prop
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="5xl" title={t('property:comparison.title')}>
-            <div className="overflow-x-auto">
+            {/* Mobile Card Layout */}
+            <div className="block md:hidden space-y-4 p-2">
+                {properties.map(p => (
+                    <div key={p.id} className="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm">
+                        <div className="p-3">
+                            <CompareModalImage property={p} />
+                        </div>
+                        <div className="border-t border-neutral-100">
+                            {rows.map(row => {
+                                const value = p[row.key as keyof Property];
+                                const displayValue = row.format(p);
+                                const isBest = row.bestValue !== undefined && value === row.bestValue;
+
+                                return (
+                                    <div key={row.label} className={`flex justify-between items-start p-3 border-b border-neutral-50 last:border-b-0 ${isBest ? 'bg-green-50' : ''}`}>
+                                        <span className="text-sm font-medium text-neutral-600 flex-shrink-0">{row.label}</span>
+                                        <span className={`text-sm text-right ml-2 ${isBest ? 'text-green-700 font-bold' : 'text-neutral-900'}`}>
+                                            {Array.isArray(displayValue)
+                                                ? (displayValue.length > 0 ? displayValue.join(', ') : '-')
+                                                : (displayValue || '-')
+                                            }
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Desktop Table Layout */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="border-b-2 border-neutral-200">
-                            <th className="p-4 text-left font-bold text-neutral-800 w-[15%] sticky left-0 bg-white z-10">{t('property:comparison.feature')}</th>
+                            <th className="p-4 text-left font-bold text-neutral-800 min-w-[120px] sticky left-0 bg-white z-10">{t('property:comparison.feature')}</th>
                             {properties.map(p => (
-                                <th key={p.id} className="p-4 w-[21.25%]">
+                                <th key={p.id} className="p-4 min-w-[180px]">
                                     <CompareModalImage property={p} />
                                 </th>
                             ))}
@@ -100,7 +131,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, prop
                                         </td>
                                       );
                                     }
-                                    
+
                                     return (
                                         <HighlightedCell key={p.id} isBest={isBest}>
                                             <span className="text-sm">{displayValue}</span>

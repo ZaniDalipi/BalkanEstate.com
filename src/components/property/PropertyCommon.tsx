@@ -21,13 +21,29 @@ interface DetailItemProps {
  * ```
  */
 export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children }) => (
-  <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-neutral-50 to-neutral-100/50 border border-neutral-200/60 hover:border-primary/30 hover:shadow-sm transition-all duration-200">
-    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-primary">
-      {icon}
-    </div>
-    <div className="flex-1 min-w-0">
-      <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wide block">{label}</span>
-      <span className="text-sm font-bold text-neutral-800 block truncate">{children}</span>
+  <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] transition-all duration-500 hover:-translate-y-1">
+    {/* Liquid glass highlight effect */}
+    <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent rounded-2xl" />
+    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+    {/* Subtle color tint on hover */}
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+
+    <div className="relative p-4 flex items-center gap-4">
+      {/* Apple-style liquid glass icon container */}
+      <div className="relative flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/90 to-primary shadow-lg shadow-primary/25 flex items-center justify-center text-white group-hover:scale-105 group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-500">
+        {/* Glass reflection */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-transparent to-transparent" />
+        <div className="absolute top-0 left-1 right-1 h-[40%] rounded-t-xl bg-gradient-to-b from-white/25 to-transparent" />
+        <div className="relative w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
+          {icon}
+        </div>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">{label}</span>
+        <span className="text-sm sm:text-base font-bold text-neutral-800 block leading-tight">{children}</span>
+      </div>
     </div>
   </div>
 );
@@ -55,11 +71,16 @@ interface ThumbnailProps {
 export const Thumbnail: React.FC<ThumbnailProps> = ({ src, alt, isActive, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-      isActive ? 'border-primary scale-105' : 'border-transparent opacity-70 hover:opacity-100'
+    className={`relative flex-shrink-0 aspect-[4/3] rounded-xl overflow-hidden border-3 transition-all duration-300 ${
+      isActive
+        ? 'border-primary ring-2 ring-primary/30 scale-[1.02] shadow-lg'
+        : 'border-transparent opacity-60 hover:opacity-100 hover:scale-[1.01]'
     }`}
   >
     <img src={src} alt={alt} className="w-full h-full object-cover" />
+    {isActive && (
+      <div className="absolute inset-0 bg-primary/10 pointer-events-none" />
+    )}
   </button>
 );
 

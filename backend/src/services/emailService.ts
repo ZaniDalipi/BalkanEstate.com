@@ -1091,7 +1091,7 @@ class EmailService {
   }
 
   /**
-   * Send subscription renewal reminder
+   * Send subscription renewal reminder (for non-auto-renewing subscriptions)
    */
   async sendSubscriptionRenewalReminder(email: string, userName: string, expiryDate: Date, planName: string): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
@@ -1122,6 +1122,73 @@ class EmailService {
       subject: `Your ${planName} subscription expires soon`,
       html,
       text: `Hi ${userName}, your ${planName} subscription expires on ${expiryDate.toLocaleDateString()}. Renew at ${frontendUrl}/account`,
+    });
+  }
+
+  /**
+   * Send auto-renewal reminder (7 days before renewal for auto-renewing subscriptions)
+   */
+  async sendAutoRenewalReminder(email: string, userName: string, renewalDate: Date, planName: string): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const formattedDate = renewalDate.toLocaleDateString();
+
+    const html = `
+      <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+          <div style="background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div style="width: 60px; height: 60px; background-color: #eff6ff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <span style="font-size: 28px;">🔔</span>
+              </div>
+              <h1 style="color: #1e40af; margin: 0 0 8px 0; font-size: 24px;">Subscription Renewal Notice</h1>
+              <p style="color: #6b7280; margin: 0; font-size: 14px;">7 days until your renewal</p>
+            </div>
+
+            <!-- Main Content -->
+            <p style="color: #374151;">Hi ${userName},</p>
+            <p style="color: #374151;">
+              This is a friendly reminder that your <strong>${planName}</strong> subscription will automatically renew on <strong>${formattedDate}</strong>.
+            </p>
+
+            <!-- Info Box -->
+            <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <h3 style="color: #1e40af; margin: 0 0 12px 0; font-size: 16px;">What happens next?</h3>
+              <ul style="color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>Your payment method will be charged on ${formattedDate}</li>
+                <li>Your subscription will continue uninterrupted</li>
+                <li>You'll receive an invoice/receipt via email</li>
+              </ul>
+            </div>
+
+            <!-- Don't want to renew? -->
+            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <p style="color: #92400e; margin: 0; font-size: 14px;">
+                <strong>Don't want to renew?</strong> You can cancel your subscription anytime from your account settings. Your access will continue until the end of the current billing period.
+              </p>
+            </div>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 28px 0;">
+              <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Manage Subscription</a>
+            </div>
+
+            <!-- Footer -->
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 24px; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;">support@balkanestate.com</a>
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: email,
+      subject: `Upcoming renewal: Your ${planName} subscription renews on ${formattedDate}`,
+      html,
+      text: `Hi ${userName}, your ${planName} subscription will automatically renew on ${formattedDate}. If you don't want to renew, you can cancel from your account settings at ${frontendUrl}/account. Your access will continue until the end of your current billing period.`,
     });
   }
 
@@ -1197,6 +1264,125 @@ class EmailService {
       subject: `Subscription cancelled - access until ${details.expiresAt.toLocaleDateString()}`,
       html,
       text: `Your ${details.planName} subscription has been cancelled. Access continues until ${details.expiresAt.toLocaleDateString()}.`,
+    });
+  }
+
+  /**
+   * Send subscription invoice with full details including auto-renewal info
+   */
+  async sendSubscriptionInvoice(email: string, userName: string, details: {
+    planName: string;
+    amount: number;
+    currency: string;
+    billingPeriod: string;
+    orderId: string;
+    subscriptionStartDate: Date;
+    nextBillingDate: Date;
+    autoRenewing: boolean;
+  }): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+    const currencySymbol = details.currency === 'EUR' ? '€' : details.currency;
+    const billingText = details.billingPeriod === 'yearly' ? 'year' : 'month';
+    const renewalDate = new Date(details.nextBillingDate);
+
+    const html = `
+      <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+          <div style="background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #16a34a; margin-bottom: 10px;">Invoice & Receipt</h1>
+              <p style="color: #6b7280; font-size: 14px;">Thank you for subscribing to BalkanEstate</p>
+            </div>
+
+            <!-- Invoice Details Box -->
+            <div style="background-color: #f3f4f6; padding: 24px; border-radius: 8px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280;">Invoice Number:</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">#${details.orderId}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280;">Plan:</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: bold;">${details.planName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280;">Billing Period:</td>
+                  <td style="padding: 8px 0; text-align: right;">${details.billingPeriod === 'yearly' ? 'Annual' : 'Monthly'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280;">Start Date:</td>
+                  <td style="padding: 8px 0; text-align: right;">${details.subscriptionStartDate.toLocaleDateString()}</td>
+                </tr>
+                <tr style="border-top: 2px solid #e5e7eb;">
+                  <td style="padding: 16px 0 8px 0; color: #111827; font-weight: bold; font-size: 18px;">Amount Paid:</td>
+                  <td style="padding: 16px 0 8px 0; text-align: right; font-weight: bold; font-size: 18px; color: #16a34a;">${currencySymbol}${details.amount.toFixed(2)}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Auto-Renewal Notice -->
+            ${details.autoRenewing ? `
+            <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0; font-size: 14px;">Auto-Renewal Information</h3>
+              <p style="color: #1e3a8a; font-size: 13px; margin-bottom: 8px;">
+                Your subscription will automatically renew on <strong>${renewalDate.toLocaleDateString()}</strong>.
+              </p>
+              <ul style="color: #1e3a8a; font-size: 12px; margin: 0; padding-left: 20px;">
+                <li>You will be charged <strong>${currencySymbol}${details.amount.toFixed(2)}/${billingText}</strong></li>
+                <li>We'll send you a reminder email 7 days before renewal</li>
+                <li>You can cancel anytime from your account settings</li>
+              </ul>
+            </div>
+            ` : `
+            <div style="background-color: #fef3c7; border: 1px solid #fcd34d; padding: 16px; border-radius: 8px; margin: 20px 0;">
+              <p style="color: #92400e; font-size: 13px; margin: 0;">
+                Your subscription is set to expire on <strong>${renewalDate.toLocaleDateString()}</strong>.
+                Visit your account to enable auto-renewal if you'd like to continue your subscription.
+              </p>
+            </div>
+            `}
+
+            <!-- What's Included -->
+            <div style="margin: 24px 0;">
+              <h3 style="color: #111827; font-size: 16px; margin-bottom: 12px;">What's Included:</h3>
+              <ul style="color: #4b5563; font-size: 14px; line-height: 1.8;">
+                <li>Premium property listings</li>
+                <li>Priority in search results</li>
+                <li>Unlimited saved searches</li>
+                <li>AI-powered property insights</li>
+                <li>Advanced analytics dashboard</li>
+                <li>Priority customer support</li>
+              </ul>
+            </div>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${frontendUrl}/account" style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Go to My Account</a>
+            </div>
+
+            <!-- Footer -->
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px; text-align: center;">
+              <p style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">
+                This receipt was sent to ${email}
+              </p>
+              <p style="color: #9ca3af; font-size: 11px;">
+                Questions? Contact us at <a href="mailto:support@balkanestate.com" style="color: #2563eb;">support@balkanestate.com</a>
+              </p>
+              <p style="color: #9ca3af; font-size: 11px; margin-top: 12px;">
+                BalkanEstate • Powered by LemonSqueezy as Merchant of Record
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: email,
+      subject: `Invoice #${details.orderId} - ${details.planName} Subscription`,
+      html,
+      text: `Invoice #${details.orderId}\n\nThank you for subscribing to ${details.planName}!\n\nAmount: ${currencySymbol}${details.amount.toFixed(2)}\nBilling: ${details.billingPeriod}\n${details.autoRenewing ? `Next renewal: ${renewalDate.toLocaleDateString()}\n\nYour subscription will automatically renew. You'll receive a reminder 7 days before.` : `Expires: ${renewalDate.toLocaleDateString()}`}\n\nManage your subscription at ${frontendUrl}/account`,
     });
   }
 
@@ -2223,6 +2409,15 @@ Questions? Contact us at support@balkanestateai.com
     email: string;
     ownerName: string;
     agencyName: string;
+    promotionCoupons?: {
+      total: number;
+      premium: number;
+      highlighted: number;
+      featured: number;
+    };
+    agentCoupons?: number;
+    teamMembersLimit?: number;
+    listingsLimit?: number;
   }): Promise<void> {
     const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
@@ -2231,6 +2426,20 @@ Questions? Contact us at support@balkanestateai.com
     const safeAgencyName = escapeHtml(params.agencyName);
 
     const currentYear = new Date().getFullYear();
+
+    // Default values if not provided
+    const listingsLimit = params.listingsLimit || 500;
+    const teamMembersLimit = params.teamMembersLimit || 5;
+    const agentCoupons = params.agentCoupons || 5;
+    const promotionCoupons = params.promotionCoupons || {
+      total: 5,
+      premium: 2,
+      highlighted: 2,
+      featured: 1,
+    };
+
+    // Create promotion coupons breakdown string
+    const couponBreakdown = `${promotionCoupons.premium} Premium + ${promotionCoupons.highlighted} Highlighted + ${promotionCoupons.featured} Featured`;
 
     const html = `
 <!DOCTYPE html>
@@ -2276,19 +2485,30 @@ Questions? Contact us at support@balkanestateai.com
           <tr>
             <td style="padding: 8px 0;">
               <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
-              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>500 Listings</strong> - Expandable as you grow</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>${listingsLimit} Listings</strong> - Expandable as you grow</span>
             </td>
           </tr>
           <tr>
             <td style="padding: 8px 0;">
               <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
-              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>5 Team Members</strong> - Each with yearly Pro subscription</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>${agentCoupons} Agent Coupons</strong> - Each with yearly Pro subscription</span>
             </td>
           </tr>
           <tr>
             <td style="padding: 8px 0;">
               <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
-              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>5 Monthly Promotion Coupons</strong> - Boost your visibility</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>${promotionCoupons.total} Monthly Promotion Coupons</strong></span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; padding-left: 40px;">
+              <span style="color: #94a3b8; font-size: 13px;">${couponBreakdown}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0;">
+              <span style="display: inline-block; width: 28px; height: 28px; background: #059669; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; color: white;">✓</span>
+              <span style="color: #e2e8f0; font-size: 14px; margin-left: 12px;"><strong>Up to ${teamMembersLimit} Team Members</strong></span>
             </td>
           </tr>
           <tr>
@@ -2362,7 +2582,7 @@ Questions? Contact us at support@balkanestateai.com
       to: params.email,
       subject: `🎉 Thank You for Choosing Enterprise! Welcome to BalkanEstateᴬᴵ`,
       html,
-      text: `Dear ${params.ownerName},\n\nWe're thrilled to have ${params.agencyName} join the BalkanEstateᴬᴵ Enterprise program!\n\nYour Enterprise Benefits:\n- 500 Listings (expandable)\n- 5 Team Members with yearly Pro subscription\n- 5 Monthly Promotion Coupons\n- Priority Support\n- Agency Branding\n\nNext Steps:\n1. Check your inbox for 5 agent registration codes\n2. Share codes with your team\n3. Set up your agency profile\n4. Start listing properties!\n\nGo to your dashboard: ${frontendUrl}/agency/dashboard\n\nThank you for trusting us!\n— The BalkanEstateᴬᴵ Team\n\n© ${currentYear} BalkanEstateᴬᴵ`,
+      text: `Dear ${params.ownerName},\n\nWe're thrilled to have ${params.agencyName} join the BalkanEstateᴬᴵ Enterprise program!\n\nYour Enterprise Benefits:\n- ${listingsLimit} Listings (expandable)\n- ${agentCoupons} Agent Coupons with yearly Pro subscription\n- ${promotionCoupons.total} Monthly Promotion Coupons (${couponBreakdown})\n- Up to ${teamMembersLimit} Team Members\n- Priority Support\n- Agency Branding\n\nNext Steps:\n1. Check your inbox for ${agentCoupons} agent registration codes\n2. Share codes with your team\n3. Set up your agency profile\n4. Start listing properties!\n\nGo to your dashboard: ${frontendUrl}/agency/dashboard\n\nThank you for trusting us!\n— The BalkanEstateᴬᴵ Team\n\n© ${currentYear} BalkanEstateᴬᴵ`,
       category: 'alerts',
     });
   }
