@@ -16,8 +16,11 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const { t } = useTranslation(['nav']);
   const { state, dispatch } = useAppContext();
-  const { isAuthenticated, currentUser } = state;
+  const { isAuthenticated, currentUser, activeView } = state;
   const { getLocalizedPath } = useLocalizedNavigation();
+
+  // Center floating header only on property details page
+  const isPropertyDetails = activeView === 'property-details';
 
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
@@ -80,8 +83,13 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   };
   
   if (isFloating) {
+    // Centered on property details, top-right on other pages
+    const headerPositionClass = isPropertyDetails
+      ? 'fixed top-2 left-1/2 -translate-x-1/2 z-[1001]'
+      : 'fixed top-2 right-3 z-[1001]';
+
     return (
-      <header className="fixed top-2 left-1/2 -translate-x-1/2 z-[1001]">
+      <header className={headerPositionClass}>
         <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-lg border border-neutral-200/50">
           <button
             onClick={handleSubscribeClick}
