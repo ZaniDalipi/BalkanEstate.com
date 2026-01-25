@@ -14,6 +14,7 @@ import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
+import { HERO_IMAGES } from '@/config/cloudinaryConfig';
 
 type SortOption = 'rating' | 'experience' | 'sales' | 'recent' | 'name';
 type SearchTab = 'all' | 'name' | 'location' | 'specialization';
@@ -814,8 +815,9 @@ const AgentsPage: React.FC = () => {
 
           {/* Contact Form Section */}
           <div className="relative rounded-xl overflow-hidden mb-12 sm:mb-16 shadow-lg" style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&h=400&fit=crop)',
-            backgroundPosition: 'center'
+            backgroundImage: `url(${HERO_IMAGES.agentsHero.src})`,
+            backgroundPosition: 'center',
+            backgroundSize: 'cover'
           }}>
             <div className="absolute inset-0 bg-gradient-to-r from-neutral-900/80 to-neutral-900/70"></div>
             <div className="relative w-full px-4 sm:px-8 py-8 sm:py-12">

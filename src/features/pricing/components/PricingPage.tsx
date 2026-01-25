@@ -921,6 +921,29 @@ const PricingPage: React.FC = () => {
               <p className="mt-2 text-gray-600">{t('pricing:listing.subtitle', 'Boost your property listings to get more visibility and inquiries')}</p>
             </div>
 
+            {/* Duration Selector - like Agency section */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-gray-100 p-1 rounded-full inline-flex">
+                {[
+                  { value: 7, label: t('pricing:duration.7days', '7 days') },
+                  { value: 30, label: t('pricing:duration.30days', '30 days') },
+                  { value: 90, label: t('pricing:duration.90days', '90 days') },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedDuration(option.value as 7 | 30 | 90)}
+                    className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                      selectedDuration === option.value
+                        ? 'bg-white text-gray-900 shadow-md'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Listing selection modal/section */}
             {selectedPromoTier && (
               <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-lg">
