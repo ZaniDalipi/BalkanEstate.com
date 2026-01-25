@@ -235,10 +235,11 @@ export const getCorsConfig = () => {
 /**
  * General API rate limiter
  * More permissive than auth rate limiting
+ * In development mode, skip rate limiting entirely
  */
 export const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 200 : 1000, // Limit each IP
+  max: isProduction ? 200 : 0, // 0 = unlimited in development
   message: {
     error: 'Too many requests',
     message: 'You have exceeded the rate limit. Please try again later.',
@@ -247,6 +248,8 @@ export const generalRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req: Request) => {
+    // Skip rate limiting entirely in development
+    if (isDevelopment) return true;
     // Skip rate limiting for health checks
     return req.path === '/health';
   },
@@ -272,10 +275,11 @@ export const sensitiveRateLimiter = rateLimit({
 
 /**
  * Very strict rate limiter for payment endpoints
+ * In development mode, skip rate limiting entirely to avoid blocking during testing
  */
 export const paymentRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: isProduction ? 10 : 50, // Very strict
+  max: isProduction ? 10 : 0, // 0 = unlimited in development
   message: {
     error: 'Too many payment attempts',
     message: 'Too many payment attempts. Please try again later.',
@@ -283,6 +287,7 @@ export const paymentRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isDevelopment, // Skip rate limiting entirely in development
 });
 
 /**
