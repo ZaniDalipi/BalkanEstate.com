@@ -23,11 +23,20 @@ export interface Product {
   durationDays?: number;
   listingsLimit?: number;
   promotionCoupons?: number;
+  // Promotion coupon breakdown
+  premiumCoupons?: number;
+  highlightedCoupons?: number;
+  featuredCoupons?: number;
+  // Agency-specific
+  agentCoupons?: number;
+  teamMembersLimit?: number;
+  // AI & Insights
   savedSearchesLimit?: number;
   aiMessagesLimit?: number;
   aiInsightsLimit?: number;
   imageDescriptionLimit?: number;
-  teamMembersLimit?: number;
+  // Other
+  maxActiveSubscriptions?: number;
 }
 
 export interface PromotionPlan {
