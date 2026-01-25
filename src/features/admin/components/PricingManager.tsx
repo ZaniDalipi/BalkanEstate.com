@@ -40,6 +40,8 @@ const PricingManager: React.FC = () => {
   const [newFeature, setNewFeature] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [mutatingProductId, setMutatingProductId] = useState<string | null>(null);
+  const [editingFeatureIndex, setEditingFeatureIndex] = useState<number | null>(null);
+  const [editingFeatureValue, setEditingFeatureValue] = useState('');
 
   // Derived state for mutation errors
   const mutationError =
@@ -124,7 +126,48 @@ const PricingManager: React.FC = () => {
   };
 
   const insertPlaceholder = (placeholder: string) => {
-    setNewFeature(prev => prev + placeholder);
+    // Insert into the field that's currently being edited
+    if (editingFeatureIndex !== null) {
+      setEditingFeatureValue(prev => prev + placeholder);
+    } else {
+      setNewFeature(prev => prev + placeholder);
+    }
+  };
+
+  const startEditingFeature = (index: number, value: string) => {
+    setEditingFeatureIndex(index);
+    setEditingFeatureValue(value);
+  };
+
+  const saveEditingFeature = () => {
+    if (editingFeatureIndex === null || !editingProduct) return;
+
+    const trimmedValue = editingFeatureValue.trim();
+    if (!trimmedValue) {
+      // If empty, cancel editing
+      cancelEditingFeature();
+      return;
+    }
+
+    const newFeatures = [...editingProduct.features];
+    newFeatures[editingFeatureIndex] = trimmedValue;
+    setEditingProduct({ ...editingProduct, features: newFeatures });
+    setEditingFeatureIndex(null);
+    setEditingFeatureValue('');
+  };
+
+  const cancelEditingFeature = () => {
+    setEditingFeatureIndex(null);
+    setEditingFeatureValue('');
+  };
+
+  const handleFeatureKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveEditingFeature();
+    } else if (e.key === 'Escape') {
+      cancelEditingFeature();
+    }
   };
 
   const handleSave = async () => {
@@ -760,7 +803,7 @@ const PricingManager: React.FC = () => {
 
               {/* Features */}
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                <h4 className="font-semibold text-indigo-900 mb-3">Features (displayed in pricing page)</h4>
+                <h4 className="font-semibold text-indigo-900 mb-3">{t('admin:pricing.featuresDescription', 'Features (displayed in pricing page)')}</h4>
 
                 {/* Features List with Reordering */}
                 <div className="space-y-2 mb-4">
@@ -799,13 +842,32 @@ const PricingManager: React.FC = () => {
                         </button>
                       </div>
 
-                      {/* Feature text */}
+                      {/* Feature text - editable */}
                       <div className="flex-1">
-                        <div className="text-sm text-gray-700">{feature}</div>
+                        {editingFeatureIndex === index ? (
+                          <input
+                            type="text"
+                            value={editingFeatureValue}
+                            onChange={(e) => setEditingFeatureValue(e.target.value)}
+                            onBlur={saveEditingFeature}
+                            onKeyDown={handleFeatureKeyDown}
+                            autoFocus
+                            className="w-full text-sm text-gray-700 px-2 py-1 border border-indigo-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder={t('admin:pricing.featurePlaceholder', 'e.g., {listingsLimit} listings per month')}
+                          />
+                        ) : (
+                          <div
+                            onClick={() => startEditingFeature(index, feature)}
+                            className="text-sm text-gray-700 cursor-text hover:bg-indigo-50 px-2 py-1 rounded -mx-2 -my-1 transition-colors"
+                            title={t('admin:common.edit', 'Click to edit')}
+                          >
+                            {feature}
+                          </div>
+                        )}
                         {/* Preview with actual values */}
-                        {hasPlaceholders(feature) && (
+                        {hasPlaceholders(editingFeatureIndex === index ? editingFeatureValue : feature) && (
                           <div className="text-xs text-indigo-500 mt-0.5">
-                            Preview: {replacePlaceholders(feature, editingProduct)}
+                            {t('admin:pricing.preview', 'Preview')}: {replacePlaceholders(editingFeatureIndex === index ? editingFeatureValue : feature, editingProduct)}
                           </div>
                         )}
                       </div>
@@ -821,7 +883,7 @@ const PricingManager: React.FC = () => {
                     </div>
                   ))}
                   {(!editingProduct.features || editingProduct.features.length === 0) && (
-                    <p className="text-sm text-gray-500 italic py-2">No features added yet</p>
+                    <p className="text-sm text-gray-500 italic py-2">{t('admin:pricing.noFeatures', 'No features added yet')}</p>
                   )}
                 </div>
 
@@ -832,7 +894,7 @@ const PricingManager: React.FC = () => {
                     value={newFeature}
                     onChange={(e) => setNewFeature(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddFeature())}
-                    placeholder="e.g., {listingsLimit} listings per month"
+                    placeholder={t('admin:pricing.featurePlaceholder', 'e.g., {listingsLimit} listings per month')}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                   <button
@@ -842,14 +904,14 @@ const PricingManager: React.FC = () => {
                     className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <PlusIcon className="w-4 h-4" />
-                    Add
+                    {t('common:add', 'Add')}
                   </button>
                 </div>
 
                 {/* Available Placeholders */}
                 <div className="bg-white border border-indigo-200 rounded-lg p-3">
                   <p className="text-xs font-semibold text-indigo-800 mb-2">
-                    Available Placeholders (click to insert):
+                    {t('admin:pricing.placeholders.title', 'Available Placeholders')} ({t('admin:pricing.placeholders.description', 'click to insert')}):
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {availablePlaceholders.map((p) => (
@@ -858,14 +920,14 @@ const PricingManager: React.FC = () => {
                         type="button"
                         onClick={() => insertPlaceholder(p.key)}
                         className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors font-mono"
-                        title={`${p.description} (e.g., ${p.example})`}
+                        title={t(`admin:pricing.placeholders.${p.key.replace(/[{}]/g, '')}Desc`, p.description)}
                       >
                         {p.key}
                       </button>
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Use placeholders like <code className="bg-gray-100 px-1 rounded">{'{listingsLimit}'}</code> to dynamically show values from the product.
+                    {t('admin:pricing.placeholders.description', 'Use placeholders to dynamically show values from the product.')}
                   </p>
                 </div>
               </div>
