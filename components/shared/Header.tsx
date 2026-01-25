@@ -81,8 +81,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   
   if (isFloating) {
     return (
-      <header className="absolute top-0 right-0 z-[1001] p-3">
-        <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-md">
+      <header className="fixed top-2 left-1/2 -translate-x-1/2 z-[1001]">
+        <nav className="flex items-center space-x-2 sm:space-x-3 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-lg border border-neutral-200/50">
           <button
             onClick={handleSubscribeClick}
             className="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-all shadow-sm hover:shadow-md whitespace-nowrap"
