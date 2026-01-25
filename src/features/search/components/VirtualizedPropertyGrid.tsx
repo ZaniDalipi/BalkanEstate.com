@@ -72,7 +72,7 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
   onPropertyHover,
   containerHeight,
   columns = 1,
-  gap = 24,
+  gap = 28,
   showFooter = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);

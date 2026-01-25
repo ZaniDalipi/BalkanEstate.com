@@ -809,14 +809,14 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                         <div className="p-4 md:p-3 relative z-0">
                             <PropertyListStyles />
                             {isLoadingProperties ? (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} index={index} />
                                     ))}
                                 </div>
                             ) : properties.length > 0 ? (
                                 <>
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-3 property-grid-transition">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 property-grid-transition">
                                         {properties.slice(0, visibleCount).map((prop, index) => (
                                             <AnimatedPropertyCard
                                                 key={prop.id}
@@ -913,14 +913,14 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                             <div className="p-4 md:p-3 relative z-0">
                                 <PropertyListStyles />
                                 {isLoadingProperties ? (
-                                    <div className="grid grid-cols-1 gap-4 md:gap-3">
+                                    <div className="grid grid-cols-1 gap-5">
                                         {Array.from({ length: 4 }).map((_, index) => (
                                             <PropertyCardSkeleton key={index} index={index} />
                                         ))}
                                     </div>
                                 ) : properties.length > 0 ? (
                                     <>
-                                        <div className="grid grid-cols-1 gap-4 md:gap-3 property-grid-transition">
+                                        <div className="grid grid-cols-1 gap-5 property-grid-transition">
                                             {properties.slice(0, visibleCount).map((prop, index) => (
                                                 <AnimatedPropertyCard
                                                     key={prop.id}
