@@ -8,7 +8,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PencilIcon,
-  VideoCameraIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
@@ -397,19 +396,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 <PencilIcon className="w-5 h-5 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline font-semibold text-sm">{t('actions.annotate')}</span>
               </button>
-
-              {property.tourUrl && (
-                <a
-                  href={property.tourUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center justify-center bg-white/90 backdrop-blur-sm text-neutral-800 rounded-full hover:scale-105 transition-transform shadow-md w-10 h-10 sm:w-auto sm:h-auto sm:gap-2 sm:px-4 sm:py-2"
-                >
-                  <VideoCameraIcon className="w-5 h-5 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline font-semibold text-sm">{t('actions.tour3d')}</span>
-                </a>
-              )}
 
             </div>
 
