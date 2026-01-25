@@ -88,8 +88,71 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
   const [mainImageError, setMainImageError] = useState(false);
-  const [viewMode, setViewMode] = useState<'photos' | 'streetview'>('photos');
+  const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+
+  // Check if property has a video tour
+  const hasVideo = !!property.tourUrl;
+
+  // Start with video view if available, then fade to photos
+  useEffect(() => {
+    if (hasVideo && !videoEnded) {
+      setViewMode('video');
+      // Auto-transition to photos after 8 seconds if user hasn't interacted
+      const timer = setTimeout(() => {
+        setViewMode('photos');
+        setVideoEnded(true);
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasVideo, videoEnded]);
+
+  // Helper to convert video URLs to embed format (YouTube, Vimeo, TikTok, Instagram)
+  const getVideoEmbedUrl = useCallback((url: string): { embedUrl: string; platform: string } => {
+    if (!url) return { embedUrl: '', platform: 'unknown' };
+
+    // YouTube URL patterns
+    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (youtubeMatch) {
+      return {
+        embedUrl: `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&mute=1&rel=0`,
+        platform: 'youtube'
+      };
+    }
+
+    // Vimeo URL patterns
+    const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+    if (vimeoMatch) {
+      return {
+        embedUrl: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&muted=1`,
+        platform: 'vimeo'
+      };
+    }
+
+    // TikTok URL patterns - extract video ID
+    const tiktokMatch = url.match(/(?:tiktok\.com\/@[\w.-]+\/video\/|vm\.tiktok\.com\/)(\d+)/);
+    if (tiktokMatch) {
+      return {
+        embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`,
+        platform: 'tiktok'
+      };
+    }
+
+    // Instagram URL patterns - Reels or Posts
+    const instagramReelMatch = url.match(/(?:instagram\.com\/(?:reel|p)\/)([A-Za-z0-9_-]+)/);
+    if (instagramReelMatch) {
+      return {
+        embedUrl: `https://www.instagram.com/p/${instagramReelMatch[1]}/embed`,
+        platform: 'instagram'
+      };
+    }
+
+    // Default - return original URL
+    return { embedUrl: url, platform: 'other' };
+  }, []);
+
+  const videoInfo = useMemo(() => getVideoEmbedUrl(property.tourUrl || ''), [property.tourUrl, getVideoEmbedUrl]);
 
   // Combine all images
   const allImages = useMemo(() => {
@@ -193,6 +256,54 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               />
             )}
           </button>
+        ) : viewMode === 'video' && hasVideo ? (
+          <div className="relative w-full h-full bg-black">
+            {/* Video embed */}
+            <iframe
+              src={videoInfo.embedUrl}
+              className="absolute inset-0 w-full h-full border-0"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              title="Property Video Tour"
+            />
+            {/* Platform badge */}
+            <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
+              {videoInfo.platform === 'youtube' && (
+                <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              )}
+              {videoInfo.platform === 'tiktok' && (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                </svg>
+              )}
+              {videoInfo.platform === 'instagram' && (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              )}
+              {videoInfo.platform === 'vimeo' && (
+                <svg className="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z"/>
+                </svg>
+              )}
+              <span className="capitalize">{t('property:gallery.videoTour', 'Video Tour')}</span>
+            </div>
+            {/* Skip to photos button */}
+            <button
+              onClick={() => {
+                setViewMode('photos');
+                setVideoEnded(true);
+              }}
+              className="absolute bottom-4 right-4 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm text-neutral-800 font-medium px-4 py-2 rounded-full hover:bg-white transition-colors shadow-lg text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {t('property:gallery.viewPhotos', 'View Photos')}
+            </button>
+          </div>
         ) : viewMode === 'streetview' ? (
           <div className={`relative w-full h-full ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
             <iframe
@@ -314,12 +425,22 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </>
         )}
 
-        {/* View Mode Toggle (Photos / Street View) - Liquid Glass Style */}
+        {/* View Mode Toggle (Video / Photos / Street View) - Liquid Glass Style */}
         <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-10">
           {/* Mobile version - smaller */}
           <div className="sm:hidden">
             <LiquidGlassSwitch
               options={[
+                // Video option (only if property has video)
+                ...(hasVideo ? [{
+                  value: 'video',
+                  label: t('actions.video', 'Video'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  ),
+                }] : []),
                 {
                   value: 'photos',
                   label: t('actions.photos'),
@@ -344,7 +465,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 },
               ]}
               value={viewMode}
-              onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
+              onChange={(val) => setViewMode(val as 'photos' | 'streetview' | 'video')}
               size="sm"
             />
           </div>
@@ -352,6 +473,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           <div className="hidden sm:block">
             <LiquidGlassSwitch
               options={[
+                // Video option (only if property has video)
+                ...(hasVideo ? [{
+                  value: 'video',
+                  label: t('actions.video', 'Video'),
+                  icon: (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  ),
+                }] : []),
                 {
                   value: 'photos',
                   label: t('actions.photos'),
@@ -376,7 +507,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 },
               ]}
               value={viewMode}
-              onChange={(val) => setViewMode(val as 'photos' | 'streetview')}
+              onChange={(val) => setViewMode(val as 'photos' | 'streetview' | 'video')}
               size="md"
             />
           </div>
