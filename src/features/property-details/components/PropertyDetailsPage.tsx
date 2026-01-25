@@ -192,6 +192,21 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
 
+  // Navigate to 3D tour - scroll to map section and open 360 tour
+  const handleNavigateTo3DTour = () => {
+    // Scroll to map section
+    const mapSection = document.getElementById('property-map-section');
+    if (mapSection) {
+      mapSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    // Open 360 tour in new tab after a short delay
+    if (property.virtualTour360Url) {
+      setTimeout(() => {
+        window.open(property.virtualTour360Url, '_blank', 'noopener,noreferrer');
+      }, 500);
+    }
+  };
+
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     // Smoothly scroll to top to show the gallery
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -470,6 +485,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
                 property={property}
                 onOpenEditor={(url) => setIsEditorOpen(true)}
                 onOpenViewer={() => setIsViewerOpen(true)}
+                onNavigateTo3DTour={handleNavigateTo3DTour}
                 activeCategory={activeCategory}
                 currentImageIndex={currentImageIndex}
                 onCategoryChange={handleCategorySelect}
@@ -511,7 +527,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             </div>
 
             {/* Map Link */}
-            <div className="animate-slide-up" style={{ animationDelay: '300ms' }}>
+            <div id="property-map-section" className="animate-slide-up" style={{ animationDelay: '300ms' }}>
               <PropertyMapLink property={property} onNavigateToMap={handleNavigateToMap} />
             </div>
 
