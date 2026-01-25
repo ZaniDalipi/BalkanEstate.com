@@ -11,6 +11,7 @@ export { PropertyPhotos } from './PropertyPhotos';
 export { PropertyMapLink } from './PropertyMapLink';
 export { PropertyGuide } from './PropertyGuide';
 export { VideoPlayer } from './VideoPlayer';
+export { SocialVideoEmbed } from './SocialVideoEmbed';
 export {
   DetailItem,
   Thumbnail,

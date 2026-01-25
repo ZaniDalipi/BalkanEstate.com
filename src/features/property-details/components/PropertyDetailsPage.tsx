@@ -19,6 +19,7 @@ import {
   PropertyPhotos,
   PropertyMapLink,
   NeighborhoodInsights,
+  SocialVideoEmbed,
 } from '@/src/components/property';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
@@ -519,7 +520,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             </div>
 
             {/* 360 Virtual Tour is now shown as a badge in the gallery and can be opened from there */}
-            {/* Video Tour is now integrated in the PropertyGallery as the first view */}
+            {/* Video Tour (YouTube/Vimeo) is now integrated in the PropertyGallery as the first view */}
+
+            {/* Social Video Embed - TikTok, Instagram, Facebook */}
+            {property.tourUrl && (property.tourUrl.includes('tiktok.com') || property.tourUrl.includes('instagram.com') || property.tourUrl.includes('facebook.com') || property.tourUrl.includes('fb.watch')) && (
+              <div className="animate-slide-up" style={{ animationDelay: '125ms' }}>
+                <SocialVideoEmbed videoUrl={property.tourUrl} />
+              </div>
+            )}
 
             {/* Property Info (Desktop only - mobile version shown above) */}
             <div className="hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
