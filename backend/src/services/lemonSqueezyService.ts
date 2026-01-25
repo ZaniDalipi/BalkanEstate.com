@@ -64,9 +64,9 @@ class LemonSqueezyService {
     this.webhookSecret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET || '';
     this.isTestMode = process.env.LEMONSQUEEZY_TEST_MODE === 'true';
 
-    if (this.apiKey) {
+    // Only log initialization in development
+    if (this.apiKey && process.env.NODE_ENV !== 'production') {
       console.log('[LemonSqueezy] Service initialized', {
-        storeId: this.storeId,
         testMode: this.isTestMode,
       });
     }

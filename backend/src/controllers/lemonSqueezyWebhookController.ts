@@ -282,12 +282,13 @@ async function handleOrderCreated(event: any): Promise<void> {
     const planName = sanitizeString(customData.plan_name);
     const planInterval = sanitizeString(customData.plan_interval);
 
-    console.log('[LemonSqueezy] Order created:', {
-      orderId,
-      userId,
-      productId,
-      status: attributes.status,
-    });
+    // Only log in development - no sensitive data in production
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Order created:', {
+        orderId,
+        status: attributes.status,
+      });
+    }
 
     // VALIDATION: User ID is required
     if (!userId) {
@@ -359,27 +360,24 @@ async function handleOrderCreated(event: any): Promise<void> {
       }
     }
 
-    // Log discount usage for audit
+    // Log discount usage for audit (production-safe - no sensitive data)
     if (discountTotal > 0) {
-      console.log('[LemonSqueezy] Discount applied:', {
-        orderId,
+      // Log to activity logger for audit trail (no console output in production)
+      activityLogger.logDiscountUsed(
         userId,
-        discountAmount: discountTotal,
-        discountPercentage: discountPercentage.toFixed(2) + '%',
-        couponCode: attributes.discount_code || 'N/A',
-      });
+        orderId,
+        discountTotal,
+        discountPercentage,
+        attributes.discount_code ? 'coupon_applied' : 'none'
+      );
 
-      // Log discount for audit (using admin action log for payment events)
-      console.log('[LemonSqueezy] Discount audit log:', {
-        orderId,
-        userId,
-        userEmail: user.email,
-        discountAmount: discountTotal,
-        discountPercentage: discountPercentage.toFixed(2) + '%',
-        couponCode: attributes.discount_code,
-        originalAmount: subtotal,
-        finalAmount: total,
-      });
+      // Only log details in development
+      if (!isProduction) {
+        console.log('[LemonSqueezy] Discount applied:', {
+          orderId,
+          discountPercentage: discountPercentage.toFixed(2) + '%',
+        });
+      }
     }
 
     // Find or create product
@@ -465,12 +463,10 @@ async function handleOrderCreated(event: any): Promise<void> {
       // Mark event as processed for idempotency
       markEventProcessed(`order_created_${orderId}`);
 
-      console.log('[LemonSqueezy] Order processed successfully:', {
-        orderId,
-        userId,
-        amount: total,
-        discountApplied: discountTotal > 0,
-      });
+      // Only log in development
+      if (!isProduction) {
+        console.log('[LemonSqueezy] Order processed successfully:', { orderId });
+      }
     }
   } catch (error: any) {
     console.error('[LemonSqueezy] Error handling order_created:', error);
@@ -497,14 +493,14 @@ async function handlePromotionOrder(
   const couponCode = sanitizeString(customData.couponCode || customData.coupon_code);
   const couponDiscount = parseFloat(customData.couponDiscount || customData.coupon_discount || '0');
 
-  console.log('[LemonSqueezy] Processing promotion order:', {
-    orderId,
-    userId,
-    propertyId,
-    promotionTier,
-    duration,
-    amount,
-  });
+  // Only log in development
+  if (!isProduction) {
+    console.log('[LemonSqueezy] Processing promotion order:', {
+      orderId,
+      promotionTier,
+      duration,
+    });
+  }
 
   // Check if property exists
   const property = await Property.findById(propertyId);
@@ -591,13 +587,14 @@ async function handlePromotionOrder(
     description: `${promotionTier.charAt(0).toUpperCase() + promotionTier.slice(1)} promotion for "${propertyTitle || property.title}" (${duration} days)`,
   });
 
-  console.log('[LemonSqueezy] Promotion created successfully:', {
-    promotionId: promotion._id,
-    propertyId,
-    tier: promotionTier,
-    duration,
-    endDate: endDate.toISOString(),
-  });
+  // Only log in development
+  if (!isProduction) {
+    console.log('[LemonSqueezy] Promotion created successfully:', {
+      promotionId: promotion._id,
+      tier: promotionTier,
+      duration,
+    });
+  }
 }
 
 /**
@@ -609,11 +606,13 @@ async function handleSubscriptionCreated(event: any): Promise<void> {
     const attributes = event.data.attributes;
     const userId = customData.user_id;
 
-    console.log('[LemonSqueezy] Subscription created:', {
-      subscriptionId: event.data.id,
-      userId,
-      status: attributes.status,
-    });
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription created:', {
+        subscriptionId: event.data.id,
+        status: attributes.status,
+      });
+    }
 
     if (!userId) {
       return;
@@ -645,7 +644,10 @@ async function handleSubscriptionPaymentSuccess(event: any): Promise<void> {
     const attributes = event.data.attributes;
     const subscriptionId = event.data.id;
 
-    console.log('[LemonSqueezy] Subscription payment success:', subscriptionId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription payment success');
+    }
 
     // Find user by LemonSqueezy subscription ID
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
@@ -717,7 +719,10 @@ async function handleSubscriptionUpdated(event: any): Promise<void> {
     const attributes = event.data.attributes;
     const subscriptionId = event.data.id;
 
-    console.log('[LemonSqueezy] Subscription updated:', subscriptionId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription updated');
+    }
 
     // Find user by subscription ID
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
@@ -744,7 +749,10 @@ async function handleSubscriptionCancelled(event: any): Promise<void> {
     const attributes = event.data.attributes;
     const subscriptionId = event.data.id;
 
-    console.log('[LemonSqueezy] Subscription cancelled:', subscriptionId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription cancelled');
+    }
 
     // Find user
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
@@ -814,7 +822,10 @@ async function handleSubscriptionExpired(event: any): Promise<void> {
   try {
     const subscriptionId = event.data.id;
 
-    console.log('[LemonSqueezy] Subscription expired:', subscriptionId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription expired');
+    }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
     if (!user) {
@@ -844,7 +855,10 @@ async function handleSubscriptionPaused(event: any): Promise<void> {
   try {
     const subscriptionId = event.data.id;
 
-    console.log('[LemonSqueezy] Subscription paused:', subscriptionId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription paused');
+    }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
     if (user) {
@@ -864,7 +878,10 @@ async function handleSubscriptionResumed(event: any): Promise<void> {
   try {
     const subscriptionId = event.data.id;
 
-    console.log('[LemonSqueezy] Subscription resumed:', subscriptionId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription resumed');
+    }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
     if (user) {
@@ -884,7 +901,10 @@ async function handleSubscriptionPaymentFailed(event: any): Promise<void> {
   try {
     const subscriptionId = event.data.id;
 
-    console.log('[LemonSqueezy] Subscription payment failed:', subscriptionId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Subscription payment failed');
+    }
 
     const user = await User.findOne({ lemonSqueezySubscriptionId: subscriptionId });
     if (user) {
@@ -913,7 +933,10 @@ async function handleOrderRefunded(event: any): Promise<void> {
     const attributes = event.data.attributes;
     const orderId = event.data.id;
 
-    console.log('[LemonSqueezy] Order refunded:', orderId);
+    // Only log in development
+    if (!isProduction) {
+      console.log('[LemonSqueezy] Order refunded');
+    }
 
     // Find payment record
     const paymentRecord = await PaymentRecord.findOne({

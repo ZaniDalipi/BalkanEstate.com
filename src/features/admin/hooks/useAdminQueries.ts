@@ -69,6 +69,12 @@ export const adminKeys = {
   heatmapData: (days?: number) => [...adminKeys.all, 'heatmap', { days }] as const,
   recentSubscriptions: (limit?: number) => [...adminKeys.all, 'recentSubscriptions', { limit }] as const,
 
+  // Payments
+  payments: () => [...adminKeys.all, 'payments'] as const,
+  paymentsList: (filters?: { page?: number; limit?: number; status?: string }) =>
+    [...adminKeys.payments(), 'list', { filters }] as const,
+  paymentStats: () => [...adminKeys.payments(), 'stats'] as const,
+
   // Inquiries
   inquiries: () => [...adminKeys.all, 'inquiries'] as const,
   inquiriesList: (filters?: { page?: number; limit?: number; status?: string }) =>
@@ -393,11 +399,49 @@ export function useHeatmapData(days: number = 30) {
 export function useRecentSubscriptions(limit: number = 10) {
   return useQuery({
     queryKey: adminKeys.recentSubscriptions(limit),
-    queryFn: () => apiRequest(`/analytics/recent-subscriptions?limit=${limit}`, { requiresAuth: true }),
+    queryFn: () => apiRequest(`/analytics/subscriptions/recent?limit=${limit}`, { requiresAuth: true }),
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
     refetchInterval: 60 * 1000,
+  });
+}
+
+// ============================================================================
+// PAYMENT HOOKS
+// ============================================================================
+
+/**
+ * Fetch all payments with filters
+ */
+export function useAdminPayments(filters?: { page?: number; limit?: number; status?: string }) {
+  return useQuery({
+    queryKey: adminKeys.paymentsList(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters?.page) params.append('page', String(filters.page));
+      if (filters?.limit) params.append('limit', String(filters.limit));
+      if (filters?.status) params.append('status', filters.status);
+      return apiRequest(`/admin/payments?${params.toString()}`, { requiresAuth: true });
+    },
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60 * 1000,
+  });
+}
+
+/**
+ * Fetch payment statistics
+ */
+export function usePaymentStats() {
+  return useQuery({
+    queryKey: adminKeys.paymentStats(),
+    queryFn: () => apiRequest('/admin/payments/stats', { requiresAuth: true }),
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 120 * 1000, // Poll every 2 minutes
   });
 }
 
