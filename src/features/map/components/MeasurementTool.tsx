@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useMap, Polyline, Polygon, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useAppContext } from '../../../../context/AppContext';
@@ -607,8 +608,8 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
         )}
       </div>
 
-      {/* Save Modal - Full screen overlay on top of everything */}
-      {showSaveDialog && (
+      {/* Save Modal - Portal to body for proper z-index stacking */}
+      {showSaveDialog && createPortal(
         <div
           className="fixed inset-0 z-[99999] flex items-center justify-center"
           style={{ pointerEvents: 'auto' }}
@@ -744,7 +745,8 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Animation styles */}

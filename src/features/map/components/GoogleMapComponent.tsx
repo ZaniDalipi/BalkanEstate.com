@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
@@ -1879,8 +1880,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           </>
         )}
 
-        {/* Save Measurement Modal */}
-        {showSaveModal && pendingMeasurement && (
+        {/* Save Measurement Modal - Portal to body for proper z-index */}
+        {showSaveModal && pendingMeasurement && createPortal(
           <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
             <div
               className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden"
@@ -1997,7 +1998,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </HighlightedPropertiesProvider>
