@@ -5,6 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import { LogoIcon, BuildingOfficeIcon, SearchIcon, HomeIcon, MapIcon, ChartBarIcon, ShieldCheckIcon, StarIcon } from '@/constants';
 import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
 import { getAgencies } from '@/src/features/agencies/api';
+import { apiRequest } from '@/src/shared/api';
 
 /* ---------------- CONFIG ---------------- */
 
@@ -44,6 +45,11 @@ const Onboarding: React.FC = () => {
   const rafRef = useRef<number | null>(null);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [visibleAgencyIndex, setVisibleAgencyIndex] = useState(0);
+  const [platformStats, setPlatformStats] = useState({
+    propertiesCount: 0,
+    countriesCount: 11, // Balkan countries - can be made dynamic if needed
+    agenciesCount: 0,
+  });
   const VISIBLE_AGENCY_COUNT = 5; // Show 5 agencies at a time
   const ROTATION_INTERVAL = 3000; // Rotate every 3 seconds
 
@@ -51,20 +57,30 @@ const Onboarding: React.FC = () => {
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ----------- FETCH AGENCIES ----------- */
+  /* ----------- FETCH PLATFORM STATS & AGENCIES ----------- */
   useEffect(() => {
-    const fetchAgencyData = async () => {
+    const fetchPlatformData = async () => {
       try {
-        const response = await getAgencies({ limit: 30 });
-        const agenciesWithLogos = (response.agencies || []).filter(
-          (a: Agency) => a.logo
-        );
+        // Fetch agencies
+        const agencyResponse = await getAgencies({ limit: 100 });
+        const allAgencies = agencyResponse.agencies || [];
+        const agenciesWithLogos = allAgencies.filter((a: Agency) => a.logo);
         setAgencies(agenciesWithLogos);
+
+        // Fetch properties count (just need pagination info)
+        const propertiesResponse = await apiRequest<{ pagination: { total: number } }>('/properties?limit=1');
+
+        // Update platform stats with real data
+        setPlatformStats({
+          propertiesCount: propertiesResponse.pagination?.total || 0,
+          countriesCount: 11, // Fixed: 11 Balkan countries
+          agenciesCount: allAgencies.length,
+        });
       } catch (error) {
-        console.error('Failed to fetch agencies:', error);
+        console.error('Failed to fetch platform data:', error);
       }
     };
-    fetchAgencyData();
+    fetchPlatformData();
   }, []);
 
   /* ----------- ROTATE VISIBLE AGENCIES ----------- */
@@ -195,11 +211,18 @@ const Onboarding: React.FC = () => {
 
   /* ---------------- RENDER ---------------- */
 
-  // Stats data
+  // Stats data - using real platform stats
+  const formatNumber = (num: number): string => {
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1)}k+`;
+    }
+    return num > 0 ? `${num.toLocaleString()}+` : '0';
+  };
+
   const stats = [
-    { value: '2,500+', label: t('common:stats.properties', 'Properties'), icon: HomeIcon },
-    { value: '11', label: t('common:stats.countries', 'Countries'), icon: MapIcon },
-    { value: '50+', label: t('common:stats.agencies', 'Agencies'), icon: BuildingOfficeIcon },
+    { value: formatNumber(platformStats.propertiesCount), label: t('common:stats.properties', 'Properties'), icon: HomeIcon },
+    { value: String(platformStats.countriesCount), label: t('common:stats.countries', 'Countries'), icon: MapIcon },
+    { value: platformStats.agenciesCount > 0 ? `${platformStats.agenciesCount}+` : '0', label: t('common:stats.agencies', 'Agencies'), icon: BuildingOfficeIcon },
     { value: '24/7', label: t('common:stats.support', 'Support'), icon: StarIcon },
   ];
 
