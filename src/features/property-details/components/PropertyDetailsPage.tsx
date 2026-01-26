@@ -407,19 +407,21 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           />
         </div>
 
-        <div className={`p-4 flex items-center justify-between transition-all duration-300 ${
+        <div className={`p-4 flex flex-col gap-3 transition-all duration-300 ${
           isBreadcrumbCollapsed ? 'pt-2' : 'pt-2'
         }`}>
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-primary font-semibold hover:underline"
-            aria-label={t('property:navigation.goBackToSearch')}
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            {t('property:navigation.back')}
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 text-primary font-semibold hover:underline"
+              aria-label={t('property:navigation.goBackToSearch')}
+            >
+              <ArrowLeftIcon className="w-5 h-5" />
+              {t('property:navigation.back')}
+            </button>
+          </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end">
             {/* Promote/Extend Button - Only visible to property owners */}
             {isOwner && property.status !== 'sold' && (
               <button
