@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import PaymentWindow from '@/components/shared/PaymentWindow';
-import { replacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
+import { translateAndReplacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
 import Footer from '@/components/shared/Footer';
 import {
   FloatingSphere,
@@ -629,7 +629,7 @@ const PricingPage: React.FC = () => {
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center mt-0.5">
                           <CheckIcon className="w-3 h-3 text-emerald-600" />
                         </div>
-                        <span className="text-sm text-gray-700">{replacePlaceholders(feature, proYearlyProduct)}</span>
+                        <span className="text-sm text-gray-700">{translateAndReplacePlaceholders(feature, proYearlyProduct, t)}</span>
                       </li>
                     ))}
                   </ul>
@@ -685,7 +685,7 @@ const PricingPage: React.FC = () => {
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center mt-0.5">
                           <CheckIcon className="w-3 h-3 text-gray-600" />
                         </div>
-                        <span className="text-sm text-gray-700">{replacePlaceholders(feature, proMonthlyProduct)}</span>
+                        <span className="text-sm text-gray-700">{translateAndReplacePlaceholders(feature, proMonthlyProduct, t)}</span>
                       </li>
                     ))}
                   </ul>
@@ -759,7 +759,7 @@ const PricingPage: React.FC = () => {
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center mt-0.5">
                           <CheckIcon className="w-3 h-3 text-amber-400" />
                         </div>
-                        <span className="text-sm text-gray-300">{replacePlaceholders(feature, enterpriseProduct)}</span>
+                        <span className="text-sm text-gray-300">{translateAndReplacePlaceholders(feature, enterpriseProduct, t)}</span>
                       </li>
                     ))}
                   </ul>
@@ -803,7 +803,7 @@ const PricingPage: React.FC = () => {
                       <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
                         <CheckIcon className="w-3 h-3 text-blue-600" />
                       </div>
-                      <span className="text-sm text-gray-700">{replacePlaceholders(feature, buyerProduct)}</span>
+                      <span className="text-sm text-gray-700">{translateAndReplacePlaceholders(feature, buyerProduct, t)}</span>
                     </li>
                   ))}
                 </ul>

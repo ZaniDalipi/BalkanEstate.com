@@ -128,6 +128,125 @@ export function processFeatures(features: string[], product: ProductValues): str
   return features.map(feature => replacePlaceholders(feature, product));
 }
 
+/**
+ * Feature translation patterns - maps English feature text patterns to translation keys
+ */
+const featurePatterns: Array<{ pattern: RegExp; key: string; extractValues?: (match: RegExpMatchArray) => Record<string, string> }> = [
+  // Listings
+  { pattern: /^(\d+|Unlimited)\s*listings?\s*per\s*year$/i, key: 'listingsPerYear', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^(\d+|Unlimited)\s*listings?\s*per\s*month$/i, key: 'listingsPerMonth', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^(\d+|Unlimited)\s*listings?\s*\(expandable\)$/i, key: 'listingsExpandable', extractValues: (m) => ({ count: m[1] }) },
+
+  // Analytics & Dashboard
+  { pattern: /^Advanced analytics dashboard$/i, key: 'advancedAnalyticsDashboard' },
+  { pattern: /^Basic analytics$/i, key: 'basicAnalytics' },
+  { pattern: /^Lead management system$/i, key: 'leadManagementSystem' },
+
+  // Support
+  { pattern: /^Priority customer support$/i, key: 'priorityCustomerSupport' },
+  { pattern: /^Priority support$/i, key: 'priorityCustomerSupport' },
+  { pattern: /^Email support$/i, key: 'emailSupport' },
+
+  // Placement
+  { pattern: /^Standard placement$/i, key: 'standardPlacement' },
+  { pattern: /^Premium listing placement$/i, key: 'premiumPlacement' },
+  { pattern: /^Premium placement$/i, key: 'premiumPlacement' },
+
+  // Promo coupons - complex patterns
+  {
+    pattern: /^(\d+)\s*promoted?\s*coupons?\s*of\s*which\s*(\d+)\s*highlighted\s*and\s*(\d+)\s*featured\s*coupon\s*per\s*month$/i,
+    key: 'promotedCouponsBasic',
+    extractValues: (m) => ({ count: m[1], highlighted: m[2], featured: m[3] })
+  },
+  {
+    pattern: /^(\d+)\s*promoted?\s*coupons?\s*of\s*which\s*(\d+)\s*premium,?\s*(\d+)\s*highlighted\s*and\s*(\d+)\s*featured\s*per\s*month$/i,
+    key: 'promotedCouponsAdvanced',
+    extractValues: (m) => ({ count: m[1], premium: m[2], highlighted: m[3], featured: m[4] })
+  },
+  { pattern: /^(\d+)\s*promo\s*coupons?\/month$/i, key: 'promoCouponsPerMonth', extractValues: (m) => ({ count: m[1] }) },
+
+  // AI features
+  { pattern: /^Unlimited AI messages? per month$/i, key: 'unlimitedAiMessages' },
+  { pattern: /^(\d+)\s*AI messages? per month$/i, key: 'limitedAiMessages', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^Unlimited AI insights? per month$/i, key: 'unlimitedAiInsights' },
+  { pattern: /^(\d+)\s*insights? per month$/i, key: 'limitedAiInsights', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^Unlimited AI image descriptions? per month$/i, key: 'unlimitedAiImageDescriptions' },
+  { pattern: /^(\d+)\s*AI image descriptions? per month$/i, key: 'limitedAiImageDescriptions', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^Unlimited AI chat$/i, key: 'unlimitedAiChat' },
+  { pattern: /^Unlimited AI & insights$/i, key: 'unlimitedAiAndInsights' },
+
+  // Saved searches
+  { pattern: /^Unlimited saved searches? per month$/i, key: 'unlimitedSavedSearches' },
+  { pattern: /^Unlimited saved searches$/i, key: 'unlimitedSavedSearches' },
+  { pattern: /^(\d+)\s*saved searches? per month$/i, key: 'limitedSavedSearches', extractValues: (m) => ({ count: m[1] }) },
+
+  // Agency features
+  { pattern: /^Special agency page with banner and logo$/i, key: 'specialAgencyPage' },
+  { pattern: /^1 week free featuring the agency$/i, key: 'weekFreeAgencyFeaturing' },
+  { pattern: /^(\d+)\s*agent coupons? when creating agency$/i, key: 'agentCoupons', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^Agency branding page$/i, key: 'agencyBrandingPage' },
+
+  // Team members
+  { pattern: /^Unlimited team members$/i, key: 'unlimitedTeamMembers' },
+  { pattern: /^Up to (\d+) team members$/i, key: 'limitedTeamMembers', extractValues: (m) => ({ count: m[1] }) },
+
+  // Other features
+  { pattern: /^Dedicated account manager$/i, key: 'dedicatedAccountManager' },
+  { pattern: /^API access$/i, key: 'apiAccess' },
+  { pattern: /^Custom branding$/i, key: 'customBranding' },
+
+  // Buyer Pro features
+  { pattern: /^Save unlimited searches$/i, key: 'saveUnlimitedSearches' },
+  { pattern: /^Early access to new listings$/i, key: 'earlyAccessNewListings' },
+  { pattern: /^Advanced market insights$/i, key: 'advancedMarketInsights' },
+  { pattern: /^Instant Email notification$/i, key: 'instantEmailNotification' },
+  { pattern: /^(\d+)\s*AI messages$/i, key: 'aiMessages', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^(\d+)\s*Generate Insights$/i, key: 'generateInsights', extractValues: (m) => ({ count: m[1] }) },
+  { pattern: /^(\d+)\s*Auto labeling images when creating new listing$/i, key: 'autoLabelingImages', extractValues: (m) => ({ count: m[1] }) },
+];
+
+/**
+ * Translate a feature string to the current language
+ * @param feature - The English feature string
+ * @param t - The i18next translation function
+ * @returns Translated feature string, or original if no translation found
+ */
+export function translateFeature(feature: string, t: (key: string, options?: Record<string, unknown>) => string): string {
+  // Try to match against known patterns
+  for (const { pattern, key, extractValues } of featurePatterns) {
+    const match = feature.match(pattern);
+    if (match) {
+      const values = extractValues ? extractValues(match) : {};
+      const translatedKey = `pricing:featureTranslations.${key}`;
+      const translated = t(translatedKey, values);
+      // If translation returns the key itself, it means no translation exists
+      if (translated !== translatedKey) {
+        return translated;
+      }
+    }
+  }
+  // Return original if no pattern matched
+  return feature;
+}
+
+/**
+ * Translate and replace placeholders in a feature string
+ * @param feature - The feature string with placeholders
+ * @param product - The product values for placeholder replacement
+ * @param t - The i18next translation function
+ * @returns The fully processed feature string
+ */
+export function translateAndReplacePlaceholders(
+  feature: string,
+  product: ProductValues,
+  t: (key: string, options?: Record<string, unknown>) => string
+): string {
+  // First replace placeholders with actual values
+  const withValues = replacePlaceholders(feature, product);
+  // Then translate the result
+  return translateFeature(withValues, t);
+}
+
 export default {
   replacePlaceholders,
   processFeatures,
@@ -135,4 +254,6 @@ export default {
   getUsedPlaceholders,
   validatePlaceholders,
   availablePlaceholders,
+  translateFeature,
+  translateAndReplacePlaceholders,
 };
