@@ -705,6 +705,18 @@ const AuthPage: React.FC = () => {
                 />
             )}
 
+            {/* CSS Keyframes for magical animations */}
+            <style>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-8px); }
+                }
+                @keyframes shimmer {
+                    0% { background-position: -200% 0; }
+                    100% { background-position: 200% 0; }
+                }
+            `}</style>
+
             {/* Backdrop with animated gradient */}
             <div
                 className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto"
@@ -747,10 +759,36 @@ const AuthPage: React.FC = () => {
 
                     {/* Content */}
                     <div className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-8">
-                        {/* Logo with glow effect */}
-                        <div className="flex justify-center items-center mb-4 pt-4 md:pt-0">
-                            <div className="p-3 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg shadow-primary/10">
-                                <LogoIcon className="w-8 h-8 text-primary" />
+                        {/* Magical Logo Container */}
+                        <div className="flex justify-center items-center mb-6 pt-4 md:pt-0">
+                            <div className="relative group">
+                                {/* Outer glow rings */}
+                                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/40 via-blue-400/30 to-primary/40 blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 animate-pulse" style={{ animationDuration: '3s' }} />
+                                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-primary/20 via-blue-300/20 to-primary/20 blur-lg opacity-40 animate-pulse" style={{ animationDuration: '4s', animationDelay: '0.5s' }} />
+
+                                {/* Main container with floating animation */}
+                                <div
+                                    className="relative p-5 rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-2xl shadow-primary/20 overflow-hidden"
+                                    style={{
+                                        animation: 'float 4s ease-in-out infinite',
+                                    }}
+                                >
+                                    {/* Inner shine effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-white/40 pointer-events-none" />
+
+                                    {/* Animated sparkles */}
+                                    <div className="absolute top-2 right-2 w-2 h-2 bg-blue-400 rounded-full opacity-60 animate-ping" style={{ animationDuration: '2s' }} />
+                                    <div className="absolute bottom-3 left-3 w-1.5 h-1.5 bg-primary rounded-full opacity-50 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }} />
+
+                                    {/* Logo SVG - Full size display */}
+                                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                                        <LogoIcon className="w-full h-full drop-shadow-lg" />
+                                    </div>
+                                </div>
+
+                                {/* Floating particles */}
+                                <div className="absolute -top-2 -right-2 w-3 h-3 bg-gradient-to-br from-blue-400 to-primary rounded-full opacity-70 animate-bounce" style={{ animationDuration: '2s' }} />
+                                <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-gradient-to-br from-primary to-blue-500 rounded-full opacity-60 animate-bounce" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }} />
                             </div>
                         </div>
 
