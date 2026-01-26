@@ -170,7 +170,7 @@ function getRandomPrice(propertyType: string, country: string): number {
   return Math.round((basePrice * multiplier) / 1000) * 1000;
 }
 
-function generateProperty(sellerId: mongoose.Types.ObjectId, index: number): any {
+function generateProperty(sellerId: any, index: number): any {
   const location = getRandomElement(BALKAN_LOCATIONS);
   const propertyType = getRandomElement(PROPERTY_TYPES);
   const address = `${getRandomInt(1, 999)} ${getRandomElement(STREET_NAMES)}`;
