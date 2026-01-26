@@ -20,38 +20,38 @@
   Cache-Control: public, max-age=31536000, immutable
 
 # Cache fonts
-*.woff
+/*.woff
   Cache-Control: public, max-age=31536000, immutable
 
-*.woff2
+/*.woff2
   Cache-Control: public, max-age=31536000, immutable
 
-*.ttf
+/*.ttf
   Cache-Control: public, max-age=31536000, immutable
 
-*.eot
+/*.eot
   Cache-Control: public, max-age=31536000, immutable
 
-# Cache images with longer TTL and stale-while-revalidate
-*.png
+# Cache images with longer TTL
+/*.png
   Cache-Control: public, max-age=31536000, immutable
 
-*.jpg
+/*.jpg
   Cache-Control: public, max-age=31536000, immutable
 
-*.jpeg
+/*.jpeg
   Cache-Control: public, max-age=31536000, immutable
 
-*.svg
+/*.svg
   Cache-Control: public, max-age=31536000, immutable
 
-*.webp
+/*.webp
   Cache-Control: public, max-age=31536000, immutable
 
-*.gif
+/*.gif
   Cache-Control: public, max-age=31536000, immutable
 
-*.ico
+/*.ico
   Cache-Control: public, max-age=31536000, immutable
 
 # Cache manifest and other metadata (shorter TTL)
