@@ -497,8 +497,8 @@ export const switchRole = async (
 export const getProperties = async (filters?: Filters, options?: { limit?: number }): Promise<Property[]> => {
   const params = new URLSearchParams();
 
-  // Add limit parameter - default to 1000 to get all properties for map/saved searches
-  params.append('limit', String(options?.limit || 1000));
+  // Add limit parameter - default to 3000 to get all properties for map/saved searches
+  params.append('limit', String(options?.limit || 3000));
 
   if (filters) {
     if (filters.query) params.append('query', filters.query);
