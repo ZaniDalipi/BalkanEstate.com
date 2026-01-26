@@ -4,8 +4,15 @@ import { MapContainer, TileLayer, Rectangle, useMapEvents, useMap } from 'react-
 import { Property } from '@/types';
 import L from 'leaflet';
 
-// Maximum markers to render for performance (will show closest to center)
-const MAX_VISIBLE_MARKERS = 500;
+// Zillow-style: Zoom-based marker limits for performance
+// More markers when zoomed in, fewer when zoomed out
+const getMaxMarkersForZoom = (zoom: number): number => {
+  if (zoom >= 15) return 500;  // Street level - show many
+  if (zoom >= 13) return 300;  // Neighborhood level
+  if (zoom >= 11) return 150;  // City level
+  if (zoom >= 9) return 80;    // Region level
+  return 40;                    // Country level - show few
+};
 import { useAppContext } from '@/context/AppContext';
 import {
   PencilIcon,
@@ -444,11 +451,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
     return valid;
   }, [properties]);
 
-  // Always show all valid properties on the map (up to 500 for performance)
-  // This ensures the map never appears empty and users can navigate to any property
+  // Zillow-style: Smart property selection based on zoom level
+  // Prioritizes promoted listings, limits total for performance
   const propertiesInView = useMemo(() => {
-    return validProperties.slice(0, 500);
-  }, [validProperties]);
+    const maxMarkers = getMaxMarkersForZoom(currentZoom);
+
+    // Separate promoted and regular properties
+    const promoted = validProperties.filter(p => p.isPromoted);
+    const regular = validProperties.filter(p => !p.isPromoted);
+
+    // Always show all promoted, fill rest with regular up to limit
+    const promotedCount = Math.min(promoted.length, maxMarkers);
+    const regularCount = Math.max(0, maxMarkers - promotedCount);
+
+    return [...promoted.slice(0, promotedCount), ...regular.slice(0, regularCount)];
+  }, [validProperties, currentZoom]);
 
   const { center, zoom } = useMemo(() => {
     if (userLocation) return { center: userLocation, zoom: 13 };
@@ -537,8 +554,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
           <CadastreLayer enabled={showCadastre && (mapType === 'satellite' || mapType === 'hybrid')} opacity={0.7} />
           <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
-          {/* Render markers - limited for performance */}
-          <Markers properties={propertiesInView.slice(0, MAX_VISIBLE_MARKERS)} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={false} />
+          {/* Render markers - zoom-based limit applied in propertiesInView */}
+          <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={false} />
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
           {/* Land Measurement Tool */}
