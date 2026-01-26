@@ -12,6 +12,13 @@ const EyeSlashIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
+// Animated alert icon for validation errors
+const AlertIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+);
+
 interface PasswordRequirements {
     minLength: boolean;
     hasUppercase: boolean;
@@ -20,6 +27,12 @@ interface PasswordRequirements {
     hasSpecialChar: boolean;
     noSequential: boolean;
     notCommon: boolean;
+}
+
+interface FieldErrors {
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
 }
 
 // Common weak passwords to reject (matching backend)
@@ -106,39 +119,73 @@ const validatePassword = (password: string) => {
     return null;
 };
 
+const validateEmail = (email: string): string | null => {
+    if (!email.trim()) {
+        return "Please enter your email address";
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return "Please enter a valid email address";
+    }
+    return null;
+};
+
+// Glassmorphism styled social button
 const SocialButton: React.FC<{ icon: React.ReactNode; label: string, onClick: () => void, disabled: boolean }> = ({ icon, label, onClick, disabled }) => (
-    <button type="button" onClick={onClick} disabled={disabled} className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50">
-        <div className="w-6 h-6">{icon}</div>
+    <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className="w-full flex items-center justify-center gap-3 py-3.5 px-4
+                   bg-white/60 backdrop-blur-sm border border-white/40
+                   rounded-2xl hover:bg-white/80 hover:border-white/60
+                   hover:shadow-lg hover:shadow-primary/5
+                   transition-all duration-300 disabled:opacity-50
+                   group"
+    >
+        <div className="w-6 h-6 transition-transform duration-300 group-hover:scale-110">{icon}</div>
         <span className="text-base font-semibold text-neutral-700">{label}</span>
     </button>
 );
 
+// Custom validation error message component with animation
+const ValidationError: React.FC<{ message?: string; show: boolean }> = ({ message, show }) => (
+    <div className={`overflow-hidden transition-all duration-300 ease-out ${show && message ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+        <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-red-50/80 backdrop-blur-sm border border-red-200/50">
+            <AlertIcon className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5 animate-pulse" />
+            <span className="text-sm text-red-600 font-medium">{message}</span>
+        </div>
+    </div>
+);
+
 const PasswordRequirementsIndicator: React.FC<{ requirements: PasswordRequirements }> = ({ requirements }) => {
     const RequirementItem: React.FC<{ met: boolean; text: string }> = ({ met, text }) => (
-        <div className="flex items-center gap-2">
-            <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all ${met ? 'bg-green-500' : 'bg-gray-300'}`}>
+        <div className="flex items-center gap-2 transition-all duration-300">
+            <div className={`w-4 h-4 rounded-full flex items-center justify-center transition-all duration-300 ${met ? 'bg-green-500 scale-100' : 'bg-neutral-300/60 scale-90'}`}>
                 {met && (
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 text-white animate-in zoom-in-50 duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                 )}
             </div>
-            <span className={`text-xs transition-colors ${met ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
+            <span className={`text-xs transition-all duration-300 ${met ? 'text-green-700 font-medium' : 'text-neutral-500'}`}>
                 {text}
             </span>
         </div>
     );
 
     return (
-        <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
-            <p className="text-xs font-semibold text-gray-700 mb-2">Password requirements:</p>
-            <RequirementItem met={requirements.minLength} text="At least 8 characters" />
-            <RequirementItem met={requirements.hasUppercase} text="One uppercase letter (A-Z)" />
-            <RequirementItem met={requirements.hasLowercase} text="One lowercase letter (a-z)" />
-            <RequirementItem met={requirements.hasNumber} text="One number (0-9)" />
-            <RequirementItem met={requirements.hasSpecialChar} text="One special character (!@#$%...)" />
-            <RequirementItem met={requirements.noSequential} text="No sequential characters (123, abc, qwe)" />
-            <RequirementItem met={requirements.notCommon} text="Not a common password" />
+        <div className="mt-3 p-4 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/50 space-y-2.5 shadow-inner">
+            <p className="text-xs font-semibold text-neutral-600 mb-3">Password requirements:</p>
+            <div className="grid grid-cols-1 gap-2">
+                <RequirementItem met={requirements.minLength} text="At least 8 characters" />
+                <RequirementItem met={requirements.hasUppercase} text="One uppercase letter (A-Z)" />
+                <RequirementItem met={requirements.hasLowercase} text="One lowercase letter (a-z)" />
+                <RequirementItem met={requirements.hasNumber} text="One number (0-9)" />
+                <RequirementItem met={requirements.hasSpecialChar} text="One special character (!@#$%...)" />
+                <RequirementItem met={requirements.noSequential} text="No sequential characters (123, abc)" />
+                <RequirementItem met={requirements.notCommon} text="Not a common password" />
+            </div>
         </div>
     );
 };
@@ -156,6 +203,10 @@ const AuthPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    // Field-level errors for custom validation
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+    const [touched, setTouched] = useState<{ email?: boolean; password?: boolean; confirmPassword?: boolean }>({});
 
     // Password requirements state for real-time feedback
     const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
@@ -190,10 +241,31 @@ const AuthPage: React.FC = () => {
         // Reset state when modal opens or view changes
         setError(null);
         setIsLoading(false);
+        setFieldErrors({});
+        setTouched({});
     }, [state.isAuthModalOpen, state.authModalView]);
 
     const handleClose = () => {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
+    };
+
+    const handleBlur = (field: 'email' | 'password' | 'confirmPassword') => {
+        setTouched(prev => ({ ...prev, [field]: true }));
+
+        // Validate on blur
+        if (field === 'email') {
+            const emailError = validateEmail(email);
+            setFieldErrors(prev => ({ ...prev, email: emailError || undefined }));
+        } else if (field === 'password' && state.authModalView === 'signup') {
+            const passwordError = validatePassword(password);
+            setFieldErrors(prev => ({ ...prev, password: passwordError || undefined }));
+        } else if (field === 'confirmPassword') {
+            if (password !== confirmPassword) {
+                setFieldErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+            } else {
+                setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
+            }
+        }
     };
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,11 +275,21 @@ const AuthPage: React.FC = () => {
         const requirements = checkPasswordRequirements(newPassword);
         setPasswordRequirements(requirements);
 
-        // Clear error if all requirements are met
+        // Clear password error if all requirements are met
         if (requirements.minLength && requirements.hasUppercase && requirements.hasLowercase &&
             requirements.hasNumber && requirements.hasSpecialChar && requirements.noSequential &&
             requirements.notCommon) {
+            setFieldErrors(prev => ({ ...prev, password: undefined }));
             setError(null);
+        }
+
+        // Also check confirm password match if it's been touched
+        if (touched.confirmPassword && confirmPassword) {
+            if (newPassword !== confirmPassword) {
+                setFieldErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+            } else {
+                setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
+            }
         }
     };
 
@@ -225,22 +307,39 @@ const AuthPage: React.FC = () => {
 
     const handleEmailSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        setError(null);
+
+        // Custom validation before submit
+        const emailError = validateEmail(email);
+        let passwordError: string | null = null;
+        let confirmError: string | null = null;
 
         if (state.authModalView === 'signup') {
-            const passwordError = validatePassword(password);
-            if (passwordError) {
-                setError(passwordError);
-                setIsLoading(false);
-                return;
-            }
+            passwordError = validatePassword(password);
             if (password !== confirmPassword) {
-                setError("Passwords do not match.");
-                setIsLoading(false);
-                return;
+                confirmError = "Passwords do not match";
+            }
+        } else {
+            // Login - just check if password is provided
+            if (!password.trim()) {
+                passwordError = "Please enter your password";
             }
         }
+
+        // Set all errors and mark fields as touched
+        setTouched({ email: true, password: true, confirmPassword: true });
+        setFieldErrors({
+            email: emailError || undefined,
+            password: passwordError || undefined,
+            confirmPassword: confirmError || undefined
+        });
+
+        // If any errors, don't proceed
+        if (emailError || passwordError || confirmError) {
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
 
         try {
             if (state.authModalView === 'login') {
@@ -259,6 +358,14 @@ const AuthPage: React.FC = () => {
 
     const handlePasswordResetRequest = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate email first
+        const emailError = validateEmail(email);
+        setTouched({ email: true });
+        setFieldErrors({ email: emailError || undefined });
+
+        if (emailError) return;
+
         setIsLoading(true);
         setError(null);
         try {
@@ -271,8 +378,18 @@ const AuthPage: React.FC = () => {
         }
     };
 
-    const floatingInputClasses = "block px-2.5 pb-2.5 pt-4 w-full text-base text-neutral-900 bg-white rounded-lg border border-neutral-300 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer";
-    const floatingLabelClasses = "absolute text-base text-neutral-700 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1";
+    // Glassmorphism input styles
+    const glassInputClasses = (hasError: boolean) => `
+        block w-full px-4 py-4 text-base text-neutral-900
+        bg-white/50 backdrop-blur-sm rounded-2xl
+        border-2 transition-all duration-300
+        ${hasError
+            ? 'border-red-300 focus:border-red-400 focus:ring-4 focus:ring-red-100'
+            : 'border-white/60 hover:border-white/80 focus:border-primary/50 focus:ring-4 focus:ring-primary/10'
+        }
+        focus:outline-none focus:bg-white/70
+        placeholder:text-neutral-400
+    `;
 
     const renderContent = () => {
         switch (state.authModalView) {
@@ -280,31 +397,87 @@ const AuthPage: React.FC = () => {
             case 'signup':
                 return (
                     <>
-                        <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm mb-4 sm:mb-6">
-                            <button onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })} className={`w-1/2 px-4 py-2 rounded-full text-base font-semibold transition-all duration-300 ${state.authModalView === 'login' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('auth:login.title')}</button>
-                            <button onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'signup' })} className={`w-1/2 px-4 py-2 rounded-full text-base font-semibold transition-all duration-300 ${state.authModalView === 'signup' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('auth:signup.title')}</button>
+                        {/* Glass tab switcher */}
+                        <div className="bg-white/30 backdrop-blur-md p-1.5 rounded-2xl flex items-center space-x-1 border border-white/40 shadow-inner mb-6">
+                            <button
+                                onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })}
+                                className={`w-1/2 px-4 py-2.5 rounded-xl text-base font-semibold transition-all duration-300 ${
+                                    state.authModalView === 'login'
+                                        ? 'bg-white/90 text-primary shadow-lg shadow-primary/10'
+                                        : 'text-neutral-600 hover:bg-white/40'
+                                }`}
+                            >
+                                {t('auth:login.title')}
+                            </button>
+                            <button
+                                onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'signup' })}
+                                className={`w-1/2 px-4 py-2.5 rounded-xl text-base font-semibold transition-all duration-300 ${
+                                    state.authModalView === 'signup'
+                                        ? 'bg-white/90 text-primary shadow-lg shadow-primary/10'
+                                        : 'text-neutral-600 hover:bg-white/40'
+                                }`}
+                            >
+                                {t('auth:signup.title')}
+                            </button>
                         </div>
-                        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
 
-                        <form onSubmit={handleEmailSubmit} className="space-y-4">
-                            <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required autoComplete="email" /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
+                        {/* Global error message */}
+                        {error && (
+                            <div className="mb-4 flex items-start gap-2 px-4 py-3 rounded-2xl bg-red-50/80 backdrop-blur-sm border border-red-200/50 animate-in slide-in-from-top-2 duration-300">
+                                <AlertIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-red-600 font-medium">{error}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleEmailSubmit} noValidate className="space-y-4">
+                            {/* Email field */}
+                            <div>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    value={email}
+                                    onChange={e => {
+                                        setEmail(e.target.value);
+                                        if (touched.email) {
+                                            const err = validateEmail(e.target.value);
+                                            setFieldErrors(prev => ({ ...prev, email: err || undefined }));
+                                        }
+                                    }}
+                                    onBlur={() => handleBlur('email')}
+                                    className={glassInputClasses(!!fieldErrors.email && touched.email)}
+                                    placeholder={t('auth:login.email')}
+                                    autoComplete="email"
+                                />
+                                <ValidationError
+                                    message={fieldErrors.email}
+                                    show={!!touched.email && !!fieldErrors.email}
+                                />
+                            </div>
+
+                            {/* Password field */}
                             <div>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         id="password"
                                         value={password}
-                                        onChange={state.authModalView === 'signup' ? handlePasswordChange : (e => setPassword(e.target.value))}
-                                        className={floatingInputClasses}
-                                        placeholder=" "
-                                        required
+                                        onChange={state.authModalView === 'signup' ? handlePasswordChange : (e => {
+                                            setPassword(e.target.value);
+                                            if (touched.password && !e.target.value.trim()) {
+                                                setFieldErrors(prev => ({ ...prev, password: "Please enter your password" }));
+                                            } else if (touched.password) {
+                                                setFieldErrors(prev => ({ ...prev, password: undefined }));
+                                            }
+                                        })}
+                                        onBlur={() => handleBlur('password')}
+                                        className={`${glassInputClasses(!!fieldErrors.password && touched.password)} pr-12`}
+                                        placeholder={t('auth:login.password')}
                                         autoComplete={state.authModalView === 'signup' ? 'new-password' : 'current-password'}
                                     />
-                                    <label htmlFor="password" className={floatingLabelClasses}>{t('auth:login.password')}</label>
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-white/50"
                                         aria-label={showPassword ? "Hide password" : "Show password"}
                                     >
                                         {showPassword ? (
@@ -314,46 +487,120 @@ const AuthPage: React.FC = () => {
                                         )}
                                     </button>
                                 </div>
+                                <ValidationError
+                                    message={fieldErrors.password}
+                                    show={!!touched.password && !!fieldErrors.password && state.authModalView === 'login'}
+                                />
                                 {state.authModalView === 'signup' && password && (
                                     <PasswordRequirementsIndicator requirements={passwordRequirements} />
                                 )}
                             </div>
-                            {state.authModalView === 'login' && <div className="text-right"><button type="button" onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPassword'})} className="text-sm font-semibold text-primary hover:underline">{t('auth:login.forgotPassword')}</button></div>}
-                            {state.authModalView === 'signup' && (
-                                <div className="relative">
-                                    <input
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        id="confirmPassword"
-                                        value={confirmPassword}
-                                        onChange={e => setConfirmPassword(e.target.value)}
-                                        className={floatingInputClasses}
-                                        placeholder=" "
-                                        required
-                                    />
-                                    <label htmlFor="confirmPassword" className={floatingLabelClasses}>{t('auth:signup.confirmPassword')}</label>
+
+                            {/* Forgot password link */}
+                            {state.authModalView === 'login' && (
+                                <div className="text-right">
                                     <button
                                         type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                        onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPassword'})}
+                                        className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
                                     >
-                                        {showConfirmPassword ? (
-                                            <EyeSlashIcon className="w-5 h-5" />
-                                        ) : (
-                                            <EyeIcon className="w-5 h-5" />
-                                        )}
+                                        {t('auth:login.forgotPassword')}
                                     </button>
                                 </div>
                             )}
-                            <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm text-base sm:text-lg font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? t('common:loading') : (state.authModalView === 'login' ? t('auth:login.submit') : t('auth:signup.submit'))}</button>
+
+                            {/* Confirm password field (signup only) */}
+                            {state.authModalView === 'signup' && (
+                                <div>
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            id="confirmPassword"
+                                            value={confirmPassword}
+                                            onChange={e => {
+                                                setConfirmPassword(e.target.value);
+                                                if (touched.confirmPassword) {
+                                                    if (password !== e.target.value) {
+                                                        setFieldErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+                                                    } else {
+                                                        setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                                                    }
+                                                }
+                                            }}
+                                            onBlur={() => handleBlur('confirmPassword')}
+                                            className={`${glassInputClasses(!!fieldErrors.confirmPassword && touched.confirmPassword)} pr-12`}
+                                            placeholder={t('auth:signup.confirmPassword')}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-white/50"
+                                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showConfirmPassword ? (
+                                                <EyeSlashIcon className="w-5 h-5" />
+                                            ) : (
+                                                <EyeIcon className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                    </div>
+                                    <ValidationError
+                                        message={fieldErrors.confirmPassword}
+                                        show={!!touched.confirmPassword && !!fieldErrors.confirmPassword}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Submit button with gradient */}
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full mt-4 py-4 px-6 rounded-2xl text-base font-bold text-white
+                                           bg-gradient-to-r from-primary to-primary-dark
+                                           hover:from-primary-dark hover:to-primary
+                                           shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30
+                                           transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
+                                           disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        {t('common:loading')}
+                                    </span>
+                                ) : (
+                                    state.authModalView === 'login' ? t('auth:login.submit') : t('auth:signup.submit')
+                                )}
+                            </button>
                         </form>
 
+                        {/* Social login section */}
                         {(availableProviders.google || availableProviders.apple) && (
                             <>
-                                <div className="my-4 sm:my-6 flex items-center"><div className="flex-grow border-t border-neutral-300"></div><span className="flex-shrink mx-4 text-neutral-500 font-medium text-sm">{t('auth:login.orContinueWith')}</span><div className="flex-grow border-t border-neutral-300"></div></div>
+                                <div className="my-6 flex items-center">
+                                    <div className="flex-grow h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent"></div>
+                                    <span className="flex-shrink mx-4 text-neutral-500 font-medium text-sm">{t('auth:login.orContinueWith')}</span>
+                                    <div className="flex-grow h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent"></div>
+                                </div>
                                 <div className="space-y-3">
-                                    {availableProviders.google && <SocialButton icon={<GoogleIcon/>} label={t('auth:login.google')} onClick={() => handleSocialLoginClick('google')} disabled={isLoading} />}
-                                    {availableProviders.apple && <SocialButton icon={<AppleIcon className="text-black"/>} label={t('auth:login.apple')} onClick={() => handleSocialLoginClick('apple')} disabled={isLoading} />}
+                                    {availableProviders.google && (
+                                        <SocialButton
+                                            icon={<GoogleIcon/>}
+                                            label={t('auth:login.google')}
+                                            onClick={() => handleSocialLoginClick('google')}
+                                            disabled={isLoading}
+                                        />
+                                    )}
+                                    {availableProviders.apple && (
+                                        <SocialButton
+                                            icon={<AppleIcon className="text-black"/>}
+                                            label={t('auth:login.apple')}
+                                            onClick={() => handleSocialLoginClick('apple')}
+                                            disabled={isLoading}
+                                        />
+                                    )}
                                 </div>
                             </>
                         )}
@@ -362,22 +609,81 @@ const AuthPage: React.FC = () => {
             case 'forgotPassword':
                 return (
                     <>
-                        <h3 className="text-lg font-bold text-center mb-4">{t('auth:forgotPassword.title')}</h3>
-                        <p className="text-sm text-neutral-600 text-center mb-6">{t('auth:forgotPassword.subtitle')}</p>
-                        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
-                        <form onSubmit={handlePasswordResetRequest} className="space-y-4">
-                             <div className="relative"><input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className={floatingInputClasses} placeholder=" " required autoComplete="email" /><label htmlFor="email" className={floatingLabelClasses}>{t('auth:login.email')}</label></div>
-                            <button type="submit" disabled={isLoading} className="w-full mt-2 py-3 px-4 rounded-lg shadow-sm font-bold text-white bg-primary hover:bg-primary-dark disabled:opacity-50">{isLoading ? t('common:loading') : t('auth:forgotPassword.submit')}</button>
-                            <button type="button" onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })} className="w-full text-sm font-semibold text-primary hover:underline mt-2">{t('auth:forgotPassword.backToLogin')}</button>
+                        <h3 className="text-xl font-bold text-center mb-3 text-neutral-800">{t('auth:forgotPassword.title')}</h3>
+                        <p className="text-sm text-neutral-500 text-center mb-6">{t('auth:forgotPassword.subtitle')}</p>
+
+                        {error && (
+                            <div className="mb-4 flex items-start gap-2 px-4 py-3 rounded-2xl bg-red-50/80 backdrop-blur-sm border border-red-200/50">
+                                <AlertIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-red-600 font-medium">{error}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handlePasswordResetRequest} noValidate className="space-y-4">
+                            <div>
+                                <input
+                                    type="email"
+                                    id="resetEmail"
+                                    value={email}
+                                    onChange={e => {
+                                        setEmail(e.target.value);
+                                        if (touched.email) {
+                                            const err = validateEmail(e.target.value);
+                                            setFieldErrors(prev => ({ ...prev, email: err || undefined }));
+                                        }
+                                    }}
+                                    onBlur={() => handleBlur('email')}
+                                    className={glassInputClasses(!!fieldErrors.email && touched.email)}
+                                    placeholder={t('auth:login.email')}
+                                    autoComplete="email"
+                                />
+                                <ValidationError
+                                    message={fieldErrors.email}
+                                    show={!!touched.email && !!fieldErrors.email}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full py-4 px-6 rounded-2xl text-base font-bold text-white
+                                           bg-gradient-to-r from-primary to-primary-dark
+                                           hover:from-primary-dark hover:to-primary
+                                           shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30
+                                           transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
+                                           disabled:opacity-50"
+                            >
+                                {isLoading ? t('common:loading') : t('auth:forgotPassword.submit')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })}
+                                className="w-full text-sm font-semibold text-primary hover:text-primary-dark transition-colors mt-2"
+                            >
+                                {t('auth:forgotPassword.backToLogin')}
+                            </button>
                         </form>
                     </>
                 );
             case 'forgotPasswordSuccess':
                  return (
-                    <div className="text-center">
-                        <h3 className="text-lg font-bold mb-4">{t('auth:forgotPassword.checkEmail')}</h3>
-                        <p className="text-sm text-neutral-600 mb-6">{t('auth:forgotPassword.emailSent', { email })}</p>
-                        <button onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })} className="w-full py-3 px-4 rounded-lg font-bold text-white bg-primary hover:bg-primary-dark">{t('auth:forgotPassword.backToLogin')}</button>
+                    <div className="text-center py-4">
+                        {/* Success icon with animation */}
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100/80 backdrop-blur-sm flex items-center justify-center animate-in zoom-in-50 duration-300">
+                            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-bold mb-3 text-neutral-800">{t('auth:forgotPassword.checkEmail')}</h3>
+                        <p className="text-sm text-neutral-500 mb-6">{t('auth:forgotPassword.emailSent', { email })}</p>
+                        <button
+                            onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })}
+                            className="w-full py-4 px-6 rounded-2xl font-bold text-white
+                                       bg-gradient-to-r from-primary to-primary-dark
+                                       hover:from-primary-dark hover:to-primary
+                                       shadow-lg shadow-primary/25 transition-all duration-300"
+                        >
+                            {t('auth:forgotPassword.backToLogin')}
+                        </button>
                     </div>
                 );
             default:
@@ -398,14 +704,62 @@ const AuthPage: React.FC = () => {
                     }}
                 />
             )}
-            <div className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center bg-black/50 p-0 md:p-4 overflow-y-auto" onClick={handleClose}>
-                <div className="bg-white w-full min-h-screen md:min-h-0 md:h-auto md:max-w-md md:max-h-[90vh] md:rounded-2xl md:shadow-2xl flex flex-col relative md:my-4 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={handleClose} className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-800 z-10 bg-white/80 rounded-full p-1" aria-label="Close authentication modal"><XMarkIcon className="w-6 h-6" /></button>
-                    <div className="p-6 sm:p-8 w-full max-w-md mx-auto pb-8">
-                        <div className="flex justify-center items-center space-x-2 mb-4 pt-4 md:pt-0"><LogoIcon className="w-8 h-8 text-primary" /></div>
-                        <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 text-center mb-4 sm:mb-6">
-                            {state.authModalView === 'login' ? t('auth:login.subtitle') : t('auth:signup.subtitle')}
+
+            {/* Backdrop with animated gradient */}
+            <div
+                className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto"
+                onClick={handleClose}
+            >
+                {/* Glassmorphism backdrop */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-neutral-900/60 to-primary/30 backdrop-blur-md" />
+
+                {/* Animated gradient orbs for visual interest */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-primary/30 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+                    <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-blue-500/20 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+                </div>
+
+                {/* Modal container with liquid glass effect */}
+                <div
+                    className="relative bg-white/80 backdrop-blur-2xl w-full min-h-screen
+                               md:min-h-0 md:h-auto md:max-w-md md:max-h-[90vh]
+                               md:rounded-3xl md:shadow-2xl md:shadow-black/20
+                               md:border md:border-white/50
+                               flex flex-col md:my-4 overflow-y-auto
+                               animate-in fade-in-0 zoom-in-95 duration-300"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {/* Subtle inner glow */}
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/50 via-transparent to-white/30 pointer-events-none" />
+
+                    {/* Close button with glass effect */}
+                    <button
+                        onClick={handleClose}
+                        className="absolute top-4 right-4 z-10 p-2 rounded-full
+                                   bg-white/60 backdrop-blur-sm border border-white/50
+                                   text-neutral-500 hover:text-neutral-800 hover:bg-white/80
+                                   transition-all duration-300 hover:scale-110 active:scale-95
+                                   shadow-lg shadow-black/5"
+                        aria-label="Close authentication modal"
+                    >
+                        <XMarkIcon className="w-5 h-5" />
+                    </button>
+
+                    {/* Content */}
+                    <div className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-8">
+                        {/* Logo with glow effect */}
+                        <div className="flex justify-center items-center mb-4 pt-4 md:pt-0">
+                            <div className="p-3 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg shadow-primary/10">
+                                <LogoIcon className="w-8 h-8 text-primary" />
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 text-center mb-6">
+                            {state.authModalView === 'login' ? t('auth:login.subtitle') :
+                             state.authModalView === 'signup' ? t('auth:signup.subtitle') : ''}
                         </h2>
+
                         {renderContent()}
                     </div>
                 </div>
