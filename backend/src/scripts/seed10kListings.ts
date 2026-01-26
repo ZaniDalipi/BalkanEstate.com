@@ -82,12 +82,12 @@ const BALKAN_LOCATIONS = [
   { city: 'Koper', country: 'Slovenia', lat: 45.5469, lng: 13.7294 },
 ];
 
-const PROPERTY_TYPES: Array<'house' | 'apartment' | 'villa' | 'land' | 'commercial'> = [
+const PROPERTY_TYPES: Array<'house' | 'apartment' | 'villa' | 'land' | 'other'> = [
   'apartment', 'apartment', 'apartment', // More apartments
   'house', 'house',
   'villa',
   'land',
-  'commercial'
+  'other' // commercial/other properties
 ];
 
 const STREET_NAMES = [
@@ -161,7 +161,7 @@ function getRandomPrice(propertyType: string, country: string): number {
     'villa': 2.5,
     'house': 1.5,
     'apartment': 1.0,
-    'commercial': 2.0,
+    'other': 2.0,
     'land': 0.5,
   };
 
@@ -179,8 +179,8 @@ function generateProperty(sellerId: any, index: number): any {
   const latOffset = (Math.random() - 0.5) * 0.06;
   const lngOffset = (Math.random() - 0.5) * 0.06;
 
-  const beds = propertyType === 'land' || propertyType === 'commercial' ? 0 : getRandomInt(1, 6);
-  const baths = propertyType === 'land' ? 0 : getRandomInt(1, 4);
+  const beds = propertyType === 'land' || propertyType === 'other' ? 0 : getRandomInt(1, 6);
+  const baths = propertyType === 'land' || propertyType === 'other' ? 0 : getRandomInt(1, 4);
   const sqft = propertyType === 'land' ? getRandomInt(500, 10000) : getRandomInt(40, 400);
   const yearBuilt = getRandomInt(1960, 2024); // Required field
 
@@ -192,7 +192,7 @@ function generateProperty(sellerId: any, index: number): any {
     'house': ['Family Home', 'Spacious House', 'Detached House', 'Modern House', 'Charming Home'],
     'villa': ['Luxury Villa', 'Seaside Villa', 'Mountain Villa', 'Exclusive Villa', 'Private Estate'],
     'land': ['Building Plot', 'Development Land', 'Agricultural Land', 'Prime Location Plot'],
-    'commercial': ['Office Space', 'Retail Unit', 'Commercial Property', 'Business Premises'],
+    'other': ['Office Space', 'Retail Unit', 'Commercial Property', 'Business Premises'],
   };
 
   const property: any = {
@@ -208,7 +208,7 @@ function generateProperty(sellerId: any, index: number): any {
     country: location.country,
     beds,
     baths,
-    livingRooms: propertyType === 'land' || propertyType === 'commercial' ? 0 : getRandomInt(1, 3),
+    livingRooms: propertyType === 'land' || propertyType === 'other' ? 0 : getRandomInt(1, 3),
     sqft,
     yearBuilt,
     parking: getRandomInt(0, 3),
@@ -300,8 +300,28 @@ async function seed10kListings() {
         properties.push(generateProperty(demoUser._id, batchStart + i));
       }
 
-      await Property.insertMany(properties, { ordered: false });
-      totalCreated += properties.length;
+      try {
+        const result = await Property.insertMany(properties, { ordered: false });
+        totalCreated += result.length;
+      } catch (insertError: any) {
+        // Log validation errors
+        if (insertError.writeErrors) {
+          console.error(`  ❌ Batch ${batch + 1} had ${insertError.writeErrors.length} errors`);
+          console.error(`     First error: ${insertError.writeErrors[0]?.errmsg}`);
+        } else if (insertError.errors) {
+          const errorKeys = Object.keys(insertError.errors);
+          console.error(`  ❌ Validation errors: ${errorKeys.join(', ')}`);
+          errorKeys.slice(0, 3).forEach(key => {
+            console.error(`     ${key}: ${insertError.errors[key].message}`);
+          });
+        } else {
+          console.error(`  ❌ Insert error:`, insertError.message);
+        }
+        // Still count what was inserted
+        if (insertError.insertedDocs) {
+          totalCreated += insertError.insertedDocs.length;
+        }
+      }
 
       const progress = ((totalCreated / TOTAL_LISTINGS) * 100).toFixed(1);
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
