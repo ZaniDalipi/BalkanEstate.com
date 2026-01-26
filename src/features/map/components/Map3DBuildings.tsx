@@ -867,6 +867,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       zoom: zoom,
       pitch: pitch,
       bearing: bearing,
+      minZoom: 14, // Prevent zooming out too far - keep building visible
+      maxZoom: 20,
       maxPitch: 85,
       antialias: true, // Enable antialiasing for smoother 3D buildings
       attributionControl: false,
