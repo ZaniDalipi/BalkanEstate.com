@@ -1194,6 +1194,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               strictBounds: false,
             },
             mapTypeId: getMapTypeId(),
+            disableDefaultUI: true, // Remove all default controls including compass
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: false,
@@ -1206,6 +1207,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             styles: getMapStyles(),
             minZoom: 6,
             maxZoom: 21,
+            tilt: 0, // Disable tilt to remove compass
+            heading: 0,
             mapId: 'balkan-estate-map',
           }}
         >
@@ -1474,7 +1477,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Desktop Controls */}
         {!isMobile && (
-          <div className="absolute bottom-32 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+          <div className="absolute bottom-20 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
               <button
@@ -1685,7 +1688,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Legend - bottom left */}
         {isLegendOpen && !isMobile && (
-          <div className="absolute bottom-32 left-4 z-[1000] animate-fade-in">
+          <div className="absolute bottom-20 left-4 z-[1000] animate-fade-in">
             <Legend />
           </div>
         )}
