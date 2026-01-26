@@ -597,6 +597,24 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     // Note: We don't clear measurement points when disabled so saved measurements remain visible
   }, [showMeasurement, map, isLoaded]);
 
+  // Calculate measurement values (must be before handlers that use them)
+  const measurementDistance = useMemo(() => {
+    if (measurementPoints.length < 2) return 0;
+    return calculateTotalDistance(measurementPoints);
+  }, [measurementPoints]);
+
+  const measurementArea = useMemo(() => {
+    if (measurementPoints.length < 3) return 0;
+    return calculatePolygonArea(measurementPoints);
+  }, [measurementPoints]);
+
+  const measurementPerimeter = useMemo(() => {
+    if (measurementPoints.length < 3) return 0;
+    const perim = calculateTotalDistance(measurementPoints);
+    // Add closing segment
+    return perim + calculateDistance(measurementPoints[measurementPoints.length - 1], measurementPoints[0]);
+  }, [measurementPoints]);
+
   // Save current measurement
   const handleSaveMeasurement = useCallback(() => {
     if (measurementPoints.length < 2) return;
@@ -625,24 +643,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setSavedMeasurements([]);
     setMeasurementPoints([]);
   }, []);
-
-  // Calculate measurement values
-  const measurementDistance = useMemo(() => {
-    if (measurementPoints.length < 2) return 0;
-    return calculateTotalDistance(measurementPoints);
-  }, [measurementPoints]);
-
-  const measurementArea = useMemo(() => {
-    if (measurementPoints.length < 3) return 0;
-    return calculatePolygonArea(measurementPoints);
-  }, [measurementPoints]);
-
-  const measurementPerimeter = useMemo(() => {
-    if (measurementPoints.length < 3) return 0;
-    const perim = calculateTotalDistance(measurementPoints);
-    // Add closing segment
-    return perim + calculateDistance(measurementPoints[measurementPoints.length - 1], measurementPoints[0]);
-  }, [measurementPoints]);
 
   // Update markers when properties change
   useEffect(() => {
