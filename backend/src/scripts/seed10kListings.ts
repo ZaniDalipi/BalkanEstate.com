@@ -185,7 +185,7 @@ function generateProperty(sellerId: any, index: number): any {
   const yearBuilt = getRandomInt(1960, 2024); // Required field
 
   const isSold = Math.random() < 0.15; // 15% sold
-  const isPromoted = !isSold && Math.random() < 0.08; // 8% promoted
+  const isPromoted = !isSold && Math.random() < 0.015; // 1.5% promoted (like real platforms)
 
   const titles: Record<string, string[]> = {
     'apartment': ['Modern Apartment', 'Cozy Flat', 'Luxury Apartment', 'City Center Apartment', 'Penthouse Suite'],
