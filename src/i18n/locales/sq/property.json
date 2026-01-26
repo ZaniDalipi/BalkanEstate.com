@@ -156,7 +156,14 @@
     "tour360": "Tur 360°",
     "photos": "Foto",
     "streetView": "Pamje Rruge",
+    "video": "Video",
     "all": "Të Gjitha"
+  },
+  "video": {
+    "loading": "Duke ngarkuar videon...",
+    "errorLoading": "Nuk u arrit të ngarkohej videoja",
+    "replay": "Riprodho Videon",
+    "video": "Video"
   },
   "seller": {
     "seller": "Shitësi",

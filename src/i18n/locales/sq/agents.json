@@ -418,5 +418,145 @@
       "saveChanges": "Ruaj Ndryshimet"
     },
     "editButton": "Ndrysho Profilin"
+  },
+  "verification": {
+    "title": "Verifikimi i Agjentit",
+    "description": "Verifikoni identitetin tuaj dhe licencën për t'u bërë agjent i verifikuar",
+    "benefits": {
+      "title": "Përfitimet e Verifikimit",
+      "trust": "Besueshmëri e shtuar nga klientët",
+      "badge": "Distinktiv i verifikuar në profilin tuaj",
+      "priority": "Prioritet në rezultatet e kërkimit",
+      "features": "Akses në veçori premium"
+    },
+    "requirements": {
+      "title": "Kërkesat",
+      "validLicense": "Licencë e vlefshme patundshmërie",
+      "idDocument": "Dokument identifikimi i lëshuar nga qeveria",
+      "photo": "Foto profesionale",
+      "contact": "Informacion kontakti i verifikuar"
+    },
+    "status": {
+      "pending": "Verifikimi në Pritje",
+      "approved": "I Verifikuar",
+      "rejected": "Verifikimi u Refuzua",
+      "expired": "Verifikimi Skadoi"
+    },
+    "startVerification": "Fillo Verifikimin",
+    "uploadDocuments": "Ngarko Dokumentet",
+    "pendingReview": "Dokumentet tuaja janë nën rishikim"
+  },
+  "invite": {
+    "title": "Fto Agjent",
+    "description": "Ftoni një agjent të bashkohet me agjencin tuaj",
+    "email": "Emaili i Agjentit",
+    "emailPlaceholder": "Futni adresën email të agjentit",
+    "message": "Mesazh Personal",
+    "messagePlaceholder": "Shtoni një mesazh personal (opsional)",
+    "send": "Dërgo Ftesën",
+    "sending": "Duke dërguar...",
+    "sent": "Ftesa u Dërgua!",
+    "pending": "Ftesa në Pritje",
+    "resend": "Ridërgo",
+    "cancel": "Anulo Ftesën",
+    "expired": "Skaduar",
+    "accepted": "Pranuar"
+  },
+  "manage": {
+    "title": "Menaxho Agjencin",
+    "teamMembers": "Anëtarët e Ekipit",
+    "addMember": "Shto Anëtar Ekipi",
+    "removeMember": "Hiq Anëtarin",
+    "changeRole": "Ndrysho Rolin",
+    "roles": {
+      "admin": "Admin",
+      "manager": "Menaxher",
+      "agent": "Agjent"
+    },
+    "invitationCodes": "Kodet e Ftesës",
+    "generateCode": "Gjenero Kod të Ri",
+    "codeGenerated": "Kodi u Gjenerua",
+    "copyCode": "Kopjo Kodin",
+    "codeCopied": "Kodi u Kopjua!",
+    "codeExpiry": "Skadon pas {{days}} ditësh",
+    "revokeCode": "Anulo Kodin",
+    "agencySettings": "Konfigurimet e Agjencisë",
+    "updateLogo": "Përditëso Logon",
+    "updateCover": "Përditëso Foton e Kopertinës",
+    "updateDescription": "Përditëso Përshkrimin",
+    "socialLinks": "Linket e Rrjeteve Sociale",
+    "contactInfo": "Informacioni i Kontaktit"
+  },
+  "profilePage": {
+    "header": {
+      "back": "Kthehu",
+      "backToAgents": "Kthehu te Agjentët",
+      "viewAgencyProfile": "Shiko Profilin e Agjencisë →",
+      "save": "Ruaj",
+      "saved": "Ruajtur",
+      "share": "Shpërndaj",
+      "independentAgent": "Agjent i Pavarur",
+      "editProfile": "Modifiko Profilin"
+    },
+    "stats": {
+      "propertiesSold": "Prona të Shitura",
+      "yearsExperience": "Vite Përvojë",
+      "activeListings": "Listime Aktive",
+      "reviews": "vlerësime"
+    },
+    "badges": {
+      "topAgent": "Agjent Kryesor"
+    },
+    "agencyCard": {
+      "memberOf": "Anëtar i",
+      "agents": "Agjentë",
+      "properties": "Prona",
+      "visitAgency": "Vizito Agjencin"
+    },
+    "tabs": {
+      "overview": "Përmbledhje",
+      "listings": "Listime",
+      "reviews": "Vlerësime"
+    },
+    "about": {
+      "title": "Rreth {{name}}",
+      "defaultBio": "{{name}} është një profesionist i përkushtuar i patundshmërisë me {{years}} vite përvojë në industri{{agency}}. {{name}} specializohet në ndihmimin e klientëve për të arritur qëllimet e tyre të patundshmërisë përmes njohurive eksperte të tregut dhe shërbimit të personalizuar.",
+      "asPartOf": " si pjesë e ekipit të {{agencyName}}"
+    },
+    "performance": {
+      "title": "Performanca & Statistikat",
+      "sold": "Shitur",
+      "active": "Aktive",
+      "rating": "Vlerësimi",
+      "years": "Vite",
+      "reviews": "Vlerësime",
+      "team": "Ekipi"
+    },
+    "credentials": {
+      "title": "Kredencialet & Certifikimet",
+      "licensedAgent": "Agjent i Licencuar i Patundshmërisë",
+      "authorizedToPractice": "I autorizuar të praktikojë në {{city}}, {{country}}",
+      "professionalCertifications": "Certifikime Profesionale",
+      "memberOfAssociation": "Anëtar i Shoqatës Kombëtare",
+      "awardsRecognition": "Çmime & Njohje",
+      "noAwards": "Nuk ka çmime të listuara",
+      "addCredential": "Shto Kredencial",
+      "editCredential": "Modifiko Kredencial",
+      "deleteCredential": "Fshi Kredencial",
+      "uploadDocument": "Ngarko Dokument",
+      "viewDocument": "Shiko Dokument",
+      "types": {
+        "license": "Licencë",
+        "certification": "Certifikim",
+        "award": "Çmim",
+        "membership": "Anëtarësi"
+      },
+      "status": {
+        "pending": "Në Pritje të Verifikimit",
+        "verified": "Verifikuar",
+        "rejected": "Refuzuar",
+        "expired": "Skaduar"
+      }
+    }
   }
 }

@@ -1,5 +1,6 @@
 {
   "appName": "BalkanEstate",
+  "selectLanguage": "Odaberite Jezik",
   "tagline": "Pronađite svoj dom iz snova na Balkanu",
   "loading": "Učitavanje...",
   "loadingMore": "Učitavanje više...",
@@ -358,6 +359,42 @@
     "sqm": "m²",
     "sqft": "sq ft"
   },
+  "achievements": {
+    "title": "Postignuća i Nagrade",
+    "subtitle": "Profesionalna priznanja i certifikati",
+    "add": "Dodaj Postignuće",
+    "addFirst": "Dodajte Svoje Prvo Postignuće",
+    "addTitle": "Dodaj Postignuće",
+    "editTitle": "Uredi Postignuće",
+    "addButton": "Dodaj Postignuće",
+    "verified": "Potvrđeno",
+    "expired": "Isteklo",
+    "viewDocument": "Pogledaj Dokument",
+    "empty": "Još nema postignuća za prikaz.",
+    "emptyOwner": "Prikažite svoja postignuća i certifikate kako biste izgradili povjerenje s klijentima.",
+    "types": {
+      "award": "Nagrada",
+      "certification": "Certifikat",
+      "milestone": "Važno Postignuće",
+      "recognition": "Priznanje",
+      "membership": "Članstvo"
+    },
+    "form": {
+      "type": "Vrsta",
+      "title": "Naslov",
+      "titlePlaceholder": "npr., Nagrada Najboljeg Proizvođača 2024",
+      "organization": "Organizacija Izdavatelj",
+      "organizationPlaceholder": "npr., Nacionalna Udruga Agenata",
+      "description": "Opis",
+      "descriptionPlaceholder": "Kratki opis ovog postignuća...",
+      "dateReceived": "Datum Primitka",
+      "expiryDate": "Datum Isteka",
+      "documentUrl": "URL Dokumenta/Certifikata",
+      "documentHint": "Poveznica na vaš certifikat ili popratnu dokumentaciju"
+    }
+  },
+  "saving": "Spremanje...",
+  "saveChanges": "Spremi Promjene",
   "pwa": {
     "installTitle": "Instaliraj BalkanEstate",
     "installSubtitle": "Dobij iskustvo aplikacije",

@@ -156,7 +156,14 @@
     "tour360": "360° tura",
     "photos": "Fotografije",
     "streetView": "Street View",
+    "video": "Video",
     "all": "Sve"
+  },
+  "video": {
+    "loading": "Učitavanje videa...",
+    "errorLoading": "Neuspješno učitavanje videa",
+    "replay": "Ponovo Pusti Video",
+    "video": "Video"
   },
   "seller": {
     "seller": "Prodavač",

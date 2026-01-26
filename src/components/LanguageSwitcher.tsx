@@ -17,7 +17,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   variant = 'dropdown',
   className = ''
 }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +59,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-neutral-100 transition-colors"
-          aria-label="Change language"
+          aria-label={t('aria.changeLanguage')}
           aria-expanded={isOpen}
         >
           <span className="text-xl">{currentLang.flag}</span>
@@ -114,7 +114,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
-          aria-label="Change language"
+          aria-label={t('aria.changeLanguage')}
           aria-expanded={isOpen}
         >
           <span className="text-xl flex-shrink-0">{currentLang.flag}</span>
@@ -124,7 +124,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         {isOpen && (
           <div className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-neutral-200 py-2 z-[100] max-h-[70vh] overflow-y-auto">
             <div className="px-3 py-1.5 text-xs font-semibold text-neutral-500 uppercase tracking-wide border-b border-neutral-100 mb-1">
-              Select Language
+              {t('selectLanguage')}
             </div>
             {languages.map((lang) => (
               <button
@@ -158,7 +158,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full space-x-2 px-3 py-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors border border-neutral-200"
-        aria-label="Change language"
+        aria-label={t('aria.changeLanguage')}
         aria-expanded={isOpen}
       >
         <div className="flex items-center space-x-2">
@@ -178,7 +178,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       {isOpen && (
         <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-neutral-200 py-2 z-[100] max-h-[70vh] overflow-y-auto">
           <div className="px-3 py-1.5 text-xs font-semibold text-neutral-500 uppercase tracking-wide border-b border-neutral-100 mb-1">
-            Select Language
+            {t('selectLanguage')}
           </div>
           {languages.map((lang) => (
             <button

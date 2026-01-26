@@ -1,5 +1,6 @@
 {
   "appName": "BalkanEstate",
+  "selectLanguage": "Selectați Limba",
   "tagline": "Găsește-ți Casa de Vis în Balcani",
   "loading": "Se încarcă...",
   "loadingMore": "Se încarcă mai multe...",
@@ -357,6 +358,43 @@
     "sqm": "mp",
     "sqft": "mp"
   },
+  "tryAgain": "Încearcă Din Nou",
+  "achievements": {
+    "title": "Realizări și Premii",
+    "subtitle": "Recunoașteri și certificări profesionale",
+    "add": "Adaugă Realizare",
+    "addFirst": "Adaugă Prima Ta Realizare",
+    "addTitle": "Adaugă Realizare",
+    "editTitle": "Editează Realizare",
+    "addButton": "Adaugă Realizare",
+    "verified": "Verificat",
+    "expired": "Expirat",
+    "viewDocument": "Vizualizează Document",
+    "empty": "Nu există încă realizări de afișat.",
+    "emptyOwner": "Prezintă-ți realizările și certificările pentru a construi încrederea cu clienții.",
+    "types": {
+      "award": "Premiu",
+      "certification": "Certificare",
+      "milestone": "Realizare Importantă",
+      "recognition": "Recunoaștere",
+      "membership": "Membru"
+    },
+    "form": {
+      "type": "Tip",
+      "title": "Titlu",
+      "titlePlaceholder": "ex., Premiul Top Producător 2024",
+      "organization": "Organizația Emitentă",
+      "organizationPlaceholder": "ex., Asociația Națională a Agenților",
+      "description": "Descriere",
+      "descriptionPlaceholder": "Scurtă descriere a acestei realizări...",
+      "dateReceived": "Data Primirii",
+      "expiryDate": "Data Expirării",
+      "documentUrl": "URL Document/Certificat",
+      "documentHint": "Link către certificatul sau documentația suport"
+    }
+  },
+  "saving": "Se salvează...",
+  "saveChanges": "Salvează Modificările",
   "pwa": {
     "installTitle": "Instalează BalkanEstate",
     "installSubtitle": "Obține experiența aplicației",

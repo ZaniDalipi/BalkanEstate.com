@@ -156,7 +156,14 @@
     "tour360": "Tur 360°",
     "photos": "Fotografii",
     "streetView": "Vedere Stradală",
+    "video": "Video",
     "all": "Toate"
+  },
+  "video": {
+    "loading": "Se încarcă videoul...",
+    "errorLoading": "Încărcarea videoclipului a eșuat",
+    "replay": "Redă Din Nou Videoul",
+    "video": "Video"
   },
   "seller": {
     "seller": "Vânzător",

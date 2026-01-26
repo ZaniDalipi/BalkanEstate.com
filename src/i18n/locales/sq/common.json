@@ -1,5 +1,6 @@
 {
   "appName": "BalkanEstate",
+  "selectLanguage": "Zgjidhni Gjuhën",
   "tagline": "Gjeni Shtëpinë e Ëndrrave në Ballkan",
   "loading": "Duke ngarkuar...",
   "loadingMore": "Duke ngarkuar më shumë...",
@@ -358,6 +359,42 @@
     "sqm": "m²",
     "sqft": "sq ft"
   },
+  "achievements": {
+    "title": "Arritjet dhe Çmimet",
+    "subtitle": "Njohje dhe certifikime profesionale",
+    "add": "Shto Arritje",
+    "addFirst": "Shto Arritjen Tuaj të Parë",
+    "addTitle": "Shto Arritje",
+    "editTitle": "Redakto Arritje",
+    "addButton": "Shto Arritje",
+    "verified": "E Verifikuar",
+    "expired": "Skaduar",
+    "viewDocument": "Shiko Dokumentin",
+    "empty": "Nuk ka arritje për të shfaqur ende.",
+    "emptyOwner": "Shfaqni arritjet dhe certifikimet tuaja për të ndërtuar besimin me klientët.",
+    "types": {
+      "award": "Çmim",
+      "certification": "Certifikim",
+      "milestone": "Arritje e Rëndësishme",
+      "recognition": "Njohje",
+      "membership": "Anëtarësim"
+    },
+    "form": {
+      "type": "Lloji",
+      "title": "Titulli",
+      "titlePlaceholder": "p.sh., Çmimi i Prodhuesit të Mirë 2024",
+      "organization": "Organizata Lëshuese",
+      "organizationPlaceholder": "p.sh., Shoqata Kombëtare e Agjentëve",
+      "description": "Përshkrimi",
+      "descriptionPlaceholder": "Përshkrim i shkurtër i kësaj arritje...",
+      "dateReceived": "Data e Marrjes",
+      "expiryDate": "Data e Skadimit",
+      "documentUrl": "URL e Dokumentit/Certifikimit",
+      "documentHint": "Link për certifikimin ose dokumentacionin mbështetës"
+    }
+  },
+  "saving": "Duke ruajtur...",
+  "saveChanges": "Ruaj Ndryshimet",
   "pwa": {
     "installTitle": "Instalo BalkanEstate",
     "installSubtitle": "Merr përvojën e aplikacionit",

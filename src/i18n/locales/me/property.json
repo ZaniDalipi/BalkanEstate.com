@@ -155,8 +155,15 @@
     "tour3d": "3D Tour",
     "tour360": "360° Tour",
     "photos": "Photos",
-    "streetView": "Street View",
-    "all": "All"
+    "streetView": "Ulični Prikaz",
+    "video": "Video",
+    "all": "Sve"
+  },
+  "video": {
+    "loading": "Učitavanje videa...",
+    "errorLoading": "Neuspješno učitavanje videa",
+    "replay": "Ponovo Pusti Video",
+    "video": "Video"
   },
   "seller": {
     "seller": "Seller",
