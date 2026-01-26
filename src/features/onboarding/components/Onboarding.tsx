@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { LogoIcon, BuildingOfficeIcon, SearchIcon, HomeIcon } from '@/constants';
+import { LogoIcon, BuildingOfficeIcon, SearchIcon, HomeIcon, MapIcon, ChartBarIcon, ShieldCheckIcon, SparklesIcon } from '@/constants';
 import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
 import { getAgencies } from '@/src/features/agencies/api';
 
 /* ---------------- CONFIG ---------------- */
 
-const FLOAT_SPEED = 0.0008; // Floating speed
-const FLOAT_RANGE = 20; // Pixels of movement range
+const FLOAT_SPEED = 0.0006; // Slower, more elegant floating
+const FLOAT_RANGE = 15; // Subtle movement
 
 /* ---------------- TYPES ---------------- */
 
@@ -96,13 +96,13 @@ const Onboarding: React.FC = () => {
       el.style.width = `${size}px`;
       el.style.height = `${size}px`;
 
-      // Create bubble with agency logo - enhanced glass effect
+      // Create bubble with agency logo - glass effect for dark theme
       el.innerHTML = `
-        <div class="w-full h-full rounded-full bg-white/70 backdrop-blur-lg shadow-2xl border-2 border-white/60 overflow-hidden flex items-center justify-center p-3 opacity-90 hover:opacity-100 transition-all duration-300 hover:scale-110 hover:shadow-[0_20px_50px_rgba(31,38,135,0.25)]" style="box-shadow: 0 10px 40px rgba(31, 38, 135, 0.2), inset 0 0 30px rgba(255, 255, 255, 0.5);">
+        <div class="w-full h-full rounded-full bg-white/10 backdrop-blur-xl shadow-2xl border border-white/20 overflow-hidden flex items-center justify-center p-3 opacity-70 hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-white/20 hover:border-white/30" style="box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);">
           <img
             src="${agency.logo}"
             alt="${agency.name}"
-            class="w-full h-full object-contain drop-shadow-md"
+            class="w-full h-full object-contain brightness-110"
             loading="lazy"
           />
         </div>
@@ -180,6 +180,22 @@ const Onboarding: React.FC = () => {
 
   /* ---------------- RENDER ---------------- */
 
+  // Stats data
+  const stats = [
+    { value: '2,500+', label: t('common:stats.properties', 'Properties'), icon: HomeIcon },
+    { value: '11', label: t('common:stats.countries', 'Countries'), icon: MapIcon },
+    { value: '50+', label: t('common:stats.agencies', 'Agencies'), icon: BuildingOfficeIcon },
+    { value: '24/7', label: t('common:stats.support', 'AI Support'), icon: SparklesIcon },
+  ];
+
+  // Feature highlights
+  const features = [
+    { icon: SparklesIcon, title: t('common:features.aiSearch', 'AI-Powered Search'), desc: t('common:features.aiSearchDesc', 'Smart filters and recommendations') },
+    { icon: MapIcon, title: t('common:features.coverage', 'Balkan Coverage'), desc: t('common:features.coverageDesc', '11 countries, 50+ cities') },
+    { icon: ChartBarIcon, title: t('common:features.analytics', 'Market Insights'), desc: t('common:features.analyticsDesc', 'Real-time pricing data') },
+    { icon: ShieldCheckIcon, title: t('common:features.verified', 'Verified Listings'), desc: t('common:features.verifiedDesc', 'Trusted agency partners') },
+  ];
+
   return (
     <>
       <Helmet>
@@ -195,14 +211,23 @@ const Onboarding: React.FC = () => {
         ref={containerRef}
         className="min-h-screen relative overflow-hidden"
         style={{
-          background: 'linear-gradient(145deg, #f8fafc 0%, #e2e8f0 30%, #dbeafe 60%, #e0e7ff 100%)',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
         }}
       >
-        {/* Animated gradient orbs */}
-        <div className="absolute top-10 left-[5%] w-80 h-80 bg-gradient-to-br from-blue-400/30 to-cyan-300/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-[5%] w-96 h-96 bg-gradient-to-br from-purple-400/25 to-pink-300/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-primary/20 to-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-1/3 left-1/4 w-72 h-72 bg-gradient-to-br from-indigo-300/20 to-violet-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        {/* Animated mesh gradient background */}
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/40 to-cyan-400/20 rounded-full blur-[100px] animate-blob" />
+          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-500/30 to-purple-400/20 rounded-full blur-[100px] animate-blob" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-br from-primary/25 to-indigo-500/15 rounded-full blur-[120px] animate-blob" style={{ animationDelay: '4s' }} />
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
 
         {/* BACKGROUND AGENCY BUBBLES */}
         <div
@@ -211,154 +236,192 @@ const Onboarding: React.FC = () => {
         />
 
         {/* FOREGROUND UI */}
-        <div className="relative z-10 flex flex-col justify-center items-center min-h-screen p-4 py-8">
-          {/* HEADER */}
-          <div
-            className="text-center mb-8 px-8 py-6 bg-white/50 backdrop-blur-xl rounded-3xl border border-white/50 animate-fadeIn"
-            style={{
-              boxShadow: '0 15px 50px rgba(31, 38, 135, 0.12), inset 0 0 30px rgba(255, 255, 255, 0.5)',
-            }}
-          >
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="p-2 bg-gradient-to-br from-primary to-blue-600 rounded-xl shadow-lg">
-                <LogoIcon className="w-8 h-8 text-white" />
+        <div className="relative z-10 flex flex-col min-h-screen">
+          {/* Hero Section */}
+          <div className="flex-1 flex flex-col justify-center items-center px-4 py-12 sm:py-16">
+            {/* HEADER */}
+            <div className="text-center mb-10 animate-fadeIn">
+              <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/10 backdrop-blur-md rounded-full border border-white/10">
+                <SparklesIcon className="w-4 h-4 text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-300">{t('common:aiPowered', 'AI-Powered Real Estate')}</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-neutral-800">
-                BalkanEstate<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">AI</span>
-              </h1>
-            </div>
-            <p className="text-base sm:text-lg text-neutral-600 max-w-md">
-              {t('common:tagline')}
-            </p>
-          </div>
 
-          {/* MAIN CONTENT CARD */}
-          <div
-            className="bg-white/60 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl w-full max-w-4xl border border-white/50 animate-slideUp"
-            style={{
-              boxShadow: '0 20px 60px rgba(31, 38, 135, 0.15), inset 0 0 40px rgba(255, 255, 255, 0.5)',
-              animationDelay: '0.2s',
-            }}
-          >
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 text-neutral-800">
-              {t('nav:onboarding.question')}
-            </h2>
-
-            <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-              {/* BUY CARD */}
-              <div
-                onClick={handleBuyChoice}
-                className="group p-5 sm:p-6 bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-lg rounded-2xl border border-white/60 hover:-translate-y-3 hover:shadow-[0_25px_60px_rgba(59,130,246,0.2)] transition-all duration-400 cursor-pointer flex flex-col"
-                style={{
-                  boxShadow: '0 10px 40px rgba(31, 38, 135, 0.1), inset 0 0 25px rgba(255, 255, 255, 0.4)',
-                }}
-              >
-                <div className="relative overflow-hidden rounded-xl mb-5">
-                  <img
-                    src={ONBOARDING_IMAGES.buyCard.src}
-                    srcSet={ONBOARDING_IMAGES.buyCard.srcSet}
-                    sizes="(max-width: 768px) calc(100vw - 80px), 400px"
-                    alt={ONBOARDING_IMAGES.buyCard.alt}
-                    className="h-44 sm:h-48 w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="eager"
-                    decoding="async"
-                    fetchPriority="high"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg">
-                    <SearchIcon className="w-5 h-5 text-primary" />
-                  </div>
+              <div className="flex items-center justify-center gap-4 mb-5">
+                <div className="p-3 bg-gradient-to-br from-primary via-blue-500 to-cyan-400 rounded-2xl shadow-lg shadow-primary/30">
+                  <LogoIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-2 text-center text-neutral-800 group-hover:text-primary transition-colors">
-                  {t('nav:onboarding.lookingToBuy')}
-                </h3>
-                <p className="text-neutral-600 mb-5 text-center flex-grow text-sm sm:text-base">
-                  {t('nav:onboarding.buyDescription')}
-                </p>
-                <button className="w-full bg-gradient-to-r from-primary to-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg group-hover:shadow-xl group-hover:from-primary-dark group-hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-2">
-                  <SearchIcon className="w-5 h-5" />
-                  {t('nav:onboarding.startSearching')}
-                </button>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight">
+                  Balkan<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-primary">Estate</span>
+                </h1>
               </div>
 
-              {/* SELL CARD */}
-              <div
-                onClick={handleSellChoice}
-                className="group p-5 sm:p-6 bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-lg rounded-2xl border border-white/60 hover:-translate-y-3 hover:shadow-[0_25px_60px_rgba(55,65,81,0.2)] transition-all duration-400 cursor-pointer flex flex-col"
-                style={{
-                  boxShadow: '0 10px 40px rgba(31, 38, 135, 0.1), inset 0 0 25px rgba(255, 255, 255, 0.4)',
-                }}
-              >
-                <div className="relative overflow-hidden rounded-xl mb-5">
-                  <img
-                    src={ONBOARDING_IMAGES.sellCard.src}
-                    srcSet={ONBOARDING_IMAGES.sellCard.srcSet}
-                    sizes="(max-width: 768px) calc(100vw - 80px), 400px"
-                    alt={ONBOARDING_IMAGES.sellCard.alt}
-                    className="h-44 sm:h-48 w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg">
-                    <HomeIcon className="w-5 h-5 text-neutral-700" />
-                  </div>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-2 text-center text-neutral-800 group-hover:text-neutral-900 transition-colors">
-                  {t('nav:onboarding.wantToSell')}
-                </h3>
-                <p className="text-neutral-600 mb-5 text-center flex-grow text-sm sm:text-base">
-                  {t('nav:onboarding.sellDescription')}
-                </p>
-                <button className="w-full bg-gradient-to-r from-neutral-800 to-neutral-900 text-white py-3.5 rounded-xl font-bold shadow-lg group-hover:shadow-xl group-hover:from-neutral-900 group-hover:to-black transition-all duration-300 flex items-center justify-center gap-2">
-                  <HomeIcon className="w-5 h-5" />
-                  {t('nav:onboarding.listProperty')}
-                </button>
-              </div>
+              <p className="text-lg sm:text-xl md:text-2xl text-neutral-300 max-w-2xl mx-auto leading-relaxed">
+                {t('common:heroTagline', 'Discover your dream property across 11 Balkan countries with AI-powered search')}
+              </p>
             </div>
-          </div>
 
-          {/* FEATURES ROW */}
-          <div className="mt-8 flex flex-wrap justify-center gap-4 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
-            {[
-              { icon: '🔍', text: 'AI-Powered Search' },
-              { icon: '🏠', text: '10+ Balkan Countries' },
-              { icon: '📊', text: 'Market Analytics' },
-            ].map((feature, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/50 backdrop-blur-lg rounded-full border border-white/50 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-              >
-                <span className="text-lg">{feature.icon}</span>
-                <span className="text-sm font-medium text-neutral-700">{feature.text}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* AGENCY BADGE */}
-          {agencies.length > 0 && (
+            {/* Stats Bar */}
             <div
-              className="mt-6 flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-xl rounded-full border border-white/50 shadow-lg animate-fadeIn"
+              className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-10 w-full max-w-3xl animate-slideUp"
+              style={{ animationDelay: '0.15s' }}
+            >
+              {stats.map((stat, i) => (
+                <div
+                  key={i}
+                  className="text-center p-4 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+                >
+                  <stat.icon className="w-5 h-5 text-cyan-400 mx-auto mb-2" />
+                  <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-neutral-400">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* MAIN CONTENT CARD */}
+            <div
+              className="bg-white/[0.08] backdrop-blur-2xl p-6 sm:p-8 rounded-3xl w-full max-w-4xl border border-white/10 animate-slideUp"
               style={{
-                boxShadow: '0 8px 30px rgba(31, 38, 135, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.5)',
-                animationDelay: '0.5s',
+                boxShadow: '0 25px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                animationDelay: '0.25s',
               }}
             >
-              <div className="p-2 bg-primary/10 rounded-full">
-                <BuildingOfficeIcon className="w-5 h-5 text-primary" />
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 text-white">
+                {t('nav:onboarding.question')}
+              </h2>
+
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                {/* BUY CARD */}
+                <div
+                  onClick={handleBuyChoice}
+                  className="group relative p-5 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-2xl border border-white/10 hover:border-cyan-400/30 hover:-translate-y-2 hover:shadow-[0_30px_80px_rgba(34,211,238,0.15)] transition-all duration-500 cursor-pointer flex flex-col overflow-hidden"
+                >
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/10 group-hover:to-blue-500/5 transition-all duration-500 rounded-2xl" />
+
+                  <div className="relative z-10">
+                    <div className="relative overflow-hidden rounded-xl mb-5">
+                      <img
+                        src={ONBOARDING_IMAGES.buyCard.src}
+                        srcSet={ONBOARDING_IMAGES.buyCard.srcSet}
+                        sizes="(max-width: 768px) calc(100vw - 80px), 400px"
+                        alt={ONBOARDING_IMAGES.buyCard.alt}
+                        className="h-44 sm:h-48 w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute top-3 left-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg group-hover:bg-cyan-400 group-hover:shadow-cyan-400/30 transition-all duration-300">
+                        <SearchIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2 text-center text-white group-hover:text-cyan-300 transition-colors">
+                      {t('nav:onboarding.lookingToBuy')}
+                    </h3>
+                    <p className="text-neutral-400 mb-5 text-center flex-grow text-sm sm:text-base group-hover:text-neutral-300 transition-colors">
+                      {t('nav:onboarding.buyDescription')}
+                    </p>
+                    <button className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 group-hover:from-cyan-400 group-hover:to-blue-400 transition-all duration-300 flex items-center justify-center gap-2">
+                      <SearchIcon className="w-5 h-5" />
+                      {t('nav:onboarding.startSearching')}
+                    </button>
+                  </div>
+                </div>
+
+                {/* SELL CARD */}
+                <div
+                  onClick={handleSellChoice}
+                  className="group relative p-5 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-2xl border border-white/10 hover:border-violet-400/30 hover:-translate-y-2 hover:shadow-[0_30px_80px_rgba(167,139,250,0.15)] transition-all duration-500 cursor-pointer flex flex-col overflow-hidden"
+                >
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500/0 to-purple-500/0 group-hover:from-violet-500/10 group-hover:to-purple-500/5 transition-all duration-500 rounded-2xl" />
+
+                  <div className="relative z-10">
+                    <div className="relative overflow-hidden rounded-xl mb-5">
+                      <img
+                        src={ONBOARDING_IMAGES.sellCard.src}
+                        srcSet={ONBOARDING_IMAGES.sellCard.srcSet}
+                        sizes="(max-width: 768px) calc(100vw - 80px), 400px"
+                        alt={ONBOARDING_IMAGES.sellCard.alt}
+                        className="h-44 sm:h-48 w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-violet-500/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute top-3 left-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg group-hover:bg-violet-400 group-hover:shadow-violet-400/30 transition-all duration-300">
+                        <HomeIcon className="w-5 h-5 text-neutral-700 group-hover:text-white transition-colors" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2 text-center text-white group-hover:text-violet-300 transition-colors">
+                      {t('nav:onboarding.wantToSell')}
+                    </h3>
+                    <p className="text-neutral-400 mb-5 text-center flex-grow text-sm sm:text-base group-hover:text-neutral-300 transition-colors">
+                      {t('nav:onboarding.sellDescription')}
+                    </p>
+                    <button className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-violet-500/20 group-hover:shadow-violet-500/40 group-hover:from-violet-400 group-hover:to-purple-400 transition-all duration-300 flex items-center justify-center gap-2">
+                      <HomeIcon className="w-5 h-5" />
+                      {t('nav:onboarding.listProperty')}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <span className="text-sm font-semibold text-neutral-700">
-                {agencies.length}+ {t('common:trustedAgencies', 'Trusted Agencies')}
-              </span>
             </div>
-          )}
+
+            {/* FEATURES GRID */}
+            <div
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 w-full max-w-4xl animate-fadeIn"
+              style={{ animationDelay: '0.4s' }}
+            >
+              {features.map((feature, i) => (
+                <div
+                  key={i}
+                  className="group p-4 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-center"
+                >
+                  <div className="w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-primary/20 to-cyan-400/20 rounded-xl flex items-center justify-center group-hover:from-primary/30 group-hover:to-cyan-400/30 transition-all">
+                    <feature.icon className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-white mb-1">{feature.title}</h4>
+                  <p className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* AGENCY LOGOS ROW */}
+            {agencies.length > 0 && (
+              <div
+                className="mt-10 w-full max-w-4xl animate-fadeIn"
+                style={{ animationDelay: '0.5s' }}
+              >
+                <div className="text-center mb-4">
+                  <span className="text-sm text-neutral-500">{t('common:trustedBy', 'Trusted by leading agencies')}</span>
+                </div>
+                <div className="flex flex-wrap justify-center items-center gap-6">
+                  {agencies.slice(0, 8).map((agency) => (
+                    <div
+                      key={agency._id}
+                      className="w-14 h-14 sm:w-16 sm:h-16 p-2 bg-white/10 backdrop-blur-lg rounded-xl border border-white/10 hover:bg-white/20 hover:scale-110 transition-all duration-300"
+                    >
+                      <img
+                        src={agency.logo}
+                        alt={agency.name}
+                        className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* FOOTER */}
-          <p className="text-neutral-500 mt-8 text-sm">
-            {t('common:footer.copyright', {
-              year: new Date().getFullYear(),
-            })}
-          </p>
+          <div className="py-6 text-center border-t border-white/5">
+            <p className="text-neutral-600 text-sm">
+              {t('common:footer.copyright', {
+                year: new Date().getFullYear(),
+              })}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -369,14 +432,24 @@ const Onboarding: React.FC = () => {
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(30px, -50px) scale(1.1); }
+          50% { transform: translate(-20px, 20px) scale(0.95); }
+          75% { transform: translate(20px, 50px) scale(1.05); }
+        }
         .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out forwards;
+          animation: fadeIn 0.8s ease-out forwards;
         }
         .animate-slideUp {
-          animation: slideUp 0.6s ease-out forwards;
+          animation: slideUp 0.8s ease-out forwards;
+          opacity: 0;
+        }
+        .animate-blob {
+          animation: blob 20s infinite ease-in-out;
         }
       `}</style>
     </>
