@@ -1,8 +1,15 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle, useMapEvents, useMap } from 'react-leaflet';
 import { Property } from '@/types';
 import L from 'leaflet';
+
+// Lazy load Google Maps component for better initial load
+const GoogleMapComponent = lazy(() => import('./GoogleMapComponent'));
+
+// Check if Google Maps API key is available
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY;
+const USE_GOOGLE_MAPS = !!GOOGLE_MAPS_API_KEY;
 
 // Zillow-style: Zoom-based marker limits for performance
 // More markers when zoomed in, fewer when zoomed out
@@ -477,6 +484,41 @@ const MapComponent: React.FC<MapComponentProps> = ({
     window.history.pushState({ propertyId }, '', `/property/${propertyId}`);
   };
 
+  // Use Google Maps if API key is available for better performance
+  if (USE_GOOGLE_MAPS) {
+    return (
+      <Suspense fallback={
+        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-gray-500 mt-3">{t('search:map.loading', 'Loading map...')}</p>
+          </div>
+        </div>
+      }>
+        <GoogleMapComponent
+          properties={properties}
+          onMapMove={onMapMove}
+          userLocation={userLocation}
+          onSaveSearch={onSaveSearch}
+          isSaving={isSaving}
+          isAuthenticated={isAuthenticated}
+          mapBounds={mapBounds}
+          drawnBounds={drawnBounds}
+          onDrawComplete={onDrawComplete}
+          isDrawing={isDrawing}
+          onDrawStart={onDrawStart}
+          flyToTarget={flyToTarget}
+          onFlyComplete={onFlyComplete}
+          onRecenter={onRecenter}
+          isMobile={isMobile}
+          searchMode={searchMode}
+          hoveredPropertyId={hoveredPropertyId}
+        />
+      </Suspense>
+    );
+  }
+
+  // Fallback to Leaflet-based map
   return (
     <HighlightedPropertiesProvider properties={propertiesInView}>
       <div className={`w-full h-full relative overflow-hidden ${show3DBuildings ? 'map-3d-perspective-container' : ''}`}>
