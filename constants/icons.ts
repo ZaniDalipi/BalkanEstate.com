@@ -116,30 +116,30 @@ export const ArrowTopRightOnSquareIcon: React.FC<{ className?: string }> = ({ cl
 );
 
 export const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
-    React.createElement('svg', { className: className, viewBox: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg" },
+    React.createElement('svg', { className: className, viewBox: "0 0 512 512", xmlns: "http://www.w3.org/2000/svg" },
         React.createElement('g', { fillRule: "evenodd" },
-            // Left Building - 2 stacked blocks
+            // Left Building (smaller, 2 blocks)
             // Bottom block
-            React.createElement('path', { fill: "#0252CD", d: "M2 21V16L5 14.5V21H2Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M5 14.5L8 16V21H5V14.5Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M2 16L5 14.5L8 16L5 17.5L2 16Z" }),
+            React.createElement('path', { fill: "#0252CD", d: "M85 400V310L145 280V400H85Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M145 280L195 305V400H145V280Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M85 310L145 280L195 305L135 335L85 310Z" }),
             // Top block
-            React.createElement('path', { fill: "#0252CD", d: "M3 15V11L6 9.5V15H3Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M6 9.5L9 11V15H6V9.5Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M3 11L6 9.5L9 11L6 12.5L3 11Z" }),
-            // Right Building - 3 stacked blocks
+            React.createElement('path', { fill: "#0252CD", d: "M100 290V210L155 185V290H100Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M155 185L200 207V290H155V185Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M100 210L155 185L200 207L145 232L100 210Z" }),
+            // Right Building (taller, 3 blocks)
             // Bottom block
-            React.createElement('path', { fill: "#0252CD", d: "M11 21V16L14 14V21H11Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M14 14L18 16V21H14V14Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M11 16L14 14L18 16L14 18L11 16Z" }),
+            React.createElement('path', { fill: "#0252CD", d: "M230 400V300L300 265V400H230Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M300 265L365 295V400H300V265Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M230 300L300 265L365 295L295 330L230 300Z" }),
             // Middle block
-            React.createElement('path', { fill: "#0252CD", d: "M12 15V10L15 8V15H12Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M15 8L19 10V15H15V8Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M12 10L15 8L19 10L15 12L12 10Z" }),
+            React.createElement('path', { fill: "#0252CD", d: "M250 280V190L315 160V280H250Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M315 160L375 187V280H315V160Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M250 190L315 160L375 187L310 217L250 190Z" }),
             // Top block
-            React.createElement('path', { fill: "#0252CD", d: "M13 9V5L16 3V9H13Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M16 3L20 5V9H16V3Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M13 5L16 3L20 5L16 7L13 5Z" })
+            React.createElement('path', { fill: "#0252CD", d: "M275 170V95L335 70V170H275Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M335 70L390 95V170H335V70Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M275 95L335 70L390 95L330 120L275 95Z" })
         )
     )
 );
