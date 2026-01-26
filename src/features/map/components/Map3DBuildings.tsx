@@ -1200,13 +1200,17 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     const mapInstance = map.current;
     const lighting = TIME_LIGHTING[timelapse.timePeriod];
 
-    // Remove existing shadow layer if present
-    if (mapInstance.getLayer('building-shadows')) {
-      mapInstance.removeLayer('building-shadows');
-    }
-    if (mapInstance.getSource('shadow-data')) {
-      mapInstance.removeSource('shadow-data');
-    }
+    // Remove existing shadow layers if present
+    ['building-shadows', 'building-shadows-soft', 'building-shadows-ambient'].forEach(layerId => {
+      if (mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
+      }
+    });
+    ['shadow-data', 'shadow-data-soft', 'shadow-data-ambient'].forEach(sourceId => {
+      if (mapInstance.getSource(sourceId)) {
+        mapInstance.removeSource(sourceId);
+      }
+    });
 
     // Only show shadows if sun is above horizon and shadows are enabled
     if (!showShadows || lighting.sunAltitude <= 0) return;
@@ -1217,6 +1221,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     });
 
     const shadowFeatures: GeoJSON.Feature[] = [];
+    const softShadowFeatures: GeoJSON.Feature[] = [];
+    const ambientFeatures: GeoJSON.Feature[] = [];
     const processedBuildings = new Set<string>();
 
     features.forEach(feature => {
@@ -1243,10 +1249,18 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       if (processedBuildings.has(key)) return;
       processedBuildings.add(key);
 
-      // Calculate shadow polygon
+      // Calculate main shadow polygon
       const shadowCoords = calculateBuildingShadow(
         coords,
         height,
+        lighting.sunAzimuth,
+        lighting.sunAltitude
+      );
+
+      // Calculate soft/extended shadow (1.3x longer for soft edge)
+      const softShadowCoords = calculateBuildingShadow(
+        coords,
+        height * 1.4,
         lighting.sunAzimuth,
         lighting.sunAltitude
       );
@@ -1261,36 +1275,141 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           }
         });
       }
+
+      if (softShadowCoords.length > 0) {
+        softShadowFeatures.push({
+          type: 'Feature',
+          properties: { height },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [softShadowCoords]
+          }
+        });
+      }
+
+      // Add ambient occlusion around building base (small dark ring)
+      const ambientCoords = coords.map(coord => [...coord]);
+      ambientFeatures.push({
+        type: 'Feature',
+        properties: { height },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [ambientCoords]
+        }
+      });
     });
 
-    if (shadowFeatures.length === 0) return;
-
-    // Add shadow source and layer
-    mapInstance.addSource('shadow-data', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: shadowFeatures
+    // Shadow color based on time of day - cooler blue tint
+    const getShadowColor = () => {
+      switch (timelapse.timePeriod) {
+        case 'dawn':
+        case 'sunset':
+          return '#1a1a3d'; // Purple tint for golden hour
+        case 'noon':
+          return '#0a1628'; // Deep blue for harsh midday
+        default:
+          return '#0f172a'; // Standard dark blue
       }
-    });
+    };
 
-    // Add shadow layer below buildings
-    mapInstance.addLayer({
-      id: 'building-shadows',
-      type: 'fill',
-      source: 'shadow-data',
-      paint: {
-        'fill-color': '#000000',
-        'fill-opacity': [
-          'interpolate',
-          ['linear'],
-          ['get', 'height'],
-          5, 0.15,  // Short buildings - lighter shadow
-          20, 0.25, // Medium buildings
-          50, 0.35  // Tall buildings - darker shadow
-        ]
-      }
-    }, '3d-buildings'); // Insert below 3d-buildings layer
+    const shadowColor = getShadowColor();
+
+    // Add soft shadow layer first (underneath) - larger, more transparent
+    if (softShadowFeatures.length > 0) {
+      mapInstance.addSource('shadow-data-soft', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: softShadowFeatures
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'building-shadows-soft',
+        type: 'fill',
+        source: 'shadow-data-soft',
+        paint: {
+          'fill-color': shadowColor,
+          'fill-opacity': [
+            'interpolate',
+            ['linear'],
+            ['get', 'height'],
+            5, 0.12,
+            20, 0.18,
+            50, 0.22,
+            100, 0.25
+          ]
+        }
+      }, '3d-buildings');
+    }
+
+    // Add main shadow layer - darker, more defined
+    if (shadowFeatures.length > 0) {
+      mapInstance.addSource('shadow-data', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: shadowFeatures
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'building-shadows',
+        type: 'fill',
+        source: 'shadow-data',
+        paint: {
+          'fill-color': shadowColor,
+          'fill-opacity': [
+            'interpolate',
+            ['linear'],
+            ['get', 'height'],
+            5, 0.25,
+            20, 0.40,
+            50, 0.50,
+            100, 0.55
+          ]
+        }
+      }, '3d-buildings');
+    }
+
+    // Add ambient occlusion layer - dark ring at building base
+    if (ambientFeatures.length > 0) {
+      mapInstance.addSource('shadow-data-ambient', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: ambientFeatures
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'building-shadows-ambient',
+        type: 'line',
+        source: 'shadow-data-ambient',
+        paint: {
+          'line-color': '#000000',
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['get', 'height'],
+            5, 2,
+            20, 4,
+            50, 6,
+            100, 8
+          ],
+          'line-blur': [
+            'interpolate',
+            ['linear'],
+            ['get', 'height'],
+            5, 3,
+            20, 5,
+            50, 8,
+            100, 10
+          ],
+          'line-opacity': 0.4
+        }
+      }, '3d-buildings');
+    }
   }, [mapLoaded, timelapse.timePeriod, showShadows]);
 
   // Update shadows when timelapse changes or showShadows toggles
