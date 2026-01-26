@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle, useMapEvents, useMap } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-cluster';
 import { Property } from '@/types';
 import L from 'leaflet';
+
+// Maximum markers to render for performance (will show closest to center)
+const MAX_VISIBLE_MARKERS = 500;
 import { useAppContext } from '@/context/AppContext';
 import {
   PencilIcon,
@@ -55,38 +57,6 @@ const BALKAN_BOUNDS = L.latLngBounds(
   [34, 13], // Southwest corner (Southern Greece, Western Croatia)
   [49, 31] // Northeast corner (Northern Romania, Eastern Bulgaria)
 );
-
-// CSS for cluster markers
-const injectClusterStyles = () => {
-  const styleId = 'map-cluster-styles';
-  if (document.getElementById(styleId)) return;
-
-  const style = document.createElement('style');
-  style.id = styleId;
-  style.textContent = `
-    .custom-cluster-icon {
-      background: transparent !important;
-      border: none !important;
-    }
-    .custom-cluster-icon div {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .custom-cluster-icon:hover div {
-      transform: scale(1.15);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5) !important;
-    }
-    .marker-cluster-small,
-    .marker-cluster-medium,
-    .marker-cluster-large {
-      background: transparent !important;
-    }
-    .leaflet-cluster-anim .leaflet-marker-icon,
-    .leaflet-cluster-anim .leaflet-marker-shadow {
-      transition: transform 0.3s ease-out, opacity 0.3s ease-in;
-    }
-  `;
-  document.head.appendChild(style);
-};
 
 // CSS for 3D perspective camera effect
 const inject3DPerspectiveStyles = () => {
@@ -206,7 +176,6 @@ const inject3DPerspectiveStyles = () => {
 // Initialize styles
 if (typeof window !== 'undefined') {
   inject3DPerspectiveStyles();
-  injectClusterStyles();
 }
 
 interface MapComponentProps {
@@ -568,52 +537,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
           <CadastreLayer enabled={showCadastre && (mapType === 'satellite' || mapType === 'hybrid')} opacity={0.7} />
           <HeatMapLayer properties={propertiesInView} enabled={showHeatMap} intensity="medium" />
-          <MarkerClusterGroup
-            chunkedLoading
-            maxClusterRadius={60}
-            spiderfyOnMaxZoom={true}
-            showCoverageOnHover={false}
-            zoomToBoundsOnClick={true}
-            disableClusteringAtZoom={16}
-            iconCreateFunction={(cluster) => {
-              const count = cluster.getChildCount();
-              let size = 'small';
-              let bgColor = '#3b82f6';
-
-              if (count >= 100) {
-                size = 'large';
-                bgColor = '#7c3aed';
-              } else if (count >= 20) {
-                size = 'medium';
-                bgColor = '#06b6d4';
-              }
-
-              const dimensions = size === 'large' ? 50 : size === 'medium' ? 40 : 32;
-
-              return L.divIcon({
-                html: `<div style="
-                  background: ${bgColor};
-                  width: ${dimensions}px;
-                  height: ${dimensions}px;
-                  border-radius: 50%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  color: white;
-                  font-weight: 700;
-                  font-size: ${size === 'large' ? '14px' : size === 'medium' ? '13px' : '12px'};
-                  box-shadow: 0 4px 15px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.4);
-                  border: 2px solid rgba(255,255,255,0.8);
-                  transition: all 0.2s ease;
-                ">${count}</div>`,
-                className: 'custom-cluster-icon',
-                iconSize: L.point(dimensions, dimensions),
-                iconAnchor: L.point(dimensions / 2, dimensions / 2),
-              });
-            }}
-          >
-            <Markers properties={propertiesInView} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={false} />
-          </MarkerClusterGroup>
+          {/* Render markers - limited for performance */}
+          <Markers properties={propertiesInView.slice(0, MAX_VISIBLE_MARKERS)} onPopupClick={handlePopupClick} hoveredPropertyId={hoveredPropertyId} isNightMode={false} />
           <HighlightedPropertyMarkers onPopupClick={handlePopupClick} />
           <MapAgentAvatarInner onPropertySelect={handlePopupClick} />
           {/* Land Measurement Tool */}
