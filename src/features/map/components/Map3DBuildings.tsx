@@ -1262,21 +1262,26 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     });
   }, [mapLoaded, showFloorLabels]);
 
-  // Update floor labels when toggle changes or map moves
+  // Update floor labels when toggle changes or map moves (debounced)
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
     updateFloorLabels();
 
     if (showFloorLabels) {
-      const onMoveEnd = () => updateFloorLabels();
-      map.current.on('moveend', onMoveEnd);
-      map.current.on('zoomend', onMoveEnd);
+      // Debounce floor label updates for smoother performance
+      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+      const debouncedUpdate = () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => updateFloorLabels(), 200);
+      };
+
+      map.current.on('moveend', debouncedUpdate);
 
       return () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
         if (map.current) {
-          map.current.off('moveend', onMoveEnd);
-          map.current.off('zoomend', onMoveEnd);
+          map.current.off('moveend', debouncedUpdate);
         }
       };
     }
@@ -1289,25 +1294,26 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     const mapInstance = map.current;
     const lighting = TIME_LIGHTING[timelapse.timePeriod];
 
-    // Remove existing shadow layers if present
-    ['building-shadows', 'building-shadows-soft', 'building-shadows-ambient'].forEach(layerId => {
-      if (mapInstance.getLayer(layerId)) {
-        mapInstance.removeLayer(layerId);
-      }
-    });
-    ['shadow-data', 'shadow-data-soft', 'shadow-data-ambient'].forEach(sourceId => {
-      if (mapInstance.getSource(sourceId)) {
-        mapInstance.removeSource(sourceId);
-      }
-    });
-
     // Only show shadows if sun is above horizon and shadows are enabled
-    if (!showShadows || lighting.sunAltitude <= 0) return;
+    if (!showShadows || lighting.sunAltitude <= 0) {
+      // Remove shadow layers if they exist
+      ['building-shadows', 'building-shadows-soft', 'building-shadows-ambient'].forEach(layerId => {
+        if (mapInstance.getLayer(layerId)) {
+          mapInstance.removeLayer(layerId);
+        }
+      });
+      ['shadow-data', 'shadow-data-soft', 'shadow-data-ambient'].forEach(sourceId => {
+        if (mapInstance.getSource(sourceId)) {
+          mapInstance.removeSource(sourceId);
+        }
+      });
+      return;
+    }
 
-    // Query visible buildings
+    // Query visible buildings - limit to improve performance
     const features = mapInstance.queryRenderedFeatures(undefined, {
       layers: ['3d-buildings']
-    });
+    }).slice(0, 100); // Limit to 100 buildings for performance
 
     const shadowFeatures: GeoJSON.Feature[] = [];
     const softShadowFeatures: GeoJSON.Feature[] = [];
@@ -1403,118 +1409,130 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
     const shadowColor = getShadowColor();
 
-    // Add soft shadow layer first (underneath) - larger, more transparent
-    if (softShadowFeatures.length > 0) {
-      mapInstance.addSource('shadow-data-soft', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: softShadowFeatures
-        }
-      });
+    // Helper to update or create source/layer
+    const updateOrCreateShadowLayer = (
+      sourceId: string,
+      layerId: string,
+      features: GeoJSON.Feature[],
+      layerConfig: Omit<maplibregl.LayerSpecification, 'id' | 'source'>
+    ) => {
+      if (features.length === 0) return;
 
-      mapInstance.addLayer({
-        id: 'building-shadows-soft',
-        type: 'fill',
-        source: 'shadow-data-soft',
-        paint: {
-          'fill-color': shadowColor,
-          'fill-opacity': [
-            'interpolate',
-            ['linear'],
-            ['get', 'height'],
-            5, 0.12,
-            20, 0.18,
-            50, 0.22,
-            100, 0.25
-          ]
-        }
-      }, '3d-buildings');
-    }
+      const featureCollection: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features
+      };
 
-    // Add main shadow layer - darker, more defined
-    if (shadowFeatures.length > 0) {
-      mapInstance.addSource('shadow-data', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: shadowFeatures
-        }
-      });
+      // Update existing source or create new one
+      const existingSource = mapInstance.getSource(sourceId) as maplibregl.GeoJSONSource;
+      if (existingSource) {
+        existingSource.setData(featureCollection);
+      } else {
+        mapInstance.addSource(sourceId, {
+          type: 'geojson',
+          data: featureCollection
+        });
+      }
 
-      mapInstance.addLayer({
-        id: 'building-shadows',
-        type: 'fill',
-        source: 'shadow-data',
-        paint: {
-          'fill-color': shadowColor,
-          'fill-opacity': [
-            'interpolate',
-            ['linear'],
-            ['get', 'height'],
-            5, 0.25,
-            20, 0.40,
-            50, 0.50,
-            100, 0.55
-          ]
-        }
-      }, '3d-buildings');
-    }
+      // Add layer if it doesn't exist
+      if (!mapInstance.getLayer(layerId)) {
+        mapInstance.addLayer({
+          id: layerId,
+          source: sourceId,
+          ...layerConfig
+        } as maplibregl.LayerSpecification, '3d-buildings');
+      }
+    };
 
-    // Add ambient occlusion layer - dark ring at building base
-    if (ambientFeatures.length > 0) {
-      mapInstance.addSource('shadow-data-ambient', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: ambientFeatures
-        }
-      });
+    // Update soft shadow layer
+    updateOrCreateShadowLayer('shadow-data-soft', 'building-shadows-soft', softShadowFeatures, {
+      type: 'fill',
+      paint: {
+        'fill-color': shadowColor,
+        'fill-opacity': [
+          'interpolate',
+          ['linear'],
+          ['get', 'height'],
+          5, 0.12,
+          20, 0.18,
+          50, 0.22,
+          100, 0.25
+        ]
+      }
+    });
 
-      mapInstance.addLayer({
-        id: 'building-shadows-ambient',
-        type: 'line',
-        source: 'shadow-data-ambient',
-        paint: {
-          'line-color': '#000000',
-          'line-width': [
-            'interpolate',
-            ['linear'],
-            ['get', 'height'],
-            5, 2,
-            20, 4,
-            50, 6,
-            100, 8
-          ],
-          'line-blur': [
-            'interpolate',
-            ['linear'],
-            ['get', 'height'],
-            5, 3,
-            20, 5,
-            50, 8,
-            100, 10
-          ],
-          'line-opacity': 0.4
-        }
-      }, '3d-buildings');
-    }
+    // Update main shadow layer
+    updateOrCreateShadowLayer('shadow-data', 'building-shadows', shadowFeatures, {
+      type: 'fill',
+      paint: {
+        'fill-color': shadowColor,
+        'fill-opacity': [
+          'interpolate',
+          ['linear'],
+          ['get', 'height'],
+          5, 0.25,
+          20, 0.40,
+          50, 0.50,
+          100, 0.55
+        ]
+      }
+    });
+
+    // Update ambient occlusion layer
+    updateOrCreateShadowLayer('shadow-data-ambient', 'building-shadows-ambient', ambientFeatures, {
+      type: 'line',
+      paint: {
+        'line-color': '#000000',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['get', 'height'],
+          5, 2,
+          20, 4,
+          50, 6,
+          100, 8
+        ],
+        'line-blur': [
+          'interpolate',
+          ['linear'],
+          ['get', 'height'],
+          5, 3,
+          20, 5,
+          50, 8,
+          100, 10
+        ],
+        'line-opacity': 0.4
+      }
+    });
   }, [mapLoaded, timelapse.timePeriod, showShadows]);
 
   // Update shadows when timelapse changes or showShadows toggles
+  // Use debounced updates to prevent performance issues
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
-    // Initial shadow render
-    updateBuildingShadows();
+    // Initial shadow render (delayed to let map settle)
+    const initialTimeout = setTimeout(() => {
+      updateBuildingShadows();
+    }, 500);
 
-    // Update shadows when map moves (to recalculate for visible buildings)
-    const onIdle = () => updateBuildingShadows();
-    map.current.on('idle', onIdle);
+    // Debounced shadow update - only update after map stops moving for 300ms
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedUpdate = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        updateBuildingShadows();
+      }, 300);
+    };
+
+    // Only update on moveend (not idle) to reduce frequency
+    map.current.on('moveend', debouncedUpdate);
 
     return () => {
+      clearTimeout(initialTimeout);
+      if (debounceTimer) clearTimeout(debounceTimer);
       if (map.current) {
-        map.current.off('idle', onIdle);
+        map.current.off('moveend', debouncedUpdate);
       }
     };
   }, [mapLoaded, timelapse.timePeriod, showShadows, updateBuildingShadows]);
