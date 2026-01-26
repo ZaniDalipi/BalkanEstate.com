@@ -596,66 +596,167 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           </button>
         )}
 
-        {/* Save section - compact (only in edit mode) */}
-        {!isViewMode && points.length >= 2 && (
-          <>
-            {!showSaveDialog ? (
+        {/* Save button (only in edit mode) */}
+        {!isViewMode && points.length >= 2 && !showSaveDialog && (
+          <button
+            onClick={() => setShowSaveDialog(true)}
+            className="w-full px-2 py-1.5 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
+          >
+            💾 Save
+          </button>
+        )}
+      </div>
+
+      {/* Save Modal - Full screen overlay on top of everything */}
+      {showSaveDialog && (
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center"
+          style={{ pointerEvents: 'auto' }}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setShowSaveDialog(false);
+              setSaveError(null);
+            }}
+          />
+
+          {/* Modal content */}
+          <div className="relative bg-white rounded-xl shadow-2xl p-5 w-full max-w-md mx-4 animate-fadeIn">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                💾 Save Measurement
+              </h3>
               <button
-                onClick={() => setShowSaveDialog(true)}
-                className="w-full px-2 py-1.5 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => {
+                  setShowSaveDialog(false);
+                  setSaveError(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-xl leading-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
               >
-                💾 Save
+                ×
               </button>
-            ) : (
-              <div className="space-y-1.5 border-t pt-2">
-                {!isLoggedIn && (
-                  <div className="text-[10px] text-amber-600 bg-amber-50 p-1.5 rounded">
-                    Log in to save to profile
-                  </div>
-                )}
+            </div>
+
+            {/* Measurement summary */}
+            <div className="bg-gray-50 rounded-lg p-3 mb-4">
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-500">Type:</span>
+                <span className="font-medium">{isPolygonClosed ? '🔷 Area' : '📏 Distance'}</span>
+              </div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-gray-500">Points:</span>
+                <span className="font-medium">{points.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{isPolygonClosed ? 'Perimeter:' : 'Distance:'}</span>
+                <span className="font-medium text-blue-600">{formatDistance(isPolygonClosed ? perimeter : totalDistance)}</span>
+              </div>
+              {isPolygonClosed && (
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-gray-500">Area:</span>
+                  <span className="font-semibold text-green-600">{formatArea(area)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Login notice */}
+            {!isLoggedIn && (
+              <div className="text-sm text-amber-700 bg-amber-50 p-3 rounded-lg mb-4 flex items-start gap-2">
+                <span className="text-lg">⚠️</span>
+                <span>Log in to save measurements to your profile. Otherwise, they will be saved locally.</span>
+              </div>
+            )}
+
+            {/* Form */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input
                   type="text"
                   value={measurementName}
                   onChange={(e) => setMeasurementName(e.target.value)}
-                  placeholder="Name..."
-                  className="w-full px-2 py-1 text-xs border rounded focus:ring-1 focus:ring-blue-500"
+                  placeholder="e.g., My Property Plot"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  autoFocus
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Location..."
-                  className="w-full px-2 py-1 text-xs border rounded focus:ring-1 focus:ring-blue-500"
+                  placeholder="e.g., 123 Main Street, City"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
-                {saveError && (
-                  <div className="text-[10px] text-red-600 bg-red-50 p-1.5 rounded">
-                    {saveError}
-                  </div>
-                )}
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={() => {
-                      setShowSaveDialog(false);
-                      setSaveError(null);
-                    }}
-                    disabled={isSaving}
-                    className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-green-600 text-white hover:bg-green-700"
-                  >
-                    {isSaving ? '...' : 'Save'}
-                  </button>
-                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add any notes about this measurement..."
+                  rows={2}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Error */}
+            {saveError && (
+              <div className="mt-3 text-sm text-red-600 bg-red-50 p-3 rounded-lg flex items-start gap-2">
+                <span className="text-lg">❌</span>
+                <span>{saveError}</span>
               </div>
             )}
-          </>
-        )}
-      </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => {
+                  setShowSaveDialog(false);
+                  setSaveError(null);
+                }}
+                disabled={isSaving}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>💾</span>
+                    <span>Save to {isLoggedIn ? 'Profile' : 'Device'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Animation styles */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+      `}</style>
     </>
   );
 };
