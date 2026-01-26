@@ -40,27 +40,12 @@
   "mortgageCalculator": "Mortgage Calculator",
   "onboarding": {
     "question": "How can we help you today?",
-    "headline": "Perfect choice for",
-    "headlineHighlight": "your future",
-    "tagline": "Our properties the masterpiece for every client with lasting value.",
     "lookingToBuy": "I'm looking to buy",
     "buyDescription": "Find your dream home with our powerful search tools and real-time alerts.",
-    "buySubtitle": "Start your journey",
-    "buyButton": "Buying",
     "startSearching": "Start Searching",
     "wantToSell": "I want to sell",
     "sellDescription": "List your property, reach thousands of potential buyers, and use our smart tools.",
-    "sellSubtitle": "Maximize your value",
-    "sellButton": "Selling",
-    "listProperty": "List my Property",
-    "activeListings": "1,200+ Active",
-    "freeValuation": "Free Valuation",
-    "aiMatching": "AI Matching",
-    "virtualTours": "Virtual Tours",
-    "priceAlerts": "Price Alerts",
-    "proPhotos": "Pro Photos",
-    "maxExposure": "Max Exposure",
-    "expertSupport": "Expert Support"
+    "listProperty": "List my Property"
   },
   "mobile": {
     "menu": "Menu",

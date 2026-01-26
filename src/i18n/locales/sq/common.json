@@ -248,22 +248,6 @@
     "floorPlan": "Planimetri",
     "other": "Tjetër"
   },
-  "hero": {
-    "findYour": "Gjeni",
-    "dreamHome": "Shtëpinë e Ëndrrave",
-    "subtitle": "Zbuloni mijëra prona në të gjithë Ballkanin me platformën tonë të fuqizuar nga AI"
-  },
-  "features": {
-    "smartSearch": "Kërkim i Zgjuar",
-    "verified": "Njofitme të Verifikuara",
-    "analytics": "Analitikë Tregu",
-    "topAgents": "Agjentët Top"
-  },
-  "stats": {
-    "properties": "Prona",
-    "agents": "Agjentë",
-    "countries": "Shtete"
-  },
   "footer": {
     "about": "Rreth Nesh",
     "contact": "Kontakti",
