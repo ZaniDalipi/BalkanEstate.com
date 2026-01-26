@@ -669,16 +669,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       }
 
       markerDiv.style.cssText = `
-        padding: 5px 10px;
+        padding: 2px 6px;
         background: ${color};
         border: ${borderWidth}px solid ${borderColor};
         border-radius: 999px;
         color: white;
         font-weight: 700;
-        font-size: 12px;
+        font-size: 10px;
         font-family: Inter, system-ui, sans-serif;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.25);
         transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
         white-space: nowrap;
         user-select: none;
@@ -687,13 +687,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       markerDiv.textContent = price;
 
       markerDiv.addEventListener('mouseenter', () => {
-        markerDiv.style.transform = 'scale(1.2) translateY(-2px)';
-        markerDiv.style.boxShadow = '0 6px 16px rgba(0,0,0,0.35)';
+        markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
+        markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
         markerDiv.style.zIndex = '1000';
       });
       markerDiv.addEventListener('mouseleave', () => {
         markerDiv.style.transform = 'scale(1)';
-        markerDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.25)';
+        markerDiv.style.boxShadow = '0 1px 4px rgba(0,0,0,0.25)';
         markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
       });
 
