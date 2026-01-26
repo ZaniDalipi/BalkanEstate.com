@@ -67,6 +67,16 @@ const AgenciesListPage: React.FC = () => {
     return { totalAgents, totalProperties };
   }, [agencies]);
 
+  // Memoize expensive max calculations to prevent recalculation on every render
+  const agencyStats = useMemo(() => {
+    if (agencies.length === 0) return { mostProperties: 0, mostAgents: 0, mostExperience: 0 };
+    return {
+      mostProperties: Math.max(...agencies.map(a => a.totalProperties || 0)),
+      mostAgents: Math.max(...agencies.map(a => a.totalAgents || 0)),
+      mostExperience: Math.max(...agencies.map(a => a.yearsInBusiness || 0)),
+    };
+  }, [agencies]);
+
   useEffect(() => {
     fetchAgencies();
   }, [filter, searchQuery, sortBy]);
@@ -555,7 +565,7 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
-                        {Math.max(...agencies.map(a => a.totalProperties || 0))}
+                        {agencyStats.mostProperties}
                       </div>
                       <div className="text-[10px] sm:text-xs text-gray-500">{t('agencies.mostProperties')}</div>
                     </div>
@@ -569,7 +579,7 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
-                        {Math.max(...agencies.map(a => a.totalAgents || 0))}
+                        {agencyStats.mostAgents}
                       </div>
                       <div className="text-[10px] sm:text-xs text-gray-500">{t('agencies.mostAgents')}</div>
                     </div>
@@ -583,7 +593,7 @@ const AgenciesListPage: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
-                        {Math.max(...agencies.map(a => a.yearsInBusiness || 0))}+
+                        {agencyStats.mostExperience}+
                       </div>
                       <div className="text-[10px] sm:text-xs text-gray-500">{t('agencies.mostExperience')}</div>
                     </div>
@@ -752,4 +762,4 @@ const AgenciesListPage: React.FC = () => {
   );
 };
 
-export default AgenciesListPage;
+export default React.memo(AgenciesListPage);

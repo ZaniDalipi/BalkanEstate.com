@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -261,27 +261,49 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
   };
 
-  // Sort agents by performance
-  const rankedAgents = [...agents].sort((a, b) => {
-    const scoreA = (a.stats?.totalSalesValue || 0) + (a.stats?.propertiesSold || 0) * 10000 + (a.stats?.rating || 0) * 5000;
-    const scoreB = (b.stats?.totalSalesValue || 0) + (b.stats?.propertiesSold || 0) * 10000 + (b.stats?.rating || 0) * 5000;
-    return scoreB - scoreA;
-  });
+  // Sort agents by performance - memoized to prevent recalculation on every render
+  const rankedAgents = useMemo(() => {
+    return [...agents].sort((a, b) => {
+      const scoreA = (a.stats?.totalSalesValue || 0) + (a.stats?.propertiesSold || 0) * 10000 + (a.stats?.rating || 0) * 5000;
+      const scoreB = (b.stats?.totalSalesValue || 0) + (b.stats?.propertiesSold || 0) * 10000 + (b.stats?.rating || 0) * 5000;
+      return scoreB - scoreA;
+    });
+  }, [agents]);
 
-  // Calculate sales statistics (use backend data if available, otherwise calculate)
-  const soldProperties = agencyProperties.filter(p => p.status === 'sold');
-  const salesLast12Months = agencyData.salesStats?.salesLast12Months ?? soldProperties.filter(p => {
-    if (!p.soldAt) return false;
-    const twelveMonthsAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
-    return p.soldAt >= twelveMonthsAgo;
-  }).length;
+  // Memoized filtered properties to avoid recalculating on every render
+  const { activeProperties, soldProperties } = useMemo(() => {
+    const active = agencyProperties.filter(p => p.status === 'active');
+    const sold = agencyProperties.filter(p => p.status === 'sold');
+    return { activeProperties: active, soldProperties: sold };
+  }, [agencyProperties]);
 
-  const totalSales = agencyData.salesStats?.totalSales ?? soldProperties.length;
-  const minPrice = agencyData.salesStats?.minPrice ?? (soldProperties.length > 0 ? Math.min(...soldProperties.map(p => p.price).filter(Boolean)) : 0);
-  const maxPrice = agencyData.salesStats?.maxPrice ?? (soldProperties.length > 0 ? Math.max(...soldProperties.map(p => p.price).filter(Boolean)) : 0);
-  const averagePrice = agencyData.salesStats?.averagePrice ?? (soldProperties.length > 0
-    ? soldProperties.map(p => p.price).filter(Boolean).reduce((sum, price) => sum + price, 0) / soldProperties.filter(p => p.price).length
-    : 0);
+  // Properties with coordinates - memoized
+  const propertiesWithCoords = useMemo(() => {
+    return agencyProperties.filter(p => p.lat && p.lng);
+  }, [agencyProperties]);
+
+  // Calculate sales statistics - memoized (use backend data if available, otherwise calculate)
+  const salesStats = useMemo(() => {
+    const salesLast12Months = agencyData.salesStats?.salesLast12Months ?? soldProperties.filter(p => {
+      if (!p.soldAt) return false;
+      const twelveMonthsAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
+      return p.soldAt >= twelveMonthsAgo;
+    }).length;
+
+    const totalSales = agencyData.salesStats?.totalSales ?? soldProperties.length;
+
+    const prices = soldProperties.map(p => p.price).filter(Boolean);
+    const minPrice = agencyData.salesStats?.minPrice ?? (prices.length > 0 ? Math.min(...prices) : 0);
+    const maxPrice = agencyData.salesStats?.maxPrice ?? (prices.length > 0 ? Math.max(...prices) : 0);
+    const averagePrice = agencyData.salesStats?.averagePrice ?? (prices.length > 0
+      ? prices.reduce((sum, price) => sum + price, 0) / prices.length
+      : 0);
+
+    return { salesLast12Months, totalSales, minPrice, maxPrice, averagePrice };
+  }, [agencyData.salesStats, soldProperties]);
+
+  // Destructure for easier access
+  const { salesLast12Months, totalSales, minPrice, maxPrice, averagePrice } = salesStats;
 
   const handleBack = () => {
     dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
@@ -1641,13 +1663,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div>
                 <h2 className="text-xl font-bold text-slate-900">Properties Map</h2>
                 <p className="text-xs text-slate-500">
-                  ({agencyProperties.filter(p => p.status === 'active').length} active, {agencyProperties.filter(p => p.status === 'sold').length} sold)
+                  ({activeProperties.length} active, {soldProperties.length} sold)
                 </p>
               </div>
             </div>
             <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
               <MapContainer
-                center={agencyProperties.filter(p => p.lat && p.lng)[0] ? [agencyProperties.filter(p => p.lat && p.lng)[0].lat!, agencyProperties.filter(p => p.lat && p.lng)[0].lng!] : [agencyData.lat || 42.0, agencyData.lng || 21.0]}
+                center={propertiesWithCoords[0] ? [propertiesWithCoords[0].lat!, propertiesWithCoords[0].lng!] : [agencyData.lat || 42.0, agencyData.lng || 21.0]}
                 zoom={12}
                 scrollWheelZoom={true}
                 className="w-full h-[400px] md:h-[500px]"
@@ -1660,7 +1682,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   maxZoom={22}
                 />
                 <MapInvalidator />
-                {agencyProperties.filter(p => p.lat && p.lng).map((property) => (
+                {propertiesWithCoords.map((property) => (
                   <Marker
                     key={property.id || property._id}
                     position={[property.lat!, property.lng!]}
@@ -1678,7 +1700,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <Popup>
                       <div className="min-w-[250px]">
                         {property.imageUrl && (
-                          <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" />
+                          <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" />
                         )}
                         <p className="font-semibold text-sm mb-1 text-slate-900 line-clamp-2">{property.address}</p>
                         <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>
@@ -1709,11 +1731,11 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="mt-4 flex items-center justify-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
-                <span className="text-slate-600">For Sale ({agencyProperties.filter(p => p.status === 'active').length})</span>
+                <span className="text-slate-600">For Sale ({activeProperties.length})</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                <span className="text-slate-600">Sold ({agencyProperties.filter(p => p.status === 'sold').length})</span>
+                <span className="text-slate-600">Sold ({soldProperties.length})</span>
               </div>
             </div>
           </div>
@@ -1761,7 +1783,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <div className="text-center min-w-[200px]">
                       {agencyData.logo && (
                         <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-slate-300 flex-shrink-0">
-                          <img src={agencyData.logo} alt={agencyData.name} className="w-full h-full object-cover" />
+                          <img src={agencyData.logo} alt={agencyData.name} className="w-full h-full object-cover" loading="lazy" />
                         </div>
                       )}
                       <h3 className="font-bold text-slate-900">{agencyData.name}</h3>
@@ -1804,7 +1826,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                   propertyView === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'
                 }`}>
-                  {agencyProperties.filter(p => p.status === 'active').length}
+                  {activeProperties.length}
                 </span>
               </button>
               <button
@@ -1820,7 +1842,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <span className={`ml-1 px-2 py-0.5 text-xs font-bold rounded-md ${
                   propertyView === 'sold' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-500'
                 }`}>
-                  {agencyProperties.filter(p => p.status === 'sold').length}
+                  {soldProperties.length}
                 </span>
               </button>
             </div>
@@ -1831,9 +1853,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3].map(i => <PropertyCardSkeleton key={i} />)}
             </div>
-          ) : agencyProperties.filter(p => p.status === propertyView).length > 0 ? (
+          ) : (propertyView === 'active' ? activeProperties : soldProperties).length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {agencyProperties.filter(p => p.status === propertyView).map(property => (
+              {(propertyView === 'active' ? activeProperties : soldProperties).map(property => (
                 <PropertyCard key={property.id || property._id} property={property} />
               ))}
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent, Agency } from '@/types';
 import AgencyBadge from '@/components/shared/AgencyBadge';
@@ -153,6 +153,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     const [fetchedProperties, setFetchedProperties] = useState<any[]>([]);
     const [loadingProperties, setLoadingProperties] = useState(true);
     const { success, error: showError } = useNotification();
+    const shareToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [editForm, setEditForm] = useState({
         bio: agent.bio || '',
         specializations: agent.specializations || [],
@@ -168,6 +169,15 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
     });
 
     const isAgencyAgent = agent.agencyName && agent.agencyName !== 'Independent Agent';
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (shareToastTimerRef.current) {
+                clearTimeout(shareToastTimerRef.current);
+            }
+        };
+    }, []);
 
     // Check if current user is the owner of this agent profile
     const isOwner = currentUser && (
@@ -408,7 +418,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         fetchAchievements();
     }, [agent.id, agent.userId]);
 
-    const handleShareAgent = async () => {
+    const handleShareAgent = useCallback(async () => {
         const shareUrl = window.location.href;
         const shareData = {
             title: `${agent.name} - Real Estate Agent`,
@@ -416,20 +426,25 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
             url: shareUrl,
         };
 
+        // Clear any existing timer
+        if (shareToastTimerRef.current) {
+            clearTimeout(shareToastTimerRef.current);
+        }
+
         try {
             if (navigator.share && navigator.canShare(shareData)) {
                 await navigator.share(shareData);
             } else {
                 await navigator.clipboard.writeText(shareUrl);
                 setShowShareToast(true);
-                setTimeout(() => setShowShareToast(false), 3000);
+                shareToastTimerRef.current = setTimeout(() => setShowShareToast(false), 3000);
             }
         } catch (error) {
             await navigator.clipboard.writeText(shareUrl);
             setShowShareToast(true);
-            setTimeout(() => setShowShareToast(false), 3000);
+            shareToastTimerRef.current = setTimeout(() => setShowShareToast(false), 3000);
         }
-    };
+    }, [agent.name, agent.agencyName, isAgencyAgent]);
 
     const handleContactAgent = async () => {
         if (!state.isAuthenticated) {
@@ -1281,7 +1296,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <Popup>
                                                                     <div className="min-w-[200px]">
                                                                         {property.imageUrl && (
-                                                                            <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" />
+                                                                            <img src={property.imageUrl} alt={property.address} className="w-full h-32 object-cover rounded-lg mb-2" loading="lazy" />
                                                                         )}
                                                                         <p className="font-bold text-sm mb-1">{property.address}</p>
                                                                         <p className="text-xs text-gray-600 mb-2">{property.city}, {property.country}</p>
@@ -1356,7 +1371,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                                 <div className="text-center min-w-[200px]">
                                                                     {agent.avatarUrl && (
                                                                         <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-gray-300 flex-shrink-0">
-                                                                            <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                                            <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
                                                                         </div>
                                                                     )}
                                                                     <p className="font-bold text-base mb-1">{agent.name}</p>
@@ -1389,7 +1404,7 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                                         <div className="w-full text-white text-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                                             {agent.avatarUrl && (
                                                                 <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-indigo-300 flex-shrink-0">
-                                                                    <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                                    <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
                                                                 </div>
                                                             )}
                                                             <p className="font-bold text-lg">{agent.name}</p>

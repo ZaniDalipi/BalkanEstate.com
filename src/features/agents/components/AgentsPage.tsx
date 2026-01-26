@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
@@ -56,6 +56,7 @@ const AgentsPage: React.FC = () => {
   });
   const [isSubmittingContact, setIsSubmittingContact] = useState(false);
   const [contactSubmitSuccess, setContactSubmitSuccess] = useState(false);
+  const contactSuccessTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Mouse position state for parallax effect
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -76,6 +77,15 @@ const AgentsPage: React.FC = () => {
     // is only rendered when activeView is 'agents'
     fetchAgents();
     fetchAgencies();
+  }, []);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (contactSuccessTimerRef.current) {
+        clearTimeout(contactSuccessTimerRef.current);
+      }
+    };
   }, []);
 
   const fetchAgents = async (searchTerm?: string) => {
@@ -163,7 +173,11 @@ const AgentsPage: React.FC = () => {
           location: '',
           propertyDescription: ''
         });
-        setTimeout(() => setContactSubmitSuccess(false), 5000);
+        // Clear any existing timer before setting a new one
+        if (contactSuccessTimerRef.current) {
+          clearTimeout(contactSuccessTimerRef.current);
+        }
+        contactSuccessTimerRef.current = setTimeout(() => setContactSubmitSuccess(false), 5000);
       } else {
         dispatch({
           type: 'SHOW_ALERT',

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   MapPinIcon,
@@ -51,19 +51,19 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
         </svg>
       </div>
 
-      {/* Floating orbs */}
-      <div className="absolute top-10 left-[10%] w-72 h-72 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-10 right-[10%] w-96 h-96 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl" />
+      {/* Floating orbs - optimized with will-change and reduced blur */}
+      <div className="absolute top-10 left-[10%] w-72 h-72 bg-violet-500/20 rounded-full blur-2xl" style={{ willChange: 'opacity' }} />
+      <div className="absolute bottom-10 right-[10%] w-96 h-96 bg-fuchsia-500/20 rounded-full blur-2xl" style={{ willChange: 'opacity' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-2xl" />
 
-      {/* Floating icons - decorative */}
-      <div className="absolute top-20 left-[5%] opacity-20 hidden lg:block animate-float">
+      {/* Floating icons - decorative (optimized with will-change) */}
+      <div className="absolute top-20 left-[5%] opacity-20 hidden lg:block animate-float" style={{ willChange: 'transform' }}>
         <GlobeAltIcon className="w-16 h-16 text-white" />
       </div>
-      <div className="absolute bottom-32 right-[8%] opacity-15 hidden lg:block animate-float" style={{ animationDelay: '1.5s' }}>
+      <div className="absolute bottom-32 right-[8%] opacity-15 hidden lg:block animate-float" style={{ animationDelay: '1.5s', willChange: 'transform' }}>
         <MapPinIcon className="w-20 h-20 text-white" />
       </div>
-      <div className="absolute top-40 right-[15%] opacity-10 hidden xl:block animate-float" style={{ animationDelay: '2s' }}>
+      <div className="absolute top-40 right-[15%] opacity-10 hidden xl:block animate-float" style={{ animationDelay: '2s', willChange: 'transform' }}>
         <BuildingOfficeIcon className="w-24 h-24 text-white" />
       </div>
 
@@ -231,4 +231,4 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
   );
 };
 
-export default ExploreCitiesHeroBanner;
+export default memo(ExploreCitiesHeroBanner);

@@ -70,12 +70,14 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
   // Intersection Observer for scroll animations
   useEffect(() => {
+    let progressTimer: ReturnType<typeof setTimeout> | null = null;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
           // Delay progress bar animation for smoother effect
-          setTimeout(() => setProgressAnimated(true), 300 + index * 100);
+          progressTimer = setTimeout(() => setProgressAnimated(true), 300 + index * 100);
           observer.unobserve(entry.target);
         }
       },
@@ -86,7 +88,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       observer.observe(cardRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (progressTimer) clearTimeout(progressTimer);
+    };
   }, [index]);
 
   // Calculate price range from agent's sold properties
