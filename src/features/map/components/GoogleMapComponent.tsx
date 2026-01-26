@@ -34,7 +34,6 @@ import { formatPrice } from '@/utils/currency';
 import L from 'leaflet';
 import { saveMeasurement as saveMeasurementAPI, getMeasurements } from '@/services/apiService';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
-import { useAuth } from '@/src/shared/hooks/useAuth';
 
 // Measurement point interface
 interface MeasurementPoint {
@@ -418,7 +417,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 }) => {
   const { t } = useTranslation(['search', 'property']);
   const { dispatch } = useAppContext();
-  const { isAuthenticated } = useAuth();
 
   // Map state
   const [map, setMap] = useState<google.maps.Map | null>(null);
