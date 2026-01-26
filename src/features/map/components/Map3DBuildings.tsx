@@ -454,16 +454,37 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       });
       console.log(`[Map3D] Bbox query found ${nearbyFeatures.length} features`);
 
-      // Find the building CLOSEST to our coordinates (not tallest!)
+      // Find the building CLOSEST to our coordinates that is tall enough
+      // Filter out small auxiliary structures (garages, sheds, etc.)
       if (nearbyFeatures.length > 0) {
         let minDistance = Infinity;
         let closestFeature: maplibregl.MapGeoJSONFeature | null = null;
 
+        // Minimum height requirement: building must have at least as many floors as target floor
+        // or be at least 10 meters tall (roughly 3 floors)
+        const minRequiredHeight = Math.max(10, floorNum * floorHeightM);
+
         for (const feature of nearbyFeatures) {
+          const props = feature.properties;
+
+          // Get building height
+          let buildingHeight = 10; // Default
+          if (props?.render_height) {
+            buildingHeight = props.render_height;
+          } else if (props?.['building:levels']) {
+            buildingHeight = props['building:levels'] * 3.5;
+          }
+
+          // Skip buildings that are too small (likely auxiliary structures)
+          if (buildingHeight < minRequiredHeight) {
+            console.log(`[Map3D] Skipping building with height ${buildingHeight}m (min required: ${minRequiredHeight}m)`);
+            continue;
+          }
+
           const centroid = getBuildingCentroid(feature);
           if (centroid) {
             const distance = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-            console.log(`[Map3D] Building at (${centroid.lat.toFixed(5)}, ${centroid.lng.toFixed(5)}) distance: ${distance.toFixed(6)}`);
+            console.log(`[Map3D] Building at (${centroid.lat.toFixed(5)}, ${centroid.lng.toFixed(5)}) distance: ${distance.toFixed(6)}, height: ${buildingHeight}m`);
 
             if (distance < minDistance) {
               minDistance = distance;
@@ -476,7 +497,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           buildingFeature = closestFeature;
           const height = closestFeature.properties?.render_height ||
                         (closestFeature.properties?.['building:levels'] || 1) * 3.5;
-          console.log(`[Map3D] Using closest building, distance: ${minDistance.toFixed(6)}, height: ${height}`);
+          console.log(`[Map3D] Using closest tall building, distance: ${minDistance.toFixed(6)}, height: ${height}m`);
+        } else {
+          console.warn(`[Map3D] No building found meeting minimum height requirement of ${minRequiredHeight}m`);
         }
       }
     }
