@@ -1174,7 +1174,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <div className={`flex h-full w-full flex-col md:flex-row transition-all duration-300 relative ${isMobile && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
                  <div className={`absolute inset-0 z-10 h-full w-full bg-white md:relative md:w-[55%] md:flex-shrink-0 md:border-r md:border-neutral-200 md:flex md:flex-col ${ isMobile && mobileView === 'list' ? 'translate-x-0' : '-translate-x-full md:translate-x-0' } transition-transform duration-300`}>
-                    <div className="hidden md:flex p-3 border-b border-neutral-200 flex-shrink-0 items-center gap-3 relative z-[100] bg-white">
+                    <div
+                        className="hidden md:flex p-3 border-b border-white/40 flex-shrink-0 items-center gap-3 relative z-[100] bg-white/70 backdrop-blur-xl"
+                        style={{
+                            boxShadow: '0 4px 20px rgba(31, 38, 135, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.3)',
+                        }}
+                    >
                         <h2 className="text-base font-semibold text-neutral-800 flex-shrink-0">{t('search:propertiesForSale')}</h2>
                         {/* Desktop Search Bar */}
                         <div className="flex-grow max-w-md" ref={searchWrapperRef}>
@@ -1189,7 +1194,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     onChange={(e) => handleFilterChange('query', e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                     onFocus={() => setIsQueryInputFocused(true)}
-                                    className="block w-full bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm px-3 py-2 pl-9 pr-8 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-neutral-400"
+                                    className="block w-full bg-white/60 backdrop-blur-sm border border-white/50 rounded-xl text-neutral-900 text-sm px-3 py-2 pl-9 pr-8 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-neutral-400 shadow-sm"
                                 />
                                 {filters.query && !isSearchingLocation && (
                                     <button
@@ -1205,7 +1210,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     </div>
                                 )}
                                 {suggestions.length > 0 && isQueryInputFocused && (
-                                    <ul className="absolute z-30 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    <ul
+                                        className="absolute z-30 w-full mt-1 bg-white/80 backdrop-blur-xl border border-white/40 rounded-xl max-h-60 overflow-y-auto"
+                                        style={{
+                                            boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.2)',
+                                        }}
+                                    >
                                         {suggestions.map((suggestion) => (
                                             <li
                                                 key={suggestion.place_id}
@@ -1223,7 +1233,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         <select
                             value={filters.country}
                             onChange={(e) => handleFilterChange('country', e.target.value)}
-                            className="bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer flex-shrink-0"
+                            className="bg-white/60 backdrop-blur-sm border border-white/50 rounded-xl text-neutral-900 text-sm px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none cursor-pointer flex-shrink-0 shadow-sm"
                             style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
                         >
                             <option value="any">{t('search:filters.allCountries')}</option>
@@ -1245,7 +1255,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     </div>
 
                     {/* Newsletter Subscription - Compact bar at bottom */}
-                    <div className="hidden md:flex absolute bottom-0 left-0 right-0 z-10 bg-primary/95 backdrop-blur-sm items-center justify-center gap-3 py-1.5 px-4">
+                    <div
+                        className="hidden md:flex absolute bottom-0 left-0 right-0 z-10 bg-primary/80 backdrop-blur-xl items-center justify-center gap-3 py-1.5 px-4 border-t border-white/20"
+                        style={{
+                            boxShadow: '0 -4px 20px rgba(31, 38, 135, 0.1), inset 0 1px 20px rgba(255, 255, 255, 0.1)',
+                        }}
+                    >
                         <span className="text-white text-xs font-medium">📬 Get new listings alerts</span>
                         <form onSubmit={(e) => {
                             e.preventDefault();
@@ -1291,7 +1306,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     <>
                         <div className="absolute top-0 left-0 right-0 z-[100] p-2 landscape:p-1.5 pointer-events-none safe-area-inset-top">
                             <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
-                                <div className="w-full bg-white/95 backdrop-blur-md rounded-full shadow-lg p-1 flex items-center gap-0.5 sm:gap-1">
+                                <div
+                                    className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
+                                    style={{
+                                        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.3)',
+                                    }}
+                                >
                                     <button
                                         onClick={onToggleSidebar}
                                         className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
@@ -1324,7 +1344,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             </div>
                         </div>
 
-                        <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
+                        <div className="absolute bottom-20 xs:bottom-24 sm:bottom-20 landscape:bottom-14 left-0 right-0 z-[100] p-3 sm:p-4 landscape:p-2 pointer-events-none flex justify-center" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
                             {/* Map hint tooltip - positioned to point at Map button */}
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">

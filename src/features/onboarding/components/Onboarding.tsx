@@ -8,9 +8,8 @@ import { getAgencies } from '@/src/features/agencies/api';
 
 /* ---------------- CONFIG ---------------- */
 
-const GRAVITY = 0.02;
-const DAMPING = 0.8;
-const MAX_VELOCITY = 2;
+const FLOAT_SPEED = 0.0005; // Very slow floating
+const FLOAT_RANGE = 15; // Pixels of movement range
 
 /* ---------------- TYPES ---------------- */
 
@@ -22,10 +21,14 @@ type Agency = {
 
 type Bubble = {
   el: HTMLDivElement;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
+  baseX: number;
+  baseY: number;
+  offsetX: number;
+  offsetY: number;
+  phaseX: number;
+  phaseY: number;
+  speedX: number;
+  speedY: number;
   size: number;
 };
 
@@ -95,13 +98,21 @@ const Onboarding: React.FC = () => {
 
       bg.appendChild(el);
 
+      // Position bubbles in a fixed grid-like pattern for better distribution
+      const baseX = Math.random() * (width - size);
+      const baseY = Math.random() * (height - size);
+
       bubblesRef.current.push({
         el,
         size,
-        x: Math.random() * (width - size),
-        y: Math.random() * (height - size),
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: (Math.random() - 0.5) * 1.5,
+        baseX,
+        baseY,
+        offsetX: 0,
+        offsetY: 0,
+        phaseX: Math.random() * Math.PI * 2, // Random starting phase
+        phaseY: Math.random() * Math.PI * 2,
+        speedX: FLOAT_SPEED * (0.8 + Math.random() * 0.4), // Slight speed variation
+        speedY: FLOAT_SPEED * (0.8 + Math.random() * 0.4),
       });
     });
 
@@ -115,42 +126,20 @@ const Onboarding: React.FC = () => {
   useEffect(() => {
     if (prefersReducedMotion || agencies.length === 0) return;
 
-    let last = performance.now();
-
     const animate = (now: number) => {
-      const dt = (now - last) / 16.67;
-      last = now;
-
-      const container = containerRef.current;
-      if (!container) return;
-
-      const { width, height } = container.getBoundingClientRect();
-
       bubblesRef.current.forEach(bubble => {
-        // Apply gentle gravity
-        bubble.vy += GRAVITY * dt;
+        // Gentle sinusoidal floating motion - no gravity, stays in place
+        bubble.phaseX += bubble.speedX;
+        bubble.phaseY += bubble.speedY;
 
-        // Clamp velocity
-        bubble.vx = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, bubble.vx));
-        bubble.vy = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, bubble.vy));
+        // Calculate smooth offset using sine waves
+        bubble.offsetX = Math.sin(bubble.phaseX) * FLOAT_RANGE;
+        bubble.offsetY = Math.sin(bubble.phaseY) * FLOAT_RANGE;
 
-        // Update position
-        bubble.x += bubble.vx * dt;
-        bubble.y += bubble.vy * dt;
-
-        // Bounce off walls
-        if (bubble.x <= 0 || bubble.x >= width - bubble.size) {
-          bubble.vx *= -DAMPING;
-          bubble.x = Math.max(0, Math.min(width - bubble.size, bubble.x));
-        }
-
-        if (bubble.y <= 0 || bubble.y >= height - bubble.size) {
-          bubble.vy *= -DAMPING;
-          bubble.y = Math.max(0, Math.min(height - bubble.size, bubble.y));
-        }
-
-        // Apply transform
-        bubble.el.style.transform = `translate(${bubble.x}px, ${bubble.y}px)`;
+        // Apply transform with base position + gentle floating offset
+        const x = bubble.baseX + bubble.offsetX;
+        const y = bubble.baseY + bubble.offsetY;
+        bubble.el.style.transform = `translate(${x}px, ${y}px)`;
       });
 
       rafRef.current = requestAnimationFrame(animate);
