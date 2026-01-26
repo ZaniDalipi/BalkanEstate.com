@@ -16,7 +16,8 @@ import {
   OverlayView,
   OverlayViewF,
   Rectangle,
-  HeatmapLayer,
+  Polyline,
+  Polygon,
 } from '@react-google-maps/api';
 import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
 import { Property } from '@/types';
@@ -32,11 +33,73 @@ import { HighlightedPropertiesProvider } from '@/src/context/HighlightedProperti
 import { formatPrice } from '@/utils/currency';
 import L from 'leaflet';
 
+// Measurement point interface
+interface MeasurementPoint {
+  lat: number;
+  lng: number;
+}
+
+// Calculate distance between two points using Haversine formula
+const calculateDistance = (point1: MeasurementPoint, point2: MeasurementPoint): number => {
+  const R = 6371000; // Earth's radius in meters
+  const lat1 = (point1.lat * Math.PI) / 180;
+  const lat2 = (point2.lat * Math.PI) / 180;
+  const deltaLat = ((point2.lat - point1.lat) * Math.PI) / 180;
+  const deltaLng = ((point2.lng - point1.lng) * Math.PI) / 180;
+  const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+// Calculate total distance of a path
+const calculateTotalDistance = (points: MeasurementPoint[]): number => {
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    total += calculateDistance(points[i], points[i + 1]);
+  }
+  return total;
+};
+
+// Calculate area of a polygon using Shoelace formula
+const calculatePolygonArea = (points: MeasurementPoint[]): number => {
+  if (points.length < 3) return 0;
+  const R = 6371000;
+  const toRadians = (deg: number) => (deg * Math.PI) / 180;
+  const centLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
+  const centLng = points.reduce((sum, p) => sum + p.lng, 0) / points.length;
+  const projected = points.map((p) => ({
+    x: R * toRadians(p.lng - centLng) * Math.cos(toRadians(centLat)),
+    y: R * toRadians(p.lat - centLat),
+  }));
+  let area = 0;
+  for (let i = 0; i < projected.length; i++) {
+    const j = (i + 1) % projected.length;
+    area += projected[i].x * projected[j].y;
+    area -= projected[j].x * projected[i].y;
+  }
+  return Math.abs(area / 2);
+};
+
+// Format distance for display
+const formatMeasureDistance = (meters: number): string => {
+  if (meters < 1000) return `${meters.toFixed(1)} m`;
+  return `${(meters / 1000).toFixed(2)} km`;
+};
+
+// Format area for display
+const formatMeasureArea = (sqMeters: number): string => {
+  if (sqMeters < 10000) return `${sqMeters.toFixed(1)} m²`;
+  const hectares = sqMeters / 10000;
+  if (hectares < 100) return `${hectares.toFixed(2)} ha`;
+  return `${(sqMeters / 1000000).toFixed(2)} km²`;
+};
+
 // Google Maps API key - falls back to empty string for development
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
 
 // Libraries to load
-const GOOGLE_MAPS_LIBRARIES: ('places' | 'drawing' | 'geometry' | 'visualization' | 'marker')[] = ['places', 'geometry', 'marker', 'visualization'];
+const GOOGLE_MAPS_LIBRARIES: ('places' | 'drawing' | 'geometry' | 'marker')[] = ['places', 'geometry', 'marker'];
 
 // Map container styles
 const mapContainerStyle = {
@@ -324,8 +387,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   // UI state - matching Leaflet options
   const [mapStyle, setMapStyle] = useState<MapStyleType>('street');
   const [isLegendOpen, setIsLegendOpen] = useState(false);
-  const [showHeatMap, setShowHeatMap] = useState(false);
   const [showLandmarks, setShowLandmarks] = useState(false);
+  const [show3DBuildings, setShow3DBuildings] = useState(false);
+  const [showMeasurement, setShowMeasurement] = useState(false);
+  const [measurementPoints, setMeasurementPoints] = useState<MeasurementPoint[]>([]);
+  const [measurementMode, setMeasurementMode] = useState<'distance' | 'area'>('area');
   const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
   const [isClimateMenuOpen, setIsClimateMenuOpen] = useState(false);
   const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false);
@@ -348,14 +414,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     );
   }, [properties]);
 
-  // Heat map data
-  const heatMapData = useMemo(() => {
-    if (!isLoaded || !showHeatMap) return [];
-    return validProperties.map(p => ({
-      location: new google.maps.LatLng(p.lat, p.lng),
-      weight: Math.min(p.price / 100000, 10), // Weight by price
-    }));
-  }, [validProperties, isLoaded, showHeatMap]);
 
   // Initial center from user location
   const initialCenter = useMemo(() => {
@@ -486,6 +544,65 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     map.setMapTypeId(getMapTypeId());
     map.setOptions({ styles: getMapStyles() });
   }, [map, mapStyle, showLandmarks, isLoaded, getMapTypeId, getMapStyles]);
+
+  // Handle 3D buildings toggle - tilt the map for 3D view
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+
+    if (show3DBuildings) {
+      // Enable 3D view with tilt
+      map.setTilt(45);
+      // Zoom in if needed for buildings to show
+      const currentZoom = map.getZoom();
+      if (currentZoom && currentZoom < 15) {
+        map.setZoom(15);
+      }
+    } else {
+      // Reset to flat view
+      map.setTilt(0);
+    }
+  }, [show3DBuildings, map, isLoaded]);
+
+  // Handle measurement mode - add click listener for drawing
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+
+    if (showMeasurement) {
+      // Switch to satellite for better visibility
+      setMapStyle('satellite');
+
+      const clickListener = map.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+          setMeasurementPoints(prev => [...prev, { lat: e.latLng!.lat(), lng: e.latLng!.lng() }]);
+        }
+      });
+
+      return () => {
+        google.maps.event.removeListener(clickListener);
+      };
+    } else {
+      // Clear measurement when disabled
+      setMeasurementPoints([]);
+    }
+  }, [showMeasurement, map, isLoaded]);
+
+  // Calculate measurement values
+  const measurementDistance = useMemo(() => {
+    if (measurementPoints.length < 2) return 0;
+    return calculateTotalDistance(measurementPoints);
+  }, [measurementPoints]);
+
+  const measurementArea = useMemo(() => {
+    if (measurementPoints.length < 3) return 0;
+    return calculatePolygonArea(measurementPoints);
+  }, [measurementPoints]);
+
+  const measurementPerimeter = useMemo(() => {
+    if (measurementPoints.length < 3) return 0;
+    const perim = calculateTotalDistance(measurementPoints);
+    // Add closing segment
+    return perim + calculateDistance(measurementPoints[measurementPoints.length - 1], measurementPoints[0]);
+  }, [measurementPoints]);
 
   // Update markers when properties change
   useEffect(() => {
@@ -679,33 +796,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             mapId: 'balkan-estate-map',
           }}
         >
-          {/* Heat map layer */}
-          {showHeatMap && heatMapData.length > 0 && (
-            <HeatmapLayer
-              data={heatMapData}
-              options={{
-                radius: 30,
-                opacity: 0.6,
-                gradient: [
-                  'rgba(0, 255, 255, 0)',
-                  'rgba(0, 255, 255, 1)',
-                  'rgba(0, 191, 255, 1)',
-                  'rgba(0, 127, 255, 1)',
-                  'rgba(0, 63, 255, 1)',
-                  'rgba(0, 0, 255, 1)',
-                  'rgba(0, 0, 223, 1)',
-                  'rgba(0, 0, 191, 1)',
-                  'rgba(0, 0, 159, 1)',
-                  'rgba(0, 0, 127, 1)',
-                  'rgba(63, 0, 91, 1)',
-                  'rgba(127, 0, 63, 1)',
-                  'rgba(191, 0, 31, 1)',
-                  'rgba(255, 0, 0, 1)',
-                ],
-              }}
-            />
-          )}
-
           {/* Property popup */}
           {selectedProperty && (
             <OverlayViewF
@@ -736,12 +826,134 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               }}
             />
           )}
+
+          {/* Measurement visualization */}
+          {showMeasurement && measurementPoints.length >= 2 && (
+            <>
+              {measurementMode === 'area' && measurementPoints.length >= 3 ? (
+                <Polygon
+                  paths={measurementPoints}
+                  options={{
+                    strokeColor: '#10b981',
+                    strokeOpacity: 1,
+                    strokeWeight: 3,
+                    fillColor: '#10b981',
+                    fillOpacity: 0.3,
+                    clickable: false,
+                  }}
+                />
+              ) : (
+                <Polyline
+                  path={measurementPoints}
+                  options={{
+                    strokeColor: '#10b981',
+                    strokeOpacity: 1,
+                    strokeWeight: 3,
+                    clickable: false,
+                  }}
+                />
+              )}
+            </>
+          )}
         </GoogleMap>
 
         {/* Debug info */}
         <div className="absolute top-4 left-4 z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
           <span>🔍{zoom.toFixed(1)}/21 📍{center.lat.toFixed(3)},{center.lng.toFixed(3)} 📌{validProperties.length}</span>
         </div>
+
+        {/* Measurement Tool Panel */}
+        {showMeasurement && (
+          <div
+            className="absolute top-16 left-4 z-[1002] p-4 rounded-2xl shadow-2xl border border-white/30 max-w-xs"
+            style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)' }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-sm text-gray-800 flex items-center gap-2">
+                <span>📏</span>
+                {t('search:map.measure', 'Measure Land')}
+              </h3>
+              <button
+                onClick={() => { setShowMeasurement(false); setMeasurementPoints([]); }}
+                className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
+              >
+                <XCircleIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Mode toggle */}
+            <div className="flex gap-1 mb-3 p-1 bg-gray-100 rounded-lg">
+              <button
+                onClick={() => { setMeasurementMode('area'); setMeasurementPoints([]); }}
+                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  measurementMode === 'area' ? 'bg-white shadow text-emerald-600' : 'text-gray-600 hover:bg-white/50'
+                }`}
+              >
+                📐 Area
+              </button>
+              <button
+                onClick={() => { setMeasurementMode('distance'); setMeasurementPoints([]); }}
+                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  measurementMode === 'distance' ? 'bg-white shadow text-emerald-600' : 'text-gray-600 hover:bg-white/50'
+                }`}
+              >
+                📍 Distance
+              </button>
+            </div>
+
+            {/* Instructions */}
+            <p className="text-xs text-gray-500 mb-3">
+              {measurementMode === 'area'
+                ? 'Click on the map to draw a polygon. Add at least 3 points.'
+                : 'Click on the map to add points and measure distance.'}
+            </p>
+
+            {/* Results */}
+            {measurementPoints.length >= 2 && (
+              <div className="space-y-2 mb-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                {measurementMode === 'area' && measurementPoints.length >= 3 && (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Area:</span>
+                      <span className="font-bold text-emerald-600">{formatMeasureArea(measurementArea)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Perimeter:</span>
+                      <span className="font-semibold text-gray-700">{formatMeasureDistance(measurementPerimeter)}</span>
+                    </div>
+                  </>
+                )}
+                {measurementMode === 'distance' && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-600">Distance:</span>
+                    <span className="font-bold text-emerald-600">{formatMeasureDistance(measurementDistance)}</span>
+                  </div>
+                )}
+                <div className="text-[10px] text-gray-400">
+                  {measurementPoints.length} point{measurementPoints.length !== 1 ? 's' : ''} placed
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMeasurementPoints(prev => prev.slice(0, -1))}
+                disabled={measurementPoints.length === 0}
+                className="flex-1 py-2 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ↩️ Undo
+              </button>
+              <button
+                onClick={() => setMeasurementPoints([])}
+                disabled={measurementPoints.length === 0}
+                className="flex-1 py-2 text-xs font-semibold rounded-lg bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                🗑️ Clear
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Climate Risk Legend */}
         {selectedClimateRisk !== 'none' && (
@@ -752,7 +964,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Desktop Controls */}
         {!isMobile && (
-          <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+          <div className="absolute bottom-4 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
               <button
@@ -852,16 +1064,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
               <div className="w-px h-5 bg-gray-300/50" />
 
-              {/* Heat Map Toggle */}
+              {/* 3D Buildings Toggle */}
               <button
-                onClick={() => setShowHeatMap(!showHeatMap)}
+                onClick={() => setShow3DBuildings(!show3DBuildings)}
                 className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
-                  showHeatMap ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
+                  show3DBuildings ? 'bg-slate-700 text-white' : 'text-neutral-600 hover:bg-neutral-200'
                 }`}
-                title="Heat Map"
+                title="3D Buildings"
               >
-                <span>🔥</span>
-                <span className="hidden sm:inline">Heat</span>
+                <span>🏢</span>
+                <span className="hidden sm:inline">3D</span>
               </button>
 
               {/* Landmarks Toggle */}
@@ -874,6 +1086,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               >
                 <span>🏛️</span>
                 <span className="hidden sm:inline">POI</span>
+              </button>
+
+              {/* Measurement Tool Toggle */}
+              <button
+                onClick={() => setShowMeasurement(!showMeasurement)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  showMeasurement ? 'bg-emerald-600 text-white' : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title="Measure land"
+              >
+                <span>📏</span>
+                <span className="hidden sm:inline">Measure</span>
               </button>
 
               {/* Legend Toggle */}
@@ -922,7 +1146,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Legend */}
         {isLegendOpen && !isMobile && (
-          <div className="absolute bottom-12 left-4 z-[1000] animate-fade-in">
+          <div className="absolute bottom-4 left-4 z-[1000] animate-fade-in">
             <Legend />
           </div>
         )}
@@ -939,6 +1163,24 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)' }}
                   >
                     <button
+                      onClick={() => { setShow3DBuildings(!show3DBuildings); setIsLayerMenuOpen(false); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        show3DBuildings ? 'bg-slate-100 text-slate-700' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <span>🏢</span>
+                      <span>3D Buildings</span>
+                    </button>
+                    <button
+                      onClick={() => { setShowMeasurement(!showMeasurement); setIsLayerMenuOpen(false); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        showMeasurement ? 'bg-emerald-100 text-emerald-700' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <span>📏</span>
+                      <span>Measure</span>
+                    </button>
+                    <button
                       onClick={() => { setIsLegendOpen(!isLegendOpen); setIsLayerMenuOpen(false); }}
                       className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                         isLegendOpen ? 'bg-amber-100 text-amber-700' : 'hover:bg-gray-100 text-gray-700'
@@ -946,15 +1188,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     >
                       <MapLegendIcon className="w-4 h-4" />
                       <span>Legend</span>
-                    </button>
-                    <button
-                      onClick={() => { setShowHeatMap(!showHeatMap); setIsLayerMenuOpen(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                        showHeatMap ? 'bg-orange-100 text-orange-700' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <span>🔥</span>
-                      <span>Heat Map</span>
                     </button>
                     <button
                       onClick={() => { setShowLandmarks(!showLandmarks); setIsLayerMenuOpen(false); }}

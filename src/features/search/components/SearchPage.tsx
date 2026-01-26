@@ -1253,52 +1253,6 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     <div className="absolute inset-0">
                         <MapComponent {...mapProps} />
                     </div>
-
-                    {/* Newsletter Subscription - Compact bar at bottom */}
-                    <div
-                        className="hidden md:flex absolute bottom-0 left-0 right-0 z-10 bg-primary/80 backdrop-blur-xl items-center justify-center gap-3 py-1.5 px-4 border-t border-white/20"
-                        style={{
-                            boxShadow: '0 -4px 20px rgba(31, 38, 135, 0.1), inset 0 1px 20px rgba(255, 255, 255, 0.1)',
-                        }}
-                    >
-                        <span className="text-white text-xs font-medium">📬 Get new listings alerts</span>
-                        <form onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.currentTarget);
-                            const email = formData.get('email') as string;
-                            if (!email || !email.trim() || !email.includes('@')) {
-                                dispatch({
-                                    type: 'SHOW_ALERT',
-                                    payload: {
-                                        type: 'warning',
-                                        title: 'Invalid Email',
-                                        message: 'Please enter a valid email address',
-                                    },
-                                });
-                                return;
-                            }
-                            // Navigate to pricing page with email saved
-                            dispatch({ type: 'SET_SUBSCRIPTION_EMAIL', payload: email.trim() });
-                            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                            const currentLang = window.location.pathname.split('/')[1] || 'en';
-                            const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-                            const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-                            window.history.pushState({}, '', `/${lang}/subscribe`);
-                        }} className="flex gap-1.5">
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                className="w-44 px-2.5 py-1 text-xs rounded bg-white/15 border border-white/25 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-secondary"
-                            />
-                            <button
-                                type="submit"
-                                className="px-3 py-1 text-xs font-semibold bg-secondary text-primary-dark rounded hover:bg-yellow-300 transition-colors"
-                            >
-                                Subscribe
-                            </button>
-                        </form>
-                    </div>
                 </div>
                 
                 {/* --- Mobile View Overlays --- */}
