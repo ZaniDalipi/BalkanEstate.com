@@ -32,6 +32,9 @@ import {
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 import { formatPrice } from '@/utils/currency';
 import L from 'leaflet';
+import { saveMeasurement as saveMeasurementAPI, getMeasurements } from '@/services/apiService';
+import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
+import { useAuth } from '@/src/shared/hooks/useAuth';
 
 // Measurement point interface
 interface MeasurementPoint {
@@ -39,8 +42,8 @@ interface MeasurementPoint {
   lng: number;
 }
 
-// Saved measurement interface
-interface SavedMeasurement {
+// Saved measurement interface (local state for drawing)
+interface LocalMeasurement {
   id: string;
   points: MeasurementPoint[];
   mode: 'distance' | 'area';
@@ -388,6 +391,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 }) => {
   const { t } = useTranslation(['search', 'property']);
   const { dispatch } = useAppContext();
+  const { isAuthenticated } = useAuth();
 
   // Map state
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -403,10 +407,22 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [showMeasurement, setShowMeasurement] = useState(false);
   const [measurementPoints, setMeasurementPoints] = useState<MeasurementPoint[]>([]);
   const [measurementMode, setMeasurementMode] = useState<'distance' | 'area'>('area');
-  const [savedMeasurements, setSavedMeasurements] = useState<SavedMeasurement[]>([]);
+  const [localMeasurements, setLocalMeasurements] = useState<LocalMeasurement[]>([]);
   const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
   const [isClimateMenuOpen, setIsClimateMenuOpen] = useState(false);
   const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false);
+
+  // Save measurement modal state
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [savingMeasurement, setSavingMeasurement] = useState(false);
+  const [measurementName, setMeasurementName] = useState('');
+  const [measurementAddress, setMeasurementAddress] = useState('');
+  const [measurementNotes, setMeasurementNotes] = useState('');
+  const [pendingMeasurement, setPendingMeasurement] = useState<LocalMeasurement | null>(null);
+
+  // Cadastre layer state
+  const [showCadastre, setShowCadastre] = useState(false);
+  const cadastreLayerRef = useRef<google.maps.ImageMapType | null>(null);
 
   // Refs
   const clustererRef = useRef<MarkerClusterer | null>(null);
@@ -615,11 +631,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     return perim + calculateDistance(measurementPoints[measurementPoints.length - 1], measurementPoints[0]);
   }, [measurementPoints]);
 
-  // Save current measurement
-  const handleSaveMeasurement = useCallback(() => {
+  // Open save modal for current measurement
+  const handleOpenSaveModal = useCallback(() => {
     if (measurementPoints.length < 2) return;
+    if (measurementMode === 'area' && measurementPoints.length < 3) return;
 
-    const newMeasurement: SavedMeasurement = {
+    const newMeasurement: LocalMeasurement = {
       id: `measurement-${Date.now()}`,
       points: [...measurementPoints],
       mode: measurementMode,
@@ -629,13 +646,72 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       createdAt: Date.now(),
     };
 
-    setSavedMeasurements(prev => [...prev, newMeasurement]);
+    setPendingMeasurement(newMeasurement);
+    setMeasurementName('');
+    setMeasurementAddress('');
+    setMeasurementNotes('');
+    setShowSaveModal(true);
+  }, [measurementPoints, measurementMode, measurementDistance, measurementArea, measurementPerimeter]);
+
+  // Save measurement to backend
+  const handleSaveMeasurementToBackend = useCallback(async () => {
+    if (!pendingMeasurement || !measurementName.trim()) return;
+
+    setSavingMeasurement(true);
+    try {
+      if (isAuthenticated) {
+        // Save to backend
+        await saveMeasurementAPI({
+          name: measurementName.trim(),
+          points: pendingMeasurement.points,
+          type: pendingMeasurement.mode,
+          distance: pendingMeasurement.distance,
+          area: pendingMeasurement.area,
+          perimeter: pendingMeasurement.perimeter,
+          address: measurementAddress.trim() || undefined,
+          notes: measurementNotes.trim() || undefined,
+        });
+      }
+
+      // Also keep locally for current session display
+      setLocalMeasurements(prev => [...prev, pendingMeasurement]);
+      setMeasurementPoints([]); // Clear current drawing
+      setShowSaveModal(false);
+      setPendingMeasurement(null);
+    } catch (error) {
+      console.error('Failed to save measurement:', error);
+      // Still save locally even if backend fails
+      setLocalMeasurements(prev => [...prev, pendingMeasurement]);
+      setMeasurementPoints([]);
+      setShowSaveModal(false);
+      setPendingMeasurement(null);
+    } finally {
+      setSavingMeasurement(false);
+    }
+  }, [pendingMeasurement, measurementName, measurementAddress, measurementNotes, isAuthenticated]);
+
+  // Quick save without modal (for local only)
+  const handleQuickSave = useCallback(() => {
+    if (measurementPoints.length < 2) return;
+    if (measurementMode === 'area' && measurementPoints.length < 3) return;
+
+    const newMeasurement: LocalMeasurement = {
+      id: `measurement-${Date.now()}`,
+      points: [...measurementPoints],
+      mode: measurementMode,
+      distance: measurementDistance,
+      area: measurementArea,
+      perimeter: measurementPerimeter,
+      createdAt: Date.now(),
+    };
+
+    setLocalMeasurements(prev => [...prev, newMeasurement]);
     setMeasurementPoints([]); // Clear current to start new measurement
   }, [measurementPoints, measurementMode, measurementDistance, measurementArea, measurementPerimeter]);
 
-  // Remove a saved measurement
+  // Remove a local measurement
   const handleRemoveMeasurement = useCallback((id: string) => {
-    setSavedMeasurements(prev => prev.filter(m => m.id !== id));
+    setLocalMeasurements(prev => prev.filter(m => m.id !== id));
   }, []);
 
   // Clear all measurements
@@ -1091,7 +1167,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Desktop Controls */}
         {!isMobile && (
-          <div className="absolute bottom-4 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+          <div className="absolute bottom-24 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
               <button
@@ -1271,9 +1347,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           </div>
         )}
 
-        {/* Legend */}
+        {/* Legend - bottom left */}
         {isLegendOpen && !isMobile && (
-          <div className="absolute bottom-4 left-4 z-[1000] animate-fade-in">
+          <div className="absolute bottom-24 left-4 z-[1000] animate-fade-in">
             <Legend />
           </div>
         )}
