@@ -1002,13 +1002,11 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       // Add property marker with floor info
       addPropertyMarker(mapInstance, lat, lng, floorNumber, totalFloors, propertyType);
 
-      // Hide unnecessary map details (POIs, labels, etc.) for cleaner look
+      // Show POIs (Points of Interest) for neighborhood context
+      // Only hide very minor labels that would clutter the 3D view
       const layersToHide = [
-        'poi', 'poi_label', 'poi-level-1', 'poi-level-2', 'poi-level-3',
-        'place_label', 'place-city', 'place-town', 'place-village',
-        'road_label', 'road-label', 'transit_label',
-        'water_label', 'waterway_label', 'airport_label',
-        'natural_label', 'landuse_label'
+        'natural_label', // Natural features less relevant for property context
+        'landuse_label', // Landuse labels not useful
       ];
 
       for (const layerId of layersToHide) {
@@ -1017,14 +1015,28 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         }
       }
 
-      // Also reduce visibility of minor roads and small details
-      const layersToReduce = mapInstance.getStyle().layers || [];
-      for (const layer of layersToReduce) {
-        // Hide POI icons and minor labels
-        if (layer.id.includes('poi') || layer.id.includes('label') || layer.id.includes('icon')) {
-          if (layer.type === 'symbol') {
-            mapInstance.setLayoutProperty(layer.id, 'visibility', 'none');
-          }
+      // Enhance POI visibility for neighborhood context
+      const allLayers = mapInstance.getStyle().layers || [];
+      for (const layer of allLayers) {
+        // Keep and enhance POI layers for neighborhood info (restaurants, shops, schools, etc.)
+        if (layer.id.includes('poi') && layer.type === 'symbol') {
+          mapInstance.setLayoutProperty(layer.id, 'visibility', 'visible');
+        }
+        // Keep road labels for orientation
+        if ((layer.id.includes('road') && layer.id.includes('label')) || layer.id === 'road_label') {
+          mapInstance.setLayoutProperty(layer.id, 'visibility', 'visible');
+        }
+        // Keep place names (cities, towns) for context
+        if (layer.id.includes('place')) {
+          mapInstance.setLayoutProperty(layer.id, 'visibility', 'visible');
+        }
+        // Keep transit labels (metro, bus stops)
+        if (layer.id.includes('transit')) {
+          mapInstance.setLayoutProperty(layer.id, 'visibility', 'visible');
+        }
+        // Keep water labels (rivers, lakes)
+        if (layer.id.includes('water') && layer.id.includes('label')) {
+          mapInstance.setLayoutProperty(layer.id, 'visibility', 'visible');
         }
       }
 
