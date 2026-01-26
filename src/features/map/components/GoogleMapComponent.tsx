@@ -39,6 +39,17 @@ interface MeasurementPoint {
   lng: number;
 }
 
+// Saved measurement interface
+interface SavedMeasurement {
+  id: string;
+  points: MeasurementPoint[];
+  mode: 'distance' | 'area';
+  distance: number;
+  area: number;
+  perimeter: number;
+  createdAt: number;
+}
+
 // Calculate distance between two points using Haversine formula
 const calculateDistance = (point1: MeasurementPoint, point2: MeasurementPoint): number => {
   const R = 6371000; // Earth's radius in meters
@@ -392,6 +403,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [showMeasurement, setShowMeasurement] = useState(false);
   const [measurementPoints, setMeasurementPoints] = useState<MeasurementPoint[]>([]);
   const [measurementMode, setMeasurementMode] = useState<'distance' | 'area'>('area');
+  const [savedMeasurements, setSavedMeasurements] = useState<SavedMeasurement[]>([]);
   const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
   const [isClimateMenuOpen, setIsClimateMenuOpen] = useState(false);
   const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false);
@@ -465,32 +477,33 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         render: ({ count, position }) => {
           const div = document.createElement('div');
           div.className = 'cluster-marker';
-          const size = count < 10 ? 40 : count < 50 ? 48 : count < 100 ? 56 : 64;
+          // Smaller cluster sizes for cleaner look
+          const size = count < 10 ? 28 : count < 50 ? 32 : count < 100 ? 36 : 40;
           div.style.cssText = `
             width: ${size}px;
             height: ${size}px;
             background: linear-gradient(135deg, #0252CD 0%, #0066FF 100%);
-            border: 3px solid white;
+            border: 2px solid white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: ${count < 100 ? 14 : 12}px;
+            font-size: ${count < 100 ? 11 : 10}px;
             font-family: Inter, system-ui, sans-serif;
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(2, 82, 205, 0.4), 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2);
             transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
           `;
           div.textContent = String(count);
           div.addEventListener('mouseenter', () => {
             div.style.transform = 'scale(1.15)';
-            div.style.boxShadow = '0 6px 24px rgba(2, 82, 205, 0.5), 0 4px 8px rgba(0,0,0,0.3)';
+            div.style.boxShadow = '0 4px 12px rgba(2, 82, 205, 0.5), 0 2px 4px rgba(0,0,0,0.3)';
           });
           div.addEventListener('mouseleave', () => {
             div.style.transform = 'scale(1)';
-            div.style.boxShadow = '0 4px 16px rgba(2, 82, 205, 0.4), 0 2px 4px rgba(0,0,0,0.2)';
+            div.style.boxShadow = '0 2px 8px rgba(2, 82, 205, 0.4), 0 1px 3px rgba(0,0,0,0.2)';
           });
 
           return new google.maps.marker.AdvancedMarkerElement({
@@ -580,11 +593,38 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       return () => {
         google.maps.event.removeListener(clickListener);
       };
-    } else {
-      // Clear measurement when disabled
-      setMeasurementPoints([]);
     }
+    // Note: We don't clear measurement points when disabled so saved measurements remain visible
   }, [showMeasurement, map, isLoaded]);
+
+  // Save current measurement
+  const handleSaveMeasurement = useCallback(() => {
+    if (measurementPoints.length < 2) return;
+
+    const newMeasurement: SavedMeasurement = {
+      id: `measurement-${Date.now()}`,
+      points: [...measurementPoints],
+      mode: measurementMode,
+      distance: measurementDistance,
+      area: measurementArea,
+      perimeter: measurementPerimeter,
+      createdAt: Date.now(),
+    };
+
+    setSavedMeasurements(prev => [...prev, newMeasurement]);
+    setMeasurementPoints([]); // Clear current to start new measurement
+  }, [measurementPoints, measurementMode, measurementDistance, measurementArea, measurementPerimeter]);
+
+  // Remove a saved measurement
+  const handleRemoveMeasurement = useCallback((id: string) => {
+    setSavedMeasurements(prev => prev.filter(m => m.id !== id));
+  }, []);
+
+  // Clear all measurements
+  const handleClearAllMeasurements = useCallback(() => {
+    setSavedMeasurements([]);
+    setMeasurementPoints([]);
+  }, []);
 
   // Calculate measurement values
   const measurementDistance = useMemo(() => {
@@ -827,7 +867,51 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             />
           )}
 
-          {/* Measurement visualization */}
+          {/* Saved measurements visualization */}
+          {savedMeasurements.map((measurement, index) => (
+            <React.Fragment key={measurement.id}>
+              {measurement.mode === 'area' && measurement.points.length >= 3 ? (
+                <Polygon
+                  paths={measurement.points}
+                  options={{
+                    strokeColor: '#6366f1',
+                    strokeOpacity: 0.9,
+                    strokeWeight: 2,
+                    fillColor: '#6366f1',
+                    fillOpacity: 0.2,
+                    clickable: false,
+                  }}
+                />
+              ) : (
+                <Polyline
+                  path={measurement.points}
+                  options={{
+                    strokeColor: '#6366f1',
+                    strokeOpacity: 0.9,
+                    strokeWeight: 2,
+                    clickable: false,
+                  }}
+                />
+              )}
+              {/* Label for saved measurement */}
+              <OverlayViewF
+                position={measurement.points[0]}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+              >
+                <div
+                  className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg cursor-pointer hover:bg-indigo-700 transition-colors"
+                  style={{ transform: 'translate(-50%, -100%)', marginTop: '-8px' }}
+                  onClick={() => handleRemoveMeasurement(measurement.id)}
+                  title="Click to remove"
+                >
+                  #{index + 1}: {measurement.mode === 'area' ? formatMeasureArea(measurement.area) : formatMeasureDistance(measurement.distance)}
+                  <span className="ml-1 opacity-70">✕</span>
+                </div>
+              </OverlayViewF>
+            </React.Fragment>
+          ))}
+
+          {/* Current measurement visualization (being drawn) */}
           {showMeasurement && measurementPoints.length >= 2 && (
             <>
               {measurementMode === 'area' && measurementPoints.length >= 3 ? (
@@ -874,7 +958,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 {t('search:map.measure', 'Measure Land')}
               </h3>
               <button
-                onClick={() => { setShowMeasurement(false); setMeasurementPoints([]); }}
+                onClick={() => setShowMeasurement(false)}
                 className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
               >
                 <XCircleIcon className="w-5 h-5" />
@@ -908,7 +992,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 : 'Click on the map to add points and measure distance.'}
             </p>
 
-            {/* Results */}
+            {/* Current measurement results */}
             {measurementPoints.length >= 2 && (
               <div className="space-y-2 mb-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                 {measurementMode === 'area' && measurementPoints.length >= 3 && (
@@ -936,7 +1020,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             )}
 
             {/* Actions */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-3">
               <button
                 onClick={() => setMeasurementPoints(prev => prev.slice(0, -1))}
                 disabled={measurementPoints.length === 0}
@@ -945,13 +1029,56 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 ↩️ Undo
               </button>
               <button
+                onClick={handleSaveMeasurement}
+                disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
+                className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                💾 Save
+              </button>
+              <button
                 onClick={() => setMeasurementPoints([])}
                 disabled={measurementPoints.length === 0}
                 className="flex-1 py-2 text-xs font-semibold rounded-lg bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                🗑️ Clear
+                🗑️ New
               </button>
             </div>
+
+            {/* Saved measurements list */}
+            {savedMeasurements.length > 0 && (
+              <div className="border-t border-gray-200 pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-700">Saved ({savedMeasurements.length})</span>
+                  <button
+                    onClick={handleClearAllMeasurements}
+                    className="text-[10px] text-red-500 hover:text-red-700 font-medium"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {savedMeasurements.map((m, i) => (
+                    <div
+                      key={m.id}
+                      className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-indigo-600">#{i + 1}</span>
+                        <span className="text-xs text-gray-700">
+                          {m.mode === 'area' ? formatMeasureArea(m.area) : formatMeasureDistance(m.distance)}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveMeasurement(m.id)}
+                        className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <XCircleIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
