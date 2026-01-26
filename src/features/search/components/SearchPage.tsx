@@ -15,6 +15,7 @@ import AiSearch from './AiSearch';
 import Modal from '@/components/shared/Modal';
 import { COUNTRY_OPTIONS, BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { SEO, generateSearchBreadcrumbs, Breadcrumbs } from '@/src/components/seo';
+import { LeaderboardAd } from '@/src/components/ads';
 
 // Helper to serialize Leaflet bounds to a consistent JSON format
 const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -1233,6 +1234,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    {/* Display Ad - Leaderboard */}
+                    <div className="hidden md:block px-3 py-2 border-b border-neutral-200 bg-neutral-50/50">
+                        <LeaderboardAd />
                     </div>
                     <PropertyList {...propertyListProps} />
                 </div>

@@ -1,36 +1,25 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import {
-  LogoIcon,
-  BuildingOfficeIcon,
-  MapPinIcon,
-  BedIcon,
-  HeartIcon,
-  SparklesIcon,
-  KeyIcon,
-} from '@/constants';
+import { LogoIcon } from '@/constants';
 import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
+import {
+  SPONSORED_AGENCIES,
+  SPONSOR_BANNERS,
+  AD_SETTINGS,
+  type SponsoredAgency,
+} from '@/config/adsConfig';
 
 /* ---------------- CONFIG ---------------- */
 
-const ICONS = [
-  BuildingOfficeIcon,
-  MapPinIcon,
-  BedIcon,
-  HeartIcon,
-  SparklesIcon,
-  KeyIcon,
-];
-
-const GRAVITY = 0.04;
-const DAMPING = 0.75;
-const MAX_VELOCITY = 3;
+const GRAVITY = 0.02; // Slower gravity for smoother floating
+const DAMPING = 0.8;
+const MAX_VELOCITY = 2;
 
 /* ---------------- TYPES ---------------- */
 
-type Bot = {
+type FloatingLogo = {
   el: HTMLDivElement;
   x: number;
   y: number;
@@ -39,6 +28,7 @@ type Bot = {
   rotation: number;
   vr: number;
   size: number;
+  sponsor: SponsoredAgency;
 };
 
 /* ---------------- COMPONENT ---------------- */
@@ -49,67 +39,98 @@ const Onboarding: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
-  const botsRef = useRef<Bot[]>([]);
+  const logosRef = useRef<FloatingLogo[]>([]);
   const rafRef = useRef<number | null>(null);
+
+  // Sponsor banner rotation state
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [bannerVisible, setBannerVisible] = useState(true);
 
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ----------- INIT FLOATING ICONS ----------- */
+  /* ----------- SPONSOR BANNER ROTATION ----------- */
   useEffect(() => {
-    if (!backgroundRef.current || prefersReducedMotion) return;
+    if (!AD_SETTINGS.sponsorBanner.enabled || SPONSOR_BANNERS.length <= 1) return;
+
+    const interval = setInterval(() => {
+      // Fade out
+      setBannerVisible(false);
+
+      // After fade out, change banner and fade in
+      setTimeout(() => {
+        setCurrentBannerIndex(prev => (prev + 1) % SPONSOR_BANNERS.length);
+        setBannerVisible(true);
+      }, AD_SETTINGS.sponsorBanner.animationDuration);
+    }, AD_SETTINGS.sponsorBanner.rotationInterval);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentBanner = SPONSOR_BANNERS[currentBannerIndex];
+
+  /* ----------- INIT FLOATING AGENCY LOGOS ----------- */
+  useEffect(() => {
+    if (!backgroundRef.current || prefersReducedMotion || !AD_SETTINGS.floatingLogos.enabled) return;
 
     const bg = backgroundRef.current;
     const container = containerRef.current!;
     const { width, height } = container.getBoundingClientRect();
 
-    botsRef.current = [];
+    logosRef.current = [];
 
-    ICONS.forEach(Icon => {
-      for (let i = 0; i < 3; i++) {
-        const size = Math.random() * 30 + 30;
+    SPONSORED_AGENCIES.forEach(sponsor => {
+      const instances = AD_SETTINGS.floatingLogos.instancesPerSponsor[sponsor.tier];
+      const sizeRange = AD_SETTINGS.floatingLogos.sizeRange[sponsor.tier];
+
+      for (let i = 0; i < instances; i++) {
+        const size = Math.random() * (sizeRange.max - sizeRange.min) + sizeRange.min;
 
         const el = document.createElement('div');
-        el.className =
-          'absolute text-primary/10 pointer-events-none will-change-transform';
+        el.className = 'absolute pointer-events-none will-change-transform';
         el.style.width = `${size}px`;
         el.style.height = `${size}px`;
+        el.style.opacity = String(AD_SETTINGS.floatingLogos.opacity);
 
+        // Create image element for the logo
+        const img = document.createElement('img');
+        img.src = sponsor.logo;
+        img.alt = sponsor.name;
+        img.className = 'w-full h-full object-contain rounded-lg drop-shadow-sm';
+        img.style.filter = 'grayscale(30%)';
+        img.loading = 'lazy';
+        img.onerror = () => {
+          // Fallback to text if image fails to load
+          el.innerHTML = `<div class="w-full h-full bg-primary/10 rounded-lg flex items-center justify-center text-primary/30 text-xs font-bold">${sponsor.name.charAt(0)}</div>`;
+        };
+
+        el.appendChild(img);
         bg.appendChild(el);
 
-        const root = document.createElement('div');
-        root.style.width = '100%';
-        root.style.height = '100%';
-        el.appendChild(root);
-
-        // Render icon ONCE
-        import('react-dom/client').then(({ createRoot }) => {
-          createRoot(root).render(<Icon className="w-full h-full" />);
-        });
-
-        botsRef.current.push({
+        logosRef.current.push({
           el,
           size,
+          sponsor,
           x: Math.random() * (width - size),
           y: Math.random() * (height - size),
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: (Math.random() - 0.5) * 1.2,
-          rotation: Math.random() * 360,
-          vr: (Math.random() - 0.5) * 0.6,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: (Math.random() - 0.5) * 0.8,
+          rotation: (Math.random() - 0.5) * 10, // Subtle rotation
+          vr: (Math.random() - 0.5) * 0.2,
         });
       }
     });
 
     return () => {
-      botsRef.current.forEach(bot => bot.el.remove());
-      botsRef.current = [];
+      logosRef.current.forEach(logo => logo.el.remove());
+      logosRef.current = [];
     };
   }, [prefersReducedMotion]);
 
   /* ------------- ANIMATION LOOP ------------- */
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || !AD_SETTINGS.floatingLogos.enabled) return;
 
     let last = performance.now();
 
@@ -122,31 +143,36 @@ const Onboarding: React.FC = () => {
 
       const { width, height } = container.getBoundingClientRect();
 
-      botsRef.current.forEach(bot => {
-        bot.vy += GRAVITY * dt;
+      logosRef.current.forEach(logo => {
+        // Add gentle floating effect (sine wave)
+        logo.vy += GRAVITY * dt * Math.sin(now / 2000);
 
-        bot.vx = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, bot.vx));
-        bot.vy = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, bot.vy));
+        logo.vx = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, logo.vx));
+        logo.vy = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, logo.vy));
 
-        bot.x += bot.vx * dt;
-        bot.y += bot.vy * dt;
-        bot.rotation += bot.vr * dt;
+        logo.x += logo.vx * dt;
+        logo.y += logo.vy * dt;
+        logo.rotation += logo.vr * dt;
 
-        if (bot.x <= 0 || bot.x >= width - bot.size) {
-          bot.vx *= -DAMPING;
-          bot.x = Math.max(0, Math.min(width - bot.size, bot.x));
+        // Bounce off walls
+        if (logo.x <= 0 || logo.x >= width - logo.size) {
+          logo.vx *= -DAMPING;
+          logo.x = Math.max(0, Math.min(width - logo.size, logo.x));
         }
 
-        if (bot.y <= 0 || bot.y >= height - bot.size) {
-          bot.vy *= -DAMPING;
-          bot.y = Math.max(0, Math.min(height - bot.size, bot.y));
+        if (logo.y <= 0 || logo.y >= height - logo.size) {
+          logo.vy *= -DAMPING;
+          logo.y = Math.max(0, Math.min(height - logo.size, logo.y));
         }
 
-        bot.vr *= 0.99;
+        logo.vr *= 0.995;
 
-        bot.el.style.transform = `
-          translate(${bot.x}px, ${bot.y}px)
-          rotate(${bot.rotation}deg)
+        // Apply transform with subtle scale pulse
+        const scalePulse = 1 + Math.sin(now / 1500) * 0.02;
+        logo.el.style.transform = `
+          translate(${logo.x}px, ${logo.y}px)
+          rotate(${logo.rotation}deg)
+          scale(${scalePulse})
         `;
       });
 
@@ -227,16 +253,42 @@ const Onboarding: React.FC = () => {
               onClick={handleBuyChoice}
               className="group p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             >
-              <img
-                src={ONBOARDING_IMAGES.buyCard.src}
-                srcSet={ONBOARDING_IMAGES.buyCard.srcSet}
-                sizes="(max-width: 768px) calc(100vw - 80px), 400px"
-                alt={ONBOARDING_IMAGES.buyCard.alt}
-                className="rounded-lg mb-6 h-48 w-full object-cover"
-                loading="eager"
-                decoding="async"
-                fetchpriority="high"
-              />
+              {/* Image with Sponsor Overlay */}
+              <div className="relative rounded-lg mb-6 overflow-hidden">
+                <img
+                  src={ONBOARDING_IMAGES.buyCard.src}
+                  srcSet={ONBOARDING_IMAGES.buyCard.srcSet}
+                  sizes="(max-width: 768px) calc(100vw - 80px), 400px"
+                  alt={ONBOARDING_IMAGES.buyCard.alt}
+                  className="h-48 w-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                  fetchpriority="high"
+                />
+                {/* Sponsor Banner Overlay */}
+                {AD_SETTINGS.sponsorBanner.enabled && currentBanner && (
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-3 transition-opacity duration-500 ${
+                      bannerVisible ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-white">
+                      {currentBanner.logo && (
+                        <img
+                          src={currentBanner.logo}
+                          alt={currentBanner.agencyName}
+                          className="w-6 h-6 object-contain bg-white rounded p-0.5"
+                        />
+                      )}
+                      <p className="text-xs font-medium leading-tight">
+                        <span className="font-bold">{currentBanner.agencyName}</span>
+                        {' '}{currentBanner.message}{' '}
+                        <span className="text-primary-light font-bold">BalkanEstate.com</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
               <h3 className="text-2xl font-semibold mb-2 text-center">
                 {t('nav:onboarding.lookingToBuy')}
               </h3>
@@ -253,15 +305,43 @@ const Onboarding: React.FC = () => {
               onClick={handleSellChoice}
               className="group p-6 bg-white rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col"
             >
-              <img
-                src={ONBOARDING_IMAGES.sellCard.src}
-                srcSet={ONBOARDING_IMAGES.sellCard.srcSet}
-                sizes="(max-width: 768px) calc(100vw - 80px), 400px"
-                alt={ONBOARDING_IMAGES.sellCard.alt}
-                className="rounded-lg mb-6 h-48 w-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+              {/* Image with Sponsor Overlay */}
+              <div className="relative rounded-lg mb-6 overflow-hidden">
+                <img
+                  src={ONBOARDING_IMAGES.sellCard.src}
+                  srcSet={ONBOARDING_IMAGES.sellCard.srcSet}
+                  sizes="(max-width: 768px) calc(100vw - 80px), 400px"
+                  alt={ONBOARDING_IMAGES.sellCard.alt}
+                  className="h-48 w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                {/* Sponsor Banner Overlay - Show different banner on sell card */}
+                {AD_SETTINGS.sponsorBanner.enabled && SPONSOR_BANNERS.length > 0 && (
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-3 transition-opacity duration-500 ${
+                      bannerVisible ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-white">
+                      {SPONSOR_BANNERS[(currentBannerIndex + 1) % SPONSOR_BANNERS.length]?.logo && (
+                        <img
+                          src={SPONSOR_BANNERS[(currentBannerIndex + 1) % SPONSOR_BANNERS.length].logo}
+                          alt={SPONSOR_BANNERS[(currentBannerIndex + 1) % SPONSOR_BANNERS.length].agencyName}
+                          className="w-6 h-6 object-contain bg-white rounded p-0.5"
+                        />
+                      )}
+                      <p className="text-xs font-medium leading-tight">
+                        <span className="font-bold">
+                          {SPONSOR_BANNERS[(currentBannerIndex + 1) % SPONSOR_BANNERS.length]?.agencyName}
+                        </span>
+                        {' '}{SPONSOR_BANNERS[(currentBannerIndex + 1) % SPONSOR_BANNERS.length]?.message}{' '}
+                        <span className="text-primary-light font-bold">BalkanEstate.com</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
               <h3 className="text-2xl font-semibold mb-2 text-center">
                 {t('nav:onboarding.wantToSell')}
               </h3>
