@@ -118,28 +118,22 @@ export const ArrowTopRightOnSquareIcon: React.FC<{ className?: string }> = ({ cl
 export const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement('svg', { className: className, viewBox: "0 0 512 512", xmlns: "http://www.w3.org/2000/svg" },
         React.createElement('g', { fillRule: "evenodd" },
-            // Left Building (smaller, 2 blocks)
-            // Bottom block
-            React.createElement('path', { fill: "#0252CD", d: "M85 400V310L145 280V400H85Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M145 280L195 305V400H145V280Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M85 310L145 280L195 305L135 335L85 310Z" }),
-            // Top block
-            React.createElement('path', { fill: "#0252CD", d: "M100 290V210L155 185V290H100Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M155 185L200 207V290H155V185Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M100 210L155 185L200 207L145 232L100 210Z" }),
-            // Right Building (taller, 3 blocks)
-            // Bottom block
-            React.createElement('path', { fill: "#0252CD", d: "M230 400V300L300 265V400H230Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M300 265L365 295V400H300V265Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M230 300L300 265L365 295L295 330L230 300Z" }),
-            // Middle block
-            React.createElement('path', { fill: "#0252CD", d: "M250 280V190L315 160V280H250Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M315 160L375 187V280H315V160Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M250 190L315 160L375 187L310 217L250 190Z" }),
-            // Top block
-            React.createElement('path', { fill: "#0252CD", d: "M275 170V95L335 70V170H275Z" }),
-            React.createElement('path', { fill: "#4A8FE7", d: "M335 70L390 95V170H335V70Z" }),
-            React.createElement('path', { fill: "#6BA3F5", d: "M275 95L335 70L390 95L330 120L275 95Z" })
+            // Left Building (shorter)
+            // Front face - lighter blue
+            React.createElement('path', { fill: "#6BA3F5", d: "M115 380L115 200L195 160L195 380Z" }),
+            // Right side face - medium blue
+            React.createElement('path', { fill: "#4A8FE7", d: "M195 160L245 190L245 380L195 380Z" }),
+            // Top face
+            React.createElement('path', { fill: "#89B4F8", d: "M115 200L195 160L245 190L165 230Z" }),
+            // Right Building (taller)
+            // Front face - lighter blue
+            React.createElement('path', { fill: "#6BA3F5", d: "M260 380L260 120L340 80L340 380Z" }),
+            // Right side face - darker blue
+            React.createElement('path', { fill: "#0252CD", d: "M340 80L400 115L400 380L340 380Z" }),
+            // Top face
+            React.createElement('path', { fill: "#4A8FE7", d: "M260 120L340 80L400 115L320 155Z" }),
+            // Top notch/indent
+            React.createElement('path', { fill: "#4A8FE7", d: "M260 120L260 155L290 140L290 105Z" })
         )
     )
 );

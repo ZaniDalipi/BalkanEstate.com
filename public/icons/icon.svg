@@ -2,42 +2,23 @@
   <!-- Background -->
   <rect x="0" y="0" width="512" height="512" fill="#ffffff" rx="64"/>
 
-  <!-- BalkanEstate Logo - 3D Building Blocks Design -->
+  <!-- BalkanEstate Logo - Two 3D Buildings -->
 
-  <!-- Left Building (smaller, 2 blocks) -->
-  <!-- Bottom block - front face -->
-  <path d="M85 400V310L145 280V400H85Z" fill="#0252CD"/>
-  <!-- Bottom block - right side -->
-  <path d="M145 280L195 305V400H145V280Z" fill="#4A8FE7"/>
-  <!-- Bottom block - top -->
-  <path d="M85 310L145 280L195 305L135 335L85 310Z" fill="#6BA3F5"/>
+  <!-- Left Building (shorter) -->
+  <!-- Front face - lighter blue -->
+  <path d="M115 380L115 200L195 160L195 380Z" fill="#6BA3F5"/>
+  <!-- Right side face - medium blue -->
+  <path d="M195 160L245 190L245 380L195 380Z" fill="#4A8FE7"/>
+  <!-- Top face -->
+  <path d="M115 200L195 160L245 190L165 230Z" fill="#89B4F8"/>
 
-  <!-- Top block - front face -->
-  <path d="M100 290V210L155 185V290H100Z" fill="#0252CD"/>
-  <!-- Top block - right side -->
-  <path d="M155 185L200 207V290H155V185Z" fill="#4A8FE7"/>
-  <!-- Top block - top -->
-  <path d="M100 210L155 185L200 207L145 232L100 210Z" fill="#6BA3F5"/>
-
-  <!-- Right Building (taller, 3 blocks) -->
-  <!-- Bottom block - front face -->
-  <path d="M230 400V300L300 265V400H230Z" fill="#0252CD"/>
-  <!-- Bottom block - right side -->
-  <path d="M300 265L365 295V400H300V265Z" fill="#4A8FE7"/>
-  <!-- Bottom block - top -->
-  <path d="M230 300L300 265L365 295L295 330L230 300Z" fill="#6BA3F5"/>
-
-  <!-- Middle block - front face -->
-  <path d="M250 280V190L315 160V280H250Z" fill="#0252CD"/>
-  <!-- Middle block - right side -->
-  <path d="M315 160L375 187V280H315V160Z" fill="#4A8FE7"/>
-  <!-- Middle block - top -->
-  <path d="M250 190L315 160L375 187L310 217L250 190Z" fill="#6BA3F5"/>
-
-  <!-- Top block - front face -->
-  <path d="M275 170V95L335 70V170H275Z" fill="#0252CD"/>
-  <!-- Top block - right side -->
-  <path d="M335 70L390 95V170H335V70Z" fill="#4A8FE7"/>
-  <!-- Top block - top -->
-  <path d="M275 95L335 70L390 95L330 120L275 95Z" fill="#6BA3F5"/>
+  <!-- Right Building (taller) -->
+  <!-- Front face - lighter blue -->
+  <path d="M260 380L260 120L340 80L340 380Z" fill="#6BA3F5"/>
+  <!-- Right side face - darker blue -->
+  <path d="M340 80L400 115L400 380L340 380Z" fill="#0252CD"/>
+  <!-- Top face -->
+  <path d="M260 120L340 80L400 115L320 155Z" fill="#4A8FE7"/>
+  <!-- Top notch/indent -->
+  <path d="M260 120L260 155L290 140L290 105Z" fill="#4A8FE7"/>
 </svg>
