@@ -865,18 +865,72 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     });
   }, [hoveredPropertyId, validProperties]);
 
-  // Handle flyTo target
+  // Handle flyTo target - smooth cinematic animation
   useEffect(() => {
     if (!map || !flyToTarget) return;
 
-    map.panTo({ lat: flyToTarget.center[0], lng: flyToTarget.center[1] });
-    setTimeout(() => {
-      if (map) {
-        map.setZoom(flyToTarget.zoom);
-      }
-    }, 300);
+    const targetLat = flyToTarget.center[0];
+    const targetLng = flyToTarget.center[1];
+    const targetZoom = flyToTarget.zoom;
+    const currentZoom = map.getZoom() || 10;
+    const currentCenter = map.getCenter();
 
-    setTimeout(onFlyComplete, 800);
+    // Calculate distance to target (rough approximation)
+    const distance = currentCenter
+      ? Math.sqrt(
+          Math.pow(currentCenter.lat() - targetLat, 2) +
+          Math.pow(currentCenter.lng() - targetLng, 2)
+        )
+      : 1;
+
+    // For short distances, just do a simple smooth pan
+    if (distance < 0.1 && Math.abs(currentZoom - targetZoom) < 3) {
+      map.panTo({ lat: targetLat, lng: targetLng });
+      setTimeout(() => {
+        if (map) map.setZoom(targetZoom);
+        onFlyComplete();
+      }, 500);
+      return;
+    }
+
+    // Cinematic fly animation for longer distances:
+    // 1. Zoom out to show context
+    // 2. Pan to target
+    // 3. Zoom in to target level
+
+    // Calculate intermediate zoom (zoomed out view)
+    const intermediateZoom = Math.max(8, Math.min(currentZoom, targetZoom) - 4);
+
+    // Step 1: Zoom out
+    map.setZoom(intermediateZoom);
+
+    // Step 2: After zoom out, pan to target location
+    setTimeout(() => {
+      if (!map) return;
+      map.panTo({ lat: targetLat, lng: targetLng });
+
+      // Step 3: After pan, zoom in to target
+      setTimeout(() => {
+        if (!map) return;
+
+        // Gradually zoom in for smooth effect
+        const zoomSteps = 3;
+        const zoomDiff = targetZoom - intermediateZoom;
+        const stepDelay = 200;
+
+        for (let i = 1; i <= zoomSteps; i++) {
+          setTimeout(() => {
+            if (map) {
+              const stepZoom = intermediateZoom + (zoomDiff * (i / zoomSteps));
+              map.setZoom(Math.round(stepZoom));
+            }
+          }, stepDelay * i);
+        }
+
+        // Complete after all animations
+        setTimeout(onFlyComplete, stepDelay * zoomSteps + 200);
+      }, 600);
+    }, 400);
   }, [flyToTarget, map, onFlyComplete]);
 
   // Handle view details click
@@ -1827,7 +1881,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Save Measurement Modal */}
         {showSaveModal && pendingMeasurement && (
-          <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
             <div
               className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
