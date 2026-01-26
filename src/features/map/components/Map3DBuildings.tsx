@@ -126,6 +126,55 @@ const PERIOD_ICONS: Record<TimePeriod, string> = {
 };
 
 /**
+ * Calculate shadow polygon for a building based on sun position
+ * @param buildingCoords - The building footprint coordinates [lng, lat][]
+ * @param height - Building height in meters
+ * @param sunAzimuth - Sun azimuth angle in degrees (0 = North, clockwise)
+ * @param sunAltitude - Sun altitude angle in degrees above horizon
+ * @returns Shadow polygon coordinates
+ */
+const calculateBuildingShadow = (
+  buildingCoords: number[][],
+  height: number,
+  sunAzimuth: number,
+  sunAltitude: number
+): number[][] => {
+  // If sun is below horizon, no shadow
+  if (sunAltitude <= 0) return [];
+
+  // Convert angles to radians
+  const azimuthRad = ((sunAzimuth + 180) * Math.PI) / 180; // Shadow direction is opposite to sun
+  const altitudeRad = (sunAltitude * Math.PI) / 180;
+
+  // Calculate shadow length factor based on sun altitude
+  // Higher sun = shorter shadows
+  const shadowLength = height / Math.tan(altitudeRad);
+
+  // Convert shadow length to approximate degrees (at equator ~111km per degree)
+  const metersPerDegree = 111320;
+  const shadowOffsetLat = (shadowLength * Math.cos(azimuthRad)) / metersPerDegree;
+  const shadowOffsetLng = (shadowLength * Math.sin(azimuthRad)) / metersPerDegree;
+
+  // Create shadow polygon by extending building footprint in shadow direction
+  const shadowPolygon: number[][] = [];
+
+  // Add original building footprint points
+  buildingCoords.forEach(coord => {
+    shadowPolygon.push([coord[0], coord[1]]);
+  });
+
+  // Add shadow-extended points in reverse order to create proper polygon
+  for (let i = buildingCoords.length - 1; i >= 0; i--) {
+    shadowPolygon.push([
+      buildingCoords[i][0] + shadowOffsetLng,
+      buildingCoords[i][1] + shadowOffsetLat
+    ]);
+  }
+
+  return shadowPolygon;
+};
+
+/**
  * Map3DBuildings Component - OneGeo-style 3D map
  */
 const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
@@ -154,6 +203,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   const [is3DMode, setIs3DMode] = useState(true);
   const [showFloorIndicator, setShowFloorIndicator] = useState(true);
   const [showFloorLabels, setShowFloorLabels] = useState(false);
+  const [showShadows, setShowShadows] = useState(true);
   const [show360Tour, setShow360Tour] = useState(false);
   const [isEnteringBuilding, setIsEnteringBuilding] = useState(false);
 
@@ -948,6 +998,124 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     }
   }, [mapLoaded, showFloorLabels, updateFloorLabels]);
 
+  // Update building shadows based on sun position
+  const updateBuildingShadows = useCallback(() => {
+    if (!map.current || !mapLoaded) return;
+
+    const mapInstance = map.current;
+    const lighting = TIME_LIGHTING[timelapse.timePeriod];
+
+    // Remove existing shadow layer if present
+    if (mapInstance.getLayer('building-shadows')) {
+      mapInstance.removeLayer('building-shadows');
+    }
+    if (mapInstance.getSource('shadow-data')) {
+      mapInstance.removeSource('shadow-data');
+    }
+
+    // Only show shadows if sun is above horizon and shadows are enabled
+    if (!showShadows || lighting.sunAltitude <= 0) return;
+
+    // Query visible buildings
+    const features = mapInstance.queryRenderedFeatures(undefined, {
+      layers: ['3d-buildings']
+    });
+
+    const shadowFeatures: GeoJSON.Feature[] = [];
+    const processedBuildings = new Set<string>();
+
+    features.forEach(feature => {
+      const props = feature.properties;
+      let height = 10; // Default height
+
+      if (props?.render_height) {
+        height = props.render_height;
+      } else if (props?.['building:levels']) {
+        height = props['building:levels'] * 3.5;
+      }
+
+      let coords: number[][] = [];
+      if (feature.geometry.type === 'Polygon') {
+        coords = (feature.geometry as GeoJSON.Polygon).coordinates[0];
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        coords = (feature.geometry as GeoJSON.MultiPolygon).coordinates[0][0];
+      }
+
+      if (coords.length < 3) return;
+
+      // Create unique key for building
+      const key = coords.slice(0, 3).map(c => `${c[0].toFixed(5)},${c[1].toFixed(5)}`).join('|');
+      if (processedBuildings.has(key)) return;
+      processedBuildings.add(key);
+
+      // Calculate shadow polygon
+      const shadowCoords = calculateBuildingShadow(
+        coords,
+        height,
+        lighting.sunAzimuth,
+        lighting.sunAltitude
+      );
+
+      if (shadowCoords.length > 0) {
+        shadowFeatures.push({
+          type: 'Feature',
+          properties: { height },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [shadowCoords]
+          }
+        });
+      }
+    });
+
+    if (shadowFeatures.length === 0) return;
+
+    // Add shadow source and layer
+    mapInstance.addSource('shadow-data', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: shadowFeatures
+      }
+    });
+
+    // Add shadow layer below buildings
+    mapInstance.addLayer({
+      id: 'building-shadows',
+      type: 'fill',
+      source: 'shadow-data',
+      paint: {
+        'fill-color': '#000000',
+        'fill-opacity': [
+          'interpolate',
+          ['linear'],
+          ['get', 'height'],
+          5, 0.15,  // Short buildings - lighter shadow
+          20, 0.25, // Medium buildings
+          50, 0.35  // Tall buildings - darker shadow
+        ]
+      }
+    }, '3d-buildings'); // Insert below 3d-buildings layer
+  }, [mapLoaded, timelapse.timePeriod, showShadows]);
+
+  // Update shadows when timelapse changes or showShadows toggles
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    // Initial shadow render
+    updateBuildingShadows();
+
+    // Update shadows when map moves (to recalculate for visible buildings)
+    const onIdle = () => updateBuildingShadows();
+    map.current.on('idle', onIdle);
+
+    return () => {
+      if (map.current) {
+        map.current.off('idle', onIdle);
+      }
+    };
+  }, [mapLoaded, timelapse.timePeriod, showShadows, updateBuildingShadows]);
+
   return (
     <div className="relative rounded-xl overflow-hidden shadow-xl" style={{ height }}>
       {/* Map container */}
@@ -1117,7 +1285,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         </button>
       )}
 
-      {/* 2D/3D Toggle and Floor Labels Toggle - top right, OneGeo style */}
+      {/* 2D/3D Toggle, Floor Labels Toggle, and Shadow Toggle - top right, OneGeo style */}
       {!show360Tour && (
         <div className="absolute top-3 sm:top-4 right-2 sm:right-4 z-10 flex flex-col gap-2">
           <button
@@ -1129,6 +1297,20 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             }`}
           >
             {is3DMode ? '2D' : '3D'}
+          </button>
+          <button
+            onClick={() => setShowShadows(!showShadows)}
+            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center gap-1 ${
+              showShadows
+                ? 'bg-amber-500 text-white border border-amber-400'
+                : 'bg-slate-900/90 text-white border border-slate-600'
+            }`}
+            title={t('property:map3d.shadows', 'Show Building Shadows')}
+          >
+            <span className="text-sm">☀️</span>
+            <span className="hidden sm:inline text-xs">
+              {showShadows ? t('property:map3d.shadowsOn', 'Shadows') : t('property:map3d.shadowsOff', 'Shadows')}
+            </span>
           </button>
           <button
             onClick={() => setShowFloorLabels(!showFloorLabels)}
