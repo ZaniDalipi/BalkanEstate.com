@@ -182,7 +182,7 @@ function generateProperty(sellerId: any, index: number): any {
   const beds = propertyType === 'land' || propertyType === 'commercial' ? 0 : getRandomInt(1, 6);
   const baths = propertyType === 'land' ? 0 : getRandomInt(1, 4);
   const sqft = propertyType === 'land' ? getRandomInt(500, 10000) : getRandomInt(40, 400);
-  const yearBuilt = propertyType === 'land' ? null : getRandomInt(1960, 2024);
+  const yearBuilt = getRandomInt(1960, 2024); // Required field
 
   const isSold = Math.random() < 0.15; // 15% sold
   const isPromoted = !isSold && Math.random() < 0.08; // 8% promoted
@@ -199,6 +199,7 @@ function generateProperty(sellerId: any, index: number): any {
     sellerId,
     createdByName: 'Demo Agent',
     createdByEmail: 'demo@balkanestate.com',
+    createdAsRole: 'agent', // Required field
     title: `${getRandomElement(titles[propertyType] || ['Property'])} in ${location.city}`,
     status: isSold ? 'sold' : 'active',
     price: getRandomPrice(propertyType, location.country),
