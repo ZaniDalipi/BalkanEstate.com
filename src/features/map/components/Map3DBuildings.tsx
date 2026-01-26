@@ -581,6 +581,107 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       });
     }
 
+    // Add floor number labels on the building
+    // Show: floor 1, every 5th floor, the target floor, and top floor
+    const floorsToLabel: number[] = [];
+
+    // Add floor 1
+    if (!floorsToLabel.includes(1)) floorsToLabel.push(1);
+
+    // Add every 5th floor
+    for (let f = 5; f <= totalFlrs; f += 5) {
+      if (!floorsToLabel.includes(f)) floorsToLabel.push(f);
+    }
+
+    // Add the target floor (apartment)
+    if (!floorsToLabel.includes(floorNum)) floorsToLabel.push(floorNum);
+
+    // Add top floor
+    if (!floorsToLabel.includes(totalFlrs)) floorsToLabel.push(totalFlrs);
+
+    // Sort floors
+    floorsToLabel.sort((a, b) => a - b);
+
+    // Find the south-facing edge of the building for label placement
+    const ring = scaledCoords[0];
+    let southEdgeStart = 0;
+    let minLat = Infinity;
+
+    // Find the vertex that is most south (lowest lat)
+    for (let i = 0; i < ring.length - 1; i++) {
+      if (ring[i][1] < minLat) {
+        minLat = ring[i][1];
+        southEdgeStart = i;
+      }
+    }
+
+    // Get the midpoint of the south edge
+    const nextIdx = (southEdgeStart + 1) % (ring.length - 1);
+    const labelLng = (ring[southEdgeStart][0] + ring[nextIdx][0]) / 2;
+    const labelLat = (ring[southEdgeStart][1] + ring[nextIdx][1]) / 2;
+
+    // Offset slightly outward from the building face
+    const labelOffset = 0.00006; // ~6m outward
+    const baseLabelLng = labelLng;
+    const baseLabelLat = labelLat - labelOffset;
+
+    // Remove existing floor labels
+    document.querySelectorAll('.floor-number-label').forEach(el => el.remove());
+
+    // Create floor number labels
+    floorsToLabel.forEach(floor => {
+      const isTargetFloor = floor === floorNum;
+      const floorCenter = (floor - 0.5) * adjustedFloorHeight;
+
+      const labelEl = document.createElement('div');
+      labelEl.className = 'floor-number-label';
+      labelEl.innerHTML = `
+        <div style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 28px;
+          height: 22px;
+          padding: 0 6px;
+          background: ${isTargetFloor ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'rgba(30, 41, 59, 0.95)'};
+          color: white;
+          font-size: 11px;
+          font-weight: bold;
+          border-radius: 6px;
+          border: 2px solid ${isTargetFloor ? '#86efac' : 'rgba(148, 163, 184, 0.5)'};
+          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+          white-space: nowrap;
+          ${isTargetFloor ? 'animation: floorLabelPulse 2s ease-in-out infinite;' : ''}
+        ">${floor}${isTargetFloor ? ' ←' : ''}</div>
+      `;
+
+      // Calculate vertical offset based on zoom level and floor height
+      const calculateFloorLabelOffset = (currentZoom: number) => {
+        const basePixelsPerMeter = 0.15;
+        const zoomFactor = Math.pow(2, currentZoom - 16);
+        const pixelsPerMeter = basePixelsPerMeter * zoomFactor;
+        return -(floorCenter * pixelsPerMeter);
+      };
+
+      const initialOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+      const floorLabel = new maplibregl.Marker({
+        element: labelEl,
+        anchor: 'right',
+        offset: [-8, initialOffset],
+      })
+        .setLngLat([baseLabelLng, baseLabelLat])
+        .addTo(mapInstance);
+
+      // Update marker offset when zoom changes
+      const updateLabelOffset = () => {
+        const newOffset = calculateFloorLabelOffset(mapInstance.getZoom());
+        floorLabel.setOffset([-8, newOffset]);
+      };
+
+      mapInstance.on('zoom', updateLabelOffset);
+      mapInstance.on('pitch', updateLabelOffset);
+    });
+
     // Add door icon directly on the highlighted floor for 360 tour
     if (floorNum > 0 && floorNum <= totalFlrs) {
       // Show door icon if 360 tour is available
@@ -1649,6 +1750,20 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         }
         .apartment-door-marker {
           z-index: 100;
+        }
+        .floor-number-label {
+          z-index: 90;
+          pointer-events: none;
+        }
+        @keyframes floorLabelPulse {
+          0%, 100% {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            transform: scale(1);
+          }
+          50% {
+            box-shadow: 0 2px 12px rgba(34,197,94,0.6), 0 0 20px rgba(34,197,94,0.4);
+            transform: scale(1.05);
+          }
         }
       `}</style>
     </div>
