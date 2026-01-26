@@ -108,6 +108,14 @@ const formatMeasureArea = (sqMeters: number): string => {
   return `${(sqMeters / 1000000).toFixed(2)} km²`;
 };
 
+// Convert lat/lng to Web Mercator (EPSG:3857) for WMS requests
+const latLngToWebMercator = (lat: number, lng: number): { x: number; y: number } => {
+  const earthRadius = 6378137; // Earth's radius in meters
+  const x = lng * (Math.PI / 180) * earthRadius;
+  const y = Math.log(Math.tan((90 + lat) * (Math.PI / 360))) * earthRadius;
+  return { x, y };
+};
+
 // Google Maps API key - falls back to empty string for development
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
 
@@ -892,6 +900,246 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     onRecenter();
   }, [map, userLocation, onRecenter]);
 
+  // Cadastre layer overlay effect
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+
+    // Remove existing cadastre overlay
+    if (cadastreLayerRef.current) {
+      map.overlayMapTypes.forEach((overlay, index) => {
+        if (overlay === cadastreLayerRef.current) {
+          map.overlayMapTypes.removeAt(index);
+        }
+      });
+      cadastreLayerRef.current = null;
+    }
+
+    if (!showCadastre) return;
+
+    // Get current map center to determine which country's cadastre to show
+    const mapCenter = map.getCenter();
+    if (!mapCenter) return;
+
+    const cadastreConfig = getCadastreLayerForLocation(mapCenter.lat(), mapCenter.lng());
+    if (!cadastreConfig) {
+      console.log('[Cadastre] No cadastre layer available for current location');
+      return;
+    }
+
+    console.log(`[Cadastre] Loading ${cadastreConfig.country} cadastre layer`);
+
+    // Create WMS tile overlay
+    const wmsLayer = new google.maps.ImageMapType({
+      getTileUrl: (coord, zoom) => {
+        // Only show cadastre at zoom levels >= minZoom
+        if (zoom < (cadastreConfig.minZoom || CADASTRE_MIN_ZOOM)) {
+          return '';
+        }
+
+        // Calculate tile bounds
+        const proj = map.getProjection();
+        if (!proj) return '';
+
+        const zfactor = Math.pow(2, zoom);
+        const tileSize = 256;
+
+        // Calculate world coordinates for tile corners
+        const topLeft = new google.maps.Point(
+          (coord.x * tileSize) / zfactor,
+          (coord.y * tileSize) / zfactor
+        );
+        const bottomRight = new google.maps.Point(
+          ((coord.x + 1) * tileSize) / zfactor,
+          ((coord.y + 1) * tileSize) / zfactor
+        );
+
+        // Convert to lat/lng
+        const sw = proj.fromPointToLatLng(new google.maps.Point(topLeft.x, bottomRight.y));
+        const ne = proj.fromPointToLatLng(new google.maps.Point(bottomRight.x, topLeft.y));
+
+        if (!sw || !ne) return '';
+
+        // Build WMS GetMap URL
+        const bbox = cadastreConfig.additionalParams?.CRS === 'EPSG:3857'
+          ? `${sw.lng()},${sw.lat()},${ne.lng()},${ne.lat()}`
+          : `${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}`;
+
+        const params = new URLSearchParams({
+          SERVICE: 'WMS',
+          VERSION: cadastreConfig.version || '1.3.0',
+          REQUEST: 'GetMap',
+          LAYERS: cadastreConfig.layers,
+          STYLES: '',
+          FORMAT: cadastreConfig.format || 'image/png',
+          TRANSPARENT: 'true',
+          WIDTH: '256',
+          HEIGHT: '256',
+          CRS: cadastreConfig.additionalParams?.CRS || 'EPSG:4326',
+          BBOX: bbox,
+        });
+
+        return `${cadastreConfig.wmsUrl}?${params.toString()}`;
+      },
+      tileSize: new google.maps.Size(256, 256),
+      opacity: 0.7,
+      name: 'Cadastre',
+    });
+
+    // Add to map
+    map.overlayMapTypes.push(wmsLayer);
+    cadastreLayerRef.current = wmsLayer;
+
+    // Update cadastre layer when map moves
+    const updateCadastre = () => {
+      const newCenter = map.getCenter();
+      if (!newCenter) return;
+
+      const newConfig = getCadastreLayerForLocation(newCenter.lat(), newCenter.lng());
+      if (newConfig?.countryCode !== cadastreConfig.countryCode) {
+        // Trigger re-render to switch cadastre source
+        setShowCadastre(false);
+        setTimeout(() => setShowCadastre(true), 100);
+      }
+    };
+
+    const listener = map.addListener('idle', updateCadastre);
+
+    return () => {
+      google.maps.event.removeListener(listener);
+      if (cadastreLayerRef.current) {
+        map.overlayMapTypes.forEach((overlay, index) => {
+          if (overlay === cadastreLayerRef.current) {
+            map.overlayMapTypes.removeAt(index);
+          }
+        });
+        cadastreLayerRef.current = null;
+      }
+    };
+  }, [map, isLoaded, showCadastre]);
+
+  // Climate risk layer overlay effect
+  const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
+
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+
+    // Remove existing climate overlay
+    if (climateLayerRef.current) {
+      map.overlayMapTypes.forEach((overlay, index) => {
+        if (overlay === climateLayerRef.current) {
+          map.overlayMapTypes.removeAt(index);
+        }
+      });
+      climateLayerRef.current = null;
+    }
+
+    if (selectedClimateRisk === 'none') return;
+
+    // Climate risk tile layer configurations using real APIs
+    const climateLayerConfigs: Record<string, { url: string; opacity: number; name: string }> = {
+      // OpenWeatherMap layers (free tier available)
+      flood: {
+        url: 'https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=demo',
+        opacity: 0.6,
+        name: 'Precipitation/Flood Risk'
+      },
+      // NASA FIRMS active fire data (free)
+      fire: {
+        url: 'https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/51e65c3412f9d1b15eddb27ab9c3b28c/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_24&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX={bbox}&WIDTH=256&HEIGHT=256',
+        opacity: 0.7,
+        name: 'Active Fires (NASA FIRMS)'
+      },
+      // Wind speed layer
+      wind: {
+        url: 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=demo',
+        opacity: 0.5,
+        name: 'Wind Speed'
+      },
+      // Air quality - OpenWeatherMap
+      air: {
+        url: 'https://tiles.aqicn.org/tiles/usepa-aqi/{z}/{x}/{y}.png',
+        opacity: 0.6,
+        name: 'Air Quality Index (WAQI)'
+      },
+      // Temperature/Heat
+      heat: {
+        url: 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=demo',
+        opacity: 0.5,
+        name: 'Temperature/Heat'
+      }
+    };
+
+    const config = climateLayerConfigs[selectedClimateRisk];
+    if (!config) return;
+
+    console.log(`[Climate] Loading ${config.name} layer`);
+
+    // Create tile overlay based on risk type
+    let climateLayer: google.maps.ImageMapType;
+
+    if (selectedClimateRisk === 'fire') {
+      // NASA FIRMS uses WMS format
+      climateLayer = new google.maps.ImageMapType({
+        getTileUrl: (coord, zoom) => {
+          const proj = map.getProjection();
+          if (!proj) return '';
+
+          const tileSize = 256;
+          const scale = Math.pow(2, zoom);
+
+          // Calculate bounds for this tile in Web Mercator
+          const worldCoordinate = (coord.x * tileSize) / scale;
+          const worldCoordinate2 = ((coord.x + 1) * tileSize) / scale;
+          const worldCoordinateY = (coord.y * tileSize) / scale;
+          const worldCoordinateY2 = ((coord.y + 1) * tileSize) / scale;
+
+          const sw = proj.fromPointToLatLng(new google.maps.Point(worldCoordinate, worldCoordinateY2));
+          const ne = proj.fromPointToLatLng(new google.maps.Point(worldCoordinate2, worldCoordinateY));
+
+          if (!sw || !ne) return '';
+
+          // Convert to Web Mercator coordinates for bbox
+          const swMerc = latLngToWebMercator(sw.lat(), sw.lng());
+          const neMerc = latLngToWebMercator(ne.lat(), ne.lng());
+
+          const bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
+
+          return `https://firms.modaps.eosdis.nasa.gov/mapserver/wms/fires/51e65c3412f9d1b15eddb27ab9c3b28c/?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=fires_viirs_24&STYLES=&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857&BBOX=${bbox}&WIDTH=256&HEIGHT=256`;
+        },
+        tileSize: new google.maps.Size(256, 256),
+        opacity: config.opacity,
+        name: config.name,
+      });
+    } else {
+      // Standard XYZ tile layers
+      climateLayer = new google.maps.ImageMapType({
+        getTileUrl: (coord, zoom) => {
+          return config.url
+            .replace('{z}', zoom.toString())
+            .replace('{x}', coord.x.toString())
+            .replace('{y}', coord.y.toString());
+        },
+        tileSize: new google.maps.Size(256, 256),
+        opacity: config.opacity,
+        name: config.name,
+      });
+    }
+
+    map.overlayMapTypes.push(climateLayer);
+    climateLayerRef.current = climateLayer;
+
+    return () => {
+      if (climateLayerRef.current) {
+        map.overlayMapTypes.forEach((overlay, index) => {
+          if (overlay === climateLayerRef.current) {
+            map.overlayMapTypes.removeAt(index);
+          }
+        });
+        climateLayerRef.current = null;
+      }
+    };
+  }, [map, isLoaded, selectedClimateRisk]);
+
   // Loading state
   if (loadError) {
     return (
@@ -950,6 +1198,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             streetViewControl: false,
             fullscreenControl: false,
             zoomControl: false,
+            rotateControl: false,
+            scaleControl: false,
+            panControl: false,
+            keyboardShortcuts: false,
             gestureHandling: 'greedy',
             styles: getMapStyles(),
             minZoom: 6,
@@ -1222,7 +1474,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Desktop Controls */}
         {!isMobile && (
-          <div className="absolute bottom-24 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+          <div className="absolute bottom-32 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
               <button
@@ -1375,6 +1627,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 <span className="hidden sm:inline">Measure</span>
               </button>
 
+              {/* Cadastre Layer Toggle */}
+              <button
+                onClick={() => setShowCadastre(!showCadastre)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  showCadastre ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title="Show cadastre parcels (zoom in for details)"
+              >
+                <span>📐</span>
+                <span className="hidden sm:inline">Cadastre</span>
+              </button>
+
               {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen(!isLegendOpen)}
@@ -1421,7 +1685,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         {/* Legend - bottom left */}
         {isLegendOpen && !isMobile && (
-          <div className="absolute bottom-24 left-4 z-[1000] animate-fade-in">
+          <div className="absolute bottom-32 left-4 z-[1000] animate-fade-in">
             <Legend />
           </div>
         )}
@@ -1430,7 +1694,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         {isMobile && (
           <>
             {/* Mobile layer menu FAB */}
-            <div className="absolute bottom-20 left-3 z-[1003]">
+            <div className="absolute bottom-28 left-3 z-[1003]">
               {isLayerMenuOpen && (
                 <div className="absolute bottom-full left-0 mb-3 animate-fade-in">
                   <div
@@ -1472,6 +1736,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     >
                       <span>🏛️</span>
                       <span>POI</span>
+                    </button>
+                    <button
+                      onClick={() => { setShowCadastre(!showCadastre); setIsLayerMenuOpen(false); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        showCadastre ? 'bg-orange-100 text-orange-700' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <span>📐</span>
+                      <span>Cadastre</span>
                     </button>
                   </div>
                 </div>
@@ -1542,7 +1815,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
             {/* Mobile Legend */}
             {isLegendOpen && (
-              <div className="absolute bottom-36 left-3 z-[1002] animate-fade-in">
+              <div className="absolute bottom-44 left-3 z-[1002] animate-fade-in">
                 <Legend />
               </div>
             )}
