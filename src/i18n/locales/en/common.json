@@ -248,6 +248,22 @@
     "floorPlan": "Floor Plan",
     "other": "Other"
   },
+  "hero": {
+    "findYour": "Find Your",
+    "dreamHome": "Dream Home",
+    "subtitle": "Discover thousands of properties across the Balkans with our AI-powered platform"
+  },
+  "features": {
+    "smartSearch": "Smart Search",
+    "verified": "Verified Listings",
+    "analytics": "Market Analytics",
+    "topAgents": "Top Agents"
+  },
+  "stats": {
+    "properties": "Properties",
+    "agents": "Agents",
+    "countries": "Countries"
+  },
   "footer": {
     "about": "About Us",
     "contact": "Contact",

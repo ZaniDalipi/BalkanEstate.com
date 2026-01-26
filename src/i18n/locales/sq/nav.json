@@ -42,10 +42,20 @@
     "question": "Si mund t'ju ndihmojmë sot?",
     "lookingToBuy": "Dua të blej",
     "buyDescription": "Gjeni shtëpinë e ëndrrave me mjetet tona të fuqishme të kërkimit dhe njoftime në kohë reale.",
+    "buySubtitle": "Filloni udhëtimin tuaj",
     "startSearching": "Fillo Kërkimin",
     "wantToSell": "Dua të shes",
     "sellDescription": "Publikoni pronën tuaj, arrini mijëra blerës potencial dhe përdorni mjetet tona të mençura.",
-    "listProperty": "Listo Pronën Time"
+    "sellSubtitle": "Maksimizoni vlerën",
+    "listProperty": "Listo Pronën Time",
+    "activeListings": "1,200+ Aktive",
+    "freeValuation": "Vlerësim Falas",
+    "aiMatching": "Përputhje AI",
+    "virtualTours": "Ture Virtuale",
+    "priceAlerts": "Alarme Çmimesh",
+    "proPhotos": "Foto Profesionale",
+    "maxExposure": "Ekspozim Maksimal",
+    "expertSupport": "Mbështetje Eksperte"
   },
   "mobile": {
     "menu": "Menuja",
