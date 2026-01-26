@@ -768,20 +768,20 @@ const AuthPage: React.FC = () => {
 
                                 {/* Main container with floating animation */}
                                 <div
-                                    className="relative p-5 rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-2xl shadow-primary/20 overflow-hidden"
+                                    className="relative p-4 rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-2xl shadow-primary/20"
                                     style={{
                                         animation: 'float 4s ease-in-out infinite',
                                     }}
                                 >
                                     {/* Inner shine effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-white/40 pointer-events-none" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-white/40 pointer-events-none rounded-3xl" />
 
                                     {/* Animated sparkles */}
                                     <div className="absolute top-2 right-2 w-2 h-2 bg-blue-400 rounded-full opacity-60 animate-ping" style={{ animationDuration: '2s' }} />
                                     <div className="absolute bottom-3 left-3 w-1.5 h-1.5 bg-primary rounded-full opacity-50 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }} />
 
                                     {/* Logo SVG - Full size display */}
-                                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
                                         <LogoIcon className="w-full h-full drop-shadow-lg" />
                                     </div>
                                 </div>
