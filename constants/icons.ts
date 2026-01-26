@@ -118,8 +118,28 @@ export const ArrowTopRightOnSquareIcon: React.FC<{ className?: string }> = ({ cl
 export const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement('svg', { className: className, viewBox: "0 0 24 24", xmlns: "http://www.w3.org/2000/svg" },
         React.createElement('g', { fillRule: "evenodd" },
-            React.createElement('path', { fill: "#003A96", d: "M12 21V5L10 7V23L12 21Z M4 21V10L2 12V23L4 21Z" }),
-            React.createElement('path', { fill: "#0252CD", d: "M12 5H20V21H12V5Z M4 10H10V21H4V10Z" })
+            // Left Building - 2 stacked blocks
+            // Bottom block
+            React.createElement('path', { fill: "#0252CD", d: "M2 21V16L5 14.5V21H2Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M5 14.5L8 16V21H5V14.5Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M2 16L5 14.5L8 16L5 17.5L2 16Z" }),
+            // Top block
+            React.createElement('path', { fill: "#0252CD", d: "M3 15V11L6 9.5V15H3Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M6 9.5L9 11V15H6V9.5Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M3 11L6 9.5L9 11L6 12.5L3 11Z" }),
+            // Right Building - 3 stacked blocks
+            // Bottom block
+            React.createElement('path', { fill: "#0252CD", d: "M11 21V16L14 14V21H11Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M14 14L18 16V21H14V14Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M11 16L14 14L18 16L14 18L11 16Z" }),
+            // Middle block
+            React.createElement('path', { fill: "#0252CD", d: "M12 15V10L15 8V15H12Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M15 8L19 10V15H15V8Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M12 10L15 8L19 10L15 12L12 10Z" }),
+            // Top block
+            React.createElement('path', { fill: "#0252CD", d: "M13 9V5L16 3V9H13Z" }),
+            React.createElement('path', { fill: "#4A8FE7", d: "M16 3L20 5V9H16V3Z" }),
+            React.createElement('path', { fill: "#6BA3F5", d: "M13 5L16 3L20 5L16 7L13 5Z" })
         )
     )
 );
