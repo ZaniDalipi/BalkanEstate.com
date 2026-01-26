@@ -5,6 +5,7 @@
  * - Smooth pan/zoom with native GPU acceleration
  * - Marker clustering for performance with many listings
  * - AdvancedMarkerElement for custom styled markers
+ * - All layer options from Leaflet implementation
  */
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -15,6 +16,7 @@ import {
   OverlayView,
   OverlayViewF,
   Rectangle,
+  HeatmapLayer,
 } from '@react-google-maps/api';
 import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
 import { Property } from '@/types';
@@ -34,7 +36,7 @@ import L from 'leaflet';
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
 
 // Libraries to load
-const GOOGLE_MAPS_LIBRARIES: ('places' | 'drawing' | 'geometry' | 'visualization' | 'marker')[] = ['places', 'geometry', 'marker'];
+const GOOGLE_MAPS_LIBRARIES: ('places' | 'drawing' | 'geometry' | 'visualization' | 'marker')[] = ['places', 'geometry', 'marker', 'visualization'];
 
 // Map container styles
 const mapContainerStyle = {
@@ -71,18 +73,27 @@ const PROMOTION_TIER_COLORS: Record<string, string> = {
   standard: '#9ca3af',
 };
 
+// Map style options
+type MapStyleType = 'clean' | 'color' | 'street' | 'satellite' | 'hybrid';
+
+// Climate risk types
+type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
+
 // Map styles for clean look (properties stand out)
-const mapStyles: google.maps.MapTypeStyle[] = [
-  {
-    featureType: 'poi',
-    elementType: 'labels',
-    stylers: [{ visibility: 'off' }],
-  },
-  {
-    featureType: 'transit',
-    elementType: 'labels',
-    stylers: [{ visibility: 'off' }],
-  },
+const cleanMapStyles: google.maps.MapTypeStyle[] = [
+  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'road', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9d7e8' }] },
+  { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+];
+
+// Color/Voyager style (shows neighborhoods)
+const colorMapStyles: google.maps.MapTypeStyle[] = [
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#c8e6c9' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#b3d9ff' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#ffeb99' }] },
 ];
 
 /**
@@ -124,123 +135,6 @@ interface GoogleMapComponentProps {
 }
 
 /**
- * Property Marker Component - Custom styled marker with price
- */
-const PropertyMarker: React.FC<{
-  property: Property;
-  isHovered: boolean;
-  onClick: () => void;
-  zoom: number;
-}> = ({ property, isHovered, onClick, zoom }) => {
-  const price = formatMarkerPrice(property.price);
-  const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
-
-  // Check if actively promoted
-  const isActivelyPromoted = property.isPromoted &&
-    property.promotionEndDate &&
-    property.promotionEndDate > Date.now();
-
-  // Get border color based on promotion tier
-  let borderColor = 'white';
-  if (isActivelyPromoted && property.promotionTier) {
-    borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
-  }
-
-  // Scale based on zoom
-  const scale = zoom >= 14 ? 1 : zoom >= 12 ? 0.9 : zoom >= 10 ? 0.85 : 0.8;
-  const hoverScale = isHovered ? 1.15 : 1;
-
-  return (
-    <div
-      onClick={onClick}
-      className="cursor-pointer transition-all duration-200"
-      style={{
-        transform: `scale(${scale * hoverScale})`,
-        transformOrigin: 'center bottom',
-        zIndex: isHovered ? 1000 : isActivelyPromoted ? 100 : 1,
-      }}
-    >
-      {/* Simple marker for zoomed out, detailed for zoomed in */}
-      {zoom < 12 ? (
-        // Simple pill marker
-        <div
-          className="px-2 py-1 rounded-full font-bold text-white text-xs shadow-lg"
-          style={{
-            backgroundColor: color,
-            border: `2px solid ${borderColor}`,
-            filter: isHovered ? 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))',
-          }}
-        >
-          {price}
-        </div>
-      ) : (
-        // Detailed house marker
-        <div className="relative">
-          <svg
-            width="52"
-            height="42"
-            viewBox="0 0 70 56"
-            fill="none"
-            style={{
-              filter: isHovered
-                ? 'drop-shadow(0 6px 16px rgba(0,0,0,0.4))'
-                : 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))',
-            }}
-          >
-            <path d="M35 56L25 44H45L35 56Z" fill="#003A96" />
-            <path
-              d="M65 24.5V44H5V24.5L35 5L65 24.5Z"
-              fill={color}
-              stroke={borderColor}
-              strokeWidth={isActivelyPromoted ? 3 : 2}
-            />
-            <text
-              x="35"
-              y="30"
-              fontFamily="Inter, sans-serif"
-              fontSize="14"
-              fontWeight="bold"
-              fill="white"
-              textAnchor="middle"
-              dominantBaseline="middle"
-            >
-              {price}
-            </text>
-          </svg>
-        </div>
-      )}
-    </div>
-  );
-};
-
-/**
- * Cluster Marker Component - Shows count of properties in cluster
- */
-const ClusterMarker: React.FC<{
-  count: number;
-  onClick: () => void;
-}> = ({ count, onClick }) => {
-  // Size based on count
-  const size = count < 10 ? 36 : count < 100 ? 44 : 52;
-
-  return (
-    <div
-      onClick={onClick}
-      className="cursor-pointer flex items-center justify-center rounded-full font-bold text-white shadow-lg transition-transform hover:scale-110"
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: '#0252CD',
-        border: '3px solid white',
-        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))',
-      }}
-    >
-      {count}
-    </div>
-  );
-};
-
-/**
  * Property Popup Component
  */
 const PropertyPopup: React.FC<{
@@ -253,7 +147,6 @@ const PropertyPopup: React.FC<{
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
     : property.imageUrl;
 
-  // Check if actively promoted
   const isActivelyPromoted = property.isPromoted &&
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
@@ -264,7 +157,6 @@ const PropertyPopup: React.FC<{
       style={{ width: 220, maxWidth: '90vw' }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Image */}
       <div className="relative h-32 bg-gray-100">
         {imageUrl ? (
           <img src={imageUrl} alt={property.title || property.address} className="w-full h-full object-cover" />
@@ -280,7 +172,6 @@ const PropertyPopup: React.FC<{
         >
           <XCircleIcon className="w-4 h-4 text-gray-600" />
         </button>
-        {/* Promotion badge */}
         {isActivelyPromoted && property.promotionTier && (
           <div
             className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow"
@@ -302,8 +193,6 @@ const PropertyPopup: React.FC<{
           </span>
         </div>
       </div>
-
-      {/* Content */}
       <div className="p-3">
         <h3 className="font-bold text-sm text-gray-900 line-clamp-1">
           {property.title || property.address}
@@ -312,8 +201,6 @@ const PropertyPopup: React.FC<{
           <span>📍</span>
           {property.city}, {property.country}
         </p>
-
-        {/* Stats */}
         {property.propertyType === 'land' ? (
           <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
             <span className="flex items-center gap-1">
@@ -323,21 +210,11 @@ const PropertyPopup: React.FC<{
           </div>
         ) : (
           <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
-            <span className="flex items-center gap-1">
-              <span>🛏️</span>
-              <b>{property.beds}</b>
-            </span>
-            <span className="flex items-center gap-1">
-              <span>🚿</span>
-              <b>{property.baths}</b>
-            </span>
-            <span className="flex items-center gap-1">
-              <span>📐</span>
-              <b>{property.sqft}</b> m²
-            </span>
+            <span className="flex items-center gap-1"><span>🛏️</span><b>{property.beds}</b></span>
+            <span className="flex items-center gap-1"><span>🚿</span><b>{property.baths}</b></span>
+            <span className="flex items-center gap-1"><span>📐</span><b>{property.sqft}</b> m²</span>
           </div>
         )}
-
         <button
           onClick={onViewDetails}
           className="w-full mt-3 py-2.5 bg-primary hover:bg-primary-dark text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1"
@@ -379,6 +256,43 @@ const Legend: React.FC = () => {
 };
 
 /**
+ * Climate Risk Legend Component
+ */
+const ClimateRiskLegend: React.FC<{ riskType: ClimateRiskType }> = ({ riskType }) => {
+  const { t } = useTranslation(['search']);
+
+  if (riskType === 'none') return null;
+
+  const riskConfig: Record<ClimateRiskType, { label: string; colors: string[]; labels: string[] }> = {
+    none: { label: '', colors: [], labels: [] },
+    flood: { label: t('search:map.climateRisks.flood', 'Flood Risk'), colors: ['#e3f2fd', '#64b5f6', '#1976d2', '#0d47a1'], labels: ['Low', 'Moderate', 'High', 'Severe'] },
+    fire: { label: t('search:map.climateRisks.fire', 'Fire Risk'), colors: ['#fff3e0', '#ffb74d', '#f57c00', '#bf360c'], labels: ['Low', 'Moderate', 'High', 'Severe'] },
+    wind: { label: t('search:map.climateRisks.wind', 'Wind Risk'), colors: ['#e8f5e9', '#81c784', '#388e3c', '#1b5e20'], labels: ['Calm', 'Breezy', 'Windy', 'Strong'] },
+    air: { label: t('search:map.climateRisks.air', 'Air Quality'), colors: ['#e8f5e9', '#fff59d', '#ff8a65', '#b71c1c'], labels: ['Good', 'Moderate', 'Poor', 'Hazardous'] },
+    heat: { label: t('search:map.climateRisks.heat', 'Heat Risk'), colors: ['#e3f2fd', '#fff59d', '#ff8a65', '#d32f2f'], labels: ['Cool', 'Warm', 'Hot', 'Extreme'] },
+  };
+
+  const config = riskConfig[riskType];
+
+  return (
+    <div
+      className="px-3 py-2 rounded-xl shadow-lg border border-white/30"
+      style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(12px)' }}
+    >
+      <p className="text-xs font-semibold text-gray-700 mb-2">{config.label}</p>
+      <div className="flex gap-1">
+        {config.colors.map((color, i) => (
+          <div key={i} className="flex flex-col items-center">
+            <div className="w-6 h-3 rounded" style={{ backgroundColor: color }} />
+            <span className="text-[8px] text-gray-500 mt-0.5">{config.labels[i]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/**
  * Main GoogleMapComponent
  */
 const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
@@ -388,7 +302,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   onSaveSearch,
   isSaving,
   isAuthenticated,
-  mapBounds,
   drawnBounds,
   onDrawComplete,
   isDrawing,
@@ -397,7 +310,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   onFlyComplete,
   onRecenter,
   isMobile,
-  searchMode,
   hoveredPropertyId,
 }) => {
   const { t } = useTranslation(['search', 'property']);
@@ -408,14 +320,20 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+
+  // UI state - matching Leaflet options
+  const [mapStyle, setMapStyle] = useState<MapStyleType>('street');
   const [isLegendOpen, setIsLegendOpen] = useState(false);
-  const [mapType, setMapType] = useState<'roadmap' | 'satellite' | 'hybrid'>('roadmap');
+  const [showHeatMap, setShowHeatMap] = useState(false);
+  const [showLandmarks, setShowLandmarks] = useState(false);
+  const [selectedClimateRisk, setSelectedClimateRisk] = useState<ClimateRiskType>('none');
+  const [isClimateMenuOpen, setIsClimateMenuOpen] = useState(false);
+  const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false);
 
   // Refs
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
   const markerDivsRef = useRef<Map<string, HTMLDivElement>>(new Map());
-  const isInitialLoadRef = useRef(true);
 
   // Load Google Maps API
   const { isLoaded, loadError } = useJsApiLoader({
@@ -430,6 +348,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     );
   }, [properties]);
 
+  // Heat map data
+  const heatMapData = useMemo(() => {
+    if (!isLoaded || !showHeatMap) return [];
+    return validProperties.map(p => ({
+      location: new google.maps.LatLng(p.lat, p.lng),
+      weight: Math.min(p.price / 100000, 10), // Weight by price
+    }));
+  }, [validProperties, isLoaded, showHeatMap]);
+
   // Initial center from user location
   const initialCenter = useMemo(() => {
     if (userLocation) {
@@ -437,6 +364,33 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
     return DEFAULT_CENTER;
   }, [userLocation]);
+
+  // Get map type ID based on style
+  const getMapTypeId = useCallback((): google.maps.MapTypeId => {
+    switch (mapStyle) {
+      case 'satellite':
+        return google.maps.MapTypeId.SATELLITE;
+      case 'hybrid':
+        return google.maps.MapTypeId.HYBRID;
+      default:
+        return google.maps.MapTypeId.ROADMAP;
+    }
+  }, [mapStyle]);
+
+  // Get map styles based on style type
+  const getMapStyles = useCallback((): google.maps.MapTypeStyle[] => {
+    switch (mapStyle) {
+      case 'clean':
+        return cleanMapStyles;
+      case 'color':
+        return colorMapStyles;
+      default:
+        return showLandmarks ? [] : [
+          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+        ];
+    }
+  }, [mapStyle, showLandmarks]);
 
   // Handle map load
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
@@ -446,12 +400,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     const clusterer = new MarkerClusterer({
       map: mapInstance,
       algorithm: new SuperClusterAlgorithm({
-        radius: 100, // Larger radius for better clustering
-        maxZoom: 15, // Stop clustering at zoom 15+
+        radius: 100,
+        maxZoom: 15,
       }),
       renderer: {
         render: ({ count, position }) => {
-          // Create custom cluster marker
           const div = document.createElement('div');
           div.className = 'cluster-marker';
           const size = count < 10 ? 40 : count < 50 ? 48 : count < 100 ? 56 : 64;
@@ -515,7 +468,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       setZoom(currentZoom);
       setCenter({ lat: mapCenter.lat(), lng: mapCenter.lng() });
 
-      // Convert Google bounds to Leaflet bounds for compatibility
       const ne = bounds.getNorthEast();
       const sw = bounds.getSouthWest();
       const leafletBounds = L.latLngBounds(
@@ -528,20 +480,24 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [map, onMapMove]);
 
+  // Update map style when it changes
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+    map.setMapTypeId(getMapTypeId());
+    map.setOptions({ styles: getMapStyles() });
+  }, [map, mapStyle, showLandmarks, isLoaded, getMapTypeId, getMapStyles]);
+
   // Update markers when properties change
   useEffect(() => {
     if (!map || !clustererRef.current || !isLoaded) return;
 
-    // Clear existing markers
     clustererRef.current.clearMarkers();
     markersRef.current.clear();
     markerDivsRef.current.clear();
 
-    // Create new markers
     const markers: google.maps.marker.AdvancedMarkerElement[] = [];
 
     validProperties.forEach((property) => {
-      // Create marker content div
       const markerDiv = document.createElement('div');
       markerDiv.className = 'property-marker';
 
@@ -555,7 +511,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         borderWidth = 3;
       }
 
-      // Simple pill marker style with smooth transitions
       markerDiv.style.cssText = `
         padding: 5px 10px;
         background: ${color};
@@ -574,7 +529,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       `;
       markerDiv.textContent = price;
 
-      // Hover effects
       markerDiv.addEventListener('mouseenter', () => {
         markerDiv.style.transform = 'scale(1.2) translateY(-2px)';
         markerDiv.style.boxShadow = '0 6px 16px rgba(0,0,0,0.35)';
@@ -586,17 +540,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
       });
 
-      // Click to show popup
       markerDiv.addEventListener('click', (e) => {
         e.stopPropagation();
         setSelectedProperty(property);
-        // Pan map to center on property
         if (map) {
           map.panTo({ lat: property.lat, lng: property.lng });
         }
       });
 
-      // Create advanced marker
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: property.lat, lng: property.lng },
         content: markerDiv,
@@ -608,7 +559,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       markerDivsRef.current.set(property.id, markerDiv);
     });
 
-    // Add markers to clusterer
     clustererRef.current.addMarkers(markers);
   }, [validProperties, map, isLoaded]);
 
@@ -633,7 +583,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   useEffect(() => {
     if (!map || !flyToTarget) return;
 
-    // Use smooth animation
     map.panTo({ lat: flyToTarget.center[0], lng: flyToTarget.center[1] });
     setTimeout(() => {
       if (map) {
@@ -641,7 +590,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       }
     }, 300);
 
-    // Call complete after animation
     setTimeout(onFlyComplete, 800);
   }, [flyToTarget, map, onFlyComplete]);
 
@@ -719,18 +667,45 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               latLngBounds: BALKAN_BOUNDS,
               strictBounds: false,
             },
-            mapTypeId: mapType,
+            mapTypeId: getMapTypeId(),
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: false,
             zoomControl: false,
             gestureHandling: 'greedy',
-            styles: mapStyles,
+            styles: getMapStyles(),
             minZoom: 6,
             maxZoom: 21,
-            mapId: 'balkan-estate-map', // Required for AdvancedMarkerElement
+            mapId: 'balkan-estate-map',
           }}
         >
+          {/* Heat map layer */}
+          {showHeatMap && heatMapData.length > 0 && (
+            <HeatmapLayer
+              data={heatMapData}
+              options={{
+                radius: 30,
+                opacity: 0.6,
+                gradient: [
+                  'rgba(0, 255, 255, 0)',
+                  'rgba(0, 255, 255, 1)',
+                  'rgba(0, 191, 255, 1)',
+                  'rgba(0, 127, 255, 1)',
+                  'rgba(0, 63, 255, 1)',
+                  'rgba(0, 0, 255, 1)',
+                  'rgba(0, 0, 223, 1)',
+                  'rgba(0, 0, 191, 1)',
+                  'rgba(0, 0, 159, 1)',
+                  'rgba(0, 0, 127, 1)',
+                  'rgba(63, 0, 91, 1)',
+                  'rgba(127, 0, 63, 1)',
+                  'rgba(191, 0, 31, 1)',
+                  'rgba(255, 0, 0, 1)',
+                ],
+              }}
+            />
+          )}
+
           {/* Property popup */}
           {selectedProperty && (
             <OverlayViewF
@@ -768,7 +743,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           <span>🔍{zoom.toFixed(1)}/21 📍{center.lat.toFixed(3)},{center.lng.toFixed(3)} 📌{validProperties.length}</span>
         </div>
 
-        {/* Controls - Desktop */}
+        {/* Climate Risk Legend */}
+        {selectedClimateRisk !== 'none' && (
+          <div className="absolute top-14 left-4 z-[1000]">
+            <ClimateRiskLegend riskType={selectedClimateRisk} />
+          </div>
+        )}
+
+        {/* Desktop Controls */}
         {!isMobile && (
           <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
@@ -783,28 +765,40 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
               <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full">
                 <button
-                  onClick={() => setMapType('roadmap')}
+                  onClick={() => setMapStyle('clean')}
                   className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                    mapType === 'roadmap' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
+                    mapStyle === 'clean' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                   }`}
+                  title="Clean, minimal - properties stand out"
+                >
+                  {t('search:map.clean', 'Clean')}
+                </button>
+                <button
+                  onClick={() => setMapStyle('color')}
+                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                    mapStyle === 'color' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
+                  }`}
+                  title="Shows neighborhoods, parks, amenities"
+                >
+                  {t('search:map.color', 'Color')}
+                </button>
+                <button
+                  onClick={() => setMapStyle('street')}
+                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                    mapStyle === 'street' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
+                  }`}
+                  title="Google Maps street view"
                 >
                   {t('search:map.street', 'Street')}
                 </button>
                 <button
-                  onClick={() => setMapType('satellite')}
+                  onClick={() => setMapStyle('satellite')}
                   className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                    mapType === 'satellite' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
+                    mapStyle === 'satellite' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
                   }`}
+                  title="Aerial/satellite imagery"
                 >
                   {t('search:map.satellite', 'Satellite')}
-                </button>
-                <button
-                  onClick={() => setMapType('hybrid')}
-                  className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                    mapType === 'hybrid' ? 'bg-white shadow text-primary' : 'text-neutral-600 hover:bg-white/50'
-                  }`}
-                >
-                  Hybrid
                 </button>
               </div>
 
@@ -823,6 +817,66 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
             {/* Layer toggles */}
             <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10">
+              {/* Climate Risks Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsClimateMenuOpen(!isClimateMenuOpen)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                    isClimateMenuOpen || selectedClimateRisk !== 'none'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'
+                  }`}
+                >
+                  <span>🌡️</span>
+                  <span>{t('search:map.climateRisks.title', 'Climate')}</span>
+                  <svg className={`w-3 h-3 transition-transform ${isClimateMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isClimateMenuOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 min-w-[160px]">
+                    {(['none', 'flood', 'fire', 'wind', 'air', 'heat'] as ClimateRiskType[]).map((risk) => (
+                      <button
+                        key={risk}
+                        onClick={() => { setSelectedClimateRisk(risk); setIsClimateMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                          selectedClimateRisk === risk ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-700'
+                        }`}
+                      >
+                        {risk === 'none' ? '✕ None' : risk === 'flood' ? '💧 Flood' : risk === 'fire' ? '🔥 Fire' : risk === 'wind' ? '💨 Wind' : risk === 'air' ? '🌬️ Air Quality' : '☀️ Heat'}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="w-px h-5 bg-gray-300/50" />
+
+              {/* Heat Map Toggle */}
+              <button
+                onClick={() => setShowHeatMap(!showHeatMap)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  showHeatMap ? 'bg-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title="Heat Map"
+              >
+                <span>🔥</span>
+                <span className="hidden sm:inline">Heat</span>
+              </button>
+
+              {/* Landmarks Toggle */}
+              <button
+                onClick={() => setShowLandmarks(!showLandmarks)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  showLandmarks ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title="Show POI"
+              >
+                <span>🏛️</span>
+                <span className="hidden sm:inline">POI</span>
+              </button>
+
+              {/* Legend Toggle */}
               <button
                 onClick={() => setIsLegendOpen(!isLegendOpen)}
                 className={`flex items-center gap-1 px-2.5 py-2.5 text-xs font-semibold rounded-full transition-all ${
@@ -873,66 +927,118 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           </div>
         )}
 
-        {/* Mobile controls */}
+        {/* Mobile Controls */}
         {isMobile && (
-          <div className="absolute top-16 right-2 z-[999]">
-            <div className="flex flex-col gap-1.5 items-end">
-              <div
-                className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  backdropFilter: 'blur(20px) saturate(180%)',
-                }}
-              >
-                <button
-                  onClick={() => setMapType(mapType === 'roadmap' ? 'satellite' : 'roadmap')}
-                  className="px-2.5 py-2 text-xs font-semibold rounded-xl text-gray-700 hover:bg-white/50"
-                >
-                  {mapType === 'roadmap' ? '🛰️' : '🗺️'}
-                </button>
-                <button
-                  onClick={handleRecenter}
-                  className="p-2 rounded-xl hover:bg-white/50 text-neutral-600"
-                >
-                  <CrosshairsIcon className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={onDrawStart}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all ${
-                    isDrawing ? 'bg-red-500 text-white' : 'bg-neutral-800 text-white'
-                  }`}
-                >
-                  {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
-                </button>
-              </div>
-
-              {drawnBounds && !isDrawing && (
-                <div
-                  className="flex items-center gap-2 p-2 rounded-2xl shadow-2xl border border-white/40"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.92)',
-                    backdropFilter: 'blur(20px) saturate(200%)',
-                  }}
-                >
-                  {isAuthenticated && (
-                    <button
-                      onClick={onSaveSearch}
-                      disabled={isSaving}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl disabled:opacity-50"
-                    >
-                      <SearchPlusIcon className="w-4 h-4" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => onDrawComplete(null)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl"
+          <>
+            {/* Mobile layer menu FAB */}
+            <div className="absolute bottom-20 left-3 z-[1003]">
+              {isLayerMenuOpen && (
+                <div className="absolute bottom-full left-0 mb-3 animate-fade-in">
+                  <div
+                    className="flex flex-col gap-1 p-2 rounded-2xl shadow-2xl border border-white/40"
+                    style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)' }}
                   >
-                    <XCircleIcon className="w-4 h-4" />
-                  </button>
+                    <button
+                      onClick={() => { setIsLegendOpen(!isLegendOpen); setIsLayerMenuOpen(false); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        isLegendOpen ? 'bg-amber-100 text-amber-700' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <MapLegendIcon className="w-4 h-4" />
+                      <span>Legend</span>
+                    </button>
+                    <button
+                      onClick={() => { setShowHeatMap(!showHeatMap); setIsLayerMenuOpen(false); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        showHeatMap ? 'bg-orange-100 text-orange-700' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <span>🔥</span>
+                      <span>Heat Map</span>
+                    </button>
+                    <button
+                      onClick={() => { setShowLandmarks(!showLandmarks); setIsLayerMenuOpen(false); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        showLandmarks ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <span>🏛️</span>
+                      <span>POI</span>
+                    </button>
+                  </div>
                 </div>
               )}
+              <button
+                onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
+                className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all ${
+                  isLayerMenuOpen ? 'bg-primary text-white' : 'bg-white text-gray-700'
+                }`}
+              >
+                <span className="text-lg">📊</span>
+              </button>
             </div>
-          </div>
+
+            {/* Mobile controls - top right */}
+            <div className="absolute top-16 right-2 z-[999]">
+              <div className="flex flex-col gap-1.5 items-end">
+                <div
+                  className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
+                  style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(20px)' }}
+                >
+                  <button
+                    onClick={() => setMapStyle(mapStyle === 'street' ? 'satellite' : 'street')}
+                    className="px-2.5 py-2 text-xs font-semibold rounded-xl text-gray-700 hover:bg-white/50"
+                  >
+                    {mapStyle === 'satellite' || mapStyle === 'hybrid' ? '🗺️' : '🛰️'}
+                  </button>
+                  <button
+                    onClick={handleRecenter}
+                    className="p-2 rounded-xl hover:bg-white/50 text-neutral-600"
+                  >
+                    <CrosshairsIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={onDrawStart}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all ${
+                      isDrawing ? 'bg-red-500 text-white' : 'bg-neutral-800 text-white'
+                    }`}
+                  >
+                    {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {drawnBounds && !isDrawing && (
+                  <div
+                    className="flex items-center gap-2 p-2 rounded-2xl shadow-2xl border border-white/40"
+                    style={{ background: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(20px)' }}
+                  >
+                    {isAuthenticated && (
+                      <button
+                        onClick={onSaveSearch}
+                        disabled={isSaving}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl disabled:opacity-50"
+                      >
+                        <SearchPlusIcon className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => onDrawComplete(null)}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl"
+                    >
+                      <XCircleIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile Legend */}
+            {isLegendOpen && (
+              <div className="absolute bottom-36 left-3 z-[1002] animate-fade-in">
+                <Legend />
+              </div>
+            )}
+          </>
         )}
       </div>
     </HighlightedPropertiesProvider>
