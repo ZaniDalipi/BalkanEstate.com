@@ -56,8 +56,8 @@
     "newMessage": "Mesazh i ri nga {{name}}",
     "newProperty": "Pronë e re që përputhet me kërkimin tuaj",
     "priceReduced": "Çmimi u ul në pronën e ruajtur",
-    "propertyViewed": "Shpallja juaj u shikua {{count}} herë",
-    "newInquiry": "Kërkesë e re për shpalljen tuaj"
+    "propertyViewed": "Listimi juaj u shikua {{count}} herë",
+    "newInquiry": "Kërkesë e re për listimen tuaj"
   },
   "toast": {
     "success": "Sukses!",
@@ -80,8 +80,8 @@
   "empty": {
     "favorites": "Nuk ka prona të ruajtura ende",
     "favoritesHint": "Ruani pronat që ju pëlqejnë për t'i parë më vonë",
-    "listings": "Nuk ka shpallje ende",
-    "listingsHint": "Krijoni shpalljen tuaj të parë",
+    "listings": "Nuk ka listime ende",
+    "listingsHint": "Krijoni listimen tuaj të parë",
     "searches": "Nuk ka kërkime të ruajtura",
     "searchesHint": "Ruani kërkimet për t'u njoftuar për prona të reja"
   },

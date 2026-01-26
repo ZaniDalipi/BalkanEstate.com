@@ -1,9 +1,9 @@
 {
   "title": "Llogaria Ime",
-  "description": "Menaxho llogarinë tuaj në Balkan Estate, shpalljet dhe abonimin.",
+  "description": "Menaxho llogarinë tuaj në Balkan Estate, listimet dhe abonimin.",
   "mustBeLoggedIn": "Duhet të jeni i identifikuar për të parë këtë faqe.",
   "tabs": {
-    "myListings": "Shpalljet e Mia",
+    "myListings": "Listimet e Mia",
     "promotions": "Promovimet e Mia",
     "performance": "Performanca",
     "subscription": "Abonimi",
@@ -12,14 +12,14 @@
   },
   "promotions": {
     "title": "Promovimet e Mia",
-    "subtitle": "Menaxho shpalljet e promovuara",
+    "subtitle": "Menaxho listimet e promovuara",
     "noActive": "Nuk Ka Promovime Aktive",
     "noExpired": "Nuk Ka Promovime të Skaduara",
     "noPromotions": "Asnjë Promovim Ende",
-    "promoteHint": "Promovo shpalljet tuaja për të marrë më shumë dukshmëri!",
+    "promoteHint": "Promovo listimet tuaja për të marrë më shumë dukshmëri!",
     "historyHint": "Historia e promovimeve tuaja do të shfaqet këtu.",
-    "promoteButton": "Promovo një Shpallje",
-    "viewListing": "Shiko Shpalljen",
+    "promoteButton": "Promovo një Listim",
+    "viewListing": "Shiko Listimin",
     "extend": "Zgjat",
     "timeRemaining": "Koha e Mbetur",
     "expired": "Skaduar",
@@ -169,8 +169,8 @@
     "inquiries": "Kërkesa Totale",
     "saves": "Ruajtje Totale",
     "shares": "Shpërndarje Totale",
-    "activeListings": "Shpallje Aktive",
-    "soldListings": "Shpallje të Shitura",
+    "activeListings": "Listime Aktive",
+    "soldListings": "Listime të Shitura",
     "avgResponseTime": "Koha Mesatare e Përgjigjes",
     "responseRate": "Shkalla e Përgjigjes",
     "period": {
@@ -183,9 +183,9 @@
     "chart": {
       "views": "Shikime",
       "inquiries": "Kërkesa",
-      "listings": "Shpallje"
+      "listings": "Listime"
     },
-    "topListings": "Shpalljet me Performancë më të Lartë",
+    "topListings": "Listimet me Performancë më të Lartë",
     "recentActivity": "Aktiviteti i Fundit"
   },
   "notifications": {
@@ -196,7 +196,7 @@
     "categories": {
       "messages": "Mesazhe të Reja",
       "inquiries": "Kërkesa për Prona",
-      "listings": "Përditësime Shpalljesh",
+      "listings": "Përditësime Listimesh",
       "matches": "Përputhje të Reja Pronash",
       "priceDrops": "Alarme Uljeje Çmimi",
       "newsletter": "Buletini",

@@ -98,7 +98,7 @@
       "getNotified": {
         "title": "Merrni Njoftime",
         "heading": "Alarme & Përditësime",
-        "desc": "Merrni njoftime me email për uljen e çmimeve në të preferuarat dhe shpallje të reja që përputhen me kërkesat tuaja."
+        "desc": "Merrni njoftime me email për uljen e çmimeve në të preferuarat dhe listime të reja që përputhen me kërkesat tuaja."
       }
     },
     "contactingSellers": {
@@ -124,7 +124,7 @@
       }
     },
     "createListing": {
-      "title": "Krijimi i një Shpalljeje Prone",
+      "title": "Krijimi i një Listimeje Prone",
       "steps": {
         "step1": {
           "title": "Info Bazë",
@@ -176,7 +176,7 @@
       },
       "notifications": {
         "title": "Njoftimet",
-        "desc": "Konfiguroni alarmet me email, njoftimet e uljes së çmimit dhe alarmet e shpalljeve të reja.",
+        "desc": "Konfiguroni alarmet me email, njoftimet e uljes së çmimit dhe alarmet e listimeve të reja.",
         "access": "Qasja: Menu → Cilësimet"
       }
     },
@@ -295,7 +295,7 @@
       "types": {
         "priceAnalysis": {
           "title": "Analiza e Çmimeve",
-          "desc": "A është ky çmim i pronës i drejtë? Krahasoni me shpallje të ngjashme në zonë"
+          "desc": "A është ky çmim i pronës i drejtë? Krahasoni me listime të ngjashme në zonë"
         },
         "neighborhood": {
           "title": "Rezultati i Lagjës",
@@ -351,7 +351,7 @@
     "analytics": {
       "title": "Paneli i Detajuar i Analitikave",
       "badge": "PRO",
-      "desc": "Ndiqni performancën e shpalljes tuaj me analitika dhe njohuri gjithëpërfshirëse",
+      "desc": "Ndiqni performancën e listimes tuaj me analitika dhe njohuri gjithëpërfshirëse",
       "metrics": {
         "views": "Shikime totale & vizitorë unikë",
         "inquiries": "Numri i pyetjeve & norma e konvertimit",
@@ -369,12 +369,12 @@
     }
   },
   "listingPromotions": {
-    "title": "Si Funksionojnë Promomet e Shpalljeve",
+    "title": "Si Funksionojnë Promomet e Listimeve",
     "subtitle": "Rritni dukshmërinë e pronës suaj dhe shisni më shpejt me opsionet tona të promovimit",
     "comparison": {
       "title": "Krahasimi i Promovimeve",
       "standard": {
-        "title": "Shpallje Standarde",
+        "title": "Listime Standarde",
         "features": {
           "position": "Pozicion i rregullt në kërkim",
           "visibility": "Dukshmëri bazë",
@@ -417,10 +417,10 @@
       }
     },
     "benefits": {
-      "title": "Pse të Promovoni Shpalljen Tuaj?",
+      "title": "Pse të Promovoni Listimen Tuaj?",
       "faster": {
         "title": "Shisni më Shpejt",
-        "desc": "Shpalljet e promovuara shiten mesatarisht 60% më shpejt se shpalljet standarde"
+        "desc": "Listimet e promovuara shiten mesatarisht 60% më shpejt se listimet standarde"
       },
       "visibility": {
         "title": "Dukshmëri Maksimale",
@@ -428,7 +428,7 @@
       },
       "standOut": {
         "title": "Dallohuni",
-        "desc": "Shenjat dhe kufijtë tërheqës bëjnë shpalljen tuaj të pamundur për t'u humbur"
+        "desc": "Shenjat dhe kufijtë tërheqës bëjnë listimen tuaj të pamundur për t'u humbur"
       },
       "analytics": {
         "title": "Ndiqni Performancën",
@@ -438,7 +438,7 @@
   },
   "featuredAgencies": {
     "title": "Përfitimet e Agjencisë së Veçuar",
-    "subtitle": "Merrni më shumë dukshmëri dhe klientë potencialë me një shpallje Agjencie e Veçuar",
+    "subtitle": "Merrni më shumë dukshmëri dhe klientë potencialë me një listime Agjencie e Veçuar",
     "benefits": {
       "visibility": {
         "title": "5x Më Shumë Dukshmëri",
@@ -449,8 +449,8 @@
         "desc": "Dallohuni me një shenjë të verifikuar të veçuar që krijon besim me klientët"
       },
       "priority": {
-        "title": "Shpallje me Prioritet",
-        "desc": "Agjencia juaj dhe të gjitha shpalljet e agjentëve marrin prioritet në rezultatet e kërkimit"
+        "title": "Listime me Prioritet",
+        "desc": "Agjencia juaj dhe të gjitha listimet e agjentëve marrin prioritet në rezultatet e kërkimit"
       },
       "leads": {
         "title": "Më Shumë Klientë Potencialë të Kualifikuar",
@@ -462,7 +462,7 @@
       },
       "analytics": {
         "title": "Analitika të Agjencisë",
-        "desc": "Ndiqni performancën e ekipit, shikimet e shpalljeve dhe konvertimin e klientëve potencialë në të gjithë agjentët"
+        "desc": "Ndiqni performancën e ekipit, shikimet e listimeve dhe konvertimin e klientëve potencialë në të gjithë agjentët"
       }
     },
     "howToBecome": {
@@ -498,7 +498,7 @@
       "tagline": "Gjithçka që ju nevojitet për të drejtuar një agjenci të suksesshme",
       "whatsIncluded": "Çfarë Përfshihet",
       "features": {
-        "listings": "500 shpallje pronash (të zgjerohem)",
+        "listings": "500 listime pronash (të zgjerohem)",
         "teamMembers": "5 anëtarë ekipi të përfshirë",
         "promotions": "5 kupona promovimi/muaj",
         "branding": "Faqe e markës së agjencisë",
@@ -523,7 +523,7 @@
       },
       "growTogether": {
         "title": "Rritet Së Bashku",
-        "desc": "Agjentët tuaj fillojnë të shpallin prona dhe agjencia juaj lulëzon"
+        "desc": "Agjentët tuaj fillojnë të listojnë prona dhe agjencia juaj lulëzon"
       }
     },
     "agentInvitation": {
@@ -535,7 +535,7 @@
       },
       "subscriptionCoupons": {
         "title": "Kuponat e Abonimit të Agjentëve",
-        "desc": "Gjeneroni kode kuponash që u japin agjentëve një abonim FALAS vjetor Pro kur bashkohen me agjencinë tuaj. Çdo agjent merr 20 shpallje/muaj."
+        "desc": "Gjeneroni kode kuponash që u japin agjentëve një abonim FALAS vjetor Pro kur bashkohen me agjencinë tuaj. Çdo agjent merr 20 listime/muaj."
       }
     }
   },
@@ -549,7 +549,7 @@
       "period": "/muaj",
       "yearlyNote": "ose €200/vit (kurseni 33%)",
       "features": {
-        "listings": "20 shpallje/muaj ose 250/vit",
+        "listings": "20 listime/muaj ose 250/vit",
         "promotions": "3 kupona promovimi/muaj",
         "profile": "Profil personal i agjentit",
         "ai": "Chat & njohuri AI të pakufizuara",
@@ -564,9 +564,9 @@
       "price": "€0",
       "period": "/vit",
       "features": {
-        "listings": "20 shpallje aktive në muaj",
+        "listings": "20 listime aktive në muaj",
         "promotions": "Ndani grupin e promovimit të agjencisë",
-        "branding": "Marka e agjencisë në shpallje",
+        "branding": "Marka e agjencisë në listime",
         "collaboration": "Bashkëpunim i ekipit",
         "support": "Rrjeti i mbështetjes së agjencisë"
       },
@@ -583,7 +583,7 @@
         "desc": "Vendosni kodin e kuponit në cilësimet e llogarisë tuaj për të aktivizuar abonimin tuaj falas"
       },
       "step3": {
-        "title": "Filloni të Shpallni",
+        "title": "Filloni të Listoni",
         "desc": "Filloni të postoni prona nën markën e agjencisë tuaj dhe bashkëpunoni me ekipin tuaj"
       }
     }
@@ -597,7 +597,7 @@
       "period": "përgjithmonë",
       "tagline": "Gjithçka që ju nevojitet për të filluar kërkimin tuaj të pronës",
       "features": {
-        "browse": "Shfletoni të gjitha shpalljet",
+        "browse": "Shfletoni të gjitha listimet",
         "mapSearch": "Kërkimi me hartë interaktive",
         "favorites": "Ruani të preferuarat",
         "contact": "Kontaktoni shitësit & agjentët",
@@ -614,7 +614,7 @@
       "features": {
         "notifications": "Njoftime të menjëhershme me email & SMS",
         "savedSearches": "Kërkime të ruajtura të pakufizuara",
-        "earlyAccess": "Qasje e hershme në shpallje të reja",
+        "earlyAccess": "Qasje e hershme në listime të reja",
         "insights": "Njohuri të avancuara të tregut",
         "priceDrops": "Njoftime për uljen e çmimeve",
         "calculator": "Kalkulator investimi",
@@ -634,7 +634,7 @@
       },
       "savedSearches": {
         "title": "Kërkime të Ruajtura",
-        "desc": "Krijoni kërkime të ruajtura dhe merrni alarme kur shpallen prona të reja përkatëse"
+        "desc": "Krijoni kërkime të ruajtura dhe merrni alarme kur listohen prona të reja përkatëse"
       },
       "directMessaging": {
         "title": "Mesazhe të Drejtpërdrejta",
@@ -690,14 +690,14 @@
   },
   "sellers": {
     "title": "Shisni Pronën Tuaj",
-    "subtitle": "Shpallni pronën tuaj dhe arrini në mijëra blerës të mundshëm në të gjithë rajonin",
+    "subtitle": "Listoni pronën tuaj dhe arrini në mijëra blerës të mundshëm në të gjithë rajonin",
     "freePlan": {
       "title": "Plani Falas",
       "price": "€0",
       "period": "/muaj",
       "tagline": "Perfekt për shitës privatë me vetëm disa prona",
       "features": {
-        "listings": "3 shpallje aktive",
+        "listings": "3 listime aktive",
         "searches": "3 kërkime të ruajtura",
         "ai": "3 mesazhe chat AI",
         "photos": "Galeri fotosh (deri në 10 imazhe)",
@@ -713,7 +713,7 @@
       "yearlyNote": "ose €200/vit (kurseni 33%)",
       "tagline": "Për shitës seriozë që dëshirojnë ekspozim maksimal",
       "features": {
-        "listings": "20 shpallje/muaj ose 250/vit",
+        "listings": "20 listime/muaj ose 250/vit",
         "promotions": "3 kupona promovimi/muaj",
         "ai": "Chat & njohuri AI të pakufizuara",
         "searches": "Kërkime të ruajtura të pakufizuara",
@@ -723,7 +723,7 @@
       }
     },
     "howToList": {
-      "title": "Si të Shpallni Pronën Tuaj",
+      "title": "Si të Listoni Pronën Tuaj",
       "step1": {
         "title": "Krijoni Llogari",
         "desc": "Regjistrohuni si shitës privat ose agjent"
@@ -734,7 +734,7 @@
       },
       "step3": {
         "title": "Shkoni Live",
-        "desc": "Publikoni dhe shpallja juaj shfaqet në hartë"
+        "desc": "Publikoni dhe listimi juaj shfaqet në hartë"
       },
       "step4": {
         "title": "Lidhuni",
@@ -742,7 +742,7 @@
       }
     },
     "promotions": {
-      "title": "Rrisni Dukshmërinë e Shpalljes Tuaj",
+      "title": "Rrisni Dukshmërinë e Listimes Tuaj",
       "featured": {
         "title": "E Veçuar",
         "price": "€15",
@@ -778,24 +778,24 @@
     "seeItInAction": {
       "title": "Shiheni në Veprim",
       "listingDemo": {
-        "title": "Krijuesi i Shpalljes",
+        "title": "Krijuesi i Listimes",
         "coming": "Screenshot së shpejti",
-        "heading": "Krijim i Lehtë i Shpalljes",
-        "desc": "Krijoni shpallje të bukura pronash në minuta me formularin tonë intuitiv. Shtoni foto, vendosni çmimin tuaj dhe përshkruani veçoritë më të mira të pronës suaj."
+        "heading": "Krijim i Lehtë i Listimes",
+        "desc": "Krijoni listime të bukura pronash në minuta me formularin tonë intuitiv. Shtoni foto, vendosni çmimin tuaj dhe përshkruani veçoritë më të mira të pronës suaj."
       },
       "analyticsDemo": {
         "title": "Dashboard Analitik",
         "coming": "Screenshot së shpejti",
         "heading": "Ndiqni Performancën Tuaj",
-        "desc": "Monitoroni shikimet, pyetjet dhe angazhimin për të gjitha shpalljet tuaja. Shikoni cilat prona performojnë më mirë dhe optimizoni strategjinë tuaj."
+        "desc": "Monitoroni shikimet, pyetjet dhe angazhimin për të gjitha listimet tuaja. Shikoni cilat prona performojnë më mirë dhe optimizoni strategjinë tuaj."
       }
     }
   },
   "cta": {
     "title": "Gati për të Filluar?",
-    "subtitle": "Bashkohuni me mijëra përdorues që tashmë po gjejnë dhe shpallin prona në Balkan Estate",
+    "subtitle": "Bashkohuni me mijëra përdorues që tashmë po gjejnë dhe listojnë prona në Balkan Estate",
     "browseProperties": "Shfletoni Pronat",
-    "listProperty": "Shpallni Pronën Tuaj"
+    "listProperty": "Listoni Pronën Tuaj"
   },
   "faq": {
     "title": "Pyetje të Shpeshta",
@@ -805,19 +805,19 @@
     },
     "q2": {
       "question": "Si funksionojnë kodet e kuponave të agjencisë?",
-      "answer": "Pronarët e agjencive mund të gjenerojnë deri në 5 kode kuponash. Kur një agjent shpërblen një kod, ata marrin një abonim vjetor Pro falas (20 shpallje/muaj) dhe bashkohen me atë agjenci."
+      "answer": "Pronarët e agjencive mund të gjenerojnë deri në 5 kode kuponash. Kur një agjent shpërblen një kod, ata marrin një abonim vjetor Pro falas (20 listime/muaj) dhe bashkohen me atë agjenci."
     },
     "q3": {
       "question": "A mund të kaloj nga agjent i pavarur në agjent të agjencisë?",
-      "answer": "Po! Nëse merrni një kod kuponi nga një agjenci, mund ta shpërbleni atë për t'u bashkuar me ekipin e tyre. Shpalljet tuaja atëherë do të shoqërohen me atë agjenci."
+      "answer": "Po! Nëse merrni një kod kuponi nga një agjenci, mund ta shpërbleni atë për t'u bashkuar me ekipin e tyre. Listimet tuaja atëherë do të shoqërohen me atë agjenci."
     },
     "q4": {
       "question": "Çfarë ndodh kur skadon abonamenti im?",
-      "answer": "Shpalljet tuaja ekzistuese mbeten aktive, por nuk do të jeni në gjendje të krijoni të reja derisa të rinovoni. Do të merrni kujtesa para skadimit."
+      "answer": "Listimet tuaja ekzistuese mbeten aktive, por nuk do të jeni në gjendje të krijoni të reja derisa të rinovoni. Do të merrni kujtesa para skadimit."
     },
     "q5": {
       "question": "Si funksionojnë kreditë e promovimit?",
-      "answer": "Kreditë e promovimit ju lejojnë të rrisni shpalljet tuaja për t'u shfaqur më lart në rezultatet e kërkimit. Përdoruesit Pro marrin 3 kredite/muaj, agjencitë marrin 15 për t'i ndarë mes ekipit të tyre."
+      "answer": "Kreditë e promovimit ju lejojnë të rrisni listimet tuaja për t'u shfaqur më lart në rezultatet e kërkimit. Përdoruesit Pro marrin 3 kredite/muaj, agjencitë marrin 15 për t'i ndarë mes ekipit të tyre."
     }
   }
 }

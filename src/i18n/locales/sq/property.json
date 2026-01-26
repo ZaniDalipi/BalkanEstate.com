@@ -14,9 +14,9 @@
     "views": "shikime",
     "viewsCount": "{{count}} shikime",
     "inquiries": "Kërkesa",
-    "id": "ID e Shpalljes"
+    "id": "ID e Listimit"
   },
-  "listings": "Shpallje",
+  "listings": "Listime",
   "forSale": "Për Shitje",
   "forRent": "Me Qira",
   "sold": "Shitur",
@@ -137,7 +137,7 @@
     "copyLink": "Kopjo Linkun",
     "linkCopied": "Linku u Kopjua!",
     "print": "Printo",
-    "report": "Raporto Shpalljen",
+    "report": "Raporto Listimin",
     "compare": "Krahaso",
     "comparing": "Duke Krahasuar",
     "addToCompare": "Shto për Krahasim",
@@ -260,7 +260,7 @@
       "land": "Tokë",
       "other": "Tjetër"
     },
-    "promotedListings": "Shpallje të Promovuara",
+    "promotedListings": "Listime të Promovuara",
     "agentHint": "Kliko për rekomandime!",
     "tiers": {
       "premium": "Premium",
@@ -284,7 +284,7 @@
     "agentRecommendations": {
       "premium": {
         "1": "Kjo pronë premium është zgjedhja jonë më e mirë për ju!",
-        "2": "Shpallje ekskluzive! Mos humbisni këtë mundësi premium.",
+        "2": "Listim ekskluziv! Mos humbisni këtë mundësi premium.",
         "3": "Prona jonë më e rekomanduar në këtë zonë.",
         "4": "Zgjedhje premium me vlerë të jashtëzakonshme!"
       },
@@ -292,10 +292,10 @@
         "1": "E theksuar për shitje të shpejtë - ia vlen të shikohet!",
         "2": "Zgjedhje popullore! Kjo pronë po merr shumë vëmendje.",
         "3": "Shitësi i motivuar - e theksuar për dukshmëri!",
-        "4": "Mundësi e madhe - shikoni këtë shpallje të theksuar!"
+        "4": "Mundësi e madhe - shikoni këtë listim të theksuar!"
       },
       "featured": {
-        "1": "Shpallje e veçuar me komoditete speciale.",
+        "1": "Listim i veçuar me komoditete speciale.",
         "2": "Kjo pronë dallohet në lagje.",
         "3": "Ia vlen të merret në konsideratë - e veçuar nga pronari.",
         "4": "Shikoni nga afër këtë shtëpi të veçuar!"
@@ -420,7 +420,7 @@
   },
   "sections": {
     "highlighted": "Prona të Veçuara",
-    "highlightedCount": "shpallje premium",
-    "moreListings": "Më Shumë Shpallje"
+    "highlightedCount": "listime premium",
+    "moreListings": "Më Shumë Listime"
   }
 }

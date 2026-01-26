@@ -31,7 +31,7 @@
     "anyCountry": "Çdo Shtet",
     "propertyType": "Lloji i Pronës",
     "allTypes": "Të Gjitha Llojet",
-    "listingType": "Lloji i Shpalljes",
+    "listingType": "Lloji i Listimit",
     "buyOrRent": "Bli ose Me Qira",
     "buy": "Bli",
     "rent": "Me Qira",
@@ -240,7 +240,7 @@
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",
-    "subtitle": "Abonohu për të marrë njoftime për shpallje të reja në zonën tuaj",
+    "subtitle": "Abonohu për të marrë njoftime për listime të reja në zonën tuaj",
     "placeholder": "Shkruaj email-in tuaj",
     "subscribe": "Abonohu"
   },
@@ -250,7 +250,7 @@
     "saveSearch": "Ruaj Kërkimin",
     "name": "Emri i Kërkimit",
     "namePlaceholder": "p.sh., Banesa 2 dhoma në Prishtinë",
-    "notifications": "Njoftohu për shpallje të reja",
+    "notifications": "Njoftohu për listime të reja",
     "saved": "Kërkimi u ruajt me sukses",
     "delete": "Fshi Kërkimin",
     "noSavedSearches": "Nuk ka kërkime të ruajtura ende"
@@ -331,7 +331,7 @@
     "goToPage": "Shko te faqja"
   },
   "quickFilters": {
-    "newListings": "Shpallje të Reja",
+    "newListings": "Listime të Reja",
     "priceReduced": "Çmim i Ulur",
     "openHouse": "Ditë e Hapur",
     "virtualTour": "Tur Virtual i Disponueshëm",

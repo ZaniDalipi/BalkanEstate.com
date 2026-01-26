@@ -45,21 +45,21 @@
     }
   },
   "metrics": {
-    "listingsYear": "Shpallje/Vit",
-    "listingsMonth": "Shpallje/Muaj",
+    "listingsYear": "Listime/Vit",
+    "listingsMonth": "Listime/Muaj",
     "promoCouponsMonth": "Kupona Promo/Muaj",
-    "listings": "Shpallje",
+    "listings": "Listime",
     "teamMembers": "Anëtarë Ekipi"
   },
   "features": {
-    "activeListings": "Deri në {{count}} shpallje aktive",
-    "promotedListings": "Promovo {{count}} shpallje për {{days}} ditë",
-    "featuredListings": "{{count}} shpallje të veçuara",
+    "activeListings": "Deri në {{count}} listime aktive",
+    "promotedListings": "Promovo {{count}} listime për {{days}} ditë",
+    "featuredListings": "{{count}} listime të veçuara",
     "prioritySupport": "Mbështetje prioritare",
     "prioritySupportDesc": "Merrni ndihmë më shpejt",
     "analytics": "Panel analitike i avancuar",
-    "analyticsDesc": "Ndiqni performancën e shpalljeve tuaja",
-    "premiumPlacement": "Vendosje premium e shpalljeve",
+    "analyticsDesc": "Ndiqni performancën e listimeve tuaja",
+    "premiumPlacement": "Vendosje premium e listimeve",
     "leadManagement": "Sistem menaxhimi i klientëve",
     "teamMembers": "Deri në {{count}} anëtarë ekipi",
     "apiAccess": "Qasje në API",
@@ -108,7 +108,7 @@
     "moneyBack": "Garanci 30-Ditore Kthimi",
     "moneyBackDesc": "Rimbursim i plotë nëse nuk jeni të kënaqur",
     "moreViews": "3x Më Shumë Shikime",
-    "moreViewsDesc": "Shpalljet premium marrin më shumë ekspozim",
+    "moreViewsDesc": "Listimet premium marrin më shumë ekspozim",
     "instantActivation": "Aktivizim i Menjëhershëm",
     "instantActivationDesc": "Filloni të shisni menjëherë",
     "cancelAnytime": "Anulo në çdo kohë"

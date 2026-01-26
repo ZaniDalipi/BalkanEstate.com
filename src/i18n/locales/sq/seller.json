@@ -346,17 +346,17 @@
     "doorman": "Portier / Konsierzh"
   },
   "success": {
-    "published": "Shpallja juaj u publikua!",
+    "published": "Listimi juaj u publikua!",
     "saved": "Drafti u ruajt me sukses",
-    "updated": "Shpallja u përditësua me sukses",
-    "deleted": "Shpallja u fshi",
+    "updated": "Listimi u përditësua me sukses",
+    "deleted": "Listimi u fshi",
     "promoted": "Promovimi u aplikua me sukses"
   },
   "errors": {
-    "publishFailed": "Publikimi i shpalljes dështoi",
+    "publishFailed": "Publikimi i listimit dështoi",
     "saveFailed": "Ruajtja e draftit dështoi",
-    "loadFailed": "Ngarkimi i shpalljes dështoi",
-    "deleteFailed": "Fshirja e shpalljes dështoi",
+    "loadFailed": "Ngarkimi i listimit dështoi",
+    "deleteFailed": "Fshirja e listimit dështoi",
     "uploadFailed": "Ngarkimi i fotove dështoi",
     "invalidData": "Ju lutem kontrolloni të dhënat e futura",
     "listingLimitReached": "Limiti i Listimeve u Arrit",

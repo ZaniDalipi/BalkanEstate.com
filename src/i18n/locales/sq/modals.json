@@ -18,17 +18,17 @@
     "loadingPlans": "Duke ngarkuar planet...",
     "buyerPro": {
       "name": "Blerës Pro",
-      "description": "Mos humbisni asnjë shpallje të re! Merrni njoftim sapo një pronë që përputhet me kriteret tuaja del në treg.",
+      "description": "Mos humbisni asnjë listime të re! Merrni njoftim sapo një pronë që përputhet me kriteret tuaja del në treg.",
       "features": {
         "notifications": "Njoftime të menjëhershme me email dhe SMS",
         "unlimitedSearches": "Ruaj kërkime të pakufizuara",
-        "earlyAccess": "Qasje e hershme në shpallje të reja",
+        "earlyAccess": "Qasje e hershme në listime të reja",
         "marketInsights": "Njohuri të avancuara të tregut"
       }
     },
     "sellerPromotion": {
-      "title": "Planet e Promovimit të Shpalljeve",
-      "description": "Rritni dukshmërinë e shpalljeve tuaja të pronave dhe merrni më shumë pyetje",
+      "title": "Planet e Promovimit të Listimeve",
+      "description": "Rritni dukshmërinë e listimeve tuaja të pronave dhe merrni më shumë pyetje",
       "featured": {
         "title": "I Veçantë",
         "subtitle": "Prioritet në kërkim",
@@ -53,21 +53,21 @@
       },
       "duration": "7-90 ditë",
       "howItWorks": "Si funksionon:",
-      "howItWorksDescription": "Klikoni në një nivel promovimi më sipër për të filluar, ose krijoni një shpallje së pari.",
+      "howItWorksDescription": "Klikoni në një nivel promovimi më sipër për të filluar, ose krijoni një listime së pari.",
       "promotionGuide": {
         "title": "Promovimi {{tier}}",
-        "description": "Për të promovuar një shpallje, shkoni te faqja <strong>Shpalljet e Mia</strong> dhe klikoni \"Promovo\" në çdo shpallje, ose zgjidhni një promovim kur krijoni një shpallje të re.",
-        "goToListings": "Shko te Shpalljet e Mia",
-        "createListing": "Krijo Shpallje të Re",
+        "description": "Për të promovuar një listime, shkoni te faqja <strong>Listimet e Mia</strong> dhe klikoni \"Promovo\" në çdo listime, ose zgjidhni një promovim kur krijoni një listime të re.",
+        "goToListings": "Shko te Listimet e Mia",
+        "createListing": "Krijo Listime të Re",
         "backToOptions": "Kthehu te opsionet e promovimit"
       },
       "viewSubscriptionPlans": "Shiko Planet e Abonimit",
-      "startCreatingListing": "Fillo Krijimin e Shpalljes"
+      "startCreatingListing": "Fillo Krijimin e Listimes"
     }
   },
   "listingLimit": {
-    "title": "Limiti i Shpalljeve Falas u Arrit",
-    "message": "Keni përdorur të gjitha shpalljet falas! Për të publikuar më shumë, duhet të abonoheni.",
+    "title": "Limiti i Listimeve Falas u Arrit",
+    "message": "Keni përdorur të gjitha listimet falas! Për të publikuar më shumë, duhet të abonoheni.",
     "discountOffer": "Por së pari, luani një lojë të shpejtë për mundësinë të fitoni një zbritje të madhe në abonimin tuaj të parë!",
     "playForDiscount": "Luaj për një Zbritje!"
   },
@@ -194,13 +194,13 @@
     "copyEmbed": "Kopjo Kodin e Ngulitur"
   },
   "report": {
-    "title": "Raporto Shpalljen",
+    "title": "Raporto Listimen",
     "reason": "Arsyeja e raportimit",
     "reasons": {
       "spam": "Spam ose Mashtruese",
       "scam": "Mashtrim ose Frikësim",
       "inappropriate": "Përmbajtje e Papërshtatshme",
-      "duplicate": "Shpallje e Dublikuar",
+      "duplicate": "Listime e Dublikuar",
       "wrongInfo": "Informacion i Gabuar",
       "soldRented": "Tashmë e Shitur/Dhënë me Qira",
       "other": "Tjetër"
