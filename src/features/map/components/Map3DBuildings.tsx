@@ -392,6 +392,32 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       console.warn('[Map3D] 3d-buildings layer not found!');
     }
 
+    // Helper function to calculate building centroid
+    const getBuildingCentroid = (feature: maplibregl.MapGeoJSONFeature): { lng: number; lat: number } | null => {
+      let coords: number[][] = [];
+      if (feature.geometry.type === 'Polygon') {
+        coords = (feature.geometry as GeoJSON.Polygon).coordinates[0];
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        coords = (feature.geometry as GeoJSON.MultiPolygon).coordinates[0][0];
+      }
+      if (coords.length === 0) return null;
+
+      let sumLng = 0, sumLat = 0;
+      const numPoints = coords.length - 1; // Exclude closing point
+      for (let i = 0; i < numPoints; i++) {
+        sumLng += coords[i][0];
+        sumLat += coords[i][1];
+      }
+      return { lng: sumLng / numPoints, lat: sumLat / numPoints };
+    };
+
+    // Helper function to calculate distance between two points (in degrees, approximate)
+    const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+      const dLat = lat2 - lat1;
+      const dLng = lng2 - lng1;
+      return Math.sqrt(dLat * dLat + dLng * dLng);
+    };
+
     // Try multiple query approaches to find the building
     // 1. First try exact point query on the 3d-buildings layer
     const exactFeatures = mapInstance.queryRenderedFeatures(point, {
@@ -400,8 +426,23 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     console.log(`[Map3D] Exact query found ${exactFeatures.length} features`);
 
     if (exactFeatures.length > 0) {
-      buildingFeature = exactFeatures[0];
-      console.log('[Map3D] Using exact query result', buildingFeature.properties);
+      // If we hit multiple buildings at exact point, pick the one closest to our coordinates
+      if (exactFeatures.length === 1) {
+        buildingFeature = exactFeatures[0];
+      } else {
+        let minDist = Infinity;
+        for (const feature of exactFeatures) {
+          const centroid = getBuildingCentroid(feature);
+          if (centroid) {
+            const dist = getDistance(latitude, longitude, centroid.lat, centroid.lng);
+            if (dist < minDist) {
+              minDist = dist;
+              buildingFeature = feature;
+            }
+          }
+        }
+      }
+      console.log('[Map3D] Using exact query result', buildingFeature?.properties);
     } else {
       // 2. Try a larger bounding box query
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
@@ -413,19 +454,30 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       });
       console.log(`[Map3D] Bbox query found ${nearbyFeatures.length} features`);
 
-      // Find the tallest building in the area (most likely the target)
+      // Find the building CLOSEST to our coordinates (not tallest!)
       if (nearbyFeatures.length > 0) {
-        // Sort by height and pick the tallest
-        let maxHeight = 0;
+        let minDistance = Infinity;
+        let closestFeature: maplibregl.MapGeoJSONFeature | null = null;
+
         for (const feature of nearbyFeatures) {
-          const height = feature.properties?.render_height ||
-                        (feature.properties?.['building:levels'] || 1) * 3.5;
-          if (height > maxHeight) {
-            maxHeight = height;
-            buildingFeature = feature;
+          const centroid = getBuildingCentroid(feature);
+          if (centroid) {
+            const distance = getDistance(latitude, longitude, centroid.lat, centroid.lng);
+            console.log(`[Map3D] Building at (${centroid.lat.toFixed(5)}, ${centroid.lng.toFixed(5)}) distance: ${distance.toFixed(6)}`);
+
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestFeature = feature;
+            }
           }
         }
-        console.log('[Map3D] Using tallest building from bbox query, height:', maxHeight);
+
+        if (closestFeature) {
+          buildingFeature = closestFeature;
+          const height = closestFeature.properties?.render_height ||
+                        (closestFeature.properties?.['building:levels'] || 1) * 3.5;
+          console.log(`[Map3D] Using closest building, distance: ${minDistance.toFixed(6)}, height: ${height}`);
+        }
       }
     }
 
