@@ -122,8 +122,11 @@ const SunCompass: React.FC<{
   sunAzimuth: number;
   hour: number;
   isNightMode: boolean;
-}> = ({ sunAzimuth, hour, isNightMode }) => {
-  const isNight = hour < 6 || hour >= 20;
+  sunrise: number; // Decimal hours (e.g., 7.12 = 7:07 AM)
+  sunset: number;  // Decimal hours (e.g., 19.85 = 7:51 PM)
+}> = ({ sunAzimuth, hour, isNightMode, sunrise, sunset }) => {
+  // Use actual sunrise/sunset times - sun visible only during daylight
+  const isNight = hour < sunrise || hour >= sunset;
 
   return (
     <div className="relative w-24 h-24">
@@ -344,7 +347,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
           `}
         >
           <div className={`p-1.5 rounded-lg bg-gradient-to-br ${getTimeGradient()} flex-shrink-0`}>
-            <span className="text-base">{hour >= 6 && hour < 20 ? '☀️' : '🌙'}</span>
+            <span className="text-base">{isCurrentlyDay ? '☀️' : '🌙'}</span>
           </div>
           <span className="text-sm font-semibold">{formatHour(hour)}</span>
           <svg
@@ -485,7 +488,7 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
         <div className="mt-3 space-y-3">
           {/* Sun Compass - smaller */}
           <div className="flex justify-center">
-            <SunCompass sunAzimuth={sunAzimuth} hour={hour} isNightMode={isNightMode} />
+            <SunCompass sunAzimuth={sunAzimuth} hour={hour} isNightMode={isNightMode} sunrise={sunriseSunset.sunrise} sunset={sunriseSunset.sunset} />
           </div>
 
           {/* Sun direction info - compact */}

@@ -1,7 +1,7 @@
 // PropertyDetailsPage - Main Component
 // Orchestrates all property detail subcomponents
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '@/types';
 import { useAppContext } from '@/context/AppContext';
@@ -69,6 +69,43 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
   // State for promotion modal
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+
+  // State for mobile breadcrumb collapse on scroll
+  const [isBreadcrumbCollapsed, setIsBreadcrumbCollapsed] = useState(false);
+  const lastScrollY = useRef(0);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+
+  // Handle scroll to collapse/expand breadcrumb on mobile
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setIsBreadcrumbCollapsed(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollThreshold = 50; // Minimum scroll before collapsing
+
+      if (currentScrollY > scrollThreshold && currentScrollY > lastScrollY.current) {
+        // Scrolling down - collapse
+        setIsBreadcrumbCollapsed(true);
+      } else if (currentScrollY < lastScrollY.current - 10) {
+        // Scrolling up (with 10px buffer) - expand
+        setIsBreadcrumbCollapsed(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
 
   // Get current user
   const currentUser = state.currentUser || state.user;
@@ -352,8 +389,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
 
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
-        {/* Breadcrumbs */}
-        <div className="px-4 pt-3 pb-1">
+        {/* Breadcrumbs - Collapses on scroll on mobile */}
+        <div
+          className={`px-4 overflow-hidden transition-all duration-300 ease-in-out ${
+            isBreadcrumbCollapsed
+              ? 'max-h-0 opacity-0 py-0'
+              : 'max-h-20 opacity-100 pt-3 pb-1'
+          }`}
+        >
           <Breadcrumbs
             items={generatePropertyBreadcrumbs({
               id: property.id,
@@ -364,7 +407,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           />
         </div>
 
-        <div className="p-4 pt-14 flex items-center justify-between">
+        <div className={`p-4 flex items-center justify-between transition-all duration-300 ${
+          isBreadcrumbCollapsed ? 'pt-2' : 'pt-2'
+        }`}>
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-primary font-semibold hover:underline"
