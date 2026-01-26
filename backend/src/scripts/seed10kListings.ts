@@ -217,7 +217,7 @@ function generateProperty(sellerId: any, index: number): any {
     materials: getRandomElements(MATERIALS, getRandomInt(1, 3)),
     amenities: getRandomElements(AMENITIES, getRandomInt(2, 6)),
     imageUrl: getRandomElement(PROPERTY_IMAGES),
-    images: getRandomElements(PROPERTY_IMAGES, getRandomInt(2, 6)).map(url => ({ url, tag: 'interior' })),
+    images: getRandomElements(PROPERTY_IMAGES, getRandomInt(2, 6)).map(url => ({ url, tag: 'other' })),
     lat: location.lat + latOffset,
     lng: location.lng + lngOffset,
     propertyType,
