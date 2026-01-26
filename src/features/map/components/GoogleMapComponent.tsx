@@ -212,7 +212,7 @@ interface GoogleMapComponentProps {
 }
 
 /**
- * Property Popup Component
+ * Property Popup Component - Compact and elegant design
  */
 const PropertyPopup: React.FC<{
   property: Property;
@@ -230,71 +230,98 @@ const PropertyPopup: React.FC<{
 
   return (
     <div
-      className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
-      style={{ width: 220, maxWidth: '90vw' }}
+      className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100/50"
+      style={{ width: 200, maxWidth: '85vw' }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="relative h-32 bg-gray-100">
-        {imageUrl ? (
-          <img src={imageUrl} alt={property.title || property.address} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-            <span className="text-3xl">🏠</span>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition-colors"
-        >
-          <XCircleIcon className="w-4 h-4 text-gray-600" />
-        </button>
-        {isActivelyPromoted && property.promotionTier && (
-          <div
-            className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow"
-            style={{ backgroundColor: PROMOTION_TIER_COLORS[property.promotionTier] }}
+      {/* Compact image container with rounded corners */}
+      <div className="p-2 pb-0">
+        <div className="relative h-24 rounded-xl overflow-hidden bg-gray-100">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={property.title || property.address}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+              <span className="text-2xl opacity-50">🏠</span>
+            </div>
+          )}
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors"
           >
-            {property.promotionTier === 'premium' ? '👑 Premium' :
-             property.promotionTier === 'highlight' ? '💎 Highlight' :
-             property.promotionTier === 'featured' ? '⭐ Featured' : 'Promoted'}
+            <XCircleIcon className="w-3.5 h-3.5 text-white" />
+          </button>
+
+          {/* Promotion badge */}
+          {isActivelyPromoted && property.promotionTier && (
+            <div
+              className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white shadow-sm backdrop-blur-sm"
+              style={{ backgroundColor: `${PROMOTION_TIER_COLORS[property.promotionTier]}dd` }}
+            >
+              {property.promotionTier === 'premium' ? '👑 Premium' :
+               property.promotionTier === 'highlight' ? '💎 Highlight' :
+               property.promotionTier === 'featured' ? '⭐ Featured' : 'Promoted'}
+            </div>
+          )}
+
+          {/* Property type badge */}
+          <div className="absolute bottom-1.5 right-1.5">
+            <span className="bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[9px] font-semibold text-gray-700 capitalize shadow-sm">
+              {property.propertyType}
+            </span>
           </div>
-        )}
-        <div className="absolute bottom-2 left-2">
-          <span className="font-bold text-lg text-white drop-shadow-lg">
-            {formatPrice(property.price, property.country)}
-          </span>
-        </div>
-        <div className="absolute bottom-2 right-2">
-          <span className="bg-white/90 px-2 py-0.5 rounded text-[10px] font-semibold text-gray-700 capitalize">
-            {property.propertyType}
-          </span>
         </div>
       </div>
-      <div className="p-3">
-        <h3 className="font-bold text-sm text-gray-900 line-clamp-1">
+
+      {/* Content */}
+      <div className="p-2.5 pt-2">
+        {/* Price - prominent */}
+        <div className="font-bold text-base text-gray-900">
+          {formatPrice(property.price, property.country)}
+        </div>
+
+        {/* Title */}
+        <h3 className="font-medium text-xs text-gray-700 line-clamp-1 mt-0.5">
           {property.title || property.address}
         </h3>
-        <p className="text-xs text-gray-500 mt-0.5 line-clamp-1 flex items-center gap-1">
-          <span>📍</span>
-          {property.city}, {property.country}
+
+        {/* Location */}
+        <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-1">
+          📍 {property.city}, {property.country}
         </p>
+
+        {/* Property details */}
         {property.propertyType === 'land' ? (
-          <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
-            <span className="flex items-center gap-1">
-              <span>📐</span>
-              <b>{property.sqft?.toLocaleString()}</b> m²
+          <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gray-500">
+            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
+              📐 <b className="text-gray-700">{property.sqft?.toLocaleString()}</b> m²
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
-            <span className="flex items-center gap-1"><span>🛏️</span><b>{property.beds}</b></span>
-            <span className="flex items-center gap-1"><span>🚿</span><b>{property.baths}</b></span>
-            <span className="flex items-center gap-1"><span>📐</span><b>{property.sqft}</b> m²</span>
+          <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-gray-500">
+            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
+              🛏️ <b className="text-gray-700">{property.beds}</b>
+            </span>
+            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
+              🚿 <b className="text-gray-700">{property.baths}</b>
+            </span>
+            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
+              📐 <b className="text-gray-700">{property.sqft}</b>
+            </span>
           </div>
         )}
+
+        {/* View details button */}
         <button
           onClick={onViewDetails}
-          className="w-full mt-3 py-2.5 bg-primary hover:bg-primary-dark text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1"
+          className="w-full mt-2.5 py-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white text-[11px] font-semibold rounded-lg transition-all shadow-sm hover:shadow flex items-center justify-center gap-1"
         >
           <span>{t('map.popup.viewDetails', 'View Details')}</span>
           <span>→</span>
@@ -424,6 +451,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [showCadastre, setShowCadastre] = useState(false);
   const cadastreLayerRef = useRef<google.maps.ImageMapType | null>(null);
 
+  // Promoted listings filter
+  const [showOnlyPromoted, setShowOnlyPromoted] = useState(false);
+
   // Refs
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
@@ -435,11 +465,28 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
-  // Filter valid properties
+  // Filter valid properties (optionally only promoted)
   const validProperties = useMemo(() => {
-    return properties.filter(
+    let filtered = properties.filter(
       (p) => p.lat != null && !isNaN(p.lat) && p.lng != null && !isNaN(p.lng)
     );
+
+    // Filter to only show promoted listings if enabled
+    if (showOnlyPromoted) {
+      filtered = filtered.filter(
+        (p) => p.isPromoted && p.promotionEndDate && p.promotionEndDate > Date.now()
+      );
+    }
+
+    return filtered;
+  }, [properties, showOnlyPromoted]);
+
+  // Count of promoted properties for badge
+  const promotedCount = useMemo(() => {
+    return properties.filter(
+      (p) => p.lat != null && !isNaN(p.lat) && p.lng != null && !isNaN(p.lng) &&
+             p.isPromoted && p.promotionEndDate && p.promotionEndDate > Date.now()
+    ).length;
   }, [properties]);
 
 
@@ -716,7 +763,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // Clear all measurements
   const handleClearAllMeasurements = useCallback(() => {
-    setSavedMeasurements([]);
+    setLocalMeasurements([]);
     setMeasurementPoints([]);
   }, []);
 
@@ -944,7 +991,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           )}
 
           {/* Saved measurements visualization */}
-          {savedMeasurements.map((measurement, index) => (
+          {localMeasurements.map((measurement, index) => (
             <React.Fragment key={measurement.id}>
               {measurement.mode === 'area' && measurement.points.length >= 3 ? (
                 <Polygon
@@ -1104,13 +1151,23 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               >
                 ↩️ Undo
               </button>
-              <button
-                onClick={handleSaveMeasurement}
-                disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
-                className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                💾 Save
-              </button>
+              {isAuthenticated ? (
+                <button
+                  onClick={handleOpenSaveModal}
+                  disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
+                  className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  💾 Save
+                </button>
+              ) : (
+                <button
+                  onClick={handleQuickSave}
+                  disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
+                  className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  💾 Keep
+                </button>
+              )}
               <button
                 onClick={() => setMeasurementPoints([])}
                 disabled={measurementPoints.length === 0}
@@ -1121,10 +1178,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             </div>
 
             {/* Saved measurements list */}
-            {savedMeasurements.length > 0 && (
+            {localMeasurements.length > 0 && (
               <div className="border-t border-gray-200 pt-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-gray-700">Saved ({savedMeasurements.length})</span>
+                  <span className="text-xs font-semibold text-gray-700">Saved ({localMeasurements.length})</span>
                   <button
                     onClick={handleClearAllMeasurements}
                     className="text-[10px] text-red-500 hover:text-red-700 font-medium"
@@ -1133,7 +1190,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                   </button>
                 </div>
                 <div className="space-y-1 max-h-32 overflow-y-auto">
-                  {savedMeasurements.map((m, i) => (
+                  {localMeasurements.map((m, i) => (
                     <div
                       key={m.id}
                       className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg group"
@@ -1264,6 +1321,23 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                   </div>
                 )}
               </div>
+
+              {/* Promoted/Premium Filter */}
+              <button
+                onClick={() => setShowOnlyPromoted(!showOnlyPromoted)}
+                className={`relative flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
+                  showOnlyPromoted ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'text-neutral-600 hover:bg-neutral-200'
+                }`}
+                title={showOnlyPromoted ? 'Show all listings' : 'Show only premium & promoted'}
+              >
+                <span>👑</span>
+                <span className="hidden sm:inline">{t('search:map.promoted', 'Premium')}</span>
+                {promotedCount > 0 && !showOnlyPromoted && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold bg-amber-500 text-white rounded-full px-1">
+                    {promotedCount}
+                  </span>
+                )}
+              </button>
 
               <div className="w-px h-5 bg-gray-300/50" />
 
@@ -1475,6 +1549,127 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               </div>
             )}
           </>
+        )}
+
+        {/* Save Measurement Modal */}
+        {showSaveModal && pendingMeasurement && (
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+            <div
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-5 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📏</span>
+                    <div>
+                      <h3 className="font-bold text-lg">{t('search:map.saveMeasurement', 'Save Measurement')}</h3>
+                      <p className="text-xs text-white/80">
+                        {pendingMeasurement.mode === 'area'
+                          ? formatMeasureArea(pendingMeasurement.area)
+                          : formatMeasureDistance(pendingMeasurement.distance)}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { setShowSaveModal(false); setPendingMeasurement(null); }}
+                    className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                  >
+                    <XCircleIcon className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Form */}
+              <div className="p-5 space-y-4">
+                {/* Name field */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    {t('search:map.measurementName', 'Name')} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={measurementName}
+                    onChange={(e) => setMeasurementName(e.target.value)}
+                    placeholder={t('search:map.measurementNamePlaceholder', 'e.g., Garden plot, Building lot...')}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    autoFocus
+                  />
+                </div>
+
+                {/* Address/Location field */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    {t('search:map.measurementLocation', 'Location / Address')}
+                  </label>
+                  <input
+                    type="text"
+                    value={measurementAddress}
+                    onChange={(e) => setMeasurementAddress(e.target.value)}
+                    placeholder={t('search:map.measurementLocationPlaceholder', 'e.g., Near Lake Ohrid, Albania...')}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  />
+                </div>
+
+                {/* Notes field */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    {t('search:map.measurementNotes', 'Notes')}
+                  </label>
+                  <textarea
+                    value={measurementNotes}
+                    onChange={(e) => setMeasurementNotes(e.target.value)}
+                    placeholder={t('search:map.measurementNotesPlaceholder', 'Any additional details...')}
+                    rows={3}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+                  />
+                </div>
+
+                {/* Measurement details */}
+                <div className="p-3 bg-indigo-50 rounded-xl">
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="text-indigo-600 font-semibold">{pendingMeasurement.mode === 'area' ? '📐 Area' : '📍 Distance'}</span>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-gray-700">{pendingMeasurement.points.length} points</span>
+                    {pendingMeasurement.mode === 'area' && (
+                      <>
+                        <span className="text-gray-500">•</span>
+                        <span className="text-gray-700">Perimeter: {formatMeasureDistance(pendingMeasurement.perimeter)}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="px-5 py-4 bg-gray-50 flex items-center justify-end gap-3">
+                <button
+                  onClick={() => { setShowSaveModal(false); setPendingMeasurement(null); }}
+                  className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  {t('common:cancel', 'Cancel')}
+                </button>
+                <button
+                  onClick={handleSaveMeasurementToBackend}
+                  disabled={!measurementName.trim() || savingMeasurement}
+                  className="px-5 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                >
+                  {savingMeasurement ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>{t('common:saving', 'Saving...')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>💾</span>
+                      <span>{t('search:map.saveToProfile', 'Save to Profile')}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </HighlightedPropertiesProvider>

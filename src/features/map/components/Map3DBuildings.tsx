@@ -382,48 +382,72 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
     // Query the actual building at this location from the map's building layer
     const point = mapInstance.project([longitude, latitude]);
+    console.log(`[Map3D] Querying building at ${latitude}, ${longitude}, point: ${point.x}, ${point.y}`);
 
     let buildingCoords: number[][][] | null = null;
     let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
+
+    // Check if 3d-buildings layer exists
+    if (!mapInstance.getLayer('3d-buildings')) {
+      console.warn('[Map3D] 3d-buildings layer not found!');
+    }
 
     // Try multiple query approaches to find the building
     // 1. First try exact point query on the 3d-buildings layer
     const exactFeatures = mapInstance.queryRenderedFeatures(point, {
       layers: ['3d-buildings']
     });
+    console.log(`[Map3D] Exact query found ${exactFeatures.length} features`);
 
     if (exactFeatures.length > 0) {
       buildingFeature = exactFeatures[0];
+      console.log('[Map3D] Using exact query result', buildingFeature.properties);
     } else {
       // 2. Try a larger bounding box query
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 100, point.y - 100],
-        [point.x + 100, point.y + 100]
+        [point.x - 150, point.y - 150],
+        [point.x + 150, point.y + 150]
       ];
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
         layers: ['3d-buildings']
       });
+      console.log(`[Map3D] Bbox query found ${nearbyFeatures.length} features`);
 
-      // Find the building closest to our point
+      // Find the tallest building in the area (most likely the target)
       if (nearbyFeatures.length > 0) {
-        buildingFeature = nearbyFeatures[0];
+        // Sort by height and pick the tallest
+        let maxHeight = 0;
+        for (const feature of nearbyFeatures) {
+          const height = feature.properties?.render_height ||
+                        (feature.properties?.['building:levels'] || 1) * 3.5;
+          if (height > maxHeight) {
+            maxHeight = height;
+            buildingFeature = feature;
+          }
+        }
+        console.log('[Map3D] Using tallest building from bbox query, height:', maxHeight);
       }
     }
 
     // Extract coordinates from the building feature
     if (buildingFeature) {
+      console.log('[Map3D] Building feature found, geometry type:', buildingFeature.geometry.type);
       if (buildingFeature.geometry.type === 'Polygon') {
         buildingCoords = (buildingFeature.geometry as GeoJSON.Polygon).coordinates;
       } else if (buildingFeature.geometry.type === 'MultiPolygon') {
         // For MultiPolygon, use the first polygon
         buildingCoords = (buildingFeature.geometry as GeoJSON.MultiPolygon).coordinates[0];
       }
+      console.log('[Map3D] Extracted building coords, points:', buildingCoords?.[0]?.length || 0);
     }
 
-    // If we still don't have building coords, create a fallback based on typical building size
+    // If we still don't have building coords, create a fallback based on the building's floor count
     if (!buildingCoords) {
+      console.warn('[Map3D] No building found! Creating fallback building');
       const metersToDegrees = 1 / 111320;
-      const halfSize = 20 * metersToDegrees; // 20m fallback
+      // For a tall building, use a larger footprint (proportional to floors)
+      const buildingSize = Math.max(25, totalFlrs * 1.5); // At least 25m, scales with floors
+      const halfSize = buildingSize * metersToDegrees;
       const lonAdjust = halfSize / Math.cos(latitude * Math.PI / 180);
       buildingCoords = [[
         [longitude - lonAdjust, latitude - halfSize],
@@ -449,8 +473,8 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     // Recalculate floor height based on actual building
     const adjustedFloorHeight = finalBuildingHeight / totalFlrs;
 
-    // Scale up the building coordinates slightly to cover the original and prevent z-fighting
-    const scaleFactor = 1.02; // 2% larger to prevent flickering
+    // Scale up the building coordinates to fully cover the original and prevent z-fighting
+    const scaleFactor = 1.05; // 5% larger to fully cover original building
 
     // Calculate centroid for scaling and label positioning
     const outerRing = buildingCoords[0];
@@ -472,7 +496,35 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       ])
     );
 
-    // Hide the original 3D buildings layer in this area by adding our custom one on top
+    // First, try to hide the original building by setting a filter that excludes buildings at this location
+    // We'll do this by creating a small exclusion zone around the property
+    if (mapInstance.getLayer('3d-buildings')) {
+      // Get the current filter and add exclusion for this building's area
+      const latTolerance = 0.0003; // ~30m tolerance
+      const lngTolerance = 0.0003;
+
+      // Apply filter to exclude the original building (by checking if building is within our area)
+      // This uses a bounding box check
+      mapInstance.setFilter('3d-buildings', [
+        'any',
+        ['<', ['get', 'render_height'], 5], // Keep short buildings
+        ['all',
+          ['any',
+            ['<', ['geometry-type'], 'Polygon'], // Keep non-polygons
+            ['any',
+              // Keep buildings outside our exclusion zone
+              // We can't easily filter by geometry center, so use a workaround
+              // by relying on the custom building to cover the original
+            ]
+          ]
+        ]
+      ]);
+
+      // Alternative: Just let the custom building cover the original
+      // Remove the filter and rely on proper z-ordering
+      mapInstance.setFilter('3d-buildings', null);
+    }
+
     // Add source for the custom building using actual geometry
     if (!mapInstance.getSource('custom-building')) {
       mapInstance.addSource('custom-building', {
@@ -486,30 +538,47 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           },
         },
       });
+    } else {
+      // Update existing source
+      (mapInstance.getSource('custom-building') as maplibregl.GeoJSONSource).setData({
+        type: 'Feature',
+        properties: { height: totalHeightM, totalFloors: totalFlrs },
+        geometry: {
+          type: 'Polygon',
+          coordinates: scaledCoords,
+        },
+      });
     }
 
-    // Add floor slice layers using adjusted height to match actual building
+    // Remove existing floor layers if any
+    for (let floor = 1; floor <= 100; floor++) {
+      const layerId = `building-floor-${floor}`;
+      if (mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
+      }
+    }
+
+    // Add floor slice layers - each floor is a separate layer for the striped effect
+    // Add them on top of the 3d-buildings layer
     for (let floor = 1; floor <= totalFlrs; floor++) {
       const floorBase = (floor - 1) * adjustedFloorHeight;
       const floorTop = floor * adjustedFloorHeight;
       const isApartmentFloor = floor === floorNum;
       const layerId = `building-floor-${floor}`;
 
-      if (!mapInstance.getLayer(layerId)) {
-        mapInstance.addLayer({
-          id: layerId,
-          type: 'fill-extrusion',
-          source: 'custom-building',
-          paint: {
-            'fill-extrusion-color': isApartmentFloor
-              ? '#22c55e' // Green for apartment floor
-              : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
-            'fill-extrusion-height': floorTop - 0.1, // Small gap between floors
-            'fill-extrusion-base': floorBase,
-            'fill-extrusion-opacity': isApartmentFloor ? 0.95 : 0.85,
-          },
-        });
-      }
+      mapInstance.addLayer({
+        id: layerId,
+        type: 'fill-extrusion',
+        source: 'custom-building',
+        paint: {
+          'fill-extrusion-color': isApartmentFloor
+            ? '#22c55e' // Bright green for apartment floor
+            : floor % 2 === 0 ? '#4b5563' : '#6b7280', // Alternating grey for other floors
+          'fill-extrusion-height': floorTop - 0.15, // Gap between floors for visual separation
+          'fill-extrusion-base': floorBase + 0.05,
+          'fill-extrusion-opacity': isApartmentFloor ? 1 : 0.92,
+        },
+      });
     }
 
     // Add door icon directly on the highlighted floor for 360 tour
@@ -784,17 +853,42 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       // Add custom 3D building with floor slices for apartments
       // Wait for tiles to fully load before querying building geometry
       if (propertyType === 'apartment' && floorNumber != null && totalFloors != null && totalFloors > 0) {
-        // Use 'idle' event to ensure all tiles are loaded
+        // Retry mechanism to ensure building tiles are loaded
+        let retryCount = 0;
+        const maxRetries = 5;
+
+        const tryAddCustomBuilding = () => {
+          // First zoom to the building location to ensure tiles load
+          mapInstance.flyTo({
+            center: [lng, lat],
+            zoom: Math.max(mapInstance.getZoom(), 17),
+            duration: 1500,
+          });
+
+          // Wait for the fly animation and tiles to load
+          setTimeout(() => {
+            addCustomBuilding3D(
+              mapInstance,
+              lat,
+              lng,
+              floorNumber,
+              totalFloors,
+              virtualTour360Url,
+              virtualTour360Url ? handleEnterBuilding : undefined
+            );
+
+            // Check if source was added successfully - if not, retry
+            if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
+              retryCount++;
+              console.log(`[Map3D] Retrying custom building creation, attempt ${retryCount}`);
+              setTimeout(tryAddCustomBuilding, 1000);
+            }
+          }, 2000);
+        };
+
+        // Start the process after initial load
         const addBuildingOnIdle = () => {
-          addCustomBuilding3D(
-            mapInstance,
-            lat,
-            lng,
-            floorNumber,
-            totalFloors,
-            virtualTour360Url,
-            virtualTour360Url ? handleEnterBuilding : undefined
-          );
+          tryAddCustomBuilding();
           mapInstance.off('idle', addBuildingOnIdle);
         };
         mapInstance.on('idle', addBuildingOnIdle);
@@ -1329,9 +1423,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         </div>
       )}
 
-      {/* Shadow Timelapse Panel - Right side */}
+      {/* Shadow Timelapse Panel - Right side, positioned below the control buttons */}
       {enableShadowTimelapse && !show360Tour && (
-        <div className="absolute top-14 sm:top-16 right-2 sm:right-4 z-10 w-44 sm:w-52">
+        <div className="absolute top-36 sm:top-40 right-2 sm:right-4 z-10 w-44 sm:w-52">
           {!showTimelapse ? (
             <button
               onClick={() => setShowTimelapse(true)}
