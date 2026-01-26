@@ -304,20 +304,32 @@ async function seed10kListings() {
         const result = await Property.insertMany(properties, { ordered: false });
         totalCreated += result.length;
       } catch (insertError: any) {
-        // Log validation errors
-        if (insertError.writeErrors) {
-          console.error(`  ❌ Batch ${batch + 1} had ${insertError.writeErrors.length} errors`);
-          console.error(`     First error: ${insertError.writeErrors[0]?.errmsg}`);
-        } else if (insertError.errors) {
-          const errorKeys = Object.keys(insertError.errors);
-          console.error(`  ❌ Validation errors: ${errorKeys.join(', ')}`);
-          errorKeys.slice(0, 3).forEach(key => {
-            console.error(`     ${key}: ${insertError.errors[key].message}`);
+        console.error(`\n  ❌ Batch ${batch + 1} FAILED:`);
+        console.error(`     Error name: ${insertError.name}`);
+        console.error(`     Error message: ${insertError.message}`);
+
+        // Log validation errors from Mongoose
+        if (insertError.errors) {
+          Object.keys(insertError.errors).forEach(key => {
+            console.error(`     Field "${key}": ${insertError.errors[key].message}`);
           });
-        } else {
-          console.error(`  ❌ Insert error:`, insertError.message);
         }
-        // Still count what was inserted
+
+        // Log write errors from MongoDB
+        if (insertError.writeErrors) {
+          console.error(`     Write errors: ${insertError.writeErrors.length}`);
+          insertError.writeErrors.slice(0, 3).forEach((we: any, i: number) => {
+            console.error(`     [${i}]: ${we.errmsg}`);
+          });
+        }
+
+        // Log the first property to debug
+        if (batch === 0) {
+          console.error(`\n     Sample property being inserted:`);
+          console.error(JSON.stringify(properties[0], null, 2).split('\n').slice(0, 20).join('\n'));
+        }
+
+        // Count what was inserted despite errors
         if (insertError.insertedDocs) {
           totalCreated += insertError.insertedDocs.length;
         }
