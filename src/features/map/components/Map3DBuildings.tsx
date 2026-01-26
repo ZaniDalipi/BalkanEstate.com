@@ -148,10 +148,12 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const doorMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const floorLabelsRef = useRef<maplibregl.Marker[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [showTimelapse, setShowTimelapse] = useState(false);
   const [is3DMode, setIs3DMode] = useState(true);
   const [showFloorIndicator, setShowFloorIndicator] = useState(true);
+  const [showFloorLabels, setShowFloorLabels] = useState(false);
   const [show360Tour, setShow360Tour] = useState(false);
   const [isEnteringBuilding, setIsEnteringBuilding] = useState(false);
 
@@ -762,6 +764,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     );
 
     return () => {
+      // Clean up floor labels
+      floorLabelsRef.current.forEach(marker => marker.remove());
+      floorLabelsRef.current = [];
       mapInstance.remove();
       map.current = null;
     };
@@ -816,6 +821,132 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       essential: true,
     });
   }, [lat, lng]);
+
+  // Update floor labels for all visible buildings with building:levels
+  const updateFloorLabels = useCallback(() => {
+    if (!map.current || !mapLoaded) return;
+
+    // Remove existing labels
+    floorLabelsRef.current.forEach(marker => marker.remove());
+    floorLabelsRef.current = [];
+
+    if (!showFloorLabels) return;
+
+    // Query all rendered buildings
+    const features = map.current.queryRenderedFeatures(undefined, {
+      layers: ['3d-buildings']
+    });
+
+    // Track building centroids to avoid duplicate labels
+    const labeledBuildings = new Set<string>();
+
+    features.forEach(feature => {
+      const props = feature.properties;
+      const levels = props?.['building:levels'];
+
+      if (!levels || levels <= 0) return;
+
+      // Get building centroid for label positioning
+      let centroidLng = 0;
+      let centroidLat = 0;
+      let coords: number[][] = [];
+
+      if (feature.geometry.type === 'Polygon') {
+        coords = (feature.geometry as GeoJSON.Polygon).coordinates[0];
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        coords = (feature.geometry as GeoJSON.MultiPolygon).coordinates[0][0];
+      }
+
+      if (coords.length === 0) return;
+
+      // Calculate centroid
+      const numPoints = coords.length - 1;
+      for (let i = 0; i < numPoints; i++) {
+        centroidLng += coords[i][0];
+        centroidLat += coords[i][1];
+      }
+      centroidLng /= numPoints;
+      centroidLat /= numPoints;
+
+      // Create unique key for building to avoid duplicates
+      const key = `${centroidLng.toFixed(5)},${centroidLat.toFixed(5)}`;
+      if (labeledBuildings.has(key)) return;
+      labeledBuildings.add(key);
+
+      // Create floor label marker
+      const labelEl = document.createElement('div');
+      labelEl.className = 'building-floor-label';
+      labelEl.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          pointer-events: none;
+        ">
+          <div style="
+            background: rgba(30, 41, 59, 0.95);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            border: 2px solid rgba(148, 163, 184, 0.5);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          ">
+            <span style="font-size: 12px;">🏢</span>
+            <span>${levels}F</span>
+          </div>
+          <div style="
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(30, 41, 59, 0.95);
+            margin-top: -1px;
+          "></div>
+        </div>
+      `;
+
+      // Calculate vertical offset based on building height
+      const buildingHeight = props?.render_height || (levels * 3.5);
+      const zoomFactor = Math.pow(2, map.current!.getZoom() - 16);
+      const heightOffset = -buildingHeight * zoomFactor * 0.8;
+
+      const marker = new maplibregl.Marker({
+        element: labelEl,
+        anchor: 'bottom',
+        offset: [0, heightOffset],
+      })
+        .setLngLat([centroidLng, centroidLat])
+        .addTo(map.current!);
+
+      floorLabelsRef.current.push(marker);
+    });
+  }, [mapLoaded, showFloorLabels]);
+
+  // Update floor labels when toggle changes or map moves
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    updateFloorLabels();
+
+    if (showFloorLabels) {
+      const onMoveEnd = () => updateFloorLabels();
+      map.current.on('moveend', onMoveEnd);
+      map.current.on('zoomend', onMoveEnd);
+
+      return () => {
+        if (map.current) {
+          map.current.off('moveend', onMoveEnd);
+          map.current.off('zoomend', onMoveEnd);
+        }
+      };
+    }
+  }, [mapLoaded, showFloorLabels, updateFloorLabels]);
 
   return (
     <div className="relative rounded-xl overflow-hidden shadow-xl" style={{ height }}>
@@ -986,7 +1117,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
         </button>
       )}
 
-      {/* 2D/3D Toggle - top right, OneGeo style */}
+      {/* 2D/3D Toggle and Floor Labels Toggle - top right, OneGeo style */}
       {!show360Tour && (
         <div className="absolute top-3 sm:top-4 right-2 sm:right-4 z-10 flex flex-col gap-2">
           <button
@@ -998,6 +1129,20 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             }`}
           >
             {is3DMode ? '2D' : '3D'}
+          </button>
+          <button
+            onClick={() => setShowFloorLabels(!showFloorLabels)}
+            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center gap-1 ${
+              showFloorLabels
+                ? 'bg-blue-600 text-white border border-blue-500'
+                : 'bg-slate-900/90 text-white border border-slate-600'
+            }`}
+            title={t('property:map3d.floorLabels', 'Show Floor Levels')}
+          >
+            <span className="text-sm">🏢</span>
+            <span className="hidden sm:inline text-xs">
+              {showFloorLabels ? t('property:map3d.hideFloors', 'Hide') : t('property:map3d.showFloors', 'Floors')}
+            </span>
           </button>
         </div>
       )}
