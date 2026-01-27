@@ -316,13 +316,31 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
                       }}
                     >
                       <Popup>
-                        <div className="text-sm">
-                          <strong>{measurement.name}</strong>
-                          <div className="text-gray-500 text-xs mt-1">
-                            {measurement.type === 'area'
-                              ? `Area: ${formatArea(measurement.area || 0)}`
-                              : `Distance: ${formatDistance(measurement.distance || 0)}`
-                            }
+                        <div className="min-w-[160px] p-2">
+                          <div className="font-semibold text-gray-900 text-sm mb-1.5 leading-tight">
+                            {measurement.name}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className={`px-2 py-0.5 rounded-full font-medium ${
+                              measurement.type === 'area'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {measurement.type === 'area' ? '📐 Area' : '📏 Distance'}
+                            </span>
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-gray-100">
+                            <div className="text-sm font-bold text-gray-800">
+                              {measurement.type === 'area'
+                                ? formatArea(measurement.area || 0)
+                                : formatDistance(measurement.distance || 0)
+                              }
+                            </div>
+                            {measurement.address && (
+                              <div className="text-xs text-gray-500 mt-1 truncate">
+                                📍 {measurement.address}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </Popup>

@@ -983,6 +983,14 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
     console.log(`[Cadastre] Loading ${cadastreConfig.country} cadastre layer`);
 
+    // Helper function to convert lat/lng to Web Mercator (EPSG:3857) meters
+    const latLngToMercator = (lat: number, lng: number): { x: number; y: number } => {
+      const x = lng * 20037508.34 / 180;
+      let y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+      y = y * 20037508.34 / 180;
+      return { x, y };
+    };
+
     // Create WMS tile overlay
     const wmsLayer = new google.maps.ImageMapType({
       getTileUrl: (coord, zoom) => {
@@ -1014,10 +1022,19 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
         if (!sw || !ne) return '';
 
-        // Build WMS GetMap URL
-        const bbox = cadastreConfig.additionalParams?.CRS === 'EPSG:3857'
-          ? `${sw.lng()},${sw.lat()},${ne.lng()},${ne.lat()}`
-          : `${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}`;
+        // Build WMS GetMap URL with correct BBOX format
+        let bbox: string;
+        const crs = cadastreConfig.additionalParams?.CRS || 'EPSG:4326';
+
+        if (crs === 'EPSG:3857') {
+          // Convert to Web Mercator meters for EPSG:3857
+          const swMerc = latLngToMercator(sw.lat(), sw.lng());
+          const neMerc = latLngToMercator(ne.lat(), ne.lng());
+          bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
+        } else {
+          // EPSG:4326 - WMS 1.3.0 uses lat,lng order (y,x)
+          bbox = `${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}`;
+        }
 
         const params = new URLSearchParams({
           SERVICE: 'WMS',
@@ -1029,7 +1046,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           TRANSPARENT: 'true',
           WIDTH: '256',
           HEIGHT: '256',
-          CRS: cadastreConfig.additionalParams?.CRS || 'EPSG:4326',
+          CRS: crs,
           BBOX: bbox,
         });
 
