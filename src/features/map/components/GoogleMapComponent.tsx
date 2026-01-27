@@ -479,11 +479,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   // Promoted listings filter
   const [showOnlyPromoted, setShowOnlyPromoted] = useState(false);
 
-  // Refs
+  // Refs - ALL useRef hooks must be at the top to maintain consistent hook order
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
   const markerDivsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const lastCadastreZoomRef = useRef<number | null>(null);
+  const lastMapTypeRef = useRef<string | null>(null);
+  const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
 
   // Load Google Maps API
   const { isLoaded, loadError } = useJsApiLoader({
@@ -713,7 +715,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   }, [map, onMapMove]);
 
   // Update map type when it changes (styles are controlled via mapId in Cloud Console)
-  const lastMapTypeRef = useRef<string | null>(null);
   useEffect(() => {
     if (!map || !isLoaded) return;
     const newMapType = getMapTypeId();
@@ -1277,8 +1278,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   }, [map, isLoaded, showCadastre]);
 
   // Climate risk layer overlay effect
-  const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
-
   useEffect(() => {
     if (!map || !isLoaded) return;
 

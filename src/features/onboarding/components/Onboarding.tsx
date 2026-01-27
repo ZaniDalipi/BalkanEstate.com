@@ -8,7 +8,7 @@ import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
 /* ---------------- CONSTANTS ---------------- */
 
 const STORAGE_KEY = 'balkanestate_onboarding_complete';
-const PARTICLE_COUNT = 50;
+const PARTICLE_COUNT = 40;
 
 /* ---------------- PARTICLE SYSTEM ---------------- */
 
@@ -25,11 +25,11 @@ interface Particle {
 const createParticle = (width: number, height: number): Particle => ({
   x: Math.random() * width,
   y: Math.random() * height,
-  size: Math.random() * 4 + 1,
-  speedX: (Math.random() - 0.5) * 0.5,
-  speedY: (Math.random() - 0.5) * 0.5 - 0.3,
-  opacity: Math.random() * 0.5 + 0.2,
-  hue: Math.random() * 60 + 200, // Blue to purple range
+  size: Math.random() * 3 + 1,
+  speedX: (Math.random() - 0.5) * 0.3,
+  speedY: (Math.random() - 0.5) * 0.3 - 0.2,
+  opacity: Math.random() * 0.4 + 0.1,
+  hue: Math.random() * 40 + 210, // Blue range
 });
 
 /* ---------------- COMPONENT ---------------- */
@@ -74,7 +74,7 @@ const Onboarding: React.FC = () => {
 
     const resize = () => {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.height = window.innerHeight * 2; // Make canvas taller for scrolling
     };
     resize();
     window.addEventListener('resize', resize);
@@ -87,7 +87,7 @@ const Onboarding: React.FC = () => {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particlesRef.current.forEach((particle, index) => {
+      particlesRef.current.forEach((particle) => {
         particle.x += particle.speedX;
         particle.y += particle.speedY;
 
@@ -97,16 +97,16 @@ const Onboarding: React.FC = () => {
         if (particle.y < 0) particle.y = canvas.height;
         if (particle.y > canvas.height) particle.y = 0;
 
-        // Draw particle with glow
+        // Draw particle with soft glow
         ctx.beginPath();
         const gradient = ctx.createRadialGradient(
           particle.x, particle.y, 0,
-          particle.x, particle.y, particle.size * 2
+          particle.x, particle.y, particle.size * 3
         );
-        gradient.addColorStop(0, `hsla(${particle.hue}, 70%, 60%, ${particle.opacity})`);
-        gradient.addColorStop(1, `hsla(${particle.hue}, 70%, 60%, 0)`);
+        gradient.addColorStop(0, `hsla(${particle.hue}, 80%, 55%, ${particle.opacity})`);
+        gradient.addColorStop(1, `hsla(${particle.hue}, 80%, 55%, 0)`);
         ctx.fillStyle = gradient;
-        ctx.arc(particle.x, particle.y, particle.size * 2, 0, Math.PI * 2);
+        ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2);
         ctx.fill();
       });
 
@@ -164,52 +164,41 @@ const Onboarding: React.FC = () => {
       </Helmet>
 
       <div
-        className={`fixed inset-0 z-[9999] transition-opacity duration-1000 ${
+        className={`fixed inset-0 z-[9999] overflow-y-auto transition-opacity duration-1000 ${
           isVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-hidden">
-          {/* Aurora effect layers */}
-          <div className="absolute inset-0">
+        {/* Light gradient background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #ddd6fe 50%, #fce7f3 75%, #fff1f2 100%)',
+          }}
+        >
+          {/* Animated gradient orbs */}
+          <div className="absolute inset-0 overflow-hidden">
             <div
-              className="absolute top-0 left-1/4 w-[800px] h-[800px] rounded-full opacity-30"
+              className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full opacity-60"
               style={{
-                background: 'radial-gradient(circle, rgba(99,102,241,0.4) 0%, transparent 70%)',
-                animation: 'aurora1 15s ease-in-out infinite',
+                background: 'radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%)',
+                animation: 'float1 20s ease-in-out infinite',
               }}
             />
             <div
-              className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full opacity-25"
+              className="absolute top-1/3 -right-20 w-[500px] h-[500px] rounded-full opacity-50"
               style={{
-                background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)',
-                animation: 'aurora2 12s ease-in-out infinite',
+                background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)',
+                animation: 'float2 15s ease-in-out infinite',
               }}
             />
             <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full opacity-20"
+              className="absolute -bottom-20 left-1/3 w-[700px] h-[700px] rounded-full opacity-40"
               style={{
-                background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)',
-                animation: 'aurora3 18s ease-in-out infinite',
+                background: 'radial-gradient(circle, rgba(236,72,153,0.15) 0%, transparent 70%)',
+                animation: 'float3 18s ease-in-out infinite',
               }}
             />
           </div>
-
-          {/* Mesh gradient overlay */}
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage: `
-                radial-gradient(at 40% 20%, hsla(228,90%,60%,0.3) 0px, transparent 50%),
-                radial-gradient(at 80% 0%, hsla(189,100%,56%,0.2) 0px, transparent 50%),
-                radial-gradient(at 0% 50%, hsla(355,85%,63%,0.15) 0px, transparent 50%),
-                radial-gradient(at 80% 50%, hsla(340,80%,60%,0.2) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, hsla(269,80%,55%,0.3) 0px, transparent 50%),
-                radial-gradient(at 80% 100%, hsla(22,100%,55%,0.15) 0px, transparent 50%),
-                radial-gradient(at 0% 0%, hsla(343,100%,56%,0.2) 0px, transparent 50%)
-              `,
-            }}
-          />
 
           {/* Particle canvas */}
           <canvas
@@ -217,46 +206,45 @@ const Onboarding: React.FC = () => {
             className="absolute inset-0 pointer-events-none"
           />
 
-          {/* Subtle grid pattern */}
+          {/* Subtle pattern overlay */}
           <div
             className="absolute inset-0 opacity-[0.03]"
             style={{
-              backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-              backgroundSize: '100px 100px',
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0)`,
+              backgroundSize: '40px 40px',
             }}
           />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
+        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
           {/* Logo and title */}
           <div
-            className={`text-center mb-12 transform transition-all duration-1000 delay-300 ${
+            className={`text-center mb-10 transform transition-all duration-1000 delay-300 ${
               isVisible ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'
             }`}
           >
             <div className="flex items-center justify-center gap-4 mb-6">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl blur-xl opacity-50 animate-pulse" />
-                <div className="relative p-4 bg-gradient-to-br from-blue-500 to-violet-600 rounded-2xl shadow-2xl shadow-blue-500/25">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl blur-xl opacity-40 animate-pulse" />
+                <div className="relative p-4 bg-gradient-to-br from-blue-500 to-violet-600 rounded-2xl shadow-xl shadow-blue-500/20">
                   <LogoIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
                 </div>
               </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight mb-4">
-              Balkan<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400">Estate</span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 tracking-tight mb-4">
+              Balkan<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-violet-600 to-fuchsia-600">Estate</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/60 max-w-lg mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-lg mx-auto">
               {t('common:heroTagline', 'Discover your dream property across 11 Balkan countries')}
             </p>
           </div>
 
           {/* Main question */}
           <h2
-            className={`text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-10 transform transition-all duration-1000 delay-500 ${
+            className={`text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 text-center mb-10 transform transition-all duration-1000 delay-500 ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}
           >
@@ -272,19 +260,19 @@ const Onboarding: React.FC = () => {
             {/* Buy Card */}
             <button
               onClick={handleBuyChoice}
-              className={`group relative overflow-hidden rounded-3xl transition-all duration-500 ${
+              className={`group relative overflow-hidden rounded-3xl transition-all duration-500 text-left ${
                 activeCard === 'buy'
                   ? 'scale-105 ring-4 ring-blue-400'
                   : activeCard === 'sell'
                     ? 'scale-95 opacity-50'
-                    : 'hover:scale-[1.02]'
+                    : 'hover:scale-[1.02] hover:-translate-y-1'
               }`}
             >
               {/* Glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 rounded-3xl opacity-0 group-hover:opacity-70 blur-xl transition-all duration-500" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 rounded-3xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500" />
 
               {/* Card content */}
-              <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 sm:p-8">
+              <div className="relative bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-6 sm:p-8 shadow-xl shadow-gray-200/50 group-hover:shadow-2xl group-hover:shadow-blue-200/50 transition-all duration-500">
                 {/* Image */}
                 <div className="relative h-48 sm:h-56 rounded-2xl overflow-hidden mb-6">
                   <img
@@ -297,24 +285,24 @@ const Onboarding: React.FC = () => {
                     decoding="async"
                     fetchpriority="high"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                   {/* Icon badge */}
-                  <div className="absolute top-4 left-4 p-3 bg-blue-500/90 backdrop-blur-sm rounded-xl shadow-lg shadow-blue-500/30">
+                  <div className="absolute top-4 left-4 p-3 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
                     <SearchIcon className="w-6 h-6 text-white" />
                   </div>
                 </div>
 
                 {/* Text */}
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors">
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
                   {t('nav:onboarding.lookingToBuy', "I'm looking to buy")}
                 </h3>
-                <p className="text-white/60 mb-6 group-hover:text-white/80 transition-colors">
+                <p className="text-gray-600 mb-6 group-hover:text-gray-700 transition-colors">
                   {t('nav:onboarding.buyDescription', 'Find your dream home with our powerful search tools and real-time alerts.')}
                 </p>
 
                 {/* CTA */}
-                <div className="flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl font-bold text-white shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all">
+                <div className="flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-bold text-white shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:from-blue-600 group-hover:to-blue-700 transition-all">
                   <SearchIcon className="w-5 h-5" />
                   <span>{t('nav:onboarding.startSearching', 'Start Searching')}</span>
                   <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -327,19 +315,19 @@ const Onboarding: React.FC = () => {
             {/* Sell Card */}
             <button
               onClick={handleSellChoice}
-              className={`group relative overflow-hidden rounded-3xl transition-all duration-500 ${
+              className={`group relative overflow-hidden rounded-3xl transition-all duration-500 text-left ${
                 activeCard === 'sell'
                   ? 'scale-105 ring-4 ring-violet-400'
                   : activeCard === 'buy'
                     ? 'scale-95 opacity-50'
-                    : 'hover:scale-[1.02]'
+                    : 'hover:scale-[1.02] hover:-translate-y-1'
               }`}
             >
               {/* Glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-500 via-fuchsia-400 to-violet-500 rounded-3xl opacity-0 group-hover:opacity-70 blur-xl transition-all duration-500" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-500 rounded-3xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500" />
 
               {/* Card content */}
-              <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 sm:p-8">
+              <div className="relative bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl p-6 sm:p-8 shadow-xl shadow-gray-200/50 group-hover:shadow-2xl group-hover:shadow-violet-200/50 transition-all duration-500">
                 {/* Image */}
                 <div className="relative h-48 sm:h-56 rounded-2xl overflow-hidden mb-6">
                   <img
@@ -351,24 +339,24 @@ const Onboarding: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                   {/* Icon badge */}
-                  <div className="absolute top-4 left-4 p-3 bg-violet-500/90 backdrop-blur-sm rounded-xl shadow-lg shadow-violet-500/30">
+                  <div className="absolute top-4 left-4 p-3 bg-violet-500 rounded-xl shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform">
                     <HomeIcon className="w-6 h-6 text-white" />
                   </div>
                 </div>
 
                 {/* Text */}
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 group-hover:text-violet-300 transition-colors">
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 group-hover:text-violet-600 transition-colors">
                   {t('nav:onboarding.wantToSell', 'I want to sell')}
                 </h3>
-                <p className="text-white/60 mb-6 group-hover:text-white/80 transition-colors">
+                <p className="text-gray-600 mb-6 group-hover:text-gray-700 transition-colors">
                   {t('nav:onboarding.sellDescription', 'List your property, reach thousands of potential buyers, and use our smart tools.')}
                 </p>
 
                 {/* CTA */}
-                <div className="flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-xl font-bold text-white shadow-lg shadow-violet-500/30 group-hover:shadow-violet-500/50 transition-all">
+                <div className="flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-violet-500 to-violet-600 rounded-xl font-bold text-white shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 group-hover:from-violet-600 group-hover:to-violet-700 transition-all">
                   <HomeIcon className="w-5 h-5" />
                   <span>{t('nav:onboarding.listProperty', 'List my Property')}</span>
                   <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -381,7 +369,7 @@ const Onboarding: React.FC = () => {
 
           {/* Bottom tagline */}
           <p
-            className={`text-white/40 text-sm mt-10 text-center transform transition-all duration-1000 delay-1000 ${
+            className={`text-gray-500 text-sm mt-10 text-center transform transition-all duration-1000 delay-1000 ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}
           >
@@ -392,20 +380,20 @@ const Onboarding: React.FC = () => {
 
       {/* Keyframe animations */}
       <style>{`
-        @keyframes aurora1 {
+        @keyframes float1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(100px, -50px) scale(1.1); }
-          50% { transform: translate(-50px, 100px) scale(0.9); }
-          75% { transform: translate(50px, 50px) scale(1.05); }
+          25% { transform: translate(50px, 30px) scale(1.05); }
+          50% { transform: translate(-30px, 60px) scale(0.95); }
+          75% { transform: translate(40px, -20px) scale(1.02); }
         }
-        @keyframes aurora2 {
+        @keyframes float2 {
           0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(-80px, 60px) scale(1.15); }
-          66% { transform: translate(60px, -40px) scale(0.85); }
+          33% { transform: translate(-40px, 40px) scale(1.08); }
+          66% { transform: translate(30px, -30px) scale(0.92); }
         }
-        @keyframes aurora3 {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          50% { transform: translate(-50%, -50%) scale(1.2); }
+        @keyframes float3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(40px, -40px) scale(1.1); }
         }
       `}</style>
     </>
