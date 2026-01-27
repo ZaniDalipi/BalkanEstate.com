@@ -781,9 +781,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         setIsAtMeasurementLimit(result.count >= result.maxAllowed);
       }
 
-      // Also keep locally for current session display
-      setLocalMeasurements(prev => [...prev, pendingMeasurement]);
-      setMeasurementPoints([]); // Clear current drawing
+      // Clear all measurement lines from map after saving
+      setLocalMeasurements([]);
+      setMeasurementPoints([]);
       setShowSaveModal(false);
       setPendingMeasurement(null);
     } catch (error: any) {
@@ -803,9 +803,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         setMeasurementSaveError(error.message);
         return;
       } else {
-        // Generic error - still save locally
-        setMeasurementSaveError('Failed to save to your profile. Saved locally instead.');
-        setLocalMeasurements(prev => [...prev, pendingMeasurement]);
+        // Generic error - clear measurements and show error
+        setMeasurementSaveError('Failed to save to your profile. Please try again.');
+        setLocalMeasurements([]);
         setMeasurementPoints([]);
         // Close after a delay to show the message
         setTimeout(() => {
@@ -819,35 +819,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [pendingMeasurement, measurementName, measurementAddress, measurementNotes, isAuthenticated, isAtMeasurementLimit, measurementCount, measurementMaxAllowed, measurementIsPro]);
 
-  // Quick save without modal (for local only)
+  // Quick save/keep - just clears the current drawing (for non-authenticated users)
   const handleQuickSave = useCallback(() => {
     if (measurementPoints.length < 2) return;
     if (measurementMode === 'area' && measurementPoints.length < 3) return;
 
-    const newMeasurement: LocalMeasurement = {
-      id: `measurement-${Date.now()}`,
-      points: [...measurementPoints],
-      mode: measurementMode,
-      distance: measurementDistance,
-      area: measurementArea,
-      perimeter: measurementPerimeter,
-      createdAt: Date.now(),
-    };
-
-    setLocalMeasurements(prev => [...prev, newMeasurement]);
-    setMeasurementPoints([]); // Clear current to start new measurement
-  }, [measurementPoints, measurementMode, measurementDistance, measurementArea, measurementPerimeter]);
-
-  // Remove a local measurement
-  const handleRemoveMeasurement = useCallback((id: string) => {
-    setLocalMeasurements(prev => prev.filter(m => m.id !== id));
-  }, []);
-
-  // Clear all measurements
-  const handleClearAllMeasurements = useCallback(() => {
+    // Clear all measurement lines from map
     setLocalMeasurements([]);
     setMeasurementPoints([]);
-  }, []);
+  }, [measurementPoints, measurementMode]);
 
   // Update markers when properties change - optimized with batching
   useEffect(() => {
@@ -1449,50 +1429,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             />
           )}
 
-          {/* Saved measurements visualization */}
-          {localMeasurements.map((measurement, index) => (
-            <React.Fragment key={measurement.id}>
-              {measurement.mode === 'area' && measurement.points.length >= 3 ? (
-                <Polygon
-                  paths={measurement.points}
-                  options={{
-                    strokeColor: '#6366f1',
-                    strokeOpacity: 0.9,
-                    strokeWeight: 2,
-                    fillColor: '#6366f1',
-                    fillOpacity: 0.2,
-                    clickable: false,
-                  }}
-                />
-              ) : (
-                <Polyline
-                  path={measurement.points}
-                  options={{
-                    strokeColor: '#6366f1',
-                    strokeOpacity: 0.9,
-                    strokeWeight: 2,
-                    clickable: false,
-                  }}
-                />
-              )}
-              {/* Label for saved measurement */}
-              <OverlayViewF
-                position={measurement.points[0]}
-                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-              >
-                <div
-                  className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg cursor-pointer hover:bg-indigo-700 transition-colors"
-                  style={{ transform: 'translate(-50%, -100%)', marginTop: '-8px' }}
-                  onClick={() => handleRemoveMeasurement(measurement.id)}
-                  title="Click to remove"
-                >
-                  #{index + 1}: {measurement.mode === 'area' ? formatMeasureArea(measurement.area) : formatMeasureDistance(measurement.distance)}
-                  <span className="ml-1 opacity-70">✕</span>
-                </div>
-              </OverlayViewF>
-            </React.Fragment>
-          ))}
-
           {/* Current measurement visualization (being drawn) */}
           {showMeasurement && measurementPoints.length >= 2 && (
             <>
@@ -1636,41 +1572,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
               </button>
             </div>
 
-            {/* Saved measurements list */}
-            {localMeasurements.length > 0 && (
-              <div className="border-t border-gray-200 pt-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-gray-700">Saved ({localMeasurements.length})</span>
-                  <button
-                    onClick={handleClearAllMeasurements}
-                    className="text-[10px] text-red-500 hover:text-red-700 font-medium"
-                  >
-                    Clear All
-                  </button>
-                </div>
-                <div className="space-y-1 max-h-32 overflow-y-auto">
-                  {localMeasurements.map((m, i) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-indigo-600">#{i + 1}</span>
-                        <span className="text-xs text-gray-700">
-                          {m.mode === 'area' ? formatMeasureArea(m.area) : formatMeasureDistance(m.distance)}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveMeasurement(m.id)}
-                        className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <XCircleIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
