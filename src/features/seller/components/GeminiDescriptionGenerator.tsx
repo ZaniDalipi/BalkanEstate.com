@@ -1435,23 +1435,27 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 </div>
                             </div>
 
-                            {/* Optional Street Address */}
-                            <div className="relative md:col-span-2 cursor-text" onClick={() => document.getElementById('ai-streetAddress')?.focus()}>
-                                <input
-                                    type="text"
-                                    id="ai-streetAddress"
-                                    name="streetAddress"
-                                    value={listingData.streetAddress}
-                                    onChange={handleInputChange}
-                                    className={`${floatingInputClasses} border-neutral-300`}
-                                    placeholder=" "
-                                />
-                                <label htmlFor="ai-streetAddress" className={floatingLabelClasses}>{t('seller:createListing.location.address')}</label>
-                                <p className="mt-1 text-xs text-neutral-500">
-                                    <MapPinIcon className="w-3 h-3 inline-block mr-1" />
-                                    {t('seller:createListing.ai.locationHint', 'Adding location helps AI generate more accurate, location-specific descriptions')}
-                                </p>
-                            </div>
+                            {/* Show interactive map when city is selected */}
+                            {selectedCity && listingData.lat !== 0 && listingData.lng !== 0 && (
+                                <div className="md:col-span-2">
+                                    <p className="mb-2 text-xs text-neutral-500">
+                                        <MapPinIcon className="w-3 h-3 inline-block mr-1" />
+                                        {t('seller:createListing.ai.locationHint', 'Adding location helps AI generate more accurate, location-specific descriptions')}
+                                    </p>
+                                    <MapLocationPicker
+                                        lat={listingData.lat}
+                                        lng={listingData.lng}
+                                        address={listingData.streetAddress || `${selectedCity}, ${selectedCountry}`}
+                                        zoom={getZoomLevel}
+                                        country={selectedCountry}
+                                        city={selectedCity}
+                                        cityLat={cityData?.lat}
+                                        cityLng={cityData?.lng}
+                                        onLocationChange={handleMapLocationChange}
+                                        onAddressChange={handleMapAddressChange}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-neutral-300 border-dashed rounded-lg cursor-pointer bg-neutral-50 hover:bg-neutral-100">
