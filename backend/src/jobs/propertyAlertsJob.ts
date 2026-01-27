@@ -17,7 +17,7 @@ import { sendPropertyAlert, sendPriceDropAlert, sendNewListingsDigest } from '..
 
 // Subscription tiers that have access to property alerts
 const ALERT_ELIGIBLE_TIERS = ['buyer', 'pro', 'agency_owner', 'agency_agent'];
-const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace'];
+const ALERT_ELIGIBLE_STATUSES = ['active', 'trial', 'grace', 'pending_cancellation'];
 
 /**
  * Check if a property matches saved search filters
@@ -473,40 +473,69 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
     // Get the property
     const property = await Property.findById(propertyId);
     if (!property) {
-      console.log(`   Property ${propertyId} not found`);
+      console.log(`   ❌ Property ${propertyId} not found`);
       return;
     }
 
     // Only process active properties
     if (property.status !== 'active') {
-      console.log(`   Property ${propertyId} is not active (status: ${property.status})`);
+      console.log(`   ⏸️ Property ${propertyId} is not active (status: ${property.status})`);
       return;
     }
+
+    console.log(`   📍 Property: ${property.title || property.address}, ${property.city} (lat: ${property.lat}, lng: ${property.lng})`);
 
     // Get all saved searches with instant alerts enabled
+    // Note: alertsEnabled defaults to true in schema, but older records may not have it
+    // So we check for alertsEnabled !== false (true or undefined)
     const savedSearches = await SavedSearch.find({
-      alertsEnabled: true,
-      alertFrequency: 'instant',
+      alertsEnabled: { $ne: false },
+      $or: [
+        { alertFrequency: 'instant' },
+        { alertFrequency: { $exists: false } }, // Default to instant for records without alertFrequency
+      ],
     }).populate('userId', 'email name subscription');
 
+    console.log(`   📋 Found ${savedSearches.length} saved searches with instant alerts enabled`);
+
     if (savedSearches.length === 0) {
-      console.log('   No saved searches with instant alerts enabled');
+      console.log('   ℹ️ No saved searches with instant alerts enabled');
       return;
     }
+
+    // Log all saved searches for debugging
+    savedSearches.forEach((search, i) => {
+      const user = search.userId as any;
+      console.log(`   [${i + 1}] Search "${search.name}" by ${user?.email || 'unknown'} - subscription: ${user?.subscription?.tier || 'none'} (${user?.subscription?.status || 'none'})`);
+    });
 
     // Filter to only users with active subscriptions
     const eligibleSearches = savedSearches.filter(search => {
       const user = search.userId as any;
-      if (!user || !user.subscription) return false;
+      if (!user || !user.subscription) {
+        console.log(`   ❌ Search "${search.name}" - no user or subscription`);
+        return false;
+      }
 
       const { tier, status } = user.subscription;
       const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
       const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
 
-      return isEligibleTier && isActiveStatus;
+      if (!isEligibleTier || !isActiveStatus) {
+        console.log(`   ❌ Search "${search.name}" - user ${user.email} not eligible (tier: ${tier}, status: ${status})`);
+        return false;
+      }
+
+      console.log(`   ✓ Search "${search.name}" - user ${user.email} is eligible`);
+      return true;
     });
 
-    console.log(`   Checking ${eligibleSearches.length} eligible saved searches for property match`);
+    console.log(`   👥 ${eligibleSearches.length} eligible saved searches (users with Pro subscription)`);
+
+    if (eligibleSearches.length === 0) {
+      console.log('   ℹ️ No users with eligible subscriptions');
+      return;
+    }
 
     let alertsSent = 0;
 
@@ -517,20 +546,26 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
 
       // Skip if already seen
       if (search.seenPropertyIds.includes(String(property._id))) {
+        console.log(`   ⏭️ Search "${search.name}" - property already seen`);
         continue;
       }
 
-      // Check if property matches filters and bounds
-      if (!propertyMatchesFilters(property, search.filters)) {
+      // Check if property matches filters
+      const matchesFilters = propertyMatchesFilters(property, search.filters);
+      if (!matchesFilters) {
+        console.log(`   ⏭️ Search "${search.name}" - property doesn't match filters`);
         continue;
       }
 
-      if (!propertyInBounds(property, search.drawnBoundsJSON)) {
+      // Check if property is within bounds
+      const inBounds = propertyInBounds(property, search.drawnBoundsJSON);
+      if (!inBounds) {
+        console.log(`   ⏭️ Search "${search.name}" - property not in bounds (drawnBoundsJSON: ${search.drawnBoundsJSON ? 'exists' : 'null'})`);
         continue;
       }
 
       // Property matches this saved search!
-      console.log(`   ✓ Property matches saved search "${search.name}" for user ${user.email}`);
+      console.log(`   ✅ Property matches saved search "${search.name}" for user ${user.email}`);
 
       // Create alert record
       await PropertyAlert.create({
@@ -552,6 +587,7 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
 
       // Send email notification immediately
       try {
+        console.log(`   📧 Sending email to ${user.email}...`);
         await sendPropertyAlert({
           recipientEmail: user.email,
           recipientName: user.name || 'User',
@@ -576,9 +612,9 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
         );
 
         alertsSent++;
-        console.log(`   📧 Instant alert email sent to ${user.email}`);
+        console.log(`   ✉️ Instant alert email sent to ${user.email}`);
       } catch (emailError) {
-        console.error(`   Failed to send instant alert email to ${user.email}:`, emailError);
+        console.error(`   ❌ Failed to send instant alert email to ${user.email}:`, emailError);
       }
     }
 
