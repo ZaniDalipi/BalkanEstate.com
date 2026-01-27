@@ -514,31 +514,50 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
+      @keyframes promotedFloat {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
       @keyframes promotedGlow {
         0%, 100% {
           opacity: 1;
-          transform: scale(1);
         }
         50% {
           opacity: 0.85;
-          transform: scale(1.08);
         }
       }
       .promoted-marker-premium {
-        animation: promotedGlow 2s ease-in-out infinite;
+        animation: promotedFloat 2s ease-in-out infinite, promotedGlow 2s ease-in-out infinite;
         box-shadow: 0 0 12px 3px rgba(255, 184, 0, 0.7), 0 0 20px 6px rgba(255, 184, 0, 0.4), 0 1px 4px rgba(0,0,0,0.25) !important;
       }
       .promoted-marker-highlight {
-        animation: promotedGlow 2s ease-in-out infinite;
+        animation: promotedFloat 2.2s ease-in-out infinite, promotedGlow 2.2s ease-in-out infinite;
         box-shadow: 0 0 12px 3px rgba(14, 165, 233, 0.7), 0 0 20px 6px rgba(14, 165, 233, 0.4), 0 1px 4px rgba(0,0,0,0.25) !important;
       }
       .promoted-marker-featured {
-        animation: promotedGlow 2s ease-in-out infinite;
+        animation: promotedFloat 2.4s ease-in-out infinite, promotedGlow 2.4s ease-in-out infinite;
         box-shadow: 0 0 12px 3px rgba(124, 58, 237, 0.7), 0 0 20px 6px rgba(124, 58, 237, 0.4), 0 1px 4px rgba(0,0,0,0.25) !important;
       }
       .promoted-marker-standard {
-        animation: promotedGlow 2.5s ease-in-out infinite;
+        animation: promotedFloat 2.6s ease-in-out infinite, promotedGlow 2.6s ease-in-out infinite;
         box-shadow: 0 0 8px 2px rgba(156, 163, 175, 0.6), 0 0 14px 4px rgba(156, 163, 175, 0.3), 0 1px 4px rgba(0,0,0,0.25) !important;
+      }
+      .promoted-marker-premium.marker-highlighted,
+      .promoted-marker-highlight.marker-highlighted,
+      .promoted-marker-featured.marker-highlighted,
+      .promoted-marker-standard.marker-highlighted {
+        animation: none !important;
+        transform: scale(1.3) translateY(-4px) !important;
+        z-index: 2000 !important;
+      }
+      .marker-highlighted {
+        transform: scale(1.3) translateY(-4px) !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
+        z-index: 2000 !important;
       }
     `;
     document.head.appendChild(style);
@@ -812,16 +831,27 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setMeasurementPoints([]);
   }, [measurementPoints, measurementMode]);
 
+  // Ref to store promoted markers separately (not clustered)
+  const promotedMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+
   // Update markers when properties change - optimized with batching
   useEffect(() => {
     if (!map || !clustererRef.current || !isLoaded) return;
 
+    // Clear existing markers
     clustererRef.current.clearMarkers();
     markersRef.current.clear();
     markerDivsRef.current.clear();
 
-    const markers: google.maps.marker.AdvancedMarkerElement[] = [];
-    const BATCH_SIZE = 100; // Process markers in batches for better performance
+    // Remove promoted markers from map
+    promotedMarkersRef.current.forEach(marker => {
+      marker.map = null;
+    });
+    promotedMarkersRef.current = [];
+
+    const regularMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+    const promotedMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
+    const BATCH_SIZE = 100;
     let currentIndex = 0;
 
     const createMarkerBatch = () => {
@@ -831,6 +861,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         const property = validProperties[i];
         const markerDiv = document.createElement('div');
         markerDiv.className = 'property-marker';
+        markerDiv.dataset.propertyId = property.id;
 
         const price = formatMarkerPrice(property.price);
         const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
@@ -842,7 +873,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           borderWidth = 3;
         }
 
-        // Add glow animation class for promoted markers
+        // Add animation class for promoted markers
         if (isActivelyPromoted && property.promotionTier) {
           markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
         }
@@ -860,19 +891,24 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           box-shadow: 0 1px 4px rgba(0,0,0,0.25);
           white-space: nowrap;
           user-select: none;
+          transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
         `;
         markerDiv.textContent = price;
 
-        // Use event delegation pattern - attach handlers only on interaction
+        // Hover handlers - don't override if highlighted from list
         markerDiv.onmouseenter = () => {
-          markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
-          markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
-          markerDiv.style.zIndex = '1000';
+          if (!markerDiv.classList.contains('marker-highlighted')) {
+            markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
+            markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
+            markerDiv.style.zIndex = '1000';
+          }
         };
         markerDiv.onmouseleave = () => {
-          markerDiv.style.transform = '';
-          markerDiv.style.boxShadow = '';
-          markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
+          if (!markerDiv.classList.contains('marker-highlighted')) {
+            markerDiv.style.transform = '';
+            markerDiv.style.boxShadow = '';
+            markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
+          }
         };
 
         markerDiv.onclick = (e) => {
@@ -887,40 +923,60 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           zIndex: isActivelyPromoted ? 100 : 1,
         });
 
-        markers.push(marker);
+        // Separate promoted markers from regular ones
+        if (isActivelyPromoted) {
+          // Add promoted markers directly to map (not clustered)
+          marker.map = map;
+          promotedMarkers.push(marker);
+        } else {
+          regularMarkers.push(marker);
+        }
+
         markersRef.current.set(property.id, marker);
         markerDivsRef.current.set(property.id, markerDiv);
       }
 
       currentIndex = endIndex;
 
-      // If there are more markers to create, schedule next batch
       if (currentIndex < validProperties.length) {
         requestAnimationFrame(createMarkerBatch);
       } else {
-        // All markers created, add to clusterer
-        clustererRef.current?.addMarkers(markers);
+        // Add only regular markers to clusterer (promoted stay individual)
+        clustererRef.current?.addMarkers(regularMarkers);
+        promotedMarkersRef.current = promotedMarkers;
       }
     };
 
-    // Start creating markers
     if (validProperties.length > 0) {
       createMarkerBatch();
     }
+
+    // Cleanup function
+    return () => {
+      promotedMarkersRef.current.forEach(marker => {
+        marker.map = null;
+      });
+    };
   }, [validProperties, map, isLoaded]);
 
-  // Handle hover state changes from property list
+  // Handle hover state changes from property list - use CSS classes for better performance
   useEffect(() => {
     markerDivsRef.current.forEach((div, id) => {
-      if (id === hoveredPropertyId) {
-        div.style.transform = 'scale(1.2) translateY(-2px)';
-        div.style.boxShadow = '0 6px 16px rgba(0,0,0,0.35)';
-        div.style.zIndex = '1000';
+      const isHovered = id === hoveredPropertyId;
+      const prop = validProperties.find(p => p.id === id);
+      const isPromoted = prop?.isPromoted && prop?.promotionEndDate && prop.promotionEndDate > Date.now();
+
+      if (isHovered) {
+        div.classList.add('marker-highlighted');
+        // Force styles for highlighted state
+        div.style.transform = 'scale(1.3) translateY(-4px)';
+        div.style.boxShadow = '0 8px 20px rgba(0,0,0,0.4)';
+        div.style.zIndex = '2000';
       } else {
-        div.style.transform = 'scale(1)';
-        div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.25)';
-        const prop = validProperties.find(p => p.id === id);
-        const isPromoted = prop?.isPromoted && prop?.promotionEndDate && prop.promotionEndDate > Date.now();
+        div.classList.remove('marker-highlighted');
+        // Reset to default styles
+        div.style.transform = '';
+        div.style.boxShadow = '';
         div.style.zIndex = isPromoted ? '100' : '1';
       }
     });
