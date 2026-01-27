@@ -463,8 +463,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [pendingMeasurement, setPendingMeasurement] = useState<LocalMeasurement | null>(null);
 
   // Measurement limit state
-  const [measurementCount, setMeasurementCount] = useState(0);
-  const [measurementMaxAllowed, setMeasurementMaxAllowed] = useState(MEASUREMENT_LIMITS.FREE_MAX);
+  const [measurementCount, setMeasurementCount] = useState<number>(0);
+  const [measurementMaxAllowed, setMeasurementMaxAllowed] = useState<number>(MEASUREMENT_LIMITS.FREE_MAX);
   const [measurementIsPro, setMeasurementIsPro] = useState(false);
   const [measurementSaveError, setMeasurementSaveError] = useState<string | null>(null);
   const [isAtMeasurementLimit, setIsAtMeasurementLimit] = useState(false);

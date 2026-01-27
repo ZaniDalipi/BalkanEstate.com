@@ -336,7 +336,7 @@ const Onboarding: React.FC = () => {
                         className="h-44 sm:h-48 w-full object-cover transition-transform duration-700 group-hover:scale-110"
                         loading="eager"
                         decoding="async"
-                        fetchPriority="high"
+                        fetchpriority="high"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="absolute top-3 left-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg group-hover:bg-primary group-hover:shadow-primary/30 transition-all duration-300">
