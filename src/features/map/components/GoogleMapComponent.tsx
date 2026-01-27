@@ -1054,11 +1054,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
     const cadastreConfig = getCadastreLayerForLocation(mapCenter.lat(), mapCenter.lng());
     if (!cadastreConfig) {
-      console.log('[Cadastre] No cadastre layer available for current location');
       return;
     }
-
-    console.log(`[Cadastre] Loading ${cadastreConfig.country} cadastre layer`);
 
     // Helper function to convert lat/lng to Web Mercator (EPSG:3857) meters
     const latLngToMercator = (lat: number, lng: number): { x: number; y: number } => {
@@ -1220,8 +1217,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
     const config = climateLayerConfigs[selectedClimateRisk];
     if (!config) return;
-
-    console.log(`[Climate] Loading ${config.name} layer`);
 
     // Create tile overlay based on risk type
     let climateLayer: google.maps.ImageMapType;

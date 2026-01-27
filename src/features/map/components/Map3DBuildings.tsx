@@ -382,7 +382,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
     // Query the actual building at this location from the map's building layer
     const point = mapInstance.project([longitude, latitude]);
-    console.log(`[Map3D] Querying building at ${latitude}, ${longitude}, point: ${point.x}, ${point.y}`);
 
     let buildingCoords: number[][][] | null = null;
     let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
@@ -423,7 +422,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
     const exactFeatures = mapInstance.queryRenderedFeatures(point, {
       layers: ['3d-buildings']
     });
-    console.log(`[Map3D] Exact query found ${exactFeatures.length} features`);
 
     if (exactFeatures.length > 0) {
       // If we hit multiple buildings at exact point, pick the one closest to our coordinates
@@ -442,7 +440,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           }
         }
       }
-      console.log('[Map3D] Using exact query result', buildingFeature?.properties);
     } else {
       // 2. Try a larger bounding box query
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
@@ -452,7 +449,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
       const nearbyFeatures = mapInstance.queryRenderedFeatures(bbox, {
         layers: ['3d-buildings']
       });
-      console.log(`[Map3D] Bbox query found ${nearbyFeatures.length} features`);
 
       // Find the building CLOSEST to our coordinates that is tall enough
       // Filter out small auxiliary structures (garages, sheds, etc.)
@@ -477,14 +473,12 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
           // Skip buildings that are too small (likely auxiliary structures)
           if (buildingHeight < minRequiredHeight) {
-            console.log(`[Map3D] Skipping building with height ${buildingHeight}m (min required: ${minRequiredHeight}m)`);
             continue;
           }
 
           const centroid = getBuildingCentroid(feature);
           if (centroid) {
             const distance = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-            console.log(`[Map3D] Building at (${centroid.lat.toFixed(5)}, ${centroid.lng.toFixed(5)}) distance: ${distance.toFixed(6)}, height: ${buildingHeight}m`);
 
             if (distance < minDistance) {
               minDistance = distance;
@@ -497,7 +491,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           buildingFeature = closestFeature;
           const height = closestFeature.properties?.render_height ||
                         (closestFeature.properties?.['building:levels'] || 1) * 3.5;
-          console.log(`[Map3D] Using closest tall building, distance: ${minDistance.toFixed(6)}, height: ${height}m`);
         } else {
           console.warn(`[Map3D] No building found meeting minimum height requirement of ${minRequiredHeight}m`);
         }
@@ -506,14 +499,12 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
     // Extract coordinates from the building feature
     if (buildingFeature) {
-      console.log('[Map3D] Building feature found, geometry type:', buildingFeature.geometry.type);
       if (buildingFeature.geometry.type === 'Polygon') {
         buildingCoords = (buildingFeature.geometry as GeoJSON.Polygon).coordinates;
       } else if (buildingFeature.geometry.type === 'MultiPolygon') {
         // For MultiPolygon, use the first polygon
         buildingCoords = (buildingFeature.geometry as GeoJSON.MultiPolygon).coordinates[0];
       }
-      console.log('[Map3D] Extracted building coords, points:', buildingCoords?.[0]?.length || 0);
     }
 
     // If we still don't have building coords, create a fallback based on the building's floor count
@@ -873,7 +864,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
 
         // Look for vector source with building data
         const sourceNames = Object.keys(sources);
-        console.log('[Map3D] Available sources:', sourceNames);
 
         // Check common source names used by different tile providers
         const possibleSources = ['openmaptiles', 'composite', 'mapbox', 'osm', 'vectorTiles'];
@@ -889,7 +879,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           for (const [name, source] of Object.entries(sources)) {
             if ((source as any).type === 'vector') {
               buildingSource = name;
-              console.log('[Map3D] Using detected vector source:', buildingSource);
               break;
             }
           }
@@ -933,7 +922,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             },
             labelLayerId
           );
-          console.log('[Map3D] 3D buildings layer added successfully using source:', buildingSource);
         } catch (error) {
           console.error('[Map3D] Failed to add 3D buildings layer:', error);
         }
@@ -1010,7 +998,6 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
             // Check if source was added successfully - if not, retry
             if (!mapInstance.getSource('custom-building') && retryCount < maxRetries) {
               retryCount++;
-              console.log(`[Map3D] Retrying custom building creation, attempt ${retryCount}`);
               setTimeout(tryAddCustomBuilding, 1000);
             }
           }, 2000);
