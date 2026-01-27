@@ -1351,6 +1351,29 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   const googleDrawnBounds = getGoogleBounds(drawnBounds);
 
+  // Memoize map options to prevent unnecessary re-renders and repeated warnings
+  const mapOptions = useMemo(() => ({
+    restriction: {
+      latLngBounds: BALKAN_BOUNDS,
+      strictBounds: false,
+    },
+    disableDefaultUI: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    zoomControl: false,
+    rotateControl: false,
+    scaleControl: false,
+    panControl: false,
+    keyboardShortcuts: false,
+    gestureHandling: 'greedy' as const,
+    minZoom: 6,
+    maxZoom: 21,
+    tilt: 0,
+    heading: 0,
+    mapId: GOOGLE_MAPS_MAP_ID,
+  }), []);
+
   return (
     <HighlightedPropertiesProvider properties={validProperties}>
       <div className="w-full h-full relative overflow-hidden">
@@ -1361,28 +1384,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           onLoad={onLoad}
           onUnmount={onUnmount}
           onIdle={onIdle}
-          options={{
-            restriction: {
-              latLngBounds: BALKAN_BOUNDS,
-              strictBounds: false,
-            },
-            mapTypeId: getMapTypeId(),
-            disableDefaultUI: true, // Remove all default controls including compass
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false,
-            zoomControl: false,
-            rotateControl: false,
-            scaleControl: false,
-            panControl: false,
-            keyboardShortcuts: false,
-            gestureHandling: 'greedy',
-            minZoom: 6,
-            maxZoom: 21,
-            tilt: 0, // Disable tilt to remove compass
-            heading: 0,
-            mapId: GOOGLE_MAPS_MAP_ID, // Required for AdvancedMarkerElement
-          }}
+          options={mapOptions}
         >
           {/* Property popup */}
           {selectedProperty && (
