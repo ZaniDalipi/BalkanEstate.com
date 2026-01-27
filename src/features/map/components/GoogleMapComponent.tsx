@@ -123,6 +123,9 @@ const latLngToWebMercator = (lat: number, lng: number): { x: number; y: number }
 // Google Maps API key - falls back to empty string for development
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
 
+// Google Maps Map ID for Advanced Markers and cloud-based styling
+const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'balkan-estate-map';
+
 // Libraries to load
 const GOOGLE_MAPS_LIBRARIES: ('places' | 'drawing' | 'geometry' | 'marker')[] = ['places', 'geometry', 'marker'];
 
@@ -1351,7 +1354,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             maxZoom: 21,
             tilt: 0, // Disable tilt to remove compass
             heading: 0,
-            mapId: 'balkan-estate-map', // Required for AdvancedMarkerElement
+            mapId: GOOGLE_MAPS_MAP_ID, // Required for AdvancedMarkerElement
           }}
         >
           {/* Property popup */}
