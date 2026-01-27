@@ -539,6 +539,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           isMobile={isMobile}
           searchMode={searchMode}
           hoveredPropertyId={hoveredPropertyId}
+          hideControls={hideControls}
         />
       </Suspense>
     );
