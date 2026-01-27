@@ -3,7 +3,6 @@
 
 import {
   IMeasurementRepository,
-  MeasurementNotFoundError,
   InvalidMeasurementError,
 } from '../../repositories/IMeasurementRepository';
 

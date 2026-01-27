@@ -71,16 +71,10 @@ export class MeasurementRepository implements IMeasurementRepository {
 
   /**
    * Save a new measurement
+   * Note: Limit validation should be done by the use case before calling this method
    */
   async saveMeasurement(data: CreateMeasurementDTO): Promise<MeasurementResponse> {
     try {
-      // First check if user can save more
-      const { canSave, count, maxAllowed, isPro } = await this.canSaveMeasurement();
-
-      if (!canSave) {
-        throw new MeasurementLimitExceededError(count, maxAllowed, isPro);
-      }
-
       const response = await measurementApiClient.saveMeasurement({
         name: data.name,
         points: data.points,

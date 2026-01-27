@@ -1,7 +1,7 @@
 // Use Case: Save Measurement
 // Single responsibility: Save a new measurement with limit validation
 
-import { Measurement, MEASUREMENT_LIMITS } from '../../entities/Measurement';
+import { Measurement } from '../../entities/Measurement';
 import {
   IMeasurementRepository,
   CreateMeasurementDTO,
