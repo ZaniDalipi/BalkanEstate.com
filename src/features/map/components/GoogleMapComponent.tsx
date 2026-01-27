@@ -416,6 +416,17 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const lastMapTypeRef = useRef<string | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
 
+  // Drawing refs - for rectangle drawing on map
+  const drawingStartRef = useRef<{ lat: number; lng: number } | null>(null);
+  const isDrawingDragRef = useRef(false);
+  const [drawingRect, setDrawingRect] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
+  const drawingPropsRef = useRef({ isDrawing, onDrawComplete });
+
+  // Keep drawing props ref updated
+  useEffect(() => {
+    drawingPropsRef.current = { isDrawing, onDrawComplete };
+  }, [isDrawing, onDrawComplete]);
+
   // Load Google Maps API using centralized hook (enables preloading benefits)
   const { isLoaded, loadError } = useGoogleMapLoader();
 
@@ -478,6 +489,139 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
     fetchMeasurementLimits();
   }, [isAuthenticated]);
+
+  // Drawing mode - handle cursor and map interaction
+  useEffect(() => {
+    if (!map) return;
+
+    const mapDiv = map.getDiv();
+    if (isDrawing) {
+      mapDiv.style.cursor = 'crosshair';
+      map.setOptions({ draggable: false, scrollwheel: false });
+    } else {
+      mapDiv.style.cursor = '';
+      map.setOptions({ draggable: true, scrollwheel: true });
+      // Clear drawing state if cancelled
+      if (isDrawingDragRef.current) {
+        isDrawingDragRef.current = false;
+        drawingStartRef.current = null;
+        setDrawingRect(null);
+      }
+    }
+  }, [isDrawing, map]);
+
+  // Drawing event handlers
+  useEffect(() => {
+    if (!map) return;
+
+    const mapDiv = map.getDiv();
+
+    const getLatLngFromEvent = (e: MouseEvent | TouchEvent): { lat: number; lng: number } | null => {
+      const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0]?.clientY : e.clientY;
+      if (clientX === undefined || clientY === undefined) return null;
+
+      const rect = mapDiv.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      // Convert pixel position to lat/lng
+      const bounds = map.getBounds();
+      const projection = map.getProjection();
+      if (!bounds || !projection) return null;
+
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      const topRight = projection.fromLatLngToPoint(ne);
+      const bottomLeft = projection.fromLatLngToPoint(sw);
+      if (!topRight || !bottomLeft) return null;
+
+      const scale = Math.pow(2, map.getZoom() || 0);
+      const worldPoint = new google.maps.Point(
+        bottomLeft.x + (x / scale) * (topRight.x - bottomLeft.x) / rect.width * scale,
+        topRight.y + (y / scale) * (bottomLeft.y - topRight.y) / rect.height * scale
+      );
+
+      // Simpler approach: use overlay projection
+      const latLng = map.getCenter();
+      if (!latLng) return null;
+
+      // Calculate based on bounds
+      const lng = sw.lng() + (x / rect.width) * (ne.lng() - sw.lng());
+      const lat = ne.lat() - (y / rect.height) * (ne.lat() - sw.lat());
+
+      return { lat, lng };
+    };
+
+    const handleMouseDown = (e: MouseEvent | TouchEvent) => {
+      if (!drawingPropsRef.current.isDrawing || isDrawingDragRef.current) return;
+      if ('button' in e && e.button !== 0) return;
+
+      e.preventDefault();
+      const latLng = getLatLngFromEvent(e);
+      if (!latLng) return;
+
+      isDrawingDragRef.current = true;
+      drawingStartRef.current = latLng;
+      setDrawingRect(null);
+    };
+
+    const handleMouseMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDrawingDragRef.current || !drawingStartRef.current) return;
+
+      e.preventDefault();
+      const latLng = getLatLngFromEvent(e);
+      if (!latLng) return;
+
+      const start = drawingStartRef.current;
+      setDrawingRect({
+        north: Math.max(start.lat, latLng.lat),
+        south: Math.min(start.lat, latLng.lat),
+        east: Math.max(start.lng, latLng.lng),
+        west: Math.min(start.lng, latLng.lng),
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (!isDrawingDragRef.current) return;
+
+      isDrawingDragRef.current = false;
+      const rect = drawingRect;
+      const start = drawingStartRef.current;
+
+      // Clear temp drawing state
+      drawingStartRef.current = null;
+      setDrawingRect(null);
+
+      // Convert to Leaflet LatLngBounds format for compatibility
+      if (rect && Math.abs(rect.north - rect.south) > 0.0001 && Math.abs(rect.east - rect.west) > 0.0001) {
+        const bounds = L.latLngBounds(
+          L.latLng(rect.south, rect.west),
+          L.latLng(rect.north, rect.east)
+        );
+        drawingPropsRef.current.onDrawComplete(bounds);
+      } else {
+        drawingPropsRef.current.onDrawComplete(null);
+      }
+    };
+
+    // Attach event listeners
+    mapDiv.addEventListener('mousedown', handleMouseDown);
+    mapDiv.addEventListener('touchstart', handleMouseDown, { passive: false });
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleMouseMove, { passive: false });
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchend', handleMouseUp);
+
+    return () => {
+      mapDiv.removeEventListener('mousedown', handleMouseDown);
+      mapDiv.removeEventListener('touchstart', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [map, drawingRect]);
 
   // Get map type ID based on style
   const getMapTypeId = useCallback((): google.maps.MapTypeId => {
@@ -1463,6 +1607,22 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 strokeWeight: 3,
                 fillColor: '#0252CD',
                 fillOpacity: 0.2,
+                clickable: false,
+              }}
+            />
+          )}
+
+          {/* Temporary drawing rectangle (while drawing) */}
+          {drawingRect && isDrawing && (
+            <Rectangle
+              bounds={drawingRect}
+              options={{
+                strokeColor: '#0252CD',
+                strokeOpacity: 1,
+                strokeWeight: 2,
+                strokeDashArray: [5, 5],
+                fillColor: '#0252CD',
+                fillOpacity: 0.1,
                 clickable: false,
               }}
             />
