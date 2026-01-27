@@ -441,6 +441,7 @@
     "detectedFeatures": "Detected Features",
     "detectedRooms": "Detected Rooms",
     "estimatedArea": "Estimated Area",
+    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions",
     "tips": {
       "title": "Tips for Best Results",
       "goodLighting": "Use photos with good lighting",
