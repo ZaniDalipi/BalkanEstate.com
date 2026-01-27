@@ -210,6 +210,8 @@ interface MapComponentProps {
   isMobile: boolean;
   searchMode: 'manual' | 'ai';
   hoveredPropertyId?: string | null;
+  /** Hide all map controls (for saved searches view) */
+  hideControls?: boolean;
 }
 
 /**
@@ -308,6 +310,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   isMobile,
   searchMode,
   hoveredPropertyId,
+  hideControls = false,
 }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
@@ -633,7 +636,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         )}
 
       {/* Desktop Controls - positioned above the newsletter bar (bottom-12 = ~112px) */}
-      {!isMobile && (
+      {!isMobile && !hideControls && (
         <>
           <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar - compact with glass effect */}
@@ -876,7 +879,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       )}
 
       {/* Mobile Controls - hidden on desktop via CSS as fallback */}
-      {isMobile && (
+      {isMobile && !hideControls && (
         <>
           {/* Mobile: Layers FAB with liquid glass dropdown */}
           <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>

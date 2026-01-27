@@ -159,6 +159,8 @@ interface GoogleMapComponentProps {
   isMobile: boolean;
   searchMode: 'manual' | 'ai';
   hoveredPropertyId?: string | null;
+  /** Hide all map controls (for saved searches view) */
+  hideControls?: boolean;
 }
 
 /**
@@ -363,6 +365,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   onRecenter,
   isMobile,
   hoveredPropertyId,
+  hideControls = false,
 }) => {
   const { t } = useTranslation(['search', 'property']);
   const { dispatch } = useAppContext();
@@ -1804,7 +1807,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         )}
 
         {/* Desktop Controls */}
-        {!isMobile && (
+        {!isMobile && !hideControls && (
           <div className="absolute bottom-20 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
@@ -2022,7 +2025,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         )}
 
         {/* Mobile Controls */}
-        {isMobile && (
+        {isMobile && !hideControls && (
           <>
             {/* Mobile layer menu FAB */}
             <div className="absolute bottom-28 left-3 z-[1003]">

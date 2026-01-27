@@ -466,6 +466,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 onRecenter={() => {}}
                 isMobile={false}
                 searchMode="manual"
+                hideControls={true}
               />
             </div>
           )}
