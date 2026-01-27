@@ -1397,28 +1397,33 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   }, [map, isLoaded, selectedClimateRisk]);
 
   // Memoize map options - MUST be before any early returns to maintain hooks order
-  const mapOptions = useMemo<google.maps.MapOptions>(() => ({
-    restriction: {
-      latLngBounds: BALKAN_BOUNDS,
-      strictBounds: false,
-    },
-    mapTypeId: google.maps.MapTypeId.ROADMAP, // Set stable initial type
-    disableDefaultUI: true,
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-    zoomControl: false,
-    rotateControl: false,
-    scaleControl: false,
-    panControl: false,
-    keyboardShortcuts: false,
-    gestureHandling: 'greedy',
-    minZoom: 6,
-    maxZoom: 21,
-    tilt: 0,
-    heading: 0,
-    mapId: GOOGLE_MAPS_MAP_ID,
-  }), []);
+  // Check if google is defined before accessing google.maps
+  const mapOptions = useMemo<google.maps.MapOptions | undefined>(() => {
+    if (!isLoaded || typeof google === 'undefined') return undefined;
+
+    return {
+      restriction: {
+        latLngBounds: BALKAN_BOUNDS,
+        strictBounds: false,
+      },
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDefaultUI: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: false,
+      rotateControl: false,
+      scaleControl: false,
+      panControl: false,
+      keyboardShortcuts: false,
+      gestureHandling: 'greedy',
+      minZoom: 6,
+      maxZoom: 21,
+      tilt: 0,
+      heading: 0,
+      mapId: GOOGLE_MAPS_MAP_ID,
+    };
+  }, [isLoaded]);
 
   // Loading state - early returns MUST come after all hooks
   if (loadError) {
