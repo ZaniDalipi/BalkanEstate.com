@@ -1084,18 +1084,20 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       return { x, y };
     };
 
-    // Create WMS tile overlay with larger tiles to reduce duplicate labels
-    const TILE_SIZE = 512; // Larger tiles = fewer requests = fewer duplicate labels
+    // Create WMS tile overlay - optimized for cleaner appearance
+    // Use 256px tiles but request at 2x resolution for sharper, thinner lines
+    const TILE_SIZE = 256;
+    const REQUEST_SIZE = 512; // Request larger image, display smaller = thinner lines
 
     const wmsLayer = new google.maps.ImageMapType({
       getTileUrl: (coord, zoom) => {
-        // Only show cadastre at zoom levels >= minZoom (increased to 17 for clearer labels)
+        // Only show cadastre at zoom levels >= minZoom
         const minZoom = Math.max(cadastreConfig.minZoom || CADASTRE_MIN_ZOOM, 17);
         if (zoom < minZoom) {
           return '';
         }
 
-        // Calculate tile bounds using larger tile size
+        // Calculate tile bounds
         const proj = map.getProjection();
         if (!proj) return '';
 
@@ -1139,8 +1141,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           STYLES: '',
           FORMAT: cadastreConfig.format || 'image/png',
           TRANSPARENT: 'true',
-          WIDTH: String(TILE_SIZE),
-          HEIGHT: String(TILE_SIZE),
+          WIDTH: String(REQUEST_SIZE),
+          HEIGHT: String(REQUEST_SIZE),
           CRS: crs,
           BBOX: bbox,
         });
@@ -1148,7 +1150,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         return `${cadastreConfig.wmsUrl}?${params.toString()}`;
       },
       tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
-      opacity: 0.75,
+      opacity: 0.55, // Lower opacity for cleaner overlay
       name: 'Cadastre',
     });
 
