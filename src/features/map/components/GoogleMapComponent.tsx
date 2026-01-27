@@ -814,6 +814,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [map, mapStyle, isLoaded, getMapTypeId]);
 
+  // Apply map styles when mapStyle changes (clean/color/street)
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+    // Only apply styles for roadmap-based views (clean, color, street)
+    // Satellite and hybrid don't support custom styles
+    if (mapStyle === 'satellite' || mapStyle === 'hybrid') {
+      map.setOptions({ styles: [] });
+    } else {
+      map.setOptions({ styles: getMapStyles() });
+    }
+  }, [map, mapStyle, isLoaded, getMapStyles, showLandmarks]);
+
   // Handle 3D buildings toggle - tilt the map for 3D view
   useEffect(() => {
     if (!map || !isLoaded) return;
