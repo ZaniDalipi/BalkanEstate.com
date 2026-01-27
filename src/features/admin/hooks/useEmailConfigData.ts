@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { httpClient } from '@/src/shared/api/httpClient';
+import { apiRequest } from '@/src/shared/api/httpClient';
 
 // ============================================================================
 // Types
@@ -62,8 +62,6 @@ export interface CategoryCount {
 // API Functions
 // ============================================================================
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-
 async function getEmailConfigs(params?: {
   category?: string;
   isActive?: string;
@@ -74,49 +72,75 @@ async function getEmailConfigs(params?: {
   if (params?.isActive) searchParams.append('isActive', params.isActive);
   if (params?.search) searchParams.append('search', params.search);
 
-  const url = `${API_URL}/admin/email-configs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-  return httpClient.get(url);
+  const endpoint = `/admin/email-configs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  return apiRequest<EmailConfigsResponse>(endpoint, { requiresAuth: true });
 }
 
 async function getEmailConfig(key: string): Promise<{ config: EmailConfig }> {
-  return httpClient.get(`${API_URL}/admin/email-configs/${key}`);
+  return apiRequest<{ config: EmailConfig }>(`/admin/email-configs/${key}`, { requiresAuth: true });
 }
 
 async function updateEmailConfig(
   key: string,
   data: Partial<EmailConfig>
 ): Promise<{ message: string; config: EmailConfig }> {
-  return httpClient.patch(`${API_URL}/admin/email-configs/${key}`, data);
+  return apiRequest<{ message: string; config: EmailConfig }>(`/admin/email-configs/${key}`, {
+    method: 'PATCH',
+    body: data,
+    requiresAuth: true,
+  });
 }
 
 async function toggleEmailStatus(key: string): Promise<{ message: string; config: EmailConfig }> {
-  return httpClient.post(`${API_URL}/admin/email-configs/${key}/toggle`);
+  return apiRequest<{ message: string; config: EmailConfig }>(`/admin/email-configs/${key}/toggle`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
 }
 
 async function resetEmailConfig(key: string): Promise<{ message: string; config: EmailConfig }> {
-  return httpClient.post(`${API_URL}/admin/email-configs/${key}/reset`);
+  return apiRequest<{ message: string; config: EmailConfig }>(`/admin/email-configs/${key}/reset`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
 }
 
 async function resetAllEmailConfigs(): Promise<{ message: string }> {
-  return httpClient.post(`${API_URL}/admin/email-configs/reset-all`);
+  return apiRequest<{ message: string }>(`/admin/email-configs/reset-all`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
 }
 
 async function sendTestEmail(
   key: string,
   data: { testEmail: string; testVariables?: Record<string, string> }
 ): Promise<{ message: string }> {
-  return httpClient.post(`${API_URL}/admin/email-configs/${key}/test`, data);
+  return apiRequest<{ message: string }>(`/admin/email-configs/${key}/test`, {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+  });
 }
 
 async function previewEmail(
   key: string,
   data: { testVariables?: Record<string, string> }
 ): Promise<{ subject: string; html: string; preheaderText: string }> {
-  return httpClient.post(`${API_URL}/admin/email-configs/${key}/preview`, data);
+  return apiRequest<{ subject: string; html: string; preheaderText: string }>(
+    `/admin/email-configs/${key}/preview`,
+    {
+      method: 'POST',
+      body: data,
+      requiresAuth: true,
+    }
+  );
 }
 
 async function getEmailCategories(): Promise<{ categories: CategoryCount[] }> {
-  return httpClient.get(`${API_URL}/admin/email-configs/categories`);
+  return apiRequest<{ categories: CategoryCount[] }>(`/admin/email-configs/categories`, {
+    requiresAuth: true,
+  });
 }
 
 // ============================================================================
