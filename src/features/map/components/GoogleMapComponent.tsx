@@ -242,97 +242,107 @@ const PropertyPopup: React.FC<{
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
 
+  // Format property type display
+  const propertyTypeDisplay = property.propertyType
+    ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
+    : 'Property';
+
   return (
     <div
-      className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100/50 relative"
-      style={{ width: 200, maxWidth: '85vw' }}
+      className="bg-white rounded-2xl shadow-2xl border border-gray-100/50 relative"
+      style={{ width: 280, maxWidth: '90vw' }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Close button - positioned outside image for better accessibility */}
+      {/* Close button - inside card for visibility */}
       <button
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           onClose();
         }}
-        className="absolute -top-2 -right-2 w-8 h-8 bg-gray-800 hover:bg-gray-900 rounded-full flex items-center justify-center transition-colors shadow-lg z-50"
+        className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center transition-colors z-50"
         aria-label="Close popup"
       >
-        <XCircleIcon className="w-5 h-5 text-white" />
+        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
       </button>
 
-      {/* Compact image container with rounded corners */}
-      <div className="p-2 pb-0">
-        <div className="relative h-24 rounded-xl overflow-hidden bg-gray-100">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={property.title || property.address}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-              <span className="text-2xl opacity-50">🏠</span>
-            </div>
-          )}
-          {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-
-          {/* Promotion badge */}
-          {isActivelyPromoted && property.promotionTier && (
-            <div
-              className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white shadow-sm backdrop-blur-sm"
-              style={{ backgroundColor: `${PROMOTION_TIER_COLORS[property.promotionTier]}dd` }}
-            >
-              {property.promotionTier === 'premium' ? '👑 Premium' :
-               property.promotionTier === 'highlight' ? '💎 Highlight' :
-               property.promotionTier === 'featured' ? '⭐ Featured' : 'Promoted'}
-            </div>
-          )}
-
-          {/* Property type badge */}
-          <div className="absolute bottom-1.5 right-1.5">
-            <span className="bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-md text-[9px] font-semibold text-gray-700 capitalize shadow-sm">
-              {property.propertyType}
-            </span>
+      {/* Image container */}
+      <div className="relative h-36 rounded-t-2xl overflow-hidden bg-gray-100">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={property.title || property.address}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <span className="text-3xl opacity-50">🏠</span>
           </div>
+        )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+        {/* Promotion badge */}
+        {isActivelyPromoted && property.promotionTier && (
+          <div
+            className="absolute top-2 left-2 px-2 py-1 rounded-lg text-[10px] font-bold text-white shadow-md backdrop-blur-sm"
+            style={{ backgroundColor: `${PROMOTION_TIER_COLORS[property.promotionTier]}ee` }}
+          >
+            {property.promotionTier === 'premium' ? '👑 Premium' :
+             property.promotionTier === 'highlight' ? '💎 Highlight' :
+             property.promotionTier === 'featured' ? '⭐ Featured' : 'Promoted'}
+          </div>
+        )}
+
+        {/* Property type badge */}
+        <div className="absolute bottom-2 right-2">
+          <span className="bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-semibold text-white shadow-md">
+            {propertyTypeDisplay}
+          </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-2.5 pt-2">
+      <div className="p-4">
         {/* Price - prominent */}
-        <div className="font-bold text-base text-gray-900">
+        <div className="font-bold text-xl text-gray-900 mb-1">
           {formatPrice(property.price, property.country)}
         </div>
 
-        {/* Title */}
-        <h3 className="font-medium text-xs text-gray-700 line-clamp-1 mt-0.5">
-          {property.title || property.address}
+        {/* Property type as subtitle */}
+        <h3 className="font-semibold text-sm text-gray-800 mb-1">
+          {propertyTypeDisplay}
         </h3>
 
         {/* Location */}
-        <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-1">
-          📍 {property.city}, {property.country}
+        <p className="text-xs text-gray-500 mb-3 flex items-center gap-1">
+          <span className="text-red-500">📍</span>
+          {property.city}, {property.country}
         </p>
 
         {/* Property details */}
         {property.propertyType === 'land' ? (
-          <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gray-500">
-            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
-              📐 <b className="text-gray-700">{property.sqft?.toLocaleString()}</b> m²
+          <div className="flex items-center gap-3 mb-4 text-xs text-gray-600">
+            <span className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1.5 rounded-lg">
+              <span className="text-gray-400">📐</span>
+              <b className="text-gray-800">{property.sqft?.toLocaleString()}</b> m²
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-gray-500">
-            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
-              🛏️ <b className="text-gray-700">{property.beds}</b>
+          <div className="flex items-center gap-2 mb-4 text-xs text-gray-600">
+            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1.5 rounded-lg">
+              <span className="text-gray-400">🛏️</span>
+              <b className="text-gray-800">{property.beds || 0}</b>
             </span>
-            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
-              🚿 <b className="text-gray-700">{property.baths}</b>
+            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1.5 rounded-lg">
+              <span className="text-gray-400">🚿</span>
+              <b className="text-gray-800">{property.baths || 0}</b>
             </span>
-            <span className="flex items-center gap-0.5 bg-gray-50 px-1.5 py-0.5 rounded">
-              📐 <b className="text-gray-700">{property.sqft}</b>
+            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1.5 rounded-lg">
+              <span className="text-gray-400">📐</span>
+              <b className="text-gray-800">{property.sqft || 0}</b>
             </span>
           </div>
         )}
@@ -340,9 +350,9 @@ const PropertyPopup: React.FC<{
         {/* View details button */}
         <button
           onClick={onViewDetails}
-          className="w-full mt-2.5 py-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white text-[11px] font-semibold rounded-lg transition-all shadow-sm hover:shadow flex items-center justify-center gap-1"
+          className="w-full py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5"
         >
-          <span>{t('map.popup.viewDetails', 'View Details')}</span>
+          <span>{t('map.popup.viewDetails', 'View details')}</span>
           <span>→</span>
         </button>
       </div>
