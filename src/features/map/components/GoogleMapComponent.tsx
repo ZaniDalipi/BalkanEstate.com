@@ -1067,29 +1067,31 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       return { x, y };
     };
 
-    // Create WMS tile overlay
+    // Create WMS tile overlay with larger tiles to reduce duplicate labels
+    const TILE_SIZE = 512; // Larger tiles = fewer requests = fewer duplicate labels
+
     const wmsLayer = new google.maps.ImageMapType({
       getTileUrl: (coord, zoom) => {
-        // Only show cadastre at zoom levels >= minZoom
-        if (zoom < (cadastreConfig.minZoom || CADASTRE_MIN_ZOOM)) {
+        // Only show cadastre at zoom levels >= minZoom (increased to 17 for clearer labels)
+        const minZoom = Math.max(cadastreConfig.minZoom || CADASTRE_MIN_ZOOM, 17);
+        if (zoom < minZoom) {
           return '';
         }
 
-        // Calculate tile bounds
+        // Calculate tile bounds using larger tile size
         const proj = map.getProjection();
         if (!proj) return '';
 
         const zfactor = Math.pow(2, zoom);
-        const tileSize = 256;
 
         // Calculate world coordinates for tile corners
         const topLeft = new google.maps.Point(
-          (coord.x * tileSize) / zfactor,
-          (coord.y * tileSize) / zfactor
+          (coord.x * TILE_SIZE) / zfactor,
+          (coord.y * TILE_SIZE) / zfactor
         );
         const bottomRight = new google.maps.Point(
-          ((coord.x + 1) * tileSize) / zfactor,
-          ((coord.y + 1) * tileSize) / zfactor
+          ((coord.x + 1) * TILE_SIZE) / zfactor,
+          ((coord.y + 1) * TILE_SIZE) / zfactor
         );
 
         // Convert to lat/lng
@@ -1120,16 +1122,16 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           STYLES: '',
           FORMAT: cadastreConfig.format || 'image/png',
           TRANSPARENT: 'true',
-          WIDTH: '256',
-          HEIGHT: '256',
+          WIDTH: String(TILE_SIZE),
+          HEIGHT: String(TILE_SIZE),
           CRS: crs,
           BBOX: bbox,
         });
 
         return `${cadastreConfig.wmsUrl}?${params.toString()}`;
       },
-      tileSize: new google.maps.Size(256, 256),
-      opacity: 0.7,
+      tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
+      opacity: 0.75,
       name: 'Cadastre',
     });
 
