@@ -663,12 +663,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [map, onMapMove]);
 
-  // Update map style when it changes
+  // Update map type when it changes (styles are controlled via mapId in Cloud Console)
   useEffect(() => {
     if (!map || !isLoaded) return;
     map.setMapTypeId(getMapTypeId());
-    map.setOptions({ styles: getMapStyles() });
-  }, [map, mapStyle, showLandmarks, isLoaded, getMapTypeId, getMapStyles]);
+  }, [map, mapStyle, isLoaded, getMapTypeId]);
 
   // Handle 3D buildings toggle - tilt the map for 3D view
   useEffect(() => {
@@ -1348,12 +1347,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             panControl: false,
             keyboardShortcuts: false,
             gestureHandling: 'greedy',
-            styles: getMapStyles(),
             minZoom: 6,
             maxZoom: 21,
             tilt: 0, // Disable tilt to remove compass
             heading: 0,
-            // Note: mapId and styles are mutually exclusive - using client-side styles for dynamic theming
+            mapId: 'balkan-estate-map', // Required for AdvancedMarkerElement
           }}
         >
           {/* Property popup */}
