@@ -1249,8 +1249,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
 
                 {/* --- Right Panel: Map --- */}
-                <div className="h-full w-full md:w-[45%] md:flex-shrink-0 relative z-0">
-                    <div className="absolute inset-0">
+                <div className="h-full w-full md:w-[45%] md:flex-shrink-0 relative z-0 overflow-hidden">
+                    <div className="absolute inset-0 overflow-hidden">
                         <MapComponent {...mapProps} />
                     </div>
                 </div>

@@ -7,3 +7,4 @@ export * from './IAgencyRepository';
 export * from './IConversationRepository';
 export * from './IUserRepository';
 export * from './IPaymentRepository';
+export * from './IMeasurementRepository';

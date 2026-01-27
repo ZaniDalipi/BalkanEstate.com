@@ -33,8 +33,11 @@ import {
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 import { formatPrice } from '@/utils/currency';
 import L from 'leaflet';
-import { saveMeasurement as saveMeasurementAPI, getMeasurements } from '@/services/apiService';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
+import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/usecases/measurement';
+import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
+import { MeasurementLimitExceededError, InvalidMeasurementError } from '@/src/domain/repositories/IMeasurementRepository';
+import { MEASUREMENT_LIMITS } from '@/src/domain/entities/Measurement';
 
 // Measurement point interface
 interface MeasurementPoint {
@@ -454,6 +457,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const [measurementNotes, setMeasurementNotes] = useState('');
   const [pendingMeasurement, setPendingMeasurement] = useState<LocalMeasurement | null>(null);
 
+  // Measurement limit state
+  const [measurementCount, setMeasurementCount] = useState(0);
+  const [measurementMaxAllowed, setMeasurementMaxAllowed] = useState(MEASUREMENT_LIMITS.FREE_MAX);
+  const [measurementIsPro, setMeasurementIsPro] = useState(false);
+  const [measurementSaveError, setMeasurementSaveError] = useState<string | null>(null);
+  const [isAtMeasurementLimit, setIsAtMeasurementLimit] = useState(false);
+
   // Cadastre layer state
   const [showCadastre, setShowCadastre] = useState(false);
   const cadastreLayerRef = useRef<google.maps.ImageMapType | null>(null);
@@ -504,6 +514,33 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
     return DEFAULT_CENTER;
   }, [userLocation]);
+
+  // Fetch measurement count on mount and when authentication changes
+  useEffect(() => {
+    const fetchMeasurementLimits = async () => {
+      if (!isAuthenticated) {
+        // Reset to defaults for non-authenticated users
+        setMeasurementCount(0);
+        setMeasurementMaxAllowed(MEASUREMENT_LIMITS.FREE_MAX);
+        setMeasurementIsPro(false);
+        setIsAtMeasurementLimit(false);
+        return;
+      }
+
+      try {
+        const getMeasurementsUseCase = new GetMeasurementsUseCase(measurementRepository);
+        const result = await getMeasurementsUseCase.execute();
+        setMeasurementCount(result.count);
+        setMeasurementMaxAllowed(result.maxAllowed);
+        setMeasurementIsPro(result.isPro);
+        setIsAtMeasurementLimit(result.isAtLimit);
+      } catch (error) {
+        console.error('[Map] Failed to fetch measurement limits:', error);
+      }
+    };
+
+    fetchMeasurementLimits();
+  }, [isAuthenticated]);
 
   // Get map type ID based on style
   const getMapTypeId = useCallback((): google.maps.MapTypeId => {
@@ -704,18 +741,28 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setMeasurementName('');
     setMeasurementAddress('');
     setMeasurementNotes('');
+    setMeasurementSaveError(null); // Clear any previous error
     setShowSaveModal(true);
   }, [measurementPoints, measurementMode, measurementDistance, measurementArea, measurementPerimeter]);
 
-  // Save measurement to backend
+  // Save measurement to backend with proper validation
   const handleSaveMeasurementToBackend = useCallback(async () => {
     if (!pendingMeasurement || !measurementName.trim()) return;
 
+    // Clear any previous error
+    setMeasurementSaveError(null);
     setSavingMeasurement(true);
+
     try {
       if (isAuthenticated) {
-        // Save to backend
-        await saveMeasurementAPI({
+        // Check if at limit before attempting to save
+        if (isAtMeasurementLimit) {
+          throw new MeasurementLimitExceededError(measurementCount, measurementMaxAllowed, measurementIsPro);
+        }
+
+        // Use the domain use case for proper validation
+        const saveMeasurementUseCase = new SaveMeasurementUseCase(measurementRepository);
+        const result = await saveMeasurementUseCase.execute({
           name: measurementName.trim(),
           points: pendingMeasurement.points,
           type: pendingMeasurement.mode,
@@ -725,6 +772,10 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           address: measurementAddress.trim() || undefined,
           notes: measurementNotes.trim() || undefined,
         });
+
+        // Update the limit state after successful save
+        setMeasurementCount(result.count);
+        setIsAtMeasurementLimit(result.count >= result.maxAllowed);
       }
 
       // Also keep locally for current session display
@@ -732,17 +783,38 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       setMeasurementPoints([]); // Clear current drawing
       setShowSaveModal(false);
       setPendingMeasurement(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save measurement:', error);
-      // Still save locally even if backend fails
-      setLocalMeasurements(prev => [...prev, pendingMeasurement]);
-      setMeasurementPoints([]);
-      setShowSaveModal(false);
-      setPendingMeasurement(null);
+
+      // Handle specific error types
+      if (error instanceof MeasurementLimitExceededError) {
+        setMeasurementSaveError(
+          error.isPro
+            ? `You've reached the maximum limit of ${error.maxAllowed} measurements.`
+            : `Free users can save up to ${error.maxAllowed} measurements. Upgrade to Pro for more!`
+        );
+        setIsAtMeasurementLimit(true);
+        // Don't close modal - show the error
+        return;
+      } else if (error instanceof InvalidMeasurementError) {
+        setMeasurementSaveError(error.message);
+        return;
+      } else {
+        // Generic error - still save locally
+        setMeasurementSaveError('Failed to save to your profile. Saved locally instead.');
+        setLocalMeasurements(prev => [...prev, pendingMeasurement]);
+        setMeasurementPoints([]);
+        // Close after a delay to show the message
+        setTimeout(() => {
+          setShowSaveModal(false);
+          setPendingMeasurement(null);
+          setMeasurementSaveError(null);
+        }, 2000);
+      }
     } finally {
       setSavingMeasurement(false);
     }
-  }, [pendingMeasurement, measurementName, measurementAddress, measurementNotes, isAuthenticated]);
+  }, [pendingMeasurement, measurementName, measurementAddress, measurementNotes, isAuthenticated, isAtMeasurementLimit, measurementCount, measurementMaxAllowed, measurementIsPro]);
 
   // Quick save without modal (for local only)
   const handleQuickSave = useCallback(() => {
@@ -1252,7 +1324,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   return (
     <HighlightedPropertiesProvider properties={validProperties}>
-      <div className="w-full h-full relative">
+      <div className="w-full h-full relative overflow-hidden">
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={initialCenter}
@@ -1986,25 +2058,71 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                     )}
                   </div>
                 </div>
+
+                {/* Measurement limit indicator */}
+                {isAuthenticated && (
+                  <div className={`p-3 rounded-xl ${isAtMeasurementLimit ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        {t('search:map.measurementUsage', 'Saved measurements')}
+                      </span>
+                      <span className={`text-sm font-bold ${isAtMeasurementLimit ? 'text-red-600' : 'text-gray-700'}`}>
+                        {measurementCount} / {measurementMaxAllowed}
+                      </span>
+                    </div>
+                    {!measurementIsPro && measurementCount >= measurementMaxAllowed - 1 && (
+                      <p className="text-xs text-amber-600 mt-1">
+                        {isAtMeasurementLimit
+                          ? '⚠️ You\'ve reached the free limit. Upgrade to Pro for more!'
+                          : '⚠️ 1 slot remaining. Upgrade to Pro for more measurements.'
+                        }
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Error message */}
+                {measurementSaveError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                    <div className="flex items-start gap-2">
+                      <span className="text-red-500 text-lg">❌</span>
+                      <div>
+                        <p className="text-sm font-semibold text-red-700">
+                          {t('search:map.saveFailed', 'Could not save')}
+                        </p>
+                        <p className="text-xs text-red-600 mt-0.5">{measurementSaveError}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
               <div className="px-5 py-4 bg-gray-50 flex items-center justify-end gap-3">
                 <button
-                  onClick={() => { setShowSaveModal(false); setPendingMeasurement(null); }}
+                  onClick={() => {
+                    setShowSaveModal(false);
+                    setPendingMeasurement(null);
+                    setMeasurementSaveError(null);
+                  }}
                   className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   {t('common:cancel', 'Cancel')}
                 </button>
                 <button
                   onClick={handleSaveMeasurementToBackend}
-                  disabled={!measurementName.trim() || savingMeasurement}
+                  disabled={!measurementName.trim() || savingMeasurement || (isAuthenticated && isAtMeasurementLimit)}
                   className="px-5 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                 >
                   {savingMeasurement ? (
                     <>
                       <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>{t('common:saving', 'Saving...')}</span>
+                    </>
+                  ) : isAtMeasurementLimit && isAuthenticated ? (
+                    <>
+                      <span>🔒</span>
+                      <span>{t('search:map.limitReached', 'Limit Reached')}</span>
                     </>
                   ) : (
                     <>

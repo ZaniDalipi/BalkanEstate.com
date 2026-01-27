@@ -8,3 +8,4 @@ export * from './Agency';
 export * from './Conversation';
 export * from './SavedSearch';
 export * from './PropertyFilters';
+export * from './Measurement';
