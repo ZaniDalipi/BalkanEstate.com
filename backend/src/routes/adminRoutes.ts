@@ -68,6 +68,9 @@ import {
   sendTestEmail,
   previewEmail,
   getEmailCategories,
+  createEmailConfig,
+  deleteEmailConfig,
+  duplicateEmailConfig,
 } from '../controllers/emailConfigController';
 import multer from 'multer';
 
@@ -206,11 +209,14 @@ router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoU
 // ===== Email Configuration Management =====
 router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);
 router.get('/email-configs/categories', logAdminAction('VIEW_EMAIL_CATEGORIES'), getEmailCategories);
+router.post('/email-configs', logAdminAction('CREATE_EMAIL_CONFIG'), createEmailConfig);
+router.post('/email-configs/reset-all', logAdminAction('RESET_ALL_EMAIL_CONFIGS'), resetAllEmailConfigs);
 router.get('/email-configs/:key', logAdminAction('VIEW_EMAIL_CONFIG'), getEmailConfigByKey);
 router.patch('/email-configs/:key', logAdminAction('UPDATE_EMAIL_CONFIG'), updateEmailConfig);
+router.delete('/email-configs/:key', logAdminAction('DELETE_EMAIL_CONFIG'), deleteEmailConfig);
 router.post('/email-configs/:key/toggle', logAdminAction('TOGGLE_EMAIL_STATUS'), toggleEmailStatus);
 router.post('/email-configs/:key/reset', logAdminAction('RESET_EMAIL_CONFIG'), resetEmailConfig);
-router.post('/email-configs/reset-all', logAdminAction('RESET_ALL_EMAIL_CONFIGS'), resetAllEmailConfigs);
+router.post('/email-configs/:key/duplicate', logAdminAction('DUPLICATE_EMAIL_CONFIG'), duplicateEmailConfig);
 router.post('/email-configs/:key/test', logAdminAction('SEND_TEST_EMAIL'), sendTestEmail);
 router.post('/email-configs/:key/preview', logAdminAction('PREVIEW_EMAIL'), previewEmail);
 

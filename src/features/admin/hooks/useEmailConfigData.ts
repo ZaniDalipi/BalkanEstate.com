@@ -143,6 +143,37 @@ async function getEmailCategories(): Promise<{ categories: CategoryCount[] }> {
   });
 }
 
+async function createEmailConfig(
+  data: Partial<EmailConfig>
+): Promise<{ message: string; config: EmailConfig }> {
+  return apiRequest<{ message: string; config: EmailConfig }>(`/admin/email-configs`, {
+    method: 'POST',
+    body: data,
+    requiresAuth: true,
+  });
+}
+
+async function deleteEmailConfig(key: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(`/admin/email-configs/${key}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+}
+
+async function duplicateEmailConfig(
+  key: string,
+  data: { newKey: string; newName: string }
+): Promise<{ message: string; config: EmailConfig }> {
+  return apiRequest<{ message: string; config: EmailConfig }>(
+    `/admin/email-configs/${key}/duplicate`,
+    {
+      method: 'POST',
+      body: data,
+      requiresAuth: true,
+    }
+  );
+}
+
 // ============================================================================
 // Query Keys
 // ============================================================================
@@ -287,5 +318,55 @@ export function usePreviewEmail() {
       key: string;
       testVariables?: Record<string, string>;
     }) => previewEmail(key, { testVariables }),
+  });
+}
+
+/**
+ * useCreateEmailConfig - Mutation to create a new email configuration
+ */
+export function useCreateEmailConfig() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Partial<EmailConfig>) => createEmailConfig(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: emailConfigKeys.all });
+    },
+  });
+}
+
+/**
+ * useDeleteEmailConfig - Mutation to delete an email configuration
+ */
+export function useDeleteEmailConfig() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (key: string) => deleteEmailConfig(key),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: emailConfigKeys.all });
+    },
+  });
+}
+
+/**
+ * useDuplicateEmailConfig - Mutation to duplicate an email configuration
+ */
+export function useDuplicateEmailConfig() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      key,
+      newKey,
+      newName,
+    }: {
+      key: string;
+      newKey: string;
+      newName: string;
+    }) => duplicateEmailConfig(key, { newKey, newName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: emailConfigKeys.all });
+    },
   });
 }

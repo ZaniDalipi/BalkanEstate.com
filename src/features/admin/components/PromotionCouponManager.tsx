@@ -1,156 +1,109 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * PromotionCouponManager - Admin component for managing promotion coupons
+ *
+ * Uses React Query for real-time data management with:
+ * - Auto-refresh every 10 seconds
+ * - Optimistic updates for instant UI feedback
+ * - Automatic cache invalidation
+ */
+
+import React, { useState } from 'react';
 import { PlusIcon, XMarkIcon } from '@/constants';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
+import {
+  usePromotionCoupons,
+  useCreatePromotionCoupon,
+  useDisablePromotionCoupon,
+  useRefreshPromotionCoupons,
+  type PromotionCoupon,
+  type CreateCouponData,
+} from '../hooks/usePromotionCouponData';
 
-interface PromotionCoupon {
-  _id: string;
-  code: string;
-  description?: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  validFrom: string;
-  validUntil: string;
-  status: 'active' | 'expired' | 'disabled';
-  maxTotalUses?: number;
-  maxUsesPerUser: number;
-  currentTotalUses: number;
-  applicableTiers: string[];
-  minimumPurchaseAmount?: number;
-  isPublic: boolean;
-  notes?: string;
-  createdAt: string;
-}
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// ============================================================================
+// Component
+// ============================================================================
 
 const PromotionCouponManager: React.FC = () => {
   const { confirm } = useConfirmation();
-  const [coupons, setCoupons] = useState<PromotionCoupon[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Filter states
+  // React Query hooks for data management
+  const { data, isLoading, error: queryError, dataUpdatedAt } = usePromotionCoupons();
+  const createMutation = useCreatePromotionCoupon();
+  const disableMutation = useDisablePromotionCoupon();
+  const refreshCoupons = useRefreshPromotionCoupons();
+
+  // Local UI state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'expired' | 'disabled'>('all');
 
   // Form state for creating coupons
-  const [newCoupon, setNewCoupon] = useState({
+  const [newCoupon, setNewCoupon] = useState<CreateCouponData>({
     code: '',
     description: '',
-    discountType: 'percentage' as 'percentage' | 'fixed',
+    discountType: 'percentage',
     discountValue: 10,
     validUntil: '',
     maxTotalUses: 100,
     maxUsesPerUser: 1,
-    applicableTiers: [] as string[],
+    applicableTiers: [],
     minimumPurchaseAmount: 0,
     isPublic: false,
     notes: '',
   });
 
-  useEffect(() => {
-    fetchCoupons();
-  }, []);
-
-  const fetchCoupons = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/coupons`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch coupons');
-
-      const data = await response.json();
-      setCoupons(data.coupons || []);
-    } catch (err) {
-      setError('Failed to load promotion coupons');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // ============================================================================
+  // Handlers
+  // ============================================================================
 
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      // Validate validUntil is in the future
-      const validUntilDate = new Date(newCoupon.validUntil);
-      if (validUntilDate <= new Date()) {
-        setError('Valid until date must be in the future');
-        setTimeout(() => setError(null), 5000);
-        return;
-      }
 
-      const token = localStorage.getItem('balkan_estate_token');
-
-      // Prepare payload with proper handling of optional number fields
-      const payload: any = {
-        code: newCoupon.code.toUpperCase(),
-        description: newCoupon.description || undefined,
-        discountType: newCoupon.discountType,
-        discountValue: newCoupon.discountValue,
-        validFrom: new Date().toISOString(),
-        validUntil: validUntilDate.toISOString(),
-        maxUsesPerUser: newCoupon.maxUsesPerUser || 1,
-        isPublic: newCoupon.isPublic,
-        notes: newCoupon.notes || undefined,
-      };
-
-      // Only include optional fields if they have valid values
-      if (newCoupon.maxTotalUses && newCoupon.maxTotalUses > 0) {
-        payload.maxTotalUses = newCoupon.maxTotalUses;
-      }
-
-      if (newCoupon.minimumPurchaseAmount && newCoupon.minimumPurchaseAmount > 0) {
-        payload.minimumPurchaseAmount = newCoupon.minimumPurchaseAmount;
-      }
-
-      if (newCoupon.applicableTiers && newCoupon.applicableTiers.length > 0) {
-        payload.applicableTiers = newCoupon.applicableTiers;
-      }
-
-      const response = await fetch(`${API_URL}/coupons`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create coupon');
-      }
-
-      await fetchCoupons();
-      setIsCreateModalOpen(false);
-      setSuccessMessage('Promotion coupon created successfully!');
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      // Reset form
-      setNewCoupon({
-        code: '',
-        description: '',
-        discountType: 'percentage',
-        discountValue: 10,
-        validUntil: '',
-        maxTotalUses: 100,
-        maxUsesPerUser: 1,
-        applicableTiers: [],
-        minimumPurchaseAmount: 0,
-        isPublic: false,
-        notes: '',
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to create coupon');
-      setTimeout(() => setError(null), 5000);
+    // Validate validUntil is in the future
+    const validUntilDate = new Date(newCoupon.validUntil);
+    if (validUntilDate <= new Date()) {
+      setLocalError('Valid until date must be in the future');
+      setTimeout(() => setLocalError(null), 5000);
+      return;
     }
+
+    // Prepare payload
+    const payload: CreateCouponData = {
+      code: newCoupon.code.toUpperCase(),
+      description: newCoupon.description || undefined,
+      discountType: newCoupon.discountType,
+      discountValue: newCoupon.discountValue,
+      validFrom: new Date().toISOString(),
+      validUntil: validUntilDate.toISOString(),
+      maxUsesPerUser: newCoupon.maxUsesPerUser || 1,
+      isPublic: newCoupon.isPublic,
+      notes: newCoupon.notes || undefined,
+    };
+
+    // Add optional fields if valid
+    if (newCoupon.maxTotalUses && newCoupon.maxTotalUses > 0) {
+      payload.maxTotalUses = newCoupon.maxTotalUses;
+    }
+    if (newCoupon.minimumPurchaseAmount && newCoupon.minimumPurchaseAmount > 0) {
+      payload.minimumPurchaseAmount = newCoupon.minimumPurchaseAmount;
+    }
+    if (newCoupon.applicableTiers && newCoupon.applicableTiers.length > 0) {
+      payload.applicableTiers = newCoupon.applicableTiers;
+    }
+
+    createMutation.mutate(payload, {
+      onSuccess: () => {
+        setIsCreateModalOpen(false);
+        setSuccessMessage('Promotion coupon created successfully!');
+        setTimeout(() => setSuccessMessage(null), 3000);
+        resetForm();
+      },
+      onError: (err: any) => {
+        setLocalError(err.message || 'Failed to create coupon');
+        setTimeout(() => setLocalError(null), 5000);
+      },
+    });
   };
 
   const handleDisableCoupon = async (id: string) => {
@@ -163,64 +116,44 @@ const PromotionCouponManager: React.FC = () => {
     });
     if (!confirmed) return;
 
-    try {
-      const token = localStorage.getItem('balkan_estate_token');
-      const response = await fetch(`${API_URL}/coupons/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to disable coupon');
-
-      await fetchCoupons();
-      setSuccessMessage('Coupon disabled successfully');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError('Failed to disable coupon');
-      setTimeout(() => setError(null), 5000);
-    }
-  };
-
-  const filteredCoupons = coupons.filter(coupon => {
-    if (filterStatus === 'all') return true;
-    return coupon.status === filterStatus;
-  });
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    disableMutation.mutate(id, {
+      onSuccess: () => {
+        setSuccessMessage('Coupon disabled successfully');
+        setTimeout(() => setSuccessMessage(null), 3000);
+      },
+      onError: () => {
+        setLocalError('Failed to disable coupon');
+        setTimeout(() => setLocalError(null), 5000);
+      },
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'expired': return 'bg-red-100 text-red-800';
-      case 'disabled': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const resetForm = () => {
+    setNewCoupon({
+      code: '',
+      description: '',
+      discountType: 'percentage',
+      discountValue: 10,
+      validUntil: '',
+      maxTotalUses: 100,
+      maxUsesPerUser: 1,
+      applicableTiers: [],
+      minimumPurchaseAmount: 0,
+      isPublic: false,
+      notes: '',
+    });
   };
 
-  const getTierBadgeColor = (tier: string) => {
-    switch (tier) {
-      case 'premium': return 'bg-purple-100 text-purple-800';
-      case 'highlight': return 'bg-amber-100 text-amber-800';
-      case 'featured': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // ============================================================================
+  // Presets
+  // ============================================================================
 
-  // Quick create presets
   const applyPreset = (preset: 'test100' | 'welcome' | 'seasonal') => {
-    const presets = {
+    const presets: Record<string, CreateCouponData> = {
       test100: {
         code: 'TEST100',
         description: 'Test coupon - 100% off for development',
-        discountType: 'percentage' as const,
+        discountType: 'percentage',
         discountValue: 100,
         validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
         maxTotalUses: 1000,
@@ -233,7 +166,7 @@ const PromotionCouponManager: React.FC = () => {
       welcome: {
         code: 'WELCOME15',
         description: 'Welcome bonus - 15% off first promotion',
-        discountType: 'percentage' as const,
+        discountType: 'percentage',
         discountValue: 15,
         validUntil: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
         maxTotalUses: 500,
@@ -246,7 +179,7 @@ const PromotionCouponManager: React.FC = () => {
       seasonal: {
         code: 'SUMMER25',
         description: 'Summer sale - 25% off all promotions',
-        discountType: 'percentage' as const,
+        discountType: 'percentage',
         discountValue: 25,
         validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
         maxTotalUses: 200,
@@ -260,6 +193,64 @@ const PromotionCouponManager: React.FC = () => {
     setNewCoupon(presets[preset]);
   };
 
+  // ============================================================================
+  // Helpers
+  // ============================================================================
+
+  const coupons = data?.coupons || [];
+  const filteredCoupons = coupons.filter((coupon) => {
+    if (filterStatus === 'all') return true;
+    return coupon.status === filterStatus;
+  });
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatLastUpdated = (timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'expired':
+        return 'bg-red-100 text-red-800';
+      case 'disabled':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getTierBadgeColor = (tier: string) => {
+    switch (tier) {
+      case 'premium':
+        return 'bg-purple-100 text-purple-800';
+      case 'highlight':
+        return 'bg-amber-100 text-amber-800';
+      case 'featured':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const error = localError || (queryError ? String(queryError) : null);
+
+  // ============================================================================
+  // Loading State
+  // ============================================================================
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8 text-center">
@@ -269,6 +260,10 @@ const PromotionCouponManager: React.FC = () => {
     );
   }
 
+  // ============================================================================
+  // Render
+  // ============================================================================
+
   return (
     <div className="bg-white rounded-lg shadow-lg">
       {/* Header */}
@@ -277,16 +272,32 @@ const PromotionCouponManager: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Promotion Coupons</h2>
             <p className="text-sm text-gray-500 mt-1">
-              Manage discount coupons for property listing promotions (Featured, Highlight, Premium tiers)
+              Manage discount coupons for property listing promotions (Featured, Highlight, Premium
+              tiers)
             </p>
           </div>
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Create Coupon
-          </button>
+          <div className="flex items-center gap-4">
+            {/* Real-time indicator */}
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Auto-refresh 10s</span>
+              <span className="text-gray-400">|</span>
+              <span>Updated: {formatLastUpdated(dataUpdatedAt)}</span>
+            </div>
+            <button
+              onClick={refreshCoupons}
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Refresh
+            </button>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2"
+            >
+              <PlusIcon className="w-5 h-5" />
+              Create Coupon
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -321,22 +332,38 @@ const PromotionCouponManager: React.FC = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Period</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiers</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Code
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Discount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Usage
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Valid Period
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Tiers
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredCoupons.map((coupon, index) => (
+            {filteredCoupons.map((coupon: PromotionCoupon, index: number) => (
               <tr key={coupon._id || `coupon-${index}`} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-mono font-bold text-gray-900">{coupon.code}</div>
                   {coupon.description && (
-                    <div className="text-xs text-gray-500 mt-1 max-w-xs truncate">{coupon.description}</div>
+                    <div className="text-xs text-gray-500 mt-1 max-w-xs truncate">
+                      {coupon.description}
+                    </div>
                   )}
                   {coupon.isPublic && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded">
@@ -346,7 +373,9 @@ const PromotionCouponManager: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="font-semibold text-purple-600 text-lg">
-                    {coupon.discountType === 'percentage' ? `${coupon.discountValue}%` : `€${coupon.discountValue}`}
+                    {coupon.discountType === 'percentage'
+                      ? `${coupon.discountValue}%`
+                      : `€${coupon.discountValue}`}
                   </span>
                   {coupon.minimumPurchaseAmount && coupon.minimumPurchaseAmount > 0 && (
                     <div className="text-xs text-gray-500">Min: €{coupon.minimumPurchaseAmount}</div>
@@ -354,14 +383,18 @@ const PromotionCouponManager: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm">
-                    <span className={coupon.maxTotalUses && coupon.currentTotalUses >= coupon.maxTotalUses ? 'text-red-600 font-semibold' : 'text-gray-900'}>
+                    <span
+                      className={
+                        coupon.maxTotalUses && coupon.currentTotalUses >= coupon.maxTotalUses
+                          ? 'text-red-600 font-semibold'
+                          : 'text-gray-900'
+                      }
+                    >
                       {coupon.currentTotalUses}
                     </span>
                     <span className="text-gray-500"> / {coupon.maxTotalUses || '∞'}</span>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {coupon.maxUsesPerUser} per user
-                  </div>
+                  <div className="text-xs text-gray-500">{coupon.maxUsesPerUser} per user</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div>{formatDate(coupon.validFrom)}</div>
@@ -371,7 +404,10 @@ const PromotionCouponManager: React.FC = () => {
                   {coupon.applicableTiers.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {coupon.applicableTiers.map((tier) => (
-                        <span key={tier} className={`px-2 py-0.5 text-xs font-medium rounded ${getTierBadgeColor(tier)}`}>
+                        <span
+                          key={tier}
+                          className={`px-2 py-0.5 text-xs font-medium rounded ${getTierBadgeColor(tier)}`}
+                        >
                           {tier}
                         </span>
                       ))}
@@ -381,7 +417,9 @@ const PromotionCouponManager: React.FC = () => {
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(coupon.status)}`}>
+                  <span
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(coupon.status)}`}
+                  >
                     {coupon.status}
                   </span>
                 </td>
@@ -389,9 +427,10 @@ const PromotionCouponManager: React.FC = () => {
                   {coupon.status === 'active' && (
                     <button
                       onClick={() => handleDisableCoupon(coupon._id)}
-                      className="text-red-600 hover:text-red-900"
+                      disabled={disableMutation.isPending}
+                      className="text-red-600 hover:text-red-900 disabled:opacity-50"
                     >
-                      Disable
+                      {disableMutation.isPending ? 'Disabling...' : 'Disable'}
                     </button>
                   )}
                 </td>
@@ -461,9 +500,7 @@ const PromotionCouponManager: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <input
                   type="text"
                   value={newCoupon.description}
@@ -480,7 +517,9 @@ const PromotionCouponManager: React.FC = () => {
                   </label>
                   <select
                     value={newCoupon.discountType}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, discountType: e.target.value as any })}
+                    onChange={(e) =>
+                      setNewCoupon({ ...newCoupon, discountType: e.target.value as any })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="percentage">Percentage (%)</option>
@@ -495,7 +534,9 @@ const PromotionCouponManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCoupon.discountValue}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, discountValue: Number(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      setNewCoupon({ ...newCoupon, discountValue: Number(e.target.value) || 0 })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                     max={newCoupon.discountType === 'percentage' ? 100 : undefined}
@@ -526,7 +567,12 @@ const PromotionCouponManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCoupon.minimumPurchaseAmount}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, minimumPurchaseAmount: Number(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      setNewCoupon({
+                        ...newCoupon,
+                        minimumPurchaseAmount: Number(e.target.value) || 0,
+                      })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="0"
                     placeholder="0 (optional)"
@@ -542,7 +588,12 @@ const PromotionCouponManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCoupon.maxTotalUses || ''}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, maxTotalUses: e.target.value ? Number(e.target.value) : 0 })}
+                    onChange={(e) =>
+                      setNewCoupon({
+                        ...newCoupon,
+                        maxTotalUses: e.target.value ? Number(e.target.value) : 0,
+                      })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                     placeholder="Unlimited (optional)"
@@ -557,7 +608,9 @@ const PromotionCouponManager: React.FC = () => {
                   <input
                     type="number"
                     value={newCoupon.maxUsesPerUser}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, maxUsesPerUser: Number(e.target.value) || 1 })}
+                    onChange={(e) =>
+                      setNewCoupon({ ...newCoupon, maxUsesPerUser: Number(e.target.value) || 1 })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     min="1"
                     required
@@ -574,23 +627,35 @@ const PromotionCouponManager: React.FC = () => {
                     <label key={tier} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={newCoupon.applicableTiers.includes(tier)}
+                        checked={newCoupon.applicableTiers?.includes(tier)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setNewCoupon({ ...newCoupon, applicableTiers: [...newCoupon.applicableTiers, tier] });
+                            setNewCoupon({
+                              ...newCoupon,
+                              applicableTiers: [...(newCoupon.applicableTiers || []), tier],
+                            });
                           } else {
-                            setNewCoupon({ ...newCoupon, applicableTiers: newCoupon.applicableTiers.filter(t => t !== tier) });
+                            setNewCoupon({
+                              ...newCoupon,
+                              applicableTiers: (newCoupon.applicableTiers || []).filter(
+                                (t) => t !== tier
+                              ),
+                            });
                           }
                         }}
                         className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                       />
-                      <span className={`px-2 py-1 text-xs font-medium rounded ${getTierBadgeColor(tier)}`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded ${getTierBadgeColor(tier)}`}
+                      >
                         {tier.charAt(0).toUpperCase() + tier.slice(1)}
                       </span>
                     </label>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Leave all unchecked to apply to all tiers</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Leave all unchecked to apply to all tiers
+                </p>
               </div>
 
               <div>
@@ -603,7 +668,9 @@ const PromotionCouponManager: React.FC = () => {
                   />
                   <span className="text-sm font-medium text-gray-700">Public Coupon</span>
                 </label>
-                <p className="text-xs text-gray-500 mt-1 ml-6">Public coupons can be displayed to users on the promotion page</p>
+                <p className="text-xs text-gray-500 mt-1 ml-6">
+                  Public coupons can be displayed to users on the promotion page
+                </p>
               </div>
 
               <div>
@@ -629,9 +696,10 @@ const PromotionCouponManager: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+                  disabled={createMutation.isPending}
+                  className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium disabled:opacity-50"
                 >
-                  Create Coupon
+                  {createMutation.isPending ? 'Creating...' : 'Create Coupon'}
                 </button>
               </div>
             </form>

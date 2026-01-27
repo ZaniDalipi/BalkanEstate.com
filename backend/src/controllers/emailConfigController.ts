@@ -306,6 +306,139 @@ export const getEmailCategories = async (_req: Request, res: Response): Promise<
   }
 };
 
+// Create new email configuration
+export const createEmailConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const configData = req.body;
+    const userId = (req as any).user?._id;
+
+    // Validate required fields
+    if (!configData.key || !configData.name || !configData.subject || !configData.bodyTemplate) {
+      res.status(400).json({
+        message: 'Missing required fields: key, name, subject, bodyTemplate are required',
+      });
+      return;
+    }
+
+    // Check if key already exists
+    const existing = await EmailConfig.findOne({ key: configData.key });
+    if (existing) {
+      res.status(409).json({ message: 'Email configuration with this key already exists' });
+      return;
+    }
+
+    // Sanitize key (lowercase, alphanumeric with dashes)
+    configData.key = configData.key.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+
+    // Set defaults
+    configData.isActive = configData.isActive ?? true;
+    configData.category = configData.category || 'transactional';
+    configData.fromCategory = configData.fromCategory || 'noreply';
+    configData.headerTitle = configData.headerTitle || configData.name;
+    configData.headerGradient = configData.headerGradient || 'linear-gradient(135deg, #0252CD 0%, #0369a1 100%)';
+    configData.showUnsubscribe = configData.showUnsubscribe ?? false;
+    configData.ctaEnabled = configData.ctaEnabled ?? false;
+    configData.variables = configData.variables || [];
+    configData.lastModified = new Date();
+
+    if (userId) {
+      configData.modifiedBy = userId;
+    }
+
+    const config = await EmailConfig.create(configData);
+
+    res.status(201).json({
+      message: 'Email configuration created successfully',
+      config,
+    });
+  } catch (error) {
+    console.error('Error creating email config:', error);
+    res.status(500).json({ message: 'Failed to create email configuration' });
+  }
+};
+
+// Delete email configuration
+export const deleteEmailConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { key } = req.params;
+
+    // Check if this is a system email (from seed data)
+    const { defaultEmailConfigs } = await import('../seeds/emailConfigSeed');
+    const isSystemEmail = defaultEmailConfigs.some((c) => c.key === key);
+
+    if (isSystemEmail) {
+      res.status(403).json({
+        message: 'Cannot delete system email templates. You can disable them instead.',
+      });
+      return;
+    }
+
+    const config = await EmailConfig.findOneAndDelete({ key });
+
+    if (!config) {
+      res.status(404).json({ message: 'Email configuration not found' });
+      return;
+    }
+
+    res.json({
+      message: 'Email configuration deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting email config:', error);
+    res.status(500).json({ message: 'Failed to delete email configuration' });
+  }
+};
+
+// Duplicate an existing email configuration
+export const duplicateEmailConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { key } = req.params;
+    const { newKey, newName } = req.body;
+    const userId = (req as any).user?._id;
+
+    if (!newKey || !newName) {
+      res.status(400).json({ message: 'newKey and newName are required' });
+      return;
+    }
+
+    // Check if source exists
+    const source = await EmailConfig.findOne({ key }).lean();
+    if (!source) {
+      res.status(404).json({ message: 'Source email configuration not found' });
+      return;
+    }
+
+    // Check if new key already exists
+    const existing = await EmailConfig.findOne({ key: newKey });
+    if (existing) {
+      res.status(409).json({ message: 'Email configuration with this key already exists' });
+      return;
+    }
+
+    // Create duplicate
+    const duplicateData = {
+      ...source,
+      _id: undefined,
+      key: newKey.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+      name: newName,
+      lastModified: new Date(),
+      modifiedBy: userId,
+      createdAt: undefined,
+      updatedAt: undefined,
+    };
+
+    const config = await EmailConfig.create(duplicateData);
+
+    res.status(201).json({
+      message: 'Email configuration duplicated successfully',
+      config,
+    });
+  } catch (error) {
+    console.error('Error duplicating email config:', error);
+    res.status(500).json({ message: 'Failed to duplicate email configuration' });
+  }
+};
+
 // Helper function to replace variables in a string
 function replaceVariables(template: string, variables: Record<string, string>): string {
   let result = template;
