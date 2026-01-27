@@ -865,37 +865,78 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = ({
           }
         }
 
-        // Add 3D buildings layer - OneGeo style dark grey buildings
-        mapInstance.addLayer(
-          {
-            id: '3d-buildings',
-            source: 'openmaptiles',
-            'source-layer': 'building',
-            type: 'fill-extrusion',
-            minzoom: 14,
-            paint: {
-              'fill-extrusion-color': [
-                'interpolate',
-                ['linear'],
-                ['coalesce', ['get', 'render_height'], 10],
-                0, '#6b7280',  // Shorter buildings - medium grey
-                20, '#4b5563', // Medium buildings - darker grey
-                50, '#374151', // Tall buildings - dark grey
-                100, '#1f2937', // Very tall - very dark
-              ],
-              'fill-extrusion-height': [
-                'coalesce',
-                ['get', 'render_height'],
-                ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
-                10,
-              ],
-              'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-              'fill-extrusion-opacity': 0.92,
-              'fill-extrusion-vertical-gradient': true,
+        // Detect the correct source name from the style
+        // OpenFreeMap uses 'openmaptiles', but we check dynamically to be safe
+        const style = mapInstance.getStyle();
+        const sources = style?.sources || {};
+        let buildingSource = 'openmaptiles'; // Default
+
+        // Look for vector source with building data
+        const sourceNames = Object.keys(sources);
+        console.log('[Map3D] Available sources:', sourceNames);
+
+        // Check common source names used by different tile providers
+        const possibleSources = ['openmaptiles', 'composite', 'mapbox', 'osm', 'vectorTiles'];
+        for (const sourceName of possibleSources) {
+          if (sources[sourceName] && (sources[sourceName] as any).type === 'vector') {
+            buildingSource = sourceName;
+            break;
+          }
+        }
+
+        // If no known source found, use the first vector source
+        if (!sources[buildingSource]) {
+          for (const [name, source] of Object.entries(sources)) {
+            if ((source as any).type === 'vector') {
+              buildingSource = name;
+              console.log('[Map3D] Using detected vector source:', buildingSource);
+              break;
+            }
+          }
+        }
+
+        // Verify the source exists before adding layer
+        if (!mapInstance.getSource(buildingSource)) {
+          console.error('[Map3D] Building source not found:', buildingSource, 'Available:', sourceNames);
+          return;
+        }
+
+        try {
+          // Add 3D buildings layer - OneGeo style dark grey buildings
+          mapInstance.addLayer(
+            {
+              id: '3d-buildings',
+              source: buildingSource,
+              'source-layer': 'building',
+              type: 'fill-extrusion',
+              minzoom: 14,
+              paint: {
+                'fill-extrusion-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['coalesce', ['get', 'render_height'], 10],
+                  0, '#6b7280',  // Shorter buildings - medium grey
+                  20, '#4b5563', // Medium buildings - darker grey
+                  50, '#374151', // Tall buildings - dark grey
+                  100, '#1f2937', // Very tall - very dark
+                ],
+                'fill-extrusion-height': [
+                  'coalesce',
+                  ['get', 'render_height'],
+                  ['*', ['coalesce', ['get', 'building:levels'], 3], 3.5],
+                  10,
+                ],
+                'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                'fill-extrusion-opacity': 0.92,
+                'fill-extrusion-vertical-gradient': true,
+              },
             },
-          },
-          labelLayerId
-        );
+            labelLayerId
+          );
+          console.log('[Map3D] 3D buildings layer added successfully using source:', buildingSource);
+        } catch (error) {
+          console.error('[Map3D] Failed to add 3D buildings layer:', error);
+        }
       }
 
       // Add property marker with floor info
