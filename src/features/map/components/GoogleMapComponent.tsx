@@ -1353,7 +1353,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
             maxZoom: 21,
             tilt: 0, // Disable tilt to remove compass
             heading: 0,
-            mapId: 'balkan-estate-map',
+            // Note: mapId and styles are mutually exclusive - using client-side styles for dynamic theming
           }}
         >
           {/* Property popup */}
