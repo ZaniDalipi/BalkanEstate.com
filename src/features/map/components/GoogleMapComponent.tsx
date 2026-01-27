@@ -667,9 +667,15 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   }, [map, onMapMove]);
 
   // Update map type when it changes (styles are controlled via mapId in Cloud Console)
+  const lastMapTypeRef = useRef<string | null>(null);
   useEffect(() => {
     if (!map || !isLoaded) return;
-    map.setMapTypeId(getMapTypeId());
+    const newMapType = getMapTypeId();
+    // Only update if map type actually changed to avoid repeated warnings
+    if (lastMapTypeRef.current !== newMapType) {
+      lastMapTypeRef.current = newMapType;
+      map.setMapTypeId(newMapType);
+    }
   }, [map, mapStyle, isLoaded, getMapTypeId]);
 
   // Handle 3D buildings toggle - tilt the map for 3D view
