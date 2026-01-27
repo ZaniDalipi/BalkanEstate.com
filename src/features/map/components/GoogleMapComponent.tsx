@@ -577,6 +577,51 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
   }, [mapStyle, showLandmarks]);
 
+  // Inject CSS keyframes for promoted marker glow animation
+  useEffect(() => {
+    const styleId = 'promoted-marker-glow-styles';
+    if (document.getElementById(styleId)) return;
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      @keyframes promotedGlow {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.85;
+          transform: scale(1.08);
+        }
+      }
+      .promoted-marker-premium {
+        animation: promotedGlow 2s ease-in-out infinite;
+        box-shadow: 0 0 12px 3px rgba(255, 184, 0, 0.7), 0 0 20px 6px rgba(255, 184, 0, 0.4), 0 1px 4px rgba(0,0,0,0.25) !important;
+      }
+      .promoted-marker-highlight {
+        animation: promotedGlow 2s ease-in-out infinite;
+        box-shadow: 0 0 12px 3px rgba(14, 165, 233, 0.7), 0 0 20px 6px rgba(14, 165, 233, 0.4), 0 1px 4px rgba(0,0,0,0.25) !important;
+      }
+      .promoted-marker-featured {
+        animation: promotedGlow 2s ease-in-out infinite;
+        box-shadow: 0 0 12px 3px rgba(124, 58, 237, 0.7), 0 0 20px 6px rgba(124, 58, 237, 0.4), 0 1px 4px rgba(0,0,0,0.25) !important;
+      }
+      .promoted-marker-standard {
+        animation: promotedGlow 2.5s ease-in-out infinite;
+        box-shadow: 0 0 8px 2px rgba(156, 163, 175, 0.6), 0 0 14px 4px rgba(156, 163, 175, 0.3), 0 1px 4px rgba(0,0,0,0.25) !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
+
   // Handle map load
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
     setMap(mapInstance);
@@ -889,6 +934,11 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           borderWidth = 3;
         }
 
+        // Add glow animation class for promoted markers
+        if (isActivelyPromoted && property.promotionTier) {
+          markerDiv.classList.add(`promoted-marker-${property.promotionTier}`);
+        }
+
         markerDiv.style.cssText = `
           padding: 2px 6px;
           background: ${color};
@@ -1057,21 +1107,34 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     onRecenter();
   }, [map, userLocation, onRecenter]);
 
+  // Track zoom for cadastre refresh
+  const lastCadastreZoomRef = useRef<number | null>(null);
+
   // Cadastre layer overlay effect
   useEffect(() => {
     if (!map || !isLoaded) return;
 
-    // Remove existing cadastre overlay
-    if (cadastreLayerRef.current) {
-      map.overlayMapTypes.forEach((overlay, index) => {
-        if (overlay === cadastreLayerRef.current) {
-          map.overlayMapTypes.removeAt(index);
+    // Helper to remove existing cadastre overlay
+    const removeCadastreLayer = () => {
+      if (cadastreLayerRef.current) {
+        // Find and remove from overlayMapTypes array
+        const overlays = map.overlayMapTypes;
+        for (let i = overlays.getLength() - 1; i >= 0; i--) {
+          if (overlays.getAt(i) === cadastreLayerRef.current) {
+            overlays.removeAt(i);
+          }
         }
-      });
-      cadastreLayerRef.current = null;
-    }
+        cadastreLayerRef.current = null;
+      }
+    };
 
-    if (!showCadastre) return;
+    // Remove existing cadastre overlay
+    removeCadastreLayer();
+
+    if (!showCadastre) {
+      lastCadastreZoomRef.current = null;
+      return;
+    }
 
     // Get current map center to determine which country's cadastre to show
     const mapCenter = map.getCenter();
@@ -1081,6 +1144,9 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     if (!cadastreConfig) {
       return;
     }
+
+    // Store current zoom level
+    lastCadastreZoomRef.current = map.getZoom() || null;
 
     // Helper function to convert lat/lng to Web Mercator (EPSG:3857) meters
     const latLngToMercator = (lat: number, lng: number): { x: number; y: number } => {
@@ -1095,77 +1161,102 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     const TILE_SIZE = 256;
     const REQUEST_SIZE = 512; // Request larger image, display smaller = thinner lines
 
-    const wmsLayer = new google.maps.ImageMapType({
-      getTileUrl: (coord, zoom) => {
-        // Only show cadastre at zoom levels >= minZoom
-        const minZoom = Math.max(cadastreConfig.minZoom || CADASTRE_MIN_ZOOM, 17);
-        if (zoom < minZoom) {
-          return '';
-        }
+    // Create a unique cache buster based on zoom to prevent stale tiles
+    const createWmsLayer = () => {
+      return new google.maps.ImageMapType({
+        getTileUrl: (coord, zoom) => {
+          // Only show cadastre at zoom levels >= minZoom
+          const minZoom = Math.max(cadastreConfig.minZoom || CADASTRE_MIN_ZOOM, 17);
+          if (zoom < minZoom) {
+            return '';
+          }
 
-        // Calculate tile bounds
-        const proj = map.getProjection();
-        if (!proj) return '';
+          // Calculate tile bounds
+          const proj = map.getProjection();
+          if (!proj) return '';
 
-        const zfactor = Math.pow(2, zoom);
+          const zfactor = Math.pow(2, zoom);
 
-        // Calculate world coordinates for tile corners
-        const topLeft = new google.maps.Point(
-          (coord.x * TILE_SIZE) / zfactor,
-          (coord.y * TILE_SIZE) / zfactor
-        );
-        const bottomRight = new google.maps.Point(
-          ((coord.x + 1) * TILE_SIZE) / zfactor,
-          ((coord.y + 1) * TILE_SIZE) / zfactor
-        );
+          // Calculate world coordinates for tile corners
+          const topLeft = new google.maps.Point(
+            (coord.x * TILE_SIZE) / zfactor,
+            (coord.y * TILE_SIZE) / zfactor
+          );
+          const bottomRight = new google.maps.Point(
+            ((coord.x + 1) * TILE_SIZE) / zfactor,
+            ((coord.y + 1) * TILE_SIZE) / zfactor
+          );
 
-        // Convert to lat/lng
-        const sw = proj.fromPointToLatLng(new google.maps.Point(topLeft.x, bottomRight.y));
-        const ne = proj.fromPointToLatLng(new google.maps.Point(bottomRight.x, topLeft.y));
+          // Convert to lat/lng
+          const sw = proj.fromPointToLatLng(new google.maps.Point(topLeft.x, bottomRight.y));
+          const ne = proj.fromPointToLatLng(new google.maps.Point(bottomRight.x, topLeft.y));
 
-        if (!sw || !ne) return '';
+          if (!sw || !ne) return '';
 
-        // Build WMS GetMap URL with correct BBOX format
-        let bbox: string;
-        const crs = cadastreConfig.additionalParams?.CRS || 'EPSG:4326';
+          // Build WMS GetMap URL with correct BBOX format
+          let bbox: string;
+          const crs = cadastreConfig.additionalParams?.CRS || 'EPSG:4326';
 
-        if (crs === 'EPSG:3857') {
-          // Convert to Web Mercator meters for EPSG:3857
-          const swMerc = latLngToMercator(sw.lat(), sw.lng());
-          const neMerc = latLngToMercator(ne.lat(), ne.lng());
-          bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
-        } else {
-          // EPSG:4326 - WMS 1.3.0 uses lat,lng order (y,x)
-          bbox = `${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}`;
-        }
+          if (crs === 'EPSG:3857') {
+            // Convert to Web Mercator meters for EPSG:3857
+            const swMerc = latLngToMercator(sw.lat(), sw.lng());
+            const neMerc = latLngToMercator(ne.lat(), ne.lng());
+            bbox = `${swMerc.x},${swMerc.y},${neMerc.x},${neMerc.y}`;
+          } else {
+            // EPSG:4326 - WMS 1.3.0 uses lat,lng order (y,x)
+            bbox = `${sw.lat()},${sw.lng()},${ne.lat()},${ne.lng()}`;
+          }
 
-        const params = new URLSearchParams({
-          SERVICE: 'WMS',
-          VERSION: cadastreConfig.version || '1.3.0',
-          REQUEST: 'GetMap',
-          LAYERS: cadastreConfig.layers,
-          STYLES: '',
-          FORMAT: cadastreConfig.format || 'image/png',
-          TRANSPARENT: 'true',
-          WIDTH: String(REQUEST_SIZE),
-          HEIGHT: String(REQUEST_SIZE),
-          CRS: crs,
-          BBOX: bbox,
-        });
+          const params = new URLSearchParams({
+            SERVICE: 'WMS',
+            VERSION: cadastreConfig.version || '1.3.0',
+            REQUEST: 'GetMap',
+            LAYERS: cadastreConfig.layers,
+            STYLES: '',
+            FORMAT: cadastreConfig.format || 'image/png',
+            TRANSPARENT: 'true',
+            WIDTH: String(REQUEST_SIZE),
+            HEIGHT: String(REQUEST_SIZE),
+            CRS: crs,
+            BBOX: bbox,
+          });
 
-        return `${cadastreConfig.wmsUrl}?${params.toString()}`;
-      },
-      tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
-      opacity: 0.55, // Lower opacity for cleaner overlay
-      name: 'Cadastre',
-    });
+          return `${cadastreConfig.wmsUrl}?${params.toString()}`;
+        },
+        tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
+        opacity: 0.55, // Lower opacity for cleaner overlay
+        name: 'Cadastre',
+      });
+    };
+
+    const wmsLayer = createWmsLayer();
 
     // Add to map
     map.overlayMapTypes.push(wmsLayer);
     cadastreLayerRef.current = wmsLayer;
 
-    // Update cadastre layer when map moves
-    const updateCadastre = () => {
+    // Refresh cadastre layer on zoom changes to clear stale tiles
+    const handleZoomChange = () => {
+      const newZoom = map.getZoom();
+      if (newZoom !== undefined && lastCadastreZoomRef.current !== newZoom) {
+        lastCadastreZoomRef.current = newZoom;
+
+        // Remove old layer and create new one to force tile refresh
+        removeCadastreLayer();
+
+        // Small delay to ensure clean transition
+        requestAnimationFrame(() => {
+          if (showCadastre) {
+            const newLayer = createWmsLayer();
+            map.overlayMapTypes.push(newLayer);
+            cadastreLayerRef.current = newLayer;
+          }
+        });
+      }
+    };
+
+    // Update cadastre layer when map moves (for country changes)
+    const handleIdle = () => {
       const newCenter = map.getCenter();
       if (!newCenter) return;
 
@@ -1177,18 +1268,13 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       }
     };
 
-    const listener = map.addListener('idle', updateCadastre);
+    const zoomListener = map.addListener('zoom_changed', handleZoomChange);
+    const idleListener = map.addListener('idle', handleIdle);
 
     return () => {
-      google.maps.event.removeListener(listener);
-      if (cadastreLayerRef.current) {
-        map.overlayMapTypes.forEach((overlay, index) => {
-          if (overlay === cadastreLayerRef.current) {
-            map.overlayMapTypes.removeAt(index);
-          }
-        });
-        cadastreLayerRef.current = null;
-      }
+      google.maps.event.removeListener(zoomListener);
+      google.maps.event.removeListener(idleListener);
+      removeCadastreLayer();
     };
   }, [map, isLoaded, showCadastre]);
 
@@ -1352,11 +1438,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const googleDrawnBounds = getGoogleBounds(drawnBounds);
 
   // Memoize map options to prevent unnecessary re-renders and repeated warnings
-  const mapOptions = useMemo(() => ({
+  const mapOptions = useMemo<google.maps.MapOptions>(() => ({
     restriction: {
       latLngBounds: BALKAN_BOUNDS,
       strictBounds: false,
     },
+    mapTypeId: google.maps.MapTypeId.ROADMAP, // Set stable initial type
     disableDefaultUI: true,
     mapTypeControl: false,
     streetViewControl: false,
@@ -1366,7 +1453,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     scaleControl: false,
     panControl: false,
     keyboardShortcuts: false,
-    gestureHandling: 'greedy' as const,
+    gestureHandling: 'greedy',
     minZoom: 6,
     maxZoom: 21,
     tilt: 0,
