@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImage, PropertyImageTag, Seller, UserRole, NominatimResult, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
-import { generateDescriptionFromImages, PropertyAnalysisResult, calculatePropertyDistances } from '@/services/geminiService';
+import { generateDescriptionFromImages, PropertyAnalysisResult, calculatePropertyDistances, LocationContext } from '@/services/geminiService';
 import { searchLocation } from '@/services/osmService';
 import { SparklesIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import { getCurrencySymbol } from '@/utils/currency';
@@ -709,7 +709,17 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                 return;
             }
 
-            const result = await generateDescriptionFromImages(imageFiles, language, aiPropertyType);
+            // Build location context for AI if location info is available
+            const locationContext: LocationContext | undefined =
+                (selectedCountry || selectedCity || listingData.streetAddress)
+                    ? {
+                        country: selectedCountry || undefined,
+                        city: selectedCity || undefined,
+                        address: listingData.streetAddress || undefined,
+                    }
+                    : undefined;
+
+            const result = await generateDescriptionFromImages(imageFiles, language, aiPropertyType, locationContext);
             
             const validTags = result.image_tags
                 .filter(tagInfo => ALL_VALID_TAGS.includes(tagInfo.tag as PropertyImageTag))
@@ -1375,6 +1385,79 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500"><svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div>
                             </div>
                         </div>
+
+                        {/* Location Section for AI context */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                            {/* Country Dropdown */}
+                            <div className="relative">
+                                <select
+                                    id="ai-country"
+                                    value={selectedCountry}
+                                    onChange={handleCountryChange}
+                                    className={`${floatingInputClasses} border-neutral-300`}
+                                >
+                                    <option value="">{t('seller:createListing.location.selectCountry')}</option>
+                                    {BALKAN_LOCATIONS.map(country => (
+                                        <option key={country.code} value={country.name}>
+                                            {country.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <label htmlFor="ai-country" className={floatingSelectLabelClasses}>{t('seller:createListing.location.country')}</label>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* City Dropdown */}
+                            <div className="relative">
+                                <select
+                                    id="ai-city"
+                                    value={selectedCity}
+                                    onChange={handleCityChange}
+                                    className={`${floatingInputClasses} border-neutral-300`}
+                                    disabled={!selectedCountry}
+                                >
+                                    <option value="">{t('seller:createListing.location.selectCity')}</option>
+                                    {availableCities.map(city => (
+                                        <option key={city.name} value={city.name}>
+                                            {city.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <label htmlFor="ai-city" className={floatingSelectLabelClasses}>{t('seller:createListing.location.city')}</label>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-500">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* Show interactive map when city is selected */}
+                            {selectedCity && listingData.lat !== 0 && listingData.lng !== 0 && (
+                                <div className="md:col-span-2">
+                                    <p className="mb-2 text-xs text-neutral-500">
+                                        <MapPinIcon className="w-3 h-3 inline-block mr-1" />
+                                        {t('seller:createListing.ai.locationHint', 'Adding location helps AI generate more accurate, location-specific descriptions')}
+                                    </p>
+                                    <MapLocationPicker
+                                        lat={listingData.lat}
+                                        lng={listingData.lng}
+                                        address={listingData.streetAddress || `${selectedCity}, ${selectedCountry}`}
+                                        zoom={getZoomLevel}
+                                        country={selectedCountry}
+                                        city={selectedCity}
+                                        cityLat={cityData?.lat}
+                                        cityLng={cityData?.lng}
+                                        onLocationChange={handleMapLocationChange}
+                                        onAddressChange={handleMapAddressChange}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
                         <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-48 border-2 border-neutral-300 border-dashed rounded-lg cursor-pointer bg-neutral-50 hover:bg-neutral-100">
                             <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className="w-10 h-10 mb-3 text-neutral-400" /><p className="mb-2 text-sm text-neutral-500"><span className="font-semibold">{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-neutral-500">{t('seller:createListing.upload.fileTypes')}</p></div>
                             <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />

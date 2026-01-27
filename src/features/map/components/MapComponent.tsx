@@ -210,6 +210,8 @@ interface MapComponentProps {
   isMobile: boolean;
   searchMode: 'manual' | 'ai';
   hoveredPropertyId?: string | null;
+  /** Hide all map controls (for saved searches view) */
+  hideControls?: boolean;
 }
 
 /**
@@ -275,6 +277,29 @@ const ZoomAdjuster: React.FC<{ mapType: TileLayerType; currentZoom: number }> = 
 };
 
 /**
+ * FitBoundsHandler Component - fits the map to drawnBounds when they exist
+ * Used in saved searches to show the saved search area
+ */
+const FitBoundsHandler: React.FC<{ drawnBounds: L.LatLngBounds | null }> = ({ drawnBounds }) => {
+  const map = useMap();
+  const hasFittedRef = useRef(false);
+
+  useEffect(() => {
+    if (!drawnBounds || hasFittedRef.current) return;
+
+    try {
+      // Fit the map to the drawn bounds with padding
+      map.fitBounds(drawnBounds, { padding: [50, 50], animate: true, duration: 0.5 });
+      hasFittedRef.current = true;
+    } catch (e) {
+      console.error('[MapComponent] Error fitting to drawnBounds:', e);
+    }
+  }, [map, drawnBounds]);
+
+  return null;
+};
+
+/**
  * MapComponent
  *
  * Main map component for property search with:
@@ -308,6 +333,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   isMobile,
   searchMode,
   hoveredPropertyId,
+  hideControls = false,
 }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
@@ -513,6 +539,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           isMobile={isMobile}
           searchMode={searchMode}
           hoveredPropertyId={hoveredPropertyId}
+          hideControls={hideControls}
         />
       </Suspense>
     );
@@ -549,6 +576,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <ZoomTracker onZoomChange={setCurrentZoom} />
           {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
           <ZoomSnapAdjuster currentZoom={currentZoom} />
+          <FitBoundsHandler drawnBounds={drawnBounds} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
@@ -633,7 +661,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         )}
 
       {/* Desktop Controls - positioned above the newsletter bar (bottom-12 = ~112px) */}
-      {!isMobile && (
+      {!isMobile && !hideControls && (
         <>
           <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar - compact with glass effect */}
@@ -876,7 +904,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       )}
 
       {/* Mobile Controls - hidden on desktop via CSS as fallback */}
-      {isMobile && (
+      {isMobile && !hideControls && (
         <>
           {/* Mobile: Layers FAB with liquid glass dropdown */}
           <div className={`absolute bottom-20 left-3 z-[1003] pointer-events-none md:hidden ${showMeasurement ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>

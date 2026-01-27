@@ -82,7 +82,7 @@ const detectUserCountry = (userProfileCountry?: string): string => {
 // ============================================
 // COMING SOON FLAG - Set to false when ready to launch payments
 // ============================================
-const PAYMENTS_COMING_SOON = false;
+const PAYMENTS_COMING_SOON = true;
 // ============================================
 
 // Check if we're in development mode - disable aggressive polling
@@ -653,83 +653,183 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     );
   }
 
-  // Coming Soon overlay
+  // Coming Soon overlay - with coupon support
   if (PAYMENTS_COMING_SOON) {
+    // Allow 100% off coupons to work even in "coming soon" mode
+    const canActivateFree = finalPrice === 0 || finalPrice < 0.01;
+
     return (
       <Modal isOpen={isOpen} onClose={onClose} title="">
         <div className="max-w-md mx-auto">
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <div className="text-center pb-4 border-b border-neutral-200">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <ClockIcon className="w-10 h-10 text-white" />
+            <div className="text-center pb-3 sm:pb-4 border-b border-neutral-200">
+              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg ${
+                canActivateFree
+                  ? 'bg-gradient-to-br from-green-400 to-emerald-500'
+                  : 'bg-gradient-to-br from-amber-400 to-orange-500'
+              }`}>
+                {canActivateFree ? (
+                  <CheckCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                ) : (
+                  <ClockIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                )}
               </div>
-              <h2 className="text-2xl font-bold text-neutral-800 mb-2">Coming Soon</h2>
-              <p className="text-sm text-neutral-500">Premium subscriptions launching soon!</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-1 sm:mb-2">
+                {canActivateFree ? 'Activate Free Subscription' : 'Payment Coming Soon'}
+              </h2>
+              <p className="text-xs sm:text-sm text-neutral-500">
+                {canActivateFree
+                  ? 'Your coupon provides 100% off!'
+                  : 'Premium subscriptions launching very soon!'}
+              </p>
             </div>
 
-            {/* Plan Summary */}
-            <div className="rounded-xl p-6 border bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-              <div className="flex justify-between items-start mb-4">
+            {/* Plan Summary with Coupon Support */}
+            <div className={`rounded-lg sm:rounded-xl p-4 sm:p-6 border ${
+              canActivateFree
+                ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
+                : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
+            }`}>
+              <div className="flex justify-between items-start mb-3 sm:mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-neutral-800">{planName}</h3>
-                  <p className="text-sm text-neutral-500 capitalize">Billed {planInterval}ly</p>
+                  <h3 className="text-base sm:text-lg font-bold text-neutral-800">{planName}</h3>
+                  <p className="text-xs sm:text-sm text-neutral-500 capitalize">Billed {planInterval}ly</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-neutral-400">€{planPrice.toFixed(2)}</p>
+                  {(discountPercent > 0 || codeValidation?.valid) && (
+                    <>
+                      <p className="text-xs sm:text-sm text-neutral-400 line-through">€{planPrice.toFixed(2)}</p>
+                      <p className={`text-xl sm:text-2xl font-bold ${canActivateFree ? 'text-green-600' : 'text-amber-600'}`}>
+                        {canActivateFree ? 'FREE' : `€${finalPrice.toFixed(2)}`}
+                      </p>
+                      <p className="text-[10px] sm:text-xs text-green-600 font-semibold">
+                        {canActivateFree ? '100% OFF!' : `Save €${savings.toFixed(2)}`}
+                      </p>
+                    </>
+                  )}
+                  {discountPercent === 0 && !codeValidation?.valid && (
+                    <p className="text-xl sm:text-2xl font-bold text-neutral-400">€{planPrice.toFixed(2)}</p>
+                  )}
                 </div>
               </div>
+
+              {/* Discount Code Input */}
+              {!appliedDiscountCode && (
+                <div className="mb-3 sm:mb-4">
+                  <label className="block text-xs sm:text-sm font-medium text-neutral-700 mb-1.5 sm:mb-2">
+                    Have a discount code?
+                  </label>
+                  <div className="flex gap-1.5 sm:gap-2">
+                    <input
+                      type="text"
+                      value={discountCode}
+                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                      placeholder="Enter code"
+                      className="flex-1 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
+                      onKeyPress={(e) => e.key === 'Enter' && handleValidateDiscountCode()}
+                      disabled={validatingCode}
+                    />
+                    <button
+                      onClick={handleValidateDiscountCode}
+                      disabled={validatingCode || !discountCode.trim()}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {validatingCode ? 'Checking...' : 'Apply'}
+                    </button>
+                  </div>
+                  {codeValidation && !codeValidation.valid && (
+                    <p className="text-[10px] sm:text-xs text-red-600 mt-1">{codeValidation.message}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Applied Discount Code */}
+              {appliedDiscountCode && codeValidation?.valid && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                    <div>
+                      <p className="text-xs sm:text-sm text-green-700 font-medium">
+                        Code "{appliedDiscountCode}" applied!
+                      </p>
+                      <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleRemoveDiscountCode}
+                    className="text-green-700 hover:text-green-900 text-[10px] sm:text-xs font-medium"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Coming Soon Message */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex gap-3">
-                <CreditCardIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-blue-900 mb-1">Payment System Under Development</p>
-                  <p className="text-xs text-blue-700 leading-relaxed">
-                    We're working hard to bring you secure payment options. Premium subscriptions will be available soon with support for major credit cards and local payment methods.
-                  </p>
+            {/* Coming Soon Message - only show if not free */}
+            {!canActivateFree && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                <div className="flex gap-2 sm:gap-3">
+                  <CreditCardIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs sm:text-sm font-semibold text-blue-900 mb-0.5 sm:mb-1">Payment System Launching Soon</p>
+                    <p className="text-[10px] sm:text-xs text-blue-700 leading-relaxed">
+                      We're finalizing our payment system. In the meantime, you can apply discount codes - including 100% off codes for immediate access!
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Features Preview */}
-            <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
-              <p className="text-sm font-semibold text-neutral-800 mb-3">What you'll get:</p>
-              <ul className="text-sm text-neutral-600 space-y-2">
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                  Secure payment processing
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                  Multiple payment methods
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                  Instant subscription activation
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                  Easy cancellation anytime
-                </li>
-              </ul>
-            </div>
+            {/* Free Subscription Info - only show if free */}
+            {canActivateFree && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
+                <div className="flex gap-2 sm:gap-3">
+                  <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">Free Subscription Ready</p>
+                    <p className="text-[10px] sm:text-xs text-green-700 leading-relaxed">
+                      Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-            {/* Notify Me Button */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-            >
-              Got it, notify me when available!
-            </button>
+            {/* Action Button */}
+            {canActivateFree ? (
+              <button
+                type="button"
+                onClick={handlePayment}
+                disabled={isProcessing}
+                className="w-full py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent"></div>
+                    <span>Activating...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>Activate Free Subscription</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+              >
+                Got it, notify me when available!
+              </button>
+            )}
 
             {/* Close */}
             <button
               onClick={onClose}
-              className="w-full py-3 text-neutral-600 hover:text-neutral-800 font-medium transition-colors"
+              className="w-full py-2 sm:py-3 text-neutral-600 hover:text-neutral-800 font-medium text-sm sm:text-base transition-colors"
             >
               Close
             </button>

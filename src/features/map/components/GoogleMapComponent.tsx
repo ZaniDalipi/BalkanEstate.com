@@ -159,6 +159,8 @@ interface GoogleMapComponentProps {
   isMobile: boolean;
   searchMode: 'manual' | 'ai';
   hoveredPropertyId?: string | null;
+  /** Hide all map controls (for saved searches view) */
+  hideControls?: boolean;
 }
 
 /**
@@ -363,6 +365,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   onRecenter,
   isMobile,
   hoveredPropertyId,
+  hideControls = false,
 }) => {
   const { t } = useTranslation(['search', 'property']);
   const { dispatch } = useAppContext();
@@ -415,6 +418,23 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const lastCadastreZoomRef = useRef<number | null>(null);
   const lastMapTypeRef = useRef<string | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
+
+  // Drawing refs - for rectangle drawing on map
+  const drawingStartRef = useRef<{ lat: number; lng: number } | null>(null);
+  const isDrawingDragRef = useRef(false);
+  const [drawingRect, setDrawingRect] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
+  const drawingRectRef = useRef<{ north: number; south: number; east: number; west: number } | null>(null);
+  const drawingPropsRef = useRef({ isDrawing, onDrawComplete });
+
+  // Keep drawing props ref updated
+  useEffect(() => {
+    drawingPropsRef.current = { isDrawing, onDrawComplete };
+  }, [isDrawing, onDrawComplete]);
+
+  // Keep drawingRect ref in sync with state (for use in event handlers)
+  useEffect(() => {
+    drawingRectRef.current = drawingRect;
+  }, [drawingRect]);
 
   // Load Google Maps API using centralized hook (enables preloading benefits)
   const { isLoaded, loadError } = useGoogleMapLoader();
@@ -478,6 +498,143 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
     fetchMeasurementLimits();
   }, [isAuthenticated]);
+
+  // Drawing mode - handle cursor and map interaction
+  useEffect(() => {
+    if (!map) return;
+
+    const mapDiv = map.getDiv();
+    if (isDrawing) {
+      mapDiv.style.cursor = 'crosshair';
+      map.setOptions({ draggable: false, scrollwheel: false });
+    } else {
+      mapDiv.style.cursor = '';
+      map.setOptions({ draggable: true, scrollwheel: true });
+      // Clear drawing state if cancelled
+      if (isDrawingDragRef.current) {
+        isDrawingDragRef.current = false;
+        drawingStartRef.current = null;
+        setDrawingRect(null);
+      }
+    }
+  }, [isDrawing, map]);
+
+  // Drawing event handlers
+  useEffect(() => {
+    if (!map) return;
+
+    const mapDiv = map.getDiv();
+
+    const getLatLngFromEvent = (e: MouseEvent | TouchEvent): { lat: number; lng: number } | null => {
+      const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0]?.clientY : e.clientY;
+      if (clientX === undefined || clientY === undefined) return null;
+
+      const rect = mapDiv.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      // Convert pixel position to lat/lng
+      const bounds = map.getBounds();
+      const projection = map.getProjection();
+      if (!bounds || !projection) return null;
+
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      const topRight = projection.fromLatLngToPoint(ne);
+      const bottomLeft = projection.fromLatLngToPoint(sw);
+      if (!topRight || !bottomLeft) return null;
+
+      const scale = Math.pow(2, map.getZoom() || 0);
+      const worldPoint = new google.maps.Point(
+        bottomLeft.x + (x / scale) * (topRight.x - bottomLeft.x) / rect.width * scale,
+        topRight.y + (y / scale) * (bottomLeft.y - topRight.y) / rect.height * scale
+      );
+
+      // Simpler approach: use overlay projection
+      const latLng = map.getCenter();
+      if (!latLng) return null;
+
+      // Calculate based on bounds
+      const lng = sw.lng() + (x / rect.width) * (ne.lng() - sw.lng());
+      const lat = ne.lat() - (y / rect.height) * (ne.lat() - sw.lat());
+
+      return { lat, lng };
+    };
+
+    const handleMouseDown = (e: MouseEvent | TouchEvent) => {
+      if (!drawingPropsRef.current.isDrawing || isDrawingDragRef.current) return;
+      if ('button' in e && e.button !== 0) return;
+
+      e.preventDefault();
+      const latLng = getLatLngFromEvent(e);
+      if (!latLng) return;
+
+      isDrawingDragRef.current = true;
+      drawingStartRef.current = latLng;
+      setDrawingRect(null);
+    };
+
+    const handleMouseMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDrawingDragRef.current || !drawingStartRef.current) return;
+
+      e.preventDefault();
+      const latLng = getLatLngFromEvent(e);
+      if (!latLng) return;
+
+      const start = drawingStartRef.current;
+      const newRect = {
+        north: Math.max(start.lat, latLng.lat),
+        south: Math.min(start.lat, latLng.lat),
+        east: Math.max(start.lng, latLng.lng),
+        west: Math.min(start.lng, latLng.lng),
+      };
+      // Update both ref (for immediate use in handlers) and state (for rendering)
+      drawingRectRef.current = newRect;
+      setDrawingRect(newRect);
+    };
+
+    const handleMouseUp = () => {
+      if (!isDrawingDragRef.current) return;
+
+      isDrawingDragRef.current = false;
+      // Read from ref to get the latest value (not from closure which may be stale)
+      const rect = drawingRectRef.current;
+
+      // Clear temp drawing state
+      drawingStartRef.current = null;
+      drawingRectRef.current = null;
+      setDrawingRect(null);
+
+      // Convert to Leaflet LatLngBounds format for compatibility
+      if (rect && Math.abs(rect.north - rect.south) > 0.0001 && Math.abs(rect.east - rect.west) > 0.0001) {
+        const bounds = L.latLngBounds(
+          L.latLng(rect.south, rect.west),
+          L.latLng(rect.north, rect.east)
+        );
+        drawingPropsRef.current.onDrawComplete(bounds);
+      } else {
+        drawingPropsRef.current.onDrawComplete(null);
+      }
+    };
+
+    // Attach event listeners
+    mapDiv.addEventListener('mousedown', handleMouseDown);
+    mapDiv.addEventListener('touchstart', handleMouseDown, { passive: false });
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleMouseMove, { passive: false });
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchend', handleMouseUp);
+
+    return () => {
+      mapDiv.removeEventListener('mousedown', handleMouseDown);
+      mapDiv.removeEventListener('touchstart', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchend', handleMouseUp);
+    };
+  }, [map]); // Only depend on map - use refs for other values
 
   // Get map type ID based on style
   const getMapTypeId = useCallback((): google.maps.MapTypeId => {
@@ -669,6 +826,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       map.setMapTypeId(newMapType);
     }
   }, [map, mapStyle, isLoaded, getMapTypeId]);
+
+  // Apply map styles when mapStyle changes (clean/color/street)
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+    // Only apply styles for roadmap-based views (clean, color, street)
+    // Satellite and hybrid don't support custom styles
+    if (mapStyle === 'satellite' || mapStyle === 'hybrid') {
+      map.setOptions({ styles: [] });
+    } else {
+      map.setOptions({ styles: getMapStyles() });
+    }
+  }, [map, mapStyle, isLoaded, getMapStyles, showLandmarks]);
 
   // Handle 3D buildings toggle - tilt the map for 3D view
   useEffect(() => {
@@ -1050,6 +1219,28 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }, 400);
   }, [flyToTarget, map, onFlyComplete]);
 
+  // Fit map to drawnBounds when they exist (for saved searches)
+  useEffect(() => {
+    if (!map || !drawnBounds) return;
+
+    // Only fit bounds if there's no flyToTarget (which handles positioning)
+    // and if drawnBounds changed
+    try {
+      const sw = drawnBounds.getSouthWest();
+      const ne = drawnBounds.getNorthEast();
+
+      const bounds = new google.maps.LatLngBounds(
+        { lat: sw.lat, lng: sw.lng },
+        { lat: ne.lat, lng: ne.lng }
+      );
+
+      // Fit the map to show the drawn bounds with some padding
+      map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+    } catch (e) {
+      console.error('[GoogleMapComponent] Error fitting to drawnBounds:', e);
+    }
+  }, [map, drawnBounds]);
+
   // Handle view details click
   const handleViewDetails = useCallback((propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
@@ -1413,14 +1604,19 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   // Convert Leaflet bounds to Google bounds for drawn rectangle
   const getGoogleBounds = (leafletBounds: L.LatLngBounds | null) => {
     if (!leafletBounds) return null;
-    const sw = leafletBounds.getSouthWest();
-    const ne = leafletBounds.getNorthEast();
-    return {
-      north: ne.lat,
-      south: sw.lat,
-      east: ne.lng,
-      west: sw.lng,
-    };
+    try {
+      const sw = leafletBounds.getSouthWest();
+      const ne = leafletBounds.getNorthEast();
+      return {
+        north: ne.lat,
+        south: sw.lat,
+        east: ne.lng,
+        west: sw.lng,
+      };
+    } catch (e) {
+      console.error('[GoogleMapComponent] Error converting bounds:', e, leafletBounds);
+      return null;
+    }
   };
 
   const googleDrawnBounds = getGoogleBounds(drawnBounds);
@@ -1463,6 +1659,22 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 strokeWeight: 3,
                 fillColor: '#0252CD',
                 fillOpacity: 0.2,
+                clickable: false,
+              }}
+            />
+          )}
+
+          {/* Temporary drawing rectangle (while drawing) */}
+          {drawingRect && isDrawing && (
+            <Rectangle
+              bounds={drawingRect}
+              options={{
+                strokeColor: '#0252CD',
+                strokeOpacity: 1,
+                strokeWeight: 2,
+                strokeDashArray: [5, 5],
+                fillColor: '#0252CD',
+                fillOpacity: 0.1,
                 clickable: false,
               }}
             />
@@ -1622,7 +1834,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         )}
 
         {/* Desktop Controls */}
-        {!isMobile && (
+        {!isMobile && !hideControls && (
           <div className="absolute bottom-20 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
@@ -1840,7 +2052,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         )}
 
         {/* Mobile Controls */}
-        {isMobile && (
+        {isMobile && !hideControls && (
           <>
             {/* Mobile layer menu FAB */}
             <div className="absolute bottom-28 left-3 z-[1003]">

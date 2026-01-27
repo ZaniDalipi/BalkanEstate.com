@@ -12,7 +12,7 @@ import {
   deleteFolder,
 } from '../services/cloudinaryService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
-import { recordPriceChange } from '../jobs/propertyAlertsJob';
+import { recordPriceChange, processInstantAlertsForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
 
@@ -586,6 +586,12 @@ export const createProperty = async (
     // Update stats for active listings
     if (propertyData.status === 'active') {
       await incrementActiveListings(String(user._id));
+
+      // Trigger instant alerts for saved searches that match this property
+      // Run asynchronously to not block the response
+      processInstantAlertsForProperty(String(property._id)).catch(err => {
+        console.error('Error processing instant alerts:', err);
+      });
     }
 
     // Update agent activeListings count if user is an agent
@@ -664,6 +670,7 @@ export const updateProperty = async (
 
     // Track price change for alerts
     const previousPrice = property.price;
+    const previousStatus = property.status;
 
     // Log if someone tried to change immutable fields
     const attemptedImmutableChanges = immutableFields.filter(field => req.body[field] !== undefined);
@@ -732,6 +739,15 @@ export const updateProperty = async (
     if (updateData.price !== undefined && updateData.price !== previousPrice) {
       await recordPriceChange(String(property._id), property.price, previousPrice);
       console.log(`💰 Price changed: €${previousPrice} → €${property.price}`);
+    }
+
+    // Trigger instant alerts if property status changed to 'active'
+    // This handles the case when a property is published from 'pending' or 'draft'
+    if (previousStatus !== 'active' && property.status === 'active') {
+      console.log(`📢 Property ${property._id} status changed to active - triggering instant alerts`);
+      processInstantAlertsForProperty(String(property._id)).catch(err => {
+        console.error('Error processing instant alerts:', err);
+      });
     }
 
     // Populate seller info

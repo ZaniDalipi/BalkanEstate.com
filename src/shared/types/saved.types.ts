@@ -10,4 +10,7 @@ export interface SavedSearch {
   createdAt: number;
   lastAccessed: number;
   seenPropertyIds?: string[];
+  // Alert settings
+  alertsEnabled?: boolean;
+  alertFrequency?: 'instant' | 'daily' | 'weekly';
 }

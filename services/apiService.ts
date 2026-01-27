@@ -1078,6 +1078,9 @@ function transformBackendSavedSearch(backendSearch: any): SavedSearch {
     createdAt: new Date(backendSearch.createdAt).getTime(),
     lastAccessed: new Date(backendSearch.lastAccessed).getTime(),
     seenPropertyIds: backendSearch.seenPropertyIds || [],
+    // Alert settings - default to enabled with instant frequency
+    alertsEnabled: backendSearch.alertsEnabled ?? true,
+    alertFrequency: backendSearch.alertFrequency || 'instant',
   };
 }
 

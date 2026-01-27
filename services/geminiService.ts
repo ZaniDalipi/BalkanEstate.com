@@ -90,13 +90,40 @@ export interface PropertyAnalysisResult {
 }
 
 
-export const generateDescriptionFromImages = async (images: File[], language: string, propertyType: 'house' | 'apartment' | 'villa' | 'other'): Promise<PropertyAnalysisResult> => {
+export interface LocationContext {
+    country?: string;
+    city?: string;
+    address?: string;
+}
+
+export const generateDescriptionFromImages = async (
+    images: File[],
+    language: string,
+    propertyType: 'house' | 'apartment' | 'villa' | 'land' | 'other',
+    location?: LocationContext
+): Promise<PropertyAnalysisResult> => {
     if (!isAiAvailable() || !ai) {
         throw new Error('AI features are not available. Please configure the Gemini API key.');
     }
     const imageParts = await Promise.all(images.map(fileToGenerativePart));
 
-    const prompt = `You are a professional real estate analyst specializing in Balkan properties. Analyze the following images for a property that is a(n) "${propertyType}". Based on the images and knowing its type, provide a detailed, accurate analysis. The property is located in the Balkans. The description should be written in ${language} and be tailored specifically for a(n) "${propertyType}". Provide the following details in a JSON object:
+    // Build location context string if provided
+    const locationInfo = location && (location.country || location.city || location.address)
+        ? `
+    **LOCATION CONTEXT:**
+    ${location.country ? `- Country: ${location.country}` : ''}
+    ${location.city ? `- City: ${location.city}` : ''}
+    ${location.address ? `- Address/Neighborhood: ${location.address}` : ''}
+
+    Use this location information to make the description more specific and relevant. Mention local landmarks, nearby attractions, or neighborhood characteristics that would be typical for this area. The description should reflect the character of ${location.city || location.country || 'the area'}.
+    `
+        : 'The property is located somewhere in the Balkans.';
+
+    const prompt = `You are a professional real estate analyst specializing in Balkan properties. Analyze the following images for a property that is a(n) "${propertyType}". Based on the images and knowing its type, provide a detailed, accurate analysis.
+
+    ${locationInfo}
+
+    The description should be written in ${language} and be tailored specifically for a(n) "${propertyType}". Provide the following details in a JSON object:
 
     Always make sure to organize the text in a bullet list format where applicable for clarity.
 
