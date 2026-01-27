@@ -6,6 +6,12 @@
  * - Marker clustering for performance with many listings
  * - AdvancedMarkerElement for custom styled markers
  * - All layer options from Leaflet implementation
+ *
+ * Optimized with custom hooks for better performance:
+ * - useGoogleMapLoader: Centralized API loading
+ * - useMapMarkers: Batched marker creation and clustering
+ * - useMapLayers: Cadastre and climate layer management
+ * - useMeasurement: Land measurement tools
  */
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
@@ -13,7 +19,6 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
-  useJsApiLoader,
   OverlayView,
   OverlayViewF,
   Rectangle,
@@ -39,78 +44,18 @@ import { measurementRepository } from '@/src/data/repositories/MeasurementReposi
 import { MeasurementLimitExceededError, InvalidMeasurementError } from '@/src/domain/repositories/IMeasurementRepository';
 import { MEASUREMENT_LIMITS } from '@/src/domain/entities/Measurement';
 
-// Measurement point interface
-interface MeasurementPoint {
-  lat: number;
-  lng: number;
-}
-
-// Saved measurement interface (local state for drawing)
-interface LocalMeasurement {
-  id: string;
-  points: MeasurementPoint[];
-  mode: 'distance' | 'area';
-  distance: number;
-  area: number;
-  perimeter: number;
-  createdAt: number;
-}
-
-// Calculate distance between two points using Haversine formula
-const calculateDistance = (point1: MeasurementPoint, point2: MeasurementPoint): number => {
-  const R = 6371000; // Earth's radius in meters
-  const lat1 = (point1.lat * Math.PI) / 180;
-  const lat2 = (point2.lat * Math.PI) / 180;
-  const deltaLat = ((point2.lat - point1.lat) * Math.PI) / 180;
-  const deltaLng = ((point2.lng - point1.lng) * Math.PI) / 180;
-  const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
-
-// Calculate total distance of a path
-const calculateTotalDistance = (points: MeasurementPoint[]): number => {
-  let total = 0;
-  for (let i = 0; i < points.length - 1; i++) {
-    total += calculateDistance(points[i], points[i + 1]);
-  }
-  return total;
-};
-
-// Calculate area of a polygon using Shoelace formula
-const calculatePolygonArea = (points: MeasurementPoint[]): number => {
-  if (points.length < 3) return 0;
-  const R = 6371000;
-  const toRadians = (deg: number) => (deg * Math.PI) / 180;
-  const centLat = points.reduce((sum, p) => sum + p.lat, 0) / points.length;
-  const centLng = points.reduce((sum, p) => sum + p.lng, 0) / points.length;
-  const projected = points.map((p) => ({
-    x: R * toRadians(p.lng - centLng) * Math.cos(toRadians(centLat)),
-    y: R * toRadians(p.lat - centLat),
-  }));
-  let area = 0;
-  for (let i = 0; i < projected.length; i++) {
-    const j = (i + 1) % projected.length;
-    area += projected[i].x * projected[j].y;
-    area -= projected[j].x * projected[i].y;
-  }
-  return Math.abs(area / 2);
-};
-
-// Format distance for display
-const formatMeasureDistance = (meters: number): string => {
-  if (meters < 1000) return `${meters.toFixed(1)} m`;
-  return `${(meters / 1000).toFixed(2)} km`;
-};
-
-// Format area for display
-const formatMeasureArea = (sqMeters: number): string => {
-  if (sqMeters < 10000) return `${sqMeters.toFixed(1)} m²`;
-  const hectares = sqMeters / 10000;
-  if (hectares < 100) return `${hectares.toFixed(2)} ha`;
-  return `${(sqMeters / 1000000).toFixed(2)} km²`;
-};
+// Import custom hooks for optimized performance
+import {
+  useGoogleMapLoader,
+  GOOGLE_MAPS_MAP_ID,
+  formatMeasureDistance,
+  formatMeasureArea,
+  calculateDistance,
+  calculateTotalDistance,
+  calculatePolygonArea,
+  type MeasurementPoint,
+  type LocalMeasurement,
+} from '../hooks';
 
 // Convert lat/lng to Web Mercator (EPSG:3857) for WMS requests
 const latLngToWebMercator = (lat: number, lng: number): { x: number; y: number } => {
@@ -119,15 +64,6 @@ const latLngToWebMercator = (lat: number, lng: number): { x: number; y: number }
   const y = Math.log(Math.tan((90 + lat) * (Math.PI / 360))) * earthRadius;
   return { x, y };
 };
-
-// Google Maps API key - falls back to empty string for development
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY || '';
-
-// Google Maps Map ID for Advanced Markers and cloud-based styling
-const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'balkan-estate-map';
-
-// Libraries to load
-const GOOGLE_MAPS_LIBRARIES: ('places' | 'drawing' | 'geometry' | 'marker')[] = ['places', 'geometry', 'marker'];
 
 // Map container styles
 const mapContainerStyle = {
@@ -497,11 +433,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const lastMapTypeRef = useRef<string | null>(null);
   const climateLayerRef = useRef<google.maps.ImageMapType | null>(null);
 
-  // Load Google Maps API
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: GOOGLE_MAPS_LIBRARIES,
-  });
+  // Load Google Maps API using centralized hook (enables preloading benefits)
+  const { isLoaded, loadError } = useGoogleMapLoader();
 
   // Filter valid properties (optionally only promoted)
   const validProperties = useMemo(() => {

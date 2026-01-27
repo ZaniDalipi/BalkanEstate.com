@@ -5,6 +5,9 @@ export {
   useMeasurement,
   formatMeasureDistance,
   formatMeasureArea,
+  calculateDistance,
+  calculateTotalDistance,
+  calculatePolygonArea,
   type MeasurementPoint,
   type LocalMeasurement,
 } from './useMeasurement';

@@ -22,8 +22,8 @@ export interface LocalMeasurement {
   createdAt: number;
 }
 
-// Calculate distance using Haversine formula
-const calculateDistance = (point1: MeasurementPoint, point2: MeasurementPoint): number => {
+// Calculate distance using Haversine formula - exported for reuse
+export const calculateDistance = (point1: MeasurementPoint, point2: MeasurementPoint): number => {
   const R = 6371000;
   const lat1 = (point1.lat * Math.PI) / 180;
   const lat2 = (point2.lat * Math.PI) / 180;
@@ -35,7 +35,7 @@ const calculateDistance = (point1: MeasurementPoint, point2: MeasurementPoint): 
   return R * c;
 };
 
-const calculateTotalDistance = (points: MeasurementPoint[]): number => {
+export const calculateTotalDistance = (points: MeasurementPoint[]): number => {
   let total = 0;
   for (let i = 0; i < points.length - 1; i++) {
     total += calculateDistance(points[i], points[i + 1]);
@@ -43,7 +43,7 @@ const calculateTotalDistance = (points: MeasurementPoint[]): number => {
   return total;
 };
 
-const calculatePolygonArea = (points: MeasurementPoint[]): number => {
+export const calculatePolygonArea = (points: MeasurementPoint[]): number => {
   if (points.length < 3) return 0;
   const R = 6371000;
   const toRadians = (deg: number) => (deg * Math.PI) / 180;
