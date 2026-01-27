@@ -483,6 +483,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
   const markerDivsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const lastCadastreZoomRef = useRef<number | null>(null);
 
   // Load Google Maps API
   const { isLoaded, loadError } = useJsApiLoader({
@@ -1106,9 +1107,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }
     onRecenter();
   }, [map, userLocation, onRecenter]);
-
-  // Track zoom for cadastre refresh
-  const lastCadastreZoomRef = useRef<number | null>(null);
 
   // Cadastre layer overlay effect
   useEffect(() => {
