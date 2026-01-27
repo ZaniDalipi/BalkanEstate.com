@@ -241,10 +241,23 @@ const PropertyPopup: React.FC<{
 
   return (
     <div
-      className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100/50"
+      className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100/50 relative"
       style={{ width: 200, maxWidth: '85vw' }}
       onClick={(e) => e.stopPropagation()}
     >
+      {/* Close button - positioned outside image for better accessibility */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onClose();
+        }}
+        className="absolute -top-2 -right-2 w-8 h-8 bg-gray-800 hover:bg-gray-900 rounded-full flex items-center justify-center transition-colors shadow-lg z-50"
+        aria-label="Close popup"
+      >
+        <XCircleIcon className="w-5 h-5 text-white" />
+      </button>
+
       {/* Compact image container with rounded corners */}
       <div className="p-2 pb-0">
         <div className="relative h-24 rounded-xl overflow-hidden bg-gray-100">
@@ -260,15 +273,7 @@ const PropertyPopup: React.FC<{
             </div>
           )}
           {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors"
-          >
-            <XCircleIcon className="w-3.5 h-3.5 text-white" />
-          </button>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
           {/* Promotion badge */}
           {isActivelyPromoted && property.promotionTier && (
