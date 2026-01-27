@@ -853,7 +853,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     setMeasurementPoints([]);
   }, []);
 
-  // Update markers when properties change
+  // Update markers when properties change - optimized with batching
   useEffect(() => {
     if (!map || !clustererRef.current || !isLoaded) return;
 
@@ -862,70 +862,87 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     markerDivsRef.current.clear();
 
     const markers: google.maps.marker.AdvancedMarkerElement[] = [];
+    const BATCH_SIZE = 100; // Process markers in batches for better performance
+    let currentIndex = 0;
 
-    validProperties.forEach((property) => {
-      const markerDiv = document.createElement('div');
-      markerDiv.className = 'property-marker';
+    const createMarkerBatch = () => {
+      const endIndex = Math.min(currentIndex + BATCH_SIZE, validProperties.length);
 
-      const price = formatMarkerPrice(property.price);
-      const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
-      const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
-      let borderColor = 'white';
-      let borderWidth = 2;
-      if (isActivelyPromoted && property.promotionTier) {
-        borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
-        borderWidth = 3;
+      for (let i = currentIndex; i < endIndex; i++) {
+        const property = validProperties[i];
+        const markerDiv = document.createElement('div');
+        markerDiv.className = 'property-marker';
+
+        const price = formatMarkerPrice(property.price);
+        const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+        const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
+        let borderColor = 'white';
+        let borderWidth = 2;
+        if (isActivelyPromoted && property.promotionTier) {
+          borderColor = PROMOTION_TIER_COLORS[property.promotionTier] || PROMOTION_TIER_COLORS.standard;
+          borderWidth = 3;
+        }
+
+        markerDiv.style.cssText = `
+          padding: 2px 6px;
+          background: ${color};
+          border: ${borderWidth}px solid ${borderColor};
+          border-radius: 999px;
+          color: white;
+          font-weight: 700;
+          font-size: 10px;
+          font-family: Inter, system-ui, sans-serif;
+          cursor: pointer;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+          white-space: nowrap;
+          user-select: none;
+        `;
+        markerDiv.textContent = price;
+
+        // Use event delegation pattern - attach handlers only on interaction
+        markerDiv.onmouseenter = () => {
+          markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
+          markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
+          markerDiv.style.zIndex = '1000';
+        };
+        markerDiv.onmouseleave = () => {
+          markerDiv.style.transform = '';
+          markerDiv.style.boxShadow = '';
+          markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
+        };
+
+        markerDiv.onclick = (e) => {
+          e.stopPropagation();
+          setSelectedProperty(property);
+          map?.panTo({ lat: property.lat, lng: property.lng });
+        };
+
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: property.lat, lng: property.lng },
+          content: markerDiv,
+          zIndex: isActivelyPromoted ? 100 : 1,
+        });
+
+        markers.push(marker);
+        markersRef.current.set(property.id, marker);
+        markerDivsRef.current.set(property.id, markerDiv);
       }
 
-      markerDiv.style.cssText = `
-        padding: 2px 6px;
-        background: ${color};
-        border: ${borderWidth}px solid ${borderColor};
-        border-radius: 999px;
-        color: white;
-        font-weight: 700;
-        font-size: 10px;
-        font-family: Inter, system-ui, sans-serif;
-        cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-        transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-        white-space: nowrap;
-        user-select: none;
-        -webkit-user-select: none;
-      `;
-      markerDiv.textContent = price;
+      currentIndex = endIndex;
 
-      markerDiv.addEventListener('mouseenter', () => {
-        markerDiv.style.transform = 'scale(1.25) translateY(-2px)';
-        markerDiv.style.boxShadow = '0 4px 10px rgba(0,0,0,0.35)';
-        markerDiv.style.zIndex = '1000';
-      });
-      markerDiv.addEventListener('mouseleave', () => {
-        markerDiv.style.transform = 'scale(1)';
-        markerDiv.style.boxShadow = '0 1px 4px rgba(0,0,0,0.25)';
-        markerDiv.style.zIndex = isActivelyPromoted ? '100' : '1';
-      });
+      // If there are more markers to create, schedule next batch
+      if (currentIndex < validProperties.length) {
+        requestAnimationFrame(createMarkerBatch);
+      } else {
+        // All markers created, add to clusterer
+        clustererRef.current?.addMarkers(markers);
+      }
+    };
 
-      markerDiv.addEventListener('click', (e) => {
-        e.stopPropagation();
-        setSelectedProperty(property);
-        if (map) {
-          map.panTo({ lat: property.lat, lng: property.lng });
-        }
-      });
-
-      const marker = new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: property.lat, lng: property.lng },
-        content: markerDiv,
-        zIndex: isActivelyPromoted ? 100 : 1,
-      });
-
-      markers.push(marker);
-      markersRef.current.set(property.id, marker);
-      markerDivsRef.current.set(property.id, markerDiv);
-    });
-
-    clustererRef.current.addMarkers(markers);
+    // Start creating markers
+    if (validProperties.length > 0) {
+      createMarkerBatch();
+    }
   }, [validProperties, map, isLoaded]);
 
   // Handle hover state changes from property list
