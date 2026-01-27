@@ -1839,133 +1839,254 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
           </div>
         )}
 
-        {/* Mobile Controls */}
+        {/* Mobile/Tablet Controls - Responsive for portrait and landscape */}
         {isMobile && (
           <>
-            {/* Mobile layer menu FAB */}
-            <div className="absolute bottom-28 left-3 z-[1003]">
+            {/* Mobile main controls - bottom of screen */}
+            <div className="absolute bottom-4 left-2 right-2 z-[1003]">
+              {/* Layer menu popup */}
               {isLayerMenuOpen && (
-                <div className="absolute bottom-full left-0 mb-3 animate-fade-in">
+                <div className="absolute bottom-full left-0 right-0 mb-3 animate-fade-in">
                   <div
-                    className="flex flex-col gap-1 p-2 rounded-2xl shadow-2xl border border-white/40"
-                    style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)' }}
+                    className="mx-auto max-w-md p-3 rounded-2xl shadow-2xl border border-white/30"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.85)',
+                      backdropFilter: 'blur(20px) saturate(180%)',
+                      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    }}
                   >
-                    <button
-                      onClick={() => { setShow3DBuildings(!show3DBuildings); setIsLayerMenuOpen(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                        show3DBuildings ? 'bg-slate-100 text-slate-700' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <span>🏢</span>
-                      <span>3D Buildings</span>
-                    </button>
-                    <button
-                      onClick={() => { setShowMeasurement(!showMeasurement); setIsLayerMenuOpen(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                        showMeasurement ? 'bg-emerald-100 text-emerald-700' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <span>📏</span>
-                      <span>Measure</span>
-                    </button>
-                    <button
-                      onClick={() => { setIsLegendOpen(!isLegendOpen); setIsLayerMenuOpen(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                        isLegendOpen ? 'bg-amber-100 text-amber-700' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <MapLegendIcon className="w-4 h-4" />
-                      <span>Legend</span>
-                    </button>
-                    <button
-                      onClick={() => { setShowLandmarks(!showLandmarks); setIsLayerMenuOpen(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                        showLandmarks ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <span>🏛️</span>
-                      <span>POI</span>
-                    </button>
-                    <button
-                      onClick={() => { setShowCadastre(!showCadastre); setIsLayerMenuOpen(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                        showCadastre ? 'bg-orange-100 text-orange-700' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <span>📐</span>
-                      <span>Cadastre</span>
-                    </button>
+                    {/* Map Style Options */}
+                    <div className="mb-3">
+                      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">Map Style</p>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {(['clean', 'color', 'street', 'satellite'] as MapStyleType[]).map((style) => (
+                          <button
+                            key={style}
+                            onClick={() => setMapStyle(style)}
+                            className={`flex flex-col items-center gap-1 p-2 rounded-xl text-[10px] font-medium transition-all ${
+                              mapStyle === style
+                                ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
+                                : 'bg-white/60 text-gray-600 hover:bg-white'
+                            }`}
+                          >
+                            <span className="text-base">
+                              {style === 'clean' ? '✨' : style === 'color' ? '🎨' : style === 'street' ? '🗺️' : '🛰️'}
+                            </span>
+                            <span className="capitalize">{style}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Layer Options */}
+                    <div className="mb-3">
+                      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">Layers</p>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          onClick={() => setShow3DBuildings(!show3DBuildings)}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                            show3DBuildings
+                              ? 'bg-slate-600 text-white'
+                              : 'bg-white/60 text-gray-700 hover:bg-white'
+                          }`}
+                        >
+                          <span>🏢</span>
+                          <span>3D Buildings</span>
+                        </button>
+                        <button
+                          onClick={() => setShowLandmarks(!showLandmarks)}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                            showLandmarks
+                              ? 'bg-primary text-white'
+                              : 'bg-white/60 text-gray-700 hover:bg-white'
+                          }`}
+                        >
+                          <span>🏛️</span>
+                          <span>Points of Interest</span>
+                        </button>
+                        <button
+                          onClick={() => setShowCadastre(!showCadastre)}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                            showCadastre
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-white/60 text-gray-700 hover:bg-white'
+                          }`}
+                        >
+                          <span>📐</span>
+                          <span>Cadastre</span>
+                        </button>
+                        <button
+                          onClick={() => setIsLegendOpen(!isLegendOpen)}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                            isLegendOpen
+                              ? 'bg-amber-500 text-white'
+                              : 'bg-white/60 text-gray-700 hover:bg-white'
+                          }`}
+                        >
+                          <MapLegendIcon className="w-4 h-4" />
+                          <span>Legend</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Climate Risks */}
+                    <div className="mb-3">
+                      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">Climate Risks</p>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {(['none', 'flood', 'fire', 'wind', 'air', 'heat'] as ClimateRiskType[]).map((risk) => (
+                          <button
+                            key={risk}
+                            onClick={() => setSelectedClimateRisk(risk)}
+                            className={`flex flex-col items-center gap-1 p-2 rounded-xl text-[10px] font-medium transition-all ${
+                              selectedClimateRisk === risk
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white/60 text-gray-600 hover:bg-white'
+                            }`}
+                          >
+                            <span className="text-sm">
+                              {risk === 'none' ? '✕' : risk === 'flood' ? '💧' : risk === 'fire' ? '🔥' : risk === 'wind' ? '💨' : risk === 'air' ? '🌬️' : '☀️'}
+                            </span>
+                            <span className="capitalize">{risk === 'none' ? 'Off' : risk}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Tools */}
+                    <div>
+                      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">Tools</p>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          onClick={() => { setShowMeasurement(!showMeasurement); setIsLayerMenuOpen(false); }}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                            showMeasurement
+                              ? 'bg-emerald-500 text-white'
+                              : 'bg-white/60 text-gray-700 hover:bg-white'
+                          }`}
+                        >
+                          <span>📏</span>
+                          <span>Measure Land</span>
+                        </button>
+                        <button
+                          onClick={() => setShowOnlyPromoted(!showOnlyPromoted)}
+                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                            showOnlyPromoted
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                              : 'bg-white/60 text-gray-700 hover:bg-white'
+                          }`}
+                        >
+                          <span>👑</span>
+                          <span>Premium Only</span>
+                          {promotedCount > 0 && !showOnlyPromoted && (
+                            <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center text-[9px] font-bold bg-amber-500 text-white rounded-full px-1">
+                              {promotedCount}
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
-              <button
-                onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
-                className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all ${
-                  isLayerMenuOpen ? 'bg-primary text-white' : 'bg-white text-gray-700'
-                }`}
-              >
-                <span className="text-lg">📊</span>
-              </button>
-            </div>
 
-            {/* Mobile controls - top right */}
-            <div className="absolute top-16 right-2 z-[999]">
-              <div className="flex flex-col gap-1.5 items-end">
-                <div
-                  className="flex items-center gap-1 p-1.5 rounded-2xl shadow-xl border border-white/30"
-                  style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(20px)' }}
+              {/* Bottom control bar */}
+              <div
+                className="flex items-center justify-between gap-2 p-2 rounded-2xl shadow-xl border border-white/30"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.85)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                }}
+              >
+                {/* Options button */}
+                <button
+                  onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    isLayerMenuOpen
+                      ? 'bg-primary text-white'
+                      : 'bg-white/70 text-gray-700 hover:bg-white'
+                  }`}
                 >
-                  <button
-                    onClick={() => setMapStyle(mapStyle === 'street' ? 'satellite' : 'street')}
-                    className="px-2.5 py-2 text-xs font-semibold rounded-xl text-gray-700 hover:bg-white/50"
-                  >
-                    {mapStyle === 'satellite' || mapStyle === 'hybrid' ? '🗺️' : '🛰️'}
-                  </button>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Options</span>
+                </button>
+
+                {/* Center controls */}
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={handleRecenter}
-                    className="p-2 rounded-xl hover:bg-white/50 text-neutral-600"
+                    className="p-2.5 rounded-xl bg-white/70 hover:bg-white text-gray-700 transition-all"
+                    title="Center on location"
                   >
                     <CrosshairsIcon className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={onDrawStart}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all ${
-                      isDrawing ? 'bg-red-500 text-white' : 'bg-neutral-800 text-white'
-                    }`}
+                    onClick={() => setMapStyle(mapStyle === 'satellite' ? 'street' : 'satellite')}
+                    className="p-2.5 rounded-xl bg-white/70 hover:bg-white text-gray-700 transition-all"
+                    title="Toggle map style"
                   >
-                    {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+                    <span className="text-lg">{mapStyle === 'satellite' || mapStyle === 'hybrid' ? '🗺️' : '🛰️'}</span>
                   </button>
                 </div>
 
-                {drawnBounds && !isDrawing && (
-                  <div
-                    className="flex items-center gap-2 p-2 rounded-2xl shadow-2xl border border-white/40"
-                    style={{ background: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(20px)' }}
-                  >
-                    {isAuthenticated && (
-                      <button
-                        onClick={onSaveSearch}
-                        disabled={isSaving}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl disabled:opacity-50"
-                      >
-                        <SearchPlusIcon className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => onDrawComplete(null)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl"
-                    >
-                      <XCircleIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+                {/* Draw button */}
+                <button
+                  onClick={onDrawStart}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    isDrawing
+                      ? 'bg-red-500 text-white'
+                      : 'bg-neutral-800 text-white'
+                  }`}
+                >
+                  {isDrawing ? <XCircleIcon className="w-4 h-4" /> : <PencilIcon className="w-4 h-4" />}
+                  <span>{isDrawing ? 'Cancel' : 'Draw'}</span>
+                </button>
               </div>
+
+              {/* Drawn bounds actions */}
+              {drawnBounds && !isDrawing && (
+                <div
+                  className="flex items-center justify-center gap-2 mt-2 p-2 rounded-2xl shadow-xl border border-white/30 animate-fade-in"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                  }}
+                >
+                  {isAuthenticated && (
+                    <button
+                      onClick={onSaveSearch}
+                      disabled={isSaving}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-blue-600 text-white text-xs font-semibold rounded-xl shadow-md disabled:opacity-50"
+                    >
+                      <SearchPlusIcon className="w-4 h-4" />
+                      <span>{isSaving ? 'Saving...' : 'Save Area'}</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onDrawComplete(null)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white text-xs font-semibold rounded-xl shadow-md"
+                  >
+                    <XCircleIcon className="w-4 h-4" />
+                    <span>Clear</span>
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Mobile Legend */}
+            {/* Mobile Legend - positioned above controls */}
             {isLegendOpen && (
-              <div className="absolute bottom-44 left-3 z-[1002] animate-fade-in">
+              <div className="absolute bottom-32 left-2 z-[1002] animate-fade-in">
                 <Legend />
+              </div>
+            )}
+
+            {/* Climate Risk Legend for mobile */}
+            {selectedClimateRisk !== 'none' && (
+              <div className="absolute top-16 left-2 z-[1000] animate-fade-in">
+                <ClimateRiskLegend riskType={selectedClimateRisk} />
               </div>
             )}
           </>
