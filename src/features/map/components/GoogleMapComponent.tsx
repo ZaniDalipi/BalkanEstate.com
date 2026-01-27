@@ -1604,14 +1604,19 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   // Convert Leaflet bounds to Google bounds for drawn rectangle
   const getGoogleBounds = (leafletBounds: L.LatLngBounds | null) => {
     if (!leafletBounds) return null;
-    const sw = leafletBounds.getSouthWest();
-    const ne = leafletBounds.getNorthEast();
-    return {
-      north: ne.lat,
-      south: sw.lat,
-      east: ne.lng,
-      west: sw.lng,
-    };
+    try {
+      const sw = leafletBounds.getSouthWest();
+      const ne = leafletBounds.getNorthEast();
+      return {
+        north: ne.lat,
+        south: sw.lat,
+        east: ne.lng,
+        west: sw.lng,
+      };
+    } catch (e) {
+      console.error('[GoogleMapComponent] Error converting bounds:', e, leafletBounds);
+      return null;
+    }
   };
 
   const googleDrawnBounds = getGoogleBounds(drawnBounds);

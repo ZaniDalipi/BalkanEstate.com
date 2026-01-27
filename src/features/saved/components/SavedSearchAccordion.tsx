@@ -140,6 +140,17 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
     }
   }, [search.drawnBoundsJSON]);
 
+  // Create memoized Leaflet bounds object for the map
+  const leafletDrawnBounds = useMemo(() => {
+    if (!parsedBounds) return null;
+    try {
+      return L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast);
+    } catch (e) {
+      console.error('[SavedSearchAccordion] Failed to create Leaflet bounds:', e);
+      return null;
+    }
+  }, [parsedBounds]);
+
   const matchingProperties = useMemo(() => {
       console.log('[SavedSearchAccordion] Computing matchingProperties:', {
           searchId: search.id,
@@ -447,7 +458,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
       {isOpen && (
         <div className="p-4 bg-neutral-50/70 border-t border-neutral-200 animate-fade-in">
           {/* Map display for saved search area */}
-          {parsedBounds && (
+          {leafletDrawnBounds && (
             <div className="mb-4 rounded-lg overflow-hidden border border-neutral-300 shadow-sm" style={{ height: '400px' }}>
               <MapComponent
                 properties={matchingProperties}
@@ -457,7 +468,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                 isSaving={false}
                 isAuthenticated={false}
                 mapBounds={null}
-                drawnBounds={L.latLngBounds(parsedBounds._southWest, parsedBounds._northEast)}
+                drawnBounds={leafletDrawnBounds}
                 onDrawComplete={() => {}}
                 isDrawing={false}
                 onDrawStart={() => {}}
