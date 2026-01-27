@@ -420,12 +420,18 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   const drawingStartRef = useRef<{ lat: number; lng: number } | null>(null);
   const isDrawingDragRef = useRef(false);
   const [drawingRect, setDrawingRect] = useState<{ north: number; south: number; east: number; west: number } | null>(null);
+  const drawingRectRef = useRef<{ north: number; south: number; east: number; west: number } | null>(null);
   const drawingPropsRef = useRef({ isDrawing, onDrawComplete });
 
   // Keep drawing props ref updated
   useEffect(() => {
     drawingPropsRef.current = { isDrawing, onDrawComplete };
   }, [isDrawing, onDrawComplete]);
+
+  // Keep drawingRect ref in sync with state (for use in event handlers)
+  useEffect(() => {
+    drawingRectRef.current = drawingRect;
+  }, [drawingRect]);
 
   // Load Google Maps API using centralized hook (enables preloading benefits)
   const { isLoaded, loadError } = useGoogleMapLoader();
@@ -574,23 +580,27 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       if (!latLng) return;
 
       const start = drawingStartRef.current;
-      setDrawingRect({
+      const newRect = {
         north: Math.max(start.lat, latLng.lat),
         south: Math.min(start.lat, latLng.lat),
         east: Math.max(start.lng, latLng.lng),
         west: Math.min(start.lng, latLng.lng),
-      });
+      };
+      // Update both ref (for immediate use in handlers) and state (for rendering)
+      drawingRectRef.current = newRect;
+      setDrawingRect(newRect);
     };
 
     const handleMouseUp = () => {
       if (!isDrawingDragRef.current) return;
 
       isDrawingDragRef.current = false;
-      const rect = drawingRect;
-      const start = drawingStartRef.current;
+      // Read from ref to get the latest value (not from closure which may be stale)
+      const rect = drawingRectRef.current;
 
       // Clear temp drawing state
       drawingStartRef.current = null;
+      drawingRectRef.current = null;
       setDrawingRect(null);
 
       // Convert to Leaflet LatLngBounds format for compatibility
@@ -621,7 +631,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('touchend', handleMouseUp);
     };
-  }, [map, drawingRect]);
+  }, [map]); // Only depend on map - use refs for other values
 
   // Get map type ID based on style
   const getMapTypeId = useCallback((): google.maps.MapTypeId => {
