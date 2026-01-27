@@ -262,7 +262,10 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
         {/* Urgent Badge */}
         {property.hasUrgentBadge && (
-          <div className="absolute top-3 right-14 bg-gradient-to-r from-red-600 to-rose-600 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-lg animate-pulse flex items-center gap-1 z-10">
+          <div
+            className="absolute top-3 right-14 bg-gradient-to-r from-red-600 to-rose-600 text-white text-xs font-bold px-2 py-1 rounded-lg animate-pulse flex items-center gap-1 z-10"
+            style={{ boxShadow: '0 0 12px 2px rgba(239, 68, 68, 0.6), 0 0 20px 4px rgba(239, 68, 68, 0.3)' }}
+          >
             🔥 {t('property:status.urgent').toUpperCase()}
           </div>
         )}

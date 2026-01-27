@@ -184,7 +184,10 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
 
               {/* Urgent badge */}
               {currentMapFeatured.hasUrgentBadge && (
-                <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 text-white text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded animate-pulse flex items-center gap-0.5">
+                <div
+                  className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 text-white text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded animate-pulse flex items-center gap-0.5"
+                  style={{ boxShadow: '0 0 10px 2px rgba(239, 68, 68, 0.6), 0 0 16px 4px rgba(239, 68, 68, 0.3)' }}
+                >
                   <span>🔥</span> <span className="hidden xs:inline">URGENT</span>
                 </div>
               )}
