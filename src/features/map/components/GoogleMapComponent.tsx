@@ -1396,7 +1396,31 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     };
   }, [map, isLoaded, selectedClimateRisk]);
 
-  // Loading state
+  // Memoize map options - MUST be before any early returns to maintain hooks order
+  const mapOptions = useMemo<google.maps.MapOptions>(() => ({
+    restriction: {
+      latLngBounds: BALKAN_BOUNDS,
+      strictBounds: false,
+    },
+    mapTypeId: google.maps.MapTypeId.ROADMAP, // Set stable initial type
+    disableDefaultUI: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    zoomControl: false,
+    rotateControl: false,
+    scaleControl: false,
+    panControl: false,
+    keyboardShortcuts: false,
+    gestureHandling: 'greedy',
+    minZoom: 6,
+    maxZoom: 21,
+    tilt: 0,
+    heading: 0,
+    mapId: GOOGLE_MAPS_MAP_ID,
+  }), []);
+
+  // Loading state - early returns MUST come after all hooks
   if (loadError) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
@@ -1433,30 +1457,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   };
 
   const googleDrawnBounds = getGoogleBounds(drawnBounds);
-
-  // Memoize map options to prevent unnecessary re-renders and repeated warnings
-  const mapOptions = useMemo<google.maps.MapOptions>(() => ({
-    restriction: {
-      latLngBounds: BALKAN_BOUNDS,
-      strictBounds: false,
-    },
-    mapTypeId: google.maps.MapTypeId.ROADMAP, // Set stable initial type
-    disableDefaultUI: true,
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-    zoomControl: false,
-    rotateControl: false,
-    scaleControl: false,
-    panControl: false,
-    keyboardShortcuts: false,
-    gestureHandling: 'greedy',
-    minZoom: 6,
-    maxZoom: 21,
-    tilt: 0,
-    heading: 0,
-    mapId: GOOGLE_MAPS_MAP_ID,
-  }), []);
 
   return (
     <HighlightedPropertiesProvider properties={validProperties}>
