@@ -58,6 +58,17 @@ import {
   deleteContent,
   uploadVideo,
 } from '../controllers/siteContentController';
+import {
+  getAllEmailConfigs,
+  getEmailConfigByKey,
+  updateEmailConfig,
+  toggleEmailStatus,
+  resetEmailConfig,
+  resetAllEmailConfigs,
+  sendTestEmail,
+  previewEmail,
+  getEmailCategories,
+} from '../controllers/emailConfigController';
 import multer from 'multer';
 
 const router = express.Router();
@@ -191,5 +202,16 @@ router.post('/site-content', logAdminAction('CREATE_SITE_CONTENT'), createConten
 router.patch('/site-content/:id', logAdminAction('UPDATE_SITE_CONTENT'), updateContent);
 router.delete('/site-content/:id', logAdminAction('DELETE_SITE_CONTENT'), deleteContent);
 router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoUpload.single('video'), uploadVideo);
+
+// ===== Email Configuration Management =====
+router.get('/email-configs', logAdminAction('VIEW_EMAIL_CONFIGS'), getAllEmailConfigs);
+router.get('/email-configs/categories', logAdminAction('VIEW_EMAIL_CATEGORIES'), getEmailCategories);
+router.get('/email-configs/:key', logAdminAction('VIEW_EMAIL_CONFIG'), getEmailConfigByKey);
+router.patch('/email-configs/:key', logAdminAction('UPDATE_EMAIL_CONFIG'), updateEmailConfig);
+router.post('/email-configs/:key/toggle', logAdminAction('TOGGLE_EMAIL_STATUS'), toggleEmailStatus);
+router.post('/email-configs/:key/reset', logAdminAction('RESET_EMAIL_CONFIG'), resetEmailConfig);
+router.post('/email-configs/reset-all', logAdminAction('RESET_ALL_EMAIL_CONFIGS'), resetAllEmailConfigs);
+router.post('/email-configs/:key/test', logAdminAction('SEND_TEST_EMAIL'), sendTestEmail);
+router.post('/email-configs/:key/preview', logAdminAction('PREVIEW_EMAIL'), previewEmail);
 
 export default router;

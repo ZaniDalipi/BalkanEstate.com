@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import CityMarketData from '../models/CityMarketData';
+import EmailConfig from '../models/EmailConfig';
 import { updateAllCityMarketData } from '../services/cityMarketDataService';
+import { seedEmailConfigs } from '../seeds/emailConfigSeed';
 
 export const initializeDatabase = async (): Promise<void> => {
   try {
@@ -37,6 +39,20 @@ export const initializeDatabase = async (): Promise<void> => {
       }
     } else {
       console.log('✅ User indexes are up to date');
+    }
+
+    // Initialize email configurations if empty
+    try {
+      const emailConfigCount = await EmailConfig.countDocuments();
+      if (emailConfigCount === 0) {
+        console.log('🌱 No email configurations found. Seeding defaults...');
+        await seedEmailConfigs();
+        console.log('✅ Email configurations seeded successfully!');
+      } else {
+        console.log(`✅ Email configurations loaded (${emailConfigCount} templates)`);
+      }
+    } catch (error) {
+      console.error('❌ Error initializing email configurations:', error);
     }
 
     // Initialize city market data if empty

@@ -17,6 +17,7 @@ import AgentRequestManager from './AgentRequestManager';
 import SystemSettings from './SystemSettings';
 import ActivityLog from './ActivityLog';
 import HowItWorksManager from './HowItWorksManager';
+import EmailManager from './EmailManager';
 import type { AdminSection } from '@/types';
 
 // Map URL sections to AdminView types
@@ -34,6 +35,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'activity': 'activity',
   'settings': 'settings',
   'how-it-works': 'howItWorks',
+  'email-templates': 'emailTemplates',
 };
 
 // Map AdminView to URL sections
@@ -51,6 +53,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'activity': 'activity',
   'settings': 'settings',
   'howItWorks': 'how-it-works',
+  'emailTemplates': 'email-templates',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -197,6 +200,8 @@ const AdminDashboard: React.FC = () => {
         return <SystemSettings />;
       case 'howItWorks':
         return <HowItWorksManager />;
+      case 'emailTemplates':
+        return <EmailManager />;
       default:
         return <AnalyticsDashboard />;
     }

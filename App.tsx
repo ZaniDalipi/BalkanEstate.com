@@ -260,7 +260,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       const adminMatch = path.match(/^\/admin(?:\/(.+))?$/);
       if (adminMatch) {
         const section = adminMatch[1] || 'dashboard'; // Default to dashboard
-        const validSections: AdminSection[] = ['dashboard', 'users', 'inquiries', 'agent-requests', 'discounts', 'promotions', 'properties', 'agencies', 'pricing', 'activity', 'settings'];
+        const validSections: AdminSection[] = ['dashboard', 'users', 'inquiries', 'agent-requests', 'discounts', 'promotions', 'properties', 'agencies', 'pricing', 'activity', 'settings', 'how-it-works', 'email-templates'];
         const validSection: AdminSection = validSections.includes(section as AdminSection) ? section as AdminSection : 'dashboard';
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });

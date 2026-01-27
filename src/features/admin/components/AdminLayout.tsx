@@ -30,7 +30,8 @@ export type AdminView =
   | 'agentRequests'
   | 'settings'
   | 'activity'
-  | 'howItWorks';
+  | 'howItWorks'
+  | 'emailTemplates';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
