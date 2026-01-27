@@ -86,30 +86,53 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
 }
 
 /**
- * Check if property is within drawn bounds (GeoJSON polygon)
+ * Check if property is within drawn bounds
+ * Supports two formats:
+ * 1. Leaflet bounds: { _southWest: { lat, lng }, _northEast: { lat, lng } }
+ * 2. GeoJSON polygon: { coordinates: [[[lng, lat], ...]] }
  */
 function propertyInBounds(property: IProperty, drawnBoundsJSON: string | null): boolean {
   if (!drawnBoundsJSON) return true; // No bounds = match all
 
   try {
     const bounds = JSON.parse(drawnBoundsJSON);
-    if (!bounds || !bounds.coordinates || !Array.isArray(bounds.coordinates[0])) return true;
+    if (!bounds) return true;
 
-    const point = [property.lng, property.lat];
-    const polygon = bounds.coordinates[0];
+    // Handle Leaflet bounds format (rectangle)
+    if (bounds._southWest && bounds._northEast) {
+      const sw = bounds._southWest;
+      const ne = bounds._northEast;
 
-    // Ray casting algorithm for point-in-polygon
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i][0], yi = polygon[i][1];
-      const xj = polygon[j][0], yj = polygon[j][1];
+      // Check if property is within the rectangle
+      const lat = property.lat;
+      const lng = property.lng;
 
-      if (((yi > point[1]) !== (yj > point[1])) &&
-          (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi)) {
-        inside = !inside;
-      }
+      const inLatRange = lat >= sw.lat && lat <= ne.lat;
+      const inLngRange = lng >= sw.lng && lng <= ne.lng;
+
+      return inLatRange && inLngRange;
     }
-    return inside;
+
+    // Handle GeoJSON polygon format
+    if (bounds.coordinates && Array.isArray(bounds.coordinates[0])) {
+      const point = [property.lng, property.lat];
+      const polygon = bounds.coordinates[0];
+
+      // Ray casting algorithm for point-in-polygon
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i][0], yi = polygon[i][1];
+        const xj = polygon[j][0], yj = polygon[j][1];
+
+        if (((yi > point[1]) !== (yj > point[1])) &&
+            (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi)) {
+          inside = !inside;
+        }
+      }
+      return inside;
+    }
+
+    return true; // Unknown format, include the property
   } catch {
     return true; // If bounds parsing fails, include the property
   }
@@ -435,6 +458,134 @@ export async function recordPriceChange(
     console.log(`📊 Price history recorded: ${propertyId} - ${changeType} ${percentageChange ? `(${percentageChange}%)` : ''}`);
   } catch (error) {
     console.error('Error recording price history:', error);
+  }
+}
+
+/**
+ * Process instant alerts for a single newly created/activated property
+ * Called immediately when a property is created or activated
+ * This provides truly instant notifications instead of waiting for the 15-minute cron
+ */
+export async function processInstantAlertsForProperty(propertyId: string): Promise<void> {
+  console.log(`🔔 Processing instant alerts for property ${propertyId}...`);
+
+  try {
+    // Get the property
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      console.log(`   Property ${propertyId} not found`);
+      return;
+    }
+
+    // Only process active properties
+    if (property.status !== 'active') {
+      console.log(`   Property ${propertyId} is not active (status: ${property.status})`);
+      return;
+    }
+
+    // Get all saved searches with instant alerts enabled
+    const savedSearches = await SavedSearch.find({
+      alertsEnabled: true,
+      alertFrequency: 'instant',
+    }).populate('userId', 'email name subscription');
+
+    if (savedSearches.length === 0) {
+      console.log('   No saved searches with instant alerts enabled');
+      return;
+    }
+
+    // Filter to only users with active subscriptions
+    const eligibleSearches = savedSearches.filter(search => {
+      const user = search.userId as any;
+      if (!user || !user.subscription) return false;
+
+      const { tier, status } = user.subscription;
+      const isEligibleTier = ALERT_ELIGIBLE_TIERS.includes(tier);
+      const isActiveStatus = ALERT_ELIGIBLE_STATUSES.includes(status);
+
+      return isEligibleTier && isActiveStatus;
+    });
+
+    console.log(`   Checking ${eligibleSearches.length} eligible saved searches for property match`);
+
+    let alertsSent = 0;
+
+    // Process each saved search
+    for (const search of eligibleSearches) {
+      const user = search.userId as any;
+      if (!user || !user.email) continue;
+
+      // Skip if already seen
+      if (search.seenPropertyIds.includes(String(property._id))) {
+        continue;
+      }
+
+      // Check if property matches filters and bounds
+      if (!propertyMatchesFilters(property, search.filters)) {
+        continue;
+      }
+
+      if (!propertyInBounds(property, search.drawnBoundsJSON)) {
+        continue;
+      }
+
+      // Property matches this saved search!
+      console.log(`   ✓ Property matches saved search "${search.name}" for user ${user.email}`);
+
+      // Create alert record
+      await PropertyAlert.create({
+        userId: user._id,
+        propertyId: property._id,
+        alertType: 'new_listing',
+        savedSearchId: search._id,
+        emailSent: false,
+      });
+
+      // Update seen property IDs
+      await SavedSearch.updateOne(
+        { _id: search._id },
+        {
+          $addToSet: { seenPropertyIds: String(property._id) },
+          $set: { lastAlertSentAt: new Date() },
+        }
+      );
+
+      // Send email notification immediately
+      try {
+        await sendPropertyAlert({
+          recipientEmail: user.email,
+          recipientName: user.name || 'User',
+          searchName: search.name,
+          property: {
+            id: String(property._id),
+            title: property.title || `${property.address}, ${property.city}`,
+            address: property.address,
+            city: property.city,
+            price: property.price,
+            beds: property.beds,
+            baths: property.baths,
+            sqft: property.sqft,
+            imageUrl: property.imageUrl,
+          },
+        });
+
+        // Mark alert as sent
+        await PropertyAlert.updateOne(
+          { userId: user._id, propertyId: property._id, alertType: 'new_listing' },
+          { emailSent: true, emailSentAt: new Date() }
+        );
+
+        alertsSent++;
+        console.log(`   📧 Instant alert email sent to ${user.email}`);
+      } catch (emailError) {
+        console.error(`   Failed to send instant alert email to ${user.email}:`, emailError);
+      }
+    }
+
+    console.log(`✅ Instant alerts processed for property ${propertyId}: ${alertsSent} alerts sent`);
+  } catch (error) {
+    console.error(`❌ Error processing instant alerts for property ${propertyId}:`, error);
+    // Don't throw - we don't want to break the property creation flow
   }
 }
 
