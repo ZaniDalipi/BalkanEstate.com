@@ -1219,6 +1219,28 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     }, 400);
   }, [flyToTarget, map, onFlyComplete]);
 
+  // Fit map to drawnBounds when they exist (for saved searches)
+  useEffect(() => {
+    if (!map || !drawnBounds) return;
+
+    // Only fit bounds if there's no flyToTarget (which handles positioning)
+    // and if drawnBounds changed
+    try {
+      const sw = drawnBounds.getSouthWest();
+      const ne = drawnBounds.getNorthEast();
+
+      const bounds = new google.maps.LatLngBounds(
+        { lat: sw.lat, lng: sw.lng },
+        { lat: ne.lat, lng: ne.lng }
+      );
+
+      // Fit the map to show the drawn bounds with some padding
+      map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+    } catch (e) {
+      console.error('[GoogleMapComponent] Error fitting to drawnBounds:', e);
+    }
+  }, [map, drawnBounds]);
+
   // Handle view details click
   const handleViewDetails = useCallback((propertyId: string) => {
     dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });

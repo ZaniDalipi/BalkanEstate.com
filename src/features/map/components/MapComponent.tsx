@@ -277,6 +277,29 @@ const ZoomAdjuster: React.FC<{ mapType: TileLayerType; currentZoom: number }> = 
 };
 
 /**
+ * FitBoundsHandler Component - fits the map to drawnBounds when they exist
+ * Used in saved searches to show the saved search area
+ */
+const FitBoundsHandler: React.FC<{ drawnBounds: L.LatLngBounds | null }> = ({ drawnBounds }) => {
+  const map = useMap();
+  const hasFittedRef = useRef(false);
+
+  useEffect(() => {
+    if (!drawnBounds || hasFittedRef.current) return;
+
+    try {
+      // Fit the map to the drawn bounds with padding
+      map.fitBounds(drawnBounds, { padding: [50, 50], animate: true, duration: 0.5 });
+      hasFittedRef.current = true;
+    } catch (e) {
+      console.error('[MapComponent] Error fitting to drawnBounds:', e);
+    }
+  }, [map, drawnBounds]);
+
+  return null;
+};
+
+/**
  * MapComponent
  *
  * Main map component for property search with:
@@ -552,6 +575,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           <ZoomTracker onZoomChange={setCurrentZoom} />
           {/* <ZoomAdjuster mapType={mapType} currentZoom={currentZoom} /> */}
           <ZoomSnapAdjuster currentZoom={currentZoom} />
+          <FitBoundsHandler drawnBounds={drawnBounds} />
           <MapDrawEvents isDrawing={isDrawing} onDrawComplete={onDrawComplete} />
           <ZoomBasedTileSwitch mapType={mapType} setMapType={setMapType} />
           {/* ZoomBased3DBuildings removed - user has manual control via toggle button */}
