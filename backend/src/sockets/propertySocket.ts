@@ -3,19 +3,23 @@ import mongoose from 'mongoose';
 
 // Store the io instance for emitting from controllers
 let ioInstance: Server | null = null;
+let changeStreamActive = false;
 
 /**
  * Property Socket Module
  *
  * Provides real-time property updates using:
- * 1. MongoDB Change Streams - for database-level changes
- * 2. Manual emit functions - for controller-triggered events
+ * 1. MongoDB Change Streams - for database-level changes (requires replica set)
+ * 2. Manual emit functions - for controller-triggered events (always works)
  *
  * Events:
  * - property:created - New property listing added
  * - property:updated - Property details changed
  * - property:deleted - Property removed
  * - property:statusChanged - Property status changed (sold, available, etc.)
+ *
+ * NOTE: Change Streams require MongoDB replica set. If not available,
+ * real-time updates still work via manual emit functions from controllers.
  */
 
 export const setupPropertySocket = (io: Server) => {
@@ -23,13 +27,14 @@ export const setupPropertySocket = (io: Server) => {
 
   console.log('🏠 Property socket initialized');
 
-  // Setup MongoDB Change Stream for real-time database updates
+  // Try to setup MongoDB Change Stream (optional - requires replica set)
   setupChangeStream();
 };
 
 /**
  * Setup MongoDB Change Stream to watch for property changes
  * This provides true real-time updates directly from MongoDB
+ * NOTE: Requires MongoDB replica set - will fail gracefully on standalone
  */
 const setupChangeStream = async () => {
   try {
@@ -42,12 +47,34 @@ const setupChangeStream = async () => {
       initializeChangeStream();
     }
   } catch (error) {
-    console.error('❌ Failed to setup property change stream:', error);
+    console.warn('⚠️ Change streams not available. Using controller-triggered events only.');
   }
 };
 
-const initializeChangeStream = () => {
+const initializeChangeStream = async () => {
   try {
+    // Check if we're connected to a replica set
+    const db = mongoose.connection.db;
+    if (!db) {
+      console.warn('⚠️ Database not ready for change streams');
+      return;
+    }
+
+    // Try to get admin info to check replica set status
+    try {
+      const admin = db.admin();
+      const serverStatus = await admin.serverStatus();
+
+      // Check if replication is available
+      if (!serverStatus.repl) {
+        console.log('ℹ️ MongoDB running in standalone mode - Change Streams require replica set');
+        console.log('ℹ️ Real-time updates will use controller-triggered events instead');
+        return;
+      }
+    } catch {
+      // Can't check server status - try anyway
+    }
+
     const collection = mongoose.connection.collection('properties');
 
     // Watch for changes with full document on updates
@@ -60,27 +87,54 @@ const initializeChangeStream = () => {
         }
       ],
       {
-        fullDocument: 'updateLookup', // Get the full document on updates
-        fullDocumentBeforeChange: 'whenAvailable' // Get document before delete
+        fullDocument: 'updateLookup'
       }
     );
 
+    // Use async iterator pattern (more reliable)
+    changeStreamActive = true;
+    console.log('✅ Property MongoDB Change Stream active');
+
+    // Handle changes using event emitter pattern
     changeStream.on('change', (change: any) => {
       handlePropertyChange(change);
     });
 
-    changeStream.on('error', (error) => {
-      console.error('❌ Property change stream error:', error);
-      // Attempt to restart the change stream after a delay
+    changeStream.on('error', (error: any) => {
+      console.error('❌ Property change stream error:', error.message || error);
+      changeStreamActive = false;
+
+      // Don't retry if it's a "not replica set" error
+      if (error.message?.includes('replica set') || error.code === 40573) {
+        console.log('ℹ️ Change Streams not supported - using controller events only');
+        return;
+      }
+
+      // Attempt to restart the change stream after a delay for other errors
       setTimeout(() => {
         console.log('🔄 Attempting to restart property change stream...');
         initializeChangeStream();
-      }, 5000);
+      }, 10000);
     });
 
-    console.log('✅ Property MongoDB Change Stream active');
-  } catch (error) {
-    console.error('❌ Failed to initialize property change stream:', error);
+    changeStream.on('close', () => {
+      changeStreamActive = false;
+      console.log('ℹ️ Property change stream closed');
+    });
+
+  } catch (error: any) {
+    // Gracefully handle if change streams aren't supported
+    const errorMessage = error?.message || String(error);
+
+    if (errorMessage.includes('replica set') ||
+        errorMessage.includes('not supported') ||
+        errorMessage.includes('$changeStream') ||
+        error?.code === 40573) {
+      console.log('ℹ️ MongoDB Change Streams not available (requires replica set)');
+      console.log('ℹ️ Real-time updates will use controller-triggered events');
+    } else {
+      console.warn('⚠️ Could not initialize change stream:', errorMessage);
+    }
   }
 };
 
@@ -96,13 +150,12 @@ const handlePropertyChange = (change: any) => {
   switch (operationType) {
     case 'insert':
       if (fullDocument) {
-        // Transform MongoDB document to match frontend expectations
         const property = transformProperty(fullDocument);
         ioInstance.emit('property:created', {
           property,
           timestamp: new Date().toISOString(),
         });
-        console.log(`📤 Emitted property:created for ${propertyId}`);
+        console.log(`📤 [ChangeStream] property:created for ${propertyId}`);
       }
       break;
 
@@ -115,7 +168,7 @@ const handlePropertyChange = (change: any) => {
           property,
           timestamp: new Date().toISOString(),
         });
-        console.log(`📤 Emitted property:updated for ${propertyId}`);
+        console.log(`📤 [ChangeStream] property:updated for ${propertyId}`);
       }
       break;
 
@@ -124,7 +177,7 @@ const handlePropertyChange = (change: any) => {
         propertyId,
         timestamp: new Date().toISOString(),
       });
-      console.log(`📤 Emitted property:deleted for ${propertyId}`);
+      console.log(`📤 [ChangeStream] property:deleted for ${propertyId}`);
       break;
   }
 };
@@ -133,15 +186,18 @@ const handlePropertyChange = (change: any) => {
  * Transform MongoDB document to frontend-compatible format
  */
 const transformProperty = (doc: any) => {
+  if (!doc) return null;
+
   return {
     id: doc._id?.toString(),
     ...doc,
-    _id: undefined, // Remove _id as we use id
+    _id: undefined,
   };
 };
 
 // ============================================================================
 // MANUAL EMIT FUNCTIONS - Call these from controllers for immediate updates
+// These work regardless of whether Change Streams are available
 // ============================================================================
 
 /**
@@ -151,10 +207,13 @@ const transformProperty = (doc: any) => {
 export const emitPropertyCreated = (property: any) => {
   if (!ioInstance) return;
 
+  const transformed = transformProperty(property);
   ioInstance.emit('property:created', {
-    property: transformProperty(property),
+    property: transformed,
+    propertyId: transformed?.id,
     timestamp: new Date().toISOString(),
   });
+  console.log(`📤 [Controller] property:created for ${transformed?.id}`);
 };
 
 /**
@@ -169,6 +228,7 @@ export const emitPropertyUpdated = (propertyId: string, property: any) => {
     property: transformProperty(property),
     timestamp: new Date().toISOString(),
   });
+  console.log(`📤 [Controller] property:updated for ${propertyId}`);
 };
 
 /**
@@ -182,6 +242,7 @@ export const emitPropertyDeleted = (propertyId: string) => {
     propertyId,
     timestamp: new Date().toISOString(),
   });
+  console.log(`📤 [Controller] property:deleted for ${propertyId}`);
 };
 
 /**
@@ -196,6 +257,7 @@ export const emitPropertyStatusChanged = (propertyId: string, status: string, pr
     property: property ? transformProperty(property) : undefined,
     timestamp: new Date().toISOString(),
   });
+  console.log(`📤 [Controller] property:statusChanged for ${propertyId} -> ${status}`);
 };
 
 /**
@@ -209,4 +271,10 @@ export const emitPropertiesBulkUpdate = (action: 'created' | 'updated' | 'delete
     count,
     timestamp: new Date().toISOString(),
   });
+  console.log(`📤 [Controller] property:bulkUpdate - ${action} ${count} properties`);
 };
+
+/**
+ * Check if change stream is active
+ */
+export const isChangeStreamActive = () => changeStreamActive;

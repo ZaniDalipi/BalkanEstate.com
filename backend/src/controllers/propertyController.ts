@@ -15,6 +15,11 @@ import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/h
 import { recordPriceChange, processInstantAlertsForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../config/subscriptionConstants';
+import {
+  emitPropertyCreated,
+  emitPropertyUpdated,
+  emitPropertyDeleted,
+} from '../sockets/propertySocket';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -606,6 +611,9 @@ export const createProperty = async (
     // Populate seller info
     await property.populate('sellerId', 'name email phone avatarUrl role agencyName');
 
+    // Emit real-time event for instant updates across all connected clients
+    emitPropertyCreated(property.toObject());
+
     // Return updated subscription info so frontend can update UI immediately
     res.status(201).json({
       property,
@@ -752,6 +760,9 @@ export const updateProperty = async (
 
     // Populate seller info
     await property.populate('sellerId', 'name email phone avatarUrl role agencyName');
+
+    // Emit real-time event for instant updates across all connected clients
+    emitPropertyUpdated(String(property._id), property.toObject());
 
     res.json({ property });
   } catch (error: any) {
@@ -900,7 +911,13 @@ export const deleteProperty = async (
       }
     }
 
+    // Store property ID before deletion for emit
+    const deletedPropertyId = String(property._id);
+
     await property.deleteOne();
+
+    // Emit real-time event for instant updates across all connected clients
+    emitPropertyDeleted(deletedPropertyId);
 
     // Get updated subscription info to return to frontend
     const updatedUser = await User.findById(String(currentUser._id));

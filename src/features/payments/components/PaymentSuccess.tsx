@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
 import { CheckCircleIcon, ArrowLeftIcon, LogoIcon, BuildingOfficeIcon, TicketIcon, ClipboardDocumentIcon } from '@/constants';
 import { verifyPayment as verifyPaymentApi, getSubscriptionStatus, type VerifyPaymentResponse } from '../api/paymentApi';
@@ -7,6 +8,7 @@ import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
 import { authApiClient } from '@/src/data/api/AuthApiClient';
 import { trackEcommerce, trackEvent } from '@/src/components/marketing/Analytics';
+import { propertyKeys } from '@/src/features/properties/api';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -46,7 +48,8 @@ interface GeneratedCoupon {
 
 const PaymentSuccess: React.FC = () => {
   const { t } = useTranslation(['payment']);
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, fetchProperties } = useAppContext();
+  const queryClient = useQueryClient();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [provider, setProvider] = useState<PaymentProvider | null>(null);
@@ -58,6 +61,38 @@ const PaymentSuccess: React.FC = () => {
   const [agencyResult, setAgencyResult] = useState<AgencyResult | null>(null);
   const [agentCoupons, setAgentCoupons] = useState<GeneratedCoupon[]>([]);
   const [copiedCouponIndex, setCopiedCouponIndex] = useState<number | null>(null);
+
+  /**
+   * Auto-refresh data after payment to ensure database changes are reflected
+   * This handles the webhook processing delay
+   */
+  const scheduleDataRefresh = useCallback(() => {
+    // First refresh after 3 seconds (quick check)
+    setTimeout(() => {
+      console.log('📡 Payment success: Refreshing data (3s)...');
+      fetchProperties?.();
+      queryClient.invalidateQueries({ queryKey: propertyKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['promotions'] });
+    }, 3000);
+
+    // Second refresh after 10 seconds (ensure webhook processed)
+    setTimeout(() => {
+      console.log('📡 Payment success: Refreshing data (10s)...');
+      fetchProperties?.();
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.all,
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['promotions'],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.myListings(),
+        refetchType: 'active',
+      });
+    }, 10000);
+  }, [fetchProperties, queryClient]);
 
   useEffect(() => {
     // Get parameters from URL - supports Stripe, LemonSqueezy
@@ -151,6 +186,10 @@ const PaymentSuccess: React.FC = () => {
         } catch (refreshError) {
           console.error('Failed to refresh user data:', refreshError);
         }
+
+        // Schedule data refresh to pick up any database changes from webhook
+        // This ensures promotions and property updates are visible
+        scheduleDataRefresh();
       }
 
       // If this was an Enterprise payment and we have pending agency data, create the agency
