@@ -1,7 +1,15 @@
 import { Request, Response } from 'express';
 import DiscountCode from '../models/DiscountCode';
-import { IUser } from '../models/User';
+import User, { IUser } from '../models/User';
 import { generateSecureRandomString } from '../utils/secureRandom';
+
+/**
+ * Helper to check if user is admin
+ */
+async function isUserAdmin(userId: string): Promise<boolean> {
+  const user = await User.findById(userId).select('role');
+  return user?.role === 'admin' || user?.role === 'super_admin';
+}
 
 // @desc    Create a new discount code (Admin only)
 // @route   POST /api/discount-codes
@@ -346,6 +354,14 @@ export const deactivateDiscountCode = async (req: Request, res: Response): Promi
       return;
     }
 
+    const currentUser = req.user as IUser;
+    const isAdmin = await isUserAdmin(String(currentUser._id));
+
+    if (!isAdmin) {
+      res.status(403).json({ message: 'Admin access required' });
+      return;
+    }
+
     const discountCode = await DiscountCode.findById(req.params.id);
 
     if (!discountCode) {
@@ -377,6 +393,14 @@ export const deleteDiscountCode = async (req: Request, res: Response): Promise<v
   try {
     if (!req.user) {
       res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const isAdmin = await isUserAdmin(String(currentUser._id));
+
+    if (!isAdmin) {
+      res.status(403).json({ message: 'Admin access required' });
       return;
     }
 

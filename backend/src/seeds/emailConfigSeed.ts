@@ -384,47 +384,88 @@ export const defaultEmailConfigs = [
   // ===== MARKETING EMAILS =====
   {
     key: 'monthly-coupon',
-    name: 'Monthly Promotion Coupon',
-    description: 'Monthly promotion coupon for Pro and Agency members',
+    name: 'Monthly Promotion Coupons',
+    description: 'Monthly promotion coupons for Pro and Agency members - shows all coupon types',
     category: 'marketing',
     fromCategory: 'support',
-    subject: '🎁 Your Monthly Promotion Coupon is Ready!',
-    preheaderText: 'Use your exclusive coupon to boost your listings',
-    headerTitle: 'Your Monthly Coupon',
-    headerEmoji: '🎁',
+    subject: '🎟️ Your {{currentMonth}} Promotion Coupons Are Ready! ({{totalCoupons}} available)',
+    preheaderText: 'Your monthly promotion coupons have arrived - boost your listings now!',
+    headerTitle: '{{currentMonth}} Coupons Ready!',
+    headerEmoji: '🎟️',
     headerGradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     bodyTemplate: `
       <p style="color: #374151; font-size: 16px; margin: 0 0 16px 0;">
-        Hi <strong>{{userName}}</strong>,
+        Hey <strong>{{userName}}</strong>! 👋
       </p>
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0;">
-        Your monthly promotion coupon is here! Use it to get free promotion credits for your listings.
+        Your <strong>{{planName}}</strong> subscription includes fresh promotion coupons for {{currentMonth}}. Time to boost your listings!
       </p>
-      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 24px; text-align: center; margin: 0 0 24px 0;">
-        <p style="color: #92400e; font-size: 14px; margin: 0 0 8px 0;">Your Coupon Code:</p>
-        <p style="font-family: monospace; font-size: 28px; font-weight: 700; color: #78350f; background: #fff; padding: 12px 24px; border-radius: 8px; display: inline-block; margin: 0 0 8px 0;">{{couponCode}}</p>
-        <p style="color: #92400e; font-size: 13px; margin: 0;">Valid until: {{expiryDate}}</p>
+
+      <!-- Coupon Summary Card -->
+      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin: 0 0 24px 0; border: 2px solid #f59e0b;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 48px; font-weight: 700; color: #92400e;">{{totalCoupons}}</div>
+          <div style="font-size: 14px; color: #78350f; font-weight: 600;">Total Coupons Available</div>
+        </div>
+
+        <!-- New + Rollover breakdown -->
+        <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+          <div style="display: table; width: 100%;">
+            <div style="display: table-cell; text-align: center; width: 50%; border-right: 1px solid #f59e0b;">
+              <div style="font-size: 20px; font-weight: 700; color: #92400e;">+{{newCoupons}}</div>
+              <div style="font-size: 11px; color: #78350f;">New This Month</div>
+            </div>
+            <div style="display: table-cell; text-align: center; width: 50%;">
+              <div style="font-size: 20px; font-weight: 700; color: #92400e;">+{{rolledOver}}</div>
+              <div style="font-size: 11px; color: #78350f;">Rolled Over</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coupon Type Breakdown -->
+        <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 12px; color: #78350f; font-weight: 600; margin-bottom: 8px; text-align: center;">Coupon Breakdown:</div>
+          <div style="display: table; width: 100%;">
+            <div style="display: table-cell; text-align: center;">
+              <div style="font-size: 18px; font-weight: 700; color: #059669;">{{highlightedCoupons}}</div>
+              <div style="font-size: 10px; color: #78350f;">Highlighted</div>
+            </div>
+            <div style="display: table-cell; text-align: center;">
+              <div style="font-size: 18px; font-weight: 700; color: #7c3aed;">{{premiumCoupons}}</div>
+              <div style="font-size: 10px; color: #78350f;">Premium</div>
+            </div>
+            <div style="display: table-cell; text-align: center;">
+              <div style="font-size: 18px; font-weight: 700; color: #dc2626;">{{featuredCoupons}}</div>
+              <div style="font-size: 10px; color: #78350f;">Featured</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <p style="color: #6b7280; font-size: 14px; margin: 0 0 8px 0;">
-        <strong>Coupon Details:</strong>
-      </p>
-      <ul style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0; padding-left: 20px;">
-        <li style="margin-bottom: 4px;">{{creditsAmount}} promotion credits</li>
-        <li style="margin-bottom: 4px;">Use for Boost or Featured promotions</li>
-        <li>One-time use only</li>
-      </ul>
+
+      <!-- Info Box -->
+      <div style="background: #eff6ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
+        <p style="color: #1e40af; font-size: 13px; margin: 0; line-height: 1.5;">
+          <strong>💡 Pro Tip:</strong> Use your promotion coupons to boost listings that aren't getting enough views.
+          Promoted listings get up to <strong>5x more visibility</strong>!
+        </p>
+      </div>
     `,
     ctaEnabled: true,
-    ctaText: 'Use Coupon Now',
-    ctaUrl: '{{frontendUrl}}/account/listings',
+    ctaText: 'Use My Coupons →',
+    ctaUrl: '{{frontendUrl}}/promotions',
     showUnsubscribe: true,
     unsubscribeType: 'marketing',
-    footerReason: 'You\'re receiving this email as part of your Pro/Agency membership benefits.',
+    footerReason: 'You\'re receiving this email as part of your {{planName}} membership benefits.',
     variables: [
       { name: 'userName', description: 'User\'s name', required: true, example: 'John Doe' },
-      { name: 'couponCode', description: 'Coupon code', required: true, example: 'PRO-JAN-2024-ABC123' },
-      { name: 'expiryDate', description: 'Coupon expiry date', required: true, example: 'January 31, 2024' },
-      { name: 'creditsAmount', description: 'Number of credits', required: true, example: '3' },
+      { name: 'planName', description: 'Subscription plan name', required: true, example: 'Pro' },
+      { name: 'currentMonth', description: 'Current month name', required: true, example: 'January' },
+      { name: 'totalCoupons', description: 'Total coupons available', required: true, example: '6' },
+      { name: 'newCoupons', description: 'New coupons this month', required: true, example: '3' },
+      { name: 'rolledOver', description: 'Coupons rolled over from last month', required: true, example: '3' },
+      { name: 'highlightedCoupons', description: 'Number of highlighted promotion coupons', required: true, example: '2' },
+      { name: 'premiumCoupons', description: 'Number of premium promotion coupons', required: true, example: '1' },
+      { name: 'featuredCoupons', description: 'Number of featured promotion coupons', required: true, example: '1' },
       { name: 'frontendUrl', description: 'Frontend base URL', required: true, example: 'https://balkanestate.com' },
     ],
     isActive: true,

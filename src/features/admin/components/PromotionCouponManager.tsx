@@ -121,8 +121,9 @@ const PromotionCouponManager: React.FC = () => {
         setSuccessMessage('Coupon disabled successfully');
         setTimeout(() => setSuccessMessage(null), 3000);
       },
-      onError: () => {
-        setLocalError('Failed to disable coupon');
+      onError: (err: any) => {
+        const message = err?.message || 'Failed to disable coupon';
+        setLocalError(message);
         setTimeout(() => setLocalError(null), 5000);
       },
     });

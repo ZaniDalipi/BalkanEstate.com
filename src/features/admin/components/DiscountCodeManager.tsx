@@ -160,8 +160,9 @@ const DiscountCodeManager: React.FC = () => {
         setSuccessMessage('Discount code deactivated');
         setTimeout(() => setSuccessMessage(null), 3000);
       },
-      onError: () => {
-        setLocalError('Failed to deactivate discount code');
+      onError: (err: any) => {
+        const message = err?.message || 'Failed to deactivate discount code';
+        setLocalError(message);
         setTimeout(() => setLocalError(null), 5000);
       },
     });
@@ -182,8 +183,9 @@ const DiscountCodeManager: React.FC = () => {
         setSuccessMessage('Discount code deleted');
         setTimeout(() => setSuccessMessage(null), 3000);
       },
-      onError: () => {
-        setLocalError('Failed to delete discount code');
+      onError: (err: any) => {
+        const message = err?.message || 'Failed to delete discount code';
+        setLocalError(message);
         setTimeout(() => setLocalError(null), 5000);
       },
     });
