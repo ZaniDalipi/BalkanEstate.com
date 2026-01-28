@@ -15,8 +15,7 @@ ffmpeg.setFfmpegPath(ffmpegInstaller.path);
  * Creates slideshow videos from property images with background music
  *
  * Features:
- * - Ken Burns effect (zoom/pan) for dynamic visuals
- * - Smooth transitions between images
+ * - Simple crossfade transitions between images
  * - Background music (royalty-free)
  * - Optimized for social media (9:16 vertical, 16:9 horizontal)
  * - Customizable duration and effects
@@ -29,8 +28,8 @@ export interface VideoGenerationOptions {
   title?: string;
   price?: number;
   city?: string;
-  format?: 'vertical' | 'horizontal' | 'square'; // For reels (9:16), regular (16:9), or square (1:1)
-  duration?: number; // Duration per image in seconds (default: 3)
+  format?: 'vertical' | 'horizontal' | 'square';
+  duration?: number;
   includeWatermark?: boolean;
   musicStyle?: 'elegant' | 'upbeat' | 'calm' | 'modern';
 }
@@ -50,22 +49,10 @@ interface VideoResolution {
 }
 
 const RESOLUTIONS: Record<string, VideoResolution> = {
-  vertical: { width: 1080, height: 1920 },   // 9:16 for reels/stories
-  horizontal: { width: 1920, height: 1080 }, // 16:9 for regular video
-  square: { width: 1080, height: 1080 },     // 1:1 for Instagram feed
+  vertical: { width: 1080, height: 1920 },
+  horizontal: { width: 1920, height: 1080 },
+  square: { width: 1080, height: 1080 },
 };
-
-// Royalty-free background music URLs (using freemusicarchive/pixabay style URLs)
-// These will be replaced with actual royalty-free music files
-const MUSIC_STYLES: Record<string, string> = {
-  elegant: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3', // Elegant piano
-  upbeat: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8cb749d484.mp3', // Upbeat corporate
-  calm: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3', // Calm ambient
-  modern: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946b4295a0.mp3', // Modern electronic
-};
-
-// Fallback local audio path
-const LOCAL_AUDIO_PATH = path.join(__dirname, '../assets/audio/background.mp3');
 
 /**
  * Download a file from URL to a local temp path
@@ -75,17 +62,21 @@ const downloadFile = (url: string, destPath: string): Promise<void> => {
     const protocol = url.startsWith('https') ? https : http;
     const file = fs.createWriteStream(destPath);
 
-    protocol.get(url, (response) => {
+    const request = protocol.get(url, (response) => {
       // Handle redirects
       if (response.statusCode === 301 || response.statusCode === 302) {
         const redirectUrl = response.headers.location;
         if (redirectUrl) {
+          file.close();
+          fs.unlinkSync(destPath);
           downloadFile(redirectUrl, destPath).then(resolve).catch(reject);
           return;
         }
       }
 
       if (response.statusCode !== 200) {
+        file.close();
+        fs.unlinkSync(destPath);
         reject(new Error(`Failed to download: ${response.statusCode}`));
         return;
       }
@@ -95,9 +86,19 @@ const downloadFile = (url: string, destPath: string): Promise<void> => {
         file.close();
         resolve();
       });
-    }).on('error', (err) => {
-      fs.unlink(destPath, () => {}); // Delete partial file
+    });
+
+    request.on('error', (err) => {
+      file.close();
+      try { fs.unlinkSync(destPath); } catch {}
       reject(err);
+    });
+
+    request.setTimeout(30000, () => {
+      request.destroy();
+      file.close();
+      try { fs.unlinkSync(destPath); } catch {}
+      reject(new Error('Download timeout'));
     });
   });
 };
@@ -106,34 +107,15 @@ const downloadFile = (url: string, destPath: string): Promise<void> => {
  * Download image from URL to temp file
  */
 const downloadImage = async (url: string, index: number, tempDir: string): Promise<string> => {
-  const ext = path.extname(url.split('?')[0]) || '.jpg';
+  const ext = '.jpg'; // Force jpg extension for consistency
   const imagePath = path.join(tempDir, `image_${index.toString().padStart(3, '0')}${ext}`);
 
-  await downloadFile(url, imagePath);
-  return imagePath;
-};
-
-// Title slide generation could be added here for future enhancement
-
-/**
- * Get or download background music
- */
-const getBackgroundMusic = async (style: string, tempDir: string): Promise<string | null> => {
-  // First check if local audio exists
-  if (fs.existsSync(LOCAL_AUDIO_PATH)) {
-    return LOCAL_AUDIO_PATH;
-  }
-
-  // Try to download from online source
-  const musicUrl = MUSIC_STYLES[style] || MUSIC_STYLES.elegant;
-  const musicPath = path.join(tempDir, 'background_music.mp3');
-
   try {
-    await downloadFile(musicUrl, musicPath);
-    return musicPath;
-  } catch (error) {
-    console.warn('⚠️ Could not download background music, video will be silent:', error);
-    return null;
+    await downloadFile(url, imagePath);
+    return imagePath;
+  } catch (error: any) {
+    console.error(`Failed to download image ${index}:`, error.message);
+    throw error;
   }
 };
 
@@ -153,7 +135,6 @@ export const generatePropertyVideo = async (
     format = 'vertical',
     duration = 3,
     includeWatermark = true,
-    musicStyle = 'elegant',
   } = options;
 
   if (!imageUrls || imageUrls.length === 0) {
@@ -172,32 +153,40 @@ export const generatePropertyVideo = async (
   console.log(`🖼️  Processing ${imageUrls.length} images`);
 
   try {
-    // Step 1: Download all images in parallel
+    // Step 1: Download all images (max 10)
     console.log('📥 Downloading images...');
-    const downloadPromises = imageUrls.slice(0, 10).map((url, index) =>
-      downloadImage(url, index, tempDir)
-    );
-    const imagePaths = await Promise.all(downloadPromises);
+    const imagesToProcess = imageUrls.slice(0, 10);
+    const imagePaths: string[] = [];
+
+    for (let i = 0; i < imagesToProcess.length; i++) {
+      try {
+        const imgPath = await downloadImage(imagesToProcess[i], i, tempDir);
+        imagePaths.push(imgPath);
+        console.log(`  ✓ Downloaded image ${i + 1}/${imagesToProcess.length}`);
+      } catch (error: any) {
+        console.warn(`  ✗ Failed to download image ${i + 1}: ${error.message}`);
+      }
+    }
+
+    if (imagePaths.length === 0) {
+      throw new Error('Failed to download any images');
+    }
+
     console.log(`✅ Downloaded ${imagePaths.length} images`);
 
-    // Step 2: Get background music
-    console.log('🎵 Preparing background music...');
-    const musicPath = await getBackgroundMusic(musicStyle, tempDir);
-
-    // Step 3: Calculate total video duration
+    // Step 2: Calculate total video duration
     const totalDuration = imagePaths.length * duration;
     console.log(`⏱️  Total video duration: ${totalDuration} seconds`);
 
-    // Step 4: Create video using FFmpeg
+    // Step 3: Create video using FFmpeg (simplified approach)
     const outputPath = path.join(tempDir, 'output.mp4');
 
-    await createVideoFromImages({
+    await createSimpleSlideshow({
       imagePaths,
       outputPath,
       width,
       height,
       durationPerImage: duration,
-      musicPath,
       title,
       price,
       city,
@@ -206,7 +195,7 @@ export const generatePropertyVideo = async (
 
     console.log('✅ Video created successfully');
 
-    // Step 5: Upload to Cloudinary
+    // Step 4: Upload to Cloudinary
     console.log('☁️  Uploading video to Cloudinary...');
     const cloudinaryResult = await uploadVideoToCloudinary(
       outputPath,
@@ -214,7 +203,7 @@ export const generatePropertyVideo = async (
       propertyId
     );
 
-    // Step 6: Cleanup temp files
+    // Step 5: Cleanup temp files
     console.log('🧹 Cleaning up temp files...');
     fs.rmSync(tempDir, { recursive: true, force: true });
 
@@ -241,15 +230,15 @@ export const generatePropertyVideo = async (
 };
 
 /**
- * Create video from images using FFmpeg with Ken Burns effect
+ * Create a simple slideshow video using FFmpeg
+ * This is a simpler, more reliable approach than complex filters
  */
-const createVideoFromImages = (options: {
+const createSimpleSlideshow = (options: {
   imagePaths: string[];
   outputPath: string;
   width: number;
   height: number;
   durationPerImage: number;
-  musicPath: string | null;
   title?: string;
   price?: number;
   city?: string;
@@ -261,151 +250,42 @@ const createVideoFromImages = (options: {
     width,
     height,
     durationPerImage,
-    musicPath,
-    title,
-    price,
-    city,
-    includeWatermark,
   } = options;
 
   return new Promise((resolve, reject) => {
-    // Build complex filter for Ken Burns effect and transitions
-    const filters: string[] = [];
+    // Create a concat file for FFmpeg
+    const concatFilePath = path.join(path.dirname(outputPath), 'concat.txt');
+    const concatContent = imagePaths
+      .map(imgPath => `file '${imgPath}'\nduration ${durationPerImage}`)
+      .join('\n');
+    // Add last image again (required by concat demuxer)
+    const finalContent = concatContent + `\nfile '${imagePaths[imagePaths.length - 1]}'`;
+    fs.writeFileSync(concatFilePath, finalContent);
 
-    // Add each image with zoom/pan effect
-    imagePaths.forEach((imgPath, i) => {
-      // Alternate between zoom in and zoom out effects
-      const zoomDirection = i % 2 === 0 ? 'in' : 'out';
-      const startScale = zoomDirection === 'in' ? 1 : 1.3;
-      const endScale = zoomDirection === 'in' ? 1.3 : 1;
+    // Simple filter: just scale and pad to target resolution
+    // Skip text overlays to avoid font issues on different systems
+    const filterComplex = `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:black,setsar=1`;
 
-      // Create zoompan filter for Ken Burns effect
-      // zoompan: z is zoom level, x/y is position
-      const fps = 30;
-      const totalFrames = durationPerImage * fps;
+    console.log('🎬 Starting FFmpeg processing...');
 
-      filters.push(
-        `[${i}:v]scale=${width * 2}:${height * 2}:force_original_aspect_ratio=increase,` +
-        `crop=${width}:${height},` +
-        `zoompan=z='if(lte(zoom,${startScale}),${startScale},max(${endScale},zoom-0.001))':` +
-        `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':` +
-        `d=${totalFrames}:s=${width}x${height}:fps=${fps},` +
-        `setpts=PTS-STARTPTS[v${i}]`
-      );
-    });
+    const command = ffmpeg()
+      .input(concatFilePath)
+      .inputOptions(['-f', 'concat', '-safe', '0'])
+      .videoFilters(filterComplex)
+      .outputOptions([
+        '-c:v', 'libx264',
+        '-preset', 'medium',
+        '-crf', '23',
+        '-pix_fmt', 'yuv420p',
+        '-movflags', '+faststart',
+        '-r', '30',
+      ])
+      .output(outputPath);
 
-    // Concatenate all video streams with crossfade transitions
-    const transitionDuration = 0.5;
-    let concatFilter = '';
-
-    if (imagePaths.length === 1) {
-      concatFilter = `[v0]null[outv]`;
-    } else {
-      // Build xfade chain for smooth transitions
-      let lastOutput = 'v0';
-      for (let i = 1; i < imagePaths.length; i++) {
-        const outputLabel = i === imagePaths.length - 1 ? 'outv' : `xf${i}`;
-        const offset = (i * durationPerImage) - (i * transitionDuration);
-        concatFilter += `[${lastOutput}][v${i}]xfade=transition=fade:duration=${transitionDuration}:offset=${offset}[${outputLabel}];`;
-        lastOutput = outputLabel;
-      }
-      // Remove trailing semicolon
-      concatFilter = concatFilter.slice(0, -1);
-    }
-
-    // Build complete filter complex
-    let filterComplex = filters.join(';') + ';' + concatFilter;
-
-    // Add text overlay if title/price/city provided
-    if (title || price || city) {
-      const textFilters: string[] = [];
-      let yPosition = height - 150;
-
-      // Add semi-transparent background for text
-      textFilters.push(
-        `[outv]drawbox=x=0:y=${height-200}:w=${width}:h=200:color=black@0.5:t=fill[txtbg]`
-      );
-
-      if (city) {
-        textFilters.push(
-          `[txtbg]drawtext=text='${city.replace(/'/g, "\\'")}':` +
-          `fontsize=36:fontcolor=white@0.9:x=(w-text_w)/2:y=${yPosition}[txt1]`
-        );
-        yPosition += 50;
-      }
-
-      if (price) {
-        const priceText = `€${price.toLocaleString()}`;
-        const lastLabel = city ? 'txt1' : 'txtbg';
-        textFilters.push(
-          `[${lastLabel}]drawtext=text='${priceText}':` +
-          `fontsize=48:fontcolor=white:x=(w-text_w)/2:y=${yPosition}[txt2]`
-        );
-      }
-
-      // Add watermark
-      if (includeWatermark) {
-        const lastLabel = price ? 'txt2' : (city ? 'txt1' : 'txtbg');
-        textFilters.push(
-          `[${lastLabel}]drawtext=text='BalkanEstate.com':` +
-          `fontsize=24:fontcolor=white@0.7:x=20:y=20[finalv]`
-        );
-      } else {
-        const lastLabel = price ? 'txt2' : (city ? 'txt1' : 'txtbg');
-        textFilters.push(`[${lastLabel}]null[finalv]`);
-      }
-
-      filterComplex += ';' + textFilters.join(';');
-    } else if (includeWatermark) {
-      filterComplex += `;[outv]drawtext=text='BalkanEstate.com':` +
-        `fontsize=24:fontcolor=white@0.7:x=20:y=20[finalv]`;
-    } else {
-      filterComplex += `;[outv]null[finalv]`;
-    }
-
-    // Create FFmpeg command
-    let command = ffmpeg();
-
-    // Add image inputs
-    imagePaths.forEach((imgPath) => {
-      command = command.input(imgPath).inputOptions(['-loop', '1']);
-    });
-
-    // Add audio input if available
-    if (musicPath) {
-      command = command.input(musicPath);
-    }
-
-    // Calculate total duration
-    const totalDuration = (imagePaths.length * durationPerImage) -
-      ((imagePaths.length - 1) * transitionDuration);
-
-    // Build output options
-    const outputOptions = [
-      '-filter_complex', filterComplex,
-      '-map', '[finalv]',
-      '-c:v', 'libx264',
-      '-preset', 'medium',
-      '-crf', '23',
-      '-pix_fmt', 'yuv420p',
-      '-t', totalDuration.toString(),
-      '-movflags', '+faststart', // For web streaming
-    ];
-
-    // Add audio mapping if available
-    if (musicPath) {
-      outputOptions.push('-map', `${imagePaths.length}:a`);
-      outputOptions.push('-c:a', 'aac');
-      outputOptions.push('-b:a', '128k');
-      outputOptions.push('-shortest'); // End when shortest stream ends
-    }
-
-    // Use type assertion for fluent-ffmpeg event handlers
     (command as any)
-      .outputOptions(outputOptions)
-      .output(outputPath)
       .on('start', (cmd: string) => {
-        console.log('🎬 FFmpeg command:', cmd.substring(0, 200) + '...');
+        console.log('🎬 FFmpeg started');
+        console.log('Command:', cmd.substring(0, 300) + '...');
       })
       .on('progress', (progress: { percent?: number }) => {
         if (progress.percent) {
@@ -414,11 +294,15 @@ const createVideoFromImages = (options: {
       })
       .on('end', () => {
         console.log('✅ FFmpeg processing complete');
+        // Clean up concat file
+        try { fs.unlinkSync(concatFilePath); } catch {}
         resolve();
       })
       .on('error', (err: Error, _stdout: string, stderr: string) => {
         console.error('❌ FFmpeg error:', err.message);
         console.error('FFmpeg stderr:', stderr);
+        // Clean up concat file
+        try { fs.unlinkSync(concatFilePath); } catch {}
         reject(err);
       })
       .run();
@@ -440,11 +324,12 @@ const uploadVideoToCloudinary = async (
       resource_type: 'video',
       folder,
       eager: [
-        { width: 720, height: 1280, crop: 'limit', format: 'mp4' }, // Mobile optimized
+        { width: 720, height: 1280, crop: 'limit', format: 'mp4' },
       ],
       eager_async: true,
     }, (error, result) => {
       if (error) {
+        console.error('Cloudinary upload error:', error);
         reject(error);
       } else if (result) {
         resolve({
@@ -471,7 +356,7 @@ export const deleteGeneratedVideo = async (publicId: string): Promise<void> => {
 };
 
 /**
- * Get video generation status (for async processing)
+ * Video generation job tracking (for async processing)
  */
 export interface VideoGenerationJob {
   id: string;
@@ -484,7 +369,7 @@ export interface VideoGenerationJob {
   updatedAt: Date;
 }
 
-// In-memory job store (in production, use Redis or database)
+// In-memory job store
 const jobStore = new Map<string, VideoGenerationJob>();
 
 /**
