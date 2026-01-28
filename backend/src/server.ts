@@ -87,6 +87,7 @@ import analyticsRoutes from './routes/analyticsRoutes';
 import siteContentRoutes from './routes/siteContentRoutes';
 import achievementRoutes from './routes/achievementRoutes';
 import promotionPlanRoutes from './routes/promotionPlanRoutes';
+import videoRoutes from './routes/videoRoutes';
 
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
@@ -268,6 +269,7 @@ app.use('/api/analytics', analyticsRoutes); // Analytics and activity tracking
 app.use('/api/site-content', siteContentRoutes); // Public site content (how it works videos)
 app.use('/api/achievements', achievementRoutes); // User and agency achievements
 app.use('/api/promotion-plans', promotionPlanRoutes); // Listing promotion and agency feature plans
+app.use('/api/videos', videoRoutes); // Property video generation (FFmpeg-based)
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

@@ -8,6 +8,14 @@ import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
+import { VideoGenerator } from '../../src/features/videos';
+
+// Video Icon component
+const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+);
 
 // Role badge component to show which role created the listing
 const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
@@ -63,8 +71,9 @@ const ListingCard: React.FC<{
     onDelete: (id: string) => void,
     onPromote: (id: string) => void,
     onExtend: (id: string) => void,
+    onVideo: (id: string) => void,
     renewalStatus: { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number } | null,
-}> = ({ property, onRenew, onMarkAsSold, onDelete, onPromote, onExtend, renewalStatus }) => {
+}> = ({ property, onRenew, onMarkAsSold, onDelete, onPromote, onExtend, onVideo, renewalStatus }) => {
     const { dispatch } = useAppContext();
     const [imageError, setImageError] = useState(false);
 
@@ -178,6 +187,15 @@ const ListingCard: React.FC<{
                     </button>
                 )}
                 <button
+                    onClick={(e) => { e.stopPropagation(); onVideo(property.id); }}
+                    disabled={!property.images || property.images.length === 0}
+                    title={property.images && property.images.length > 0 ? 'Create video reel' : 'Add images first'}
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <VideoIcon className="w-4 h-4" />
+                    {property.videoUrl ? 'Video' : 'Create Video'}
+                </button>
+                <button
                     onClick={(e) => { e.stopPropagation(); onRenew(property.id); }}
                     disabled={!isActionable || !canRenew}
                     title={!canRenew && renewalStatus ? `Can renew in ${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : 'Renew listing to appear at top'}
@@ -230,6 +248,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [showPromotionModal, setShowPromotionModal] = useState(false);
     const [propertyToPromote, setPropertyToPromote] = useState<Property | null>(null);
     const [isExtensionMode, setIsExtensionMode] = useState(false);
+    const [showVideoModal, setShowVideoModal] = useState(false);
+    const [propertyForVideo, setPropertyForVideo] = useState<Property | null>(null);
     const [myProperties, setMyProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
@@ -497,6 +517,19 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         }
     };
 
+    const handleVideo = (id: string) => {
+        const property = myProperties.find(p => p.id === id);
+        if (property) {
+            setPropertyForVideo(property);
+            setShowVideoModal(true);
+        }
+    };
+
+    const handleVideoSuccess = () => {
+        // Refresh properties to show updated video URL
+        fetchMyListings();
+    };
+
     const handlePromotionSuccess = async () => {
         // Refresh properties to show updated promotion status
         setShowPromotionModal(false);
@@ -564,6 +597,28 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     currentEndDate={propertyToPromote.promotionEndDate ? new Date(propertyToPromote.promotionEndDate) : undefined}
                 />
             )}
+
+            {/* Video Generator Modal */}
+            <Modal
+                isOpen={showVideoModal && propertyForVideo !== null}
+                onClose={() => {
+                    setShowVideoModal(false);
+                    setPropertyForVideo(null);
+                }}
+                title=""
+                maxWidth="max-w-2xl"
+            >
+                {propertyForVideo && (
+                    <VideoGenerator
+                        property={propertyForVideo}
+                        onVideoGenerated={handleVideoSuccess}
+                        onClose={() => {
+                            setShowVideoModal(false);
+                            setPropertyForVideo(null);
+                        }}
+                    />
+                )}
+            </Modal>
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">My Listings ({myProperties.length})</h3>
@@ -654,6 +709,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             onDelete={handleDeleteClick}
                             onPromote={handlePromote}
                             onExtend={handleExtend}
+                            onVideo={handleVideo}
                             renewalStatus={renewalStatuses[prop.id] || null}
                         />
                     )}
