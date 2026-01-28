@@ -1,47 +1,81 @@
 /**
  * My Promotions Page
  * Displays and manages user's promoted properties
- * Uses extracted PromotedPropertyCard component and usePromotions hooks
+ * Uses React Query for real-time updates (auto-refresh every 10s)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../types';
 import { useAppContext } from '../../context/AppContext';
-import { SparklesIcon } from '../../constants';
+import { SparklesIcon, ArrowPathIcon } from '../../constants';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import PromotionHistoryModal from '../../src/features/promotions/components/PromotionHistoryModal';
 import PromotedPropertyCard, { TIER_CONFIG } from '../../src/features/promotions/components/PromotedPropertyCard';
-import { usePromotions, usePromotionActions, PromotionFilter } from '../../hooks/usePromotions';
+import {
+  usePromotionsQuery,
+  useAddUrgentBadge,
+  useToggleAutoExtend,
+  useAutoExtendCheckout,
+  useRefreshPromotions,
+  type PromotionFilter,
+} from '../../src/features/promotions/hooks/usePromotionData';
 
 const MyPromotions: React.FC = () => {
   const { t } = useTranslation(['account', 'property']);
   const { dispatch } = useAppContext();
 
-  // Use extracted hooks for data and actions
+  // React Query hooks for real-time data
   const {
-    filteredProperties,
-    promotions,
-    stats,
+    data,
     isLoading,
-    filter,
-    setFilter,
+    isFetching,
+    dataUpdatedAt,
     refetch,
-    updatePromotion,
-  } = usePromotions();
+  } = usePromotionsQuery();
 
-  const {
-    actionLoading,
-    handleAddUrgent,
-    handleToggleAutoExtend,
-    handleCompleteAutoExtend,
-  } = usePromotionActions();
+  const addUrgentMutation = useAddUrgentBadge();
+  const toggleAutoExtendMutation = useToggleAutoExtend();
+  const autoExtendCheckoutMutation = useAutoExtendCheckout();
+  const refreshPromotions = useRefreshPromotions();
+
+  // Local state
+  const [filter, setFilter] = useState<PromotionFilter>('active');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Modal state
   const [showExtendModal, setShowExtendModal] = useState(false);
   const [propertyToExtend, setPropertyToExtend] = useState<Property | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [propertyForHistory, setPropertyForHistory] = useState<Property | null>(null);
+
+  // Extract data with defaults
+  const promotedProperties = data?.promotedProperties || [];
+  const promotions = data?.promotions || {};
+  const stats = data?.stats || { active: 0, expired: 0, total: 0, tierCounts: {} };
+
+  // Filter properties based on selected filter
+  const filteredProperties = useMemo(() => {
+    const now = Date.now();
+    return promotedProperties.filter(p => {
+      if (filter === 'active') {
+        return p.promotionEndDate && p.promotionEndDate > now;
+      }
+      if (filter === 'expired') {
+        return !p.promotionEndDate || p.promotionEndDate <= now;
+      }
+      return true;
+    });
+  }, [promotedProperties, filter]);
+
+  // Format last updated time
+  const formatLastUpdated = (timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  };
 
   // Handlers
   const handleViewProperty = (propertyId: string) => {
@@ -58,7 +92,8 @@ const MyPromotions: React.FC = () => {
   const handleExtensionSuccess = async () => {
     setShowExtendModal(false);
     setPropertyToExtend(null);
-    await refetch();
+    // React Query will auto-refresh, but we can force immediate refresh
+    refreshPromotions();
   };
 
   const handleViewHistory = (property: Property) => {
@@ -66,15 +101,58 @@ const MyPromotions: React.FC = () => {
     setShowHistoryModal(true);
   };
 
-  // Wrap toggle auto-extend with local state update
-  const onToggleAutoExtend = async (promotionId: string, autoExtend: boolean) => {
-    await handleToggleAutoExtend(promotionId, autoExtend, () => {
-      // Find propertyId for this promotion and update local state
-      const propertyId = Object.keys(promotions).find(k => promotions[k]._id === promotionId);
-      if (propertyId) {
-        updatePromotion(propertyId, { autoExtend });
+  // Action handlers
+  const handleAddUrgent = async (promotionId: string) => {
+    try {
+      setActionLoading(promotionId);
+      const result = await addUrgentMutation.mutateAsync(promotionId);
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to add urgent badge');
       }
-    });
+
+      if (result.isFree) {
+        // Free urgent badge - data will auto-refresh
+        refreshPromotions();
+        setActionLoading(null);
+      } else if (result.url) {
+        // Redirect to Stripe checkout
+        window.location.href = result.url;
+      } else {
+        throw new Error('No payment URL returned. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Failed to add urgent badge:', error);
+      alert(error.message || 'Failed to add urgent badge. Please try again.');
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleAutoExtend = async (promotionId: string, autoExtend: boolean) => {
+    try {
+      await toggleAutoExtendMutation.mutateAsync({ promotionId, autoExtend });
+      // Data will auto-refresh via React Query
+    } catch (error: any) {
+      console.error('Failed to update auto-extend:', error);
+      alert(error.message || 'Failed to update auto-extend');
+    }
+  };
+
+  const handleCompleteAutoExtend = async (promotionId: string) => {
+    try {
+      setActionLoading(promotionId);
+      const result = await autoExtendCheckoutMutation.mutateAsync(promotionId);
+      if (result.success && result.url) {
+        window.location.href = result.url;
+      } else {
+        alert('No pending auto-extend checkout found');
+        setActionLoading(null);
+      }
+    } catch (error: any) {
+      console.error('Failed to complete auto-extend:', error);
+      alert(error.message || 'Failed to get auto-extend checkout');
+      setActionLoading(null);
+    }
   };
 
   if (isLoading) {
@@ -112,6 +190,24 @@ const MyPromotions: React.FC = () => {
               {t('account:promotions.subtitle', 'Manage your promoted listings')}
             </p>
           </div>
+        </div>
+
+        {/* Real-time indicator */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-neutral-500">
+            <div className={`w-2 h-2 rounded-full ${isFetching ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`} />
+            <span>{isFetching ? 'Syncing...' : 'Live'}</span>
+            <span className="text-neutral-400">|</span>
+            <span>Updated: {formatLastUpdated(dataUpdatedAt)}</span>
+          </div>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors disabled:opacity-50"
+            title="Refresh promotions"
+          >
+            <ArrowPathIcon className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
@@ -189,7 +285,7 @@ const MyPromotions: React.FC = () => {
               onViewProperty={handleViewProperty}
               onExtend={handleExtend}
               onAddUrgent={handleAddUrgent}
-              onToggleAutoExtend={onToggleAutoExtend}
+              onToggleAutoExtend={handleToggleAutoExtend}
               onCompleteAutoExtend={handleCompleteAutoExtend}
               onViewHistory={handleViewHistory}
               isAddingUrgent={actionLoading === promotions[property.id]?._id}
