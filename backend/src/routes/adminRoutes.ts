@@ -67,6 +67,7 @@ import {
   resetAllEmailConfigs,
   sendTestEmail,
   previewEmail,
+  previewMinimalisticTemplate,
   getEmailCategories,
   createEmailConfig,
   deleteEmailConfig,
@@ -219,5 +220,9 @@ router.post('/email-configs/:key/reset', logAdminAction('RESET_EMAIL_CONFIG'), r
 router.post('/email-configs/:key/duplicate', logAdminAction('DUPLICATE_EMAIL_CONFIG'), duplicateEmailConfig);
 router.post('/email-configs/:key/test', logAdminAction('SEND_TEST_EMAIL'), sendTestEmail);
 router.post('/email-configs/:key/preview', logAdminAction('PREVIEW_EMAIL'), previewEmail);
+
+// New minimalistic email templates with 3D house graphics
+router.get('/email-templates/preview/:templateType', logAdminAction('PREVIEW_TEMPLATE'), previewMinimalisticTemplate);
+router.post('/email-templates/preview/:templateType', logAdminAction('PREVIEW_TEMPLATE'), previewMinimalisticTemplate);
 
 export default router;

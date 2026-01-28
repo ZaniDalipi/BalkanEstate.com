@@ -1,6 +1,22 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import User from '../models/User';
+import {
+  getPromoTemplate,
+  getTransactionalTemplate,
+  getReportTemplate,
+  getPropertyAlertTemplate,
+  get3DHouseGraphic,
+  getBaseTemplate,
+  getCardContainer,
+  getMinimalHeader,
+  getPromoHero,
+  getTextSection,
+  getCtaButton,
+  getStatsGrid,
+  getMinimalFooter,
+  BRAND_COLORS,
+} from '../templates/emailTemplates';
 
 // =============================================================================
 // Security Utilities
@@ -695,13 +711,28 @@ class EmailService {
     const safeAgencyName = escapeHtml(agencyName);
     const safeCouponCode = escapeHtml(couponCode);
     const expiryDateStr = expiryDate.toLocaleDateString();
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
 
-    const html = `<html><body><h1>Welcome ${safeAgencyName}!</h1><p>Use coupon <strong>${safeCouponCode}</strong> for 1 week FREE featured listing.</p><p>Valid until: ${expiryDateStr}</p></body></html>`;
+    const html = getPromoTemplate({
+      title: '1 Week FREE Featured Listing',
+      subtitle: 'Welcome to BalkanEstate! Start showcasing your properties today.',
+      greeting: `Hi ${safeAgencyName},`,
+      bodyParagraphs: [
+        'Thank you for joining BalkanEstate! To help you get started, we\'re giving you a special welcome gift.',
+        `Use code <strong style="font-family: monospace; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; color: ${BRAND_COLORS.primary};">${safeCouponCode}</strong> to get 1 week of featured listing absolutely free.`,
+        `This offer is valid until ${expiryDateStr}. Don\'t miss out!`,
+      ],
+      ctaText: 'Claim Your Free Week',
+      ctaUrl: `${frontendUrl}/dashboard/promotions?coupon=${encodeURIComponent(couponCode)}`,
+      houseStyle: 'modern',
+      badge: 'Welcome Gift',
+    });
+
     await this.sendEmail({
       to: email,
-      subject: `${agencyName} - Get 1 Week FREE Featured Listing!`,
+      subject: `Welcome ${agencyName}! Claim Your FREE Featured Listing`,
       html,
-      text: `Welcome! Use coupon ${couponCode} for 1 week free. Valid until ${expiryDateStr}`,
+      text: `Welcome ${agencyName}! Use coupon ${couponCode} for 1 week free featured listing. Valid until ${expiryDateStr}`,
     });
   }
 
@@ -709,13 +740,29 @@ class EmailService {
     const safeAgencyName = escapeHtml(agencyName);
     const safeCouponCode = escapeHtml(couponCode);
     const expiryDateStr = expiryDate.toLocaleDateString();
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
 
-    const html = `<html><body><h1>Your Featured Listing Expires Tomorrow!</h1><p>Hi ${safeAgencyName},</p><p>Your subscription expires on ${expiryDateStr}</p><p>Use coupon <strong>${safeCouponCode}</strong> for ${discount}% off renewal!</p></body></html>`;
+    const html = getPromoTemplate({
+      title: `${discount}% OFF Renewal`,
+      subtitle: 'Your featured listing expires tomorrow - renew now and save!',
+      greeting: `Hi ${safeAgencyName},`,
+      bodyParagraphs: [
+        `Your featured listing subscription expires on <strong>${expiryDateStr}</strong>.`,
+        'Don\'t lose your premium visibility! Properties with featured status get <strong>5x more views</strong> on average.',
+        `Renew now with code <strong style="font-family: monospace; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; color: ${BRAND_COLORS.primary};">${safeCouponCode}</strong> to get ${discount}% off your renewal.`,
+      ],
+      ctaText: `Renew & Save ${discount}%`,
+      ctaUrl: `${frontendUrl}/dashboard/promotions?coupon=${encodeURIComponent(couponCode)}`,
+      houseStyle: 'modern',
+      badge: 'Expires Tomorrow',
+      badgeColor: '#f59e0b',
+    });
+
     await this.sendEmail({
       to: email,
-      subject: `${agencyName} - Expires Tomorrow! ${discount}% OFF`,
+      subject: `Your Featured Listing Expires Tomorrow - Save ${discount}%`,
       html,
-      text: `Your listing expires ${expiryDateStr}. Use ${couponCode} for ${discount}% off!`,
+      text: `Your listing expires ${expiryDateStr}. Use ${couponCode} for ${discount}% off renewal!`,
     });
   }
 
@@ -723,13 +770,29 @@ class EmailService {
     const safeAgencyName = escapeHtml(agencyName);
     const safeInterval = escapeHtml(details.interval);
     const renewsDate = details.endDate.toLocaleDateString();
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
 
-    const html = `<html><body><h1>Subscription Activated!</h1><p>Hi ${safeAgencyName},</p><p>Your featured listing is now active.</p><p>Plan: ${safeInterval}</p><p>Price: €${details.price}</p><p>Renews: ${renewsDate}</p></body></html>`;
+    const html = getPromoTemplate({
+      title: 'Featured Listing Activated!',
+      subtitle: 'Your properties now have premium visibility',
+      greeting: `Hi ${safeAgencyName},`,
+      bodyParagraphs: [
+        'Great news! Your featured listing subscription is now active.',
+        `<strong>Plan:</strong> ${safeInterval}<br><strong>Price:</strong> €${details.price}<br><strong>Renews:</strong> ${renewsDate}`,
+        'Your properties will now appear at the top of search results and get up to 5x more views.',
+      ],
+      ctaText: 'View Your Dashboard',
+      ctaUrl: `${frontendUrl}/dashboard`,
+      houseStyle: 'modern',
+      badge: 'Active',
+      badgeColor: BRAND_COLORS.success,
+    });
+
     await this.sendEmail({
       to: email,
-      subject: `${agencyName} - Featured Listing Active!`,
+      subject: `Your Featured Listing is Now Active!`,
       html,
-      text: `Your subscription is active! Renews: ${renewsDate}`,
+      text: `Your subscription is active! Plan: ${details.interval}, Price: €${details.price}, Renews: ${renewsDate}`,
     });
   }
 

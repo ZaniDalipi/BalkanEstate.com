@@ -519,3 +519,211 @@ function generateEmailHtml(config: IEmailConfig, variables: Record<string, strin
 </body>
 </html>`;
 }
+
+// =============================================================================
+// Preview New Minimalistic Templates
+// =============================================================================
+
+import {
+  getPromoTemplate,
+  getTransactionalTemplate,
+  getReportTemplate,
+  getPropertyAlertTemplate,
+} from '../templates/emailTemplates';
+
+/**
+ * Preview new minimalistic email templates with 3D house graphics
+ */
+export const previewMinimalisticTemplate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { templateType } = req.params;
+    const testData = req.body || {};
+
+    let html = '';
+    let subject = '';
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://balkanestate.com';
+
+    switch (templateType) {
+      case 'promo':
+      case 'promotional':
+        subject = testData.subject || 'Special Offer: Get 25% OFF Your Featured Listing';
+        html = getPromoTemplate({
+          title: testData.title || '25% OFF Featured Listing',
+          subtitle: testData.subtitle || 'Limited time offer for new members',
+          greeting: testData.greeting || 'Hi John,',
+          bodyParagraphs: testData.bodyParagraphs || [
+            'We have a special offer just for you!',
+            'Get <strong>25% off</strong> your first featured listing and start attracting more buyers today.',
+            'This offer expires in 48 hours, so act fast!',
+          ],
+          ctaText: testData.ctaText || 'Claim Your Discount',
+          ctaUrl: testData.ctaUrl || `${frontendUrl}/dashboard/promotions`,
+          houseStyle: testData.houseStyle || 'modern',
+          badge: testData.badge || 'Limited Offer',
+          unsubscribeUrl: `${frontendUrl}/unsubscribe`,
+          preferencesUrl: `${frontendUrl}/settings/notifications`,
+        });
+        break;
+
+      case 'welcome':
+        subject = testData.subject || 'Welcome to BalkanEstate! Claim Your FREE Week';
+        html = getPromoTemplate({
+          title: '1 Week FREE Featured Listing',
+          subtitle: 'Welcome to BalkanEstate! Start showcasing your properties today.',
+          greeting: 'Hi New Agent,',
+          bodyParagraphs: [
+            'Thank you for joining BalkanEstate! To help you get started, we\'re giving you a special welcome gift.',
+            'Use code <strong style="font-family: monospace; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; color: #0252CD;">WELCOME100</strong> to get 1 week of featured listing absolutely free.',
+            'This offer is valid until December 31, 2026. Don\'t miss out!',
+          ],
+          ctaText: 'Claim Your Free Week',
+          ctaUrl: `${frontendUrl}/dashboard/promotions?coupon=WELCOME100`,
+          houseStyle: 'modern',
+          badge: 'Welcome Gift',
+        });
+        break;
+
+      case 'transactional':
+        subject = testData.subject || 'Your Password Has Been Reset';
+        html = getTransactionalTemplate({
+          greeting: testData.greeting || 'Hi John,',
+          bodyParagraphs: testData.bodyParagraphs || [
+            'Your password has been successfully reset.',
+            'If you did not request this change, please contact our support team immediately.',
+            'You can now log in with your new password.',
+          ],
+          ctaText: testData.ctaText || 'Log In Now',
+          ctaUrl: testData.ctaUrl || `${frontendUrl}/login`,
+        });
+        break;
+
+      case 'report':
+      case 'stats':
+        subject = testData.subject || 'Your Weekly Performance Report';
+        html = getReportTemplate({
+          title: testData.title || 'Weekly Performance Report',
+          period: testData.period || 'Jan 20 - Jan 26, 2026',
+          greeting: testData.greeting || 'Hi John,',
+          stats: testData.stats || [
+            { value: '1,234', label: 'Views', change: 12, color: '#0369a1' },
+            { value: '45', label: 'Inquiries', change: -5, color: '#16a34a' },
+            { value: '89', label: 'Saves', change: 23, color: '#d97706' },
+          ],
+          highlights: testData.highlights || [
+            'Your "Modern Villa in Ohrid" got 3x more views this week',
+            'You responded to inquiries 2x faster than average',
+            'Consider promoting your top property for more visibility',
+          ],
+          ctaText: testData.ctaText || 'View Full Analytics',
+          ctaUrl: testData.ctaUrl || `${frontendUrl}/dashboard/analytics`,
+        });
+        break;
+
+      case 'property-alert':
+      case 'alert':
+        subject = testData.subject || '3 New Properties Match Your Search';
+        html = getPropertyAlertTemplate({
+          recipientName: testData.recipientName || 'John',
+          searchName: testData.searchName || 'Apartments in Skopje',
+          properties: testData.properties || [
+            {
+              title: 'Modern 2BR Apartment',
+              address: 'City Center, Skopje',
+              price: 85000,
+              beds: 2,
+              baths: 1,
+              sqft: 750,
+              url: `${frontendUrl}/property/123`,
+              badge: 'New',
+            },
+            {
+              title: 'Luxury Penthouse',
+              address: 'Vodno District, Skopje',
+              price: 195000,
+              beds: 3,
+              baths: 2,
+              sqft: 1200,
+              url: `${frontendUrl}/property/456`,
+            },
+            {
+              title: 'Cozy Studio',
+              address: 'Aerodrom, Skopje',
+              price: 45000,
+              beds: 1,
+              baths: 1,
+              sqft: 400,
+              url: `${frontendUrl}/property/789`,
+              badge: 'Price Drop',
+            },
+          ],
+          viewAllUrl: `${frontendUrl}/saved-searches`,
+        });
+        break;
+
+      case 'villa':
+        subject = 'Luxury Villa Promotion';
+        html = getPromoTemplate({
+          title: 'Exclusive Villa Listings',
+          subtitle: 'Discover luxury living in the Balkans',
+          greeting: 'Dear Valued Client,',
+          bodyParagraphs: [
+            'We have curated the finest villa properties just for you.',
+            'From lakefront retreats to mountain escapes, find your dream home.',
+            'Schedule a private viewing today.',
+          ],
+          ctaText: 'Browse Luxury Villas',
+          ctaUrl: `${frontendUrl}/search?type=villa`,
+          houseStyle: 'villa',
+          badge: 'Luxury Collection',
+          badgeColor: '#f59e0b',
+        });
+        break;
+
+      case 'apartment':
+        subject = 'New Apartment Listings';
+        html = getPromoTemplate({
+          title: 'City Living Awaits',
+          subtitle: 'Modern apartments in prime locations',
+          greeting: 'Hi there,',
+          bodyParagraphs: [
+            'Looking for the perfect urban home?',
+            'We have new apartments in the best neighborhoods.',
+            'From studios to penthouses, find your ideal space.',
+          ],
+          ctaText: 'View Apartments',
+          ctaUrl: `${frontendUrl}/search?type=apartment`,
+          houseStyle: 'apartment',
+          badge: 'New Listings',
+        });
+        break;
+
+      default:
+        res.status(400).json({
+          message: `Unknown template type: ${templateType}`,
+          availableTypes: [
+            'promo',
+            'promotional',
+            'welcome',
+            'transactional',
+            'report',
+            'stats',
+            'property-alert',
+            'alert',
+            'villa',
+            'apartment',
+          ],
+        });
+        return;
+    }
+
+    res.json({
+      templateType,
+      subject,
+      html,
+    });
+  } catch (error) {
+    console.error('Error previewing minimalistic template:', error);
+    res.status(500).json({ message: 'Failed to generate template preview' });
+  }
+};
