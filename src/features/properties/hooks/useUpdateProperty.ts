@@ -53,9 +53,15 @@ export function useUpdateProperty() {
       // Update cache with server response
       queryClient.setQueryData(propertyKeys.detail(updatedProperty.id), updatedProperty);
 
-      // Invalidate lists to ensure consistency
-      queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: propertyKeys.myListings() });
+      // Invalidate and immediately refetch lists to ensure consistency
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.lists(),
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.myListings(),
+        refetchType: 'active',
+      });
     },
   });
 

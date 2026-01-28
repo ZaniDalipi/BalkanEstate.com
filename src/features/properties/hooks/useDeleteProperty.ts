@@ -71,10 +71,19 @@ export function useDeleteProperty() {
       // Remove from cache
       queryClient.removeQueries({ queryKey: propertyKeys.detail(propertyId) });
 
-      // Invalidate lists
-      queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: propertyKeys.myListings() });
-      queryClient.invalidateQueries({ queryKey: propertyKeys.favorites() });
+      // Invalidate and immediately refetch lists
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.lists(),
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.myListings(),
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.favorites(),
+        refetchType: 'active',
+      });
 
       // Invalidate user data to refresh subscription counts
       if (result?.updatedSubscription) {

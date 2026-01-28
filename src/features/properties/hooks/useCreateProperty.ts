@@ -34,9 +34,16 @@ export function useCreateProperty() {
   const mutation = useMutation({
     mutationFn: (propertyData: Property) => createProperty(propertyData),
     onSuccess: (result) => {
-      // Invalidate and refetch property lists
-      queryClient.invalidateQueries({ queryKey: propertyKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: propertyKeys.myListings() });
+      // Invalidate and IMMEDIATELY refetch property lists
+      // This ensures the new listing appears right away
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.lists(),
+        refetchType: 'active', // Refetch immediately, not just mark stale
+      });
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.myListings(),
+        refetchType: 'active',
+      });
 
       // Add to cache immediately for instant access
       queryClient.setQueryData(propertyKeys.detail(result.property.id), result.property);
