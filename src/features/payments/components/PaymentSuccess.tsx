@@ -292,9 +292,14 @@ const PaymentSuccess: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="flex flex-col items-center justify-center mb-4">
-            <LogoIcon className="w-16 h-16 animate-pulse" />
-            <h1 className="text-xl font-bold text-neutral-800 mt-2">
+          {/* BalkanEstate Logo with subtle breathing animation */}
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="relative">
+              <LogoIcon className="w-20 h-20 animate-pulse" />
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 w-20 h-20 bg-primary/20 rounded-full blur-xl animate-pulse" />
+            </div>
+            <h1 className="text-xl font-bold text-neutral-800 mt-4">
               Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
             </h1>
           </div>
@@ -306,6 +311,12 @@ const PaymentSuccess: React.FC = () => {
               ? 'Setting up your agency profile and generating team invitation codes...'
               : t('success.verifyingDescription')}
           </p>
+          {/* Simple loading dots */}
+          <div className="flex justify-center gap-1 mt-4">
+            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
         </div>
       </div>
     );
