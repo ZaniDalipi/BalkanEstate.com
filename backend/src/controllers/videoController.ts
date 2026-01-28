@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import Property from '../models/Property';
-import { IUser } from '../models/User';
+import User, { IUser } from '../models/User';
 import {
   generatePropertyVideo,
   startVideoGenerationJob,
@@ -68,7 +68,12 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     // Prepare image URLs
     const imageUrls = property.images.map(img => img.url);
 
-    // Generate video options
+    // Get seller info
+    const seller = await User.findById(property.sellerId);
+    const sellerName = property.createdByName || seller?.name || '';
+    const sellerPhone = seller?.phone || '';
+
+    // Generate video options with full property details
     const options: VideoGenerationOptions = {
       propertyId: String(property._id),
       userId,
@@ -76,6 +81,11 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
       title: property.title,
       price: property.price,
       city: property.city,
+      beds: property.beds,
+      baths: property.baths,
+      sqft: property.sqft,
+      sellerName,
+      sellerPhone,
       format,
       duration,
       includeWatermark,
@@ -153,7 +163,12 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
     // Prepare image URLs
     const imageUrls = property.images.map(img => img.url);
 
-    // Generate video options
+    // Get seller info
+    const seller = await User.findById(property.sellerId);
+    const sellerName = property.createdByName || seller?.name || '';
+    const sellerPhone = seller?.phone || '';
+
+    // Generate video options with full property details
     const options: VideoGenerationOptions = {
       propertyId: String(property._id),
       userId,
@@ -161,6 +176,11 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
       title: property.title,
       price: property.price,
       city: property.city,
+      beds: property.beds,
+      baths: property.baths,
+      sqft: property.sqft,
+      sellerName,
+      sellerPhone,
       format,
       duration,
       includeWatermark,
