@@ -1,6 +1,5 @@
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
-import Property from '../models/Property';
 
 // Store the io instance for emitting from controllers
 let ioInstance: Server | null = null;

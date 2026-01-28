@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Agent, Agency } from '@/types';
 import AgencyBadge from '@/components/shared/AgencyBadge';
 import { useAppContext } from '@/context/AppContext';
+import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import {
   ArrowLeftIcon,
   BuildingOfficeIcon,
@@ -291,27 +292,44 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, [agent.id]);
 
-    // Fetch agent's properties from API
-    useEffect(() => {
-        const fetchAgentProperties = async () => {
-            setLoadingProperties(true);
-            try {
-                // Try fetching with agent.userId first, then agent.id
-                const userId = agent.userId || agent.id;
-                if (userId) {
-                    const properties = await getPropertiesBySellerId(String(userId));
-                    setFetchedProperties(properties);
-                }
-            } catch (error) {
-                console.error('Error fetching agent properties:', error);
-                // Don't clear - we still have state.properties as fallback
-            } finally {
-                setLoadingProperties(false);
+    // Function to fetch agent's properties
+    const fetchAgentProperties = useCallback(async () => {
+        setLoadingProperties(true);
+        try {
+            // Try fetching with agent.userId first, then agent.id
+            const userId = agent.userId || agent.id;
+            if (userId) {
+                const properties = await getPropertiesBySellerId(String(userId));
+                setFetchedProperties(properties);
             }
-        };
-
-        fetchAgentProperties();
+        } catch (error) {
+            console.error('Error fetching agent properties:', error);
+            // Don't clear - we still have state.properties as fallback
+        } finally {
+            setLoadingProperties(false);
+        }
     }, [agent.userId, agent.id]);
+
+    // Fetch agent's properties from API on mount
+    useEffect(() => {
+        fetchAgentProperties();
+    }, [fetchAgentProperties]);
+
+    // Enable real-time updates - refresh agent's listings when properties change
+    useRealtimeProperties({
+        onPropertyCreated: () => {
+            // Refresh agent's listings when a new property is created
+            fetchAgentProperties();
+        },
+        onPropertyUpdated: () => {
+            // Refresh agent's listings when a property is updated
+            fetchAgentProperties();
+        },
+        onPropertyDeleted: () => {
+            // Refresh agent's listings when a property is deleted
+            fetchAgentProperties();
+        },
+    });
 
     // Fetch similar agents from same agency or city and fetch agency gradient
     useEffect(() => {

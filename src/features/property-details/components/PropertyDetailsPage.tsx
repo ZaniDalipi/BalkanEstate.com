@@ -1,10 +1,12 @@
 // PropertyDetailsPage - Main Component
 // Orchestrates all property detail subcomponents
+// Real-time updates via WebSocket for instant price/status changes
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '@/types';
 import { useAppContext } from '@/context/AppContext';
+import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { ArrowLeftIcon, SparklesIcon } from '@/constants';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
@@ -42,7 +44,7 @@ import Footer from '@/components/shared/Footer';
  */
 const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => {
   const { t } = useTranslation(['property']);
-  const { state, dispatch, createConversation, toggleSavedHome } = useAppContext();
+  const { state, dispatch, createConversation, toggleSavedHome, fetchProperties } = useAppContext();
   const { error } = useNotification();
 
   // Track page view for analytics
@@ -50,6 +52,23 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
     entityType: 'property',
     entityId: property.id,
     enabled: !!property.id,
+  });
+
+  // Enable real-time updates - refresh when this property is updated
+  useRealtimeProperties({
+    onPropertyUpdated: (data) => {
+      // If the updated property is the one being viewed, refresh the data
+      if (data.propertyId === property.id) {
+        fetchProperties?.();
+      }
+    },
+    onPropertyDeleted: (data) => {
+      // If the property being viewed was deleted, go back to search
+      if (data.propertyId === property.id) {
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        window.history.pushState({}, '', '/');
+      }
+    },
   });
 
   // State for image gallery

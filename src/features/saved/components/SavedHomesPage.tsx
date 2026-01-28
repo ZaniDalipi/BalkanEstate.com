@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { Property, Agent } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import { HeartIcon, UserCircleIcon, HomeIcon, UsersIcon } from '@/constants';
@@ -17,13 +18,25 @@ import SavedItemsHeroBanner from '@/components/shared/SavedItemsHeroBanner';
 
 const SavedPropertiesPage: React.FC = () => {
   const { t } = useTranslation(['property', 'nav', 'agents']);
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, fetchSavedHomes } = useAppContext();
   const { savedHomes, comparisonList, properties, isAuthenticated, isLoadingUserData } = state;
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
   const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
   const [activeTab, setActiveTab] = useState<'properties' | 'agents'>('properties');
   const [savedAgentsList, setSavedAgentsList] = useState<Agent[]>([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+
+  // Enable real-time updates - refresh saved homes when properties change
+  useRealtimeProperties({
+    onPropertyUpdated: () => {
+      // Refresh saved homes when a property is updated (price change, status change, etc.)
+      if (isAuthenticated) fetchSavedHomes?.();
+    },
+    onPropertyDeleted: () => {
+      // Refresh saved homes when a property is deleted
+      if (isAuthenticated) fetchSavedHomes?.();
+    },
+  });
 
   const showToast = (message: string, type: 'success' | 'error') => {
       setToast({ show: true, message, type });

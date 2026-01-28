@@ -1,5 +1,6 @@
 // useFavorites Hook - Get and toggle favorite properties
 // Uses TanStack Query for favorites list and mutation for toggle
+// Real-time updates via polling (auto-refresh every 15 seconds)
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertyKeys } from '../api';
@@ -9,22 +10,35 @@ import type { Property } from '@/types';
 /**
  * Hook to get user's favorite properties
  *
+ * Features:
+ * - Real-time updates via polling (every 15 seconds)
+ * - Automatic caching
+ * - Auto-refetch on window focus
+ *
  * Usage:
  * ```tsx
  * const { favorites, isLoading } = useFavorites();
  * ```
  */
-export function useFavorites() {
+export function useFavorites(options?: { enablePolling?: boolean }) {
+  const { enablePolling = true } = options || {};
+
   const {
     data: favorites = [],
     isLoading,
+    isFetching,
     error,
     refetch,
+    dataUpdatedAt,
   } = useQuery({
     queryKey: propertyKeys.favorites(),
     queryFn: getFavorites,
-    staleTime: 3 * 60 * 1000, // 3 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 1000, // 5 seconds - consider stale quickly for real-time feel
+    gcTime: 10 * 60 * 1000, // 10 minutes cache retention
+    refetchInterval: enablePolling ? 15 * 1000 : false, // Auto-refresh every 15 seconds
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    refetchOnMount: true, // Refresh on component mount
+    refetchOnReconnect: true, // Refresh on network reconnect
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) return false;
       return failureCount < 3;
@@ -34,8 +48,10 @@ export function useFavorites() {
   return {
     favorites,
     isLoading,
+    isFetching,
     error,
     refetch,
+    dataUpdatedAt,
     isEmpty: !isLoading && favorites.length === 0,
     isFavorite: (propertyId: string) => favorites.some(p => p.id === propertyId),
   };
@@ -96,8 +112,11 @@ export function useToggleFavorite() {
       console.error('Toggle favorite error:', err);
     },
     onSuccess: () => {
-      // Invalidate to ensure server state is correct
-      queryClient.invalidateQueries({ queryKey: propertyKeys.favorites() });
+      // Invalidate and immediately refetch to ensure server state is correct
+      queryClient.invalidateQueries({
+        queryKey: propertyKeys.favorites(),
+        refetchType: 'active',
+      });
     },
   });
 
