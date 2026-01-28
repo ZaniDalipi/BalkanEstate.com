@@ -13,7 +13,7 @@
 // Configuration
 // =============================================================================
 
-const BRAND_COLORS = {
+export const BRAND_COLORS = {
   primary: '#0252CD',
   primaryDark: '#0142a8',
   accent: '#10b981',
