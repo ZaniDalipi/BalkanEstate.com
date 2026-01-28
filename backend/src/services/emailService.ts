@@ -1,22 +1,7 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import User from '../models/User';
-import {
-  getPromoTemplate,
-  getTransactionalTemplate,
-  getReportTemplate,
-  getPropertyAlertTemplate,
-  get3DHouseGraphic,
-  getBaseTemplate,
-  getCardContainer,
-  getMinimalHeader,
-  getPromoHero,
-  getTextSection,
-  getCtaButton,
-  getStatsGrid,
-  getMinimalFooter,
-  BRAND_COLORS,
-} from '../templates/emailTemplates';
+import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 
 // =============================================================================
 // Security Utilities

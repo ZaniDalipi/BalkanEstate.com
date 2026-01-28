@@ -674,6 +674,7 @@ export const getPromoTemplate = (options: {
   ctaUrl: string;
   houseStyle?: 'modern' | 'villa' | 'apartment';
   badge?: string;
+  badgeColor?: string;
   unsubscribeUrl?: string;
   preferencesUrl?: string;
 }): string => {
@@ -684,6 +685,7 @@ export const getPromoTemplate = (options: {
       subtitle: options.subtitle,
       houseStyle: options.houseStyle,
       badge: options.badge,
+      badgeColor: options.badgeColor,
     })}
     ${getTextSection({
       greeting: options.greeting,
