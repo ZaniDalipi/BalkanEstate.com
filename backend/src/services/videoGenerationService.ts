@@ -291,6 +291,31 @@ const createVideoWithOverlays = (options: {
       .join('\n') + `\nfile '${imagePaths[imagePaths.length - 1]}'`;
     fs.writeFileSync(concatFilePath, concatContent);
 
+    // Find available font on the system
+    const fontPaths = [
+      '/System/Library/Fonts/Helvetica.ttc',           // macOS
+      '/System/Library/Fonts/SFNSText.ttf',            // macOS newer
+      '/Library/Fonts/Arial.ttf',                       // macOS
+      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', // Linux
+      '/usr/share/fonts/TTF/DejaVuSans.ttf',           // Linux alternative
+      'C:\\Windows\\Fonts\\arial.ttf',                  // Windows
+    ];
+
+    let fontFile = '';
+    for (const fp of fontPaths) {
+      if (fs.existsSync(fp)) {
+        fontFile = fp;
+        console.log(`📝 Using font: ${fp}`);
+        break;
+      }
+    }
+
+    // If no font found, skip text overlays
+    const hasFont = fontFile !== '';
+    if (!hasFont) {
+      console.warn('⚠️ No system font found, skipping text overlays');
+    }
+
     // Build filter with animated text overlays
     let filters: string[] = [];
 
@@ -317,88 +342,93 @@ const createVideoWithOverlays = (options: {
     const smallFontSize = isVertical ? 36 : 32;
     const bottomPadding = isVertical ? 300 : 150;
 
-    // Add gradient overlay at bottom for text readability
-    filters.push(`drawbox=x=0:y=ih-${bottomPadding + 50}:w=iw:h=${bottomPadding + 50}:color=black@0.6:t=fill`);
+    // Only add text overlays if we have a font
+    if (hasFont) {
+      const fontParam = `fontfile='${fontFile}'`;
 
-    // Title or Price (main text) - with fade in
-    if (priceText) {
-      filters.push(
-        `drawtext=text='${escapeText(priceText)}':` +
-        `fontsize=${fontSize}:fontcolor=white:` +
-        `x=(w-text_w)/2:y=h-${bottomPadding}:` +
-        `alpha='if(lt(mod(t,${durationPerImage}),0.5),mod(t,${durationPerImage})*2,1)'`
-      );
-    }
+      // Add gradient overlay at bottom for text readability
+      filters.push(`drawbox=x=0:y=ih-${bottomPadding + 50}:w=iw:h=${bottomPadding + 50}:color=black@0.6:t=fill`);
 
-    // Location
-    if (locationText) {
-      filters.push(
-        `drawtext=text='${escapeText(locationText)}':` +
-        `fontsize=${smallFontSize}:fontcolor=white@0.9:` +
-        `x=(w-text_w)/2:y=h-${bottomPadding - 60}`
-      );
-    }
-
-    // Features (beds, baths, sqft)
-    if (featuresText) {
-      filters.push(
-        `drawtext=text='${escapeText(featuresText)}':` +
-        `fontsize=${smallFontSize - 4}:fontcolor=white@0.8:` +
-        `x=(w-text_w)/2:y=h-${bottomPadding - 110}`
-      );
-    }
-
-    // Title at top
-    if (title) {
-      filters.push(`drawbox=x=0:y=0:w=iw:h=120:color=black@0.5:t=fill`);
-      filters.push(
-        `drawtext=text='${escapeText(title.substring(0, 40))}':` +
-        `fontsize=${smallFontSize}:fontcolor=white:` +
-        `x=(w-text_w)/2:y=40`
-      );
-    }
-
-    // Contact info on last few seconds
-    const contactStartTime = Math.max(0, totalDuration - 4);
-    if (sellerName || sellerPhone) {
-      // Show contact overlay in last 4 seconds
-      filters.push(
-        `drawbox=x=iw/4:y=ih/3:w=iw/2:h=ih/3:color=black@0.8:t=fill:enable='gte(t,${contactStartTime})'`
-      );
-
-      if (sellerName) {
+      // Price (main text) - with fade in animation
+      if (priceText) {
         filters.push(
-          `drawtext=text='${escapeText(sellerName)}':` +
-          `fontsize=${fontSize - 8}:fontcolor=white:` +
-          `x=(w-text_w)/2:y=h/2-40:` +
-          `enable='gte(t,${contactStartTime})'`
+          `drawtext=${fontParam}:text='${escapeText(priceText)}':` +
+          `fontsize=${fontSize}:fontcolor=white:` +
+          `x=(w-text_w)/2:y=h-${bottomPadding}:` +
+          `alpha='if(lt(mod(t\\,${durationPerImage})\\,0.5)\\,mod(t\\,${durationPerImage})*2\\,1)'`
         );
       }
 
-      if (sellerPhone) {
+      // Location
+      if (locationText) {
         filters.push(
-          `drawtext=text='${escapeText(sellerPhone)}':` +
+          `drawtext=${fontParam}:text='${escapeText(locationText)}':` +
           `fontsize=${smallFontSize}:fontcolor=white@0.9:` +
-          `x=(w-text_w)/2:y=h/2+20:` +
-          `enable='gte(t,${contactStartTime})'`
+          `x=(w-text_w)/2:y=h-${bottomPadding - 60}`
         );
       }
 
-      // Call to action
+      // Features (beds, baths, sqft)
+      if (featuresText) {
+        filters.push(
+          `drawtext=${fontParam}:text='${escapeText(featuresText)}':` +
+          `fontsize=${smallFontSize - 4}:fontcolor=white@0.8:` +
+          `x=(w-text_w)/2:y=h-${bottomPadding - 110}`
+        );
+      }
+
+      // Title at top
+      if (title) {
+        filters.push(`drawbox=x=0:y=0:w=iw:h=120:color=black@0.5:t=fill`);
+        filters.push(
+          `drawtext=${fontParam}:text='${escapeText(title.substring(0, 40))}':` +
+          `fontsize=${smallFontSize}:fontcolor=white:` +
+          `x=(w-text_w)/2:y=40`
+        );
+      }
+
+      // Contact info on last few seconds
+      const contactStartTime = Math.max(0, totalDuration - 4);
+      if (sellerName || sellerPhone) {
+        // Show contact overlay in last 4 seconds
+        filters.push(
+          `drawbox=x=iw/4:y=ih/3:w=iw/2:h=ih/3:color=black@0.8:t=fill:enable='gte(t\\,${contactStartTime})'`
+        );
+
+        if (sellerName) {
+          filters.push(
+            `drawtext=${fontParam}:text='${escapeText(sellerName)}':` +
+            `fontsize=${fontSize - 8}:fontcolor=white:` +
+            `x=(w-text_w)/2:y=h/2-40:` +
+            `enable='gte(t\\,${contactStartTime})'`
+          );
+        }
+
+        if (sellerPhone) {
+          filters.push(
+            `drawtext=${fontParam}:text='${escapeText(sellerPhone)}':` +
+            `fontsize=${smallFontSize}:fontcolor=white@0.9:` +
+            `x=(w-text_w)/2:y=h/2+20:` +
+            `enable='gte(t\\,${contactStartTime})'`
+          );
+        }
+
+        // Call to action
+        filters.push(
+          `drawtext=${fontParam}:text='Contact Now':` +
+          `fontsize=${smallFontSize - 4}:fontcolor=yellow:` +
+          `x=(w-text_w)/2:y=h/2+70:` +
+          `enable='gte(t\\,${contactStartTime})'`
+        );
+      }
+
+      // Watermark
       filters.push(
-        `drawtext=text='Contact Now':` +
-        `fontsize=${smallFontSize - 4}:fontcolor=yellow:` +
-        `x=(w-text_w)/2:y=h/2+70:` +
-        `enable='gte(t,${contactStartTime})'`
+        `drawtext=${fontParam}:text='BalkanEstate.com':` +
+        `fontsize=24:fontcolor=white@0.6:` +
+        `x=20:y=20`
       );
     }
-
-    // Watermark
-    filters.push(
-      `drawtext=text='BalkanEstate.com':` +
-      `fontsize=24:fontcolor=white@0.6:` +
-      `x=20:y=20`
-    );
 
     const filterComplex = filters.join(',');
 
