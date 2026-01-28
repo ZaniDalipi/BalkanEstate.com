@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
+import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyList from './PropertyList';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
@@ -176,6 +177,22 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [showMapHint, setShowMapHint] = useState(false); // Show hint about map view on mobile
     const [fallbackLocation, setFallbackLocation] = useState<string | null>(null); // Location name when showing fallback properties
 
+    // Enable real-time property updates via WebSocket
+    // When any property is created/updated/deleted, the list refreshes instantly
+    useRealtimeProperties({
+        onPropertyCreated: () => {
+            // Refetch properties when new listing is created
+            fetchProperties();
+        },
+        onPropertyUpdated: () => {
+            // Refetch properties when listing is updated
+            fetchProperties();
+        },
+        onPropertyDeleted: () => {
+            // Refetch properties when listing is deleted
+            fetchProperties();
+        },
+    });
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);

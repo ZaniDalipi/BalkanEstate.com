@@ -1,6 +1,23 @@
 import { io, Socket } from 'socket.io-client';
 import { Message } from '../types';
 
+// Property event types for real-time updates
+export interface PropertyEvent {
+  property?: any;
+  propertyId?: string;
+  timestamp: string;
+}
+
+export interface PropertyStatusEvent extends PropertyEvent {
+  status: string;
+}
+
+export interface PropertyBulkEvent {
+  action: 'created' | 'updated' | 'deleted';
+  count: number;
+  timestamp: string;
+}
+
 class SocketService {
   private socket: Socket | null = null;
   private messageHandlers: Map<string, Set<(message: Message) => void>> = new Map();
@@ -11,6 +28,13 @@ class SocketService {
   private userUpdateHandlers: Set<(data: any) => void> = new Set();
   private agencyUpdateHandlers: Map<string, Set<(data: any) => void>> = new Map();
   private currentUserId: string | null = null;
+
+  // Property real-time handlers
+  private propertyCreatedHandlers: Set<(data: PropertyEvent) => void> = new Set();
+  private propertyUpdatedHandlers: Set<(data: PropertyEvent) => void> = new Set();
+  private propertyDeletedHandlers: Set<(data: PropertyEvent) => void> = new Set();
+  private propertyStatusHandlers: Set<(data: PropertyStatusEvent) => void> = new Set();
+  private propertyBulkHandlers: Set<(data: PropertyBulkEvent) => void> = new Set();
 
   connect(token: string, userId?: string) {
     if (this.socket?.connected) {
@@ -101,6 +125,35 @@ class SocketService {
         this.userUpdateHandlers.forEach(handler => handler(data));
       });
     }
+
+    // =========================================================================
+    // PROPERTY REAL-TIME EVENTS - for instant listing updates
+    // =========================================================================
+
+    // Handle new property created
+    this.socket.on('property:created', (data: PropertyEvent) => {
+      this.propertyCreatedHandlers.forEach(handler => handler(data));
+    });
+
+    // Handle property updated
+    this.socket.on('property:updated', (data: PropertyEvent) => {
+      this.propertyUpdatedHandlers.forEach(handler => handler(data));
+    });
+
+    // Handle property deleted
+    this.socket.on('property:deleted', (data: PropertyEvent) => {
+      this.propertyDeletedHandlers.forEach(handler => handler(data));
+    });
+
+    // Handle property status changed (sold, available, etc.)
+    this.socket.on('property:statusChanged', (data: PropertyStatusEvent) => {
+      this.propertyStatusHandlers.forEach(handler => handler(data));
+    });
+
+    // Handle bulk property updates
+    this.socket.on('property:bulkUpdate', (data: PropertyBulkEvent) => {
+      this.propertyBulkHandlers.forEach(handler => handler(data));
+    });
   }
 
   disconnect() {
@@ -258,6 +311,84 @@ class SocketService {
 
   isConnected() {
     return this.socket?.connected || false;
+  }
+
+  // =========================================================================
+  // PROPERTY REAL-TIME SUBSCRIPTIONS
+  // =========================================================================
+
+  /**
+   * Subscribe to new property created events
+   * Use this to instantly show new listings in search results
+   */
+  onPropertyCreated(handler: (data: PropertyEvent) => void) {
+    this.propertyCreatedHandlers.add(handler);
+    return () => {
+      this.propertyCreatedHandlers.delete(handler);
+    };
+  }
+
+  /**
+   * Subscribe to property updated events
+   * Use this to instantly reflect property edits
+   */
+  onPropertyUpdated(handler: (data: PropertyEvent) => void) {
+    this.propertyUpdatedHandlers.add(handler);
+    return () => {
+      this.propertyUpdatedHandlers.delete(handler);
+    };
+  }
+
+  /**
+   * Subscribe to property deleted events
+   * Use this to instantly remove deleted listings
+   */
+  onPropertyDeleted(handler: (data: PropertyEvent) => void) {
+    this.propertyDeletedHandlers.add(handler);
+    return () => {
+      this.propertyDeletedHandlers.delete(handler);
+    };
+  }
+
+  /**
+   * Subscribe to property status change events (sold, available, etc.)
+   */
+  onPropertyStatusChanged(handler: (data: PropertyStatusEvent) => void) {
+    this.propertyStatusHandlers.add(handler);
+    return () => {
+      this.propertyStatusHandlers.delete(handler);
+    };
+  }
+
+  /**
+   * Subscribe to bulk property update events
+   */
+  onPropertyBulkUpdate(handler: (data: PropertyBulkEvent) => void) {
+    this.propertyBulkHandlers.add(handler);
+    return () => {
+      this.propertyBulkHandlers.delete(handler);
+    };
+  }
+
+  /**
+   * Subscribe to ALL property events at once
+   * Convenience method for React Query cache invalidation
+   */
+  onAnyPropertyChange(handler: () => void) {
+    const unsubCreated = this.onPropertyCreated(() => handler());
+    const unsubUpdated = this.onPropertyUpdated(() => handler());
+    const unsubDeleted = this.onPropertyDeleted(() => handler());
+    const unsubStatus = this.onPropertyStatusChanged(() => handler());
+    const unsubBulk = this.onPropertyBulkUpdate(() => handler());
+
+    // Return combined unsubscribe function
+    return () => {
+      unsubCreated();
+      unsubUpdated();
+      unsubDeleted();
+      unsubStatus();
+      unsubBulk();
+    };
   }
 }
 

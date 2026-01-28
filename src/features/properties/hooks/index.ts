@@ -13,3 +13,9 @@ export {
   usePromoteProperty,
   useUploadPropertyImages,
 } from './usePropertyActions';
+
+// Real-time WebSocket updates
+export {
+  useRealtimeProperties,
+  useEnableRealtimeProperties,
+} from './useRealtimeProperties';

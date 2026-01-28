@@ -6,6 +6,7 @@ import compression from 'compression';
 import morgan from 'morgan';
 import connectDB from './config/database';
 import { setupChatSocket } from './sockets/chatSocket';
+import { setupPropertySocket } from './sockets/propertySocket';
 import { setSocketInstance } from './utils/socketInstance';
 
 // Import and initialize Sentry for error monitoring (must be early)
@@ -117,6 +118,9 @@ setSocketInstance(io);
 
 // Setup chat socket handlers
 setupChatSocket(io);
+
+// Setup property socket for real-time listing updates
+setupPropertySocket(io);
 
 // Connect to database
 connectDB();
