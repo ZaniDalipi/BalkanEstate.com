@@ -1,7 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
+import { useRealtimeProperties } from '../../src/features/properties/hooks';
 import { EyeIcon, HeartIcon, InboxIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
@@ -255,7 +256,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     };
 
     // Refetch function - can be called manually or on view change
-    const fetchMyListings = async () => {
+    const fetchMyListings = useCallback(async () => {
         setIsLoading(true);
         try {
             console.log(`🔄 Fetching ALL listings for user`);
@@ -278,12 +279,29 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
+
+    // Enable real-time updates via WebSocket
+    // When any property is created/updated/deleted, refresh the list
+    useRealtimeProperties({
+        onPropertyCreated: () => {
+            console.log('🏠 MyListings: Property created, refreshing...');
+            fetchMyListings();
+        },
+        onPropertyUpdated: () => {
+            console.log('🏠 MyListings: Property updated, refreshing...');
+            fetchMyListings();
+        },
+        onPropertyDeleted: () => {
+            console.log('🏠 MyListings: Property deleted, refreshing...');
+            fetchMyListings();
+        },
+    });
 
     // Fetch on mount and when navigating back to this view (after editing)
     useEffect(() => {
         fetchMyListings();
-    }, [state.activeView]); // Refetch when view changes (e.g., returning from edit-listing)
+    }, [state.activeView, fetchMyListings]); // Refetch when view changes (e.g., returning from edit-listing)
 
     // Update renewal statuses every minute
     useEffect(() => {
