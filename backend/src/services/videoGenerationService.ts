@@ -400,13 +400,14 @@ const createVideoFromImages = (options: {
       outputOptions.push('-shortest'); // End when shortest stream ends
     }
 
-    command
+    // Use type assertion for fluent-ffmpeg event handlers
+    (command as any)
       .outputOptions(outputOptions)
       .output(outputPath)
-      .on('start', (cmd) => {
+      .on('start', (cmd: string) => {
         console.log('🎬 FFmpeg command:', cmd.substring(0, 200) + '...');
       })
-      .on('progress', (progress) => {
+      .on('progress', (progress: { percent?: number }) => {
         if (progress.percent) {
           console.log(`📊 Progress: ${Math.round(progress.percent)}%`);
         }
@@ -415,7 +416,7 @@ const createVideoFromImages = (options: {
         console.log('✅ FFmpeg processing complete');
         resolve();
       })
-      .on('error', (err, stdout, stderr) => {
+      .on('error', (err: Error, _stdout: string, stderr: string) => {
         console.error('❌ FFmpeg error:', err.message);
         console.error('FFmpeg stderr:', stderr);
         reject(err);
