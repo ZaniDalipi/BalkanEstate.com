@@ -396,11 +396,9 @@ export const getCardContainer = (content: string, options: {
  */
 export const getMinimalHeader = (options: {
   showLogo?: boolean;
-  logoUrl?: string;
   tagline?: string;
 } = {}): string => {
   const { showLogo = true, tagline } = options;
-  const logoUrl = options.logoUrl || `${process.env.FRONTEND_URL || 'https://balkanestate.com'}/logo.png`;
 
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 32px;">
@@ -509,19 +507,20 @@ export const getCtaButton = (options: {
 }): string => {
   const { text, url, style = 'primary', fullWidth = false } = options;
 
-  const styles = {
+  const styles: Record<string, { bg: string; hover: string; text: string; border?: string }> = {
     primary: { bg: BRAND_COLORS.primary, hover: BRAND_COLORS.primaryDark, text: '#ffffff' },
     secondary: { bg: '#ffffff', hover: '#f3f4f6', text: BRAND_COLORS.text, border: BRAND_COLORS.border },
     success: { bg: BRAND_COLORS.success, hover: '#059669', text: '#ffffff' },
   };
 
   const s = styles[style];
+  const borderStyle = s.border ? `border: 1px solid ${s.border};` : '';
 
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" width="${fullWidth ? '100%' : 'auto'}" style="margin: 24px 0;">
   <tr>
     <td align="center">
-      <a href="${url}" target="_blank" style="display: inline-block; background-color: ${s.bg}; color: ${s.text}; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 8px; ${s.border ? `border: 1px solid ${s.border};` : ''} transition: background-color 0.2s;">
+      <a href="${url}" target="_blank" style="display: inline-block; background-color: ${s.bg}; color: ${s.text}; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 8px; ${borderStyle} transition: background-color 0.2s;">
         ${text}
       </a>
     </td>
