@@ -12,6 +12,11 @@ export const useGoogleMapLoader = () => {
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
+  // Log errors for debugging
+  if (loadError) {
+    console.error('[useGoogleMapLoader] Google Maps failed to load:', loadError.message);
+  }
+
   return { isLoaded, loadError };
 };
 

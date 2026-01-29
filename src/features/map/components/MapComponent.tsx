@@ -11,6 +11,11 @@ const GoogleMapComponent = lazy(() => import('./GoogleMapComponent'));
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY;
 const USE_GOOGLE_MAPS = !!GOOGLE_MAPS_API_KEY;
 
+// Log map provider choice for debugging
+if (typeof window !== 'undefined') {
+  console.log(`[Map] Using ${USE_GOOGLE_MAPS ? 'Google Maps' : 'Leaflet'} ${!GOOGLE_MAPS_API_KEY ? '(no API key found)' : ''}`);
+}
+
 // Zillow-style: Zoom-based marker limits for performance
 // More markers when zoomed in, fewer when zoomed out
 const getMaxMarkersForZoom = (zoom: number): number => {
