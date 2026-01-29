@@ -665,10 +665,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           </div>
         )}
 
-      {/* Desktop Controls - positioned above the newsletter bar (bottom-12 = ~112px) */}
+      {/* Desktop Controls - positioned above the newsletter bar */}
       {!isMobile && !hideControls && (
         <>
-          <div className="absolute bottom-12 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+          <div className="absolute bottom-24 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
             {/* Main control bar - compact with glass effect */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1.5 transition-all duration-300">
               <button
