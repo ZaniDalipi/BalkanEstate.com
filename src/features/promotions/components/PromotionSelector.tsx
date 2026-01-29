@@ -177,6 +177,13 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
 
   // Handle promotion purchase or extension
   const handlePurchase = async () => {
+    // PAYMENTS COMING SOON - Show info message instead of processing payment
+    setError(null);
+    setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
+    return;
+
+    // Original payment logic - temporarily disabled
+    /*
     if (!selectedTier && !isExtension) {
       setError('Please select a promotion tier');
       return;
@@ -268,6 +275,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
     } finally {
       setSubmitting(false);
     }
+    */
   };
 
   // Combined submitting state
