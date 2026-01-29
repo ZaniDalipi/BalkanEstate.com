@@ -410,14 +410,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
         </div>
       )}
 
-      {/* Header */}
+      {/* Header - Compact on mobile */}
       <div className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
-        {/* Breadcrumbs - Collapses on scroll on mobile */}
+        {/* Breadcrumbs - Hidden on mobile, visible on larger screens */}
         <div
-          className={`px-4 overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`px-3 sm:px-4 overflow-hidden transition-all duration-300 ease-in-out hidden sm:block ${
             isBreadcrumbCollapsed
               ? 'max-h-0 opacity-0 py-0'
-              : 'max-h-20 opacity-100 pt-3 pb-1'
+              : 'max-h-20 opacity-100 pt-2 pb-1'
           }`}
         >
           <Breadcrumbs
@@ -430,33 +430,55 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           />
         </div>
 
-        <div className={`p-4 flex flex-col gap-3 transition-all duration-300 ${
-          isBreadcrumbCollapsed ? 'pt-2' : 'pt-2'
-        }`}>
-          <div className="flex items-center justify-between">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 text-primary font-semibold hover:underline"
-              aria-label={t('property:navigation.goBackToSearch')}
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-              {t('property:navigation.back')}
-            </button>
-          </div>
+        {/* Single row header on mobile: Back + Stats + Actions */}
+        <div className="px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
+          {/* Back button */}
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-1 sm:gap-2 text-primary font-semibold hover:underline text-sm sm:text-base"
+            aria-label={t('property:navigation.goBackToSearch')}
+          >
+            <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">{t('property:navigation.back')}</span>
+          </button>
 
-          <div className="flex items-center gap-2 justify-end">
+          {/* Stats - inline on mobile */}
+          {(daysListedText || property.views) && (
+            <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-neutral-500">
+              {daysListedText && (
+                <span className="flex items-center gap-0.5 sm:gap-1">
+                  <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="whitespace-nowrap">{daysListedText}</span>
+                </span>
+              )}
+              {property.views !== undefined && property.views > 0 && (
+                <span className="flex items-center gap-0.5 sm:gap-1">
+                  <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>{property.views.toLocaleString()}</span>
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Promote/Extend Button - Only visible to property owners */}
             {isOwner && property.status !== 'sold' && (
               <button
                 onClick={() => setIsPromotionModalOpen(true)}
-                className={`flex items-center gap-1.5 px-3 py-2 text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-white text-xs sm:text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all ${
                   property.isPromoted
                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
                     : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
                 }`}
                 aria-label={property.isPromoted ? t('property:actions.extendPromotion', 'Extend') : t('property:actions.promote', 'Promote')}
               >
-                <SparklesIcon className="h-4 w-4" />
+                <SparklesIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">
                   {property.isPromoted
                     ? t('property:actions.extendPromotion', 'Extend')
@@ -468,13 +490,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             {/* Share Button */}
             <button
               onClick={handleShare}
-              className="bg-white p-2 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
+              className="bg-white p-1.5 sm:p-2 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
               aria-label={t('property:actions.share')}
               title={t('property:actions.share')}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-neutral-500 hover:text-primary transition-colors"
+                className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-500 hover:text-primary transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -491,7 +513,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             {/* Favorite Button */}
             <div
               onClick={property.status === 'sold' ? undefined : handleFavoriteClick}
-              className={`bg-white p-2 rounded-full border border-neutral-200 ${
+              className={`bg-white p-1.5 sm:p-2 rounded-full border border-neutral-200 ${
                 property.status === 'sold'
                   ? 'opacity-50 cursor-not-allowed'
                   : 'cursor-pointer hover:shadow-md'
@@ -499,7 +521,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className={`h-6 w-6 transition-colors duration-300 ${
+                className={`h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-300 ${
                   property.status === 'sold'
                     ? 'text-neutral-300'
                     : isFavorited
@@ -520,29 +542,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             </div>
           </div>
         </div>
-
-        {/* Stats Bar */}
-        {(daysListedText || property.views) && (
-          <div className="px-4 pb-3 flex items-center gap-4 text-xs text-neutral-500">
-            {daysListedText && (
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {daysListedText}
-              </span>
-            )}
-            {property.views !== undefined && property.views > 0 && (
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                {property.views.toLocaleString()} {t('property:listing.views')}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Main Content */}
