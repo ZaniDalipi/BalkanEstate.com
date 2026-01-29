@@ -179,6 +179,22 @@ const PricingPage: React.FC = () => {
   };
 
   const handlePlanSelection = (product: Product) => {
+    // PAYMENTS COMING SOON - Show info message instead of processing payment
+    dispatch({
+      type: 'SHOW_ALERT',
+      payload: {
+        type: 'info',
+        title: t('pricing:comingSoon.title', 'Payments Coming Soon'),
+        message: t(
+          'pricing:comingSoon.message',
+          'We are setting up our payment system. Please contact sales@balkanestateai.com to process your subscription manually.'
+        ),
+      },
+    });
+    return;
+
+    // Original payment logic - temporarily disabled
+    /*
     if (!state.isAuthenticated || !state.currentUser) {
       dispatch({
         type: 'SET_PENDING_SUBSCRIPTION',
@@ -257,6 +273,7 @@ const PricingPage: React.FC = () => {
       productId: product.productId,
     });
     setShowPaymentWindow(true);
+    */
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {

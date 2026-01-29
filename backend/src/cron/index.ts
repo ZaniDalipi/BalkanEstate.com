@@ -1,4 +1,5 @@
 import * as cron from 'node-cron';
+import mongoose from 'mongoose';
 import AgencyFeaturedSubscription from '../models/AgencyFeaturedSubscription';
 import Agency from '../models/Agency';
 import User from '../models/User';
@@ -10,6 +11,20 @@ import { runWeeklyStatsJobs } from '../jobs/weeklyStatsJob';
 import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propertyAlertsJob';
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
+
+// Helper to check if MongoDB is connected before running a job
+const isMongoConnected = (): boolean => {
+  return mongoose.connection.readyState === 1; // 1 = connected
+};
+
+// Wrapper to run cron jobs only when DB is connected
+const withDbConnection = async (jobName: string, job: () => Promise<void>): Promise<void> => {
+  if (!isMongoConnected()) {
+    console.log(`⏭️ Skipping ${jobName} - MongoDB not connected`);
+    return;
+  }
+  await job();
+};
 
 let checkExpiringTask: cron.ScheduledTask | null = null;
 let monthlyCouponTask: cron.ScheduledTask | null = null;
@@ -27,86 +42,92 @@ let activityCleanupTask: cron.ScheduledTask | null = null;
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
   checkExpiringTask = cron.schedule('0 10 * * *', async () => {
-    try {
-      console.log('🔍 Checking expiring subscriptions...');
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(23, 59, 59, 999);
+    await withDbConnection('expiring subscriptions check', async () => {
+      try {
+        console.log('🔍 Checking expiring subscriptions...');
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(23, 59, 59, 999);
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-      const expiring = await AgencyFeaturedSubscription.find({
-        status: { $in: ['active', 'trial'] },
-        currentPeriodEnd: { $gte: today, $lte: tomorrow },
-      });
+        const expiring = await AgencyFeaturedSubscription.find({
+          status: { $in: ['active', 'trial'] },
+          currentPeriodEnd: { $gte: today, $lte: tomorrow },
+        });
 
-      for (const sub of expiring) {
-        const agency = await Agency.findById(sub.agencyId);
-        const user = await User.findById(sub.userId);
-        if (!agency || !user?.email) continue;
+        for (const sub of expiring) {
+          const agency = await Agency.findById(sub.agencyId);
+          const user = await User.findById(sub.userId);
+          if (!agency || !user?.email) continue;
 
-        const couponCode = 'RENEW20-' + agency.slug.toUpperCase().substring(0, 10) + '-' + Date.now().toString().substring(8);
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 7);
+          const couponCode = 'RENEW20-' + agency.slug.toUpperCase().substring(0, 10) + '-' + Date.now().toString().substring(8);
+          const expiryDate = new Date();
+          expiryDate.setDate(expiryDate.getDate() + 7);
 
-        await new PromotionCoupon({
-          code: couponCode,
-          description: '20% renewal discount for ' + agency.name,
-          discountType: 'percentage',
-          discountValue: 20,
-          validFrom: new Date(),
-          validUntil: expiryDate,
-          status: 'active',
-          maxUsesPerUser: 1,
-          maxTotalUses: 1,
-          applicableTiers: ['featured'],
-          isPublic: false,
-        }).save();
+          await new PromotionCoupon({
+            code: couponCode,
+            description: '20% renewal discount for ' + agency.name,
+            discountType: 'percentage',
+            discountValue: 20,
+            validFrom: new Date(),
+            validUntil: expiryDate,
+            status: 'active',
+            maxUsesPerUser: 1,
+            maxTotalUses: 1,
+            applicableTiers: ['featured'],
+            isPublic: false,
+          }).save();
 
-        await emailService.sendExpiryReminder(user.email, agency.name, sub.currentPeriodEnd, couponCode, 20);
-        console.log('✅ Sent reminder to', agency.name);
+          await emailService.sendExpiryReminder(user.email, agency.name, sub.currentPeriodEnd, couponCode, 20);
+          console.log('✅ Sent reminder to', agency.name);
+        }
+      } catch (error) {
+        console.error('Expiry cron error:', error);
       }
-    } catch (error) {
-      console.error('Expiry cron error:', error);
-    }
+    });
   });
 
   // Update expired subscriptions - runs hourly
   updateExpiredTask = cron.schedule('0 * * * *', async () => {
-    try {
-      const now = new Date();
-      const expired = await AgencyFeaturedSubscription.find({
-        status: { $in: ['active', 'trial'] },
-        currentPeriodEnd: { $lt: now },
-      });
+    await withDbConnection('expired subscriptions update', async () => {
+      try {
+        const now = new Date();
+        const expired = await AgencyFeaturedSubscription.find({
+          status: { $in: ['active', 'trial'] },
+          currentPeriodEnd: { $lt: now },
+        });
 
-      for (const sub of expired) {
-        sub.status = 'expired';
-        await sub.save();
+        for (const sub of expired) {
+          sub.status = 'expired';
+          await sub.save();
 
-        const agency = await Agency.findById(sub.agencyId);
-        if (agency?.isFeatured) {
-          agency.isFeatured = false;
-          agency.featuredEndDate = now;
-          await agency.save();
+          const agency = await Agency.findById(sub.agencyId);
+          if (agency?.isFeatured) {
+            agency.isFeatured = false;
+            agency.featuredEndDate = now;
+            await agency.save();
+          }
         }
+        console.log('✅ Updated', expired.length, 'expired subscriptions');
+      } catch (error) {
+        console.error('Expiry update cron error:', error);
       }
-      console.log('✅ Updated', expired.length, 'expired subscriptions');
-    } catch (error) {
-      console.error('Expiry update cron error:', error);
-    }
+    });
   });
 
   // Update expired user subscriptions - runs every 6 hours
   userSubscriptionTask = cron.schedule('0 */6 * * *', async () => {
-    try {
-      console.log('🔄 Checking and updating expired user subscriptions...');
-      const count = await updateExpiredSubscriptions();
-      console.log(`✅ Processed ${count} expired user subscriptions`);
-    } catch (error) {
-      console.error('User subscription expiry cron error:', error);
-    }
+    await withDbConnection('user subscription expiry', async () => {
+      try {
+        console.log('🔄 Checking and updating expired user subscriptions...');
+        const count = await updateExpiredSubscriptions();
+        console.log(`✅ Processed ${count} expired user subscriptions`);
+      } catch (error) {
+        console.error('User subscription expiry cron error:', error);
+      }
+    });
   });
 
   // Send subscription renewal reminders - runs daily at 9 AM

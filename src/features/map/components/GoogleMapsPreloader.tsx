@@ -33,8 +33,10 @@ export const preloadGoogleMaps = () => {
     isPreloading = false;
   };
 
-  script.onerror = () => {
+  script.onerror = (error) => {
+    console.error('[GoogleMapsPreloader] Failed to load Google Maps API:', error);
     isPreloading = false;
+    // Don't set isLoaded = true - allow retry
   };
 
   // Only add if not already present

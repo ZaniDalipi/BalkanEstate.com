@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { createAgency } from '@/src/features/agencies/api/agencyApi';
 import Footer from '@/components/shared/Footer';
+import PaymentComingSoon from '@/src/components/shared/PaymentComingSoon';
 import {
   BuildingOfficeIcon,
   CheckCircleIcon,
@@ -396,28 +397,12 @@ const AgencyPaymentPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Pay Button */}
-            <button
-              onClick={handlePayment}
-              disabled={isLoading || loadingPlan}
-              className="w-full mt-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold text-lg rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                  <span>{t('payment.processing', 'Processing...')}</span>
-                </>
-              ) : (
-                <>
-                  <CreditCardIcon className="w-6 h-6" />
-                  <span>{t('payment.payNow', 'Pay')} €{finalPrice.toFixed(2)}</span>
-                </>
-              )}
-            </button>
-
-            <p className="text-center text-xs text-neutral-500 mt-4">
-              {t('payment.stripeSecure', 'Payments are securely processed by Stripe')}
-            </p>
+            {/* Coming Soon Notice */}
+            <PaymentComingSoon
+              title={t('payment.comingSoon.title', 'Payments Coming Soon')}
+              message={t('payment.comingSoon.message', 'We are setting up our payment system. Contact us to set up your agency manually.')}
+              className="mt-6"
+            />
           </div>
         </div>
       </div>

@@ -118,6 +118,15 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
   const handleSubscribeClick = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // PAYMENTS COMING SOON - Show info message instead of processing payment
+    await warning(
+      'Payments Coming Soon',
+      'We are setting up our payment system. Please contact sales@balkanestateai.com to subscribe manually.'
+    );
+    return;
+
+    // Original payment logic - temporarily disabled
+    /*
     // Check if user is authenticated (check both flag and user object)
     if (!state.isAuthenticated && !state.currentUser) {
       // Save pending subscription
@@ -147,6 +156,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, 
       return;
     }
     setShowPaymentWindow(true);
+    */
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {

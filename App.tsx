@@ -88,16 +88,13 @@ const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent')
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
 
-// Lightweight loader (extracted for smaller initial bundle)
-import { Loader3D } from './components/shared/Loader3D';
-
 // Microsoft Clarity - Heatmaps & Session Recordings (lazy loaded)
 const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));
 
-// Loading fallback component with 3D animation
+// Loading fallback component with simple logo animation
 const PageLoader: React.FC = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
-    <Loader3D size="md" text="Loading..." />
+  <div className="flex flex-col items-center justify-center min-h-[50vh]">
+    <LogoIcon className="w-12 h-12 text-primary animate-pulse" />
   </div>
 );
 

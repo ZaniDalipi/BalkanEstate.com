@@ -28,13 +28,18 @@ const PremiumUpgradeBanner: React.FC<PremiumUpgradeBannerProps> = ({ onUpgradeCl
         </p>
       </div>
 
-      {/* CTA Button */}
-      <button
-        onClick={onUpgradeClick}
-        className="px-5 py-2.5 bg-white text-purple-600 font-semibold rounded-lg hover:bg-neutral-100 transition-colors text-sm"
-      >
-        Upgrade Now
-      </button>
+      {/* CTA Button with Coming Soon badge */}
+      <div className="relative">
+        <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow z-10">
+          Coming Soon
+        </span>
+        <a
+          href="mailto:sales@balkanestateai.com?subject=Premium%20Analytics%20Upgrade"
+          className="inline-block px-5 py-2.5 bg-white text-purple-600 font-semibold rounded-lg hover:bg-neutral-100 transition-colors text-sm"
+        >
+          Contact Sales
+        </a>
+      </div>
     </div>
   </div>
 );
