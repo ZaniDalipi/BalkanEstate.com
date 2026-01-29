@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useVideoPreview, useGenerateVideo, useDeleteVideo } from '../hooks/useVideoGeneration';
-import { VideoFormat, MusicStyle, GeneratedVideo } from '../api/videoApi';
+import { VideoFormat, VideoQuality, MusicStyle, GeneratedVideo } from '../api/videoApi';
 
 interface VideoGeneratorProps {
   property: Property;
@@ -73,6 +73,11 @@ const MUSIC_OPTIONS: { value: MusicStyle; label: string; description: string }[]
   { value: 'modern', label: 'Modern Electronic', description: 'Suits urban apartments' },
 ];
 
+const QUALITY_OPTIONS: { value: VideoQuality; label: string; description: string }[] = [
+  { value: 'mobile', label: 'Mobile (720p)', description: 'Smaller file, faster loading' },
+  { value: 'standard', label: 'Standard (1080p)', description: 'Full quality, larger file' },
+];
+
 const VideoGenerator: React.FC<VideoGeneratorProps> = ({
   property,
   onVideoGenerated,
@@ -82,6 +87,7 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
 
   // Video options state
   const [format, setFormat] = useState<VideoFormat>('vertical');
+  const [quality, setQuality] = useState<VideoQuality>('mobile'); // Default to mobile for smaller file size
   const [duration, setDuration] = useState<number>(3);
   const [musicStyle, setMusicStyle] = useState<MusicStyle>('elegant');
   const [includeWatermark, setIncludeWatermark] = useState<boolean>(true);
@@ -118,13 +124,14 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
       propertyId: property.id,
       videoOptions: {
         format,
+        quality,
         duration,
         musicStyle,
         includeWatermark,
       },
       useAsync: imageCount > 5, // Use async for more than 5 images
     });
-  }, [property.id, format, duration, musicStyle, includeWatermark, imageCount, generateVideo]);
+  }, [property.id, format, quality, duration, musicStyle, includeWatermark, imageCount, generateVideo]);
 
   // Handle delete video
   const handleDelete = useCallback(() => {
@@ -286,6 +293,8 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
               <VideoOptionsForm
                 format={format}
                 setFormat={setFormat}
+                quality={quality}
+                setQuality={setQuality}
                 duration={duration}
                 setDuration={setDuration}
                 musicStyle={musicStyle}
@@ -303,6 +312,8 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
           <VideoOptionsForm
             format={format}
             setFormat={setFormat}
+            quality={quality}
+            setQuality={setQuality}
             duration={duration}
             setDuration={setDuration}
             musicStyle={musicStyle}
@@ -338,6 +349,8 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
 interface VideoOptionsFormProps {
   format: VideoFormat;
   setFormat: (format: VideoFormat) => void;
+  quality: VideoQuality;
+  setQuality: (quality: VideoQuality) => void;
   duration: number;
   setDuration: (duration: number) => void;
   musicStyle: MusicStyle;
@@ -352,6 +365,8 @@ interface VideoOptionsFormProps {
 const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
   format,
   setFormat,
+  quality,
+  setQuality,
   duration,
   setDuration,
   musicStyle,
@@ -379,6 +394,27 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
               }`}
             >
               <span className="text-2xl block mb-1">{option.icon}</span>
+              <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
+              <span className="text-xs text-neutral-500">{option.description}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Quality selection */}
+      <div>
+        <label className="block text-sm font-medium text-neutral-700 mb-3">Video Quality</label>
+        <div className="grid grid-cols-2 gap-3">
+          {QUALITY_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setQuality(option.value)}
+              className={`p-3 rounded-lg border-2 transition-all text-left ${
+                quality === option.value
+                  ? 'border-primary bg-primary/5'
+                  : 'border-neutral-200 hover:border-neutral-300'
+              }`}
+            >
               <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
               <span className="text-xs text-neutral-500">{option.description}</span>
             </button>

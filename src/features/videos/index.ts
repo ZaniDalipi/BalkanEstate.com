@@ -25,6 +25,7 @@ export {
 // Types
 export type {
   VideoFormat,
+  VideoQuality,
   MusicStyle,
   VideoGenerationOptions,
   GeneratedVideo,

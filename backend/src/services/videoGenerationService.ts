@@ -28,6 +28,7 @@ export interface VideoGenerationOptions {
   sellerName?: string;
   sellerPhone?: string;
   format?: 'vertical' | 'horizontal' | 'square';
+  quality?: 'standard' | 'mobile'; // 'mobile' uses lower resolution for faster loading
   duration?: number;
   includeWatermark?: boolean;
   musicStyle?: 'elegant' | 'upbeat' | 'calm' | 'modern';
@@ -47,10 +48,23 @@ interface VideoResolution {
   height: number;
 }
 
-const RESOLUTIONS: Record<string, VideoResolution> = {
+// Standard resolutions (high quality for desktop/tablets)
+const STANDARD_RESOLUTIONS: Record<string, VideoResolution> = {
   vertical: { width: 1080, height: 1920 },
   horizontal: { width: 1920, height: 1080 },
   square: { width: 1080, height: 1080 },
+};
+
+// Mobile-optimized resolutions (smaller file size, faster loading)
+const MOBILE_RESOLUTIONS: Record<string, VideoResolution> = {
+  vertical: { width: 720, height: 1280 },
+  horizontal: { width: 1280, height: 720 },
+  square: { width: 720, height: 720 },
+};
+
+const getResolution = (format: string, quality: string): VideoResolution => {
+  const resolutions = quality === 'mobile' ? MOBILE_RESOLUTIONS : STANDARD_RESOLUTIONS;
+  return resolutions[format] || STANDARD_RESOLUTIONS.vertical;
 };
 
 // Royalty-free music URLs from Pixabay (free for commercial use)
@@ -155,6 +169,7 @@ export const generatePropertyVideo = async (
     sellerName,
     sellerPhone,
     format = 'vertical',
+    quality = 'mobile', // Default to mobile for smaller file sizes
     duration = 3,
     musicStyle = 'elegant',
   } = options;
@@ -166,11 +181,11 @@ export const generatePropertyVideo = async (
   const tempDir = path.join(os.tmpdir(), `video_gen_${propertyId}_${Date.now()}`);
   fs.mkdirSync(tempDir, { recursive: true });
 
-  const resolution = RESOLUTIONS[format];
+  const resolution = getResolution(format, quality);
   const { width, height } = resolution;
 
   console.log(`🎬 Starting video generation for property ${propertyId}`);
-  console.log(`📐 Format: ${format} (${width}x${height})`);
+  console.log(`📐 Format: ${format} (${width}x${height}) - Quality: ${quality}`);
   console.log(`🖼️  Processing ${imageUrls.length} images`);
 
   try {

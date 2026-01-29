@@ -48,6 +48,7 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     // Get options from request body
     const {
       format = 'vertical',
+      quality = 'mobile', // Default to mobile-optimized
       duration = 3,
       includeWatermark = true,
       musicStyle = 'elegant',
@@ -56,6 +57,12 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     // Validate format
     if (!['vertical', 'horizontal', 'square'].includes(format)) {
       res.status(400).json({ message: 'Invalid format. Must be vertical, horizontal, or square' });
+      return;
+    }
+
+    // Validate quality
+    if (!['standard', 'mobile'].includes(quality)) {
+      res.status(400).json({ message: 'Invalid quality. Must be standard or mobile' });
       return;
     }
 
@@ -87,12 +94,13 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
       sellerName,
       sellerPhone,
       format,
+      quality,
       duration,
       includeWatermark,
       musicStyle,
     };
 
-    console.log(`🎬 Starting video generation for property ${propertyId} by user ${userId}`);
+    console.log(`🎬 Starting video generation for property ${propertyId} by user ${userId} (quality: ${quality})`);
 
     // Generate video
     const result = await generatePropertyVideo(options);
@@ -155,6 +163,7 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
     // Get options from request body
     const {
       format = 'vertical',
+      quality = 'mobile', // Default to mobile-optimized
       duration = 3,
       includeWatermark = true,
       musicStyle = 'elegant',
@@ -182,6 +191,7 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
       sellerName,
       sellerPhone,
       format,
+      quality,
       duration,
       includeWatermark,
       musicStyle,

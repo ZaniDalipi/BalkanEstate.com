@@ -6,10 +6,12 @@ import { apiRequest } from '@/src/shared/api';
 // --- Types ---
 
 export type VideoFormat = 'vertical' | 'horizontal' | 'square';
+export type VideoQuality = 'standard' | 'mobile';
 export type MusicStyle = 'elegant' | 'upbeat' | 'calm' | 'modern';
 
 export interface VideoGenerationOptions {
   format?: VideoFormat;
+  quality?: VideoQuality; // 'mobile' (default) for smaller file size, 'standard' for full quality
   duration?: number; // seconds per image (2-10)
   includeWatermark?: boolean;
   musicStyle?: MusicStyle;

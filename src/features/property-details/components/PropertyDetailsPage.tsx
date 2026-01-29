@@ -145,7 +145,11 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
   const daysListed = React.useMemo(() => {
     if (!property.createdAt) return null;
     const now = Date.now();
-    const created = property.createdAt;
+    // Handle both number timestamps and ISO date strings from the backend
+    const created = typeof property.createdAt === 'string'
+      ? new Date(property.createdAt).getTime()
+      : property.createdAt;
+    if (isNaN(created)) return null;
     const diffDays = Math.floor((now - created) / (1000 * 60 * 60 * 24));
     return diffDays;
   }, [property.createdAt]);
