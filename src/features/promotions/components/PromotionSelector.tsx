@@ -347,7 +347,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
   };
 
   return (
-    <div className={inModal ? "w-full px-6 py-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
+    <div className={inModal ? "w-full px-4 sm:px-6 pt-8 pb-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
       {/* Header Section - Enhanced for Extension Mode */}
       {isExtension ? (
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>

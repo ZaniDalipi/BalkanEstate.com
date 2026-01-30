@@ -122,10 +122,10 @@ const Modal: React.FC<ModalProps> = ({
           onClick={onClose}
           className="
             absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4
-            text-neutral-400 hover:text-neutral-700 z-10
+            text-neutral-600 hover:text-neutral-800 z-20
             min-h-[44px] min-w-[44px] flex items-center justify-center
-            rounded-full hover:bg-black/5 active:bg-black/10
-            transition-colors touch-manipulation
+            rounded-full bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300
+            transition-colors touch-manipulation shadow-sm
             focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50
           "
           aria-label="Close modal"
