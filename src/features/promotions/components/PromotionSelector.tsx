@@ -177,13 +177,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
 
   // Handle promotion purchase or extension
   const handlePurchase = async () => {
-    // PAYMENTS COMING SOON - Show info message instead of processing payment
-    setError(null);
-    setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
-    return;
-
-    // Original payment logic - temporarily disabled
-    /*
     if (!selectedTier && !isExtension) {
       setError('Please select a promotion tier');
       return;
@@ -194,6 +187,17 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
     setSuccessMessage(null);
 
     try {
+      const { final: finalPrice } = calculateFinalPrice();
+
+      // PAYMENTS COMING SOON - If payment is required, show info message
+      if (finalPrice > 0) {
+        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
+        setSubmitting(false);
+        return;
+      }
+
+      // Free promotions (via coupon or agency allocation) can proceed
+
       // Extension mode - use propertyId to find active promotion
       if (isExtension && propertyId) {
         const result = await api.extendPromotion({
@@ -208,12 +212,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           return;
         }
 
-        // Redirect to Stripe checkout for paid extension
-        if (result.url) {
-          window.location.href = result.url;
-        } else {
-          throw new Error('Failed to create extension checkout');
-        }
+        // Payment required but payments coming soon
+        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to extend your promotion manually.');
         return;
       }
 
@@ -246,7 +246,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           return;
         }
 
-        // For paid promotions, use Stripe checkout
+        // For free promotions with coupon, use checkout endpoint
         const result = await api.createPromotionCheckout({
           propertyId,
           promotionTier: selectedTier!,
@@ -262,12 +262,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           return;
         }
 
-        // Redirect to Stripe checkout
-        if (result.url) {
-          window.location.href = result.url;
-        } else {
-          throw new Error('Failed to create checkout session');
-        }
+        // Payment required but payments coming soon
+        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to process request');
@@ -275,7 +271,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
     } finally {
       setSubmitting(false);
     }
-    */
   };
 
   // Combined submitting state
