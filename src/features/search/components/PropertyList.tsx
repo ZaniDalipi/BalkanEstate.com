@@ -950,7 +950,7 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                 )}
 
                                 {/* Footer - Integrated at bottom of property list */}
-                                <div className="overflow-x-hidden">
+                                <div className="mt-8 overflow-x-hidden">
                                     <Footer contained />
                                 </div>
                             </div>
