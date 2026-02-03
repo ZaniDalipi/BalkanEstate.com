@@ -1,24 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Background -->
-  <rect x="0" y="0" width="512" height="512" fill="#ffffff" rx="64"/>
+  <!-- Background with rounded corners -->
+  <rect x="0" y="0" width="512" height="512" fill="#ffffff" rx="96"/>
 
-  <!-- BalkanEstate Logo - Two 3D Buildings -->
+  <!-- BalkanEstate Logo - Isometric Buildings (scaled from 24x24 to fit 512x512) -->
+  <!-- Original viewBox 0 0 24 24, scaled ~17x and centered -->
+  <g transform="translate(64, 64) scale(16)">
+    <!-- Dark blue faces (left sides) -->
+    <path fill="#0252CD" d="M2 21V16L5 14.5V21H2Z M3 15V11L6 9.5V15H3Z M11 21V16L14 14V21H11Z M12 15V10L15 8V15H12Z M13 9V5L16 3V9H13Z"/>
 
-  <!-- Left Building (shorter) -->
-  <!-- Front face - lighter blue -->
-  <path d="M115 380L115 200L195 160L195 380Z" fill="#6BA3F5"/>
-  <!-- Right side face - medium blue -->
-  <path d="M195 160L245 190L245 380L195 380Z" fill="#4A8FE7"/>
-  <!-- Top face -->
-  <path d="M115 200L195 160L245 190L165 230Z" fill="#89B4F8"/>
+    <!-- Medium blue faces (right sides) -->
+    <path fill="#4A8FE7" d="M5 14.5L8 16V21H5V14.5Z M6 9.5L9 11V15H6V9.5Z M14 14L18 16V21H14V14Z M15 8L19 10V15H15V8Z M16 3L20 5V9H16V3Z"/>
 
-  <!-- Right Building (taller) -->
-  <!-- Front face - lighter blue -->
-  <path d="M260 380L260 120L340 80L340 380Z" fill="#6BA3F5"/>
-  <!-- Right side face - darker blue -->
-  <path d="M340 80L400 115L400 380L340 380Z" fill="#0252CD"/>
-  <!-- Top face -->
-  <path d="M260 120L340 80L400 115L320 155Z" fill="#4A8FE7"/>
-  <!-- Top notch/indent -->
-  <path d="M260 120L260 155L290 140L290 105Z" fill="#4A8FE7"/>
+    <!-- Light blue faces (tops) -->
+    <path fill="#6BA3F5" d="M2 16L5 14.5L8 16L5 17.5Z M3 11L6 9.5L9 11L6 12.5Z M11 16L14 14L18 16L14 18Z M12 10L15 8L19 10L15 12Z M13 5L16 3L20 5L16 7Z"/>
+  </g>
 </svg>
