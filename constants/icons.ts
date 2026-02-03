@@ -795,68 +795,19 @@ export const MapLegendIcon: React.FC<{ className?: string }> = ({ className }) =
     )
 );
 export const AgentsIcon: React.FC<{ className?: string }> = ({ className }) => (
-    React.createElement('svg', { 
-        xmlns: "http://www.w3.org/2000/svg", 
-        fill: "none", 
-        viewBox: "0 0 24 24", 
-        strokeWidth: 1.5, 
-        stroke: "currentColor", 
-        className: className 
-    },
-        // House/Property - can animate (grow, highlight)
-        React.createElement('g', { id: "property" },
-            React.createElement('path', { 
-                d: "M8 14V18M16 14V18M12 10V18M5 20V10L12 5L19 10V20H5Z",
-                strokeLinecap: "round",
-                strokeLinejoin: "round"
-            }),
-            React.createElement('path', { 
-                id: "roof",
-                d: "M5 10L12 5L19 10",
-                strokeLinecap: "round",
-                strokeLinejoin: "round"
-            })
-        ),
-        // Agent person - can animate (pulse, move)
-        React.createElement('g', { id: "agent" },
-            React.createElement('circle', {
-                cx: "12",
-                cy: "9",
-                r: "1.5"
-            }),
-            React.createElement('path', {
-                d: "M12 10.5V12M12 12C12 13 11 14 10 14"
-            })
-        ),
-        // Key - can animate (rotate, shine)
-        React.createElement('g', { id: "key" },
-            React.createElement('circle', {
-                cx: "17",
-                cy: "15",
-                r: "1",
-                strokeLinecap: "round"
-            }),
-            React.createElement('path', {
-                d: "M17 16V19M19 17H15",
-                strokeLinecap: "round"
-            })
-        ),
-        // Contract/document - can animate (wave, highlight)
-        React.createElement('g', { id: "contract" },
-            React.createElement('rect', {
-                x: "5",
-                y: "14",
-                width: "3",
-                height: "2",
-                rx: "0.5"
-            }),
-            React.createElement('line', {
-                x1: "5.5",
-                y1: "15",
-                x2: "7.5",
-                y2: "15"
-            })
-        )
+    React.createElement(Icon, { className: className },
+        // Person with badge - clean agent icon
+        React.createElement('path', {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+        }),
+        // Small badge/checkmark
+        React.createElement('path', {
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            d: "M9 12.75L11.25 15 15 9.75"
+        })
     )
 );
 
