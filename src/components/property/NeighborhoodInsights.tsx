@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { useAppContext } from '../../../context/AppContext';
-import { SparklesIcon } from '../../../constants';
+import { MapPinIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
 
 // Map language codes to full language names for AI prompt
@@ -135,7 +135,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
             onClick={fetchInsights}
             className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors"
           >
-            <SparklesIcon className="w-5 h-5" />
+            <MapPinIcon className="w-5 h-5" />
             {isAuthenticated ? t('neighborhood.generateInsights') : t('neighborhood.loginAndGenerate')}
           </button>
         </div>
@@ -203,7 +203,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
     <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
       <div className="flex items-center mb-4">
         <div className="flex-shrink-0 w-8 h-8 mr-3 text-primary bg-primary-light rounded-full flex items-center justify-center">
-          <SparklesIcon className="w-5 h-5" />
+          <MapPinIcon className="w-5 h-5" />
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-neutral-800">{t('neighborhood.title')}</h3>
       </div>

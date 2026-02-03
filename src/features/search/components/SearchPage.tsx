@@ -9,7 +9,7 @@ import { getAiChatResponse, generateSearchName, generateSearchNameFromCoords } f
 import { searchLocation } from '@/services/osmService';
 import Toast from '@/components/shared/Toast';
 import L from 'leaflet';
-import { Bars3Icon, SearchIcon, UserCircleIcon, XMarkIcon, AdjustmentsHorizontalIcon, MapPinIcon, Squares2x2Icon, BellIcon, PencilIcon, PlusIcon, SparklesIcon, CrosshairsIcon, XCircleIcon, MapIcon, SpinnerIcon } from '@/constants';
+import { Bars3Icon, SearchIcon, UserCircleIcon, XMarkIcon, AdjustmentsHorizontalIcon, MapPinIcon, Squares2x2Icon, BellIcon, PencilIcon, PlusIcon, CrosshairsIcon, XCircleIcon, MapIcon, SpinnerIcon } from '@/constants';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { filterProperties } from '@/utils/propertyUtils';
 import AiSearch from './AiSearch';

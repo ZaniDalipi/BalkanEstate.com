@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
-import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, SparklesIcon, FireIcon, StarIcon, BuildingOfficeIcon } from '@/constants';
+import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, FireIcon, StarIcon, BuildingOfficeIcon, GlobeAltIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
@@ -172,7 +172,7 @@ const CityRecommendations: React.FC = () => {
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 flex items-center gap-3">
-            <SparklesIcon className="w-8 h-8 text-primary" />
+            <GlobeAltIcon className="w-8 h-8 text-primary" />
             <h2 className="text-3xl font-bold text-neutral-900">{t('hero.title')}</h2>
           </div>
           <p className="text-neutral-600 mb-8">{t('hero.discoverSubtitle')}</p>
@@ -250,12 +250,12 @@ const CityRecommendations: React.FC = () => {
 
       <div className="p-4 sm:p-8 relative z-10">
         <div className="max-w-7xl mx-auto">
-          {/* AI-Powered Market Intelligence Card */}
+          {/* Market Intelligence Card */}
           {cities.length > 0 && (
-            <div className="mb-8 p-5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-2xl border border-violet-200 shadow-sm">
+            <div className="mb-8 p-5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-2xl border border-violet-200 shadow-sm backdrop-blur-sm">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
-                  <SparklesIcon className="w-6 h-6 text-white" />
+                  <ChartBarIcon className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 mb-1 text-lg">{t('aiInsights.title')}</h4>
@@ -299,7 +299,7 @@ const CityRecommendations: React.FC = () => {
               <button
                 key={city._id}
                 onClick={() => handleCityClick(city)}
-                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 text-left group"
+                className="bg-white/80 backdrop-blur-md rounded-xl border border-neutral-200/60 overflow-hidden hover:shadow-xl hover:border-primary hover:bg-white transition-all duration-300 text-left group shadow-sm"
               >
                 {/* City Image Header with Gradient Fade */}
                 <div className="relative h-40 overflow-hidden">
@@ -414,7 +414,7 @@ const CityRecommendations: React.FC = () => {
                   {city.highlights && city.highlights.length > 0 && (
                     <div className="border-t border-neutral-100 pt-3">
                       <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
-                        <SparklesIcon className="w-3.5 h-3.5" />
+                        <ChartBarIcon className="w-3.5 h-3.5" />
                         {t('sections.marketInsights')}
                       </h4>
                       <ul className="space-y-1.5">

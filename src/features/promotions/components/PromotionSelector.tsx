@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '@/services/apiService';
 import { Property } from '@/types';
+import { RocketLaunchIcon, EyeIcon, ChatBubbleLeftRightIcon, BoltIcon, StarIconSolid, ClockIcon, FireIcon } from '@/constants';
 
 interface PromotionSelectorProps {
   // Either propertyId (for existing listings) or pendingPropertyData (for new listings)
@@ -311,7 +312,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
       selectedBorder: 'border-violet-500',
       text: 'text-violet-600',
       selectedBg: 'from-violet-100 to-purple-100',
-      icon: '⭐',
       tierName: 'Featured',
     },
     highlight: {
@@ -322,7 +322,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
       selectedBorder: 'border-sky-500',
       text: 'text-sky-600',
       selectedBg: 'from-sky-100 to-cyan-100',
-      icon: '💎',
       tierName: 'Highlight',
     },
     premium: {
@@ -333,7 +332,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
       selectedBorder: 'border-amber-500',
       text: 'text-amber-600',
       selectedBg: 'from-amber-100 to-yellow-100',
-      icon: '👑',
       tierName: 'Premium',
     },
   };
@@ -353,7 +351,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
           {/* Tier Badge */}
           <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${extStyle.headerGradient} text-white text-sm font-semibold mb-4 shadow-lg`}>
-            <span>{extStyle.icon}</span>
+            <StarIconSolid className="w-4 h-4" />
             <span>{extStyle.tierName} Promotion</span>
           </div>
 
@@ -394,8 +392,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       ) : (
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
-          <div className={`inline-block ${inModal ? 'p-2' : 'p-3'} bg-gradient-to-br from-amber-100 to-orange-100 rounded-full mb-3 shadow-lg`}>
-            <span className={inModal ? 'text-2xl' : 'text-4xl'}>🚀</span>
+          <div className={`inline-flex items-center justify-center ${inModal ? 'w-12 h-12' : 'w-16 h-16'} bg-gradient-to-br from-primary to-primary-dark rounded-full mb-3 shadow-lg`}>
+            <RocketLaunchIcon className={`${inModal ? 'w-6 h-6' : 'w-8 h-8'} text-white`} />
           </div>
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent mb-2`}>
             Promote Your Listing
@@ -432,21 +430,21 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         <div className={`flex justify-center ${inModal ? 'gap-8' : 'gap-12 md:gap-16'}`}>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-amber-400 to-orange-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>👁️</span>
+              <EyeIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Higher Visibility</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">Top of search results</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-blue-400 to-indigo-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>📱</span>
+              <ChatBubbleLeftRightIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>More Inquiries</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">Serious buyer contacts</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-emerald-400 to-teal-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>⚡</span>
+              <BoltIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Sell Faster</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">3x faster results</p>}
@@ -504,17 +502,23 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                 >
                   {tier.highlight && (
                     <div className={`absolute -top-3 left-1/2 -translate-x-1/2 ${style.badge} text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg`}>
-                      ✨ Most Popular
+                      Most Popular
                     </div>
                   )}
 
                   <div className="text-center mb-4 pt-2">
                     <div className={`inline-flex items-center justify-center w-14 h-14 ${style.iconBg} rounded-2xl shadow-lg mb-3`}>
-                      <span className="text-2xl filter drop-shadow">
-                        {tierId === 'featured' && '⭐'}
-                        {tierId === 'highlight' && '💎'}
-                        {tierId === 'premium' && '👑'}
-                      </span>
+                      {tierId === 'featured' && <StarIconSolid className="w-7 h-7 text-white" />}
+                      {tierId === 'highlight' && (
+                        <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2L9.5 9.5H2L8 14L5.5 22L12 17L18.5 22L16 14L22 9.5H14.5L12 2Z" />
+                        </svg>
+                      )}
+                      {tierId === 'premium' && (
+                        <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z" />
+                        </svg>
+                      )}
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-1">
                       {tier.name}
@@ -558,11 +562,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           <div className={`bg-white rounded-xl border ${isExtension ? extStyle.border : 'border-gray-200'} p-5 mb-4 shadow-sm`}>
             <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className={`w-8 h-8 ${isExtension ? extStyle.iconBg : 'bg-primary/10'} rounded-lg flex items-center justify-center`}>
-                {isExtension ? (
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                ) : '⏱️'}
+                <ClockIcon className={`w-4 h-4 ${isExtension ? 'text-white' : 'text-primary'}`} />
               </span>
               {isExtension ? 'Choose Extension Duration' : 'Select Duration'}
             </h3>
@@ -621,8 +621,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                     <span className="text-sm font-semibold text-gray-800">
                       {tiersData.urgentModifier.name}
                     </span>
-                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">
-                      🔥 Urgent
+                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse inline-flex items-center gap-1">
+                      <FireIcon className="w-3 h-3" /> Urgent
                     </span>
                     <span className="text-sm font-bold text-red-600">
                       +€{tiersData.urgentModifier.price}
@@ -719,7 +719,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
               : 'bg-neutral-50 border-neutral-300'
           }`}>
             <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
-              {isExtension && <span>{extStyle.icon}</span>}
+              {isExtension && <StarIconSolid className="w-4 h-4 text-current" />}
               {isExtension ? 'Extension Summary' : 'Summary'}
             </h3>
             <div className="space-y-2 text-sm">

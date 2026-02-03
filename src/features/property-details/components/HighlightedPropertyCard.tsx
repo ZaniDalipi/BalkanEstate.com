@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon } from '@/constants';
+import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
 
@@ -139,7 +139,6 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         return {
           border: 'ring-2 ring-amber-400 border-amber-400',
           badge: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400',
-          icon: '👑',
           glow: 'shadow-[0_0_20px_rgba(255,184,0,0.4)] hover:shadow-[0_0_30px_rgba(255,184,0,0.6)]',
           label: t('property:map.tiers.premium', 'PREMIUM PREMIERE')
         };
@@ -147,7 +146,6 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         return {
           border: 'ring-2 ring-sky-400 border-sky-400',
           badge: 'bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400',
-          icon: '💎',
           glow: 'shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:shadow-[0_0_30px_rgba(14,165,233,0.6)]',
           label: t('property:map.tiers.highlight', 'HIGHLIGHT')
         };
@@ -155,7 +153,6 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         return {
           border: 'ring-2 ring-violet-500 border-violet-500',
           badge: 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400',
-          icon: '⭐',
           glow: 'shadow-[0_0_15px_rgba(124,58,237,0.35)] hover:shadow-[0_0_25px_rgba(124,58,237,0.5)]',
           label: t('property:map.tiers.featured', 'FEATURED')
         };
@@ -163,7 +160,6 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
         return {
           border: 'ring-1 ring-gray-300 border-gray-200',
           badge: 'bg-gradient-to-r from-gray-500 to-gray-600',
-          icon: '✨',
           glow: 'shadow-md hover:shadow-lg',
           label: 'PROMOTED'
         };
@@ -256,7 +252,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
         {/* Promotion Badge */}
         <div className={`absolute top-3 left-3 ${tierStyles.badge} text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 z-10`}>
-          <span className="text-sm">{tierStyles.icon}</span>
+          <StarIconSolid className="w-3.5 h-3.5" />
           {tierStyles.label}
         </div>
 
@@ -266,7 +262,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
             className="absolute top-3 right-14 bg-gradient-to-r from-red-600 to-rose-600 text-white text-xs font-bold px-2 py-1 rounded-lg animate-pulse flex items-center gap-1 z-10"
             style={{ boxShadow: '0 0 12px 2px rgba(239, 68, 68, 0.6), 0 0 20px 4px rgba(239, 68, 68, 0.3)' }}
           >
-            🔥 {t('property:status.urgent').toUpperCase()}
+            <FireIcon className="w-3 h-3" /> {t('property:status.urgent').toUpperCase()}
           </div>
         )}
 

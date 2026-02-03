@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChatMessage, AiSearchQuery, Property } from '@/types';
 import { getAiChatResponse } from '@/services/geminiService';
-import { PaperAirplaneIcon, SparklesIcon } from '@/constants';
+import { PaperAirplaneIcon, ChatBubbleLeftRightIcon } from '@/constants';
 
 interface AiSearchProps {
     properties: Property[];
@@ -111,7 +111,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
 
         // Features
         if (query.features && query.features.length > 0) {
-            query.features.forEach(f => pills.push(<FilterPill key={f}>✨ {f}</FilterPill>));
+            query.features.forEach(f => pills.push(<FilterPill key={f}>{f}</FilterPill>));
         }
 
         return pills;
@@ -124,7 +124,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                     <div key={index} className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                          {msg.sender === 'ai' && (
                             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                                <SparklesIcon className="w-5 h-5 text-white"/>
+                                <ChatBubbleLeftRightIcon className="w-5 h-5 text-white"/>
                             </div>
                          )}
                         <div className={`max-w-xs md:max-w-md p-3 rounded-2xl shadow-sm ${msg.sender === 'user' ? 'bg-primary text-white rounded-br-none' : 'bg-neutral-100 text-neutral-800 rounded-bl-none'}`}>
@@ -135,7 +135,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
 
                 {isSearching && (
                     <div className="flex items-end gap-2 justify-start">
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><SparklesIcon className="w-5 h-5 text-white"/></div>
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><ChatBubbleLeftRightIcon className="w-5 h-5 text-white"/></div>
                         <div className="p-3 rounded-2xl bg-white border shadow-sm">
                            <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-primary/40 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
