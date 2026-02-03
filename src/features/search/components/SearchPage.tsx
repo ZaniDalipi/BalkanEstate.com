@@ -280,13 +280,13 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Handle focusing map on a specific property when navigating from property details
+    // Handle focusing map on a specific property or city when navigating
     useEffect(() => {
         if (focusMapOnProperty) {
-            // Set the map to fly to the property location
+            // Set the map to fly to the location - use provided zoom or default to 18 for properties
             setFlyToTarget({
                 center: [focusMapOnProperty.lat, focusMapOnProperty.lng],
-                zoom: 18, // Zoom in closer for individual property
+                zoom: focusMapOnProperty.zoom ?? 18,
             });
 
             // Clear the focus state after triggering the map movement

@@ -136,12 +136,15 @@ const CityRecommendations: React.FC = () => {
         maxDistanceToHospital: null,
         amenities: [],
       },
-      // Set map focus to city coordinates
+      // Set map focus to city coordinates with a wider zoom to cover the whole city
       focusMapOnProperty: coords ? {
         lat: coords.lat,
         lng: coords.lng,
         address: `${city.city}, ${city.country}`,
+        zoom: 12, // City-level zoom to show all listings
       } : null,
+      // Switch to map view on mobile
+      mobileView: 'map',
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
@@ -299,7 +302,7 @@ const CityRecommendations: React.FC = () => {
               <button
                 key={city._id}
                 onClick={() => handleCityClick(city)}
-                className="bg-white/80 backdrop-blur-md rounded-xl border border-neutral-200/60 overflow-hidden hover:shadow-xl hover:border-primary hover:bg-white transition-all duration-300 text-left group shadow-sm"
+                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-2xl hover:border-primary hover:scale-[1.02] transition-all duration-300 text-left group shadow-md"
               >
                 {/* City Image Header with Gradient Fade */}
                 <div className="relative h-40 overflow-hidden">
@@ -437,6 +440,17 @@ const CityRecommendations: React.FC = () => {
                     <div className="flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
                       <span>{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
+                    </div>
+                  </div>
+
+                  {/* View Listings Button */}
+                  <div className="mt-4 pt-3 border-t border-neutral-100">
+                    <div className="w-full py-2.5 px-4 bg-primary text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 group-hover:bg-primary-dark transition-colors shadow-md">
+                      <MapPinIcon className="w-4 h-4" />
+                      <span>{t('footer.viewListings', 'View Listings on Map')}</span>
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
                 </div>

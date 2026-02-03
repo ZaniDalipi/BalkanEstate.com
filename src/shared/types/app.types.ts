@@ -71,7 +71,7 @@ export interface SearchPageState {
   aiChatHistory: ChatMessage[];
   isAiChatModalOpen: boolean;
   isFiltersOpen: boolean;
-  focusMapOnProperty: { lat: number; lng: number; address: string } | null;
+  focusMapOnProperty: { lat: number; lng: number; address: string; zoom?: number } | null;
 }
 
 export interface PendingSubscription {
