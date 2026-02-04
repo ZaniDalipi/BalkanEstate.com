@@ -965,29 +965,47 @@ const AgentsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Are you a real estate agent Section */}
-          <div className="bg-white rounded-xl shadow-md border p-6 sm:p-8 mb-8">
-            <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-3 sm:mb-4 text-center">
-              {t('agents:cta.title')}
-            </h3>
-            <p className="text-center text-neutral-600 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
-              {t('agents:cta.description')}
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-              <button
-                onClick={() => {
-                  dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
-                }}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary-dark transition-colors text-sm sm:text-base"
-              >
-                {t('agents:cta.getStarted')}
-              </button>
-              <button
-                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' })}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-primary text-primary rounded-md font-semibold hover:bg-primary hover:text-white transition-colors text-sm sm:text-base"
-              >
-                {t('agents:cta.browseAgencies')}
-              </button>
+          {/* Are you a real estate agent Section - Liquid Glass */}
+          <div
+            className="rounded-2xl p-8 sm:p-10 mb-8 relative overflow-hidden"
+            style={{
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 0 80px rgba(255, 255, 255, 0.3), -8px 0 24px rgba(31, 38, 135, 0.08), 8px 0 24px rgba(31, 38, 135, 0.08)',
+            }}
+          >
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-50/30 pointer-events-none" />
+
+            <div className="relative z-10">
+              <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-3 sm:mb-4 text-center">
+                {t('agents:cta.title')}
+              </h3>
+              <p className="text-center text-neutral-600 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
+                {t('agents:cta.description')}
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                <button
+                  onClick={() => {
+                    dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
+                  }}
+                  className="px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-all text-sm sm:text-base shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5"
+                >
+                  {t('agents:cta.getStarted')}
+                </button>
+                <button
+                  onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' })}
+                  className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl font-semibold transition-all text-sm sm:text-base text-primary hover:-translate-y-0.5"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 16px rgba(31, 38, 135, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.5)',
+                  }}
+                >
+                  {t('agents:cta.browseAgencies')}
+                </button>
+              </div>
             </div>
           </div>
         </div>
