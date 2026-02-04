@@ -52,6 +52,8 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
       duration = 3,
       includeWatermark = true,
       musicStyle = 'elegant',
+      backgroundStyle = 'elegant', // Professional background style
+      embedInListing = true, // Save video to property for auto-play on listing
     } = req.body;
 
     // Validate format
@@ -69,6 +71,12 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     // Validate duration
     if (duration < 2 || duration > 10) {
       res.status(400).json({ message: 'Duration must be between 2 and 10 seconds per image' });
+      return;
+    }
+
+    // Validate background style
+    if (!['gradient', 'blur', 'dark', 'elegant'].includes(backgroundStyle)) {
+      res.status(400).json({ message: 'Invalid background style. Must be gradient, blur, dark, or elegant' });
       return;
     }
 
@@ -98,14 +106,25 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
       duration,
       includeWatermark,
       musicStyle,
+      backgroundStyle,
+      embedInListing,
     };
 
-    console.log(`🎬 Starting video generation for property ${propertyId} by user ${userId} (quality: ${quality})`);
+    console.log(`🎬 Starting video generation for property ${propertyId} by user ${userId} (quality: ${quality}, background: ${backgroundStyle})`);
 
     // Generate video
     const result = await generatePropertyVideo(options);
 
-    // Update property with generated video URL
+    // Update property with generated video information
+    if (embedInListing) {
+      // Save to generated video fields for auto-play in listing
+      property.generatedVideoUrl = result.url;
+      property.generatedVideoPublicId = result.publicId;
+      property.generatedVideoFormat = format;
+      property.generatedVideoDuration = result.duration;
+      property.hasGeneratedVideo = true;
+    }
+    // Also store in videoUrl for backwards compatibility
     property.videoUrl = result.url;
     await property.save();
 
@@ -167,6 +186,8 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
       duration = 3,
       includeWatermark = true,
       musicStyle = 'elegant',
+      backgroundStyle = 'elegant', // Professional background style
+      embedInListing = true, // Save video to property for auto-play on listing
     } = req.body;
 
     // Prepare image URLs
@@ -195,6 +216,8 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
       duration,
       includeWatermark,
       musicStyle,
+      backgroundStyle,
+      embedInListing,
     };
 
     // Start async job
@@ -270,9 +293,11 @@ export const deleteVideo = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // If property has a generated video URL from Cloudinary, delete it
-    if (property.videoUrl && property.videoUrl.includes('cloudinary')) {
-      // Extract public_id from Cloudinary URL
+    // If property has a generated video with public ID, delete from Cloudinary
+    if (property.generatedVideoPublicId) {
+      await deleteGeneratedVideo(property.generatedVideoPublicId);
+    } else if (property.videoUrl && property.videoUrl.includes('cloudinary')) {
+      // Fallback: Extract public_id from Cloudinary URL
       const urlParts = property.videoUrl.split('/');
       const versionIndex = urlParts.findIndex(part => part.startsWith('v') && !isNaN(parseInt(part.substring(1))));
       if (versionIndex !== -1) {
@@ -282,8 +307,13 @@ export const deleteVideo = async (req: Request, res: Response): Promise<void> =>
       }
     }
 
-    // Clear video URL from property
+    // Clear all video fields from property
     property.videoUrl = undefined;
+    property.generatedVideoUrl = undefined;
+    property.generatedVideoPublicId = undefined;
+    property.generatedVideoFormat = undefined;
+    property.generatedVideoDuration = undefined;
+    property.hasGeneratedVideo = false;
     await property.save();
 
     res.status(200).json({ message: 'Video deleted successfully' });
@@ -361,6 +391,12 @@ export const getVideoPreview = async (req: Request, res: Response): Promise<void
         horizontal: { width: 1920, height: 1080, description: 'Perfect for YouTube & websites' },
         square: { width: 1080, height: 1080, description: 'Perfect for Instagram feed' },
       },
+      backgroundStyles: {
+        gradient: 'Animated purple-blue gradient (Canva style)',
+        blur: 'Blurred background effect',
+        dark: 'Elegant dark background',
+        elegant: 'Premium dark with gold accents (recommended)',
+      },
       musicStyles: {
         elegant: 'Sophisticated piano - perfect for luxury properties',
         upbeat: 'Energetic corporate - great for modern homes',
@@ -368,6 +404,11 @@ export const getVideoPreview = async (req: Request, res: Response): Promise<void
         modern: 'Contemporary electronic - suits urban apartments',
       },
       existingVideo: property.videoUrl || null,
+      generatedVideo: property.hasGeneratedVideo ? {
+        url: property.generatedVideoUrl,
+        format: property.generatedVideoFormat,
+        duration: property.generatedVideoDuration,
+      } : null,
     });
   } catch (error: any) {
     console.error('❌ Failed to get video preview:', error);

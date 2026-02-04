@@ -45,6 +45,12 @@ export interface IProperty extends Document {
   virtualTour360Url?: string; // URL for 360 virtual tour (e.g., Matterport, Kuula, etc.)
   hasVirtualTour360: boolean; // Flag indicating if 360 virtual tour is available
   videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, etc.)
+  // Generated video fields (auto-generated property showcase video)
+  generatedVideoUrl?: string; // URL for the auto-generated property video
+  generatedVideoPublicId?: string; // Cloudinary public_id for the generated video
+  generatedVideoFormat?: 'vertical' | 'horizontal' | 'square'; // Video format
+  generatedVideoDuration?: number; // Duration in seconds
+  hasGeneratedVideo: boolean; // Flag indicating if generated video is available
   imageUrl: string;
   imagePublicId?: string; // Cloudinary public_id for main image
   images: IPropertyImage[];
@@ -230,6 +236,26 @@ const PropertySchema: Schema = new Schema(
     },
     videoUrl: {
       type: String,
+    },
+    // Generated video fields
+    generatedVideoUrl: {
+      type: String,
+    },
+    generatedVideoPublicId: {
+      type: String,
+    },
+    generatedVideoFormat: {
+      type: String,
+      enum: ['vertical', 'horizontal', 'square'],
+    },
+    generatedVideoDuration: {
+      type: Number,
+      min: 0,
+    },
+    hasGeneratedVideo: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
     imageUrl: {
       type: String,

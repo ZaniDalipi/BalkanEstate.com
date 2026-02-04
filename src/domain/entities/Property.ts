@@ -86,7 +86,14 @@ export class Property {
     public readonly promotionTier?: PromotionTier,
     public readonly promotionStartDate?: number,
     public readonly promotionEndDate?: number,
-    public readonly hasUrgentBadge?: boolean
+    public readonly hasUrgentBadge?: boolean,
+    // Generated video fields (auto-generated property showcase video)
+    public readonly generatedVideoUrl?: string,
+    public readonly generatedVideoPublicId?: string,
+    public readonly generatedVideoFormat?: 'vertical' | 'horizontal' | 'square',
+    public readonly generatedVideoDuration?: number,
+    public readonly hasGeneratedVideo?: boolean,
+    public readonly videoUrl?: string // External embedded video URL
   ) {}
 
   // Business logic methods
@@ -342,7 +349,14 @@ export class Property {
       dto.promotionTier,
       dto.promotionStartDate,
       dto.promotionEndDate,
-      dto.hasUrgentBadge
+      dto.hasUrgentBadge,
+      // Generated video fields
+      dto.generatedVideoUrl,
+      dto.generatedVideoPublicId,
+      dto.generatedVideoFormat,
+      dto.generatedVideoDuration,
+      dto.hasGeneratedVideo,
+      dto.videoUrl
     );
   }
 
@@ -405,6 +419,13 @@ export class Property {
       promotionStartDate: this.promotionStartDate,
       promotionEndDate: this.promotionEndDate,
       hasUrgentBadge: this.hasUrgentBadge,
+      // Generated video fields
+      generatedVideoUrl: this.generatedVideoUrl,
+      generatedVideoPublicId: this.generatedVideoPublicId,
+      generatedVideoFormat: this.generatedVideoFormat,
+      generatedVideoDuration: this.generatedVideoDuration,
+      hasGeneratedVideo: this.hasGeneratedVideo,
+      videoUrl: this.videoUrl,
     };
   }
 }

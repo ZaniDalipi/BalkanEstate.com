@@ -8,6 +8,7 @@ import { apiRequest } from '@/src/shared/api';
 export type VideoFormat = 'vertical' | 'horizontal' | 'square';
 export type VideoQuality = 'standard' | 'mobile';
 export type MusicStyle = 'elegant' | 'upbeat' | 'calm' | 'modern';
+export type BackgroundStyle = 'gradient' | 'blur' | 'dark' | 'elegant';
 
 export interface VideoGenerationOptions {
   format?: VideoFormat;
@@ -15,6 +16,8 @@ export interface VideoGenerationOptions {
   duration?: number; // seconds per image (2-10)
   includeWatermark?: boolean;
   musicStyle?: MusicStyle;
+  backgroundStyle?: BackgroundStyle; // Professional background style
+  embedInListing?: boolean; // Save video to property for auto-play on listing open
 }
 
 export interface GeneratedVideo {
@@ -46,6 +49,12 @@ export interface VideoPreview {
     horizontal: { width: number; height: number; description: string };
     square: { width: number; height: number; description: string };
   };
+  backgroundStyles: {
+    gradient: string;
+    blur: string;
+    dark: string;
+    elegant: string;
+  };
   musicStyles: {
     elegant: string;
     upbeat: string;
@@ -53,6 +62,11 @@ export interface VideoPreview {
     modern: string;
   };
   existingVideo: string | null;
+  generatedVideo: {
+    url: string;
+    format: VideoFormat;
+    duration: number;
+  } | null;
 }
 
 // --- API Functions ---

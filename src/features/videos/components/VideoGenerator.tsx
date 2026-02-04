@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useVideoPreview, useGenerateVideo, useDeleteVideo } from '../hooks/useVideoGeneration';
-import { VideoFormat, VideoQuality, MusicStyle, GeneratedVideo } from '../api/videoApi';
+import { VideoFormat, VideoQuality, MusicStyle, BackgroundStyle, GeneratedVideo } from '../api/videoApi';
 
 interface VideoGeneratorProps {
   property: Property;
@@ -78,6 +78,13 @@ const QUALITY_OPTIONS: { value: VideoQuality; label: string; description: string
   { value: 'standard', label: 'Standard (1080p)', description: 'Full quality, larger file' },
 ];
 
+const BACKGROUND_OPTIONS: { value: BackgroundStyle; label: string; description: string; icon: string }[] = [
+  { value: 'elegant', label: 'Elegant Dark', description: 'Premium dark with gold accents', icon: '✨' },
+  { value: 'gradient', label: 'Gradient', description: 'Purple-blue gradient (Canva style)', icon: '🎨' },
+  { value: 'dark', label: 'Pure Dark', description: 'Clean dark background', icon: '🌙' },
+  { value: 'blur', label: 'Blur Effect', description: 'Blurred background effect', icon: '🔲' },
+];
+
 const VideoGenerator: React.FC<VideoGeneratorProps> = ({
   property,
   onVideoGenerated,
@@ -90,7 +97,9 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
   const [quality, setQuality] = useState<VideoQuality>('mobile'); // Default to mobile for smaller file size
   const [duration, setDuration] = useState<number>(3);
   const [musicStyle, setMusicStyle] = useState<MusicStyle>('elegant');
+  const [backgroundStyle, setBackgroundStyle] = useState<BackgroundStyle>('elegant');
   const [includeWatermark, setIncludeWatermark] = useState<boolean>(true);
+  const [embedInListing, setEmbedInListing] = useState<boolean>(true); // Auto-play video when listing opens
   const [showVideoPreview, setShowVideoPreview] = useState<boolean>(false);
 
   // Fetch preview data
@@ -127,11 +136,13 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
         quality,
         duration,
         musicStyle,
+        backgroundStyle,
         includeWatermark,
+        embedInListing,
       },
       useAsync: imageCount > 5, // Use async for more than 5 images
     });
-  }, [property.id, format, quality, duration, musicStyle, includeWatermark, imageCount, generateVideo]);
+  }, [property.id, format, quality, duration, musicStyle, backgroundStyle, includeWatermark, embedInListing, imageCount, generateVideo]);
 
   // Handle delete video
   const handleDelete = useCallback(() => {
@@ -306,8 +317,12 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
                 setDuration={setDuration}
                 musicStyle={musicStyle}
                 setMusicStyle={setMusicStyle}
+                backgroundStyle={backgroundStyle}
+                setBackgroundStyle={setBackgroundStyle}
                 includeWatermark={includeWatermark}
                 setIncludeWatermark={setIncludeWatermark}
+                embedInListing={embedInListing}
+                setEmbedInListing={setEmbedInListing}
                 preview={preview}
                 isLoadingPreview={isLoadingPreview}
                 onGenerate={handleGenerate}
@@ -325,8 +340,12 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
             setDuration={setDuration}
             musicStyle={musicStyle}
             setMusicStyle={setMusicStyle}
+            backgroundStyle={backgroundStyle}
+            setBackgroundStyle={setBackgroundStyle}
             includeWatermark={includeWatermark}
             setIncludeWatermark={setIncludeWatermark}
+            embedInListing={embedInListing}
+            setEmbedInListing={setEmbedInListing}
             preview={preview}
             isLoadingPreview={isLoadingPreview}
             onGenerate={handleGenerate}
@@ -362,8 +381,12 @@ interface VideoOptionsFormProps {
   setDuration: (duration: number) => void;
   musicStyle: MusicStyle;
   setMusicStyle: (style: MusicStyle) => void;
+  backgroundStyle: BackgroundStyle;
+  setBackgroundStyle: (style: BackgroundStyle) => void;
   includeWatermark: boolean;
   setIncludeWatermark: (include: boolean) => void;
+  embedInListing: boolean;
+  setEmbedInListing: (embed: boolean) => void;
   preview: any;
   isLoadingPreview: boolean;
   onGenerate: () => void;
@@ -378,8 +401,12 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
   setDuration,
   musicStyle,
   setMusicStyle,
+  backgroundStyle,
+  setBackgroundStyle,
   includeWatermark,
   setIncludeWatermark,
+  embedInListing,
+  setEmbedInListing,
   preview,
   isLoadingPreview,
   onGenerate,
@@ -422,6 +449,28 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
                   : 'border-neutral-200 hover:border-neutral-300'
               }`}
             >
+              <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
+              <span className="text-xs text-neutral-500">{option.description}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Background Style */}
+      <div>
+        <label className="block text-sm font-medium text-neutral-700 mb-3">Background Style</label>
+        <div className="grid grid-cols-2 gap-3">
+          {BACKGROUND_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setBackgroundStyle(option.value)}
+              className={`p-3 rounded-lg border-2 transition-all text-left ${
+                backgroundStyle === option.value
+                  ? 'border-primary bg-primary/5'
+                  : 'border-neutral-200 hover:border-neutral-300'
+              }`}
+            >
+              <span className="text-lg block mb-1">{option.icon}</span>
               <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
               <span className="text-xs text-neutral-500">{option.description}</span>
             </button>
@@ -476,13 +525,30 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
       <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
         <div>
           <span className="text-sm font-medium text-neutral-700">Include BalkanEstate.com watermark</span>
-          <p className="text-xs text-neutral-500">Adds branding to your video</p>
+          <p className="text-xs text-neutral-500">Adds branding to your video for social sharing</p>
         </div>
         <label className="relative inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
             checked={includeWatermark}
             onChange={(e) => setIncludeWatermark(e.target.checked)}
+            className="sr-only peer"
+          />
+          <div className="w-11 h-6 bg-neutral-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+        </label>
+      </div>
+
+      {/* Embed in listing toggle */}
+      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+        <div>
+          <span className="text-sm font-medium text-neutral-700">Auto-play on listing page</span>
+          <p className="text-xs text-neutral-500">Video plays automatically when visitors open your listing</p>
+        </div>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={embedInListing}
+            onChange={(e) => setEmbedInListing(e.target.checked)}
             className="sr-only peer"
           />
           <div className="w-11 h-6 bg-neutral-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>

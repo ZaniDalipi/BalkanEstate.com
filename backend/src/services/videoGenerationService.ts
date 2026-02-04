@@ -32,6 +32,8 @@ export interface VideoGenerationOptions {
   duration?: number;
   includeWatermark?: boolean;
   musicStyle?: 'elegant' | 'upbeat' | 'calm' | 'modern';
+  backgroundStyle?: 'gradient' | 'blur' | 'dark' | 'elegant';
+  embedInListing?: boolean; // Save video URL to property for auto-play on listing
 }
 
 export interface VideoGenerationResult {
@@ -230,6 +232,8 @@ export const generatePropertyVideo = async (
       sqft,
       sellerName,
       sellerPhone,
+      backgroundStyle: options.backgroundStyle || 'elegant',
+      includeWatermark: options.includeWatermark !== false,
     });
 
     console.log('✅ Video created successfully');
@@ -259,8 +263,31 @@ export const generatePropertyVideo = async (
   }
 };
 
+// Background style configurations for professional look
+const BACKGROUND_CONFIGS = {
+  gradient: {
+    // Animated gradient background (Canva-like)
+    colors: ['#1a1a2e', '#16213e', '#0f3460', '#533483'],
+    description: 'Animated purple-blue gradient'
+  },
+  blur: {
+    // Blurred version of the image as background
+    description: 'Blurred image background'
+  },
+  dark: {
+    // Elegant dark background
+    color: '#0a0a0a',
+    description: 'Elegant dark background'
+  },
+  elegant: {
+    // Premium gold and dark theme
+    colors: ['#1a1a1a', '#2d2d2d', '#c9a962'],
+    description: 'Premium dark with gold accents'
+  }
+};
+
 /**
- * Create video with text overlays and music
+ * Create video with professional backgrounds, Ken Burns effect, and overlays
  */
 const createVideoWithOverlays = (options: {
   imagePaths: string[];
@@ -277,6 +304,8 @@ const createVideoWithOverlays = (options: {
   sqft?: number;
   sellerName?: string;
   sellerPhone?: string;
+  backgroundStyle?: 'gradient' | 'blur' | 'dark' | 'elegant';
+  includeWatermark?: boolean;
 }): Promise<void> => {
   const {
     imagePaths,
@@ -293,13 +322,18 @@ const createVideoWithOverlays = (options: {
     sqft,
     sellerName,
     sellerPhone,
+    backgroundStyle = 'elegant',
+    includeWatermark = true,
   } = options;
 
   return new Promise((resolve, reject) => {
     const totalImages = imagePaths.length;
     const totalDuration = totalImages * durationPerImage;
+    const isVertical = height > width;
+    const fps = 30;
+    const framesPerImage = durationPerImage * fps;
 
-    // Create concat file
+    // Create concat file with proper duration
     const concatFilePath = path.join(path.dirname(outputPath), 'concat.txt');
     const concatContent = imagePaths
       .map(imgPath => `file '${imgPath}'\nduration ${durationPerImage}`)
@@ -312,6 +346,7 @@ const createVideoWithOverlays = (options: {
       '/System/Library/Fonts/SFNSText.ttf',            // macOS newer
       '/Library/Fonts/Arial.ttf',                       // macOS
       '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', // Linux
+      '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', // Linux Bold
       '/usr/share/fonts/TTF/DejaVuSans.ttf',           // Linux alternative
       'C:\\Windows\\Fonts\\arial.ttf',                  // Windows
     ];
@@ -325,129 +360,251 @@ const createVideoWithOverlays = (options: {
       }
     }
 
-    // If no font found, skip text overlays
     const hasFont = fontFile !== '';
     if (!hasFont) {
       console.warn('⚠️ No system font found, skipping text overlays');
     }
 
-    // Build filter with animated text overlays
+    // Build professional filter complex
     let filters: string[] = [];
 
-    // Base scaling filter
-    filters.push(`scale=${width}:${height}:force_original_aspect_ratio=decrease`);
-    filters.push(`pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:black`);
-    filters.push('setsar=1');
+    // Step 1: Create professional background based on style
+    let bgFilter = '';
+    switch (backgroundStyle) {
+      case 'gradient':
+        // Animated gradient background (purple to blue - Canva style)
+        bgFilter = `color=c=#1a1a2e:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg];` +
+          `[bg]drawbox=x=0:y=0:w=iw:h=ih/3:color=#533483@0.4:t=fill[bg1];` +
+          `[bg1]drawbox=x=0:y=ih*2/3:w=iw:h=ih/3:color=#0f3460@0.4:t=fill[bg2]`;
+        break;
+      case 'blur':
+        // Will use blurred version of current image - handled differently
+        bgFilter = `color=c=#0a0a0a:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg2]`;
+        break;
+      case 'dark':
+        bgFilter = `color=c=#0a0a0a:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg2]`;
+        break;
+      case 'elegant':
+      default:
+        // Premium dark with subtle vignette effect
+        bgFilter = `color=c=#121212:s=${width}x${height}:d=${totalDuration}:r=${fps}[bg];` +
+          `[bg]vignette=PI/4[bg2]`;
+        break;
+    }
 
-    // Property info text (shown on each image with fade animation)
-    // Format price
+    // Step 2: Scale images to fit within frame while maintaining aspect ratio
+    // This ensures images fit properly for both landscape and portrait
+    const imgScaleFilter = isVertical
+      ? `scale=w=${Math.floor(width * 0.85)}:h=-1:force_original_aspect_ratio=decrease,` +
+        `scale=w='min(iw\\,${Math.floor(width * 0.85)})':h='min(ih\\,${Math.floor(height * 0.65)})':force_original_aspect_ratio=decrease`
+      : `scale=w=-1:h=${Math.floor(height * 0.75)}:force_original_aspect_ratio=decrease,` +
+        `scale=w='min(iw\\,${Math.floor(width * 0.85)})':h='min(ih\\,${Math.floor(height * 0.75)})':force_original_aspect_ratio=decrease`;
+
+    // Step 3: Add Ken Burns effect (subtle zoom for professional look)
+    const zoomStart = 1.0;
+    const zoomEnd = 1.08;
+    const kenBurnsFilter = `zoompan=z='${zoomStart}+(${zoomEnd}-${zoomStart})*on/${framesPerImage}':` +
+      `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${framesPerImage}:s=${width}x${height}:fps=${fps}`;
+
+    // Build the complete filter complex
+    // First, create background
+    filters.push(bgFilter);
+
+    // Process input images with scaling
+    filters.push(`[0:v]${imgScaleFilter},setsar=1,format=rgba[scaled]`);
+
+    // Overlay scaled image on background (centered)
+    filters.push(`[bg2][scaled]overlay=(W-w)/2:(H-h)/2:format=auto[main]`);
+
+    // Add fade transitions between images
+    const fadeFrames = Math.floor(fps * 0.5); // 0.5 second fade
+    filters.push(`[main]fade=t=in:st=0:d=0.5,fade=t=out:st=${totalDuration - 0.5}:d=0.5[faded]`);
+
+    // Property info text formatting
     const priceText = price ? `€${price.toLocaleString()}` : '';
     const locationText = city || '';
-
-    // Property features
     const features: string[] = [];
-    if (beds) features.push(`${beds} Beds`);
-    if (baths) features.push(`${baths} Baths`);
+    if (beds) features.push(`${beds} Bed${beds > 1 ? 's' : ''}`);
+    if (baths) features.push(`${baths} Bath${baths > 1 ? 's' : ''}`);
     if (sqft) features.push(`${sqft} m²`);
-    const featuresText = features.join(' • ');
+    const featuresText = features.join('  •  ');
 
-    // Calculate positions based on format
-    const isVertical = height > width;
-    const fontSize = isVertical ? 56 : 48;
-    const smallFontSize = isVertical ? 36 : 32;
-    const bottomPadding = isVertical ? 300 : 150;
+    // Calculate responsive font sizes and positions
+    const titleFontSize = isVertical ? Math.floor(width / 18) : Math.floor(height / 18);
+    const priceFontSize = isVertical ? Math.floor(width / 12) : Math.floor(height / 14);
+    const locationFontSize = isVertical ? Math.floor(width / 22) : Math.floor(height / 22);
+    const featureFontSize = isVertical ? Math.floor(width / 26) : Math.floor(height / 26);
+    const watermarkFontSize = isVertical ? Math.floor(width / 36) : Math.floor(height / 36);
 
-    // Only add text overlays if we have a font
+    // Position calculations
+    const bottomMargin = isVertical ? Math.floor(height * 0.15) : Math.floor(height * 0.12);
+    const topMargin = isVertical ? Math.floor(height * 0.05) : Math.floor(height * 0.04);
+
+    // Add text overlays if font is available
     if (hasFont) {
       const fontParam = `fontfile='${fontFile}'`;
+      let currentFilter = '[faded]';
+      let filterIndex = 0;
 
-      // Add gradient overlay at bottom for text readability
-      filters.push(`drawbox=x=0:y=ih-${bottomPadding + 50}:w=iw:h=${bottomPadding + 50}:color=black@0.6:t=fill`);
+      // Professional bottom gradient overlay for text readability
+      const gradientHeight = isVertical ? Math.floor(height * 0.35) : Math.floor(height * 0.28);
+      filters.push(
+        `${currentFilter}drawbox=x=0:y=ih-${gradientHeight}:w=iw:h=${gradientHeight}:` +
+        `color=black@0.7:t=fill[t${filterIndex}]`
+      );
+      currentFilter = `[t${filterIndex}]`;
+      filterIndex++;
 
-      // Price (main text) - with fade in animation
-      if (priceText) {
-        filters.push(
-          `drawtext=${fontParam}:text='${escapeText(priceText)}':` +
-          `fontsize=${fontSize}:fontcolor=white:` +
-          `x=(w-text_w)/2:y=h-${bottomPadding}:` +
-          `alpha='if(lt(mod(t\\,${durationPerImage})\\,0.5)\\,mod(t\\,${durationPerImage})*2\\,1)'`
-        );
-      }
-
-      // Location
-      if (locationText) {
-        filters.push(
-          `drawtext=${fontParam}:text='${escapeText(locationText)}':` +
-          `fontsize=${smallFontSize}:fontcolor=white@0.9:` +
-          `x=(w-text_w)/2:y=h-${bottomPadding - 60}`
-        );
-      }
-
-      // Features (beds, baths, sqft)
-      if (featuresText) {
-        filters.push(
-          `drawtext=${fontParam}:text='${escapeText(featuresText)}':` +
-          `fontsize=${smallFontSize - 4}:fontcolor=white@0.8:` +
-          `x=(w-text_w)/2:y=h-${bottomPadding - 110}`
-        );
-      }
-
-      // Title at top
+      // Top bar with gradient for title
       if (title) {
-        filters.push(`drawbox=x=0:y=0:w=iw:h=120:color=black@0.5:t=fill`);
+        const topBarHeight = isVertical ? Math.floor(height * 0.12) : Math.floor(height * 0.1);
         filters.push(
-          `drawtext=${fontParam}:text='${escapeText(title.substring(0, 40))}':` +
-          `fontsize=${smallFontSize}:fontcolor=white:` +
-          `x=(w-text_w)/2:y=40`
+          `${currentFilter}drawbox=x=0:y=0:w=iw:h=${topBarHeight}:color=black@0.6:t=fill[t${filterIndex}]`
         );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+
+        // Title text with elegant styling
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(title.substring(0, 45))}':` +
+          `fontsize=${titleFontSize}:fontcolor=white:` +
+          `x=(w-text_w)/2:y=${topMargin + titleFontSize / 2}:` +
+          `alpha='if(lt(t\\,0.8)\\,t/0.8\\,1)'[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
       }
 
-      // Contact info on last few seconds
+      // Price with animated entrance (main highlight)
+      if (priceText) {
+        const priceY = height - bottomMargin - priceFontSize * 2;
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(priceText)}':` +
+          `fontsize=${priceFontSize}:fontcolor=#ffffff:` +
+          `x=(w-text_w)/2:y=${priceY}:` +
+          `alpha='if(lt(mod(t\\,${durationPerImage})\\,0.6)\\,mod(t\\,${durationPerImage})/0.6\\,1)':` +
+          `shadowcolor=black@0.5:shadowx=2:shadowy=2[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+      }
+
+      // Location with icon-like marker
+      if (locationText) {
+        const locationY = height - bottomMargin - priceFontSize * 0.5;
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='📍 ${escapeText(locationText)}':` +
+          `fontsize=${locationFontSize}:fontcolor=white@0.95:` +
+          `x=(w-text_w)/2:y=${locationY}[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+      }
+
+      // Features with elegant styling
+      if (featuresText) {
+        const featuresY = height - bottomMargin + featureFontSize;
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(featuresText)}':` +
+          `fontsize=${featureFontSize}:fontcolor=white@0.85:` +
+          `x=(w-text_w)/2:y=${featuresY}[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+      }
+
+      // Contact info overlay in last 4 seconds (professional card style)
       const contactStartTime = Math.max(0, totalDuration - 4);
       if (sellerName || sellerPhone) {
-        // Show contact overlay in last 4 seconds
+        const cardWidth = Math.floor(width * 0.7);
+        const cardHeight = Math.floor(height * 0.25);
+        const cardX = Math.floor((width - cardWidth) / 2);
+        const cardY = Math.floor(height * 0.38);
+
+        // Semi-transparent card background
         filters.push(
-          `drawbox=x=iw/4:y=ih/3:w=iw/2:h=ih/3:color=black@0.8:t=fill:enable='gte(t\\,${contactStartTime})'`
+          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=${cardHeight}:` +
+          `color=black@0.85:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
         );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+
+        // Card border (gold accent for elegant style)
+        filters.push(
+          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=3:` +
+          `color=#c9a962:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+
+        // Contact header
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='Contact Agent':` +
+          `fontsize=${locationFontSize}:fontcolor=#c9a962:` +
+          `x=(w-text_w)/2:y=${cardY + cardHeight * 0.15}:` +
+          `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
 
         if (sellerName) {
           filters.push(
-            `drawtext=${fontParam}:text='${escapeText(sellerName)}':` +
-            `fontsize=${fontSize - 8}:fontcolor=white:` +
-            `x=(w-text_w)/2:y=h/2-40:` +
-            `enable='gte(t\\,${contactStartTime})'`
+            `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerName)}':` +
+            `fontsize=${titleFontSize}:fontcolor=white:` +
+            `x=(w-text_w)/2:y=${cardY + cardHeight * 0.4}:` +
+            `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
           );
+          currentFilter = `[t${filterIndex}]`;
+          filterIndex++;
         }
 
         if (sellerPhone) {
           filters.push(
-            `drawtext=${fontParam}:text='${escapeText(sellerPhone)}':` +
-            `fontsize=${smallFontSize}:fontcolor=white@0.9:` +
-            `x=(w-text_w)/2:y=h/2+20:` +
-            `enable='gte(t\\,${contactStartTime})'`
+            `${currentFilter}drawtext=${fontParam}:text='📞 ${escapeText(sellerPhone)}':` +
+            `fontsize=${locationFontSize}:fontcolor=white@0.9:` +
+            `x=(w-text_w)/2:y=${cardY + cardHeight * 0.65}:` +
+            `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
           );
+          currentFilter = `[t${filterIndex}]`;
+          filterIndex++;
         }
-
-        // Call to action
-        filters.push(
-          `drawtext=${fontParam}:text='Contact Now':` +
-          `fontsize=${smallFontSize - 4}:fontcolor=yellow:` +
-          `x=(w-text_w)/2:y=h/2+70:` +
-          `enable='gte(t\\,${contactStartTime})'`
-        );
       }
 
-      // Watermark
-      filters.push(
-        `drawtext=${fontParam}:text='BalkanEstate.com':` +
-        `fontsize=24:fontcolor=white@0.6:` +
-        `x=20:y=20`
-      );
+      // Professional watermark with BalkanEstate branding
+      if (includeWatermark) {
+        // Watermark background pill
+        const wmWidth = Math.floor(width * 0.35);
+        const wmHeight = Math.floor(watermarkFontSize * 2.5);
+        const wmX = Math.floor(width * 0.02);
+        const wmY = Math.floor(height * 0.02);
+
+        filters.push(
+          `${currentFilter}drawbox=x=${wmX}:y=${wmY}:w=${wmWidth}:h=${wmHeight}:` +
+          `color=black@0.5:t=fill[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+
+        // BalkanEstate logo text with house icon
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='🏠 BalkanEstate.com':` +
+          `fontsize=${watermarkFontSize}:fontcolor=white@0.9:` +
+          `x=${wmX + 10}:y=${wmY + wmHeight / 2 - watermarkFontSize / 2}[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+      }
+
+      // Final output label
+      filters.push(`${currentFilter}null[out]`);
+    } else {
+      filters.push('[faded]null[out]');
     }
 
-    const filterComplex = filters.join(',');
+    const filterComplex = filters.join(';');
 
-    console.log('🎬 Starting FFmpeg processing with overlays...');
+    console.log('🎬 Starting FFmpeg processing with professional overlays...');
+    console.log(`📐 Background style: ${backgroundStyle}`);
 
     const command = ffmpeg()
       .input(concatFilePath)
@@ -458,15 +615,15 @@ const createVideoWithOverlays = (options: {
       command.input(musicPath);
     }
 
-    command.complexFilter(filterComplex);
+    command.complexFilter(filterComplex, 'out');
 
     const outputOptions = [
       '-c:v', 'libx264',
       '-preset', 'medium',
-      '-crf', '23',
+      '-crf', '22', // Slightly better quality
       '-pix_fmt', 'yuv420p',
       '-movflags', '+faststart',
-      '-r', '30',
+      '-r', fps.toString(),
       '-t', totalDuration.toString(),
     ];
 
@@ -480,7 +637,7 @@ const createVideoWithOverlays = (options: {
     (command as any)
       .on('start', (cmd: string) => {
         console.log('🎬 FFmpeg started');
-        console.log('Command preview:', cmd.substring(0, 400) + '...');
+        console.log('Command preview:', cmd.substring(0, 500) + '...');
       })
       .on('progress', (progress: { percent?: number }) => {
         if (progress.percent) {
