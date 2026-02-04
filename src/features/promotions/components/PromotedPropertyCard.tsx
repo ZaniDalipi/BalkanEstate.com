@@ -236,9 +236,9 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         </div>
 
         {/* Auto-Extend Toggle */}
-        {!isExpired && promotion?._id && (
+        {promotion?._id && (
           <div className="mt-4 pt-4 border-t border-neutral-100">
-            <label className="flex items-center justify-between cursor-pointer">
+            <label className={`flex items-center justify-between ${isExpired ? 'opacity-50' : 'cursor-pointer'}`}>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-neutral-700">Auto-Extend</span>
                 <span className="text-xs text-neutral-400">(renew automatically)</span>
@@ -247,12 +247,19 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
                 <input
                   type="checkbox"
                   checked={promotion?.autoExtend || false}
-                  onChange={(e) => onToggleAutoExtend(promotion._id, e.target.checked)}
+                  onChange={(e) => !isExpired && onToggleAutoExtend(promotion._id, e.target.checked)}
+                  disabled={isExpired}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                <div className={`w-11 h-6 ${isExpired ? 'bg-neutral-100 cursor-not-allowed' : 'bg-neutral-200'} peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-disabled:opacity-50`} />
               </div>
             </label>
+            {isExpired && (
+              <p className="text-xs text-neutral-400 mt-1">Extend your promotion to enable auto-extend</p>
+            )}
+            {!isExpired && promotion?.autoExtend && (
+              <p className="text-xs text-green-600 mt-1">Your promotion will automatically renew when it expires</p>
+            )}
           </div>
         )}
 

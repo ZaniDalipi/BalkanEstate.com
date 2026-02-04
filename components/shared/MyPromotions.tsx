@@ -40,6 +40,15 @@ const MyPromotions: React.FC = () => {
   // Local state
   const [filter, setFilter] = useState<PromotionFilter>('active');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  // Auto-hide toast after 4 seconds
+  React.useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // Modal state
   const [showExtendModal, setShowExtendModal] = useState(false);
@@ -117,10 +126,33 @@ const MyPromotions: React.FC = () => {
   const handleToggleAutoExtend = async (promotionId: string, autoExtend: boolean) => {
     try {
       await toggleAutoExtendMutation.mutateAsync({ promotionId, autoExtend });
-      // Data will auto-refresh via React Query
+      // Show success message
+      if (autoExtend) {
+        setToastMessage({
+          type: 'info',
+          message: 'Auto-extend enabled. Your promotion will automatically renew when it expires. Payments coming soon!',
+        });
+      } else {
+        setToastMessage({
+          type: 'success',
+          message: 'Auto-extend disabled. Your promotion will expire naturally.',
+        });
+      }
     } catch (error: any) {
       console.error('Failed to update auto-extend:', error);
-      alert(error.message || 'Failed to update auto-extend');
+      // Check if it's an expired promotion error
+      const errorMessage = error.message || '';
+      if (errorMessage.toLowerCase().includes('expired')) {
+        setToastMessage({
+          type: 'info',
+          message: 'This promotion has expired. Use the "Extend" button to reactivate it.',
+        });
+      } else {
+        setToastMessage({
+          type: 'error',
+          message: errorMessage || 'Failed to update auto-extend settings.',
+        });
+      }
     }
   };
 
@@ -131,12 +163,18 @@ const MyPromotions: React.FC = () => {
       if (result.success && result.url) {
         window.location.href = result.url;
       } else {
-        alert('No pending auto-extend checkout found');
+        setToastMessage({
+          type: 'info',
+          message: 'Payments coming soon! Auto-extend payment will be available shortly.',
+        });
         setActionLoading(null);
       }
     } catch (error: any) {
       console.error('Failed to complete auto-extend:', error);
-      alert(error.message || 'Failed to get auto-extend checkout');
+      setToastMessage({
+        type: 'info',
+        message: 'Payments coming soon! Contact sales@balkanestateai.com to extend your promotion.',
+      });
       setActionLoading(null);
     }
   };
@@ -162,6 +200,46 @@ const MyPromotions: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Toast Message */}
+      {toastMessage && (
+        <div
+          className={`fixed top-4 right-4 z-50 max-w-md p-4 rounded-xl shadow-lg border animate-in slide-in-from-top-2 duration-300 ${
+            toastMessage.type === 'success'
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : toastMessage.type === 'error'
+                ? 'bg-red-50 border-red-200 text-red-800'
+                : 'bg-blue-50 border-blue-200 text-blue-800'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              {toastMessage.type === 'success' ? (
+                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : toastMessage.type === 'error' ? (
+                <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1 text-sm font-medium">{toastMessage.message}</div>
+            <button
+              onClick={() => setToastMessage(null)}
+              className="flex-shrink-0 p-1 rounded-full hover:bg-black/10 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
