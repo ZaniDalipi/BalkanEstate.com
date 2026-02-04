@@ -431,7 +431,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
         </div>
 
         {/* Single row header on mobile: Back + Stats + Actions */}
-        <div className="px-3 sm:px-4 py-2 sm:py-3 md:py-4 flex items-center justify-between gap-2">
+        <div className="px-3 sm:px-4 py-2 sm:py-3 md:py-5 md:mt-2 flex items-center justify-between gap-2">
           {/* Back button */}
           <button
             onClick={handleBack}
