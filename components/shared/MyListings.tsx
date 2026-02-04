@@ -3,7 +3,7 @@ import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { useRealtimeProperties } from '../../src/features/properties/hooks';
-import { EyeIcon, HeartIcon, InboxIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon } from '../../constants';
+import { EyeIcon, HeartIcon, InboxIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon, CalendarIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
@@ -157,8 +157,8 @@ const ListingCard: React.FC<{
                 <div className="flex items-center gap-1.5" title="Saves"><HeartIcon className="w-4 h-4" /> {property.saves || 0}</div>
                 <div className="flex items-center gap-1.5" title="Inquiries"><InboxIcon className="w-4 h-4" /> {property.inquiries || 0}</div>
                 {property.lastRenewed && isActionable && (
-                    <div className="flex items-center gap-1.5 text-blue-600" title="Last Renewed">
-                        <ClockIcon className="w-4 h-4"/>
+                    <div className="flex items-center gap-1.5 text-green-600" title="Last Renewed">
+                        <CalendarIcon className="w-4 h-4"/>
                         <span className="text-xs font-medium">
                             {new Date(property.lastRenewed).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>

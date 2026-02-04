@@ -505,7 +505,7 @@ export const ClockIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 export const ArrowPathIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
-        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M16.023 9.348h4.992v-.001a.75.75 0 01.684.921l-1.91 7.126a.75.75 0 01-1.391.107l-2.09-6.273-6.273 2.09a.75.75 0 01-.107 1.391l-7.126 1.91a.75.75 0 01-.921-.684v-.001H3.003a.75.75 0 01.684-1.6l4.385-1.462a.75.75 0 01.996.347l1.459 4.377 4.377-1.459a.75.75 0 01.347.996l-1.462 4.385a.75.75 0 01-1.6.684H9.348a.75.75 0 01-.684-.921l1.91-7.126a.75.75 0 011.391-.107l2.09 6.273 6.273-2.09a.75.75 0 01.107-1.391l7.126-1.91a.75.75 0 01.921.684v.001h.001z" })
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" })
     )
 );
 
