@@ -54,12 +54,6 @@ const PlayIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const XIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
 const FORMAT_OPTIONS: { value: VideoFormat; label: string; icon: string; description: string }[] = [
   { value: 'vertical', label: 'Reels (9:16)', icon: '📱', description: 'Instagram Reels & TikTok' },
   { value: 'horizontal', label: 'Landscape (16:9)', icon: '🖥️', description: 'YouTube & Websites' },
@@ -172,14 +166,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
             <p className="text-white/80 text-sm">Create a stunning video reel from your property photos</p>
           </div>
         </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="text-white/80 hover:text-white transition-colors"
-          >
-            <XIcon className="w-6 h-6" />
-          </button>
-        )}
       </div>
 
       {/* Content */}
