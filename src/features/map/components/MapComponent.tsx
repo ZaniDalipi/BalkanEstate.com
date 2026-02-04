@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense, Component, ErrorInfo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, Component, ErrorInfo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Rectangle, useMapEvents, useMap } from 'react-leaflet';
 import { Property } from '@/types';
 import L from 'leaflet';
 
-// Lazy load Google Maps component for better initial load
-const GoogleMapComponent = lazy(() => import('./GoogleMapComponent'));
+// Import GoogleMapComponent directly for immediate display (not lazy loaded)
+import GoogleMapComponent from './GoogleMapComponent';
 
 // Check if Google Maps API key is available
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY;
@@ -671,35 +671,26 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
     return (
       <MapErrorBoundary onFallbackToLeaflet={handleFallbackToLeaflet}>
-        <Suspense fallback={
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <div className="text-center">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-gray-500 mt-3">{t('search:map.loading', 'Loading map...')}</p>
-            </div>
-          </div>
-        }>
-          <GoogleMapComponent
-            properties={properties}
-            onMapMove={onMapMove}
-            userLocation={userLocation}
-            onSaveSearch={onSaveSearch}
-            isSaving={isSaving}
-            isAuthenticated={isAuthenticated}
-            mapBounds={mapBounds}
-            drawnBounds={drawnBounds}
-            onDrawComplete={onDrawComplete}
-            isDrawing={isDrawing}
-            onDrawStart={onDrawStart}
-            flyToTarget={flyToTarget}
-            onFlyComplete={onFlyComplete}
-            onRecenter={onRecenter}
-            isMobile={isMobile}
-            searchMode={searchMode}
-            hoveredPropertyId={hoveredPropertyId}
-            hideControls={hideControls}
-          />
-        </Suspense>
+        <GoogleMapComponent
+          properties={properties}
+          onMapMove={onMapMove}
+          userLocation={userLocation}
+          onSaveSearch={onSaveSearch}
+          isSaving={isSaving}
+          isAuthenticated={isAuthenticated}
+          mapBounds={mapBounds}
+          drawnBounds={drawnBounds}
+          onDrawComplete={onDrawComplete}
+          isDrawing={isDrawing}
+          onDrawStart={onDrawStart}
+          flyToTarget={flyToTarget}
+          onFlyComplete={onFlyComplete}
+          onRecenter={onRecenter}
+          isMobile={isMobile}
+          searchMode={searchMode}
+          hoveredPropertyId={hoveredPropertyId}
+          hideControls={hideControls}
+        />
       </MapErrorBoundary>
     );
   }

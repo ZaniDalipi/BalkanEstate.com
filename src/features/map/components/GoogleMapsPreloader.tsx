@@ -54,15 +54,12 @@ export const useGoogleMapsReady = () => {
 
 /**
  * Component that preloads Google Maps when mounted
+ * Loads immediately without delay for fastest possible map display
  */
 const GoogleMapsPreloader: React.FC = () => {
   useEffect(() => {
-    // Start preloading after a small delay to not block initial render
-    const timer = setTimeout(() => {
-      preloadGoogleMaps();
-    }, 100);
-
-    return () => clearTimeout(timer);
+    // Start preloading immediately - no delay
+    preloadGoogleMaps();
   }, []);
 
   return null; // This component doesn't render anything

@@ -80,8 +80,11 @@ const RefundPolicyPage = lazy(() => import('./src/features/legal/components/Refu
 const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
 const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/AgencyPaymentPage'));
 
-// Google Maps Preloader - starts loading API early for faster map rendering
-const GoogleMapsPreloader = lazy(() => import('./src/features/map/components/GoogleMapsPreloader'));
+// Google Maps Preloader - import directly (not lazy) for immediate loading
+import GoogleMapsPreloader, { preloadGoogleMaps } from './src/features/map/components/GoogleMapsPreloader';
+
+// Start preloading Google Maps API immediately at module load
+preloadGoogleMaps();
 
 // Cookie Consent Banner (lazy loaded - shown after initial render)
 const CookieConsent = lazy(() => import('./src/shared/components/CookieConsent'));
@@ -772,6 +775,9 @@ const App: React.FC = () => {
               <NotificationProvider>
                 <ConfirmationProvider>
                   <AnimationProvider>
+                    {/* Preload Google Maps API early for faster map rendering (not lazy) */}
+                    <GoogleMapsPreloader />
+
                     {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
                     <Suspense fallback={null}>
                       <SEO />
@@ -786,8 +792,6 @@ const App: React.FC = () => {
                       )}
                       {/* Microsoft Clarity - Heatmaps & Session Recordings */}
                       <ClarityInit />
-                      {/* Preload Google Maps API early for faster map rendering */}
-                      <GoogleMapsPreloader />
                     </Suspense>
 
                     <AppWrapper />
