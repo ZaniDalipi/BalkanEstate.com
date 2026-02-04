@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
-import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, SparklesIcon, FireIcon, StarIcon, BuildingOfficeIcon } from '@/constants';
+import { MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon, CalendarIcon, HomeIcon, FireIcon, StarIcon, BuildingOfficeIcon, GlobeAltIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
@@ -10,6 +10,7 @@ import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryCon
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
 import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import { searchLocation } from '@/services/osmService';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -58,15 +59,41 @@ const CityRecommendations: React.FC = () => {
 
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
-  const handleCityClick = (city: CityMarketData) => {
-    // Get city coordinates for map zoom
-    const coords = getCityCoordinates(city.city, city.country);
+  const handleCityClick = async (city: CityMarketData) => {
+    // Get fallback coordinates from BALKAN_LOCATIONS
+    const fallbackCoords = getCityCoordinates(city.city, city.country);
 
-    // Set filters to search for properties in this city
+    // Search OSM for the city to get proper coordinates and bounding box
+    const searchQuery = `${city.city}, ${city.country}`;
+    const results = await searchLocation(searchQuery);
+
+    // Use the first result from OSM - it's typically the best match for the whole city
+    const bestResult = results[0];
+
+    // Get coordinates from OSM result or fallback
+    const lat = bestResult ? Number(bestResult.lat) : fallbackCoords?.lat ?? 0;
+    const lng = bestResult ? Number(bestResult.lon) : fallbackCoords?.lng ?? 0;
+
+    // Get the bounding box from OSM to define the city area
+    // This ensures we show ALL properties within the city boundaries
+    let drawnBoundsJSON: string | null = null;
+    if (bestResult?.boundingbox) {
+      const [south, north, west, east] = bestResult.boundingbox.map(Number);
+      drawnBoundsJSON = JSON.stringify({
+        _southWest: { lat: south, lng: west },
+        _northEast: { lat: north, lng: east }
+      });
+    }
+
+    // Get the display name for the search field
+    const displayName = `${city.city}, ${city.country}`;
+
+    // Set filters - use geographic bounds for filtering properties
+    // But show the city name in the search field for user context
     updateSearchPageState({
       filters: {
-        country: city.countryCode,
-        query: city.city, // Use query field to search by city name
+        country: 'any',
+        query: displayName, // Show city name in search field for context
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -101,8 +128,8 @@ const CityRecommendations: React.FC = () => {
         amenities: [],
       },
       activeFilters: {
-        country: city.countryCode,
-        query: city.city, // Use query field to search by city name
+        country: 'any',
+        query: '', // Empty for filtering - use geographic bounds instead
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -136,12 +163,17 @@ const CityRecommendations: React.FC = () => {
         maxDistanceToHospital: null,
         amenities: [],
       },
+      // Set city bounding box as the search area
+      drawnBoundsJSON: drawnBoundsJSON,
       // Set map focus to city coordinates
-      focusMapOnProperty: coords ? {
-        lat: coords.lat,
-        lng: coords.lng,
+      focusMapOnProperty: {
+        lat,
+        lng,
         address: `${city.city}, ${city.country}`,
-      } : null,
+        zoom: 12, // City-level zoom to show all listings
+      },
+      // Switch to map view on mobile
+      mobileView: 'map',
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
   };
@@ -172,7 +204,7 @@ const CityRecommendations: React.FC = () => {
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 flex items-center gap-3">
-            <SparklesIcon className="w-8 h-8 text-primary" />
+            <GlobeAltIcon className="w-8 h-8 text-primary" />
             <h2 className="text-3xl font-bold text-neutral-900">{t('hero.title')}</h2>
           </div>
           <p className="text-neutral-600 mb-8">{t('hero.discoverSubtitle')}</p>
@@ -250,12 +282,12 @@ const CityRecommendations: React.FC = () => {
 
       <div className="p-4 sm:p-8 relative z-10">
         <div className="max-w-7xl mx-auto">
-          {/* AI-Powered Market Intelligence Card */}
+          {/* Market Intelligence Card */}
           {cities.length > 0 && (
-            <div className="mb-8 p-5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-2xl border border-violet-200 shadow-sm">
+            <div className="mb-8 p-5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-2xl border border-violet-200 shadow-sm backdrop-blur-sm">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
-                  <SparklesIcon className="w-6 h-6 text-white" />
+                  <ChartBarIcon className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 mb-1 text-lg">{t('aiInsights.title')}</h4>
@@ -299,7 +331,7 @@ const CityRecommendations: React.FC = () => {
               <button
                 key={city._id}
                 onClick={() => handleCityClick(city)}
-                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 text-left group"
+                className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-2xl hover:border-primary hover:scale-[1.02] transition-all duration-300 text-left group shadow-md"
               >
                 {/* City Image Header with Gradient Fade */}
                 <div className="relative h-40 overflow-hidden">
@@ -414,7 +446,7 @@ const CityRecommendations: React.FC = () => {
                   {city.highlights && city.highlights.length > 0 && (
                     <div className="border-t border-neutral-100 pt-3">
                       <h4 className="text-xs font-semibold text-neutral-500 uppercase mb-2 flex items-center gap-1">
-                        <SparklesIcon className="w-3.5 h-3.5" />
+                        <ChartBarIcon className="w-3.5 h-3.5" />
                         {t('sections.marketInsights')}
                       </h4>
                       <ul className="space-y-1.5">
@@ -437,6 +469,17 @@ const CityRecommendations: React.FC = () => {
                     <div className="flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
                       <span>{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
+                    </div>
+                  </div>
+
+                  {/* View Listings Button */}
+                  <div className="mt-4 pt-3 border-t border-neutral-100">
+                    <div className="w-full py-2.5 px-4 bg-primary text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 group-hover:bg-primary-dark transition-colors shadow-md">
+                      <MapPinIcon className="w-4 h-4" />
+                      <span>{t('footer.viewListings', 'View Listings on Map')}</span>
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
                 </div>

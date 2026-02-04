@@ -13,6 +13,9 @@ interface PromotionModalProps {
   promotionId?: string;
   currentTier?: 'featured' | 'highlight' | 'premium';
   currentEndDate?: Date;
+  // Urgent badge mode props
+  focusUrgent?: boolean;
+  hasUrgentBadge?: boolean;
 }
 
 const PromotionModal: React.FC<PromotionModalProps> = ({
@@ -25,6 +28,8 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
   promotionId,
   currentTier,
   currentEndDate,
+  focusUrgent = false,
+  hasUrgentBadge = false,
 }) => {
   const handleSuccess = () => {
     if (onSuccess) {
@@ -52,6 +57,8 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
         promotionId={promotionId}
         currentTier={currentTier}
         currentEndDate={currentEndDate}
+        focusUrgent={focusUrgent}
+        hasUrgentBadge={hasUrgentBadge}
       />
     </Modal>
   );

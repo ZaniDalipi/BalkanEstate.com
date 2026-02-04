@@ -649,6 +649,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
                             new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
         existingAgentSubscription.expirationDate = subExpiresAt;
         existingAgentSubscription.renewalDate = subExpiresAt;
+        // Reset reminder flag so new reminder will be sent before new expiration
+        existingAgentSubscription.expiryReminderSent = false;
         await existingAgentSubscription.save();
         console.log(`✅ Auto-updated Subscription document for agency agent ${user.email}`);
       }

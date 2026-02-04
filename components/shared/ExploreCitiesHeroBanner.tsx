@@ -4,7 +4,6 @@ import {
   MapPinIcon,
   BuildingOfficeIcon,
   GlobeAltIcon,
-  SparklesIcon,
   ChartBarIcon,
   ArrowTrendingUpIcon,
   HomeIcon
@@ -73,11 +72,9 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
           {/* Badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-              <SparklesIcon className="w-4 h-4 text-amber-400" />
               <span className="text-white/90 font-semibold text-sm uppercase tracking-wider">
-                {t('hero.badge', 'AI-Powered Market Intelligence')}
+                {t('hero.badge', 'Market Intelligence')}
               </span>
-              <SparklesIcon className="w-4 h-4 text-amber-400" />
             </div>
           </div>
 
@@ -197,8 +194,8 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">
-              <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
-              <span className="text-xs sm:text-sm font-medium">{t('badges.aiInsights', 'AI Insights')}</span>
+              <GlobeAltIcon className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
+              <span className="text-xs sm:text-sm font-medium">{t('badges.aiInsights', 'Market Insights')}</span>
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">

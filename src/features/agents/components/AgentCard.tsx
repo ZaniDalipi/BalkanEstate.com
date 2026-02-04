@@ -10,7 +10,6 @@ import {
   CurrencyDollarIcon,
   HomeIcon,
   ChevronRightIcon,
-  SparklesIcon,
   ChartBarIcon,
   TrophyIcon,
   ArrowTrendingUpIcon,
@@ -273,9 +272,6 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
               <p className="text-sm font-semibold text-blue-700 group-hover/location:text-blue-800 transition-colors text-center">
                 {agent.address || [agent.city, agent.country].filter(Boolean).join(', ') || agent.serviceAreas?.[0] || agent.officeAddress}
               </p>
-              {isHovered && (
-                <SparklesIcon className="w-3.5 h-3.5 text-blue-500 animate-bounce" />
-              )}
             </div>
           )}
 

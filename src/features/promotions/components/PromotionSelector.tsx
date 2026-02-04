@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '@/services/apiService';
 import { Property } from '@/types';
+import { RocketLaunchIcon, EyeIcon, ChatBubbleLeftRightIcon, BoltIcon, StarIconSolid, ClockIcon, FireIcon } from '@/constants';
 
 interface PromotionSelectorProps {
   // Either propertyId (for existing listings) or pendingPropertyData (for new listings)
@@ -20,6 +21,9 @@ interface PromotionSelectorProps {
   promotionId?: string;
   currentTier?: 'featured' | 'highlight' | 'premium';
   currentEndDate?: Date;
+  // Urgent badge mode - for adding urgent badge to existing promotion with upgrade options
+  focusUrgent?: boolean;
+  hasUrgentBadge?: boolean;
 }
 
 type PromotionTier = 'featured' | 'highlight' | 'premium';
@@ -41,6 +45,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
   promotionId,
   currentTier,
   currentEndDate,
+  focusUrgent = false,
+  hasUrgentBadge: alreadyHasUrgent = false,
 }) => {
   const [tiersData, setTiersData] = useState<api.PromotionTiersResponse | null>(null);
   const [agencyAllocation, setAgencyAllocation] = useState<api.AgencyAllocation | null>(null);
@@ -50,13 +56,23 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Form state - use initial values if provided
-  const [selectedTier, setSelectedTier] = useState<PromotionTier | null>(isExtension ? currentTier || null : initialTier || null);
+  const [selectedTier, setSelectedTier] = useState<PromotionTier | null>(
+    isExtension || focusUrgent ? currentTier || null : initialTier || null
+  );
   const [selectedDuration, setSelectedDuration] = useState<PromotionDuration>(initialDuration);
-  const [hasUrgentBadge, setHasUrgentBadge] = useState(false);
+  // Auto-check urgent badge when in focusUrgent mode and property doesn't already have it
+  const [hasUrgentBadge, setHasUrgentBadge] = useState(focusUrgent && !alreadyHasUrgent);
+  // Track if user wants to upgrade tier in focusUrgent mode
+  const [wantsTierUpgrade, setWantsTierUpgrade] = useState(false);
   const [useAgencyAllocation, setUseAgencyAllocation] = useState(false);
   const [couponCode, setCouponCode] = useState(initialCoupon);
   const [couponValidation, setCouponValidation] = useState<api.CouponValidationResult | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  // State to show "online payment coming soon" message
+  const [showPaymentComingSoon, setShowPaymentComingSoon] = useState(false);
+
+  // Check if promotion is expired (for focusUrgent mode)
+  const isPromotionExpired = focusUrgent && currentEndDate && new Date(currentEndDate).getTime() < Date.now();
 
   // Load promotion tiers and agency allocation
   useEffect(() => {
@@ -117,8 +133,15 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
 
   // Calculate base price
   const calculateBasePrice = (): number => {
+    if (!tiersData) return 0;
+
+    // Focus Urgent mode - just urgent badge price if no tier upgrade
+    if (focusUrgent && !wantsTierUpgrade) {
+      return hasUrgentBadge ? tiersData.urgentModifier.price : 0;
+    }
+
     const tierToUse = isExtension ? currentTier : selectedTier;
-    if (!tiersData || !tierToUse) return 0;
+    if (!tierToUse) return 0;
 
     const pricingEntry = tiersData.pricing.find(
       (p) => p.tierId === tierToUse && p.duration === selectedDuration
@@ -177,15 +200,14 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
 
   // Handle promotion purchase or extension
   const handlePurchase = async () => {
-    // PAYMENTS COMING SOON - Show info message instead of processing payment
-    setError(null);
-    setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
-    return;
-
-    // Original payment logic - temporarily disabled
-    /*
-    if (!selectedTier && !isExtension) {
+    if (!selectedTier && !isExtension && !focusUrgent) {
       setError('Please select a promotion tier');
+      return;
+    }
+
+    // In focusUrgent mode without tier upgrade, need to have urgent badge checked
+    if (focusUrgent && !wantsTierUpgrade && !hasUrgentBadge) {
+      setError('Please select at least one option');
       return;
     }
 
@@ -194,6 +216,44 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
     setSuccessMessage(null);
 
     try {
+      const { final: finalPrice } = calculateFinalPrice();
+
+      // Focus Urgent mode without tier upgrade - handle urgent badge
+      if (focusUrgent && !wantsTierUpgrade && hasUrgentBadge && propertyId) {
+        // If free (100% discount coupon), add the badge
+        if (finalPrice === 0 && couponValidation?.isValid) {
+          try {
+            const result = await api.addUrgentBadge(promotionId || '', couponCode || undefined);
+            if (result.isFree || result.success) {
+              setSuccessMessage('Urgent badge added successfully!');
+              setTimeout(() => onSuccess?.(), 1500);
+              return;
+            }
+          } catch (err: any) {
+            // If API fails, show friendly message
+            setError(null);
+            setSuccessMessage(null);
+          }
+        }
+        // Online payment coming soon - but coupon still works
+        if (finalPrice > 0) {
+          setError(null);
+          setSubmitting(false);
+          // Show friendly message with coupon option
+          return;
+        }
+      }
+
+      // ONLINE PAYMENTS COMING SOON - If payment is required, show info message
+      if (finalPrice > 0) {
+        setError(null);
+        setShowPaymentComingSoon(true);
+        setSubmitting(false);
+        return;
+      }
+
+      // Free promotions (via coupon or agency allocation) can proceed
+
       // Extension mode - use propertyId to find active promotion
       if (isExtension && propertyId) {
         const result = await api.extendPromotion({
@@ -208,12 +268,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           return;
         }
 
-        // Redirect to Stripe checkout for paid extension
-        if (result.url) {
-          window.location.href = result.url;
-        } else {
-          throw new Error('Failed to create extension checkout');
-        }
+        // Payment required but payments coming soon
+        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to extend your promotion manually.');
         return;
       }
 
@@ -246,7 +302,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           return;
         }
 
-        // For paid promotions, use Stripe checkout
+        // For free promotions with coupon, use checkout endpoint
         const result = await api.createPromotionCheckout({
           propertyId,
           promotionTier: selectedTier!,
@@ -262,12 +318,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           return;
         }
 
-        // Redirect to Stripe checkout
-        if (result.url) {
-          window.location.href = result.url;
-        } else {
-          throw new Error('Failed to create checkout session');
-        }
+        // Payment required but payments coming soon
+        setSuccessMessage('Payments coming soon! Please contact sales@balkanestateai.com to promote your listing manually.');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to process request');
@@ -275,7 +327,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
     } finally {
       setSubmitting(false);
     }
-    */
   };
 
   // Combined submitting state
@@ -316,7 +367,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
       selectedBorder: 'border-violet-500',
       text: 'text-violet-600',
       selectedBg: 'from-violet-100 to-purple-100',
-      icon: '⭐',
       tierName: 'Featured',
     },
     highlight: {
@@ -327,7 +377,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
       selectedBorder: 'border-sky-500',
       text: 'text-sky-600',
       selectedBg: 'from-sky-100 to-cyan-100',
-      icon: '💎',
       tierName: 'Highlight',
     },
     premium: {
@@ -338,7 +387,6 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
       selectedBorder: 'border-amber-500',
       text: 'text-amber-600',
       selectedBg: 'from-amber-100 to-yellow-100',
-      icon: '👑',
       tierName: 'Premium',
     },
   };
@@ -352,13 +400,47 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
   };
 
   return (
-    <div className={inModal ? "w-full px-6 py-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
-      {/* Header Section - Enhanced for Extension Mode */}
-      {isExtension ? (
+    <div className={inModal ? "w-full px-4 sm:px-6 pt-8 pb-4" : "max-w-7xl mx-auto px-4 sm:px-6 py-8"}>
+      {/* Header Section - Enhanced for Extension Mode and Urgent Badge Mode */}
+      {focusUrgent ? (
+        <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
+          {/* Urgent Badge Mode Header */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-semibold mb-4 shadow-lg">
+            <FireIcon className="w-4 h-4" />
+            <span>Add Urgent Badge</span>
+          </div>
+
+          <div className="inline-block p-3 bg-gradient-to-br from-red-400 to-orange-500 rounded-2xl mb-4 shadow-xl">
+            <FireIcon className="w-8 h-8 text-white" />
+          </div>
+
+          <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold text-gray-900 mb-3`}>
+            {alreadyHasUrgent ? 'Upgrade Your Promotion' : 'Add Urgent Badge'}
+          </h2>
+
+          <p className={`text-neutral-600 ${inModal ? 'text-sm' : 'text-base'} max-w-xl mx-auto mb-4`}>
+            {alreadyHasUrgent
+              ? 'Your listing already has an urgent badge. Would you like to upgrade to a higher tier for more visibility?'
+              : 'Get a flashing urgent badge on your listing to attract more buyers and sell faster.'}
+          </p>
+
+          {/* Current Tier Display */}
+          {currentTier && (
+            <div className={`inline-flex items-center gap-3 bg-gradient-to-r ${extensionTierStyles[currentTier].lightBg} border ${extensionTierStyles[currentTier].border} rounded-xl px-5 py-3 shadow-sm`}>
+              <div className="text-left">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Current Plan</p>
+                <p className={`text-lg font-bold ${extensionTierStyles[currentTier].text}`}>
+                  {extensionTierStyles[currentTier].tierName}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : isExtension ? (
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
           {/* Tier Badge */}
           <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${extStyle.headerGradient} text-white text-sm font-semibold mb-4 shadow-lg`}>
-            <span>{extStyle.icon}</span>
+            <StarIconSolid className="w-4 h-4" />
             <span>{extStyle.tierName} Promotion</span>
           </div>
 
@@ -399,8 +481,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       ) : (
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
-          <div className={`inline-block ${inModal ? 'p-2' : 'p-3'} bg-gradient-to-br from-amber-100 to-orange-100 rounded-full mb-3 shadow-lg`}>
-            <span className={inModal ? 'text-2xl' : 'text-4xl'}>🚀</span>
+          <div className={`inline-flex items-center justify-center ${inModal ? 'w-12 h-12' : 'w-16 h-16'} bg-gradient-to-br from-primary to-primary-dark rounded-full mb-3 shadow-lg`}>
+            <RocketLaunchIcon className={`${inModal ? 'w-6 h-6' : 'w-8 h-8'} text-white`} />
           </div>
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent mb-2`}>
             Promote Your Listing
@@ -408,6 +490,29 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
           <p className={`text-neutral-600 ${inModal ? 'text-sm' : 'text-base md:text-lg'} max-w-2xl mx-auto`}>
             Get up to 5x more views and inquiries with promoted placement. Choose the perfect plan for your needs.
           </p>
+        </div>
+      )}
+
+      {/* Expired Promotion Message - For focusUrgent mode when promotion has expired */}
+      {focusUrgent && isPromotionExpired && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 px-5 py-4 rounded-xl mb-6 text-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold mb-1">This promotion has expired</p>
+              <p className="text-amber-700 mb-3">To add an urgent badge, you first need to extend your promotion. Click the button below to extend and then add the urgent badge.</p>
+              <button
+                onClick={onSkip}
+                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
+              >
+                Close & Extend Promotion
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -420,7 +525,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       )}
 
-      {error && (
+      {error && !isPromotionExpired && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -429,6 +534,49 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       )}
 
+      {/* Online Payment Coming Soon Banner */}
+      {showPaymentComingSoon && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-5 py-4 rounded-xl mb-6">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-blue-900 mb-1">Online Payment Coming Soon</p>
+              <p className="text-blue-700 text-sm mb-3">
+                We're working on adding online payments. In the meantime, you can use a coupon code to upgrade your listing for free!
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    setShowPaymentComingSoon(false);
+                    // Focus on coupon input
+                    const couponInput = document.querySelector('input[placeholder="Enter code"]') as HTMLInputElement;
+                    if (couponInput) {
+                      couponInput.focus();
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
+                >
+                  I Have a Coupon
+                </button>
+                <button
+                  onClick={onSkip}
+                  className="bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors text-sm border border-gray-200"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hide the rest of the form if promotion is expired in focusUrgent mode */}
+      {(!focusUrgent || !isPromotionExpired) && (
+      <>
       {/* Benefits Banner - Elegant centered design */}
       <div className={`${isExtension
         ? `bg-gradient-to-r ${extStyle.lightBg} border ${extStyle.border}`
@@ -437,21 +585,21 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         <div className={`flex justify-center ${inModal ? 'gap-8' : 'gap-12 md:gap-16'}`}>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-amber-400 to-orange-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>👁️</span>
+              <EyeIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Higher Visibility</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">Top of search results</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-blue-400 to-indigo-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>📱</span>
+              <ChatBubbleLeftRightIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>More Inquiries</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">Serious buyer contacts</p>}
           </div>
           <div className="flex flex-col items-center text-center">
             <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-emerald-400 to-teal-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <span className={`${inModal ? 'text-lg' : 'text-2xl'} filter drop-shadow`}>⚡</span>
+              <BoltIcon className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
             </div>
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>Sell Faster</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">3x faster results</p>}
@@ -459,8 +607,169 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       </div>
 
-      {/* Tier Selection - Only show if not in extension mode */}
-      {!isExtension && (
+      {/* Focus Urgent Mode - Urgent Badge + Optional Tier Upgrade */}
+      {focusUrgent && (
+        <div className={inModal ? 'mb-5' : 'mb-8'}>
+          {/* Urgent Badge Section - Only show if doesn't already have urgent badge */}
+          {!alreadyHasUrgent && tiersData && (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border-2 border-red-200 p-5 mb-4 shadow-sm">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasUrgentBadge}
+                  onChange={(e) => setHasUrgentBadge(e.target.checked)}
+                  className="mt-1 w-5 h-5 text-red-600 border-red-300 rounded focus:ring-red-500"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-base font-bold text-gray-800">
+                      {tiersData.urgentModifier.name}
+                    </span>
+                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse inline-flex items-center gap-1">
+                      <FireIcon className="w-3 h-3" /> Urgent
+                    </span>
+                    <span className="text-base font-bold text-red-600">
+                      €{tiersData.urgentModifier.price}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {tiersData.urgentModifier.description}
+                  </p>
+                </div>
+              </label>
+            </div>
+          )}
+
+          {/* Tier Upgrade Option */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                <span className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg flex items-center justify-center">
+                  <StarIconSolid className="w-4 h-4 text-white" />
+                </span>
+                Upgrade Your Plan?
+              </h3>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <span className="text-sm text-gray-600">Show upgrade options</span>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={wantsTierUpgrade}
+                    onChange={(e) => setWantsTierUpgrade(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                </div>
+              </label>
+            </div>
+
+            {!wantsTierUpgrade ? (
+              <p className="text-sm text-gray-500">
+                You're currently on the <span className="font-semibold">{currentTier ? extensionTierStyles[currentTier].tierName : 'Standard'}</span> plan.
+                {currentTier !== 'premium' && ' Enable upgrade options to boost your listing with a higher tier.'}
+              </p>
+            ) : (
+              /* Show Tier Selection when upgrade is wanted */
+              <div className={`grid grid-cols-1 md:grid-cols-3 gap-3 mt-4`}>
+                {(['featured', 'highlight', 'premium'] as PromotionTier[]).map((tierId) => {
+                  const tier = tiers[tierId];
+                  const isSelected = selectedTier === tierId;
+                  const isCurrent = currentTier === tierId;
+                  const isUpgrade = currentTier ? ['featured', 'highlight', 'premium'].indexOf(tierId) > ['featured', 'highlight', 'premium'].indexOf(currentTier) : true;
+                  const pricing = tiersData?.pricing.find(
+                    (p) => p.tierId === tierId && p.duration === selectedDuration
+                  );
+
+                  // Tier-specific styling
+                  const tierStyles = {
+                    featured: {
+                      gradient: 'from-violet-50 to-purple-50',
+                      border: isSelected ? 'border-violet-500' : 'border-violet-200',
+                      shadow: isSelected ? 'shadow-[0_0_20px_rgba(124,58,237,0.3)]' : '',
+                      iconBg: 'bg-gradient-to-br from-violet-400 to-purple-500',
+                      checkmark: 'text-violet-500',
+                      badge: 'bg-violet-500',
+                    },
+                    highlight: {
+                      gradient: 'from-sky-50 to-cyan-50',
+                      border: isSelected ? 'border-sky-500' : 'border-sky-200',
+                      shadow: isSelected ? 'shadow-[0_0_20px_rgba(14,165,233,0.3)]' : '',
+                      iconBg: 'bg-gradient-to-br from-sky-400 to-cyan-500',
+                      checkmark: 'text-sky-500',
+                      badge: 'bg-sky-500',
+                    },
+                    premium: {
+                      gradient: 'from-amber-50 to-yellow-50',
+                      border: isSelected ? 'border-amber-500' : 'border-amber-200',
+                      shadow: isSelected ? 'shadow-[0_0_20px_rgba(245,158,11,0.3)]' : '',
+                      iconBg: 'bg-gradient-to-br from-amber-400 to-yellow-500',
+                      checkmark: 'text-amber-500',
+                      badge: 'bg-gradient-to-r from-amber-500 to-yellow-500',
+                    },
+                  };
+
+                  const style = tierStyles[tierId];
+
+                  return (
+                    <button
+                      key={tierId}
+                      onClick={() => setSelectedTier(tierId)}
+                      className={`relative p-4 rounded-xl border-2 text-left transition-all duration-300 bg-gradient-to-br ${style.gradient} ${style.border} ${style.shadow} hover:scale-[1.02] ${isSelected ? 'scale-[1.02]' : ''}`}
+                    >
+                      {isCurrent && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                          Current
+                        </div>
+                      )}
+                      {isUpgrade && !isCurrent && (
+                        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 ${style.badge} text-white text-xs font-bold px-3 py-1 rounded-full`}>
+                          Upgrade
+                        </div>
+                      )}
+
+                      <div className="text-center pt-2">
+                        <div className={`inline-flex items-center justify-center w-12 h-12 ${style.iconBg} rounded-xl shadow-lg mb-2`}>
+                          {tierId === 'featured' && <StarIconSolid className="w-6 h-6 text-white" />}
+                          {tierId === 'highlight' && (
+                            <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 2L9.5 9.5H2L8 14L5.5 22L12 17L18.5 22L16 14L22 9.5H14.5L12 2Z" />
+                            </svg>
+                          )}
+                          {tierId === 'premium' && (
+                            <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z" />
+                            </svg>
+                          )}
+                        </div>
+                        <h3 className="text-base font-bold text-gray-900 mb-1">
+                          {tier.name}
+                        </h3>
+                        <div className="flex items-baseline justify-center gap-1">
+                          <span className="text-xl font-bold text-gray-900">€{pricing?.price || 0}</span>
+                          <span className="text-xs text-gray-500">/{selectedDuration}d</span>
+                        </div>
+                      </div>
+
+                      {isSelected && (
+                        <div className="absolute top-3 right-3">
+                          <div className={`w-6 h-6 ${style.iconBg} rounded-full flex items-center justify-center shadow-md`}>
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tier Selection - Only show if not in extension mode and not in focusUrgent mode */}
+      {!isExtension && !focusUrgent && (
         <div className={inModal ? 'mb-5' : 'mb-8'}>
           <h3 className={`${inModal ? 'text-base' : 'text-xl'} font-bold text-neutral-900 mb-4`}>Choose Your Plan</h3>
           <div className={`grid grid-cols-1 md:grid-cols-3 ${inModal ? 'gap-3' : 'gap-5'}`}>
@@ -509,17 +818,23 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                 >
                   {tier.highlight && (
                     <div className={`absolute -top-3 left-1/2 -translate-x-1/2 ${style.badge} text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg`}>
-                      ✨ Most Popular
+                      Most Popular
                     </div>
                   )}
 
                   <div className="text-center mb-4 pt-2">
                     <div className={`inline-flex items-center justify-center w-14 h-14 ${style.iconBg} rounded-2xl shadow-lg mb-3`}>
-                      <span className="text-2xl filter drop-shadow">
-                        {tierId === 'featured' && '⭐'}
-                        {tierId === 'highlight' && '💎'}
-                        {tierId === 'premium' && '👑'}
-                      </span>
+                      {tierId === 'featured' && <StarIconSolid className="w-7 h-7 text-white" />}
+                      {tierId === 'highlight' && (
+                        <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2L9.5 9.5H2L8 14L5.5 22L12 17L18.5 22L16 14L22 9.5H14.5L12 2Z" />
+                        </svg>
+                      )}
+                      {tierId === 'premium' && (
+                        <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z" />
+                        </svg>
+                      )}
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-1">
                       {tier.name}
@@ -557,17 +872,13 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       )}
 
-      {(selectedTier || isExtension) && (
+      {(selectedTier || isExtension || focusUrgent) && (
         <>
           {/* Duration Selection - Enhanced for Extension */}
           <div className={`bg-white rounded-xl border ${isExtension ? extStyle.border : 'border-gray-200'} p-5 mb-4 shadow-sm`}>
             <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className={`w-8 h-8 ${isExtension ? extStyle.iconBg : 'bg-primary/10'} rounded-lg flex items-center justify-center`}>
-                {isExtension ? (
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                ) : '⏱️'}
+                <ClockIcon className={`w-4 h-4 ${isExtension ? 'text-white' : 'text-primary'}`} />
               </span>
               {isExtension ? 'Choose Extension Duration' : 'Select Duration'}
             </h3>
@@ -611,8 +922,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             </div>
           </div>
 
-          {/* Urgent Badge - Hide for extensions */}
-          {!isExtension && (
+          {/* Urgent Badge - Hide for extensions and focusUrgent mode (has its own section) */}
+          {!isExtension && !focusUrgent && (
             <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100 p-5 mb-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
@@ -626,8 +937,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                     <span className="text-sm font-semibold text-gray-800">
                       {tiersData.urgentModifier.name}
                     </span>
-                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">
-                      🔥 Urgent
+                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse inline-flex items-center gap-1">
+                      <FireIcon className="w-3 h-3" /> Urgent
                     </span>
                     <span className="text-sm font-bold text-red-600">
                       +€{tiersData.urgentModifier.price}
@@ -641,8 +952,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             </div>
           )}
 
-          {/* Agency Allocation - Hide for extensions */}
-          {!isExtension && agencyAllocation && canUseAgencyAllocation() && (
+          {/* Agency Allocation - Hide for extensions and focusUrgent mode */}
+          {!isExtension && !focusUrgent && agencyAllocation && canUseAgencyAllocation() && (
             <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-5 mb-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
@@ -717,15 +1028,18 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             </div>
           )}
 
-          {/* Price Summary - Enhanced for Extension */}
+          {/* Price Summary - Enhanced for Extension and Urgent Mode */}
           <div className={`rounded-xl border p-5 mb-6 ${
-            isExtension
-              ? `bg-gradient-to-br ${extStyle.lightBg} ${extStyle.border}`
-              : 'bg-neutral-50 border-neutral-300'
+            focusUrgent
+              ? 'bg-gradient-to-br from-red-50 to-orange-50 border-red-200'
+              : isExtension
+                ? `bg-gradient-to-br ${extStyle.lightBg} ${extStyle.border}`
+                : 'bg-neutral-50 border-neutral-300'
           }`}>
             <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
-              {isExtension && <span>{extStyle.icon}</span>}
-              {isExtension ? 'Extension Summary' : 'Summary'}
+              {focusUrgent && <FireIcon className="w-4 h-4 text-red-500" />}
+              {isExtension && <StarIconSolid className="w-4 h-4 text-current" />}
+              {focusUrgent ? 'Urgent Badge Summary' : isExtension ? 'Extension Summary' : 'Summary'}
             </h3>
             <div className="space-y-2 text-sm">
               {isExtension && (
@@ -778,26 +1092,28 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
               onClick={onSkip}
               disabled={isProcessing}
               className={`px-6 py-3.5 bg-white border text-gray-700 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-sm ${
-                isExtension
-                  ? `${extStyle.border} hover:bg-gray-50`
+                isExtension || focusUrgent
+                  ? `${extStyle?.border || 'border-gray-200'} hover:bg-gray-50`
                   : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
               }`}
             >
-              {isExtension ? 'Cancel' : pendingPropertyData ? 'Post Without Promotion' : 'Skip for Now'}
+              {isExtension || focusUrgent ? 'Cancel' : pendingPropertyData ? 'Post Without Promotion' : 'Skip for Now'}
             </button>
             <button
               onClick={handlePurchase}
               disabled={isProcessing || successMessage !== null}
               className={`flex-1 px-6 py-3.5 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md ${
-                isExtension
-                  ? `bg-gradient-to-r ${extStyle.headerGradient}`
-                  : 'bg-gradient-to-r from-primary to-primary-dark'
+                focusUrgent
+                  ? 'bg-gradient-to-r from-red-500 to-orange-500'
+                  : isExtension
+                    ? `bg-gradient-to-r ${extStyle.headerGradient}`
+                    : 'bg-gradient-to-r from-primary to-primary-dark'
               }`}
             >
               {isProcessing ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  {isExtension ? 'Extending...' : pendingPropertyData ? 'Creating Listing...' : 'Processing...'}
+                  {focusUrgent ? 'Processing...' : isExtension ? 'Extending...' : pendingPropertyData ? 'Creating Listing...' : 'Processing...'}
                 </span>
               ) : successMessage ? (
                 <span className="flex items-center justify-center gap-2">
@@ -806,24 +1122,29 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
                   </svg>
                   Success!
                 </span>
+              ) : focusUrgent ? (
+                <span className="flex items-center justify-center gap-2">
+                  <FireIcon className="w-4 h-4" />
+                  {wantsTierUpgrade
+                    ? `Upgrade & Add Urgent - €${priceInfo.final.toFixed(2)}`
+                    : `Add Urgent Badge - €${priceInfo.final.toFixed(2)}`}
+                </span>
+              ) : isExtension ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
+                  </svg>
+                  Extend +{selectedDuration} days - €{priceInfo.final.toFixed(2)}
+                </span>
               ) : (
-                isExtension
-                  ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
-                      </svg>
-                      Extend +{selectedDuration} days - €{priceInfo.final.toFixed(2)}
-                    </span>
-                  )
-                  : `Continue - €${priceInfo.final.toFixed(2)}`
+                `Continue - €${priceInfo.final.toFixed(2)}`
               )}
             </button>
           </div>
         </>
       )}
 
-      {!selectedTier && !isExtension && (
+      {!selectedTier && !isExtension && !focusUrgent && (
         <div className="text-center space-y-3">
           {onBack && (
             <button
@@ -847,6 +1168,8 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
             </p>
           )}
         </div>
+      )}
+      </>
       )}
     </div>
   );

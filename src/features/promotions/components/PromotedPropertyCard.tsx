@@ -6,14 +6,14 @@
 import React, { useState, useEffect } from 'react';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
-import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon } from '@/constants';
+import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon, StarIconSolid, FireIcon } from '@/constants';
 
 // Tier configuration
-export const TIER_CONFIG: Record<string, { color: string; bg: string; icon: string; label: string }> = {
-  premium: { color: 'text-amber-700', bg: 'bg-amber-100', icon: '👑', label: 'Premium Premiere' },
-  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', icon: '💎', label: 'Highlight' },
-  featured: { color: 'text-violet-600', bg: 'bg-violet-50', icon: '⭐', label: 'Featured' },
-  standard: { color: 'text-gray-700', bg: 'bg-gray-100', icon: '✨', label: 'Standard' },
+export const TIER_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+  premium: { color: 'text-amber-700', bg: 'bg-amber-100', label: 'Premium Premiere' },
+  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', label: 'Highlight' },
+  featured: { color: 'text-violet-600', bg: 'bg-violet-50', label: 'Featured' },
+  standard: { color: 'text-gray-700', bg: 'bg-gray-100', label: 'Standard' },
 };
 
 interface TimeRemaining {
@@ -170,13 +170,13 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${tierConfig.bg} ${tierConfig.color} text-sm font-semibold`}>
-            <span>{tierConfig.icon}</span>
+            <StarIconSolid className="w-3.5 h-3.5" />
             <span>{tierConfig.label}</span>
           </div>
           <div className="flex items-center gap-2">
             {property.hasUrgentBadge ? (
               <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
-                🔥 Urgent
+                <FireIcon className="w-3 h-3" /> Urgent
               </span>
             ) : !isExpired && promotion?._id && (
               <button
@@ -186,10 +186,10 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
               >
                 {isAddingUrgent ? (
                   <>
-                    <span className="animate-spin">⏳</span> Processing...
+                    <span className="animate-spin w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full inline-block" /> Processing...
                   </>
                 ) : (
-                  <>🔥 +Urgent €0.99</>
+                  <><FireIcon className="w-3 h-3" /> +Urgent €0.99</>
                 )}
               </button>
             )}
@@ -236,9 +236,9 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         </div>
 
         {/* Auto-Extend Toggle */}
-        {!isExpired && promotion?._id && (
+        {promotion?._id && (
           <div className="mt-4 pt-4 border-t border-neutral-100">
-            <label className="flex items-center justify-between cursor-pointer">
+            <label className={`flex items-center justify-between ${isExpired ? 'opacity-50' : 'cursor-pointer'}`}>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-neutral-700">Auto-Extend</span>
                 <span className="text-xs text-neutral-400">(renew automatically)</span>
@@ -247,12 +247,19 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
                 <input
                   type="checkbox"
                   checked={promotion?.autoExtend || false}
-                  onChange={(e) => onToggleAutoExtend(promotion._id, e.target.checked)}
+                  onChange={(e) => !isExpired && onToggleAutoExtend(promotion._id, e.target.checked)}
+                  disabled={isExpired}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                <div className={`w-11 h-6 ${isExpired ? 'bg-neutral-100 cursor-not-allowed' : 'bg-neutral-200'} peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-disabled:opacity-50`} />
               </div>
             </label>
+            {isExpired && (
+              <p className="text-xs text-neutral-400 mt-1">Extend your promotion to enable auto-extend</p>
+            )}
+            {!isExpired && promotion?.autoExtend && (
+              <p className="text-xs text-green-600 mt-1">Your promotion will automatically renew when it expires</p>
+            )}
           </div>
         )}
 

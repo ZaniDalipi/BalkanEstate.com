@@ -431,7 +431,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
         </div>
 
         {/* Single row header on mobile: Back + Stats + Actions */}
-        <div className="px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
+        <div className="px-3 sm:px-4 py-2 sm:py-3 md:py-5 md:mt-2 flex items-center justify-between gap-2">
           {/* Back button */}
           <button
             onClick={handleBack}
@@ -466,7 +466,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
           )}
 
           {/* Action buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
             {/* Promote/Extend Button - Only visible to property owners */}
             {isOwner && property.status !== 'sold' && (
               <button
@@ -490,13 +490,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             {/* Share Button */}
             <button
               onClick={handleShare}
-              className="bg-white p-1.5 sm:p-2 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
+              className="bg-white p-1.5 sm:p-2 md:p-2.5 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
               aria-label={t('property:actions.share')}
               title={t('property:actions.share')}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-500 hover:text-primary transition-colors"
+                className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-neutral-500 hover:text-primary transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -513,7 +513,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             {/* Favorite Button */}
             <div
               onClick={property.status === 'sold' ? undefined : handleFavoriteClick}
-              className={`bg-white p-1.5 sm:p-2 rounded-full border border-neutral-200 ${
+              className={`bg-white p-1.5 sm:p-2 md:p-2.5 rounded-full border border-neutral-200 ${
                 property.status === 'sold'
                   ? 'opacity-50 cursor-not-allowed'
                   : 'cursor-pointer hover:shadow-md'
@@ -521,7 +521,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => 
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className={`h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-300 ${
+                className={`h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${
                   property.status === 'sold'
                     ? 'text-neutral-300'
                     : isFavorited

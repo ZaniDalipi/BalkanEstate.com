@@ -126,6 +126,39 @@ const injectMapMarkerStyles = () => {
       transform-origin: center bottom;
     }
 
+    /* Urgent Badge - Red pulsing glow for urgent properties */
+    @keyframes glowUrgent {
+      0%, 100% {
+        filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 12px rgba(220, 38, 38, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 14px rgba(248, 113, 113, 0.95)) drop-shadow(0 0 22px rgba(239, 68, 68, 0.7));
+      }
+    }
+
+    /* Border pulse animation for Urgent */
+    @keyframes borderPulseUrgent {
+      0%, 100% {
+        stroke-width: 3;
+        stroke: #EF4444;
+      }
+      50% {
+        stroke-width: 5;
+        stroke: #F87171;
+      }
+    }
+
+    /* Urgent marker - Red glow with bouncing effect */
+    .promoted-marker-inner-urgent {
+      animation: markerBounce 1.8s ease-in-out infinite, glowUrgent 1.5s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+    .promoted-marker-inner-urgent svg circle,
+    .promoted-marker-inner-urgent svg path:last-of-type,
+    .promoted-marker-inner-urgent svg rect {
+      animation: borderPulseUrgent 1.5s ease-in-out infinite;
+    }
+
     /* Enhanced popup styles for promoted properties */
     .promoted-property-popup .leaflet-popup-content-wrapper {
       padding: 0;
@@ -211,8 +244,14 @@ const getMarkerWidthForPrice = (price: string): number => {
 
 /**
  * Get animation class for promoted property markers (inner element)
+ * Urgent badges take priority for the red pulsing effect
  */
 const getPromotedMarkerInnerClass = (property: Property): string => {
+  // Urgent badge takes priority - shows red pulsing regardless of promotion status
+  if (property.hasUrgentBadge) {
+    return 'promoted-marker-inner-urgent';
+  }
+
   const isActivelyPromoted = property.isPromoted &&
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
@@ -242,11 +281,16 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
 
-  // Get ring color based on promotion tier or property type
-  // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
+  // Get ring color based on urgent badge, promotion tier, or property type
+  // Urgent = Red, Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
   let ringColor = 'none';
   let ringWidth = 2;
-  if (isActivelyPromoted) {
+
+  // Urgent badge takes priority - red ring
+  if (property.hasUrgentBadge) {
+    ringColor = '#EF4444'; // Red for urgent properties
+    ringWidth = isHovered ? 4 : 3;
+  } else if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
       ringColor = '#FFB800'; // Rich Gold for Premium Premiere (TOP tier)
     } else if (property.promotionTier === 'highlight') {
@@ -262,11 +306,12 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     ringWidth = 4;
   }
 
-  // Night mode: Only promoted properties get glow effect
-  const shouldGlow = isNightMode && isActivelyPromoted;
-  const nightModeGlow = shouldGlow
-    ? 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.8)) drop-shadow(0 0 16px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 24px rgba(0, 150, 255, 0.3))'
-    : '';
+  // Night mode: Promoted properties and urgent badges get glow effect
+  const shouldGlow = isNightMode && (isActivelyPromoted || property.hasUrgentBadge);
+  // Use red glow for urgent badges, cyan for promoted
+  const nightModeGlow = property.hasUrgentBadge
+    ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 16px rgba(220, 38, 38, 0.5)) drop-shadow(0 0 24px rgba(185, 28, 28, 0.3))'
+    : 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.8)) drop-shadow(0 0 16px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 24px rgba(0, 150, 255, 0.3))';
   const baseFilter = shouldGlow
     ? nightModeGlow
     : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
@@ -336,11 +381,16 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     property.promotionEndDate &&
     property.promotionEndDate > Date.now();
 
-  // Get stroke color based on promotion tier or property type
-  // Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
+  // Get stroke color based on urgent badge, promotion tier, or property type
+  // Urgent = Red, Premium = Gold (1st), Highlight = Light Blue (2nd), Featured = Dark Purple (3rd)
   let strokeColor = '#FFFFFF';
   let strokeWidth = 2;
-  if (isActivelyPromoted) {
+
+  // Urgent badge takes priority - red stroke
+  if (property.hasUrgentBadge) {
+    strokeColor = '#EF4444'; // Red for urgent properties
+    strokeWidth = isHovered ? 4 : 3;
+  } else if (isActivelyPromoted) {
     if (property.promotionTier === 'premium') {
       strokeColor = '#FFB800'; // Rich Gold for Premium Premiere (TOP tier)
     } else if (property.promotionTier === 'highlight') {
@@ -356,11 +406,12 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     strokeWidth = 4;
   }
 
-  // Night mode: Only promoted properties get glow effect
-  const shouldGlow = isNightMode && isActivelyPromoted;
-  const nightModeGlow = shouldGlow
-    ? 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.9)) drop-shadow(0 0 20px rgba(0, 200, 255, 0.6)) drop-shadow(0 0 30px rgba(0, 150, 255, 0.4))'
-    : '';
+  // Night mode: Promoted properties and urgent badges get glow effect
+  const shouldGlow = isNightMode && (isActivelyPromoted || property.hasUrgentBadge);
+  // Use red glow for urgent badges, cyan for promoted
+  const nightModeGlow = property.hasUrgentBadge
+    ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.9)) drop-shadow(0 0 20px rgba(220, 38, 38, 0.6)) drop-shadow(0 0 30px rgba(185, 28, 28, 0.4))'
+    : 'drop-shadow(0 0 10px rgba(0, 255, 255, 0.9)) drop-shadow(0 0 20px rgba(0, 200, 255, 0.6)) drop-shadow(0 0 30px rgba(0, 150, 255, 0.4))';
   const baseFilter = shouldGlow
     ? nightModeGlow
     : 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))';
@@ -887,6 +938,17 @@ export const Legend: React.FC<LegendProps> = ({ isNightMode = false }) => {
             </span>
           </div>
         ))}
+
+        {/* Urgent Badge indicator */}
+        <div className="flex items-center gap-2.5 pt-1 mt-1 border-t border-neutral-200/50">
+          <span
+            className="w-3 h-3 rounded-full flex-shrink-0 animate-pulse"
+            style={{ backgroundColor: '#EF4444', boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)' }}
+          />
+          <span className={`text-xs font-medium whitespace-nowrap ${isNightMode ? 'text-slate-200' : 'text-neutral-700'}`}>
+            {t('map.propertyTypes.urgent', 'Urgent')}
+          </span>
+        </div>
       </div>
     </div>
   );

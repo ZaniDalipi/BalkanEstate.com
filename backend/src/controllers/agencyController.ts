@@ -1699,6 +1699,8 @@ export const redeemAgentCoupon = async (
       existingSubscription.price = 0;
       existingSubscription.currency = 'EUR';
       existingSubscription.isAcknowledged = true;
+      // Reset reminder flag so new reminder will be sent before new expiration
+      existingSubscription.expiryReminderSent = false;
       await existingSubscription.save();
       console.log(`✅ Updated Subscription document for ${user.email}`);
     } else {
@@ -2198,6 +2200,8 @@ export const migrateAgentSubscriptions = async (
           existingSubscription.renewalDate = agencyExpiresAt;
           existingSubscription.price = 0;
           existingSubscription.autoRenewing = false;
+          // Reset reminder flag so new reminder will be sent before new expiration
+          existingSubscription.expiryReminderSent = false;
           await existingSubscription.save();
           totalUpdated++;
         }

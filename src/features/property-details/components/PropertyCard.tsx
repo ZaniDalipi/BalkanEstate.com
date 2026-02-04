@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon } from '@/constants';
+import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
@@ -267,7 +267,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                   ? 'bg-gradient-to-r from-violet-600 via-purple-500 to-violet-400'
                   : 'bg-gradient-to-r from-gray-600 to-gray-700'
               }`}>
-                <span className="text-xs">{promotionTier === 'premium' ? '👑' : promotionTier === 'highlight' ? '💎' : '⭐'}</span>
+                <StarIconSolid className="w-3 h-3" />
                 {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
                 {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
                 {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
@@ -281,7 +281,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
                 className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-md animate-pulse flex items-center gap-1"
                 style={{ boxShadow: '0 0 12px 2px rgba(239, 68, 68, 0.6), 0 0 20px 4px rgba(239, 68, 68, 0.3)' }}
               >
-                🔥 {t('property:status.urgent').toUpperCase()}
+                <FireIcon className="w-3 h-3" /> {t('property:status.urgent').toUpperCase()}
               </div>
             )}
 
