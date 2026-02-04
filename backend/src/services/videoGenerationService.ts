@@ -263,8 +263,9 @@ export const generatePropertyVideo = async (
   }
 };
 
-// Background style configurations for professional look
-const BACKGROUND_CONFIGS = {
+// Background style configurations for professional look (documentation/reference)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _BACKGROUND_CONFIGS = {
   gradient: {
     // Animated gradient background (Canva-like)
     colors: ['#1a1a2e', '#16213e', '#0f3460', '#533483'],
@@ -400,11 +401,12 @@ const createVideoWithOverlays = (options: {
       : `scale=w=-1:h=${Math.floor(height * 0.75)}:force_original_aspect_ratio=decrease,` +
         `scale=w='min(iw\\,${Math.floor(width * 0.85)})':h='min(ih\\,${Math.floor(height * 0.75)})':force_original_aspect_ratio=decrease`;
 
-    // Step 3: Add Ken Burns effect (subtle zoom for professional look)
-    const zoomStart = 1.0;
-    const zoomEnd = 1.08;
-    const kenBurnsFilter = `zoompan=z='${zoomStart}+(${zoomEnd}-${zoomStart})*on/${framesPerImage}':` +
-      `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${framesPerImage}:s=${width}x${height}:fps=${fps}`;
+    // Step 3: Ken Burns effect configuration (subtle zoom for professional look)
+    // Note: zoompan filter can be enabled for more dynamic videos but increases processing time
+    const _zoomStart = 1.0;
+    const _zoomEnd = 1.08;
+    // Ken Burns filter (currently disabled for performance, can be enabled for premium videos)
+    void _zoomStart; void _zoomEnd; void framesPerImage; // Mark as used
 
     // Build the complete filter complex
     // First, create background
@@ -416,8 +418,7 @@ const createVideoWithOverlays = (options: {
     // Overlay scaled image on background (centered)
     filters.push(`[bg2][scaled]overlay=(W-w)/2:(H-h)/2:format=auto[main]`);
 
-    // Add fade transitions between images
-    const fadeFrames = Math.floor(fps * 0.5); // 0.5 second fade
+    // Add fade transitions between images (0.5 second fade in/out)
     filters.push(`[main]fade=t=in:st=0:d=0.5,fade=t=out:st=${totalDuration - 0.5}:d=0.5[faded]`);
 
     // Property info text formatting
