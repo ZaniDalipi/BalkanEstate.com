@@ -85,13 +85,15 @@ const CityRecommendations: React.FC = () => {
       });
     }
 
-    // Set filters - use geographic bounds instead of text query
-    // This shows all properties within the city area regardless of address format
-    // Set country to 'any' since we're using geographic bounds for filtering
+    // Get the display name for the search field
+    const displayName = `${city.city}, ${city.country}`;
+
+    // Set filters - use geographic bounds for filtering properties
+    // But show the city name in the search field for user context
     updateSearchPageState({
       filters: {
         country: 'any',
-        query: '', // Don't use text query - rely on geographic bounds
+        query: displayName, // Show city name in search field for context
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -127,7 +129,7 @@ const CityRecommendations: React.FC = () => {
       },
       activeFilters: {
         country: 'any',
-        query: '', // Don't use text query - rely on geographic bounds
+        query: displayName, // Show city name in search field for context
         minPrice: null,
         maxPrice: null,
         beds: null,

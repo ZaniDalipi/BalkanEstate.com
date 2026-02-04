@@ -833,18 +833,29 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     )}
                                 </>
                             ) : (
-                                <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
-                                    <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                                    <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
-                                    <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
-                                    <button
-                                        onClick={onResetFilters}
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors shadow-md"
-                                    >
-                                        <XCircleIcon className="w-5 h-5" />
-                                        {t('search:filters.resetFilters', 'Reset Filters')}
-                                    </button>
-                                    <p className="text-xs text-neutral-400 mt-3">{t('search:results.resetHint', 'Reset filters to see all properties in this area')}</p>
+                                <div
+                                    className="text-center py-16 px-6 rounded-2xl relative overflow-hidden"
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        backdropFilter: 'blur(20px)',
+                                        WebkitBackdropFilter: 'blur(20px)',
+                                        boxShadow: '0 8px 32px rgba(31, 38, 135, 0.12), inset 0 0 60px rgba(255, 255, 255, 0.3), -6px 0 20px rgba(31, 38, 135, 0.06), 6px 0 20px rgba(31, 38, 135, 0.06)',
+                                    }}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-50/20 pointer-events-none" />
+                                    <div className="relative z-10">
+                                        <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                                        <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
+                                        <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
+                                        <button
+                                            onClick={onResetFilters}
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5"
+                                        >
+                                            <XCircleIcon className="w-5 h-5" />
+                                            {t('search:filters.resetFilters', 'Reset Filters')}
+                                        </button>
+                                        <p className="text-xs text-neutral-400 mt-3">{t('search:results.resetHint', 'Reset filters to see all properties in this area')}</p>
+                                    </div>
                                 </div>
                             )}
                             {/* Footer - Integrated at bottom of property list */}
@@ -954,18 +965,29 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                         )}
                                     </>
                                 ) : (
-                                    <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
-                                        <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                                        <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
-                                        <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
-                                        <button
-                                            onClick={onResetFilters}
-                                            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark active:bg-primary-dark transition-colors shadow-md touch-manipulation"
-                                        >
-                                            <XCircleIcon className="w-5 h-5" />
-                                            {t('search:filters.resetFilters', 'Reset Filters')}
-                                        </button>
-                                        <p className="text-xs text-neutral-400 mt-3">{t('search:results.resetHint', 'Reset filters to see all properties in this area')}</p>
+                                    <div
+                                        className="text-center py-16 px-6 rounded-2xl relative overflow-hidden"
+                                        style={{
+                                            background: 'rgba(255, 255, 255, 0.7)',
+                                            backdropFilter: 'blur(20px)',
+                                            WebkitBackdropFilter: 'blur(20px)',
+                                            boxShadow: '0 8px 32px rgba(31, 38, 135, 0.12), inset 0 0 60px rgba(255, 255, 255, 0.3), -6px 0 20px rgba(31, 38, 135, 0.06), 6px 0 20px rgba(31, 38, 135, 0.06)',
+                                        }}
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-50/20 pointer-events-none" />
+                                        <div className="relative z-10">
+                                            <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                                            <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
+                                            <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
+                                            <button
+                                                onClick={onResetFilters}
+                                                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark active:bg-primary-dark transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 touch-manipulation"
+                                            >
+                                                <XCircleIcon className="w-5 h-5" />
+                                                {t('search:filters.resetFilters', 'Reset Filters')}
+                                            </button>
+                                            <p className="text-xs text-neutral-400 mt-3">{t('search:results.resetHint', 'Reset filters to see all properties in this area')}</p>
+                                        </div>
                                     </div>
                                 )}
 
