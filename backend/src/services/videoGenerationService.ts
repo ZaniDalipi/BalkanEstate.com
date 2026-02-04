@@ -263,30 +263,6 @@ export const generatePropertyVideo = async (
   }
 };
 
-// Background style configurations for professional look (documentation/reference)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _BACKGROUND_CONFIGS = {
-  gradient: {
-    // Animated gradient background (Canva-like)
-    colors: ['#1a1a2e', '#16213e', '#0f3460', '#533483'],
-    description: 'Animated purple-blue gradient'
-  },
-  blur: {
-    // Blurred version of the image as background
-    description: 'Blurred image background'
-  },
-  dark: {
-    // Elegant dark background
-    color: '#0a0a0a',
-    description: 'Elegant dark background'
-  },
-  elegant: {
-    // Premium gold and dark theme
-    colors: ['#1a1a1a', '#2d2d2d', '#c9a962'],
-    description: 'Premium dark with gold accents'
-  }
-};
-
 /**
  * Create video with professional backgrounds, Ken Burns effect, and overlays
  */
