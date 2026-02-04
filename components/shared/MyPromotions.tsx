@@ -14,7 +14,6 @@ import PromotionHistoryModal from '../../src/features/promotions/components/Prom
 import PromotedPropertyCard, { TIER_CONFIG } from '../../src/features/promotions/components/PromotedPropertyCard';
 import {
   usePromotionsQuery,
-  useAddUrgentBadge,
   useToggleAutoExtend,
   useAutoExtendCheckout,
   useRefreshPromotions,
@@ -34,7 +33,6 @@ const MyPromotions: React.FC = () => {
     refetch,
   } = usePromotionsQuery();
 
-  const addUrgentMutation = useAddUrgentBadge();
   const toggleAutoExtendMutation = useToggleAutoExtend();
   const autoExtendCheckoutMutation = useAutoExtendCheckout();
   const refreshPromotions = useRefreshPromotions();
@@ -48,6 +46,8 @@ const MyPromotions: React.FC = () => {
   const [propertyToExtend, setPropertyToExtend] = useState<Property | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [propertyForHistory, setPropertyForHistory] = useState<Property | null>(null);
+  const [showUrgentModal, setShowUrgentModal] = useState(false);
+  const [propertyForUrgent, setPropertyForUrgent] = useState<Property | null>(null);
 
   // Extract data with defaults
   const promotedProperties = data?.promotedProperties || [];
@@ -101,31 +101,17 @@ const MyPromotions: React.FC = () => {
     setShowHistoryModal(true);
   };
 
-  // Action handlers
-  const handleAddUrgent = async (promotionId: string) => {
-    try {
-      setActionLoading(promotionId);
-      const result = await addUrgentMutation.mutateAsync(promotionId);
+  // Action handlers - Open modal for adding urgent badge
+  const handleAddUrgent = (property: Property, promotionId: string) => {
+    setPropertyForUrgent(property);
+    setShowUrgentModal(true);
+  };
 
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to add urgent badge');
-      }
-
-      if (result.isFree) {
-        // Free urgent badge - data will auto-refresh
-        refreshPromotions();
-        setActionLoading(null);
-      } else if (result.url) {
-        // Redirect to Stripe checkout
-        window.location.href = result.url;
-      } else {
-        throw new Error('No payment URL returned. Please try again.');
-      }
-    } catch (error: any) {
-      console.error('Failed to add urgent badge:', error);
-      alert(error.message || 'Failed to add urgent badge. Please try again.');
-      setActionLoading(null);
-    }
+  const handleUrgentSuccess = async () => {
+    setShowUrgentModal(false);
+    setPropertyForUrgent(null);
+    // React Query will auto-refresh, but we can force immediate refresh
+    refreshPromotions();
   };
 
   const handleToggleAutoExtend = async (promotionId: string, autoExtend: boolean) => {
@@ -284,7 +270,7 @@ const MyPromotions: React.FC = () => {
               promotion={promotions[property.id]}
               onViewProperty={handleViewProperty}
               onExtend={handleExtend}
-              onAddUrgent={handleAddUrgent}
+              onAddUrgent={(promotionId) => handleAddUrgent(property, promotionId)}
               onToggleAutoExtend={handleToggleAutoExtend}
               onCompleteAutoExtend={handleCompleteAutoExtend}
               onViewHistory={handleViewHistory}
@@ -321,6 +307,24 @@ const MyPromotions: React.FC = () => {
           }}
           propertyId={propertyForHistory.id}
           propertyTitle={propertyForHistory.title || `${propertyForHistory.address}, ${propertyForHistory.city}`}
+        />
+      )}
+
+      {/* Urgent Badge Modal */}
+      {propertyForUrgent && (
+        <PromotionModal
+          isOpen={showUrgentModal}
+          onClose={() => {
+            setShowUrgentModal(false);
+            setPropertyForUrgent(null);
+          }}
+          propertyId={propertyForUrgent.id}
+          propertyTitle={propertyForUrgent.title || `${propertyForUrgent.address}, ${propertyForUrgent.city}`}
+          onSuccess={handleUrgentSuccess}
+          focusUrgent={true}
+          currentTier={propertyForUrgent.promotionTier as 'featured' | 'highlight' | 'premium' | undefined}
+          promotionId={promotions[propertyForUrgent.id]?._id}
+          hasUrgentBadge={propertyForUrgent.hasUrgentBadge}
         />
       )}
     </div>
