@@ -635,7 +635,9 @@ const createVideoWithOverlays = (options: {
     ];
 
     // Add audio options if music is available
+    // IMPORTANT: When using complexFilter, audio streams need to be explicitly mapped
     if (musicPath && fs.existsSync(musicPath)) {
+      outputOptions.push('-map', '1:a'); // Map audio from second input (music file)
       outputOptions.push('-c:a', 'aac', '-b:a', '128k', '-shortest');
     }
 
