@@ -509,6 +509,12 @@ export const ArrowPathIcon: React.FC<{ className?: string }> = ({ className }) =
     )
 );
 
+export const InquiriesIcon: React.FC<{ className?: string }> = ({ className }) => (
+    React.createElement(Icon, { className: className },
+        React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M7.5 8.25h9m-9 3.75h6m-6 3.75h3M21 12c0 4.556-4.03 8.25-9 8.25-1.31 0-2.56-.255-3.69-.717L3 20.25l.72-3.31A7.9 7.9 0 013 12c0-4.556 4.03-8.25 9-8.25S21 7.444 21 12z" })
+    )
+);
+
 export const ChatBubbleBottomCenterTextIcon: React.FC<{ className?: string }> = ({ className }) => (
     React.createElement(Icon, { className: className },
         React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" })

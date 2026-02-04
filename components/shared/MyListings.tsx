@@ -3,7 +3,7 @@ import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { useRealtimeProperties } from '../../src/features/properties/hooks';
-import { EyeIcon, HeartIcon, ChatBubbleLeftRightIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon, CalendarIcon } from '../../constants';
+import { EyeIcon, HeartIcon, InquiriesIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon, CalendarIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
@@ -155,7 +155,7 @@ const ListingCard: React.FC<{
             <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-neutral-500 mt-3 pt-3 border-t">
                 <div className="flex items-center gap-1.5" title="Views"><EyeIcon className="w-4 h-4" /> {property.views || 0}</div>
                 <div className="flex items-center gap-1.5" title="Saves"><HeartIcon className="w-4 h-4" /> {property.saves || 0}</div>
-                <div className="flex items-center gap-1.5" title="Inquiries"><ChatBubbleLeftRightIcon className="w-4 h-4" /> {property.inquiries || 0}</div>
+                <div className="flex items-center gap-1.5" title="Inquiries"><InquiriesIcon className="w-4 h-4" /> {property.inquiries || 0}</div>
                 {property.lastRenewed && isActionable && (
                     <div className="flex items-center gap-1.5 text-green-600" title="Last Renewed">
                         <CalendarIcon className="w-4 h-4"/>
