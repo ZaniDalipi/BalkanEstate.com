@@ -3,23 +3,21 @@
  * Uses DOMPurify to safely sanitize HTML content and prevent XSS attacks
  */
 
-// Use default import with type-only workaround for Vite compatibility
-import * as DOMPurifyModule from 'dompurify';
-const DOMPurify = DOMPurifyModule.default || DOMPurifyModule;
+import DOMPurify from 'dompurify';
 
 // Type for DOMPurify config
-type DOMPurifyConfig = {
+interface SanitizeConfig {
   ALLOWED_TAGS?: string[];
   ALLOWED_ATTR?: string[];
   ALLOW_DATA_ATTR?: boolean;
   ALLOWED_URI_REGEXP?: RegExp;
-};
+}
 
 /**
  * Configuration for DOMPurify
  * Allows safe HTML tags while blocking potentially dangerous ones
  */
-const SANITIZE_CONFIG: DOMPurifyConfig = {
+const SANITIZE_CONFIG: SanitizeConfig = {
   // Allowed HTML tags (safe for content display)
   ALLOWED_TAGS: [
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
