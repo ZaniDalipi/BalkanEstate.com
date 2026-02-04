@@ -103,6 +103,7 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
 
   // Delete confirmation
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch measurements
   const fetchMeasurements = useCallback(async () => {
@@ -167,14 +168,17 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
 
   // Handle delete
   const handleDelete = async (id: string) => {
+    if (isDeleting) return; // Prevent double-click
+    setIsDeleting(true);
     try {
       await api.deleteMeasurement(id);
       setDeletingId(null);
       if (selectedMeasurement === id) setSelectedMeasurement(null);
       fetchMeasurements();
     } catch (err: any) {
-      console.error('Failed to delete measurement:', err);
       setError(err.message || 'Failed to delete measurement');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -392,8 +396,8 @@ const MyMeasurements: React.FC<MyMeasurementsProps> = ({ userId }) => {
                   <div className="text-center py-2" onClick={e => e.stopPropagation()}>
                     <p className="text-xs text-gray-600 mb-2">Delete "{measurement.name}"?</p>
                     <div className="flex gap-2 justify-center">
-                      <button onClick={() => setDeletingId(null)} className="px-3 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
-                      <button onClick={() => handleDelete(measurement.id)} className="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700">Delete</button>
+                      <button onClick={() => setDeletingId(null)} disabled={isDeleting} className="px-3 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Cancel</button>
+                      <button onClick={() => handleDelete(measurement.id)} disabled={isDeleting} className="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50">{isDeleting ? 'Deleting...' : 'Delete'}</button>
                     </div>
                   </div>
                 ) : (

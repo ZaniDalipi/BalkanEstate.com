@@ -340,6 +340,17 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
       setError('Email is required');
       return;
     }
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    // Validate URL formats if provided
+    if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
+      setError('Website URL must start with http:// or https://');
+      return;
+    }
 
     // Prepare data with yearsInBusiness as a number
     const agencyData = {

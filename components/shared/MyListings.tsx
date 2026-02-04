@@ -141,11 +141,11 @@ const ListingCard: React.FC<{
                     <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
-                     <button onClick={handleEditClick} className="p-2 text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
-                        <PencilIcon className="w-5 h-5" />
+                     <button onClick={handleEditClick} aria-label="Edit listing" className="p-2 text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
+                        <PencilIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} className="p-2 text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
-                        <TrashIcon className="w-5 h-5" />
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label="Delete listing" className="p-2 text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
+                        <TrashIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>
             </div>
