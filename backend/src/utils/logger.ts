@@ -114,7 +114,7 @@ const formatTimestamp = (): string => {
  */
 const colorize = (text: string, color: keyof typeof COLORS): string => {
   if (!config.colorize) return text;
-  return \`\${COLORS[color]}\${text}\${COLORS.reset}\`;
+  return `${COLORS[color]}${text}${COLORS.reset}`;
 };
 
 /**
@@ -128,20 +128,20 @@ const formatMessage = (
   const parts: string[] = [];
 
   if (config.includeTimestamp) {
-    parts.push(colorize(\`[\${formatTimestamp()}]\`, 'dim'));
+    parts.push(colorize(`[${formatTimestamp()}]`, 'dim'));
   }
 
-  parts.push(colorize(\`[\${level.toUpperCase().padEnd(5)}]\`, level));
+  parts.push(colorize(`[${level.toUpperCase().padEnd(5)}]`, level));
 
   if (namespace) {
-    parts.push(colorize(\`[\${namespace}]\`, 'dim'));
+    parts.push(colorize(`[${namespace}]`, 'dim'));
   }
 
   // Process arguments
   const processedArgs = args.map((arg) => {
     if (arg instanceof Error) {
       return isDevelopment
-        ? \`\${arg.message}\\n\${arg.stack}\`
+        ? `${arg.message}\n${arg.stack}`
         : arg.message;
     }
     if (typeof arg === 'object') {
@@ -204,13 +204,13 @@ export const createLogger = (namespace: string) => {
      * Create child logger with extended namespace
      */
     child: (childNamespace: string) =>
-      createLogger(\`\${namespace}:\${childNamespace}\`),
+      createLogger(`${namespace}:${childNamespace}`),
 
     /**
      * Log with request context
      */
     withRequest: (requestId: string) =>
-      createLogger(\`\${namespace}:\${requestId}\`),
+      createLogger(`${namespace}:${requestId}`),
   };
 };
 

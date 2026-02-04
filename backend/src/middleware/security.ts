@@ -341,8 +341,11 @@ export const aiRateLimiter = rateLimit({
     if (userId) {
       return `ai_user_${userId}`;
     }
-    return req.ip || 'unknown';
+    // Use default key generator behavior for IP-based limiting
+    return 'unknown';
   },
+  // Disable IPv6 validation since we use user ID primarily
+  validate: { xForwardedForHeader: false },
 });
 
 /**
