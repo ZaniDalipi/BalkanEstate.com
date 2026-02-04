@@ -92,6 +92,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
 
   // Determine video platform
   const getVideoPlatform = useCallback((url: string): string => {
@@ -315,8 +317,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             {hasGeneratedVideo ? (
               <>
                 <video
+                  ref={videoRef}
                   src={property.generatedVideoUrl}
                   autoPlay
+                  muted={isMuted}
                   playsInline
                   loop={false}
                   className="w-full h-full object-contain"
@@ -332,6 +336,28 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   </svg>
                   <span>{t('property:gallery.propertyShowcase', 'Property Showcase')}</span>
                 </div>
+                {/* Sound toggle button */}
+                <button
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    if (videoRef.current) {
+                      videoRef.current.muted = !isMuted;
+                    }
+                  }}
+                  className="absolute top-3 right-3 z-20 flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-sm text-white rounded-full hover:bg-black/80 transition-colors"
+                  title={isMuted ? 'Unmute' : 'Mute'}
+                >
+                  {isMuted ? (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                  )}
+                </button>
                 {/* Skip button */}
                 <button
                   onClick={() => {

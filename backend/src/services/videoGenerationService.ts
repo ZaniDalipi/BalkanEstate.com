@@ -442,29 +442,29 @@ const createVideoWithOverlays = (options: {
     // Add gradient overlay at bottom for text readability (modern style)
     void bgFilter; void kenBurnsFilter; // Mark as used for future enhancements
 
-    // Property info text formatting
+    // Property info text formatting - cleaner display
     const priceText = price ? `€${price.toLocaleString()}` : '';
     const locationText = city || '';
     const features: string[] = [];
     if (beds) features.push(`${beds} Bed${beds > 1 ? 's' : ''}`);
     if (baths) features.push(`${baths} Bath${baths > 1 ? 's' : ''}`);
     if (sqft) features.push(`${sqft} m²`);
-    const featuresText = features.join('  •  ');
+    const featuresText = features.join('   |   ');
 
-    // Calculate responsive font sizes for modern look
-    const titleFontSize = isVertical ? Math.floor(width / 16) : Math.floor(height / 16);
-    const priceFontSize = isVertical ? Math.floor(width / 9) : Math.floor(height / 10);
-    const locationFontSize = isVertical ? Math.floor(width / 20) : Math.floor(height / 20);
-    const featureFontSize = isVertical ? Math.floor(width / 24) : Math.floor(height / 24);
-    const watermarkFontSize = isVertical ? Math.floor(width / 32) : Math.floor(height / 32);
+    // Calculate responsive font sizes - premium typography
+    const titleFontSize = isVertical ? Math.floor(width / 18) : Math.floor(height / 18);
+    const priceFontSize = isVertical ? Math.floor(width / 8) : Math.floor(height / 9);
+    const locationFontSize = isVertical ? Math.floor(width / 22) : Math.floor(height / 22);
+    const featureFontSize = isVertical ? Math.floor(width / 26) : Math.floor(height / 26);
+    const watermarkFontSize = isVertical ? Math.floor(width / 30) : Math.floor(height / 30);
 
-    // Position calculations for bottom-aligned modern layout
-    const bottomMargin = isVertical ? Math.floor(height * 0.08) : Math.floor(height * 0.06);
+    // Position calculations for elegant bottom-aligned layout
+    const bottomMargin = isVertical ? Math.floor(height * 0.1) : Math.floor(height * 0.08);
 
-    // Animation timing - property details appear in sequence
-    const animDuration = 0.4; // Duration of fade-in animation
-    const animDelay = 0.6; // Delay between each element appearing
-    let animStartTime = 0.3; // Start after brief intro
+    // Animation timing - smooth cinematic reveal
+    const animDuration = 0.5; // Slightly longer fade for elegance
+    const animDelay = 0.5; // Consistent timing between elements
+    let animStartTime = 0.4; // Start after brief intro
 
     // Add text overlays if font is available
     if (hasFont) {
@@ -472,48 +472,40 @@ const createVideoWithOverlays = (options: {
       let currentFilter = '[faded]';
       let filterIndex = 0;
 
-      // Elegant gradient overlay at bottom - multiple layers for smooth fade effect
-      const gradientHeight = isVertical ? Math.floor(height * 0.5) : Math.floor(height * 0.45);
-      // Layer 1: Very subtle (furthest up)
-      filters.push(
-        `${currentFilter}drawbox=x=0:y=ih-${gradientHeight}:w=iw:h=${Math.floor(gradientHeight * 0.3)}:` +
-        `color=black@0.15:t=fill[t${filterIndex}]`
-      );
-      currentFilter = `[t${filterIndex}]`;
-      filterIndex++;
-      // Layer 2: Light
-      filters.push(
-        `${currentFilter}drawbox=x=0:y=ih-${Math.floor(gradientHeight * 0.7)}:w=iw:h=${Math.floor(gradientHeight * 0.25)}:` +
-        `color=black@0.3:t=fill[t${filterIndex}]`
-      );
-      currentFilter = `[t${filterIndex}]`;
-      filterIndex++;
-      // Layer 3: Medium
-      filters.push(
-        `${currentFilter}drawbox=x=0:y=ih-${Math.floor(gradientHeight * 0.45)}:w=iw:h=${Math.floor(gradientHeight * 0.2)}:` +
-        `color=black@0.45:t=fill[t${filterIndex}]`
-      );
-      currentFilter = `[t${filterIndex}]`;
-      filterIndex++;
-      // Layer 4: Darkest at bottom
-      filters.push(
-        `${currentFilter}drawbox=x=0:y=ih-${Math.floor(gradientHeight * 0.25)}:w=iw:h=${Math.floor(gradientHeight * 0.25)}:` +
-        `color=black@0.6:t=fill[t${filterIndex}]`
-      );
-      currentFilter = `[t${filterIndex}]`;
-      filterIndex++;
+      // Premium gradient overlay at bottom - ultra-smooth multi-layer fade
+      const gradientHeight = isVertical ? Math.floor(height * 0.55) : Math.floor(height * 0.5);
+      // 6 gradient layers for silky smooth transition
+      const gradientLayers = [
+        { y: 1.0, h: 0.15, opacity: 0.05 },   // Layer 1: Very subtle start
+        { y: 0.85, h: 0.15, opacity: 0.12 },  // Layer 2
+        { y: 0.70, h: 0.15, opacity: 0.22 },  // Layer 3
+        { y: 0.55, h: 0.15, opacity: 0.35 },  // Layer 4
+        { y: 0.40, h: 0.20, opacity: 0.50 },  // Layer 5
+        { y: 0.20, h: 0.20, opacity: 0.70 },  // Layer 6: Darkest at bottom
+      ];
 
-      // Subtle top gradient for watermark - also layered for smoothness
-      const topGradientHeight = Math.floor(height * 0.12);
+      for (const layer of gradientLayers) {
+        const layerY = Math.floor(gradientHeight * layer.y);
+        const layerH = Math.floor(gradientHeight * layer.h);
+        filters.push(
+          `${currentFilter}drawbox=x=0:y=ih-${layerY}:w=iw:h=${layerH}:` +
+          `color=black@${layer.opacity}:t=fill[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+      }
+
+      // Elegant top gradient for watermark - subtle and professional
+      const topGradientHeight = Math.floor(height * 0.15);
       filters.push(
-        `${currentFilter}drawbox=x=0:y=0:w=iw:h=${topGradientHeight}:` +
-        `color=black@0.35:t=fill[t${filterIndex}]`
+        `${currentFilter}drawbox=x=0:y=0:w=iw:h=${Math.floor(topGradientHeight * 0.6)}:` +
+        `color=black@0.4:t=fill[t${filterIndex}]`
       );
       currentFilter = `[t${filterIndex}]`;
       filterIndex++;
       filters.push(
-        `${currentFilter}drawbox=x=0:y=${topGradientHeight}:w=iw:h=${Math.floor(topGradientHeight * 0.5)}:` +
-        `color=black@0.15:t=fill[t${filterIndex}]`
+        `${currentFilter}drawbox=x=0:y=${Math.floor(topGradientHeight * 0.6)}:w=iw:h=${Math.floor(topGradientHeight * 0.4)}:` +
+        `color=black@0.2:t=fill[t${filterIndex}]`
       );
       currentFilter = `[t${filterIndex}]`;
       filterIndex++;
@@ -523,28 +515,13 @@ const createVideoWithOverlays = (options: {
       const fadeInAlpha = (startTime: number) =>
         `alpha='if(lt(t\\,${startTime})\\,0\\,if(lt(t\\,${startTime + animDuration})\\,(t-${startTime})/${animDuration}\\,1))'`;
 
-      // 1. PRICE - First to appear (main highlight) with slide-up effect
+      // 1. PRICE - Large and prominent, centered
       if (priceText) {
-        const priceY = height - bottomMargin - Math.floor(priceFontSize * 2.5);
+        const priceY = height - bottomMargin - Math.floor(priceFontSize * 3);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='${escapeText(priceText)}':` +
           `fontsize=${priceFontSize}:fontcolor=white:` +
           `x=(w-text_w)/2:y=${priceY}:` +
-          `${fadeInAlpha(animStartTime)}:` +
-          `shadowcolor=black@0.7:shadowx=3:shadowy=3[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
-        animStartTime += animDelay;
-      }
-
-      // 2. LOCATION - Appears second with pin icon
-      if (locationText) {
-        const locationY = height - bottomMargin - Math.floor(priceFontSize * 1.2);
-        filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='${escapeText(locationText)}':` +
-          `fontsize=${locationFontSize}:fontcolor=white@0.95:` +
-          `x=(w-text_w)/2:y=${locationY}:` +
           `${fadeInAlpha(animStartTime)}:` +
           `shadowcolor=black@0.5:shadowx=2:shadowy=2[t${filterIndex}]`
         );
@@ -553,65 +530,70 @@ const createVideoWithOverlays = (options: {
         animStartTime += animDelay;
       }
 
-      // 3. FEATURES - Appears third (beds, baths, sqft)
-      if (featuresText) {
-        const featuresY = height - bottomMargin - Math.floor(priceFontSize * 0.2);
+      // 2. LOCATION - Below price with subtle styling
+      if (locationText) {
+        const locationY = height - bottomMargin - Math.floor(priceFontSize * 1.6);
         filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='${escapeText(featuresText)}':` +
-          `fontsize=${featureFontSize}:fontcolor=white@0.9:` +
-          `x=(w-text_w)/2:y=${featuresY}:` +
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(locationText)}':` +
+          `fontsize=${locationFontSize}:fontcolor=white@0.9:` +
+          `x=(w-text_w)/2:y=${locationY}:` +
           `${fadeInAlpha(animStartTime)}:` +
-          `shadowcolor=black@0.5:shadowx=1:shadowy=1[t${filterIndex}]`
+          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
         animStartTime += animDelay;
       }
 
-      // 4. TITLE - Appears at the top area if provided
-      if (title) {
-        const titleY = height - bottomMargin + Math.floor(featureFontSize * 1.5);
+      // 3. FEATURES - Clean separator style (beds | baths | sqft)
+      if (featuresText) {
+        const featuresY = height - bottomMargin - Math.floor(priceFontSize * 0.4);
         filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='${escapeText(title.substring(0, 40))}':` +
-          `fontsize=${Math.floor(titleFontSize * 0.8)}:fontcolor=white@0.85:` +
-          `x=(w-text_w)/2:y=${titleY}:` +
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(featuresText)}':` +
+          `fontsize=${featureFontSize}:fontcolor=white@0.85:` +
+          `x=(w-text_w)/2:y=${featuresY}:` +
           `${fadeInAlpha(animStartTime)}:` +
           `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
+        animStartTime += animDelay;
       }
 
-      // 5. CONTACT INFO - Appears in last 3.5 seconds with modern card
-      const contactStartTime = Math.max(0, totalDuration - 3.5);
-      if (sellerName || sellerPhone) {
-        const cardWidth = Math.floor(width * 0.75);
-        const cardHeight = Math.floor(height * 0.22);
-        const cardX = Math.floor((width - cardWidth) / 2);
-        const cardY = Math.floor(height * 0.35);
+      // 4. TITLE - At the very bottom if provided
+      if (title) {
+        const titleY = height - bottomMargin + Math.floor(featureFontSize * 1.2);
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(title.substring(0, 35))}':` +
+          `fontsize=${Math.floor(titleFontSize * 0.75)}:fontcolor=white@0.75:` +
+          `x=(w-text_w)/2:y=${titleY}:` +
+          `${fadeInAlpha(animStartTime)}:` +
+          `shadowcolor=black@0.3:shadowx=1:shadowy=1[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+      }
 
-        // Modern frosted glass card background
+      // 5. CONTACT INFO - Appears in last 3 seconds with elegant card
+      const contactStartTime = Math.max(0, totalDuration - 3);
+      if (sellerName || sellerPhone) {
+        const cardWidth = Math.floor(width * 0.7);
+        const cardHeight = Math.floor(height * 0.18);
+        const cardX = Math.floor((width - cardWidth) / 2);
+        const cardY = Math.floor(height * 0.38);
+
+        // Elegant dark card with rounded feel
         filters.push(
           `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=${cardHeight}:` +
-          `color=black@0.8:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+          `color=black@0.85:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
-        // Accent line at top of card (brand blue)
+        // Subtle accent line at top
         filters.push(
-          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=4:` +
+          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=3:` +
           `color=${BRAND_COLORS.primary}:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
-
-        // Contact header
-        filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='Contact':` +
-          `fontsize=${Math.floor(locationFontSize * 0.85)}:fontcolor=${BRAND_COLORS.primary}:` +
-          `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.18)}:` +
-          `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
@@ -619,8 +601,8 @@ const createVideoWithOverlays = (options: {
         if (sellerName) {
           filters.push(
             `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerName)}':` +
-            `fontsize=${Math.floor(titleFontSize * 0.9)}:fontcolor=white:` +
-            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.45)}:` +
+            `fontsize=${Math.floor(titleFontSize * 0.85)}:fontcolor=white:` +
+            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.35)}:` +
             `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
           );
           currentFilter = `[t${filterIndex}]`;
@@ -630,8 +612,8 @@ const createVideoWithOverlays = (options: {
         if (sellerPhone) {
           filters.push(
             `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerPhone)}':` +
-            `fontsize=${locationFontSize}:fontcolor=white@0.9:` +
-            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.72)}:` +
+            `fontsize=${Math.floor(locationFontSize * 0.9)}:fontcolor=white@0.85:` +
+            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.65)}:` +
             `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
           );
           currentFilter = `[t${filterIndex}]`;
@@ -639,29 +621,29 @@ const createVideoWithOverlays = (options: {
         }
       }
 
-      // Elegant watermark - clean text-only design
+      // Elegant watermark - BalkanEstateAI branding
       if (includeWatermark) {
         // Position in top-left corner
         const wmX = Math.floor(width * 0.04);
-        const wmY = Math.floor(height * 0.035);
-        const wmFontSize = Math.floor(watermarkFontSize * 1.3);
-        const urlFontSize = Math.floor(watermarkFontSize * 0.75);
+        const wmY = Math.floor(height * 0.04);
+        const wmFontSize = Math.floor(watermarkFontSize * 1.2);
+        const urlFontSize = Math.floor(watermarkFontSize * 0.7);
 
-        // BALKANESTATE brand name in white (clean elegant look)
+        // BalkanEstateAI brand name - modern styling
         filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='BALKANESTATE':` +
+          `${currentFilter}drawtext=${fontParam}:text='BalkanEstateAI':` +
           `fontsize=${wmFontSize}:fontcolor=white:` +
           `x=${wmX}:y=${wmY}:` +
-          `shadowcolor=black@0.7:shadowx=2:shadowy=2[t${filterIndex}]`
+          `shadowcolor=black@0.6:shadowx=2:shadowy=2[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
-        // Website URL below in subtle style
-        const urlY = wmY + Math.floor(wmFontSize * 1.05);
+        // Website URL below
+        const urlY = wmY + Math.floor(wmFontSize * 1.15);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='balkanestateai.com':` +
-          `fontsize=${urlFontSize}:fontcolor=white@0.65:` +
+          `fontsize=${urlFontSize}:fontcolor=white@0.7:` +
           `x=${wmX}:y=${urlY}:` +
           `shadowcolor=black@0.5:shadowx=1:shadowy=1[t${filterIndex}]`
         );
