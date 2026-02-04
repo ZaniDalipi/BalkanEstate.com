@@ -768,6 +768,111 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       )}
 
+      {/* Simple Urgent Badge Add-on Section - Only show when focusUrgent mode WITHOUT tier upgrade */}
+      {focusUrgent && !wantsTierUpgrade && hasUrgentBadge && (
+        <div className="mb-5">
+          {/* Coupon Code for Urgent Badge */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              Have a Coupon?
+            </h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                placeholder="Enter coupon code"
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+              />
+              {validatingCoupon && (
+                <div className="flex items-center px-3 py-2 text-gray-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                </div>
+              )}
+            </div>
+            {couponValidation && (
+              <div
+                className={`mt-2 p-2 rounded-lg text-xs ${
+                  couponValidation.isValid
+                    ? 'bg-green-50 text-green-700 border border-green-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
+                }`}
+              >
+                {couponValidation.isValid ? (
+                  <span className="flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Coupon applied! You save €{couponValidation.discount.toFixed(2)}
+                  </span>
+                ) : (
+                  <span>{couponValidation.message}</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Price Summary for Simple Urgent Badge */}
+          <div className="rounded-xl border p-5 mb-4 bg-gradient-to-br from-red-50 to-orange-50 border-red-200">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <FireIcon className="w-5 h-5 text-red-500" />
+                <span className="font-semibold text-gray-900">Urgent Badge</span>
+              </div>
+              <div className="text-right">
+                {priceInfo.original !== priceInfo.final && (
+                  <span className="text-sm text-gray-400 line-through mr-2">€{priceInfo.original.toFixed(2)}</span>
+                )}
+                <span className="text-xl font-bold text-red-600">
+                  {priceInfo.final === 0 ? 'FREE' : `€${priceInfo.final.toFixed(2)}`}
+                </span>
+              </div>
+            </div>
+            {priceInfo.final === 0 && couponValidation?.isValid && (
+              <p className="text-xs text-green-600 mt-2 text-right">Free with coupon!</p>
+            )}
+          </div>
+
+          {/* Action Buttons for Simple Urgent Badge */}
+          <div className="flex gap-3">
+            <button
+              onClick={onSkip}
+              disabled={isProcessing}
+              className="px-6 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 shadow-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handlePurchase}
+              disabled={isProcessing || successMessage !== null}
+              className="flex-1 px-6 py-3.5 text-white rounded-xl text-sm font-bold bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 hover:shadow-lg hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            >
+              {isProcessing ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Adding...
+                </span>
+              ) : successMessage ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Added!
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <FireIcon className="w-4 h-4" />
+                  {priceInfo.final === 0 ? 'Add Urgent Badge - FREE' : `Add Urgent Badge - €${priceInfo.final.toFixed(2)}`}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Tier Selection - Only show if not in extension mode and not in focusUrgent mode */}
       {!isExtension && !focusUrgent && (
         <div className={inModal ? 'mb-5' : 'mb-8'}>
@@ -872,9 +977,9 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = ({
         </div>
       )}
 
-      {(selectedTier || isExtension || focusUrgent) && (
+      {(selectedTier || isExtension || (focusUrgent && wantsTierUpgrade)) && (
         <>
-          {/* Duration Selection - Enhanced for Extension */}
+          {/* Duration Selection - Only show for new promotions, extensions, or tier upgrades (NOT for simple urgent badge add-on) */}
           <div className={`bg-white rounded-xl border ${isExtension ? extStyle.border : 'border-gray-200'} p-5 mb-4 shadow-sm`}>
             <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className={`w-8 h-8 ${isExtension ? extStyle.iconBg : 'bg-primary/10'} rounded-lg flex items-center justify-center`}>
