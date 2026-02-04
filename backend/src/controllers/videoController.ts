@@ -87,6 +87,7 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     const seller = await User.findById(property.sellerId);
     const sellerName = property.createdByName || seller?.name || '';
     const sellerPhone = seller?.phone || '';
+    const agencyName = seller?.agencyName || '';
 
     // Generate video options with full property details
     const options: VideoGenerationOptions = {
@@ -101,6 +102,7 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
       sqft: property.sqft,
       sellerName,
       sellerPhone,
+      agencyName,
       format,
       quality,
       duration,
@@ -197,6 +199,7 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
     const seller = await User.findById(property.sellerId);
     const sellerName = property.createdByName || seller?.name || '';
     const sellerPhone = seller?.phone || '';
+    const agencyName = seller?.agencyName || '';
 
     // Generate video options with full property details
     const options: VideoGenerationOptions = {
@@ -211,6 +214,7 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
       sqft: property.sqft,
       sellerName,
       sellerPhone,
+      agencyName,
       format,
       quality,
       duration,

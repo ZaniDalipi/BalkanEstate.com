@@ -2,11 +2,11 @@
 // Orchestrates all property detail subcomponents
 // Real-time updates via WebSocket for instant price/status changes
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '@/types';
 import { useAppContext } from '@/context/AppContext';
-import { useRealtimeProperties } from '@/src/features/properties/hooks';
+import { useRealtimeProperties, useProperty } from '@/src/features/properties/hooks';
 import { ArrowLeftIcon, SparklesIcon } from '@/constants';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
@@ -42,10 +42,26 @@ import Footer from '@/components/shared/Footer';
  *
  * All major sections have been extracted into focused components <200 lines.
  */
-const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property }) => {
+const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cachedProperty }) => {
   const { t } = useTranslation(['property']);
   const { state, dispatch, createConversation, toggleSavedHome, fetchProperties } = useAppContext();
   const { error } = useNotification();
+
+  // Fetch fresh property data to ensure we have latest fields (e.g., generated video)
+  // This fixes the issue where video doesn't show when opening from search (stale cache)
+  const { property: freshProperty } = useProperty(cachedProperty?.id, {
+    enablePolling: false, // Don't poll, just fetch once on mount
+  });
+
+  // Use fresh data if available, fall back to cached data
+  // This ensures we show the page immediately with cached data, then update with fresh
+  const property = useMemo(() => {
+    if (freshProperty) {
+      // Merge fresh data with cached to ensure all fields are present
+      return { ...cachedProperty, ...freshProperty };
+    }
+    return cachedProperty;
+  }, [freshProperty, cachedProperty]);
 
   // Track page view for analytics
   useTrackView({

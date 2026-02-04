@@ -27,6 +27,7 @@ export interface VideoGenerationOptions {
   sqft?: number;
   sellerName?: string;
   sellerPhone?: string;
+  agencyName?: string; // Agency name for agents
   format?: 'vertical' | 'horizontal' | 'square';
   quality?: 'standard' | 'mobile'; // 'mobile' uses lower resolution for faster loading
   duration?: number;
@@ -181,6 +182,7 @@ export const generatePropertyVideo = async (
     sqft,
     sellerName,
     sellerPhone,
+    agencyName,
     format = 'vertical',
     quality = 'mobile', // Default to mobile for smaller file sizes
     duration = 3,
@@ -243,6 +245,7 @@ export const generatePropertyVideo = async (
       sqft,
       sellerName,
       sellerPhone,
+      agencyName,
       backgroundStyle: options.backgroundStyle || 'elegant',
       includeWatermark: options.includeWatermark !== false,
     });
@@ -292,6 +295,7 @@ const createVideoWithOverlays = (options: {
   sqft?: number;
   sellerName?: string;
   sellerPhone?: string;
+  agencyName?: string;
   backgroundStyle?: 'gradient' | 'blur' | 'dark' | 'elegant';
   includeWatermark?: boolean;
 }): Promise<void> => {
@@ -310,6 +314,7 @@ const createVideoWithOverlays = (options: {
     sqft,
     sellerName,
     sellerPhone,
+    agencyName,
     backgroundStyle = 'elegant',
     includeWatermark = true,
   } = options;
@@ -582,11 +587,12 @@ const createVideoWithOverlays = (options: {
       // 5. CONTACT INFO - Modern floating card with fade-in animation
       const contactStartTime = Math.max(0, totalDuration - 3.5);
       const contactAnimDuration = 0.4;
-      if (sellerName || sellerPhone) {
+      if (sellerName || sellerPhone || agencyName) {
         const cardWidth = Math.floor(width * 0.65);
-        const cardHeight = Math.floor(height * 0.15);
+        // Increase card height if agency name is present
+        const cardHeight = Math.floor(height * (agencyName ? 0.18 : 0.15));
         const cardX = Math.floor((width - cardWidth) / 2);
-        const cardY = Math.floor(height * 0.4);
+        const cardY = Math.floor(height * 0.38);
 
         // Card fade-in alpha
         const cardFadeAlpha = `enable='gte(t\\,${contactStartTime})'`;
@@ -609,9 +615,14 @@ const createVideoWithOverlays = (options: {
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
+        // Calculate vertical positions based on content
+        const hasAllFields = sellerName && agencyName && sellerPhone;
+        const hasNameAndAgency = sellerName && agencyName && !sellerPhone;
+        const hasNameAndPhone = sellerName && sellerPhone && !agencyName;
+
         // Name with slide-up effect
         if (sellerName) {
-          const nameY = cardY + Math.floor(cardHeight * 0.38);
+          const nameY = cardY + Math.floor(cardHeight * (hasAllFields ? 0.25 : hasNameAndAgency ? 0.35 : 0.38));
           filters.push(
             `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerName)}':` +
             `fontsize=${Math.floor(titleFontSize * 0.8)}:fontcolor=white:` +
@@ -623,9 +634,23 @@ const createVideoWithOverlays = (options: {
           filterIndex++;
         }
 
+        // Agency name with slide-up effect (shown below seller name)
+        if (agencyName) {
+          const agencyY = cardY + Math.floor(cardHeight * (hasAllFields ? 0.5 : 0.55));
+          filters.push(
+            `${currentFilter}drawtext=${fontParam}:text='${escapeText(agencyName)}':` +
+            `fontsize=${Math.floor(locationFontSize * 0.9)}:fontcolor=${BRAND_COLORS.secondary}:` +
+            `x=(w-text_w)/2:${slideUpY(agencyY, contactStartTime + 0.15)}:` +
+            `${cardFadeAlphaText(0.15)}:` +
+            `shadowcolor=black@0.3:shadowx=1:shadowy=1[t${filterIndex}]`
+          );
+          currentFilter = `[t${filterIndex}]`;
+          filterIndex++;
+        }
+
         // Phone with slide-up effect
         if (sellerPhone) {
-          const phoneY = cardY + Math.floor(cardHeight * 0.68);
+          const phoneY = cardY + Math.floor(cardHeight * (hasAllFields ? 0.75 : 0.68));
           filters.push(
             `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerPhone)}':` +
             `fontsize=${Math.floor(locationFontSize * 0.85)}:fontcolor=white@0.9:` +
