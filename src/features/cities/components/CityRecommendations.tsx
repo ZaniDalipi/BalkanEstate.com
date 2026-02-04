@@ -63,10 +63,12 @@ const CityRecommendations: React.FC = () => {
     const coords = getCityCoordinates(city.city, city.country);
 
     // Set filters to search for properties in this city
+    // Clear the query text and use geographic bounds to filter instead
+    // This avoids issues with different address formats (e.g., "Tirana" vs "Tiranë, Bashkia Tiranë")
     updateSearchPageState({
       filters: {
         country: city.countryCode,
-        query: city.city, // Use query field to search by city name
+        query: '', // Don't use text query - use map bounds for geographic filtering
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -102,7 +104,7 @@ const CityRecommendations: React.FC = () => {
       },
       activeFilters: {
         country: city.countryCode,
-        query: city.city, // Use query field to search by city name
+        query: '', // Don't use text query - use map bounds for geographic filtering
         minPrice: null,
         maxPrice: null,
         beds: null,

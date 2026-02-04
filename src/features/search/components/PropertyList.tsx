@@ -833,7 +833,19 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     )}
                                 </>
                             ) : (
-                                <div className="text-center py-16 px-4"><h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3></div>
+                                <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
+                                    <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                                    <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
+                                    <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
+                                    <button
+                                        onClick={onResetFilters}
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors shadow-md"
+                                    >
+                                        <XCircleIcon className="w-5 h-5" />
+                                        {t('search:filters.resetFilters', 'Reset Filters')}
+                                    </button>
+                                    <p className="text-xs text-neutral-400 mt-3">{t('search:results.resetHint', 'Reset filters to see all properties in this area')}</p>
+                                </div>
                             )}
                             {/* Footer - Integrated at bottom of property list */}
                             <div className="mt-8 overflow-x-hidden">
@@ -945,7 +957,15 @@ const PropertyList: React.FC<PropertyListProps> = (props) => {
                                     <div className="text-center py-16 px-4 bg-neutral-50/70 rounded-lg border">
                                         <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
                                         <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
-                                        <p className="text-neutral-500 mt-2">{t('search:results.tryDifferent')}</p>
+                                        <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
+                                        <button
+                                            onClick={onResetFilters}
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark active:bg-primary-dark transition-colors shadow-md touch-manipulation"
+                                        >
+                                            <XCircleIcon className="w-5 h-5" />
+                                            {t('search:filters.resetFilters', 'Reset Filters')}
+                                        </button>
+                                        <p className="text-xs text-neutral-400 mt-3">{t('search:results.resetHint', 'Reset filters to see all properties in this area')}</p>
                                     </div>
                                 )}
 
