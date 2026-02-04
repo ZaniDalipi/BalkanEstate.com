@@ -10,6 +10,7 @@ import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryCon
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
 import { RandomCityBubbles, FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
+import { searchLocation } from '@/services/osmService';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -58,17 +59,34 @@ const CityRecommendations: React.FC = () => {
 
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
-  const handleCityClick = (city: CityMarketData) => {
-    // Get city coordinates for map zoom
-    const coords = getCityCoordinates(city.city, city.country);
+  const handleCityClick = async (city: CityMarketData) => {
+    // Get fallback coordinates from BALKAN_LOCATIONS
+    const fallbackCoords = getCityCoordinates(city.city, city.country);
 
-    // Set filters to search for properties in this city
-    // Clear the query text and use geographic bounds to filter instead
-    // This avoids issues with different address formats (e.g., "Tirana" vs "Tiranë, Bashkia Tiranë")
+    // Search OSM for the city to get the proper localized name and bounds
+    // This ensures we get names like "Tiranë, Bashkia Tiranë" instead of just "Tirana"
+    const searchQuery = `${city.city}, ${city.country}`;
+    const results = await searchLocation(searchQuery);
+
+    // Use the first result from OSM - it's typically the best match for the whole city
+    // Examples: Tirana → "Tiranë, Bashkia Tiranë", Belgrade → "Београд, Град Београд"
+    const bestResult = results[0];
+
+    // Extract the localized city name from OSM result (first 2 parts of display_name)
+    // This gives us: "Tiranë, Bashkia Tiranë" or "Београд, Град Београд" etc.
+    const shortName = bestResult
+      ? bestResult.display_name.split(',').slice(0, 2).join(',').trim()
+      : city.city;
+
+    // Get coordinates from OSM result or fallback
+    const lat = bestResult ? Number(bestResult.lat) : fallbackCoords?.lat ?? 0;
+    const lng = bestResult ? Number(bestResult.lon) : fallbackCoords?.lng ?? 0;
+
+    // Set filters with the proper localized city name from OSM
     updateSearchPageState({
       filters: {
         country: city.countryCode,
-        query: '', // Don't use text query - use map bounds for geographic filtering
+        query: shortName, // Use OSM's localized name for better matching
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -104,7 +122,7 @@ const CityRecommendations: React.FC = () => {
       },
       activeFilters: {
         country: city.countryCode,
-        query: '', // Don't use text query - use map bounds for geographic filtering
+        query: shortName, // Use OSM's localized name for better matching
         minPrice: null,
         maxPrice: null,
         beds: null,
@@ -139,12 +157,12 @@ const CityRecommendations: React.FC = () => {
         amenities: [],
       },
       // Set map focus to city coordinates with a wider zoom to cover the whole city
-      focusMapOnProperty: coords ? {
-        lat: coords.lat,
-        lng: coords.lng,
-        address: `${city.city}, ${city.country}`,
+      focusMapOnProperty: {
+        lat,
+        lng,
+        address: shortName,
         zoom: 12, // City-level zoom to show all listings
-      } : null,
+      },
       // Switch to map view on mobile
       mobileView: 'map',
     });
