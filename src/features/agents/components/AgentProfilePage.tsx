@@ -171,6 +171,18 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
 
     const isAgencyAgent = agent.agencyName && agent.agencyName !== 'Independent Agent';
 
+    // Validate agent coordinates - must be valid and within Balkans region (roughly lat: 35-47, lng: 13-31)
+    // Coordinates of (0, 0) are in the Atlantic Ocean and clearly invalid
+    const hasValidCoordinates = useMemo(() => {
+        if (agent.lat == null || agent.lng == null) return false;
+        if (isNaN(agent.lat) || isNaN(agent.lng)) return false;
+        // Check for (0,0) which is a common default but invalid for Balkans
+        if (agent.lat === 0 && agent.lng === 0) return false;
+        // Check if within reasonable Balkans bounds
+        const isInBalkans = agent.lat >= 35 && agent.lat <= 47 && agent.lng >= 13 && agent.lng <= 31;
+        return isInBalkans;
+    }, [agent.lat, agent.lng]);
+
     // Cleanup timer on unmount
     useEffect(() => {
         return () => {
@@ -1355,8 +1367,8 @@ const AgentProfilePage: React.FC<AgentProfilePageProps> = ({ agent }) => {
                                             </div>
                                         )}
 
-                                        {/* Agent Location Map */}
-                                        {agent.lat != null && agent.lng != null && !isNaN(agent.lat) && !isNaN(agent.lng) && (
+                                        {/* Agent Location Map - only show if coordinates are valid and within Balkans */}
+                                        {hasValidCoordinates && (
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                                     <MapPinIcon className="w-6 h-6 text-blue-600" />
