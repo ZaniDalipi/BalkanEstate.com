@@ -436,8 +436,8 @@ const createVideoWithOverlays = (options: {
     // Add Ken Burns zoom effect for dynamic modern look
     // filters.push(`[scaled]${kenBurnsFilter}[zoomed]`); // Uncomment for zoom effect
 
-    // Add fade transitions - very quick fade in (0.15s), smooth fade out
-    filters.push(`[scaled]fade=t=in:st=0:d=0.15,fade=t=out:st=${totalDuration - 0.3}:d=0.3[faded]`);
+    // No fade-in (instant image), only fade-out at end
+    filters.push(`[scaled]fade=t=out:st=${totalDuration - 0.3}:d=0.3[faded]`);
 
     // Add gradient overlay at bottom for text readability (modern style)
     void bgFilter; void kenBurnsFilter; // Mark as used for future enhancements
@@ -461,10 +461,10 @@ const createVideoWithOverlays = (options: {
     // Position calculations for elegant bottom-aligned layout
     const bottomMargin = isVertical ? Math.floor(height * 0.1) : Math.floor(height * 0.08);
 
-    // Animation timing - quick reveal, no black screen delay
-    const animDuration = 0.3; // Fast fade-in
-    const animDelay = 0.25; // Quick succession
-    let animStartTime = 0.1; // Start almost immediately
+    // Animation timing - instant reveal, no delay
+    const animDuration = 0.35; // Smooth fade-in
+    const animDelay = 0.3; // Staggered appearance
+    let animStartTime = 0; // Start immediately (no black screen)
 
     // Add text overlays if font is available
     if (hasFont) {
