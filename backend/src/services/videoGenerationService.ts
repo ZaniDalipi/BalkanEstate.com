@@ -618,7 +618,6 @@ const createVideoWithOverlays = (options: {
         // Calculate vertical positions based on content
         const hasAllFields = sellerName && agencyName && sellerPhone;
         const hasNameAndAgency = sellerName && agencyName && !sellerPhone;
-        const hasNameAndPhone = sellerName && sellerPhone && !agencyName;
 
         // Name with slide-up effect
         if (sellerName) {
