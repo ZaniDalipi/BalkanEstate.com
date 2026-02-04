@@ -460,7 +460,6 @@ const createVideoWithOverlays = (options: {
 
     // Position calculations for bottom-aligned modern layout
     const bottomMargin = isVertical ? Math.floor(height * 0.08) : Math.floor(height * 0.06);
-    const topMargin = isVertical ? Math.floor(height * 0.04) : Math.floor(height * 0.03);
 
     // Animation timing - property details appear in sequence
     const animDuration = 0.4; // Duration of fade-in animation
