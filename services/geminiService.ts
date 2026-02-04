@@ -3,7 +3,8 @@ import { Property, PropertyImageTag, ChatMessage, AiSearchQuery, Filters } from 
 import type { LatLngBounds } from 'leaflet';
 
 // Only initialize if API key is available - prevents crash on missing key
-const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || '';
+// Use import.meta.env for Vite compatibility (process.env doesn't exist in browser)
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 // Helper to check if AI is available
