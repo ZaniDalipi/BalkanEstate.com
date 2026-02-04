@@ -401,6 +401,7 @@ const MyPromotions: React.FC = () => {
           onSuccess={handleUrgentSuccess}
           focusUrgent={true}
           currentTier={propertyForUrgent.promotionTier as 'featured' | 'highlight' | 'premium' | undefined}
+          currentEndDate={propertyForUrgent.promotionEndDate ? new Date(propertyForUrgent.promotionEndDate) : undefined}
           promotionId={promotions[propertyForUrgent.id]?._id}
           hasUrgentBadge={propertyForUrgent.hasUrgentBadge}
         />
