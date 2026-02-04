@@ -77,6 +77,17 @@ const MUSIC_URLS: Record<string, string> = {
   modern: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8cb749d484.mp3',
 };
 
+// BalkanEstate brand colors for video overlays
+const BRAND_COLORS = {
+  primary: '#5B8DEF',      // Brand blue
+  secondary: '#6C9FFF',    // Lighter blue
+  accent: '#4A7AE0',       // Darker blue
+  dark: '#0a0a12',         // Dark background
+  gradient1: '#667eea',    // Purple-ish blue
+  gradient2: '#764ba2',    // Purple
+  gradient3: '#06b6d4',    // Teal
+};
+
 /**
  * Download a file from URL to a local temp path
  */
@@ -345,82 +356,91 @@ const createVideoWithOverlays = (options: {
     // Build professional filter complex
     let filters: string[] = [];
 
-    // Step 1: Create professional background based on style
-    // Using BalkanEstate brand colors: Blue (#5B8DEF), Dark Blue (#1e3a5f), Purple (#8B5CF6), Teal (#06b6d4)
+    // Step 1: Create professional Canva-style background based on style
+    // Using multiple overlapping colored shapes with heavy blur for smooth mesh gradient effect
     let bgFilter = '';
-    const blurRadius = Math.floor(Math.min(width, height) / 8); // Strong blur for smooth gradients
+    const blurRadius = Math.floor(Math.min(width, height) / 6); // Strong blur for smooth gradients
 
     switch (backgroundStyle) {
       case 'gradient':
-        // Beautiful blurred multi-color gradient (Blue, Purple, Teal - BalkanEstate style)
-        bgFilter = `color=c=#0a0a12:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
-          // Add blue glow (top-right)
-          `[bgbase]drawbox=x=iw*0.6:y=0:w=iw*0.5:h=ih*0.5:color=#5B8DEF@0.6:t=fill[bg1];` +
-          // Add purple glow (bottom-left)
-          `[bg1]drawbox=x=0:y=ih*0.5:w=iw*0.5:h=ih*0.5:color=#8B5CF6@0.5:t=fill[bg2];` +
-          // Add teal accent (center)
-          `[bg2]drawbox=x=iw*0.3:y=ih*0.3:w=iw*0.4:h=ih*0.4:color=#06b6d4@0.3:t=fill[bg3];` +
-          // Apply heavy blur for smooth blended effect
-          `[bg3]gblur=sigma=${blurRadius}[bg4];` +
-          // Add subtle vignette for depth
-          `[bg4]vignette=PI/3[bg2]`;
+        // Vibrant Canva-style mesh gradient (Blue, Purple, Pink, Teal)
+        bgFilter = `color=c=#0f0f1a:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
+          // Large blue blob (top-right)
+          `[bgbase]drawbox=x=iw*0.5:y=-ih*0.2:w=iw*0.8:h=ih*0.7:color=${BRAND_COLORS.primary}@0.7:t=fill[bg1];` +
+          // Purple blob (bottom-left)
+          `[bg1]drawbox=x=-iw*0.2:y=ih*0.4:w=iw*0.7:h=ih*0.7:color=${BRAND_COLORS.gradient2}@0.6:t=fill[bg2];` +
+          // Teal accent (center-right)
+          `[bg2]drawbox=x=iw*0.4:y=ih*0.2:w=iw*0.5:h=ih*0.5:color=${BRAND_COLORS.gradient3}@0.5:t=fill[bg3];` +
+          // Pink accent (bottom-right)
+          `[bg3]drawbox=x=iw*0.6:y=ih*0.6:w=iw*0.5:h=ih*0.5:color=#ec4899@0.4:t=fill[bg4];` +
+          // Heavy blur for smooth blended mesh effect
+          `[bg4]gblur=sigma=${blurRadius * 1.5}[bg5];` +
+          // Add vignette for depth
+          `[bg5]vignette=PI/4[bg2]`;
         break;
       case 'blur':
-        // Blurred gradient with softer colors
-        bgFilter = `color=c=#0f172a:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
-          `[bgbase]drawbox=x=iw*0.5:y=0:w=iw*0.6:h=ih*0.6:color=#3b82f6@0.5:t=fill[bg1];` +
-          `[bg1]drawbox=x=0:y=ih*0.4:w=iw*0.6:h=ih*0.6:color=#6366f1@0.4:t=fill[bg2];` +
-          `[bg2]gblur=sigma=${blurRadius * 1.5}[bg3];` +
-          `[bg3]vignette=PI/4[bg2]`;
+        // Soft dreamy gradient (Indigo to Cyan)
+        bgFilter = `color=c=#0c0a1d:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
+          // Large indigo shape
+          `[bgbase]drawbox=x=iw*0.3:y=-ih*0.1:w=iw*0.8:h=ih*0.6:color=#6366f1@0.65:t=fill[bg1];` +
+          // Cyan accent
+          `[bg1]drawbox=x=-iw*0.1:y=ih*0.5:w=iw*0.7:h=ih*0.6:color=#22d3ee@0.5:t=fill[bg2];` +
+          // Purple middle
+          `[bg2]drawbox=x=iw*0.4:y=ih*0.3:w=iw*0.4:h=ih*0.4:color=#a855f7@0.4:t=fill[bg3];` +
+          // Extra heavy blur for soft dreamy effect
+          `[bg3]gblur=sigma=${blurRadius * 2}[bg4];` +
+          `[bg4]vignette=PI/4[bg2]`;
         break;
       case 'dark':
-        // Elegant dark with subtle blue accent
+        // Elegant dark with subtle color accents
         bgFilter = `color=c=#030712:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
-          `[bgbase]drawbox=x=iw*0.7:y=0:w=iw*0.4:h=ih*0.4:color=#1e3a5f@0.4:t=fill[bg1];` +
-          `[bg1]gblur=sigma=${blurRadius}[bg2]`;
+          // Subtle blue glow (top-right)
+          `[bgbase]drawbox=x=iw*0.6:y=-ih*0.1:w=iw*0.6:h=ih*0.5:color=${BRAND_COLORS.primary}@0.35:t=fill[bg1];` +
+          // Subtle purple glow (bottom-left)
+          `[bg1]drawbox=x=-iw*0.1:y=ih*0.6:w=iw*0.5:h=ih*0.5:color=#6366f1@0.25:t=fill[bg2];` +
+          `[bg2]gblur=sigma=${blurRadius}[bg3];` +
+          `[bg3]vignette=PI/3[bg2]`;
         break;
       case 'elegant':
       default:
-        // Premium dark with BalkanEstate blue gradient and blur
-        bgFilter = `color=c=#0a0a12:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
-          // Blue glow from top-right corner
-          `[bgbase]drawbox=x=iw*0.5:y=0:w=iw*0.6:h=ih*0.5:color=#5B8DEF@0.5:t=fill[bg1];` +
-          // Subtle purple from bottom-left
-          `[bg1]drawbox=x=0:y=ih*0.6:w=iw*0.4:h=ih*0.4:color=#6366f1@0.3:t=fill[bg2];` +
-          // Apply blur for smooth gradient
-          `[bg2]gblur=sigma=${blurRadius}[bg3];` +
-          // Add vignette for professional depth
-          `[bg3]vignette=PI/4[bg2]`;
+        // Premium BalkanEstate branded gradient (Blue dominant with purple accent)
+        bgFilter = `color=c=#080810:s=${width}x${height}:d=${totalDuration}:r=${fps}[bgbase];` +
+          // Main blue gradient area (top)
+          `[bgbase]drawbox=x=iw*0.2:y=-ih*0.2:w=iw*0.9:h=ih*0.7:color=${BRAND_COLORS.primary}@0.6:t=fill[bg1];` +
+          // Secondary blue (center)
+          `[bg1]drawbox=x=-iw*0.1:y=ih*0.2:w=iw*0.6:h=ih*0.5:color=${BRAND_COLORS.secondary}@0.45:t=fill[bg2];` +
+          // Purple accent (bottom)
+          `[bg2]drawbox=x=iw*0.5:y=ih*0.5:w=iw*0.6:h=ih*0.6:color=${BRAND_COLORS.gradient1}@0.4:t=fill[bg3];` +
+          // Teal touch (corner)
+          `[bg3]drawbox=x=iw*0.7:y=ih*0.7:w=iw*0.4:h=ih*0.4:color=${BRAND_COLORS.gradient3}@0.3:t=fill[bg4];` +
+          // Smooth blur
+          `[bg4]gblur=sigma=${blurRadius * 1.3}[bg5];` +
+          // Vignette for premium look
+          `[bg5]vignette=PI/4[bg2]`;
         break;
     }
 
-    // Step 2: Scale images to fit within frame while maintaining aspect ratio
-    // This ensures images fit properly for both landscape and portrait
-    const imgScaleFilter = isVertical
-      ? `scale=w=${Math.floor(width * 0.85)}:h=-1:force_original_aspect_ratio=decrease,` +
-        `scale=w='min(iw\\,${Math.floor(width * 0.85)})':h='min(ih\\,${Math.floor(height * 0.65)})':force_original_aspect_ratio=decrease`
-      : `scale=w=-1:h=${Math.floor(height * 0.75)}:force_original_aspect_ratio=decrease,` +
-        `scale=w='min(iw\\,${Math.floor(width * 0.85)})':h='min(ih\\,${Math.floor(height * 0.75)})':force_original_aspect_ratio=decrease`;
+    // Step 2: Scale images to FILL the entire frame (cover mode - no background visible)
+    // Images will be scaled up to cover the entire frame, cropping edges if needed
+    const imgScaleFilter = `scale=w=${width}:h=${height}:force_original_aspect_ratio=increase,` +
+      `crop=${width}:${height}`;
 
-    // Step 3: Ken Burns effect configuration (subtle zoom for professional look)
-    // Note: zoompan filter can be enabled for more dynamic videos but increases processing time
-    const _zoomStart = 1.0;
-    const _zoomEnd = 1.08;
-    // Ken Burns filter (currently disabled for performance, can be enabled for premium videos)
-    void _zoomStart; void _zoomEnd; void framesPerImage; // Mark as used
+    // Step 3: Ken Burns effect - subtle zoom for dynamic feel
+    const zoomSpeed = 0.0003; // Slow subtle zoom
+    const kenBurnsFilter = `zoompan=z='min(zoom+${zoomSpeed},1.1)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${framesPerImage}:s=${width}x${height}:fps=${fps}`;
 
     // Build the complete filter complex
-    // First, create background
-    filters.push(bgFilter);
-
-    // Process input images with scaling
+    // Process input images - scale to fill entire screen
     filters.push(`[0:v]${imgScaleFilter},setsar=1,format=rgba[scaled]`);
 
-    // Overlay scaled image on background (centered)
-    filters.push(`[bg2][scaled]overlay=(W-w)/2:(H-h)/2:format=auto[main]`);
+    // Add Ken Burns zoom effect for dynamic modern look
+    // filters.push(`[scaled]${kenBurnsFilter}[zoomed]`); // Uncomment for zoom effect
 
-    // Add fade transitions between images (0.5 second fade in/out)
-    filters.push(`[main]fade=t=in:st=0:d=0.5,fade=t=out:st=${totalDuration - 0.5}:d=0.5[faded]`);
+    // Add fade transitions between images (0.3 second fade for smooth modern feel)
+    filters.push(`[scaled]fade=t=in:st=0:d=0.3,fade=t=out:st=${totalDuration - 0.3}:d=0.3[faded]`);
+
+    // Add gradient overlay at bottom for text readability (modern style)
+    void bgFilter; void kenBurnsFilter; // Mark as used for future enhancements
 
     // Property info text formatting
     const priceText = price ? `€${price.toLocaleString()}` : '';
@@ -431,16 +451,21 @@ const createVideoWithOverlays = (options: {
     if (sqft) features.push(`${sqft} m²`);
     const featuresText = features.join('  •  ');
 
-    // Calculate responsive font sizes and positions
-    const titleFontSize = isVertical ? Math.floor(width / 18) : Math.floor(height / 18);
-    const priceFontSize = isVertical ? Math.floor(width / 12) : Math.floor(height / 14);
-    const locationFontSize = isVertical ? Math.floor(width / 22) : Math.floor(height / 22);
-    const featureFontSize = isVertical ? Math.floor(width / 26) : Math.floor(height / 26);
-    const watermarkFontSize = isVertical ? Math.floor(width / 36) : Math.floor(height / 36);
+    // Calculate responsive font sizes for modern look
+    const titleFontSize = isVertical ? Math.floor(width / 16) : Math.floor(height / 16);
+    const priceFontSize = isVertical ? Math.floor(width / 9) : Math.floor(height / 10);
+    const locationFontSize = isVertical ? Math.floor(width / 20) : Math.floor(height / 20);
+    const featureFontSize = isVertical ? Math.floor(width / 24) : Math.floor(height / 24);
+    const watermarkFontSize = isVertical ? Math.floor(width / 32) : Math.floor(height / 32);
 
-    // Position calculations
-    const bottomMargin = isVertical ? Math.floor(height * 0.15) : Math.floor(height * 0.12);
-    const topMargin = isVertical ? Math.floor(height * 0.05) : Math.floor(height * 0.04);
+    // Position calculations for bottom-aligned modern layout
+    const bottomMargin = isVertical ? Math.floor(height * 0.08) : Math.floor(height * 0.06);
+    const topMargin = isVertical ? Math.floor(height * 0.04) : Math.floor(height * 0.03);
+
+    // Animation timing - property details appear in sequence
+    const animDuration = 0.4; // Duration of fade-in animation
+    const animDelay = 0.6; // Delay between each element appearing
+    let animStartTime = 0.3; // Start after brief intro
 
     // Add text overlays if font is available
     if (hasFont) {
@@ -448,102 +473,117 @@ const createVideoWithOverlays = (options: {
       let currentFilter = '[faded]';
       let filterIndex = 0;
 
-      // Professional bottom gradient overlay for text readability
-      const gradientHeight = isVertical ? Math.floor(height * 0.35) : Math.floor(height * 0.28);
+      // Modern gradient overlay at bottom for text readability (sleek look)
+      const gradientHeight = isVertical ? Math.floor(height * 0.45) : Math.floor(height * 0.4);
       filters.push(
         `${currentFilter}drawbox=x=0:y=ih-${gradientHeight}:w=iw:h=${gradientHeight}:` +
-        `color=black@0.7:t=fill[t${filterIndex}]`
+        `color=black@0.6:t=fill[t${filterIndex}]`
       );
       currentFilter = `[t${filterIndex}]`;
       filterIndex++;
 
-      // Top bar with gradient for title
-      if (title) {
-        const topBarHeight = isVertical ? Math.floor(height * 0.12) : Math.floor(height * 0.1);
-        filters.push(
-          `${currentFilter}drawbox=x=0:y=0:w=iw:h=${topBarHeight}:color=black@0.6:t=fill[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
+      // Subtle top gradient for watermark
+      const topGradientHeight = Math.floor(height * 0.15);
+      filters.push(
+        `${currentFilter}drawbox=x=0:y=0:w=iw:h=${topGradientHeight}:` +
+        `color=black@0.45:t=fill[t${filterIndex}]`
+      );
+      currentFilter = `[t${filterIndex}]`;
+      filterIndex++;
 
-        // Title text with elegant styling
-        filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='${escapeText(title.substring(0, 45))}':` +
-          `fontsize=${titleFontSize}:fontcolor=white:` +
-          `x=(w-text_w)/2:y=${topMargin + titleFontSize / 2}:` +
-          `alpha='if(lt(t\\,0.8)\\,t/0.8\\,1)'[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
-      }
+      // Animation helper function - creates smooth fade-in effect
+      // alpha expression: starts at 0, fades in during animDuration after startTime
+      const fadeInAlpha = (startTime: number) =>
+        `alpha='if(lt(t\\,${startTime})\\,0\\,if(lt(t\\,${startTime + animDuration})\\,(t-${startTime})/${animDuration}\\,1))'`;
 
-      // Price with animated entrance (main highlight)
+      // 1. PRICE - First to appear (main highlight) with slide-up effect
       if (priceText) {
-        const priceY = height - bottomMargin - priceFontSize * 2;
+        const priceY = height - bottomMargin - Math.floor(priceFontSize * 2.5);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='${escapeText(priceText)}':` +
-          `fontsize=${priceFontSize}:fontcolor=#ffffff:` +
+          `fontsize=${priceFontSize}:fontcolor=white:` +
           `x=(w-text_w)/2:y=${priceY}:` +
-          `alpha='if(lt(mod(t\\,${durationPerImage})\\,0.6)\\,mod(t\\,${durationPerImage})/0.6\\,1)':` +
+          `${fadeInAlpha(animStartTime)}:` +
+          `shadowcolor=black@0.7:shadowx=3:shadowy=3[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+        animStartTime += animDelay;
+      }
+
+      // 2. LOCATION - Appears second with pin icon
+      if (locationText) {
+        const locationY = height - bottomMargin - Math.floor(priceFontSize * 1.2);
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(locationText)}':` +
+          `fontsize=${locationFontSize}:fontcolor=white@0.95:` +
+          `x=(w-text_w)/2:y=${locationY}:` +
+          `${fadeInAlpha(animStartTime)}:` +
           `shadowcolor=black@0.5:shadowx=2:shadowy=2[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
+        animStartTime += animDelay;
       }
 
-      // Location with icon-like marker
-      if (locationText) {
-        const locationY = height - bottomMargin - priceFontSize * 0.5;
-        filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='📍 ${escapeText(locationText)}':` +
-          `fontsize=${locationFontSize}:fontcolor=white@0.95:` +
-          `x=(w-text_w)/2:y=${locationY}[t${filterIndex}]`
-        );
-        currentFilter = `[t${filterIndex}]`;
-        filterIndex++;
-      }
-
-      // Features with elegant styling
+      // 3. FEATURES - Appears third (beds, baths, sqft)
       if (featuresText) {
-        const featuresY = height - bottomMargin + featureFontSize;
+        const featuresY = height - bottomMargin - Math.floor(priceFontSize * 0.2);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='${escapeText(featuresText)}':` +
-          `fontsize=${featureFontSize}:fontcolor=white@0.85:` +
-          `x=(w-text_w)/2:y=${featuresY}[t${filterIndex}]`
+          `fontsize=${featureFontSize}:fontcolor=white@0.9:` +
+          `x=(w-text_w)/2:y=${featuresY}:` +
+          `${fadeInAlpha(animStartTime)}:` +
+          `shadowcolor=black@0.5:shadowx=1:shadowy=1[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+        animStartTime += animDelay;
+      }
+
+      // 4. TITLE - Appears at the top area if provided
+      if (title) {
+        const titleY = height - bottomMargin + Math.floor(featureFontSize * 1.5);
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='${escapeText(title.substring(0, 40))}':` +
+          `fontsize=${Math.floor(titleFontSize * 0.8)}:fontcolor=white@0.85:` +
+          `x=(w-text_w)/2:y=${titleY}:` +
+          `${fadeInAlpha(animStartTime)}:` +
+          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
       }
 
-      // Contact info overlay in last 4 seconds (professional card style)
-      const contactStartTime = Math.max(0, totalDuration - 4);
+      // 5. CONTACT INFO - Appears in last 3.5 seconds with modern card
+      const contactStartTime = Math.max(0, totalDuration - 3.5);
       if (sellerName || sellerPhone) {
-        const cardWidth = Math.floor(width * 0.7);
-        const cardHeight = Math.floor(height * 0.25);
+        const cardWidth = Math.floor(width * 0.75);
+        const cardHeight = Math.floor(height * 0.22);
         const cardX = Math.floor((width - cardWidth) / 2);
-        const cardY = Math.floor(height * 0.38);
+        const cardY = Math.floor(height * 0.35);
 
-        // Semi-transparent card background
+        // Modern frosted glass card background
         filters.push(
           `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=${cardHeight}:` +
-          `color=black@0.85:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+          `color=black@0.8:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
-        // Card border (gold accent for elegant style)
+        // Accent line at top of card (brand blue)
         filters.push(
-          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=3:` +
-          `color=#c9a962:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
+          `${currentFilter}drawbox=x=${cardX}:y=${cardY}:w=${cardWidth}:h=4:` +
+          `color=${BRAND_COLORS.primary}:t=fill:enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
         // Contact header
         filters.push(
-          `${currentFilter}drawtext=${fontParam}:text='Contact Agent':` +
-          `fontsize=${locationFontSize}:fontcolor=#c9a962:` +
-          `x=(w-text_w)/2:y=${cardY + cardHeight * 0.15}:` +
+          `${currentFilter}drawtext=${fontParam}:text='Contact':` +
+          `fontsize=${Math.floor(locationFontSize * 0.85)}:fontcolor=${BRAND_COLORS.primary}:` +
+          `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.18)}:` +
           `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
@@ -552,8 +592,8 @@ const createVideoWithOverlays = (options: {
         if (sellerName) {
           filters.push(
             `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerName)}':` +
-            `fontsize=${titleFontSize}:fontcolor=white:` +
-            `x=(w-text_w)/2:y=${cardY + cardHeight * 0.4}:` +
+            `fontsize=${Math.floor(titleFontSize * 0.9)}:fontcolor=white:` +
+            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.45)}:` +
             `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
           );
           currentFilter = `[t${filterIndex}]`;
@@ -562,9 +602,9 @@ const createVideoWithOverlays = (options: {
 
         if (sellerPhone) {
           filters.push(
-            `${currentFilter}drawtext=${fontParam}:text='📞 ${escapeText(sellerPhone)}':` +
+            `${currentFilter}drawtext=${fontParam}:text='${escapeText(sellerPhone)}':` +
             `fontsize=${locationFontSize}:fontcolor=white@0.9:` +
-            `x=(w-text_w)/2:y=${cardY + cardHeight * 0.65}:` +
+            `x=(w-text_w)/2:y=${cardY + Math.floor(cardHeight * 0.72)}:` +
             `enable='gte(t\\,${contactStartTime})'[t${filterIndex}]`
           );
           currentFilter = `[t${filterIndex}]`;
@@ -572,31 +612,58 @@ const createVideoWithOverlays = (options: {
         }
       }
 
-      // Professional watermark with BalkanEstate branding (matching logo colors)
+      // Professional watermark with BalkanEstate logo and URL
       if (includeWatermark) {
         // Position in top-left corner with padding
-        const wmX = Math.floor(width * 0.03);
+        const wmX = Math.floor(width * 0.035);
         const wmY = Math.floor(height * 0.025);
-        const wmFontSize = Math.floor(watermarkFontSize * 1.3);
+        const wmFontSize = Math.floor(watermarkFontSize * 1.4);
+        const urlFontSize = Math.floor(watermarkFontSize * 0.85);
 
-        // Semi-transparent dark background for watermark visibility
-        const wmPadding = Math.floor(wmFontSize * 0.5);
-        const wmBgWidth = Math.floor(wmFontSize * 8);
-        const wmBgHeight = Math.floor(wmFontSize * 1.8);
+        // Semi-transparent dark background pill for watermark visibility
+        const wmPadding = Math.floor(wmFontSize * 0.6);
+        const wmBgWidth = Math.floor(wmFontSize * 9.5);
+        const wmBgHeight = Math.floor(wmFontSize * 2.8);
 
+        // Rounded background container
         filters.push(
           `${currentFilter}drawbox=x=${wmX - wmPadding}:y=${wmY - wmPadding / 2}:w=${wmBgWidth}:h=${wmBgHeight}:` +
-          `color=black@0.4:t=fill[t${filterIndex}]`
+          `color=black@0.55:t=fill[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
 
-        // BalkanEstate text in brand blue color (#5B8DEF)
+        // Logo icon representation (building icon using Unicode block characters)
+        // This creates a simple building-like visual
+        const iconX = wmX;
+        const iconY = wmY + Math.floor(wmFontSize * 0.15);
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='▌▌▐':` +
+          `fontsize=${Math.floor(wmFontSize * 1.1)}:fontcolor=${BRAND_COLORS.primary}:` +
+          `x=${iconX}:y=${iconY}:` +
+          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+
+        // BALKANESTATE brand name in blue
+        const textX = wmX + Math.floor(wmFontSize * 1.8);
         filters.push(
           `${currentFilter}drawtext=${fontParam}:text='BALKANESTATE':` +
-          `fontsize=${wmFontSize}:fontcolor=#5B8DEF:` +
-          `x=${wmX}:y=${wmY}:` +
-          `shadowcolor=black@0.6:shadowx=1:shadowy=1[t${filterIndex}]`
+          `fontsize=${wmFontSize}:fontcolor=${BRAND_COLORS.primary}:` +
+          `x=${textX}:y=${wmY}:` +
+          `shadowcolor=black@0.5:shadowx=1:shadowy=1[t${filterIndex}]`
+        );
+        currentFilter = `[t${filterIndex}]`;
+        filterIndex++;
+
+        // Website URL below the logo
+        const urlY = wmY + Math.floor(wmFontSize * 1.15);
+        filters.push(
+          `${currentFilter}drawtext=${fontParam}:text='balkanestateai.com':` +
+          `fontsize=${urlFontSize}:fontcolor=white@0.85:` +
+          `x=${textX}:y=${urlY}:` +
+          `shadowcolor=black@0.4:shadowx=1:shadowy=1[t${filterIndex}]`
         );
         currentFilter = `[t${filterIndex}]`;
         filterIndex++;
