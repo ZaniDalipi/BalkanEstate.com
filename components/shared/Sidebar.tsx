@@ -18,16 +18,18 @@ const NavItem: React.FC<{
   return (
     <button
       onClick={() => onClick(view)}
+      aria-label={badge && badge > 0 ? `${label} (${badge} unread)` : label}
+      aria-current={isActive ? 'page' : undefined}
       className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative ${
         isActive
           ? 'bg-primary-light text-primary-dark'
           : 'text-neutral-700 hover:bg-neutral-100'
       }`}
     >
-      <div className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary' : 'text-neutral-700'} relative`}>
+      <div className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary' : 'text-neutral-700'} relative`} aria-hidden="true">
         {icon}
         {badge && badge > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1" aria-hidden="true">
             {badge > 99 ? '99+' : badge}
           </span>
         )}
@@ -184,19 +186,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             ></div>
 
             {/* Sidebar */}
-            <aside className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-all duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} md:w-20 md:translate-x-0 hover:md:w-64`}>
+            <aside
+                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-all duration-300 ease-in-out group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} md:w-20 md:translate-x-0 hover:md:w-64`}
+                role="navigation"
+                aria-label={t('nav:mainNavigation', 'Main navigation')}
+            >
                 <div className="flex items-center p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
                     <button
                         onClick={() => handleNavClick('search')}
                         className="flex items-center space-x-2"
+                        aria-label={t('nav:goToHome', 'Go to home page')}
                     >
-                        <LogoIcon className="w-7 h-7 text-primary flex-shrink-0" />
+                        <LogoIcon className="w-7 h-7 text-primary flex-shrink-0" aria-hidden="true" />
                         <h1 className="text-lg font-bold text-neutral-800 md:hidden group-hover:md:inline whitespace-nowrap">
                             Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
                         </h1>
                     </button>
-                    <button onClick={onClose} className="md:hidden absolute right-3 top-4 text-neutral-700 hover:text-neutral-800">
-                        <XMarkIcon className="w-5 h-5"/>
+                    <button
+                        onClick={onClose}
+                        className="md:hidden absolute right-3 top-4 text-neutral-700 hover:text-neutral-800"
+                        aria-label={t('nav:closeMenu', 'Close navigation menu')}
+                    >
+                        <XMarkIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>
 
@@ -224,15 +235,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         <button
                             onClick={handleNewListingClick}
                             className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-white bg-secondary hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
+                            aria-label={t('nav:createNewListing', 'Create a new listing')}
                         >
-                            <PencilIcon className="w-5 h-5 flex-shrink-0" />
+                            <PencilIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
                         </button>
                         <button
                             onClick={handleSubscriptionClick}
                             className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
+                            aria-label={t('nav:viewSubscription', 'View subscription plans')}
                         >
-                            <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`}><StarIconSolid /></div>
+                            <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`} aria-hidden="true"><StarIconSolid /></div>
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
                         </button>
                         {isAuthenticated && (
@@ -243,8 +256,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                         ? 'bg-primary-light text-primary-dark'
                                         : 'text-neutral-700 hover:bg-neutral-100'
                                 }`}
+                                aria-label={t('nav:viewAnalytics', 'View analytics dashboard')}
+                                aria-current={activeView === 'analytics' ? 'page' : undefined}
                             >
-                                <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'analytics' ? 'text-primary' : 'text-neutral-700'}`}>
+                                <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'analytics' ? 'text-primary' : 'text-neutral-700'}`} aria-hidden="true">
                                     <ChartBarIcon />
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:analytics')}</span>
@@ -257,11 +272,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                     ? 'bg-primary-light text-primary-dark'
                                     : 'text-neutral-700 hover:bg-neutral-100'
                             }`}
+                            aria-label={totalUnreadCount > 0 ? t('nav:inboxWithUnread', 'Inbox ({{count}} unread)', { count: totalUnreadCount }) : t('nav:inbox')}
+                            aria-current={activeView === 'inbox' ? 'page' : undefined}
                         >
-                            <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'inbox' ? 'text-primary' : 'text-neutral-700'} relative`}>
+                            <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'inbox' ? 'text-primary' : 'text-neutral-700'} relative`} aria-hidden="true">
                                 <EnvelopeIcon />
                                 {totalUnreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
+                                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1" aria-hidden="true">
                                         {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
                                     </span>
                                 )}
@@ -284,20 +301,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                     ? 'bg-primary-light text-primary-dark'
                                     : 'text-neutral-700 hover:bg-neutral-100'
                                 }`}
+                                aria-label={t('nav:goToAccount', 'Go to my account')}
+                                aria-current={activeView === 'account' ? 'page' : undefined}
                             >
                                 <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100">
-                                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover"/> : <UserCircleIcon className="w-full h-full text-neutral-400" />}
+                                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} className="w-full h-full object-cover"/> : <UserCircleIcon className="w-full h-full text-neutral-400" aria-hidden="true" />}
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>
-                            <button onClick={handleLogout} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start">
-                                <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" />
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start"
+                                aria-label={t('auth:logoutAccount', 'Log out of your account')}
+                            >
+                                <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:logout')}</span>
                             </button>
                         </div>
                     ) : (
-                         <button onClick={() => { dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } }); onClose(); }} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start">
-                            <UserCircleIcon className="w-5 h-5 text-neutral-700 flex-shrink-0" />
+                         <button
+                            onClick={() => { dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } }); onClose(); }}
+                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
+                            aria-label={t('nav:loginOrRegister', 'Login or register an account')}
+                         >
+                            <UserCircleIcon className="w-5 h-5 text-neutral-700 flex-shrink-0" aria-hidden="true" />
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
                         </button>
                     )}

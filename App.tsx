@@ -15,7 +15,8 @@ import { realEstateFAQs } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
-import { UserRole, HowItWorksTab, AdminSection } from './types';
+import { UserRole, HowItWorksTab, AdminSection, Agency } from './types';
+import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS } from './src/shared/constants/app.constants';
 
 // Inline LogoIcon to avoid importing all icons from constants
 const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -100,7 +101,7 @@ const PageLoader: React.FC = () => (
 
 const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
   const { state, dispatch } = useAppContext();
-  const [selectedAgency, setSelectedAgency] = useState<any>(null);
+  const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [isLoadingAgency, setIsLoadingAgency] = useState(false);
 
   // Listen for session expiration events from httpClient
@@ -143,9 +144,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
 
         // Fetch property from API to ensure we have full data
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        fetch(`${API_URL}/properties/${propertyId}`)
-          .then(res => res.json())
+        fetch(`${API_CONFIG.BASE_URL}/properties/${propertyId}`)
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`Property not found (${res.status})`);
+            }
+            return res.json();
+          })
           .then(data => {
             if (data.property) {
               // Transform backend property to frontend format
@@ -159,7 +164,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
               dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
             }
           })
-          .catch(_err => {
+          .catch(() => {
             dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
           });
         return;
@@ -170,9 +175,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       if (editListingMatch) {
         const propertyId = decodeURIComponent(editListingMatch[1]);
         // Find the property and set it for editing
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        fetch(`${API_URL}/properties/${propertyId}`)
-          .then(res => res.json())
+        fetch(`${API_CONFIG.BASE_URL}/properties/${propertyId}`)
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`Property not found (${res.status})`);
+            }
+            return res.json();
+          })
           .then(data => {
             if (data.property) {
               // Transform backend property to frontend format (backend uses _id, frontend uses id)
@@ -185,7 +194,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
             }
           })
-          .catch(() => {});
+          .catch(() => {
+            // Property not found - redirect to search
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+          });
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         return;
@@ -244,8 +256,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       const howItWorksMatch = path.match(/^\/how-it-works(?:\/(.+))?$/);
       if (howItWorksMatch) {
         const tab = howItWorksMatch[1] || 'getting-started'; // Default to getting-started tab
-        const validTabs: HowItWorksTab[] = ['getting-started', 'premium-features', 'agencies', 'agents', 'buyers', 'sellers'];
-        const validTab: HowItWorksTab = validTabs.includes(tab as HowItWorksTab) ? tab as HowItWorksTab : 'getting-started';
+        const validTab: HowItWorksTab = HOW_IT_WORKS_TABS.includes(tab as typeof HOW_IT_WORKS_TABS[number])
+          ? tab as HowItWorksTab
+          : 'getting-started';
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: validTab });
@@ -257,8 +270,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       const adminMatch = path.match(/^\/admin(?:\/(.+))?$/);
       if (adminMatch) {
         const section = adminMatch[1] || 'dashboard'; // Default to dashboard
-        const validSections: AdminSection[] = ['dashboard', 'users', 'inquiries', 'agent-requests', 'discounts', 'promotions', 'properties', 'agencies', 'pricing', 'activity', 'settings', 'how-it-works', 'email-templates'];
-        const validSection: AdminSection = validSections.includes(section as AdminSection) ? section as AdminSection : 'dashboard';
+        const validSection: AdminSection = ADMIN_SECTIONS.includes(section as typeof ADMIN_SECTIONS[number])
+          ? section as AdminSection
+          : 'dashboard';
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ADMIN_SECTION', payload: validSection });
@@ -267,7 +281,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       }
 
       // Main navigation routes
-      const routeMap: { [key: string]: any } = {
+      const routeMap: Record<string, string> = {
         '/': 'search',
         '/search': 'search',
         '/explore-cities': 'explore-cities',
@@ -345,14 +359,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
         // Check if selectedAgencyId is already an agency object
         const agencyId = state.selectedAgencyId;
         if (typeof agencyId === 'object' && agencyId !== null && '_id' in agencyId && 'name' in agencyId) {
-          setSelectedAgency(agencyId);
+          setSelectedAgency(agencyId as Agency);
           setIsLoadingAgency(false);
           return;
         }
 
         setIsLoadingAgency(true);
         try {
-          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
           const agencyIdentifier = state.selectedAgencyId;
 
           // Include auth token so backend can identify current user and auto-add owner as member
@@ -364,7 +377,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
             headers['Authorization'] = `Bearer ${token}`;
           }
 
-          const response = await fetch(`${API_URL}/agencies/${agencyIdentifier}`, { headers });
+          const response = await fetch(`${API_CONFIG.BASE_URL}/agencies/${agencyIdentifier}`, { headers });
 
           // Check content type before parsing
           const contentType = response.headers.get('content-type');
@@ -378,9 +391,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
             setSelectedAgency(null);
           } else {
             const data = await response.json();
-            setSelectedAgency(data.agency);
+            setSelectedAgency(data.agency as Agency);
           }
-        } catch (_error) {
+        } catch {
           setSelectedAgency(null);
         } finally {
           setIsLoadingAgency(false);
