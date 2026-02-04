@@ -165,6 +165,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const shownErrorToast = useRef(false);
+    const skipGeolocationRef = useRef(false); // Skip geolocation when navigating from explore cities
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number], zoom: number } | null>(null);
     const [localFilters, setLocalFilters] = useState<Filters>(filters);
@@ -176,6 +177,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const [showAllOnMobile, setShowAllOnMobile] = useState(false); // Track if filters were reset on mobile
     const [showMapHint, setShowMapHint] = useState(false); // Show hint about map view on mobile
     const [fallbackLocation, setFallbackLocation] = useState<string | null>(null); // Location name when showing fallback properties
+    const [showDrawHint, setShowDrawHint] = useState(false); // Show draw area hint when coming from explore cities
 
     // Enable real-time property updates via WebSocket
     // When any property is created/updated/deleted, the list refreshes instantly
@@ -283,11 +285,22 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     // Handle focusing map on a specific property or city when navigating
     useEffect(() => {
         if (focusMapOnProperty) {
+            // Prevent geolocation from overriding this position (e.g., when coming from explore cities)
+            skipGeolocationRef.current = true;
+
             // Set the map to fly to the location - use provided zoom or default to 18 for properties
             setFlyToTarget({
                 center: [focusMapOnProperty.lat, focusMapOnProperty.lng],
                 zoom: focusMapOnProperty.zoom ?? 18,
             });
+
+            // Show draw hint if this is a city-level zoom (coming from explore cities)
+            // City-level zoom is typically 12, property-level is 18
+            if (focusMapOnProperty.zoom && focusMapOnProperty.zoom <= 14) {
+                setShowDrawHint(true);
+                // Auto-hide after 8 seconds
+                setTimeout(() => setShowDrawHint(false), 8000);
+            }
 
             // Clear the focus state after triggering the map movement
             updateSearchPageState({ focusMapOnProperty: null });
@@ -296,6 +309,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
     const toggleDrawing = () => {
         setIsDrawing(prev => !prev);
+        // Hide draw hint when user starts drawing
+        if (!isDrawing) {
+            setShowDrawHint(false);
+        }
     };
 
     const handleClearDrawnArea = () => {
@@ -477,6 +494,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
+                        // Skip setting user location if navigating from explore cities or similar
+                        if (skipGeolocationRef.current) {
+                            return;
+                        }
                         const { latitude, longitude } = position.coords;
                         if (!userLocation && !filters.query.trim()) {
                            setUserLocation([latitude, longitude]);
@@ -1270,6 +1291,33 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                     <div className="absolute inset-0 overflow-hidden">
                         <MapComponent {...mapProps} />
                     </div>
+
+                    {/* Draw hint banner - shown when navigating from explore cities */}
+                    {showDrawHint && !isDrawing && !drawnBounds && (
+                        <div className="absolute top-20 md:top-4 left-4 right-4 md:left-auto md:right-auto md:left-1/2 md:-translate-x-1/2 z-[1002] animate-fade-in">
+                            <div
+                                className="bg-gradient-to-r from-primary to-blue-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3"
+                                style={{
+                                    boxShadow: '0 8px 32px rgba(2, 82, 205, 0.35)',
+                                }}
+                            >
+                                <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <PencilIcon className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold">{t('search:map.drawHint.title', 'Draw to save this area')}</p>
+                                    <p className="text-xs text-white/80">{t('search:map.drawHint.subtitle', 'Use the Draw button to save your search area')}</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowDrawHint(false)}
+                                    className="flex-shrink-0 p-1.5 hover:bg-white/20 rounded-full transition-colors"
+                                    aria-label="Dismiss hint"
+                                >
+                                    <XMarkIcon className="w-5 h-5 text-white" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 
                 {/* --- Mobile View Overlays --- */}
